@@ -6,9 +6,12 @@ It is not a cleanup or fork of previous WorkOS repositories.
 ## Current position
 
 Hierarchical product catalog plus first canonical LETTERS product.
-RETURN_CANT technical / resource / EIC pilot is preserved on that product.
+FACE / BACK have confirmed-area quantities and material EIC.
+LIGHTING is required and front-lit, but EIC is unavailable without contour geometry.
+RETURN_CANT EIC remains.
 
 ```text
+FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
 PHASE 6 = PILOT_VALIDATED
 PHASE 7 = PILOT_VALIDATED
 PHASE 8 = PILOT_VALIDATED
@@ -36,4 +39,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, one canonical front-lit plexi/aluminium letters product, and a RETURN_CANT technical quantity → resource demand → partial EIC path.
+The current app has a platform shell, a real health check, a product catalog, one canonical front-lit plexi/aluminium letters product, FACE / BACK / RETURN_CANT technical quantities with partial internal EIC, and lighting left explicitly unavailable without contour geometry.

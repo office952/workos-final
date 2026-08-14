@@ -6,7 +6,7 @@ This is not a cleanup of previous WorkOS code and not a fork of workflow-adv.
 
 ## Current status
 
-Product catalog plus first canonical LETTERS product, with the RETURN_CANT EIC pilot preserved.
+Product catalog plus first canonical LETTERS product, with FACE / BACK / RETURN_CANT internal cost and lighting left explicitly incomplete.
 
 The app has a platform shell, a real health check, a hierarchical product catalog, and a schema-driven configuration flow for the first canonical product. No business database or commercial price exists yet.
 

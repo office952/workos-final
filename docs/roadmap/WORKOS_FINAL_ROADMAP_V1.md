@@ -37,8 +37,13 @@ Generalize from real products, not from theory.
 
 Product catalog hierarchy established.
 First canonical product established.
-Legacy generic LETTERS pilot realigned.
-Existing configuration / technical / EIC spine preserved.
+FACE / BACK technical quantities and material EIC added.
+LIGHTING remains technically partial (no invented LED count).
+RETURN_CANT EIC regression preserved.
+
+```text
+FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
+```
 
 - PHASE 6 = PILOT_VALIDATED
 - PHASE 7 = PILOT_VALIDATED
