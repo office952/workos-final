@@ -9,6 +9,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — construction order and phase status
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
+- `docs/worklog/WORKOS_FINAL_OWNER_SURFACES_INFORMATION_ARCHITECTURE_V1.md` — catalog IA for those projections
 
 ## Historical evidence
 
