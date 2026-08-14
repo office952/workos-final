@@ -1,11 +1,18 @@
+import { buildCatalogTree } from "./catalog.js";
 import {
-  buildCatalogTree,
-  productCategories,
-  productFamilies,
-} from "./catalog.js";
-import { productTemplates } from "./frontlitPlexiAl06.js";
+  presentedCategories,
+  presentedFamilies,
+  presentedTemplates,
+  type DisplayLabelCatalog,
+} from "./displayMetadata.js";
 import type { CatalogTreeNode } from "./types.js";
 
-export function projectProductCatalog(): CatalogTreeNode[] {
-  return buildCatalogTree(productFamilies, productCategories, productTemplates);
+export function projectProductCatalog(
+  labels: DisplayLabelCatalog,
+): CatalogTreeNode[] {
+  return buildCatalogTree(
+    presentedFamilies(labels),
+    presentedCategories(labels),
+    presentedTemplates(labels),
+  );
 }

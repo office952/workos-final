@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { registerProductRoutes } from "./product.js";
+import { registerProductSystemAdminRoutes } from "./productSystem/routes.js";
+import {
+  createProductSystemRuntime,
+  type ProductSystemRuntime,
+} from "./productSystem/runtime.js";
 import { registerSystemProjectionRoutes } from "./system.js";
 
 export const HEALTH_SERVICE_NAME = "workos-final-api" as const;
@@ -15,8 +20,13 @@ const DEV_WEB_ORIGINS = [
   "http://localhost:5173",
 ] as const;
 
-export function createApp(): Hono {
+export type CreateAppOptions = {
+  productSystem?: ProductSystemRuntime;
+};
+
+export function createApp(options: CreateAppOptions = {}): Hono {
   const app = new Hono();
+  const productSystem = options.productSystem ?? createProductSystemRuntime();
 
   app.use(
     "/api/*",
@@ -33,8 +43,9 @@ export function createApp(): Hono {
     return c.json(body);
   });
 
-  registerProductRoutes(app);
-  registerSystemProjectionRoutes(app);
+  registerProductRoutes(app, productSystem);
+  registerSystemProjectionRoutes(app, productSystem);
+  registerProductSystemAdminRoutes(app, productSystem);
 
   return app;
 }

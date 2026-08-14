@@ -14,6 +14,7 @@ import {
   productTemplates,
 } from "./frontlitPlexiAl06.js";
 import { projectProductCatalog } from "./catalogProjection.js";
+import { seededDisplayLabelCatalog } from "./displayMetadata.js";
 import type { ProductCategory, ProductFamily } from "./types.js";
 
 describe("product catalog integrity", () => {
@@ -54,7 +55,7 @@ describe("product catalog integrity", () => {
     const occupied = new Set(productTemplates.map((item) => item.categoryId));
     const empty = productCategories.filter((item) => !occupied.has(item.id));
     expect(empty.length).toBeGreaterThan(0);
-    const tree = projectProductCatalog();
+    const tree = projectProductCatalog(seededDisplayLabelCatalog());
     const emptyLabels = empty.map((item) => item.label);
     for (const family of tree) {
       if (family.kind !== "family") {

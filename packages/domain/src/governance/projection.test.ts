@@ -36,8 +36,18 @@ describe("system governance projection", () => {
       governance.roadmap.find((item) => item.id === "product-system-admin")?.state,
     ).toBe("IMPLEMENTED");
     expect(governance.sources).toContain(
-      "Proiecția read-only de administrare Product System",
+      "Metadatele de afișare persistate ale Product System",
     );
+    expect(
+      governance.roadmap.find((item) => item.id === "display-label-write")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "technical-settings-write")
+        ?.state,
+    ).toBe("NOT_IMPLEMENTED");
+    expect(
+      governance.authorities.find((item) => item.id === "AUTHORIZATION")?.state,
+    ).toBe("NOT_IMPLEMENTED");
     expect(
       governance.boundaries.find((item) => item.id === "intake-settings")?.statement,
     ).toMatch(/Intake nu deține setările tehnice/);

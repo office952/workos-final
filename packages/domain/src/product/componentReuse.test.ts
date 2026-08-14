@@ -7,6 +7,7 @@ import {
   compileDefinition,
   confirmReviewedDefinition,
 } from "./compiler.js";
+import { seededDisplayLabelCatalog } from "./displayMetadata.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
@@ -51,6 +52,7 @@ describe("component reuse", () => {
       truth,
       frontlitPlexiAl06Template,
       frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
     );
     const fromProduct = aggregate.quantities.find((item) => item.componentId === "FACE");
 
@@ -90,7 +92,12 @@ describe("component reuse", () => {
       reviewId: "test",
       confirmedAt: "2026-08-14T21:00:00.000Z",
     };
-    const aggregate = compileAggregate(truth, synthetic, frontlitPlexiAl06FormSchema);
+    const aggregate = compileAggregate(
+      truth,
+      synthetic,
+      frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
+    );
     expect(aggregate.quantities.map((item) => item.componentId)).toEqual([
       "FACE",
       "VOLUME",

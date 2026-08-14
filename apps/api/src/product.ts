@@ -3,15 +3,13 @@ import {
   compileDefinition,
   compileEic,
   confirmReviewedDefinition,
-  getFormSchemaForTemplate,
-  getProductTemplate,
-  projectProductCatalog,
   type DraftConfiguration,
   type DraftValue,
   type DraftValues,
   type ProductDefinition,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
+import type { ProductSystemRuntime } from "./productSystem/runtime.js";
 
 function asDraftValues(value: unknown): DraftValues {
   if (typeof value !== "object" || value === null) {
@@ -54,15 +52,19 @@ function readReviewedDefinition(body: unknown): {
   };
 }
 
-export function registerProductRoutes(app: Hono): void {
+export function registerProductRoutes(
+  app: Hono,
+  runtime: ProductSystemRuntime,
+): void {
   app.get("/api/product-catalog", (c) => {
-    return c.json({ tree: projectProductCatalog() });
+    return c.json({ tree: runtime.present().catalog });
   });
 
   app.get("/api/products/:productCode", (c) => {
     const productCode = c.req.param("productCode");
-    const template = getProductTemplate(productCode);
-    const formSchema = getFormSchemaForTemplate(productCode);
+    const presented = runtime.present();
+    const template = presented.template(productCode);
+    const formSchema = presented.formSchema(productCode);
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -71,8 +73,9 @@ export function registerProductRoutes(app: Hono): void {
 
   app.post("/api/products/:productCode/compile", async (c) => {
     const productCode = c.req.param("productCode");
-    const template = getProductTemplate(productCode);
-    const formSchema = getFormSchemaForTemplate(productCode);
+    const presented = runtime.present();
+    const template = presented.template(productCode);
+    const formSchema = presented.formSchema(productCode);
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -87,8 +90,9 @@ export function registerProductRoutes(app: Hono): void {
 
   app.post("/api/products/:productCode/confirm", async (c) => {
     const productCode = c.req.param("productCode");
-    const template = getProductTemplate(productCode);
-    const formSchema = getFormSchemaForTemplate(productCode);
+    const presented = runtime.present();
+    const template = presented.template(productCode);
+    const formSchema = presented.formSchema(productCode);
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -107,7 +111,12 @@ export function registerProductRoutes(app: Hono): void {
       );
     }
 
-    const aggregate = compileAggregate(confirmed, template, formSchema);
+    const aggregate = compileAggregate(
+      confirmed,
+      template,
+      formSchema,
+      runtime.labels(),
+    );
     return c.json({
       truth: confirmed,
       aggregate,

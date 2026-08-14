@@ -1,6 +1,6 @@
-import { getProductFamily } from "./catalog.js";
 import type { SharedCalculationContext } from "./componentContract.js";
 import { getComponentContract } from "./componentRegistry.js";
+import type { DisplayLabelCatalog } from "./displayMetadata.js";
 import { listTypeTechnicalSettings } from "./technicalSettings.js";
 import type {
   DraftConfiguration,
@@ -244,6 +244,7 @@ export function compileAggregate(
   truth: ProductTruth,
   template: ProductTemplate,
   schema: FormSchema,
+  labels: DisplayLabelCatalog,
 ): ProductAggregate {
   const inscription =
     typeof truth.values["root.inscription"] === "string"
@@ -284,7 +285,7 @@ export function compileAggregate(
   return {
     derivedFrom: "ProductTruth",
     productLabel: template.label,
-    familyLabel: getProductFamily(template.familyId)?.label ?? "",
+    familyLabel: labels.label("PRODUCT_FAMILY", template.familyId),
     inscription,
     components,
     quantities: calculations.flatMap((item) => item.result.quantities),

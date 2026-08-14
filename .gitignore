@@ -13,6 +13,11 @@ playwright-report/
 test-results/
 blob-report/
 .cache/
+data/
+.tmp/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
 
 .venv/
 venv/

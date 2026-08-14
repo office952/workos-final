@@ -4,6 +4,7 @@ import {
   compileDefinition,
   confirmReviewedDefinition,
 } from "../product/compiler.js";
+import { seededDisplayLabelCatalog } from "../product/displayMetadata.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
@@ -43,6 +44,7 @@ function confirmedSpine() {
     truth,
     frontlitPlexiAl06Template,
     frontlitPlexiAl06FormSchema,
+    seededDisplayLabelCatalog(),
   );
   return { definition, truth, aggregate };
 }

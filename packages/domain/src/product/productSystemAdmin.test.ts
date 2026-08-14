@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CANONICAL_PRODUCT_CODE } from "./frontlitPlexiAl06.js";
+import { seededDisplayLabelCatalog } from "./displayMetadata.js";
 import {
   collectChildCategoryIds,
   computeCategoryDepth,
@@ -9,7 +10,7 @@ import type { ProductCategory } from "./types.js";
 
 describe("product system administration projection", () => {
   it("derives family category and product relationships from the catalog", () => {
-    const admin = projectProductSystemAdministration();
+    const admin = projectProductSystemAdministration(seededDisplayLabelCatalog());
     expect(admin.families).toHaveLength(1);
     expect(admin.families[0]?.id).toBe("LIGHTED_VOLUMETRIC_SIGNS");
     expect(admin.families[0]?.label).toBe("Litere și semne volumetrice luminoase");
@@ -34,7 +35,7 @@ describe("product system administration projection", () => {
   });
 
   it("derives product composition settings and products-using without duplicate lists", () => {
-    const admin = projectProductSystemAdministration();
+    const admin = projectProductSystemAdministration(seededDisplayLabelCatalog());
     const product = admin.products[0];
     expect(product?.code).toBe(CANONICAL_PRODUCT_CODE);
     expect(product?.code).not.toBe(product?.label);

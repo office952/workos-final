@@ -5,6 +5,7 @@ import {
   confirmReviewedDefinition,
   selectedComponentIds,
 } from "./compiler.js";
+import { seededDisplayLabelCatalog } from "./displayMetadata.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
@@ -208,6 +209,7 @@ describe("ProductTruth and ProductAggregate", () => {
       truth,
       frontlitPlexiAl06Template,
       frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
     );
     expect(aggregate.quantities).toEqual(
       expect.arrayContaining([
@@ -275,6 +277,7 @@ describe("ProductTruth and ProductAggregate", () => {
       { ...truth, measurements: [] },
       frontlitPlexiAl06Template,
       frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
     );
     expect(aggregate.quantities).toEqual([]);
   });

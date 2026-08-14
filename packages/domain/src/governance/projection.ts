@@ -119,6 +119,22 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "PRODUCT_SYSTEM_PERSISTENCE",
+        label: "Persistență Product System",
+        owns: [
+          "metadatele de afișare persistate",
+          "bootstrap-ul determinist",
+          "autoritatea runtime a etichetei",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "AUTHORIZATION",
+        label: "Autorizare",
+        owns: ["enforcement-ul pe write-uri de administrare"],
+        state: "NOT_IMPLEMENTED",
+      },
+      {
         id: "RESOURCES_COST",
         label: "Resurse / cost intern",
         owns: ["identitatea resursei", "evidența de cost intern / tarife"],
@@ -171,8 +187,16 @@ export function projectSystemGovernance(): GovernanceProjection {
       },
       {
         id: "business-db",
-        label: "Bază de date de business",
-        statement: "Nu există persistență de business, migrări sau seed-uri.",
+        label: "Persistență Product System",
+        statement:
+          "SQLite local deține etichetele de afișare Product System. Nu este o bază universală de business și nu persistă setări tehnice.",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "authorization",
+        label: "Autorizare",
+        statement:
+          "Write-urile de administrare sunt acțiuni de owner. Enforcement-ul de autorizare nu este implementat.",
         state: "NOT_IMPLEMENTED",
       },
       {
@@ -198,7 +222,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
       "Harta canonică de domenii și administrare",
-      "Proiecția read-only de administrare Product System",
+      "Metadatele de afișare persistate ale Product System",
+      "Proiecția de administrare Product System",
     ],
     ownerGates: [
       { id: "scope", statement: "Doar ownerul autorizează domeniul de implementare." },
@@ -224,7 +249,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Valorile tehnice ajustabile trăiesc în setările canonice ale variantei, nu în documentație, Intake sau literali ascunși.",
       "Documentația explică; calculul consumă; Intake nu administrează setările de sistem.",
       "Fiecare domeniu deține setările sale. Nu există un Settings global care deține tot adevărul.",
-      "Fundația de administrare Product System este proiecție read-only până la primul write path persistat.",
+      "Eticheta de afișare persistată este autoritatea runtime după bootstrap. Codul rămâne default de inițializare, nu a doua valoare activă.",
+      "Setările tehnice și lifecycle-ul nu au write persistat.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -257,6 +283,31 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "product-system-admin",
         label: "Fundație administrare Product System",
         state: "IMPLEMENTED",
+      },
+      {
+        id: "product-system-persistence",
+        label: "Persistență Product System",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "display-label-write",
+        label: "Write etichetă afișată",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "administrare-nav",
+        label: "Administrare globală",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "technical-settings-write",
+        label: "Write setări tehnice",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "lifecycle-write",
+        label: "Write lifecycle",
+        state: "NOT_IMPLEMENTED",
       },
       { id: "lighting", label: "Iluminare calculabilă", state: "NOT_IMPLEMENTED" },
       { id: "commercial", label: "Commercial", state: "NOT_IMPLEMENTED" },

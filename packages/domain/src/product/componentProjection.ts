@@ -8,7 +8,11 @@ import {
   type AttributeOwnership,
   type ComponentTypeId,
 } from "./componentTypes.js";
-import { productTemplates } from "./frontlitPlexiAl06.js";
+import {
+  presentedTemplates,
+  presentedTypes,
+  type DisplayLabelCatalog,
+} from "./displayMetadata.js";
 import {
   projectTechnicalSettings,
   type ComponentTechnicalSettingProjection,
@@ -144,8 +148,11 @@ function ownsCopy(role: ComponentRole): readonly string[] {
   }
 }
 
-function roleLabel(role: ComponentRole): string {
-  for (const template of productTemplates) {
+function roleLabel(
+  role: ComponentRole,
+  templates: readonly ProductTemplate[],
+): string {
+  for (const template of templates) {
     const component = template.components.find((item) => item.id === role);
     if (component) {
       return component.label;
@@ -178,8 +185,12 @@ function inputNote(template: ProductTemplate, role: ComponentRole): string | nul
   return `Primește suprafața de la ${sourceLabel} în acest produs`;
 }
 
-function productsUsing(typeId: ComponentTypeId, role: ComponentRole): ComponentProductUse[] {
-  return productTemplates
+function productsUsing(
+  typeId: ComponentTypeId,
+  role: ComponentRole,
+  templates: readonly ProductTemplate[],
+): ComponentProductUse[] {
+  return templates
     .filter((template) => template.components.some((item) => item.typeId === typeId))
     .map((template) => ({
       productCode: template.code,
@@ -226,9 +237,10 @@ function displayAttributeValue(
 
 function configurationsFor(
   typeId: ComponentTypeId,
+  templates: readonly ProductTemplate[],
 ): ComponentProductConfiguration[] {
   const type = getComponentType(typeId);
-  return productTemplates
+  return templates
     .filter((template) => template.components.some((item) => item.typeId === typeId))
     .map((template) => ({
       productCode: template.code,
@@ -250,16 +262,23 @@ function configurationsFor(
     }));
 }
 
-export function projectComponentArchitecture(): ComponentRoleProjection[] {
+export function projectComponentArchitecture(
+  labels: DisplayLabelCatalog,
+): ComponentRoleProjection[] {
   const contracts = listComponentContracts();
+  const templates = presentedTemplates(labels);
+  const types = presentedTypes(labels);
   return COMPONENT_ROLES.map((role) => ({
     role,
-    label: roleLabel(role),
+    label: roleLabel(role, templates),
     owns: ownsCopy(role),
     types: contracts
       .filter((contract) => contract.role === role)
       .map((contract) => {
-        const type = getComponentType(contract.typeId);
+        const type = types.find((item) => item.id === contract.typeId);
+        if (!type) {
+          throw new Error(`unknown_component_type:${contract.typeId}`);
+        }
         return {
           typeId: contract.typeId,
           label: type.label,
@@ -269,8 +288,8 @@ export function projectComponentArchitecture(): ComponentRoleProjection[] {
           quantity: quantityCopy(contract.profile.quantityUnit),
           eic: eicCopy(contract.profile.eic),
           gaps: contract.profile.structuralGaps,
-          usedBy: productsUsing(contract.typeId, role),
-          configurations: configurationsFor(contract.typeId),
+          usedBy: productsUsing(contract.typeId, role, templates),
+          configurations: configurationsFor(contract.typeId, templates),
           technicalSettings: projectTechnicalSettings(contract.typeId),
           resourceIds: liveResourceIdsForType(contract.typeId),
         };

@@ -13,6 +13,22 @@ export {
 } from "./catalog.js";
 export { projectProductCatalog } from "./catalogProjection.js";
 export {
+  DISPLAY_LABEL_MAX_LENGTH,
+  PRODUCT_SYSTEM_ENTITY_KINDS,
+  createDisplayLabelCatalog,
+  displayLabelKey,
+  isKnownProductSystemEntity,
+  isProductSystemEntityKind,
+  presentedTemplate,
+  seedDisplayLabelRecords,
+  seededDisplayLabelCatalog,
+  validateDisplayLabel,
+  type DisplayLabelCatalog,
+  type DisplayLabelRecord,
+  type ProductSystemEntityKind,
+} from "./displayMetadata.js";
+export { presentProductSystem } from "./productSystemPresentation.js";
+export {
   compileAggregate,
   compileDefinition,
   confirmReviewedDefinition,

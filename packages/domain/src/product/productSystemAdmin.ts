@@ -1,18 +1,18 @@
 import { getResource } from "../resources/catalog.js";
-import {
-  categoryHasCycle,
-  getProductCategory,
-  getProductFamily,
-  productCategories,
-  productFamilies,
-} from "./catalog.js";
+import { categoryHasCycle } from "./catalog.js";
 import { listComponentContracts } from "./componentRegistry.js";
 import {
   projectComponentArchitecture,
   type ComponentProductConfiguration,
 } from "./componentProjection.js";
 import { type ComponentTypeId } from "./componentTypes.js";
-import { getFormSchema, productTemplates } from "./frontlitPlexiAl06.js";
+import {
+  presentedCategories,
+  presentedFamilies,
+  presentedTemplates,
+  type DisplayLabelCatalog,
+} from "./displayMetadata.js";
+import { getFormSchema } from "./frontlitPlexiAl06.js";
 import type { ComponentRole, ProductCategory } from "./types.js";
 import type { ComponentTechnicalSettingProjection } from "./technicalSettings.js";
 
@@ -45,6 +45,7 @@ export type AdminFamilyRecord = {
   id: string;
   label: string;
   description: string;
+  displayRevision: number;
   categoryIds: readonly string[];
   productCodes: readonly string[];
   readiness: AdminReadiness;
@@ -53,6 +54,7 @@ export type AdminFamilyRecord = {
 export type AdminCategoryRecord = {
   id: string;
   label: string;
+  displayRevision: number;
   familyId: string;
   familyLabel: string;
   parentId: string | null;
@@ -73,6 +75,7 @@ export type AdminCompositionLine = {
 export type AdminProductRecord = {
   code: string;
   label: string;
+  displayRevision: number;
   description: string;
   familyId: string;
   familyLabel: string;
@@ -91,6 +94,7 @@ export type AdminProductRecord = {
 export type AdminTypeRecord = {
   typeId: ComponentTypeId;
   label: string;
+  displayRevision: number;
   description: string;
   role: ComponentRole;
   roleLabel: string;
@@ -152,9 +156,14 @@ export function adminEditClassLabel(kind: AdminEditClass): string {
   }
 }
 
-export function projectProductSystemAdministration(): ProductSystemAdminProjection {
-  const roles = projectComponentArchitecture();
+export function projectProductSystemAdministration(
+  labels: DisplayLabelCatalog,
+): ProductSystemAdminProjection {
+  const roles = projectComponentArchitecture(labels);
   const contracts = listComponentContracts();
+  const productFamilies = presentedFamilies(labels);
+  const productCategories = presentedCategories(labels);
+  const productTemplates = presentedTemplates(labels);
 
   const families = productFamilies.map((family) => {
     const categoryIds = productCategories
@@ -166,6 +175,7 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
     return {
       id: family.id,
       label: family.label,
+      displayRevision: labels.revision("PRODUCT_FAMILY", family.id),
       description: family.description,
       categoryIds,
       productCodes,
@@ -192,8 +202,10 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
   });
 
   const categories = productCategories.map((category) => {
-    const family = getProductFamily(category.familyId);
-    const parent = category.parentId ? getProductCategory(category.parentId) : undefined;
+    const family = productFamilies.find((item) => item.id === category.familyId);
+    const parent = category.parentId
+      ? productCategories.find((item) => item.id === category.parentId)
+      : undefined;
     const childCategoryIds = collectChildCategoryIds(productCategories, category.id);
     const productCodes = productTemplates
       .filter((item) => item.categoryId === category.id)
@@ -202,6 +214,7 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
     return {
       id: category.id,
       label: category.label,
+      displayRevision: labels.revision("PRODUCT_CATEGORY", category.id),
       familyId: category.familyId,
       familyLabel: family?.label ?? category.familyId,
       parentId: category.parentId,
@@ -234,8 +247,8 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
   });
 
   const products = productTemplates.map((template) => {
-    const family = getProductFamily(template.familyId);
-    const category = getProductCategory(template.categoryId);
+    const family = productFamilies.find((item) => item.id === template.familyId);
+    const category = productCategories.find((item) => item.id === template.categoryId);
     const form = getFormSchema(template.formSchemaId);
     const composition = template.components.map((component) => {
       const role = roles.find((item) => item.role === component.id);
@@ -256,6 +269,7 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
     return {
       code: template.code,
       label: template.label,
+      displayRevision: labels.revision("PRODUCT_TEMPLATE", template.code),
       description: template.description,
       familyId: template.familyId,
       familyLabel: family?.label ?? template.familyId,
@@ -293,6 +307,7 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
     return {
       typeId: contract.typeId,
       label: type?.label ?? contract.typeId,
+      displayRevision: labels.revision("COMPONENT_TYPE", contract.typeId),
       description: type?.description ?? "",
       role: contract.role,
       roleLabel: role?.label ?? contract.role,
