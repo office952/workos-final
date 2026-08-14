@@ -21,9 +21,9 @@ const readyValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
   "face.confirmedAreaMm2": 250000,
-  "returnCant.depthMm": "60",
-  "returnCant.finish": "none",
-  "returnCant.confirmedPerimeterMm": 12500,
+  "volume.depthMm": "60",
+  "volume.finish": "none",
+  "volume.confirmedPerimeterMm": 12500,
 };
 
 function confirmedSpine() {
@@ -52,7 +52,9 @@ describe("resource ownership", () => {
     expect(JSON.stringify(frontlitPlexiAl06Template)).not.toMatch(/amount|EUR|rate/i);
     const { truth, aggregate } = confirmedSpine();
     expect(JSON.stringify(truth)).not.toMatch(/"amount":10|"amount":15/);
-    expect(aggregate.quantities[0]?.value).toBe(12.5);
+    expect(
+      aggregate.quantities.find((item) => item.componentId === "VOLUME")?.value,
+    ).toBe(12.5);
     expect(JSON.stringify(aggregate)).not.toMatch(/"amount":10|"amount":15/);
     expect(costEvidence.map((item) => item.resourceId).sort()).toEqual(
       resourceCatalog.map((item) => item.id).sort(),
@@ -68,7 +70,7 @@ describe("EIC", () => {
     const eic = compileEic(aggregate);
     expect(eic.completeness).toBe("PARTIAL");
     expect(eic.currency).toBe("EUR");
-    expect(eic.lines.map((line) => line.cost)).toEqual([125, 187.5, 4, 4]);
+    expect(eic.lines.map((line) => line.cost)).toEqual([4, 125, 187.5, 4]);
     expect(eic.total).toBe(320.5);
     expect(eic.excludedComponentLabels).toEqual(["Iluminare"]);
     expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote/i);
@@ -79,7 +81,7 @@ describe("EIC", () => {
     expect(getCostEvidence("missing_resource")).toBeUndefined();
     expect(() =>
       applyRequirement({
-        componentId: "RETURN_CANT",
+        componentId: "VOLUME",
         resourceId: "missing_resource",
         quantity: 1,
         unit: "m",

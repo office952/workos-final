@@ -26,13 +26,13 @@ export const FOREX_BACK_SHEET_ID = "forex_back_10mm";
 export const resourceCatalog: readonly ResourceDefinition[] = [
   {
     id: ALUMINIUM_RETURN_PROFILE_ID,
-    label: "Profil aluminiu cant",
+    label: "Profil aluminiu volum",
     kind: "material",
     unit: "m",
   },
   {
     id: RETURN_CANT_FORMING_ID,
-    label: "Formare cant",
+    label: "Formare volum",
     kind: "operation",
     unit: "m",
   },

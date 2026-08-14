@@ -1,15 +1,6 @@
-import { BACK_COMPONENT_ID } from "./back.js";
 import { getProductFamily } from "./catalog.js";
-import {
-  FACE_AREA_FIELD,
-  FACE_COMPONENT_ID,
-  faceAreaSquareMeters,
-} from "./face.js";
-import {
-  RETURN_CANT_COMPONENT_ID,
-  RETURN_CANT_PERIMETER_FIELD,
-  returnCantLinearMeters,
-} from "./returnCant.js";
+import type { SharedCalculationContext } from "./componentContract.js";
+import { getComponentContract } from "./componentRegistry.js";
 import type {
   DraftConfiguration,
   DraftValue,
@@ -18,11 +9,11 @@ import type {
   FormSchema,
   MissingInput,
   ProductAggregate,
+  ProductComponent,
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
   TechnicalMeasurement,
-  TechnicalQuantity,
   VisibilityRule,
 } from "./types.js";
 
@@ -143,7 +134,7 @@ export function compileDefinition(
     }
   }
 
-  const measurements = collectMeasurements(selectedIds, values);
+  const measurements = collectMeasurements(template, selectedIds, values);
   const compiled: ProductDefinition = {
     templateCode: template.code,
     templateVersion: template.version,
@@ -180,33 +171,33 @@ export function definitionReviewId(definition: ProductDefinition): string {
 }
 
 function collectMeasurements(
+  template: ProductTemplate,
   selectedIds: readonly string[],
   values: DraftValues,
 ): TechnicalMeasurement[] {
-  const measurements: TechnicalMeasurement[] = [];
-  const perimeter = values[RETURN_CANT_PERIMETER_FIELD];
-  if (selectedIds.includes(RETURN_CANT_COMPONENT_ID) && typeof perimeter === "number") {
-    measurements.push({
-      componentId: RETURN_CANT_COMPONENT_ID,
-      fieldId: RETURN_CANT_PERIMETER_FIELD,
-      value: perimeter,
-      unit: "mm",
-      source: "OPERATOR_MANUAL",
-      confirmed: true,
-    });
+  return template.components
+    .filter((component) => selectedIds.includes(component.id))
+    .flatMap((component) =>
+      getComponentContract(component.variantId).collectMeasurements(values),
+    );
+}
+
+function sharedContextFor(
+  component: ProductComponent,
+  measurements: readonly TechnicalMeasurement[],
+): SharedCalculationContext {
+  const sourceId = component.inputMapping?.confirmedAreaMm2FromComponentId;
+  if (!sourceId) {
+    return {};
   }
-  const area = values[FACE_AREA_FIELD];
-  if (selectedIds.includes(FACE_COMPONENT_ID) && typeof area === "number") {
-    measurements.push({
-      componentId: FACE_COMPONENT_ID,
-      fieldId: FACE_AREA_FIELD,
-      value: area,
-      unit: "mm2",
-      source: "OPERATOR_MANUAL",
-      confirmed: true,
-    });
-  }
-  return measurements;
+  const area = measurements.find(
+    (item) => item.componentId === sourceId && item.unit === "mm2",
+  );
+  return area ? { confirmedAreaMm2: area.value } : {};
+}
+
+function uniqueUnavailable(values: readonly string[]): string[] {
+  return [...new Set(values)];
 }
 
 export function confirmReviewedDefinition(
@@ -277,62 +268,34 @@ export function compileAggregate(
       };
     });
 
+  const calculations = template.components
+    .filter((component) => truth.selectedComponentIds.includes(component.id))
+    .map((component) => {
+      const result = getComponentContract(component.variantId).calculate({
+        values: truth.values,
+        measurements: truth.measurements,
+        shared: sharedContextFor(component, truth.measurements),
+      });
+      return { component, result };
+    });
+
   return {
     derivedFrom: "ProductTruth",
     productLabel: template.label,
     familyLabel: getProductFamily(template.familyId)?.label ?? "",
     inscription,
     components,
-    quantities: technicalQuantities(truth),
-    unavailable: [
-      "Geometrie din Analyzer",
-      "Debitare CNC",
-      "Cost intern iluminare",
-    ],
+    quantities: calculations.flatMap((item) => item.result.quantities),
+    requirements: calculations.flatMap((item) => item.result.requirements),
+    componentStatuses: calculations.map(({ component, result }) => ({
+      id: component.id,
+      label: component.label,
+      variantId: result.variantId,
+      status: result.status,
+      unavailable: result.unavailable,
+    })),
+    unavailable: uniqueUnavailable(
+      calculations.flatMap((item) => item.result.unavailable),
+    ),
   };
-}
-
-function technicalQuantities(truth: ProductTruth): TechnicalQuantity[] {
-  const quantities: TechnicalQuantity[] = [];
-  if (truth.selectedComponentIds.includes(RETURN_CANT_COMPONENT_ID)) {
-    const perimeter = truth.measurements.find(
-      (item) => item.fieldId === RETURN_CANT_PERIMETER_FIELD,
-    );
-    if (perimeter) {
-      quantities.push({
-        componentId: RETURN_CANT_COMPONENT_ID,
-        id: "return_cant_linear",
-        label: "Lungime cant",
-        value: returnCantLinearMeters(perimeter.value),
-        unit: "m",
-        basis: "confirmed_perimeter",
-      });
-    }
-  }
-
-  const area = truth.measurements.find((item) => item.fieldId === FACE_AREA_FIELD);
-  if (area) {
-    const squareMeters = faceAreaSquareMeters(area.value);
-    if (truth.selectedComponentIds.includes(FACE_COMPONENT_ID)) {
-      quantities.push({
-        componentId: FACE_COMPONENT_ID,
-        id: "face_area",
-        label: "Suprafață față",
-        value: squareMeters,
-        unit: "m2",
-        basis: "confirmed_area",
-      });
-    }
-    if (truth.selectedComponentIds.includes(BACK_COMPONENT_ID)) {
-      quantities.push({
-        componentId: BACK_COMPONENT_ID,
-        id: "back_area",
-        label: "Suprafață spate",
-        value: squareMeters,
-        unit: "m2",
-        basis: "confirmed_area",
-      });
-    }
-  }
-  return quantities;
 }

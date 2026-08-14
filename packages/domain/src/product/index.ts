@@ -20,11 +20,13 @@ export {
   isFieldVisible,
   selectedComponentIds,
 } from "./compiler.js";
-export { BACK_COMPONENT_ID } from "./back.js";
+export { getComponentContract } from "./componentRegistry.js";
+export { BACK_COMPONENT_ID, backForex10mmContract } from "./back.js";
 export {
   FACE_AREA_FIELD,
   FACE_COMPONENT_ID,
   faceAreaSquareMeters,
+  facePlexiglas3mmContract,
 } from "./face.js";
 export {
   CANONICAL_PRODUCT_CODE,
@@ -36,14 +38,27 @@ export {
   getProductTemplate,
   productTemplates,
 } from "./frontlitPlexiAl06.js";
+export { LIGHTING_COMPONENT_ID, lightingFrontLedContract } from "./lighting.js";
 export {
-  RETURN_CANT_COMPONENT_ID,
-  RETURN_CANT_PERIMETER_FIELD,
-  returnCantLinearMeters,
-} from "./returnCant.js";
+  VOLUME_COMPONENT_ID,
+  VOLUME_PERIMETER_FIELD,
+  volumeAluminium06Contract,
+  volumeLinearMeters,
+} from "./volume.js";
+export type {
+  ComponentCalculationContract,
+  ComponentCalculationInput,
+  ComponentCalculationResult,
+  SharedCalculationContext,
+} from "./componentContract.js";
 export type {
   CatalogTreeNode,
+  ComponentCalculationStatus,
+  ComponentInputMapping,
+  ComponentRole,
+  ComponentRuntimeStatus,
   ComponentSummary,
+  ComponentVariantId,
   DraftConfiguration,
   DraftValue,
   DraftValues,

@@ -18,13 +18,13 @@ export const frontlitPlexiAl06Template: ProductTemplate = {
   identityFacts: [
     { id: "lighting", label: "Iluminare", value: "Iluminare frontală" },
     { id: "face.material", label: "Material față", value: "Plexiglas 3 mm" },
-    { id: "returnCant.material", label: "Material volum", value: "Aluminiu 0,6 mm" },
+    { id: "volume.material", label: "Material volum", value: "Aluminiu 0,6 mm" },
     { id: "back.material", label: "Material spate", value: "Forex 10 mm" },
   ],
   fixedValues: {
     "face.material": "plexiglas",
     "face.thicknessMm": 3,
-    "returnCant.material": "aluminum_0_6",
+    "volume.material": "aluminum_0_6",
     "back.material": "forex",
     "back.thicknessMm": 10,
     "lighting.mode": "front_lit",
@@ -32,10 +32,26 @@ export const frontlitPlexiAl06Template: ProductTemplate = {
   formSchemaId: "prd-letters-frontlit-plexi-al06-form-v1",
   status: "PILOT",
   components: [
-    { id: "FACE", label: "Față", required: true },
-    { id: "RETURN_CANT", label: "Cant", required: true },
-    { id: "BACK", label: "Spate", required: true },
-    { id: "LIGHTING", label: "Iluminare", required: true },
+    { id: "FACE", label: "Față", required: true, variantId: "FACE_PLEXIGLAS_3MM" },
+    {
+      id: "VOLUME",
+      label: "Volum",
+      required: true,
+      variantId: "VOLUME_ALUMINIUM_06",
+    },
+    {
+      id: "BACK",
+      label: "Spate",
+      required: true,
+      variantId: "BACK_FOREX_10MM",
+      inputMapping: { confirmedAreaMm2FromComponentId: "FACE" },
+    },
+    {
+      id: "LIGHTING",
+      label: "Iluminare",
+      required: true,
+      variantId: "LIGHTING_FRONT_LED",
+    },
   ],
 };
 
@@ -96,13 +112,13 @@ export const frontlitPlexiAl06FormSchema: FormSchema = {
       ],
     },
     {
-      id: "return-cant",
-      title: "Cant",
-      componentId: "RETURN_CANT",
+      id: "volume",
+      title: "Volum",
+      componentId: "VOLUME",
       fields: [
         {
-          id: "returnCant.depthMm",
-          componentId: "RETURN_CANT",
+          id: "volume.depthMm",
+          componentId: "VOLUME",
           label: "Adâncime volum (mm)",
           type: "select",
           required: true,
@@ -115,9 +131,9 @@ export const frontlitPlexiAl06FormSchema: FormSchema = {
           visibleWhen: { kind: "always" },
         },
         {
-          id: "returnCant.finish",
-          componentId: "RETURN_CANT",
-          label: "Finisaj cant",
+          id: "volume.finish",
+          componentId: "VOLUME",
+          label: "Finisaj volum",
           type: "select",
           required: true,
           options: [
@@ -128,20 +144,20 @@ export const frontlitPlexiAl06FormSchema: FormSchema = {
           visibleWhen: { kind: "always" },
         },
         {
-          id: "returnCant.color",
-          componentId: "RETURN_CANT",
-          label: "Culoare cant",
+          id: "volume.color",
+          componentId: "VOLUME",
+          label: "Culoare volum",
           type: "text",
           required: true,
           visibleWhen: {
             kind: "fieldIn",
-            fieldId: "returnCant.finish",
+            fieldId: "volume.finish",
             values: ["vinyl", "painted"],
           },
         },
         {
-          id: "returnCant.confirmedPerimeterMm",
-          componentId: "RETURN_CANT",
+          id: "volume.confirmedPerimeterMm",
+          componentId: "VOLUME",
           label: "Perimetru confirmat (mm)",
           type: "number",
           required: true,

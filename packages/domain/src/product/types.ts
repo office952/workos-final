@@ -1,4 +1,24 @@
-export type ComponentId = "FACE" | "RETURN_CANT" | "BACK" | "LIGHTING" | "ROOT";
+import type { ResourceRequirement } from "../resources/requirement.js";
+
+export type ComponentId = "FACE" | "VOLUME" | "BACK" | "LIGHTING" | "ROOT";
+export type ComponentRole = "FACE" | "VOLUME" | "BACK" | "LIGHTING";
+export type ComponentVariantId =
+  | "FACE_PLEXIGLAS_3MM"
+  | "VOLUME_ALUMINIUM_06"
+  | "BACK_FOREX_10MM"
+  | "LIGHTING_FRONT_LED";
+export type ComponentCalculationStatus =
+  | "CALCULATED"
+  | "MISSING_MEASUREMENT"
+  | "UNAVAILABLE";
+
+export type ComponentRuntimeStatus = {
+  id: string;
+  label: string;
+  variantId: ComponentVariantId;
+  status: ComponentCalculationStatus;
+  unavailable: readonly string[];
+};
 
 export type FieldType = "text" | "number" | "select" | "boolean";
 
@@ -38,11 +58,17 @@ export type FormSchema = {
   sections: readonly FormSection[];
 };
 
+export type ComponentInputMapping = {
+  confirmedAreaMm2FromComponentId?: string;
+};
+
 export type ProductComponent = {
   id: string;
   label: string;
   required: boolean;
+  variantId: ComponentVariantId;
   selectionFieldId?: string;
+  inputMapping?: ComponentInputMapping;
 };
 
 export type ProductFamily = {
@@ -149,6 +175,8 @@ export type ProductAggregate = {
   inscription: string;
   components: readonly ComponentSummary[];
   quantities: readonly TechnicalQuantity[];
+  requirements: readonly ResourceRequirement[];
+  componentStatuses: readonly ComponentRuntimeStatus[];
   unavailable: readonly string[];
 };
 

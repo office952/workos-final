@@ -20,9 +20,9 @@ const readyValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
   "face.confirmedAreaMm2": 250000,
-  "returnCant.depthMm": "60",
-  "returnCant.finish": "none",
-  "returnCant.confirmedPerimeterMm": 12500,
+  "volume.depthMm": "60",
+  "volume.finish": "none",
+  "volume.confirmedPerimeterMm": 12500,
 };
 
 describe("canonical product", () => {
@@ -45,7 +45,7 @@ describe("canonical product", () => {
     );
     expect(frontlitPlexiAl06Template.fixedValues["face.thicknessMm"]).toBe(3);
     expect(frontlitPlexiAl06Template.fixedValues["back.thicknessMm"]).toBe(10);
-    expect(frontlitPlexiAl06Template.fixedValues["returnCant.material"]).toBe(
+    expect(frontlitPlexiAl06Template.fixedValues["volume.material"]).toBe(
       "aluminum_0_6",
     );
     expect(frontlitPlexiAl06Template.fixedValues["lighting.mode"]).toBe(
@@ -61,12 +61,13 @@ describe("canonical product", () => {
     expect(labels).not.toContain("Include iluminare");
     expect(labels).not.toContain("Material față");
     expect(labels).not.toContain("Material cant");
+    expect(labels).not.toContain("Finisaj cant");
   });
 
   it("keeps canonical depth options", () => {
     const depth = frontlitPlexiAl06FormSchema.sections
       .flatMap((section) => section.fields)
-      .find((field) => field.id === "returnCant.depthMm");
+      .find((field) => field.id === "volume.depthMm");
     expect(depth?.options?.map((option) => option.value)).toEqual([
       "30",
       "60",
@@ -98,7 +99,7 @@ describe("module law", () => {
   it("includes required lighting without an include toggle", () => {
     expect(selectedComponentIds(frontlitPlexiAl06Template, readyValues)).toEqual([
       "FACE",
-      "RETURN_CANT",
+      "VOLUME",
       "BACK",
       "LIGHTING",
     ]);
@@ -109,7 +110,7 @@ describe("module law", () => {
     );
     expect(definition.values["lighting.mode"]).toBe("front_lit");
     expect(definition.values["face.material"]).toBe("plexiglas");
-    expect(definition.values["returnCant.material"]).toBe("aluminum_0_6");
+    expect(definition.values["volume.material"]).toBe("aluminum_0_6");
   });
 
   it("keeps product-fixed identity when the draft tries to change it", () => {
@@ -138,7 +139,7 @@ describe("ProductDefinition", () => {
     expect(definition.missing).toEqual([]);
     expect(definition.selectedComponentIds).toEqual([
       "FACE",
-      "RETURN_CANT",
+      "VOLUME",
       "BACK",
       "LIGHTING",
     ]);
@@ -192,7 +193,10 @@ describe("ProductTruth and ProductAggregate", () => {
       throw new Error("expected confirmed truth");
     }
     expect(truth.values["root.inscription"]).toBe("WORKOS");
-    expect(truth.measurements[0]?.value).toBe(12500);
+    expect(
+      truth.measurements.find((item) => item.fieldId === "volume.confirmedPerimeterMm")
+        ?.value,
+    ).toBe(12500);
     expect(truth.measurements[0]?.source).toBe("OPERATOR_MANUAL");
 
     const aggregate = compileAggregate(
@@ -203,7 +207,7 @@ describe("ProductTruth and ProductAggregate", () => {
     expect(aggregate.quantities).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          componentId: "RETURN_CANT",
+          componentId: "VOLUME",
           value: 12.5,
           unit: "m",
         }),
@@ -220,18 +224,19 @@ describe("ProductTruth and ProductAggregate", () => {
       ]),
     );
     expect(JSON.stringify(aggregate)).not.toMatch(/quote|markup/i);
+    expect(JSON.stringify(aggregate)).not.toMatch(/RETURN_CANT|Lungime cant|"Cant"/);
   });
 
   it("blocks when the confirmed perimeter is missing", () => {
     const definition = compileDefinition(
       frontlitPlexiAl06Template,
       frontlitPlexiAl06FormSchema,
-      draft({ ...readyValues, "returnCant.confirmedPerimeterMm": null }),
+      draft({ ...readyValues, "volume.confirmedPerimeterMm": null }),
     );
     expect(definition.readiness).toBe("blocked");
     expect(
       definition.missing.some(
-        (item) => item.fieldId === "returnCant.confirmedPerimeterMm",
+        (item) => item.fieldId === "volume.confirmedPerimeterMm",
       ),
     ).toBe(true);
   });

@@ -1,0 +1,141 @@
+import { describe, expect, it } from "vitest";
+import { compileEic } from "../resources/eic.js";
+import { getComponentContract } from "./componentRegistry.js";
+import { FACE_AREA_FIELD, facePlexiglas3mmContract } from "./face.js";
+import {
+  compileAggregate,
+  compileDefinition,
+  confirmReviewedDefinition,
+} from "./compiler.js";
+import {
+  CANONICAL_PRODUCT_CODE,
+  frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06Template,
+} from "./frontlitPlexiAl06.js";
+import type { ProductAggregate, ProductTemplate, ProductTruth } from "./types.js";
+
+describe("component reuse", () => {
+  it("uses the same FACE contract independently and from the canonical product", () => {
+    const independent = facePlexiglas3mmContract.calculate({
+      values: {},
+      measurements: facePlexiglas3mmContract.collectMeasurements({
+        [FACE_AREA_FIELD]: 250000,
+      }),
+      shared: {},
+    });
+
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+    );
+    const fromProduct = aggregate.quantities.find((item) => item.componentId === "FACE");
+
+    expect(getComponentContract("FACE_PLEXIGLAS_3MM")).toBe(facePlexiglas3mmContract);
+    expect(fromProduct).toEqual(independent.quantities[0]);
+  });
+
+  it("reuses FACE and VOLUME contracts on a test-only composition", () => {
+    const synthetic: ProductTemplate = {
+      ...frontlitPlexiAl06Template,
+      code: "TEST-ONLY-FACE-VOLUME",
+      components: frontlitPlexiAl06Template.components.filter((item) =>
+        ["FACE", "VOLUME"].includes(item.id),
+      ),
+    };
+    const truth: ProductTruth = {
+      status: "CONFIRMED_IN_RUNTIME",
+      templateCode: synthetic.code,
+      templateVersion: synthetic.version,
+      familyId: synthetic.familyId,
+      selectedComponentIds: ["FACE", "VOLUME"],
+      values: {
+        "root.inscription": "TEST",
+        "face.confirmedAreaMm2": 250000,
+        "volume.confirmedPerimeterMm": 12500,
+      },
+      measurements: [
+        ...facePlexiglas3mmContract.collectMeasurements({
+          [FACE_AREA_FIELD]: 250000,
+        }),
+        ...getComponentContract("VOLUME_ALUMINIUM_06").collectMeasurements({
+          "volume.confirmedPerimeterMm": 12500,
+        }),
+      ],
+      reviewId: "test",
+      confirmedAt: "2026-08-14T21:00:00.000Z",
+    };
+    const aggregate = compileAggregate(truth, synthetic, frontlitPlexiAl06FormSchema);
+    expect(aggregate.quantities.map((item) => item.componentId)).toEqual([
+      "FACE",
+      "VOLUME",
+    ]);
+    expect(aggregate.componentStatuses.map((item) => item.status)).toEqual([
+      "CALCULATED",
+      "CALCULATED",
+    ]);
+    const eic = compileEic(aggregate);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.total).toBe(316.5);
+    expect(eic.excludedComponentLabels).toEqual([]);
+  });
+
+  it("lets generic EIC follow an arbitrary composition status list", () => {
+    const aggregate: ProductAggregate = {
+      derivedFrom: "ProductTruth",
+      productLabel: "Sintetic",
+      familyLabel: "Test",
+      inscription: "X",
+      components: [],
+      quantities: [],
+      requirements: [
+        {
+          componentId: "VOLUME",
+          resourceId: "aluminium_return_profile",
+          quantity: 12.5,
+          unit: "m",
+        },
+      ],
+      componentStatuses: [
+        {
+          id: "VOLUME",
+          label: "Volum",
+          variantId: "VOLUME_ALUMINIUM_06",
+          status: "CALCULATED",
+          unavailable: [],
+        },
+        {
+          id: "OTHER",
+          label: "Altceva",
+          variantId: "LIGHTING_FRONT_LED",
+          status: "UNAVAILABLE",
+          unavailable: ["lipsă"],
+        },
+      ],
+      unavailable: ["lipsă"],
+    };
+    const eic = compileEic(aggregate);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.excludedComponentLabels).toEqual(["Altceva"]);
+    expect(eic.total).toBe(125);
+  });
+});
