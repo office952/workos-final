@@ -7,6 +7,7 @@ It is not a cleanup or fork of previous WorkOS repositories.
 
 Hierarchical product catalog plus first canonical LETTERS product.
 FACE / VOLUME / BACK / LIGHTING are reusable component calculation contracts.
+Owner-facing projections: Module și componente, Guvernanța sistemului.
 ProductTemplate composes variants. ProductAggregate orchestrates. EIC is generic.
 LIGHTING remains unavailable until LED pitch and PSU reserve are owner-decided.
 
@@ -39,4 +40,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, and lighting left explicitly unavailable until pitch and PSU reserve are decided.
+The current app has a platform shell, a real health check, a product catalog, owner-facing component and governance projections, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, and lighting left explicitly unavailable until pitch and PSU reserve are decided.

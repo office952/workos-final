@@ -38,6 +38,7 @@ Generalize from real products, not from theory.
 Product catalog hierarchy established.
 First canonical product established.
 FACE / VOLUME / BACK / LIGHTING are component calculation contracts.
+Owner-facing projections exist for components and governance.
 ProductAggregate orchestrates. EIC consumes generic requirements.
 LIGHTING remains technically partial (pitch and PSU reserve unresolved).
 VOLUME EIC regression preserved (formerly RETURN_CANT).
