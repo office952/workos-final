@@ -40,6 +40,7 @@ export const facePlexiglas3mmContract: ComponentCalculationContract = {
     independentCalculation: true,
     eic: "material",
     structuralGaps: FACE_GAPS,
+    resourceIds: [PLEXIGLAS_FACE_SHEET_ID],
   },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const area = values[FACE_AREA_FIELD];

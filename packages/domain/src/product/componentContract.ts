@@ -43,6 +43,7 @@ export type ComponentContractProfile = {
   independentCalculation: boolean;
   eic: ComponentEicReadiness;
   structuralGaps: readonly string[];
+  resourceIds: readonly string[];
 };
 
 export type ComponentCalculationContract = {

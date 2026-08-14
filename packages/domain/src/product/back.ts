@@ -34,6 +34,7 @@ export const backForex10mmContract: ComponentCalculationContract = {
     independentCalculation: true,
     eic: "material",
     structuralGaps: BACK_GAPS,
+    resourceIds: [FOREX_BACK_SHEET_ID],
   },
   collectMeasurements() {
     return [];

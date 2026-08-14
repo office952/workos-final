@@ -29,6 +29,13 @@ export {
   COMPONENT_ROLES,
   projectComponentArchitecture,
 } from "./componentProjection.js";
+export {
+  adminEditClassLabel,
+  adminLifecycleLabel,
+  collectChildCategoryIds,
+  computeCategoryDepth,
+  projectProductSystemAdministration,
+} from "./productSystemAdmin.js";
 export { BACK_COMPONENT_ID, backForex10mmContract } from "./back.js";
 export {
   FACE_AREA_FIELD,
@@ -77,6 +84,16 @@ export type {
   ComponentTechnicalSettingProjection,
   TechnicalSettingsRegistry,
 } from "./technicalSettings.js";
+export type {
+  AdminCategoryRecord,
+  AdminEditClass,
+  AdminFamilyRecord,
+  AdminLifecycleState,
+  AdminProductRecord,
+  AdminReadiness,
+  AdminVariantRecord,
+  ProductSystemAdminProjection,
+} from "./productSystemAdmin.js";
 export type {
   CatalogTreeNode,
   ComponentCalculationStatus,

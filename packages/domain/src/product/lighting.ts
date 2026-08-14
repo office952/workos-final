@@ -35,6 +35,7 @@ export const lightingFrontLedContract: ComponentCalculationContract = {
     independentCalculation: true,
     eic: "unavailable",
     structuralGaps: lightingGaps(listVariantTechnicalSettings("LIGHTING_FRONT_LED")),
+    resourceIds: [],
   },
   collectMeasurements() {
     return [];

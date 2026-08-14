@@ -33,6 +33,12 @@ describe("system governance projection", () => {
       "IMPLEMENTED",
     );
     expect(
+      governance.roadmap.find((item) => item.id === "product-system-admin")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(governance.sources).toContain(
+      "Proiecția read-only de administrare Product System",
+    );
+    expect(
       governance.boundaries.find((item) => item.id === "intake-settings")?.statement,
     ).toMatch(/Intake nu deține setările tehnice/);
     expect(implementationStateLabel("NOT_IMPLEMENTED")).toBe("Neimplementat");

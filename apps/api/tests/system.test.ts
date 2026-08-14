@@ -41,6 +41,35 @@ describe("system projection API", () => {
     expect(JSON.stringify(body)).not.toMatch(/RETURN_CANT/);
   });
 
+  it("projects product system administration from canonical registries", async () => {
+    const response = await createApp().request("/api/product-system-admin");
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      families: Array<{ id: string; productCodes: string[] }>;
+      products: Array<{
+        code: string;
+        composition: Array<{ variantId: string }>;
+      }>;
+      variants: Array<{
+        variantId: string;
+        usedByProductCodes: string[];
+        technicalSettings: Array<{ id: string }>;
+      }>;
+    };
+    expect(body.families[0]?.id).toBe("LIGHTED_VOLUMETRIC_SIGNS");
+    expect(body.families[0]?.productCodes).toEqual([CANONICAL_PRODUCT_CODE]);
+    expect(body.products[0]?.composition.map((item) => item.variantId)).toEqual([
+      "FACE_PLEXIGLAS_3MM",
+      "VOLUME_ALUMINIUM_06",
+      "BACK_FOREX_10MM",
+      "LIGHTING_FRONT_LED",
+    ]);
+    expect(
+      body.variants.find((item) => item.variantId === "LIGHTING_FRONT_LED")
+        ?.usedByProductCodes,
+    ).toEqual([CANONICAL_PRODUCT_CODE]);
+  });
+
   it("projects governance without an active freeze or commercial", async () => {
     const response = await createApp().request("/api/governance");
     expect(response.status).toBe(200);

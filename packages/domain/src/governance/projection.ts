@@ -198,6 +198,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
       "Harta canonică de domenii și administrare",
+      "Proiecția read-only de administrare Product System",
     ],
     ownerGates: [
       { id: "scope", statement: "Doar ownerul autorizează domeniul de implementare." },
@@ -223,6 +224,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Valorile tehnice ajustabile trăiesc în setările canonice ale variantei, nu în documentație, Intake sau literali ascunși.",
       "Documentația explică; calculul consumă; Intake nu administrează setările de sistem.",
       "Fiecare domeniu deține setările sale. Nu există un Settings global care deține tot adevărul.",
+      "Fundația de administrare Product System este proiecție read-only până la primul write path persistat.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -249,6 +251,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "admin-map",
         label: "Hartă de administrare cross-sistem",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "product-system-admin",
+        label: "Fundație administrare Product System",
         state: "IMPLEMENTED",
       },
       { id: "lighting", label: "Iluminare calculabilă", state: "NOT_IMPLEMENTED" },
