@@ -1,5 +1,13 @@
+import type { ComponentCalculationResult } from "../product/componentContract.js";
 import { getComponentType } from "../product/componentTypes.js";
 import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
+import {
+  LIGHTING_MISSING_LED_GEOMETRY,
+  LIGHTING_MISSING_PSU_CAPACITY,
+  LIGHTING_MISSING_PSU_SELECTION,
+  lightingFrontLedContract,
+} from "../product/lighting.js";
+import { listTypeTechnicalSettings } from "../product/technicalSettings.js";
 import type {
   ComponentRole,
   ComponentTypeId,
@@ -50,6 +58,14 @@ export type CompositionNodeReadiness = (typeof COMPOSITION_NODE_READINESS)[numbe
 export const COMPOSITION_COMPLETENESS = ["READY", "PARTIAL", "BLOCKED"] as const;
 export type CompositionCompleteness = (typeof COMPOSITION_COMPLETENESS)[number];
 
+export const LIGHTING_CALCULATION_READINESS = [
+  "BLOCKED",
+  "PARTIAL",
+  "CALCULATED",
+] as const;
+export type LightingCalculationReadiness =
+  (typeof LIGHTING_CALCULATION_READINESS)[number];
+
 export const MISSING_PROCESS_CLASSIFICATIONS = [
   "REQUIRED_FOR_V1",
   "LATER",
@@ -93,7 +109,7 @@ export type ProductProcessComposition = {
   completenessReasons: readonly string[];
   technologicalProcessCompleteness: CompositionCompleteness;
   technologicalProcessCompletenessLabel: string;
-  lightingCalculationReadiness: "BLOCKED";
+  lightingCalculationReadiness: LightingCalculationReadiness;
   lightingCalculationReadinessLabel: string;
   costCompleteness: "PARTIAL";
   costCompletenessLabel: string;
@@ -123,6 +139,7 @@ export function composeTypeProcessNodes(
   scope: ComponentRole,
   typeId: ComponentTypeId,
   values: DraftValues,
+  lightingResult: ComponentCalculationResult = inspectLighting(values),
 ): ProcessCompositionNode[] {
   return resolvedProcessRequirementsForType(typeId, values).map((requirement) =>
     toNode({
@@ -132,6 +149,7 @@ export function composeTypeProcessNodes(
       condition: requirement.condition,
       reason: requirement.reason,
       dependsOn: [],
+      lightingResult,
     }),
   );
 }
@@ -141,12 +159,19 @@ export function composeProductProcesses(
   values: DraftValues,
 ): ProductProcessComposition {
   const merged: DraftValues = { ...template.fixedValues, ...values };
+  const lightingResult = inspectLighting(merged);
   const nodes = template.components.flatMap((component) =>
-    composeTypeProcessNodes(component.id as ComponentRole, component.typeId, merged),
+    composeTypeProcessNodes(
+      component.id as ComponentRole,
+      component.typeId,
+      merged,
+      lightingResult,
+    ),
   );
   const withProduct = addProductComposition(
     nodes,
     template.components.map((item) => item.id),
+    lightingResult,
   );
   const connected = applyProductDependencies(withProduct);
   const derivedOrder = topologicalOrder(connected);
@@ -161,8 +186,10 @@ export function composeProductProcesses(
     completenessReasons,
     technologicalProcessCompleteness: technological,
     technologicalProcessCompletenessLabel: completenessLabel(technological),
-    lightingCalculationReadiness: "BLOCKED",
-    lightingCalculationReadinessLabel: "Blocat",
+    lightingCalculationReadiness: lightingReadinessFrom(lightingResult),
+    lightingCalculationReadinessLabel: lightingReadinessLabel(
+      lightingReadinessFrom(lightingResult),
+    ),
     costCompleteness: "PARTIAL",
     costCompletenessLabel: "Parțială",
     executionReadiness: "NOT_IMPLEMENTED",
@@ -217,6 +244,7 @@ export function lettersProcessCompositionInspections(
 function addProductComposition(
   nodes: ProcessCompositionNode[],
   selectedComponentIds: readonly string[],
+  lightingResult: ComponentCalculationResult,
 ): ProcessCompositionNode[] {
   const extra: ProcessCompositionNode[] = [];
   if (
@@ -231,6 +259,7 @@ function addProductComposition(
         condition: { kind: "always" },
         reason: "Corpul se lipește după fața pregătită și volumul format.",
         dependsOn: [],
+        lightingResult,
       }),
     );
   }
@@ -247,6 +276,7 @@ function addProductComposition(
         condition: { kind: "always" },
         reason: "Spatele se prinde mecanic după lucrul intern din corp.",
         dependsOn: [],
+        lightingResult,
       }),
     );
   }
@@ -258,6 +288,7 @@ function addProductComposition(
       condition: { kind: "always" },
       reason: "Controlul final verifică corpul, finisajul și închiderea.",
       dependsOn: [],
+      lightingResult,
     }),
     toNode({
       scope: "PRODUCT",
@@ -266,6 +297,7 @@ function addProductComposition(
       condition: { kind: "always" },
       reason: "Ambalarea urmează după controlul final.",
       dependsOn: [],
+      lightingResult,
     }),
   );
   return [...nodes, ...extra];
@@ -356,6 +388,48 @@ function pushIfPresent(
   }
 }
 
+function inspectLighting(values: DraftValues): ComponentCalculationResult {
+  return lightingFrontLedContract.calculate({
+    values,
+    measurements: [],
+    shared: {},
+    technicalSettings: listTypeTechnicalSettings("LIGHTING_FRONT_LED"),
+  });
+}
+
+function lightingReadinessFrom(
+  result: ComponentCalculationResult,
+): LightingCalculationReadiness {
+  switch (result.status) {
+    case "CALCULATED":
+      return "CALCULATED";
+    case "PARTIAL":
+      return "PARTIAL";
+    case "UNAVAILABLE":
+    case "MISSING_MEASUREMENT":
+      return "BLOCKED";
+    default: {
+      const _exhaustive: never = result.status;
+      return _exhaustive;
+    }
+  }
+}
+
+function lightingReadinessLabel(readiness: LightingCalculationReadiness): string {
+  switch (readiness) {
+    case "CALCULATED":
+      return "Calculată";
+    case "PARTIAL":
+      return "Parțială";
+    case "BLOCKED":
+      return "Blocat";
+    default: {
+      const _exhaustive: never = readiness;
+      return _exhaustive;
+    }
+  }
+}
+
 function toNode(input: {
   scope: ProcessCompositionScope;
   typeId: ComponentTypeId | null;
@@ -363,6 +437,7 @@ function toNode(input: {
   condition: ProcessRequirementCondition;
   reason: string;
   dependsOn: readonly string[];
+  lightingResult: ComponentCalculationResult;
 }): ProcessCompositionNode {
   const process = getOperationalProcess(input.processId);
   if (!process) {
@@ -383,7 +458,7 @@ function toNode(input: {
     dependsOn: input.dependsOn,
     nodeReadiness,
     nodeReadinessLabel: nodeReadinessLabel(nodeReadiness),
-    blockers: nodeBlockers(process, nodeReadiness),
+    blockers: nodeBlockers(process, nodeReadiness, input.lightingResult),
     reason: input.reason,
   };
 }
@@ -407,6 +482,7 @@ function nodeReadinessFor(process: OperationalProcess): CompositionNodeReadiness
 function nodeBlockers(
   process: OperationalProcess,
   readiness: CompositionNodeReadiness,
+  lightingResult: ComponentCalculationResult,
 ): string[] {
   if (readiness === "REQUIRED") {
     return [];
@@ -417,11 +493,29 @@ function nodeBlockers(
       "Prețul CNC nu este modelat.",
     ];
   }
-  if (process.id === PLACE_LED_MODULES_ID || process.id === INSTALL_OR_CONNECT_PSU_ID) {
-    return [
-      "Iluminarea nu este calculabilă.",
-      "Regula de rezervă PSU nu este stabilită.",
-    ];
+  if (process.id === PLACE_LED_MODULES_ID) {
+    return lightingResult.unavailable.includes(LIGHTING_MISSING_LED_GEOMETRY)
+      ? [LIGHTING_MISSING_LED_GEOMETRY]
+      : lightingResult.unavailable.length > 0
+        ? [...lightingResult.unavailable]
+        : [process.readinessNote];
+  }
+  if (process.id === INSTALL_OR_CONNECT_PSU_ID) {
+    const capacityKnown = lightingResult.quantities.some(
+      (item) => item.id === "minimumRequiredPsuCapacityW",
+    );
+    const blockers: string[] = [];
+    if (capacityKnown) {
+      blockers.push(
+        "Capacitatea minimă a sursei este cunoscută. Selecția fizică a sursei rămâne indisponibilă.",
+      );
+    } else if (lightingResult.unavailable.includes(LIGHTING_MISSING_PSU_CAPACITY)) {
+      blockers.push(LIGHTING_MISSING_PSU_CAPACITY);
+    }
+    if (lightingResult.unavailable.includes(LIGHTING_MISSING_PSU_SELECTION)) {
+      blockers.push(LIGHTING_MISSING_PSU_SELECTION);
+    }
+    return blockers.length > 0 ? blockers : [process.readinessNote];
   }
   return [process.readinessNote];
 }

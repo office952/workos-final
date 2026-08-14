@@ -202,7 +202,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "BLOCKED",
     readinessNote:
-      "Iluminarea rămâne incompletă: rezerva PSU nu este decisă. Procesul este rezervat, nu executabil.",
+      "Cantitatea de module LED nu este calculabilă: pasul LED nu are o bază geometrică confirmată.",
   },
   {
     id: PAINT_RAL_ID,
@@ -246,7 +246,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "BLOCKED",
     readinessNote:
-      "Dimensionarea PSU rămâne blocată de rezerva nesetată. Procesul există, cantitatea nu.",
+      "Capacitatea minimă a sursei depinde de sarcina LED. Selecția fizică a sursei nu are catalog canonic.",
   },
   {
     id: TEST_LIGHTING_IGNITION_ID,

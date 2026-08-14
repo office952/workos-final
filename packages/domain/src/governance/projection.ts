@@ -401,7 +401,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Write lifecycle",
         state: "NOT_IMPLEMENTED",
       },
-      { id: "lighting", label: "Iluminare calculabilă", state: "NOT_IMPLEMENTED" },
+      { id: "lighting", label: "Iluminare calculabilă", state: "PLANNED" },
       { id: "commercial", label: "Commercial", state: "NOT_IMPLEMENTED" },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],

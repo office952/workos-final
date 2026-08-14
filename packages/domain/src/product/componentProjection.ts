@@ -4,7 +4,11 @@ import {
   processRequirementsForType,
 } from "../processes/requirements.js";
 import { listComponentContracts } from "./componentRegistry.js";
-import type { ComponentEicReadiness, ComponentMeasurementKind } from "./componentContract.js";
+import type {
+  ComponentEicReadiness,
+  ComponentInspectionLine,
+  ComponentMeasurementKind,
+} from "./componentContract.js";
 import {
   attributeKindLabel,
   attributeOwnershipLabel,
@@ -64,6 +68,8 @@ export type ComponentTypeProjection = {
   usedBy: readonly ComponentProductUse[];
   configurations: readonly ComponentProductConfiguration[];
   technicalSettings: readonly ComponentTechnicalSettingProjection[];
+  calculationInputs: readonly ComponentInspectionLine[];
+  calculationResults: readonly ComponentInspectionLine[];
   resourceIds: readonly string[];
   processIds: readonly string[];
   processRequirements: readonly { processId: string; label: string }[];
@@ -298,6 +304,8 @@ export function projectComponentArchitecture(
           usedBy: productsUsing(contract.typeId, role, templates),
           configurations: configurationsFor(contract.typeId, templates),
           technicalSettings: projectTechnicalSettings(contract.typeId),
+          calculationInputs: contract.profile.calculationInputs ?? [],
+          calculationResults: contract.profile.calculationResults ?? [],
           resourceIds: liveResourceIdsForType(contract.typeId),
           processIds: alwaysProcessIdsForType(contract.typeId),
           processRequirements: processRequirementsForType(contract.typeId).map(

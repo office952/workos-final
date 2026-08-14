@@ -37,6 +37,7 @@ export {
   type ProductionCapabilityKind,
 } from "./catalog.js";
 export {
+  LIGHTING_CALCULATION_READINESS,
   composeProductProcesses,
   composeProductProcessesFromTruth,
   composeTypeProcessNodes,
@@ -45,6 +46,7 @@ export {
   topologicalOrder,
   type CompositionCompleteness,
   type CompositionNodeReadiness,
+  type LightingCalculationReadiness,
   type MissingProcessGap,
   type ProcessCompositionInspection,
   type ProcessCompositionNode,

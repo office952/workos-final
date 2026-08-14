@@ -18,6 +18,7 @@ import {
 } from "./displayMetadata.js";
 import { getFormSchema } from "./frontlitPlexiAl06.js";
 import type { ComponentRole, ProductCategory } from "./types.js";
+import type { ComponentInspectionLine } from "./componentContract.js";
 import type { ComponentTechnicalSettingProjection } from "./technicalSettings.js";
 
 export const ADMIN_LIFECYCLE_STATES = ["DRAFT", "ACTIVE", "RETIRED"] as const;
@@ -109,6 +110,8 @@ export type AdminTypeRecord = {
   quantity: string;
   configurations: readonly ComponentProductConfiguration[];
   technicalSettings: readonly ComponentTechnicalSettingProjection[];
+  calculationInputs: readonly ComponentInspectionLine[];
+  calculationResults: readonly ComponentInspectionLine[];
   resourceReadiness: string;
   resourceReferences: readonly { id: string; label: string }[];
   processReferences: readonly { id: string; label: string }[];
@@ -325,6 +328,8 @@ export function projectProductSystemAdministration(
       quantity: type?.quantity ?? "",
       configurations: type?.configurations ?? [],
       technicalSettings: type?.technicalSettings ?? [],
+      calculationInputs: type?.calculationInputs ?? [],
+      calculationResults: type?.calculationResults ?? [],
       resourceReadiness: type?.eic ?? "",
       resourceReferences: (type?.resourceIds ?? []).map((id) => ({
         id,

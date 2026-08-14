@@ -102,14 +102,16 @@ export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSetti
       typeId: "LIGHTING_FRONT_LED",
       label: "Rezervă sursă de alimentare",
       description:
-        "Rezerva sursei de alimentare pentru iluminarea frontală. Fără valoare numerică până la decizia ownerului.",
+        "Rezerva de dimensionare a sursei pentru iluminarea frontală. Setare tehnică de sistem, nu alegere de comandă.",
       valueType: "number",
       unit: "percent",
-      resolution: { status: "UNRESOLVED", reason: "OWNER_DECISION_REQUIRED" },
-      source: "owner technical decision",
-      classification: "OWNER_DECISION_REQUIRED",
+      resolution: { status: "RESOLVED", value: 25 },
+      source: "OWNER_CONFIRMED",
+      classification: "OWNER_CONFIRMED",
       configurable: true,
       unresolvedReason: "Regula de rezervă PSU nu este stabilită",
+      note: "Valoare activă canonică. Calculatorul consumă setarea; nu o hardcodează.",
+      constraints: { min: 0, max: 100 },
     },
   ];
 
@@ -121,6 +123,17 @@ export function listTypeTechnicalSettings(
   typeId: ComponentTypeId,
 ): readonly ComponentTechnicalSettingDefinition[] {
   return componentTechnicalSettingsRegistry.listByType(typeId);
+}
+
+export function resolvedSettingValue(
+  settings: readonly ComponentTechnicalSettingDefinition[],
+  id: string,
+): number | undefined {
+  const setting = settings.find((item) => item.id === id);
+  if (setting?.resolution.status !== "RESOLVED") {
+    return undefined;
+  }
+  return setting.resolution.value;
 }
 
 export function unresolvedSettingReasons(

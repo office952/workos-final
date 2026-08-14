@@ -79,7 +79,15 @@ export {
   getProductTemplate,
   productTemplates,
 } from "./frontlitPlexiAl06.js";
-export { LIGHTING_COMPONENT_ID, lightingFrontLedContract } from "./lighting.js";
+export {
+  LIGHTING_COMPONENT_ID,
+  LIGHTING_MISSING_LED_GEOMETRY,
+  LIGHTING_MISSING_LED_LOAD,
+  LIGHTING_MISSING_PSU_CAPACITY,
+  LIGHTING_MISSING_PSU_SELECTION,
+  lightingFrontLedContract,
+  requiredPsuCapacityW,
+} from "./lighting.js";
 export {
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
@@ -87,6 +95,7 @@ export {
   createTechnicalSettingsRegistry,
   listTypeTechnicalSettings,
   projectTechnicalSettings,
+  resolvedSettingValue,
 } from "./technicalSettings.js";
 export {
   VOLUME_COMPONENT_ID,
@@ -99,6 +108,7 @@ export type {
   ComponentCalculationInput,
   ComponentCalculationResult,
   ComponentContractProfile,
+  ComponentInspectionLine,
   SharedCalculationContext,
 } from "./componentContract.js";
 export type {

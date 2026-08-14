@@ -103,6 +103,10 @@ describe("letters process composition", () => {
       compositionNodeId("VOLUME", FORM_ALUMINIUM_PROFILE_ID),
     ]);
     expect(lighting?.nodeReadiness).toBe("REQUIRED_BLOCKED");
+    expect(lighting?.blockers).toEqual([
+      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
+    ]);
+    expect(composition.lightingCalculationReadiness).toBe("PARTIAL");
     expect(composition.completeness).toBe("BLOCKED");
   });
 
@@ -167,6 +171,11 @@ describe("letters process composition", () => {
     expect(composition.nodes.find((item) => item.id === psu)?.nodeReadiness).toBe(
       "REQUIRED_BLOCKED",
     );
+    expect(composition.nodes.find((item) => item.id === psu)?.blockers).toEqual([
+      "Capacitatea minimă a sursei nu poate fi calculată: sarcina LED nu este cunoscută",
+      "Selecția fizică a sursei nu este disponibilă: nu există catalog canonic de PSU",
+    ]);
+    expect(JSON.stringify(composition)).not.toMatch(/Regula de rezervă PSU/);
   });
 
   it("keeps the graph acyclic, deterministic, and free of execution identity", () => {

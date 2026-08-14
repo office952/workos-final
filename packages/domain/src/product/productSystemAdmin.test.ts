@@ -52,7 +52,10 @@ describe("product system administration projection", () => {
     expect(product?.readiness.canDelete).toBe(false);
     expect(product?.readiness.canRetire).toBe(true);
     expect(product?.readiness.editClasses).toContain("DISPLAY_EDITABLE");
-    expect(product?.unresolvedAreas).toContain("Regula de rezervă PSU nu este stabilită");
+    expect(product?.unresolvedAreas).toContain(
+      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
+    );
+    expect(product?.unresolvedAreas).not.toContain("Regula de rezervă PSU nu este stabilită");
 
     const lighting = admin.types.find((item) => item.typeId === "LIGHTING_FRONT_LED");
     expect(lighting?.usedByProductCodes).toEqual([CANONICAL_PRODUCT_CODE]);

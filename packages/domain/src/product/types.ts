@@ -9,6 +9,7 @@ export type ComponentTypeId =
   | "LIGHTING_FRONT_LED";
 export type ComponentCalculationStatus =
   | "CALCULATED"
+  | "PARTIAL"
   | "MISSING_MEASUREMENT"
   | "UNAVAILABLE";
 
@@ -164,8 +165,8 @@ export type TechnicalQuantity = {
   id: string;
   label: string;
   value: number;
-  unit: "m" | "m2";
-  basis: "confirmed_perimeter" | "confirmed_area";
+  unit: "m" | "m2" | "W";
+  basis: "confirmed_perimeter" | "confirmed_area" | "calculated_from_settings";
 };
 
 export type ProductAggregate = {

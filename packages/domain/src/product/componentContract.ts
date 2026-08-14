@@ -9,8 +9,14 @@ import type {
   TechnicalQuantity,
 } from "./types.js";
 
+export type ComponentInspectionLine = {
+  readonly label: string;
+  readonly value: string;
+};
+
 export type SharedCalculationContext = {
   confirmedAreaMm2?: number;
+  totalLedLoadW?: number;
 };
 
 export type ComponentCalculationInput = {
@@ -43,6 +49,8 @@ export type ComponentContractProfile = {
   independentCalculation: boolean;
   eic: ComponentEicReadiness;
   structuralGaps: readonly string[];
+  calculationInputs?: readonly ComponentInspectionLine[];
+  calculationResults?: readonly ComponentInspectionLine[];
 };
 
 export type ComponentCalculationContract = {

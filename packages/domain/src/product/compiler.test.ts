@@ -230,7 +230,12 @@ describe("ProductTruth and ProductAggregate", () => {
         }),
       ]),
     );
-    expect(aggregate.unavailable).toContain("Regula de rezervă PSU nu este stabilită");
+    expect(aggregate.unavailable).toContain(
+      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
+    );
+    expect(aggregate.componentStatuses.find((item) => item.id === "LIGHTING")?.status).toBe(
+      "PARTIAL",
+    );
     expect(aggregate.unavailable).not.toContain("Regula de pas LED nu este stabilită");
     expect(JSON.stringify(aggregate)).not.toMatch(/ledPitchMm|psuReservePercent/);
     expect(JSON.stringify(aggregate)).not.toMatch(/quote|markup/i);

@@ -92,14 +92,16 @@ describe("technical settings registry", () => {
 });
 
 describe("canonical lighting settings", () => {
-  it("owns LED pitch once and leaves PSU reserve unset", () => {
+  it("owns LED pitch and owner-confirmed PSU reserve once", () => {
     const settings = listTypeTechnicalSettings("LIGHTING_FRONT_LED");
     expect(settings.map((item) => item.id)).toEqual([
       LED_PITCH_SETTING_ID,
       PSU_RESERVE_SETTING_ID,
     ]);
     expect(settings[0]?.resolution).toEqual({ status: "RESOLVED", value: 100 });
-    expect(settings[1]?.resolution.status).toBe("UNRESOLVED");
+    expect(settings[1]?.resolution).toEqual({ status: "RESOLVED", value: 25 });
+    expect(settings[1]?.source).toBe("OWNER_CONFIRMED");
+    expect(settings[1]?.configurable).toBe(true);
     expect(projectTechnicalSettings("LIGHTING_FRONT_LED")).toEqual([
       {
         id: LED_PITCH_SETTING_ID,
@@ -112,9 +114,9 @@ describe("canonical lighting settings", () => {
       {
         id: PSU_RESERVE_SETTING_ID,
         label: "Rezervă sursă de alimentare",
-        valueDisplay: "Nesetat",
-        statusLabel: "Necesită decizie owner",
-        sourceLabel: "Necesită decizie owner",
+        valueDisplay: "25 %",
+        statusLabel: "Setat",
+        sourceLabel: "Confirmat de owner",
         administrationLabel: "Configurabil",
       },
     ]);

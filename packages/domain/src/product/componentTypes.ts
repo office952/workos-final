@@ -164,7 +164,8 @@ export const componentTypes: readonly ComponentTypeDefinition[] = [
     id: "LIGHTING_FRONT_LED",
     role: "LIGHTING",
     label: "Iluminare frontală cu module LED",
-    description: "Tehnologie de iluminare. Pasul LED și rezerva PSU sunt setări tehnice, nu resurse.",
+    description:
+      "Tehnologie de iluminare. Pasul LED și rezerva de dimensionare a sursei sunt setări tehnice de sistem, nu resurse și nu alegeri de comandă.",
     attributes: [
       {
         id: "lighting.mode",
