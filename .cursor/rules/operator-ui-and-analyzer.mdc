@@ -1,0 +1,16 @@
+---
+description: Romanian operator UI and external SVG Analyzer boundary
+alwaysApply: true
+---
+
+# Operator UI and Analyzer
+
+Operator-facing UI is in Romanian. TypeScript, Python, API, database, and contract names may stay in English.
+
+Normal operator UI does not expose internal jargon: hashes, DTO names, raw codes, service names, compiler vocabulary, raw provenance, debug objects, or internal JSON. Those belong in later Development / Audit / Diagnostics views.
+
+The operator should see what to complete, what is selected, what is missing, what to confirm, what is blocked and why, the result, and what comes next.
+
+SVG Analyzer is a separate application. It may observe geometry and propose roles. It does not decide product, template, sold modules, commercial material, pricing, Product Truth, quote, order, or final execution tasks.
+
+Analyzer output is evidence or proposal until an operator confirms it.

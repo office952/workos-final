@@ -1,0 +1,16 @@
+---
+description: One business truth, one owner, no UI-coded product truth
+alwaysApply: true
+---
+
+# One truth, one owner
+
+Each business fact has a single owner. Do not create a second service, fallback, or UI path that becomes a parallel authority.
+
+UI may code experience: layout, reusable components, interaction, responsive behavior, generic renderers.
+
+UI must not hardcode business truth: product fields, materials, formulas, pricing, costs, readiness, dependencies, module activation, business statuses, totals, commercial flows, or Product Truth.
+
+Do not build a standalone calculator and a separate full-product calculator for the same component. The same geometry, resources, formulas, and technical truth apply in isolation and in composition.
+
+Unselected module = silent. Selected module = independently validatable and calculable, and owns or receives all required truth.

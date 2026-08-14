@@ -1,0 +1,16 @@
+---
+description: E2E-first delivery and runtime verification
+alwaysApply: true
+---
+
+# E2E first
+
+A feature is not done when a unit test is green.
+
+Done means the real path holds:
+
+SOURCE OF TRUTH → DOMAIN CONTRACT → BACKEND → API → FRONTEND PROJECTION → OPERATOR INTERACTION → RUNTIME → TESTS
+
+PASS requires runtime evidence. Do not claim success from mocks, hardcoded UI states, or screenshots alone.
+
+Browser or API interaction must exercise the real backend path when the feature has one.

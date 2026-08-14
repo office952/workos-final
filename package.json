@@ -1,0 +1,24 @@
+{
+  "name": "workos-final",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "scripts": {
+    "dev:web": "pnpm --filter @workos-final/web dev",
+    "dev:api": "pnpm --filter @workos-final/api dev",
+    "lint": "eslint .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.54.2",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0"
+  }
+}

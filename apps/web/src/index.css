@@ -1,0 +1,39 @@
+:root {
+  color: #1a1a1a;
+  background: #f6f4f0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+h1,
+h2 {
+  font-weight: 600;
+}
+
+h1 {
+  margin: 0 0 2rem;
+  font-size: 2rem;
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+}
+
+p {
+  margin: 0;
+}

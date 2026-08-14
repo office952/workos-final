@@ -1,0 +1,14 @@
+---
+description: Reference-repo, Owner-gate, and no-speculation boundaries
+alwaysApply: true
+---
+
+# Boundaries
+
+Do not write to previous WorkOS or other reference repositories. They are read-only evidence. Do not copy their architecture or wholesale code into this repo.
+
+Do not add business databases, ORM, migrations, seeds, or destructive data operations without an explicit Owner GO.
+
+Do not invent speculative architecture, unused modules, placeholder pages, or future framework layers before a real product path needs them.
+
+Generalize from real products, not from theory.
