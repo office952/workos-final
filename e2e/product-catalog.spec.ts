@@ -10,8 +10,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(
     page.getByRole("heading", { name: "Litere și semne volumetrice luminoase" }),
   ).toBeVisible();
+  await expect(page.getByText("Familie", { exact: true })).toBeVisible();
+  await expect(page.getByText("Produs", { exact: true })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/component-first-catalog.png",
+    path: "docs/worklog/screenshots/owner-surfaces-products.png",
     fullPage: true,
   });
 
@@ -46,15 +48,18 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.screenshot({
-    path: "docs/worklog/screenshots/component-first-configure.png",
+    path: "docs/worklog/screenshots/owner-surfaces-configure.png",
     fullPage: true,
   });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByRole("heading", { name: "Verificare înainte de confirmare" })).toBeVisible();
+  await expect(page.getByText("Revizuiți configurația.")).toBeVisible();
   await expect(page.getByText("Suprafață confirmată (mm²): 250000")).toBeVisible();
+  await expect(page.getByLabel("Textul literelor")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Modifică configurația" })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/component-first-review.png",
+    path: "docs/worklog/screenshots/owner-surfaces-review.png",
     fullPage: true,
   });
 
@@ -72,7 +77,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Lungime cant")).toHaveCount(0);
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await page.screenshot({
-    path: "docs/worklog/screenshots/component-first-confirm.png",
+    path: "docs/worklog/screenshots/owner-surfaces-confirm.png",
     fullPage: true,
   });
 });

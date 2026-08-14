@@ -49,6 +49,9 @@ describe("CatalogTree", () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByText("Familie")).toBeInTheDocument();
+    expect(screen.getAllByText("Categorie").length).toBeGreaterThan(0);
+    expect(screen.getByText("Produs")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Familie test" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Categorie test" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Subcategorie test" })).toBeInTheDocument();

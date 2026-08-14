@@ -163,7 +163,7 @@ export function ProductConfigurationPage() {
         </div>
       ) : null}
 
-      {confirmed ? null : (
+      {confirmed || definition?.readiness === "ready" ? null : (
         <>
           <FormRenderer
             template={template}
@@ -201,6 +201,7 @@ export function ProductConfigurationPage() {
       {definition?.readiness === "ready" && !confirmed ? (
         <div className="notice">
           <h2>Verificare înainte de confirmare</h2>
+          <p>Revizuiți configurația. Nu mai editați formularul în acest pas.</p>
           <p>Produs: {template.label}</p>
           <p>
             Componente active:{" "}
@@ -237,9 +238,21 @@ export function ProductConfigurationPage() {
               calculată de WorkOS.
             </p>
           ) : null}
-          <button type="button" onClick={() => void handleConfirm()} disabled={busy}>
-            Confirmă configurația
-          </button>
+          <div className="action-row">
+            <button type="button" onClick={() => void handleConfirm()} disabled={busy}>
+              Confirmă configurația
+            </button>
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => {
+                setDefinition(null);
+                setConfirmNotice(null);
+              }}
+            >
+              Modifică configurația
+            </button>
+          </div>
         </div>
       ) : null}
 
