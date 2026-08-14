@@ -114,7 +114,7 @@ They are linked, not merged.
 | `INSPECT_FINISHED_LETTER` | QUALITY_CONTROL | QUALITY_CONTROL | product | PLANNED |
 | `PACK_PRODUCT` | PACKING | PACKAGING | product | PLANNED |
 
-Letters overall composition remains BLOCKED because lighting calculation / PSU reserve is unresolved.
+Letters overall composition remains BLOCKED because Lighting calculation is PARTIAL: LED geometry, LED load, and physical PSU selection are still missing. PSU reserve is resolved (25%, owner-confirmed technical setting) and no longer blocks composition by itself.
 Technological process route is modeled. Cost remains PARTIAL. Execution remains absent.
 
 Readiness is reported separately:

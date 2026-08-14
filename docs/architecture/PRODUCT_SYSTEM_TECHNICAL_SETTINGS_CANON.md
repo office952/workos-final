@@ -82,14 +82,16 @@ Normal setting changes must not require code modification. That lifecycle is not
 
 Variant `LIGHTING_FRONT_LED` currently has two settings:
 
-- `ledPitchMm` — Pas module LED — resolved, configurable, owner-confirmed
-- `psuReservePercent` — Rezervă sursă de alimentare — unresolved, owner decision required
+- `ledPitchMm` — Pas module LED — resolved, configurable, owner-confirmed, 100 mm
+- `psuReservePercent` — Rezervă sursă de alimentare — resolved, configurable, owner-confirmed, 25 percent
 
 The active numeric value lives in the typed domain setting, not in this document.
 
 The Product System administration foundation projects these settings onto `/components`. It does not own a second settings registry.
 
-LIGHTING remains UNAVAILABLE. No LED quantity. No invented PSU reserve.
+The Lighting calculator consumes these settings. It does not hardcode 25 or 1.25.
+
+LIGHTING calculation is PARTIAL. Settings are resolved. LED module quantity, LED load, and physical PSU selection remain unavailable until geometry, module watts, and a PSU catalog exist. Minimum PSU capacity is calculated only when LED load is known.
 
 ## SYSTEM RETIREMENT PRINCIPLE
 

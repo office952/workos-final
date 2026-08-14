@@ -43,7 +43,7 @@ ProductAggregate orchestrates. EIC consumes generic requirements.
 Resources now separate material family, specification, service, and cost evidence.
 Operational Processes now separate HOW work is done from WHAT is consumed.
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan.
-LIGHTING remains technically partial: LED pitch is a canonical component setting; PSU reserve remains unresolved.
+LIGHTING calculation is PARTIAL: LED pitch 100 mm and PSU reserve 25% are owner-confirmed configurable technical settings. Module quantity, LED load, and physical PSU selection remain unavailable.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text

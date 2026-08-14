@@ -25,6 +25,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_OPERATIONAL_PROCESSES_FOUNDATION_V1.md` — Operational Processes foundation
 - `docs/worklog/WORKOS_FINAL_LETTERS_PROCESS_COMPOSITION_V1.md` — Letters process composition
 - `docs/worklog/WORKOS_FINAL_LETTERS_CRITICAL_PROCESS_COMPLETION_V1.md` — Letters critical process completion
+- `docs/worklog/WORKOS_FINAL_LIGHTING_COMPLETION_V1.md` — Lighting calculation consumes owner-confirmed PSU reserve 25%
 
 ## Historical evidence
 

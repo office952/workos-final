@@ -388,11 +388,11 @@ This map does **not** authorize the next build. Owner GO is still required.
 
 Recommended rank:
 
-1. **Versioned technical-setting write or Resources foundation**
-   Display-label persistence exists. Do not automatically choose LED pitch. Settings writes need versioning. Resources may be next if material identity is the blocking need.
+1. **Versioned technical-setting write**
+   Display-label persistence exists. Settings writes need versioning. Do not treat LED pitch or PSU reserve as automatic.
 
-2. **Lighting calculation** after the owner decides PSU reserve
-   Highest remaining E2E value on the first canonical product. Blocked on an owner numeric decision, not on this map.
+2. **Lighting Resources / Cost completion**
+   PSU reserve is resolved. Remaining Lighting blockers are LED geometry, module watts, and PSU catalog identity/cost.
 
 3. **Lifecycle retire** later, when more live entities exist.
 
@@ -407,7 +407,7 @@ Do not start People, Machines, Pontaj, Execution, or Commercial next. They depen
 
 ### Can defer
 
-- PSU reserve numeric value (blocks lighting calculation, not this map)
+- LED module wattage, geometric basis for module quantity, and PSU catalog policy
 - People before or after Execution (current roadmap keeps Execution first)
 - Attendance model (exception calendar vs daily grid)
 - Machine vs workcenter first inside Resources
