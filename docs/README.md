@@ -14,6 +14,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_OWNER_SURFACES_INFORMATION_ARCHITECTURE_V1.md` — catalog IA for those projections
 - `docs/worklog/WORKOS_FINAL_COMPONENT_TECHNICAL_SETTINGS_CANONICAL_FOUNDATION_V1.md` — settings foundation build
 - `docs/worklog/WORKOS_FINAL_SYSTEM_ADMINISTRATION_AND_DOMAIN_MAP_V1.md` — cross-system administration map build
+- `docs/worklog/WORKOS_FINAL_PRODUCT_SYSTEM_ADMIN_FOUNDATION_V1.md` — read-only Product System administration foundation
 
 ## Historical evidence
 

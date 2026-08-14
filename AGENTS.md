@@ -8,6 +8,7 @@ It is not a cleanup or fork of previous WorkOS repositories.
 Hierarchical product catalog plus first canonical LETTERS product.
 FACE / VOLUME / BACK / LIGHTING are reusable component calculation contracts.
 Owner-facing projections: Module și componente, Guvernanța sistemului.
+`/components` hosts the read-only Product System administration foundation. Do not add a global Administrare nav item until the first real write path exists.
 Cross-system domain and administration map is canonical; do not invent a second admin model per domain.
 ProductTemplate composes variants. ProductAggregate orchestrates. EIC is generic.
 LIGHTING remains unavailable: LED pitch is a canonical component setting; PSU reserve remains owner-undecided.
@@ -43,4 +44,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, owner-facing component and governance projections, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, canonical component technical settings, and lighting left unavailable because PSU reserve is still owner-undecided.
+The current app has a platform shell, a real health check, a product catalog, a read-only Product System administration foundation on `/components`, owner-facing governance, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, canonical component technical settings, and lighting left unavailable because PSU reserve is still owner-undecided.

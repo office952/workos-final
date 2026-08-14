@@ -85,6 +85,8 @@ Variant `LIGHTING_FRONT_LED` currently has two settings:
 
 The active numeric value lives in the typed domain setting, not in this document.
 
+The Product System administration foundation projects these settings onto `/components`. It does not own a second settings registry.
+
 LIGHTING remains UNAVAILABLE. No LED quantity. No invented PSU reserve.
 
 ## SYSTEM RETIREMENT PRINCIPLE

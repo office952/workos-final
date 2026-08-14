@@ -296,8 +296,8 @@ Labels are proposals. Do not ship empty admin categories.
 | Kind | Use | Current / future example |
 |---|---|---|
 | Operator | Daily workflow | `/products` configure → review → confirm |
-| Owner projection | Read-only system honesty | `/components`, `/governance` |
-| Admin | Configure system truth | Future Administrare — not built |
+| Owner projection | Read-only system honesty | `/components` (Product System admin foundation), `/governance` |
+| Admin | Configure system truth | Future Administrare — not built. No write path yet. |
 
 Do not mix system configuration into daily workflow.
 
@@ -340,8 +340,10 @@ Settings versions: keep previous active values as history after a new version is
 | Component-first FACE / VOLUME / BACK / LIGHTING contracts | IMPLEMENTED_CURRENT |
 | Component technical settings (typed, read-only projection) | IMPLEMENTED_CURRENT |
 | Owner surfaces `/components`, `/governance` | IMPLEMENTED_CURRENT |
+| Product System administration foundation (read-only projection on `/components`) | IMPLEMENTED_CURRENT |
 | Pilot resource catalog + partial EIC | FOUNDATION_ONLY |
 | Settings edit / persistence / versioning | PLANNED |
+| Global Administrare nav / admin write path | PLANNED |
 | Operational processes, labor recipes, workcenters | PLANNED |
 | Machines, People, Pontaj, Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
@@ -379,11 +381,11 @@ This map does **not** authorize the next build. Owner GO is still required.
 
 Recommended rank:
 
-1. **Product System settings and catalog admin foundation**  
-   Highest reuse. Every later domain copies this administration law. The live product already needs owned settings and catalog identity. Keep it foundation, not full CRUD.
+1. **Product System first real admin write path**
+   The read-only administration foundation exists. The next slice is one persisted write (likely display-label rename), after Owner GO and a persistence decision. Do not activate global Administrare until that write path exists.
 
 2. **Resources / Cost catalog foundation**  
-   Needed before lighting quantity, CNC, labor EIC, and workcenters. Same admin pattern as (1), different owner.
+   Needed before lighting quantity, CNC, labor EIC, and workcenters. Same admin pattern as Product System, different owner.
 
 3. **Lighting calculation** after the owner decides PSU reserve  
    Highest remaining E2E value on the first canonical product. Blocked on an owner numeric decision, not on this map.
@@ -394,8 +396,8 @@ Do not start People, Machines, Pontaj, Execution, or Commercial next. They depen
 
 ### Blocking now
 
-1. Authorize the next implementation GO (recommended: Product System admin foundation).
-2. Persistence: business DB remains forbidden until an explicit Owner GO. Without it, admin foundation stays typed configuration plus projection.
+1. Authorize the first real Product System write path (recommended: display-label rename) and the persistence needed for it.
+2. Persistence: business DB remains forbidden until an explicit Owner GO. The current foundation stays typed configuration plus read-only projection.
 
 ### Can defer
 

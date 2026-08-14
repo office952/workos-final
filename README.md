@@ -6,9 +6,9 @@ This is not a cleanup of previous WorkOS code and not a fork of workflow-adv.
 
 ## Current status
 
-Product catalog plus first canonical LETTERS product, with component-owned FACE / VOLUME / BACK internal cost, owner-facing component/governance projections, canonical component technical settings, and lighting left incomplete because PSU reserve is still owner-undecided.
+Product catalog plus first canonical LETTERS product, with component-owned FACE / VOLUME / BACK internal cost, a read-only Product System administration foundation on `/components`, owner-facing governance, canonical component technical settings, and lighting left incomplete because PSU reserve is still owner-undecided.
 
-The app has a platform shell, a real health check, a hierarchical product catalog, and a schema-driven configuration flow for the first canonical product. Cross-system administration is mapped; no business database, admin write path, or commercial price exists yet.
+The app has a platform shell, a real health check, a hierarchical product catalog, and a schema-driven configuration flow for the first canonical product. Cross-system administration is mapped; no business database, admin write path, global Administrare nav, or commercial price exists yet.
 
 ## Prerequisites
 
