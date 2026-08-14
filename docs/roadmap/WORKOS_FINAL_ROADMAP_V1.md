@@ -53,3 +53,22 @@ FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
 
 These phases are not universally COMPLETE.
 COMMERCIAL, Quote, ACM, Analyzer runtime, and full resource admin remain NOT_COMPLETE.
+
+## Finalization map
+
+Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md`.
+
+| Area | Status |
+|---|---|
+| Product System spine (catalog, template, form, truth, aggregate) | DONE / FOUNDATION |
+| Component-first calculation + technical settings law | DONE / FOUNDATION |
+| Owner projections (components, governance) | DONE / FOUNDATION |
+| Cross-system administration map | DONE / FOUNDATION |
+| Product System admin write path | NEXT (requires later Owner GO) |
+| Resources / Cost catalog beyond the pilot | V1 REQUIRED after admin pattern exists |
+| Lighting calculation | V1 REQUIRED after PSU owner decision |
+| People, Machines, Pontaj, Execution | LATER |
+| Commercial, Quote Snapshot, Order Snapshot | LATER |
+| Reporting, Documents, ACM, Logo | LATER |
+
+Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

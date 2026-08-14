@@ -8,6 +8,7 @@ It is not a cleanup or fork of previous WorkOS repositories.
 Hierarchical product catalog plus first canonical LETTERS product.
 FACE / VOLUME / BACK / LIGHTING are reusable component calculation contracts.
 Owner-facing projections: Module și componente, Guvernanța sistemului.
+Cross-system domain and administration map is canonical; do not invent a second admin model per domain.
 ProductTemplate composes variants. ProductAggregate orchestrates. EIC is generic.
 LIGHTING remains unavailable: LED pitch is a canonical component setting; PSU reserve remains owner-undecided.
 
@@ -30,6 +31,7 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 - Modular product law: an unselected module is silent. A selected module is independently validatable and calculable. Complete product is composition of the same contracts. No hidden parallel calculators.
 - Technical quantity, resource identity, internal cost evidence, EIC, and commercial price stay separate. Rates live only in Resources/Cost.
 - Adjustable technical values live in canonical Product System component settings. Documentation explains them. Calculation code consumes them. Intake does not administer them.
+- Each domain owns its settings and entities. Do not create a global Settings dump or a top-nav link per future system. See `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md`.
 - Confirm the exact reviewed definition. Do not recompile a later draft at confirm time.
 - Catalog organization (family / recursive category) is not product technical truth.
 - ProductTemplate is the configurable product. Do not invent a parallel Product entity without Owner GO.
