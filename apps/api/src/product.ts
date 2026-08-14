@@ -5,6 +5,7 @@ import {
   confirmReviewedDefinition,
   getFormSchemaForTemplate,
   getProductTemplate,
+  projectProductCatalog,
   type DraftConfiguration,
   type DraftValue,
   type DraftValues,
@@ -54,20 +55,24 @@ function readReviewedDefinition(body: unknown): {
 }
 
 export function registerProductRoutes(app: Hono): void {
-  app.get("/api/product-templates/:templateCode", (c) => {
-    const templateCode = c.req.param("templateCode");
-    const template = getProductTemplate(templateCode);
-    const formSchema = getFormSchemaForTemplate(templateCode);
+  app.get("/api/product-catalog", (c) => {
+    return c.json({ tree: projectProductCatalog() });
+  });
+
+  app.get("/api/products/:productCode", (c) => {
+    const productCode = c.req.param("productCode");
+    const template = getProductTemplate(productCode);
+    const formSchema = getFormSchemaForTemplate(productCode);
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
     return c.json({ template, formSchema });
   });
 
-  app.post("/api/product-templates/:templateCode/compile", async (c) => {
-    const templateCode = c.req.param("templateCode");
-    const template = getProductTemplate(templateCode);
-    const formSchema = getFormSchemaForTemplate(templateCode);
+  app.post("/api/products/:productCode/compile", async (c) => {
+    const productCode = c.req.param("productCode");
+    const template = getProductTemplate(productCode);
+    const formSchema = getFormSchemaForTemplate(productCode);
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -75,21 +80,21 @@ export function registerProductRoutes(app: Hono): void {
     const definition = compileDefinition(
       template,
       formSchema,
-      readDraft(templateCode, await c.req.json()),
+      readDraft(productCode, await c.req.json()),
     );
     return c.json({ definition, reviewId: definition.reviewId });
   });
 
-  app.post("/api/product-templates/:templateCode/confirm", async (c) => {
-    const templateCode = c.req.param("templateCode");
-    const template = getProductTemplate(templateCode);
-    const formSchema = getFormSchemaForTemplate(templateCode);
+  app.post("/api/products/:productCode/confirm", async (c) => {
+    const productCode = c.req.param("productCode");
+    const template = getProductTemplate(productCode);
+    const formSchema = getFormSchemaForTemplate(productCode);
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
 
     const { definition, reviewId } = readReviewedDefinition(await c.req.json());
-    if (!definition || definition.templateCode !== templateCode) {
+    if (!definition || definition.templateCode !== productCode) {
       return c.json({ error: "review_required" }, 400);
     }
 

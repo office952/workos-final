@@ -191,6 +191,21 @@ button:disabled {
   padding-left: 1.2rem;
 }
 
+.catalog-tree {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.catalog-tree ul {
+  margin: 0.4rem 0 0.8rem;
+  padding-left: 1.2rem;
+}
+
+.catalog-tree h2,
+.catalog-tree h3 {
+  margin: 1rem 0 0.4rem;
+}
+
 @media (max-width: 40rem) {
   .app-header-inner {
     align-items: flex-start;

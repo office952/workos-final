@@ -1,11 +1,12 @@
 import type {
+  CatalogTreeNode,
   DraftValues,
   EicResult,
+  FormSchema,
   ProductAggregate,
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
-  FormSchema,
 } from "@workos-final/domain";
 
 export type TemplateProjection = {
@@ -19,10 +20,19 @@ async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function fetchProductCatalog(): Promise<CatalogTreeNode[]> {
+  const response = await fetch(`${baseUrl}/api/product-catalog`);
+  if (!response.ok) {
+    throw new Error("catalog_unavailable");
+  }
+  const body = await readJson<{ tree: CatalogTreeNode[] }>(response);
+  return body.tree;
+}
+
 export async function fetchTemplateProjection(
-  templateCode: string,
+  productCode: string,
 ): Promise<TemplateProjection | null> {
-  const response = await fetch(`${baseUrl}/api/product-templates/${templateCode}`);
+  const response = await fetch(`${baseUrl}/api/products/${productCode}`);
   if (response.status === 404) {
     return null;
   }
@@ -33,17 +43,14 @@ export async function fetchTemplateProjection(
 }
 
 export async function compileConfiguration(
-  templateCode: string,
+  productCode: string,
   values: DraftValues,
 ): Promise<ProductDefinition> {
-  const response = await fetch(
-    `${baseUrl}/api/product-templates/${templateCode}/compile`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ values }),
-    },
-  );
+  const response = await fetch(`${baseUrl}/api/products/${productCode}/compile`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ values }),
+  });
   if (!response.ok) {
     throw new Error("compile_unavailable");
   }
@@ -52,7 +59,7 @@ export async function compileConfiguration(
 }
 
 export async function confirmReviewedConfiguration(
-  templateCode: string,
+  productCode: string,
   definition: ProductDefinition,
 ): Promise<
   | {
@@ -63,17 +70,14 @@ export async function confirmReviewedConfiguration(
     }
   | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
 > {
-  const response = await fetch(
-    `${baseUrl}/api/product-templates/${templateCode}/confirm`,
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        definition,
-        reviewId: definition.reviewId,
-      }),
-    },
-  );
+  const response = await fetch(`${baseUrl}/api/products/${productCode}/confirm`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      definition,
+      reviewId: definition.reviewId,
+    }),
+  });
   const body = await readJson<{
     truth?: ProductTruth;
     aggregate?: ProductAggregate;

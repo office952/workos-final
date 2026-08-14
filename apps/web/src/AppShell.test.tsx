@@ -10,7 +10,7 @@ describe("AppShell", () => {
         <AppShell
           navItems={[
             { to: "/", label: "Stare sistem" },
-            { to: "/products/letters", label: "Produse" },
+            { to: "/products", label: "Produse" },
           ]}
         >
           <p>conținut</p>

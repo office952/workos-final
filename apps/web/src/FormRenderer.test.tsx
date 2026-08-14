@@ -7,9 +7,12 @@ import { FormRenderer } from "./FormRenderer";
 const template: ProductTemplate = {
   code: "sample",
   version: "1",
-  family: { id: "LETTERS", label: "Exemplu" },
+  familyId: "SAMPLE_FAMILY",
+  categoryId: "SAMPLE_CATEGORY",
   label: "Exemplu",
   description: "",
+  identityFacts: [],
+  fixedValues: {},
   formSchemaId: "sample-form",
   status: "PILOT",
   components: [

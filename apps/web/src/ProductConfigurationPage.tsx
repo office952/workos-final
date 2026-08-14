@@ -33,11 +33,9 @@ function formatMoney(value: number): string {
 }
 
 export function ProductConfigurationPage() {
-  const { templateCode = "" } = useParams();
+  const { productCode = "" } = useParams();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
-  const [values, setValues] = useState<DraftValues>({
-    "lighting.selected": false,
-  });
+  const [values, setValues] = useState<DraftValues>({});
   const [definition, setDefinition] = useState<ProductDefinition | null>(null);
   const [confirmed, setConfirmed] = useState<{
     truth: ProductTruth;
@@ -54,7 +52,7 @@ export function ProductConfigurationPage() {
     setConfirmed(null);
     setConfirmNotice(null);
 
-    void fetchTemplateProjection(templateCode)
+    void fetchTemplateProjection(productCode)
       .then((projection) => {
         if (cancelled) {
           return;
@@ -70,7 +68,7 @@ export function ProductConfigurationPage() {
     return () => {
       cancelled = true;
     };
-  }, [templateCode]);
+  }, [productCode]);
 
   if (page.kind === "loading") {
     return <p>Se încarcă produsul…</p>;
@@ -89,7 +87,7 @@ export function ProductConfigurationPage() {
     setConfirmed(null);
     setConfirmNotice(null);
     try {
-      setDefinition(await compileConfiguration(templateCode, values));
+      setDefinition(await compileConfiguration(productCode, values));
     } catch {
       setPage({ kind: "error" });
     } finally {
@@ -104,7 +102,7 @@ export function ProductConfigurationPage() {
     setBusy(true);
     setConfirmNotice(null);
     try {
-      const result = await confirmReviewedConfiguration(templateCode, definition);
+      const result = await confirmReviewedConfiguration(productCode, definition);
       if (result.ok) {
         setConfirmed({
           truth: result.truth,
@@ -133,6 +131,19 @@ export function ProductConfigurationPage() {
     <section>
       <h1>{template.label}</h1>
       <p className="page-lead">{template.description}</p>
+
+      {template.identityFacts.length > 0 ? (
+        <div className="notice">
+          <h2>Caracteristici produs</h2>
+          <ul>
+            {template.identityFacts.map((fact) => (
+              <li key={fact.id}>
+                {fact.label}: {fact.value}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <FormRenderer
         template={template}
