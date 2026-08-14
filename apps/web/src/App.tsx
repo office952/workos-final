@@ -6,6 +6,7 @@ import { GovernancePage } from "./GovernancePage";
 import { ProductCatalogPage } from "./ProductCatalogPage";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
 import { ProductSystemAdminPage } from "./ProductSystemAdminPage";
+import { ResourcesAdminPage } from "./ResourcesAdminPage";
 import { SystemStatusPage } from "./SystemStatusPage";
 
 const NAV_ITEMS = [
@@ -27,6 +28,7 @@ export function App() {
         <Route path="/governance" element={<GovernancePage />} />
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
+        <Route path="/admin/resources" element={<ResourcesAdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>

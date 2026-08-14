@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   projectComponentArchitecture,
   projectProductSystemAdministration,
+  projectResourcesAdministration,
   projectSystemGovernance,
   seededDisplayLabelCatalog,
 } from "@workos-final/domain";
@@ -11,6 +12,7 @@ import {
   buildProductSystemAdminCatalog,
   buildProductSystemAdministrationCatalog,
 } from "./ownerCatalog";
+import { buildResourcesCatalog } from "./resourcesCatalog";
 
 describe("component catalog presentation", () => {
   it("places FACE VOLUME BACK LIGHTING under product components", () => {
@@ -121,6 +123,30 @@ describe("product system admin catalog presentation", () => {
       "Spate → Forex",
       "Iluminare → Iluminare frontală cu module LED",
     ]);
+    expect(
+      catalog.categories[3]?.items[0]?.groups[0]?.sections.find(
+        (item) => item.id === "resources",
+      )?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Referințe resursă",
+          value: "Plexiglas 3 mm opal",
+        }),
+      ]),
+    );
+    expect(
+      catalog.categories[3]?.items[1]?.groups[0]?.sections.find(
+        (item) => item.id === "resources",
+      )?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Referințe resursă",
+          value: "Profil aluminiu 0,6 mm; Formare profil aluminiu",
+        }),
+      ]),
+    );
     const faceConfig = catalog.categories[3]?.items[0]?.groups[0]?.sections.find(
       (item) => item.id.startsWith("configuration:"),
     )?.facts;
@@ -215,5 +241,45 @@ describe("product system administration catalog", () => {
     );
     expect(catalog.categories[4]?.items[0]?.editTarget).toBeUndefined();
     expect(catalog.categories[5]?.items[0]?.editTarget).toBeUndefined();
+  });
+});
+
+describe("resources catalog presentation", () => {
+  it("groups materials services and cost evidence without write targets", () => {
+    const catalog = buildResourcesCatalog(projectResourcesAdministration());
+    expect(catalog.categories.map((item) => item.id)).toEqual([
+      "materials",
+      "services",
+      "cost-evidence",
+    ]);
+    expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
+      "Plexiglas",
+      "Forex",
+      "Aluminiu",
+    ]);
+    expect(catalog.categories[0]?.items[0]?.groups[0]?.title).toBe(
+      "Plexiglas 3 mm opal",
+    );
+    expect(
+      catalog.categories[0]?.items[0]?.groups[0]?.sections.find(
+        (item) => item.id === "specification",
+      )?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Grosime", value: "3 mm" }),
+        expect.objectContaining({ label: "Proprietate optică", value: "Opal" }),
+      ]),
+    );
+    expect(catalog.categories[1]?.items[0]?.label).toBe("Formare profil aluminiu");
+    expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Serviciu");
+    expect(
+      catalog.categories[0]?.items[0]?.groups[0]?.sections.find(
+        (item) => item.id === "used-by",
+      )?.lines?.[0],
+    ).toContain("Față / Plexiglas");
+    expect(catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget)).toBe(
+      true,
+    );
+    expect(JSON.stringify(catalog)).not.toMatch(/Preț client|ofertă|TVA/i);
   });
 });

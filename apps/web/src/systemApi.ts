@@ -2,6 +2,7 @@ import type {
   GovernanceProjection,
   ProductSystemAdminProjection,
   ProductSystemEntityKind,
+  ResourcesAdminProjection,
 } from "@workos-final/domain";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -47,6 +48,14 @@ export async function patchDisplayLabel(input: {
     throw new Error("display_label_write_failed");
   }
   return { displayLabel: body.displayLabel, revision: body.revision };
+}
+
+export async function fetchResourcesAdministration(): Promise<ResourcesAdminProjection> {
+  const response = await fetch(`${baseUrl}/api/resources-admin`);
+  if (!response.ok) {
+    throw new Error("resources_admin_unavailable");
+  }
+  return readJson<ResourcesAdminProjection>(response);
 }
 
 export async function fetchSystemGovernance(): Promise<GovernanceProjection> {

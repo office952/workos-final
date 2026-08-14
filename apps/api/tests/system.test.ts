@@ -70,6 +70,29 @@ describe("system projection API", () => {
     ).toEqual([CANONICAL_PRODUCT_CODE]);
   });
 
+  it("projects resources administration from the typed catalog", async () => {
+    const response = await createApp().request("/api/resources-admin");
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      writeState: string;
+      families: Array<{ id: string; specifications: Array<{ id: string }> }>;
+      services: Array<{ id: string; kind: string }>;
+      costEvidence: Array<{ resourceId: string; amount: number }>;
+    };
+    expect(body.writeState).toBe("NOT_IMPLEMENTED");
+    expect(body.families.map((item) => item.id)).toEqual([
+      "PLEXIGLAS",
+      "FOREX",
+      "ALUMINIUM",
+    ]);
+    expect(body.families[0]?.specifications[0]?.id).toBe("plexiglas_3mm_opal");
+    expect(body.services[0]).toEqual(
+      expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
+    );
+    expect(body.costEvidence).toHaveLength(4);
+    expect(JSON.stringify(body)).not.toMatch(/plexiglas_face_3mm|forex_back_10mm/);
+  });
+
   it("projects governance without an active freeze or commercial", async () => {
     const response = await createApp().request("/api/governance");
     expect(response.status).toBe(200);

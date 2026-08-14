@@ -27,7 +27,9 @@ test("admin display-label write persists and propagates", async ({
     await page.goto("/admin");
     await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Sistem produs" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Resurse" })).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "Resurse și cost intern" }),
+    ).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-home.png",
       fullPage: true,
