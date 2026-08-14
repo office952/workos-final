@@ -35,4 +35,6 @@ Generalize from real products, not from theory.
 
 ## Current position
 
-PHASE 0 — Repository Foundation
+PHASE 1 — Platform Shell + capability boundaries
+
+Capability boundary kernel started. Phase 1 is not complete.
