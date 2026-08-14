@@ -151,6 +151,16 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "OPERATIONAL_PROCESSES",
+        label: "Procese operaționale",
+        owns: [
+          "definiția reutilizabilă a procesului",
+          "clasa de capabilitate cerută",
+          "aplicabilitatea pe tip constructiv",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
         id: "COMMERCIAL",
         label: "Commercial",
         owns: ["preț client", "ofertă", "comandă comercială"],
@@ -211,6 +221,13 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "NOT_IMPLEMENTED",
       },
       {
+        id: "machines",
+        label: "Utilaje / workcenter",
+        statement:
+          "Nu există catalog de utilaje sau workcenter. Procesul cere o clasă de capabilitate, nu un utilaj concret.",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
         id: "intake-settings",
         label: "Intake",
         statement:
@@ -230,6 +247,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Setările tehnice canonice ale variantelor de componentă",
       "ProductTemplate și catalogul de produse",
       "Catalogul canonic de resurse și cost intern",
+      "Catalogul canonic de procese operaționale",
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
       "Harta canonică de domenii și administrare",
@@ -263,6 +281,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Eticheta de afișare persistată este autoritatea runtime după bootstrap. Codul rămâne default de inițializare, nu a doua valoare activă.",
       "Setările tehnice, lifecycle-ul și resursele nu au write persistat.",
       "Identitatea resursei, specificația, dovada de cost, cererea de componentă și prețul client rămân separate.",
+      "Procesul operațional este HOW. Resursa este WHAT. Task-ul de execuție este instanța. Utilajul este WHO/WHERE ulterior.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -323,8 +342,33 @@ export function projectSystemGovernance(): GovernanceProjection {
       },
       {
         id: "operational-processes",
-        label: "Procese operaționale",
+        label: "Fundație procese operaționale",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "process-admin-write",
+        label: "Write administrare procese",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "workcenters",
+        label: "Workcenters",
         state: "PLANNED",
+      },
+      {
+        id: "machines",
+        label: "Catalog utilaje",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "labor-recipes",
+        label: "Rețete labor / serviciu",
+        state: "PLANNED",
+      },
+      {
+        id: "cnc-pricing",
+        label: "Preț CNC",
+        state: "NOT_IMPLEMENTED",
       },
       {
         id: "administrare-nav",

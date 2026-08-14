@@ -33,6 +33,11 @@ describe("component architecture projection", () => {
       }),
     ]);
     expect(face?.types[0]?.independentCalculation).toBe(true);
+    expect(face?.types[0]?.processIds).toEqual([
+      "CUT_SHEET_CNC",
+      "APPLY_SURFACE_FINISH",
+      "BOND_LETTER_BODY",
+    ]);
     expect(
       face?.types[0]?.configurations[0]?.attributes.find((item) => item.id === "face.opticalType"),
     ).toEqual(

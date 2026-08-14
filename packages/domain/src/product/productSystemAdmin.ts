@@ -1,3 +1,4 @@
+import { getOperationalProcess } from "../processes/catalog.js";
 import { getResource } from "../resources/catalog.js";
 import { categoryHasCycle } from "./catalog.js";
 import { listComponentContracts } from "./componentRegistry.js";
@@ -107,6 +108,7 @@ export type AdminTypeRecord = {
   technicalSettings: readonly ComponentTechnicalSettingProjection[];
   resourceReadiness: string;
   resourceReferences: readonly { id: string; label: string }[];
+  processReferences: readonly { id: string; label: string }[];
   gaps: readonly string[];
   readiness: AdminReadiness;
 };
@@ -324,6 +326,10 @@ export function projectProductSystemAdministration(
       resourceReferences: (type?.resourceIds ?? []).map((id) => ({
         id,
         label: getResource(id)?.label ?? id,
+      })),
+      processReferences: (type?.processIds ?? []).map((id) => ({
+        id,
+        label: getOperationalProcess(id)?.label ?? id,
       })),
       gaps: type?.gaps ?? contract.profile.structuralGaps,
       readiness: readiness({

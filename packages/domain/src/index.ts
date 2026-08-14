@@ -135,3 +135,20 @@ export {
   type ResourceRequirement,
   type ResourcesAdminProjection,
 } from "./resources/index.js";
+export {
+  APPLY_SURFACE_FINISH_ID,
+  BOND_LETTER_BODY_ID,
+  CUT_SHEET_CNC_ID,
+  FORM_ALUMINIUM_PROFILE_ID,
+  PLACE_LED_MODULES_ID,
+  getOperationalProcess,
+  getProductionCapability,
+  operationalProcesses,
+  processWhereUsed,
+  processesForType,
+  productionCapabilityClasses,
+  projectOperationalProcessesAdministration,
+  type OperationalProcess,
+  type OperationalProcessesAdminProjection,
+  type ProductionCapabilityClass,
+} from "./processes/index.js";

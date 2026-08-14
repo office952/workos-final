@@ -1,0 +1,39 @@
+import { describe, expect, it } from "vitest";
+import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
+import { RETURN_CANT_FORMING_ID } from "../resources/catalog.js";
+import { CUT_SHEET_CNC_ID, FORM_ALUMINIUM_PROFILE_ID } from "./catalog.js";
+import { projectOperationalProcessesAdministration } from "./projection.js";
+import { processWhereUsed } from "./whereUsed.js";
+
+describe("operational process projection", () => {
+  it("derives where-used from type applicability and product composition", () => {
+    const cncUses = processWhereUsed(CUT_SHEET_CNC_ID);
+    expect(cncUses.map((item) => item.role).sort()).toEqual(["BACK", "FACE"]);
+    expect(cncUses.every((item) => item.productCode === CANONICAL_PRODUCT_CODE)).toBe(
+      true,
+    );
+    expect(processWhereUsed(FORM_ALUMINIUM_PROFILE_ID)[0]?.role).toBe("VOLUME");
+  });
+
+  it("projects categories processes and capabilities without a write path", () => {
+    const admin = projectOperationalProcessesAdministration();
+    expect(admin.writeState).toBe("NOT_IMPLEMENTED");
+    expect(admin.categories.map((item) => item.id)).toEqual([
+      "CUTTING",
+      "FORMING",
+      "FINISHING",
+      "ASSEMBLY",
+      "ELECTRICAL",
+    ]);
+    const forming = admin.processes.find((item) => item.id === FORM_ALUMINIUM_PROFILE_ID);
+    expect(forming?.requiredCapabilityLabel).toBe("Formare profil");
+    expect(forming?.resourceLinks).toEqual([
+      { id: RETURN_CANT_FORMING_ID, label: "Formare profil aluminiu" },
+    ]);
+    expect(forming?.usedBy[0]?.displayLine).toContain("Volum / Aluminiu");
+    expect(admin.capabilities.find((item) => item.id === "CNC_ROUTING")?.processes[0]?.id).toBe(
+      CUT_SHEET_CNC_ID,
+    );
+    expect(JSON.stringify(admin)).not.toMatch(/machineId|ExecutionPlan|Preț client/);
+  });
+});
