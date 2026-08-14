@@ -1,3 +1,4 @@
+import { getProductFamily } from "./catalog.js";
 import {
   RETURN_CANT_COMPONENT_ID,
   RETURN_CANT_PERIMETER_FIELD,
@@ -106,9 +107,12 @@ export function compileDefinition(
 ): ProductDefinition {
   const selectedIds = selectedComponentIds(template, draft.values);
   const missing: MissingInput[] = [];
-  const values: DraftValues = {};
+  const values: DraftValues = { ...template.fixedValues };
 
   for (const field of allFields(schema)) {
+    if (field.id in template.fixedValues) {
+      continue;
+    }
     const belongsToSelected =
       field.componentId === "ROOT" || selectedIds.includes(field.componentId);
     if (!belongsToSelected) {
@@ -136,7 +140,7 @@ export function compileDefinition(
   const compiled: ProductDefinition = {
     templateCode: template.code,
     templateVersion: template.version,
-    familyId: template.family.id,
+    familyId: template.familyId,
     selectedComponentIds: selectedIds,
     values,
     measurements,
@@ -262,7 +266,7 @@ export function compileAggregate(
   return {
     derivedFrom: "ProductTruth",
     productLabel: template.label,
-    familyLabel: template.family.label,
+    familyLabel: getProductFamily(template.familyId)?.label ?? "",
     inscription,
     components,
     quantities: returnCantQuantities(truth),

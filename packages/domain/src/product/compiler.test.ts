@@ -5,41 +5,82 @@ import {
   confirmReviewedDefinition,
   selectedComponentIds,
 } from "./compiler.js";
-import { lettersFormSchema, lettersTemplate } from "./letters.js";
+import {
+  CANONICAL_PRODUCT_CODE,
+  frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06Template,
+} from "./frontlitPlexiAl06.js";
 import type { DraftConfiguration } from "./types.js";
 
 function draft(values: DraftConfiguration["values"]): DraftConfiguration {
-  return { templateCode: "letters", values };
+  return { templateCode: CANONICAL_PRODUCT_CODE, values };
 }
 
 const readyValues = {
   "root.inscription": "WORKOS",
-  "face.material": "plexiglas",
   "face.finish": "none",
-  "returnCant.material": "aluminum",
-  "returnCant.depthMm": 60,
+  "returnCant.depthMm": "60",
   "returnCant.finish": "none",
   "returnCant.confirmedPerimeterMm": 12500,
-  "back.material": "forex",
-  "lighting.selected": false,
 };
 
-describe("LETTERS template", () => {
+describe("canonical product", () => {
   it("has a stable identity and unique component ids", () => {
-    expect(lettersTemplate.code).toBe("letters");
-    expect(lettersTemplate.family.id).toBe("LETTERS");
-    expect(lettersTemplate.formSchemaId).toBe(lettersFormSchema.id);
-    const ids = lettersTemplate.components.map((item) => item.id);
+    expect(frontlitPlexiAl06Template.code).toBe(CANONICAL_PRODUCT_CODE);
+    expect(frontlitPlexiAl06Template.familyId).toBe("LIGHTED_VOLUMETRIC_SIGNS");
+    expect(frontlitPlexiAl06Template.legacyReference).toBe(
+      "TPL-VOLUMETRIC-LETTERS_v2",
+    );
+    expect(frontlitPlexiAl06Template.formSchemaId).toBe(
+      frontlitPlexiAl06FormSchema.id,
+    );
+    const ids = frontlitPlexiAl06Template.components.map((item) => item.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it("fixes product identity and keeps lighting required", () => {
+    expect(frontlitPlexiAl06Template.fixedValues["face.material"]).toBe(
+      "plexiglas",
+    );
+    expect(frontlitPlexiAl06Template.fixedValues["returnCant.material"]).toBe(
+      "aluminum_0_6",
+    );
+    expect(frontlitPlexiAl06Template.fixedValues["lighting.mode"]).toBe(
+      "front_lit",
+    );
+    expect(
+      frontlitPlexiAl06Template.components.find((item) => item.id === "LIGHTING")
+        ?.required,
+    ).toBe(true);
+    const labels = frontlitPlexiAl06FormSchema.sections
+      .flatMap((section) => section.fields)
+      .map((field) => field.label);
+    expect(labels).not.toContain("Include iluminare");
+    expect(labels).not.toContain("Material față");
+    expect(labels).not.toContain("Material cant");
+  });
+
+  it("keeps canonical depth options", () => {
+    const depth = frontlitPlexiAl06FormSchema.sections
+      .flatMap((section) => section.fields)
+      .find((field) => field.id === "returnCant.depthMm");
+    expect(depth?.options?.map((option) => option.value)).toEqual([
+      "30",
+      "60",
+      "80",
+      "100",
+    ]);
+  });
+
   it("keeps form field ids unique and bound to known components", () => {
-    const fields = lettersFormSchema.sections.flatMap((section) => section.fields);
+    const fields = frontlitPlexiAl06FormSchema.sections.flatMap(
+      (section) => section.fields,
+    );
     const fieldIds = fields.map((field) => field.id);
     expect(new Set(fieldIds).size).toBe(fieldIds.length);
     const componentIds = new Set([
       "ROOT",
-      ...lettersTemplate.components.map((item) => item.id),
+      ...frontlitPlexiAl06Template.components.map((item) => item.id),
     ]);
     for (const field of fields) {
       expect(componentIds.has(field.componentId)).toBe(true);
@@ -51,52 +92,29 @@ describe("LETTERS template", () => {
 });
 
 describe("module law", () => {
-  it("keeps unselected lighting silent", () => {
+  it("includes required lighting without an include toggle", () => {
+    expect(selectedComponentIds(frontlitPlexiAl06Template, readyValues)).toEqual([
+      "FACE",
+      "RETURN_CANT",
+      "BACK",
+      "LIGHTING",
+    ]);
     const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft(readyValues),
     );
-    expect(selectedComponentIds(lettersTemplate, readyValues)).not.toContain(
-      "LIGHTING",
-    );
-    expect(definition.values["lighting.mode"]).toBeUndefined();
-    expect(definition.missing.map((item) => item.fieldId)).not.toContain(
-      "lighting.mode",
-    );
-  });
-
-  it("requires lighting mode only when lighting is selected", () => {
-    const blocked = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
-      draft({ ...readyValues, "lighting.selected": true }),
-    );
-    expect(blocked.readiness).toBe("blocked");
-    expect(blocked.missing.some((item) => item.fieldId === "lighting.mode")).toBe(
-      true,
-    );
-
-    const ready = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
-      draft({
-        ...readyValues,
-        "lighting.selected": true,
-        "lighting.mode": "front_lit",
-      }),
-    );
-    expect(ready.readiness).toBe("ready");
-    expect(ready.selectedComponentIds).toContain("LIGHTING");
-    expect(ready.values["lighting.mode"]).toBe("front_lit");
+    expect(definition.values["lighting.mode"]).toBe("front_lit");
+    expect(definition.values["face.material"]).toBe("plexiglas");
+    expect(definition.values["returnCant.material"]).toBe("aluminum_0_6");
   });
 });
 
 describe("ProductDefinition", () => {
   it("compiles a valid draft to ready", () => {
     const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft(readyValues),
     );
     expect(definition.readiness).toBe("ready");
@@ -105,13 +123,15 @@ describe("ProductDefinition", () => {
       "FACE",
       "RETURN_CANT",
       "BACK",
+      "LIGHTING",
     ]);
+    expect(definition.templateCode).toBe(CANONICAL_PRODUCT_CODE);
   });
 
   it("blocks when a selected required field is missing", () => {
     const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft({ ...readyValues, "root.inscription": "" }),
     );
     expect(definition.readiness).toBe("blocked");
@@ -119,27 +139,13 @@ describe("ProductDefinition", () => {
       true,
     );
   });
-
-  it("ignores inactive lighting fields", () => {
-    const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
-      draft({
-        ...readyValues,
-        "lighting.selected": false,
-        "lighting.mode": "front_lit",
-      }),
-    );
-    expect(definition.readiness).toBe("ready");
-    expect(definition.values["lighting.mode"]).toBeUndefined();
-  });
 });
 
 describe("ProductTruth and ProductAggregate", () => {
   it("forbids confirmation while definition is blocked", () => {
     const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft({ ...readyValues, "root.inscription": "" }),
     );
     const result = confirmReviewedDefinition(definition, definition.reviewId);
@@ -148,13 +154,13 @@ describe("ProductTruth and ProductAggregate", () => {
 
   it("confirms the exact reviewed definition, not a later draft", () => {
     const reviewed = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft(readyValues),
     );
     const changed = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft({ ...readyValues, "root.inscription": "CHANGED" }),
     );
     const rejected = confirmReviewedDefinition(changed, reviewed.reviewId);
@@ -172,7 +178,11 @@ describe("ProductTruth and ProductAggregate", () => {
     expect(truth.measurements[0]?.value).toBe(12500);
     expect(truth.measurements[0]?.source).toBe("OPERATOR_MANUAL");
 
-    const aggregate = compileAggregate(truth, lettersTemplate, lettersFormSchema);
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+    );
     expect(aggregate.quantities[0]).toMatchObject({
       componentId: "RETURN_CANT",
       value: 12.5,
@@ -183,8 +193,8 @@ describe("ProductTruth and ProductAggregate", () => {
 
   it("blocks when the confirmed perimeter is missing", () => {
     const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft({ ...readyValues, "returnCant.confirmedPerimeterMm": null }),
     );
     expect(definition.readiness).toBe("blocked");
@@ -197,8 +207,8 @@ describe("ProductTruth and ProductAggregate", () => {
 
   it("does not invent a quantity without confirmed measurement", () => {
     const definition = compileDefinition(
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
       draft(readyValues),
     );
     const truth = confirmReviewedDefinition(definition, definition.reviewId);
@@ -207,8 +217,8 @@ describe("ProductTruth and ProductAggregate", () => {
     }
     const aggregate = compileAggregate(
       { ...truth, measurements: [] },
-      lettersTemplate,
-      lettersFormSchema,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
     );
     expect(aggregate.quantities).toEqual([]);
   });

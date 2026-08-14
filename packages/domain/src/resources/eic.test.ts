@@ -4,7 +4,11 @@ import {
   compileDefinition,
   confirmReviewedDefinition,
 } from "../product/compiler.js";
-import { lettersFormSchema, lettersTemplate } from "../product/letters.js";
+import {
+  CANONICAL_PRODUCT_CODE,
+  frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06Template,
+} from "../product/frontlitPlexiAl06.js";
 import {
   costEvidence,
   getCostEvidence,
@@ -15,32 +19,36 @@ import { applyRequirement, compileEic, resourceRequirements } from "./eic.js";
 
 const readyValues = {
   "root.inscription": "WORKOS",
-  "face.material": "plexiglas",
   "face.finish": "none",
-  "returnCant.material": "aluminum",
-  "returnCant.depthMm": 60,
+  "returnCant.depthMm": "60",
   "returnCant.finish": "none",
   "returnCant.confirmedPerimeterMm": 12500,
-  "back.material": "forex",
-  "lighting.selected": false,
 };
 
 function confirmedSpine() {
-  const definition = compileDefinition(lettersTemplate, lettersFormSchema, {
-    templateCode: "letters",
-    values: readyValues,
-  });
+  const definition = compileDefinition(
+    frontlitPlexiAl06Template,
+    frontlitPlexiAl06FormSchema,
+    {
+      templateCode: CANONICAL_PRODUCT_CODE,
+      values: readyValues,
+    },
+  );
   const truth = confirmReviewedDefinition(definition, definition.reviewId);
   if ("ok" in truth) {
     throw new Error("expected confirmed truth");
   }
-  const aggregate = compileAggregate(truth, lettersTemplate, lettersFormSchema);
+  const aggregate = compileAggregate(
+    truth,
+    frontlitPlexiAl06Template,
+    frontlitPlexiAl06FormSchema,
+  );
   return { definition, truth, aggregate };
 }
 
 describe("resource ownership", () => {
   it("keeps rates only in the resource catalog", () => {
-    expect(JSON.stringify(lettersTemplate)).not.toMatch(/amount|EUR|rate/i);
+    expect(JSON.stringify(frontlitPlexiAl06Template)).not.toMatch(/amount|EUR|rate/i);
     const { truth, aggregate } = confirmedSpine();
     expect(JSON.stringify(truth)).not.toMatch(/"amount":10|"amount":15/);
     expect(aggregate.quantities[0]?.value).toBe(12.5);

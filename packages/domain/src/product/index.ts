@@ -1,4 +1,18 @@
 export {
+  FULL_ALUMINIUM_VOLUMETRIC_LETTERS_CATEGORY_ID,
+  FRONT_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
+  HALO_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
+  LIGHTED_VOLUMETRIC_SIGNS_FAMILY_ID,
+  buildCatalogTree,
+  categoryHasCycle,
+  getProductCategory,
+  getProductFamily,
+  isLeafCategory,
+  productCategories,
+  productFamilies,
+} from "./catalog.js";
+export { projectProductCatalog } from "./catalogProjection.js";
+export {
   compileAggregate,
   compileDefinition,
   confirmReviewedDefinition,
@@ -7,21 +21,22 @@ export {
   selectedComponentIds,
 } from "./compiler.js";
 export {
-  LETTERS_FAMILY,
+  CANONICAL_PRODUCT_CODE,
   formSchemas,
+  frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06Template,
   getFormSchema,
   getFormSchemaForTemplate,
   getProductTemplate,
-  lettersFormSchema,
-  lettersTemplate,
   productTemplates,
-} from "./letters.js";
+} from "./frontlitPlexiAl06.js";
 export {
   RETURN_CANT_COMPONENT_ID,
   RETURN_CANT_PERIMETER_FIELD,
   returnCantLinearMeters,
 } from "./returnCant.js";
 export type {
+  CatalogTreeNode,
   ComponentSummary,
   DraftConfiguration,
   DraftValue,
@@ -33,10 +48,11 @@ export type {
   FormSection,
   MissingInput,
   ProductAggregate,
+  ProductCategory,
   ProductComponent,
   ProductDefinition,
   ProductFamily,
-  ProductFamilyId,
+  ProductIdentityFact,
   ProductTemplate,
   ProductTruth,
   TechnicalMeasurement,

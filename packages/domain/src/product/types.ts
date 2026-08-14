@@ -1,5 +1,3 @@
-export type ProductFamilyId = "LETTERS";
-
 export type ComponentId = "FACE" | "RETURN_CANT" | "BACK" | "LIGHTING" | "ROOT";
 
 export type FieldType = "text" | "number" | "select" | "boolean";
@@ -47,23 +45,42 @@ export type ProductComponent = {
 };
 
 export type ProductFamily = {
-  id: ProductFamilyId;
-  label: string;
-};
-
-export type ProductTemplate = {
-  code: string;
-  version: string;
-  family: ProductFamily;
+  id: string;
   label: string;
   description: string;
-  components: readonly ProductComponent[];
-  formSchemaId: string;
-  status: "PILOT";
+};
+
+export type ProductCategory = {
+  id: string;
+  familyId: string;
+  parentId: string | null;
+  label: string;
+  sortOrder: number;
+};
+
+export type ProductIdentityFact = {
+  id: string;
+  label: string;
+  value: string;
 };
 
 export type DraftValue = string | number | boolean | null;
 export type DraftValues = Record<string, DraftValue>;
+
+export type ProductTemplate = {
+  code: string;
+  version: string;
+  familyId: string;
+  categoryId: string;
+  label: string;
+  description: string;
+  legacyReference?: string;
+  identityFacts: readonly ProductIdentityFact[];
+  fixedValues: DraftValues;
+  components: readonly ProductComponent[];
+  formSchemaId: string;
+  status: "PILOT";
+};
 
 export type DraftConfiguration = {
   templateCode: string;
@@ -88,7 +105,7 @@ export type TechnicalMeasurement = {
 export type ProductDefinition = {
   templateCode: string;
   templateVersion: string;
-  familyId: ProductFamilyId;
+  familyId: string;
   selectedComponentIds: readonly string[];
   values: DraftValues;
   measurements: readonly TechnicalMeasurement[];
@@ -101,7 +118,7 @@ export type ProductTruth = {
   status: "CONFIRMED_IN_RUNTIME";
   templateCode: string;
   templateVersion: string;
-  familyId: ProductFamilyId;
+  familyId: string;
   selectedComponentIds: readonly string[];
   values: DraftValues;
   measurements: readonly TechnicalMeasurement[];
@@ -133,3 +150,24 @@ export type ProductAggregate = {
   quantities: readonly TechnicalQuantity[];
   unavailable: readonly string[];
 };
+
+export type CatalogTreeNode =
+  | {
+      kind: "family";
+      id: string;
+      label: string;
+      description: string;
+      children: readonly CatalogTreeNode[];
+    }
+  | {
+      kind: "category";
+      id: string;
+      label: string;
+      children: readonly CatalogTreeNode[];
+    }
+  | {
+      kind: "product";
+      code: string;
+      label: string;
+      description: string;
+    };

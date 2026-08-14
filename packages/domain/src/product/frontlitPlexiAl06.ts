@@ -1,34 +1,45 @@
+import {
+  FRONT_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
+  LIGHTED_VOLUMETRIC_SIGNS_FAMILY_ID,
+} from "./catalog.js";
 import type { FormSchema, ProductTemplate } from "./types.js";
 
-export const LETTERS_FAMILY = {
-  id: "LETTERS",
-  label: "Litere volumetrice",
-} as const;
+export const CANONICAL_PRODUCT_CODE = "PRD-LETTERS-FRONTLIT-PLEXI-AL06";
 
-export const lettersTemplate: ProductTemplate = {
-  code: "letters",
+export const frontlitPlexiAl06Template: ProductTemplate = {
+  code: CANONICAL_PRODUCT_CODE,
   version: "1",
-  family: LETTERS_FAMILY,
-  label: "Litere volumetrice",
-  description: "Configurare tehnică minimă pentru litere volumetrice.",
-  formSchemaId: "letters-form-v1",
+  familyId: LIGHTED_VOLUMETRIC_SIGNS_FAMILY_ID,
+  categoryId: FRONT_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
+  label: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
+  description:
+    "Litere volumetrice luminoase cu iluminare față, față din plexiglas și volum din aluminiu 0,6 mm.",
+  legacyReference: "TPL-VOLUMETRIC-LETTERS_v2",
+  identityFacts: [
+    { id: "lighting", label: "Iluminare", value: "Iluminare frontală" },
+    { id: "face.material", label: "Material față", value: "Plexiglas" },
+    { id: "returnCant.material", label: "Material volum", value: "Aluminiu 0,6 mm" },
+    { id: "back.material", label: "Material spate", value: "Forex" },
+  ],
+  fixedValues: {
+    "face.material": "plexiglas",
+    "returnCant.material": "aluminum_0_6",
+    "back.material": "forex",
+    "lighting.mode": "front_lit",
+  },
+  formSchemaId: "prd-letters-frontlit-plexi-al06-form-v1",
   status: "PILOT",
   components: [
     { id: "FACE", label: "Față", required: true },
     { id: "RETURN_CANT", label: "Cant", required: true },
     { id: "BACK", label: "Spate", required: true },
-    {
-      id: "LIGHTING",
-      label: "Iluminare",
-      required: false,
-      selectionFieldId: "lighting.selected",
-    },
+    { id: "LIGHTING", label: "Iluminare", required: true },
   ],
 };
 
-export const lettersFormSchema: FormSchema = {
-  id: "letters-form-v1",
-  templateCode: "letters",
+export const frontlitPlexiAl06FormSchema: FormSchema = {
+  id: "prd-letters-frontlit-plexi-al06-form-v1",
+  templateCode: CANONICAL_PRODUCT_CODE,
   sections: [
     {
       id: "product",
@@ -50,15 +61,6 @@ export const lettersFormSchema: FormSchema = {
       title: "Față",
       componentId: "FACE",
       fields: [
-        {
-          id: "face.material",
-          componentId: "FACE",
-          label: "Material față",
-          type: "select",
-          required: true,
-          options: [{ value: "plexiglas", label: "Plexiglas" }],
-          visibleWhen: { kind: "always" },
-        },
         {
           id: "face.finish",
           componentId: "FACE",
@@ -87,21 +89,17 @@ export const lettersFormSchema: FormSchema = {
       componentId: "RETURN_CANT",
       fields: [
         {
-          id: "returnCant.material",
-          componentId: "RETURN_CANT",
-          label: "Material cant",
-          type: "select",
-          required: true,
-          options: [{ value: "aluminum", label: "Aluminiu" }],
-          visibleWhen: { kind: "always" },
-        },
-        {
           id: "returnCant.depthMm",
           componentId: "RETURN_CANT",
-          label: "Adâncime cant (mm)",
-          type: "number",
+          label: "Adâncime volum (mm)",
+          type: "select",
           required: true,
-          min: 1,
+          options: [
+            { value: "30", label: "30 mm" },
+            { value: "60", label: "60 mm" },
+            { value: "80", label: "80 mm" },
+            { value: "100", label: "100 mm" },
+          ],
           visibleWhen: { kind: "always" },
         },
         {
@@ -140,51 +138,11 @@ export const lettersFormSchema: FormSchema = {
         },
       ],
     },
-    {
-      id: "back",
-      title: "Spate",
-      componentId: "BACK",
-      fields: [
-        {
-          id: "back.material",
-          componentId: "BACK",
-          label: "Material spate",
-          type: "select",
-          required: true,
-          options: [{ value: "forex", label: "Forex" }],
-          visibleWhen: { kind: "always" },
-        },
-      ],
-    },
-    {
-      id: "lighting",
-      title: "Iluminare",
-      componentId: "LIGHTING",
-      fields: [
-        {
-          id: "lighting.selected",
-          componentId: "LIGHTING",
-          label: "Include iluminare",
-          type: "boolean",
-          required: false,
-          visibleWhen: { kind: "always" },
-        },
-        {
-          id: "lighting.mode",
-          componentId: "LIGHTING",
-          label: "Tip iluminare",
-          type: "select",
-          required: true,
-          options: [{ value: "front_lit", label: "Iluminare frontală" }],
-          visibleWhen: { kind: "componentSelected", componentId: "LIGHTING" },
-        },
-      ],
-    },
   ],
 };
 
-export const productTemplates: readonly ProductTemplate[] = [lettersTemplate];
-export const formSchemas: readonly FormSchema[] = [lettersFormSchema];
+export const productTemplates: readonly ProductTemplate[] = [frontlitPlexiAl06Template];
+export const formSchemas: readonly FormSchema[] = [frontlitPlexiAl06FormSchema];
 
 export function getProductTemplate(code: string): ProductTemplate | undefined {
   return productTemplates.find((item) => item.code === code);
