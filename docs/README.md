@@ -26,6 +26,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_LETTERS_PROCESS_COMPOSITION_V1.md` — Letters process composition
 - `docs/worklog/WORKOS_FINAL_LETTERS_CRITICAL_PROCESS_COMPLETION_V1.md` — Letters critical process completion
 - `docs/worklog/WORKOS_FINAL_LIGHTING_COMPLETION_V1.md` — Lighting calculation consumes owner-confirmed PSU reserve 25%
+- `docs/worklog/WORKOS_FINAL_LIGHTING_SINGLE_TRUTH_ALIGNMENT_V1.md` — one Lighting evaluation path for Aggregate and processes
 
 ## Historical evidence
 
