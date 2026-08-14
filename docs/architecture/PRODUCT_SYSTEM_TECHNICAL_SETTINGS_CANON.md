@@ -49,9 +49,9 @@ Only legitimately adjustable technical or business parameters belong here.
 
 ## CURRENT CANONICAL ACTIVE CONFIGURATION
 
-WorkOS Final has no business persistence or admin write path yet.
+Display labels are persisted. Technical setting values are still typed canonical configuration.
 
-Typed domain configuration is the current canonical active configuration, not a random constant.
+LED pitch and PSU reserve are not writable in this persistence slice.
 
 Future transition, without rewriting component calculations:
 

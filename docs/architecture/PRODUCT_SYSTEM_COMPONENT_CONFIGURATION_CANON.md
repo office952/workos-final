@@ -52,6 +52,8 @@ Applied vinyl/paint color is not the same fact as inherent material color or opt
 
 Product code `PRD-LETTERS-FRONTLIT-PLEXI-AL06` is unchanged.
 
+Display labels for families, categories, templates, and constructive types are persisted metadata. They are not constructive configuration and do not change calculation lookup.
+
 ## SETTINGS BOUNDARY
 
 LED pitch and PSU reserve stay technical settings on `LIGHTING_FRONT_LED`.

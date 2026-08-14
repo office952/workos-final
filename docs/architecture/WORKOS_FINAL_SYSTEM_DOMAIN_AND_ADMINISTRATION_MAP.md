@@ -62,7 +62,7 @@ Entities need not share one schema. They must share these principles.
 
 ```text
 WorkOS Final
-├── Product System                          IMPLEMENTED_CURRENT (typed, no admin write)
+├── Product System                          IMPLEMENTED_CURRENT (typed structure + persisted display labels)
 │   ├── ProductFamily / ProductCategory
 │   ├── ProductTemplate
 │   ├── ComponentRole / ComponentVariant
@@ -267,14 +267,13 @@ Ownership arrows: Product System owns composition and settings; component contra
 
 Do not add a top-nav link per domain.
 
-Current primary nav stays the four live surfaces:
+Current primary nav:
 
 - Stare sistem
 - Produse
 - Module și componente
 - Guvernanța sistemului
-
-When the first real admin write path exists, add **one** primary entry: **Administrare**.
+- Administrare
 
 Inside Administrare, use catalog navigation (category → item → detail), not fifteen header links:
 
@@ -296,8 +295,8 @@ Labels are proposals. Do not ship empty admin categories.
 | Kind | Use | Current / future example |
 |---|---|---|
 | Operator | Daily workflow | `/products` configure → review → confirm |
-| Owner projection | Read-only system honesty | `/components` (Product System admin foundation), `/governance` |
-| Admin | Configure system truth | Future Administrare — not built. No write path yet. |
+| Owner projection | System honesty / inspection | `/components`, `/governance` |
+| Admin | Configure system truth | `/admin` — display-label write only |
 
 Do not mix system configuration into daily workflow.
 
@@ -341,10 +340,11 @@ Settings versions: keep previous active values as history after a new version is
 | Product System component configuration law (role / type / configuration) | IMPLEMENTED_CURRENT |
 | Component technical settings (typed, read-only projection) | IMPLEMENTED_CURRENT |
 | Owner surfaces `/components`, `/governance` | IMPLEMENTED_CURRENT |
-| Product System administration foundation (read-only projection on `/components`) | IMPLEMENTED_CURRENT |
+| Product System administration foundation (inspection on `/components`) | IMPLEMENTED_CURRENT |
+| Product System persisted display-label write + `/admin` | IMPLEMENTED_CURRENT |
 | Pilot resource catalog + partial EIC | FOUNDATION_ONLY |
 | Settings edit / persistence / versioning | PLANNED |
-| Global Administrare nav / admin write path | PLANNED |
+| Global Administrare nav / display-label write | IMPLEMENTED_CURRENT |
 | Operational processes, labor recipes, workcenters | PLANNED |
 | Machines, People, Pontaj, Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
@@ -382,14 +382,13 @@ This map does **not** authorize the next build. Owner GO is still required.
 
 Recommended rank:
 
-1. **Product System first real admin write path**
-   The read-only administration foundation exists. The next slice is one persisted write (likely display-label rename), after Owner GO and a persistence decision. Do not activate global Administrare until that write path exists.
+1. **Versioned technical-setting write or Resources foundation**
+   Display-label persistence exists. Do not automatically choose LED pitch. Settings writes need versioning. Resources may be next if material identity is the blocking need.
 
-2. **Resources / Cost catalog foundation**  
-   Needed before lighting quantity, CNC, labor EIC, and workcenters. Same admin pattern as Product System, different owner.
-
-3. **Lighting calculation** after the owner decides PSU reserve  
+2. **Lighting calculation** after the owner decides PSU reserve
    Highest remaining E2E value on the first canonical product. Blocked on an owner numeric decision, not on this map.
+
+3. **Lifecycle retire** later, when more live entities exist.
 
 Do not start People, Machines, Pontaj, Execution, or Commercial next. They depend on later snapshots and would recreate isolated systems.
 
@@ -397,8 +396,8 @@ Do not start People, Machines, Pontaj, Execution, or Commercial next. They depen
 
 ### Blocking now
 
-1. Authorize the first real Product System write path (recommended: display-label rename) and the persistence needed for it.
-2. Persistence: business DB remains forbidden until an explicit Owner GO. The current foundation stays typed configuration plus read-only projection.
+1. Authorize the next write: versioned technical settings, Resources foundation, or another Product System metadata field. Do not treat LED pitch as automatic.
+2. Persistence is now bounded Product System display metadata. Do not grow it into a universal business database without Owner GO.
 
 ### Can defer
 
