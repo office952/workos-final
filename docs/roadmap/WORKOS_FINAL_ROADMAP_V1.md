@@ -35,7 +35,13 @@ Generalize from real products, not from theory.
 
 ## Current position
 
-Configuration Spine V1 validated for LETTERS pilot.
-Phases 2–6 now have a first vertical implementation.
-General platform completion remains pending broader product coverage/generalization.
-Phase 7+ is not started.
+LETTERS configuration spine remains the first vertical.
+
+Technical / resource / EIC spine V1 is a RETURN_CANT pilot only:
+
+- PHASE 6 = PILOT_VALIDATED
+- PHASE 7 = PILOT_VALIDATED
+- PHASE 8 = PILOT_VALIDATED
+
+These phases are not universally COMPLETE.
+COMMERCIAL, Quote, ACM, Analyzer runtime, and full resource admin remain NOT_COMPLETE.

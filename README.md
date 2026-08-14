@@ -6,9 +6,9 @@ This is not a cleanup of previous WorkOS code and not a fork of workflow-adv.
 
 ## Current status
 
-LETTERS configuration spine (Phases 2–6 pilot).
+LETTERS configuration spine plus RETURN_CANT technical / resource / EIC pilot.
 
-The app has a platform shell, a real health check, and a schema-driven LETTERS configuration flow. No business database, pricing, or commercial flow exists yet.
+The app has a platform shell, a real health check, a schema-driven LETTERS configuration flow, and a partial internal cost for cant. No business database or commercial price exists yet.
 
 ## Prerequisites
 
