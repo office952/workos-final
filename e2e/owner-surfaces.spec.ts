@@ -274,6 +274,14 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "Stare și maturitate" }).click();
+  await page.getByRole("button", { name: "Roadmap" }).click();
+  await expect(page.getByText("Fundație calcul iluminare")).toBeVisible();
+  await expect(page.getByText("Calcul complet iluminare")).toBeVisible();
+  await expect(page.getByText("Iluminare calculabilă")).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-alignment-governance.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Freeze" }).click();
   await expect(page.getByText("Nu este activă.")).toBeVisible();
   await expect(page.getByText("Planificat").first()).toBeVisible();
