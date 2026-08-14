@@ -6,9 +6,9 @@ It is not a cleanup or fork of previous WorkOS repositories.
 ## Current position
 
 Hierarchical product catalog plus first canonical LETTERS product.
-FACE / BACK have confirmed-area quantities and material EIC.
-LIGHTING is required and front-lit, but EIC is unavailable without contour geometry.
-RETURN_CANT EIC remains.
+FACE / VOLUME / BACK / LIGHTING are reusable component calculation contracts.
+ProductTemplate composes variants. ProductAggregate orchestrates. EIC is generic.
+LIGHTING remains unavailable until LED pitch and PSU reserve are owner-decided.
 
 ```text
 FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
@@ -39,4 +39,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, one canonical front-lit plexi/aluminium letters product, FACE / BACK / RETURN_CANT technical quantities with partial internal EIC, and lighting left explicitly unavailable without contour geometry.
+The current app has a platform shell, a real health check, a product catalog, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, and lighting left explicitly unavailable until pitch and PSU reserve are decided.

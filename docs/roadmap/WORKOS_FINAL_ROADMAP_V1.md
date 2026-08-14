@@ -37,9 +37,10 @@ Generalize from real products, not from theory.
 
 Product catalog hierarchy established.
 First canonical product established.
-FACE / BACK technical quantities and material EIC added.
-LIGHTING remains technically partial (no invented LED count).
-RETURN_CANT EIC regression preserved.
+FACE / VOLUME / BACK / LIGHTING are component calculation contracts.
+ProductAggregate orchestrates. EIC consumes generic requirements.
+LIGHTING remains technically partial (pitch and PSU reserve unresolved).
+VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text
 FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
