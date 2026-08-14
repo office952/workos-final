@@ -15,6 +15,14 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   );
   await expect(page.getByText("Traseu tehnologic").first()).toBeVisible();
   await expect(page.getByText("Calcul iluminare").first()).toBeVisible();
+  await expect(page.getByText("Parțială").first()).toBeVisible();
+  await expect(page.getByText("Regula de rezervă PSU")).toHaveCount(0);
+  await expect(
+    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Selecția fizică a sursei nu este disponibilă", { exact: false }).first(),
+  ).toBeVisible();
   await expect(page.getByText("Execuție").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Față", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Iluminare", exact: true })).toBeVisible();
@@ -39,6 +47,18 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/process-completion-electrical.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-processes.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-psu.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-admin-processes.png",
     fullPage: true,
   });
   await page.screenshot({

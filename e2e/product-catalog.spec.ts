@@ -81,6 +81,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/config-product-review.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-review.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
@@ -91,7 +95,12 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     page.getByText("Total cost intern estimat (fără iluminare): 320,50 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Costul intern al produsului este parțial")).toBeVisible();
-  await expect(page.getByText("Regula de rezervă PSU nu este stabilită").first()).toBeVisible();
+  await expect(
+    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }).first(),
+  ).toBeVisible();
+  await expect(page.getByText("Regula de rezervă PSU nu este stabilită")).toHaveCount(0);
+  await expect(page.getByText("25 %")).toHaveCount(0);
+  await expect(page.getByText("psuReservePercent")).toHaveCount(0);
   await expect(page.getByText("regula de pas LED")).toHaveCount(0);
   await expect(page.getByText("Neincluse încă în costul intern pilot: Iluminare")).toBeVisible();
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
@@ -111,6 +120,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/config-product-confirm.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-confirm.png",
     fullPage: true,
   });
 });

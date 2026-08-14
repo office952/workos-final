@@ -74,6 +74,62 @@ export type OwnerCatalog = {
   categories: readonly CatalogCategory[];
 };
 
+const TECHNICAL_SETTING_SCOPE_LINES = [
+  "Setări tehnice de sistem. Configurabil înseamnă că valoarea aparține tipului, nu formularului de comandă.",
+  "Nu se editează în acest ecran.",
+] as const;
+
+function technicalSettingsSection(
+  settings: readonly {
+    label: string;
+    valueDisplay: string;
+    statusLabel: string;
+    sourceLabel: string;
+    administrationLabel: string;
+  }[],
+): CatalogDetailSection {
+  return {
+    id: "technical-settings",
+    title: "Setări tehnice",
+    settingLines: settings.map((setting) => ({
+      label: setting.label,
+      valueDisplay: setting.valueDisplay,
+      statusLabel: setting.statusLabel,
+      sourceLabel: setting.sourceLabel,
+      administrationLabel: setting.administrationLabel,
+    })),
+    lines: [...TECHNICAL_SETTING_SCOPE_LINES],
+  };
+}
+
+function calculationInspectionSections(type: {
+  calculationInputs: readonly { label: string; value: string }[];
+  calculationResults: readonly { label: string; value: string }[];
+}): CatalogDetailSection[] {
+  const sections: CatalogDetailSection[] = [];
+  if (type.calculationInputs.length > 0) {
+    sections.push({
+      id: "calculation-inputs",
+      title: "Intrări tehnice",
+      facts: type.calculationInputs.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+    });
+  }
+  if (type.calculationResults.length > 0) {
+    sections.push({
+      id: "calculation-results",
+      title: "Rezultate calculate",
+      facts: type.calculationResults.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+    });
+  }
+  return sections;
+}
+
 export function buildComponentCatalog(
   roles: readonly ComponentRoleProjection[],
 ): OwnerCatalog {
@@ -121,17 +177,7 @@ export function buildProductSystemAdminCatalog(
           kindLabel: "Tip constructiv",
           title: type.label,
           sections: [
-            {
-              id: "technical-settings",
-              title: "Setări tehnice",
-              settingLines: type.technicalSettings.map((setting) => ({
-                label: setting.label,
-                valueDisplay: setting.valueDisplay,
-                statusLabel: setting.statusLabel,
-                sourceLabel: setting.sourceLabel,
-                administrationLabel: setting.administrationLabel,
-              })),
-            },
+            technicalSettingsSection(type.technicalSettings),
             {
               id: "used-by",
               title: "Produse care o folosesc",
@@ -554,19 +600,7 @@ export function buildProductSystemAdministrationCatalog(
                 id: type.typeId,
                 kindLabel: "Tip constructiv",
                 title: type.label,
-                sections: [
-                  {
-                    id: "technical-settings",
-                    title: "Setări tehnice",
-                    settingLines: type.technicalSettings.map((setting) => ({
-                      label: setting.label,
-                      valueDisplay: setting.valueDisplay,
-                      statusLabel: setting.statusLabel,
-                      sourceLabel: setting.sourceLabel,
-                      administrationLabel: setting.administrationLabel,
-                    })),
-                  },
-                ],
+                sections: [technicalSettingsSection(type.technicalSettings)],
               },
             ],
           })),
@@ -671,20 +705,9 @@ function typeDetailSections(type: ComponentTypeProjection): CatalogDetailSection
     },
     ...configurationSections(type.configurations),
     ...(type.technicalSettings.length > 0
-      ? [
-          {
-            id: "technical-settings",
-            title: "Setări tehnice",
-            settingLines: type.technicalSettings.map((setting) => ({
-              label: setting.label,
-              valueDisplay: setting.valueDisplay,
-              statusLabel: setting.statusLabel,
-              sourceLabel: setting.sourceLabel,
-              administrationLabel: setting.administrationLabel,
-            })),
-          },
-        ]
+      ? [technicalSettingsSection(type.technicalSettings)]
       : []),
+    ...calculationInspectionSections(type),
     {
       id: "calculation",
       title: "Calcul",
@@ -748,20 +771,9 @@ function adminTypeSections(type: AdminTypeRecord): CatalogDetailSection[] {
     },
     ...configurationSections(type.configurations),
     ...(type.technicalSettings.length > 0
-      ? [
-          {
-            id: "technical-settings",
-            title: "Setări tehnice",
-            settingLines: type.technicalSettings.map((setting) => ({
-              label: setting.label,
-              valueDisplay: setting.valueDisplay,
-              statusLabel: setting.statusLabel,
-              sourceLabel: setting.sourceLabel,
-              administrationLabel: setting.administrationLabel,
-            })),
-          },
-        ]
+      ? [technicalSettingsSection(type.technicalSettings)]
       : []),
+    ...calculationInspectionSections(type),
     {
       id: "calculation",
       title: "Calcul",

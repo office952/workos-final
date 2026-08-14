@@ -31,6 +31,8 @@ function formatUnit(unit: string): string {
       return "m²";
     case "mm2":
       return "mm²";
+    case "W":
+      return "W";
     default:
       return unit;
   }
@@ -38,7 +40,7 @@ function formatUnit(unit: string): string {
 
 function lightingUnavailableReason(aggregate: ProductAggregate): string {
   const lighting = aggregate.componentStatuses.find((item) => item.id === "LIGHTING");
-  if (!lighting || lighting.status !== "UNAVAILABLE") {
+  if (!lighting || lighting.status === "CALCULATED") {
     return "";
   }
   if (lighting.unavailable.length === 0) {

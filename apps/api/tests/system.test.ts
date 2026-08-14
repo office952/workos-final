@@ -36,7 +36,7 @@ describe("system projection API", () => {
     expect(body.roles[3]?.types[0]?.eic).toBe("Indisponibil");
     expect(body.roles[3]?.types[0]?.technicalSettings).toEqual([
       expect.objectContaining({ id: "ledPitchMm", valueDisplay: "100 mm" }),
-      expect.objectContaining({ id: "psuReservePercent", valueDisplay: "Nesetat" }),
+      expect.objectContaining({ id: "psuReservePercent", valueDisplay: "25 %" }),
     ]);
     expect(JSON.stringify(body)).not.toMatch(/RETURN_CANT/);
   });

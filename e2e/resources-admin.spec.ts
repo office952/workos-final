@@ -36,6 +36,10 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
   await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-resources.png",
+    fullPage: true,
+  });
+  await page.screenshot({
     path: "docs/worklog/screenshots/resources-materials.png",
     fullPage: true,
   });

@@ -57,8 +57,10 @@ describe("component catalog presentation", () => {
         }),
         expect.objectContaining({
           label: "Rezervă sursă de alimentare",
-          valueDisplay: "Nesetat",
-          statusLabel: "Necesită decizie owner",
+          valueDisplay: "25 %",
+          statusLabel: "Setat",
+          sourceLabel: "Confirmat de owner",
+          administrationLabel: "Configurabil",
         }),
       ]),
     );

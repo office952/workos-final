@@ -130,17 +130,26 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "Iluminare" }).click();
-  await expect(page.getByText("Indisponibil", { exact: true })).toBeVisible();
+  await expect(page.getByText("Indisponibil", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Setări tehnice" })).toBeVisible();
   await expect(page.getByText("Pas module LED")).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
-  await expect(page.getByText("Confirmat de owner")).toBeVisible();
+  await expect(page.getByText("Confirmat de owner").first()).toBeVisible();
   await expect(page.getByText("Configurabil").first()).toBeVisible();
   await expect(page.getByText("Rezervă sursă de alimentare")).toBeVisible();
-  await expect(page.getByText("Nesetat")).toBeVisible();
-  await expect(page.getByText("Necesită decizie owner").first()).toBeVisible();
-  await expect(page.getByText("Regula de rezervă PSU nu este stabilită")).toBeVisible();
+  await expect(page.getByText("25 %", { exact: true })).toBeVisible();
+  await expect(page.getByText("Nesetat")).toHaveCount(0);
+  await expect(page.getByText("Necesită decizie owner")).toHaveCount(0);
+  await expect(page.getByText("Regula de rezervă PSU nu este stabilită")).toHaveCount(0);
   await expect(page.getByText("Regula de pas LED nu este stabilită")).toHaveCount(0);
+  await expect(page.getByText("Intrări tehnice")).toBeVisible();
+  await expect(page.getByText("Rezultate calculate")).toBeVisible();
+  await expect(
+    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Configurabil înseamnă că valoarea aparține tipului", { exact: false }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Editează" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Salvează" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Retrage" })).toHaveCount(0);
@@ -158,13 +167,32 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
     path: "docs/worklog/screenshots/settings-lighting.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-overview.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-calculation.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-gaps.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Setări tehnice" }).click();
   await expect(page.getByText("Pas module LED")).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
   await expect(page.getByText("Setările tehnice aparțin tipului constructiv, nu produsului.")).toBeVisible();
+  await expect(page.getByText("25 %", { exact: true })).toBeVisible();
+  await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Editează" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-lighting-settings.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-settings.png",
     fullPage: true,
   });
   await page.screenshot({
@@ -201,6 +229,10 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/settings-lighting-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-completion-narrow.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 1280, height: 900 });
