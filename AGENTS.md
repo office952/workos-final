@@ -5,7 +5,8 @@ It is not a cleanup or fork of previous WorkOS repositories.
 
 ## Current position
 
-LETTERS configuration spine plus RETURN_CANT technical / resource / EIC pilot.
+Hierarchical product catalog plus first canonical LETTERS product.
+RETURN_CANT technical / resource / EIC pilot is preserved on that product.
 
 ```text
 PHASE 6 = PILOT_VALIDATED
@@ -14,7 +15,7 @@ PHASE 8 = PILOT_VALIDATED
 COMMERCIAL = NOT_COMPLETE
 ```
 
-Do not implement Commercial, Quote, ACM, Analyzer runtime, or the next product phase without an explicit Owner GO.
+Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog product, or the next product phase without an explicit Owner GO.
 
 ## Working rules
 
@@ -25,6 +26,8 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, or the next product p
 - Modular product law: an unselected module is silent. A selected module is independently validatable and calculable. Complete product is composition of the same contracts. No hidden parallel calculators.
 - Technical quantity, resource identity, internal cost evidence, EIC, and commercial price stay separate. Rates live only in Resources/Cost.
 - Confirm the exact reviewed definition. Do not recompile a later draft at confirm time.
+- Catalog organization (family / recursive category) is not product technical truth.
+- ProductTemplate is the configurable product. Do not invent a parallel Product entity without Owner GO.
 - SVG Analyzer is a separate application. Its output is evidence/proposal, not final truth, until an operator confirms it.
 - Owner gates: no business DB, migrations, seeds, or destructive data work without Owner GO.
 - Runtime is required. Do not claim PASS from mocks, screenshots, or hardcoded UI states.
@@ -33,4 +36,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, or the next product p
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a LETTERS configuration spine, and a RETURN_CANT technical quantity → resource demand → partial EIC path.
+The current app has a platform shell, a real health check, a product catalog, one canonical front-lit plexi/aluminium letters product, and a RETURN_CANT technical quantity → resource demand → partial EIC path.

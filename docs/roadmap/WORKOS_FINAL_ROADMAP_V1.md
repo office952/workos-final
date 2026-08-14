@@ -35,9 +35,10 @@ Generalize from real products, not from theory.
 
 ## Current position
 
-LETTERS configuration spine remains the first vertical.
-
-Technical / resource / EIC spine V1 is a RETURN_CANT pilot only:
+Product catalog hierarchy established.
+First canonical product established.
+Legacy generic LETTERS pilot realigned.
+Existing configuration / technical / EIC spine preserved.
 
 - PHASE 6 = PILOT_VALIDATED
 - PHASE 7 = PILOT_VALIDATED

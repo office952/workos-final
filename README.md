@@ -6,9 +6,9 @@ This is not a cleanup of previous WorkOS code and not a fork of workflow-adv.
 
 ## Current status
 
-LETTERS configuration spine plus RETURN_CANT technical / resource / EIC pilot.
+Product catalog plus first canonical LETTERS product, with the RETURN_CANT EIC pilot preserved.
 
-The app has a platform shell, a real health check, a schema-driven LETTERS configuration flow, and a partial internal cost for cant. No business database or commercial price exists yet.
+The app has a platform shell, a real health check, a hierarchical product catalog, and a schema-driven configuration flow for the first canonical product. No business database or commercial price exists yet.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ pnpm dev:web
 
 - API: `http://127.0.0.1:8787/api/health`
 - Web: `http://127.0.0.1:5173`
-- Produse: `http://127.0.0.1:5173/products/letters`
+- Produse: `http://127.0.0.1:5173/products`
 
 In development the web app proxies `/api` to the API. Optional override: `VITE_API_BASE_URL`.
 
