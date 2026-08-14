@@ -76,7 +76,7 @@ WorkOS Final
 │   ├── Resource identity
 │   ├── Cost evidence / rates
 │   └── Labor / service recipes             PLANNED
-├── Operational Processes                   FOUNDATION_ONLY (typed catalog + Letters composition)
+├── Operational Processes                   FOUNDATION_ONLY (typed catalog + Letters technological route)
 │   ├── Process definition
 │   ├── Production capability class
 │   ├── Component process requirements

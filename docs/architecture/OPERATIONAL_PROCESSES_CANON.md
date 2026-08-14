@@ -76,7 +76,11 @@ Node identity is `scope:processId` (example: `FACE:CUT_SHEET_CNC` and `BACK:CUT_
 
 Dependencies are explicit edges. A derived topological order may be shown for readability. Global `sequence: 1,2,3` is not authority.
 
-`APPLY_SURFACE_FINISH` means vinyl/folie only. Painted volume is not this process.
+`APPLY_SURFACE_FINISH` means vinyl/folie only. Painted volume uses `PAINT_RAL` after body closure, not before forming.
+
+`CLOSE_LETTER_BODY` is a product-level BODY node: removable mechanical back fastening after internal electrical work.
+
+Final inspection and packing are PRODUCT-scope nodes.
 
 ## Resource / cost boundary
 
@@ -101,10 +105,24 @@ They are linked, not merged.
 | `APPLY_SURFACE_FINISH` | FINISHING | VINYL_APPLICATION | FACE, VOLUME | PLANNED |
 | `BOND_LETTER_BODY` | ASSEMBLY | MANUAL_ASSEMBLY | FACE, VOLUME | PLANNED |
 | `PLACE_LED_MODULES` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | BLOCKED |
+| `WIRE_LIGHTING` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | PLANNED |
+| `INSTALL_OR_CONNECT_PSU` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | BLOCKED |
+| `TEST_LIGHTING_IGNITION` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | PLANNED |
+| `PAINT_RAL` | FINISHING | PAINTING | VOLUME | PLANNED |
+| `CLOSE_LETTER_BODY` | ASSEMBLY | MANUAL_ASSEMBLY | BACK | PLANNED |
+| `TEST_ILLUMINATION_UNIFORMITY` | QUALITY_CONTROL | QUALITY_CONTROL | LIGHTING | PLANNED |
+| `INSPECT_FINISHED_LETTER` | QUALITY_CONTROL | QUALITY_CONTROL | product | PLANNED |
+| `PACK_PRODUCT` | PACKING | PACKAGING | product | PLANNED |
 
-QC, packing, closure, electrical wiring, PSU installation, and paint remain missing-process gaps, not silent omissions.
+Letters overall composition remains BLOCKED because lighting calculation / PSU reserve is unresolved.
+Technological process route is modeled. Cost remains PARTIAL. Execution remains absent.
 
-Letters composition completeness is currently BLOCKED (lighting required but technically blocked; CNC/finish/bond incomplete).
+Readiness is reported separately:
+
+- TECHNOLOGICAL_PROCESS_COMPLETENESS
+- LIGHTING_CALCULATION_READINESS
+- COST_COMPLETENESS
+- EXECUTION_READINESS
 
 ## Persistence and administration
 

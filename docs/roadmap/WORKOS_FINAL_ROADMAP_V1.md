@@ -73,6 +73,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Resources / Cost catalog foundation (identity, family/spec, service, cost evidence) | DONE / FOUNDATION |
 | Operational Processes foundation (process + capability class) | DONE / FOUNDATION |
 | Letters process composition (requirements, conditions, dependencies) | DONE / FOUNDATION |
+| Letters critical technological process completion | DONE / FOUNDATION |
 | Resources admin write / process admin write | NOT_IMPLEMENTED |
 | Lighting calculation | V1 REQUIRED after PSU owner decision |
 | People, Machines, Pontaj, Execution | LATER |
