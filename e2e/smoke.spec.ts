@@ -23,6 +23,7 @@ test("platform shell shows real health and no fake business menu", async ({
   await expect(page.getByRole("link", { name: "Produse" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Module și componente" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Guvernanța sistemului" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Administrare" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Comenzi" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Rapoarte" })).toHaveCount(0);
 

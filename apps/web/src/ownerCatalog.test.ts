@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   projectComponentArchitecture,
+  projectProductSystemAdministration,
   projectSystemGovernance,
 } from "@workos-final/domain";
-import { buildComponentCatalog, buildGovernanceCatalog } from "./ownerCatalog";
+import {
+  buildComponentCatalog,
+  buildGovernanceCatalog,
+  buildProductSystemAdminCatalog,
+} from "./ownerCatalog";
 
 describe("component catalog presentation", () => {
   it("places FACE VOLUME BACK LIGHTING under product components", () => {
@@ -66,6 +71,67 @@ describe("component catalog presentation", () => {
       "product-components",
       "future",
     ]);
+  });
+});
+
+describe("product system admin catalog presentation", () => {
+  it("groups derived families categories products settings and lifecycle", () => {
+    const catalog = buildProductSystemAdminCatalog(projectProductSystemAdministration());
+    expect(catalog.categories.map((item) => item.id)).toEqual([
+      "families",
+      "categories",
+      "products",
+      "product-components",
+      "technical-settings",
+      "compositions",
+      "lifecycle",
+    ]);
+    expect(catalog.categories[0]?.items[0]?.label).toBe(
+      "Litere și semne volumetrice luminoase",
+    );
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toEqual([
+      "Litere volumetrice luminoase cu iluminare față",
+      "Litere volumetrice luminoase cu iluminare halou",
+      "Litere volumetrice luminoase integral aluminiu",
+    ]);
+    const emptyCategory = catalog.categories[1]?.items[1];
+    expect(
+      emptyCategory?.groups[0]?.sections
+        .find((item) => item.id === "general")
+        ?.lines,
+    ).toEqual(["Niciun produs în această categorie."]);
+    expect(
+      emptyCategory?.groups[0]?.sections
+        .find((item) => item.id === "lifecycle")
+        ?.facts?.find((item) => item.label === "Poate fi ștearsă")?.value,
+    ).toBe("Da");
+    expect(catalog.categories[3]?.items.map((item) => item.id)).toEqual([
+      "FACE",
+      "VOLUME",
+      "BACK",
+      "LIGHTING",
+    ]);
+    expect(
+      catalog.categories[5]?.items[0]?.groups[0]?.sections[0]?.lines,
+    ).toEqual([
+      "Față → Plexiglas 3 mm",
+      "Volum → Aluminiu 0,6 mm",
+      "Spate → Forex 10 mm",
+      "Iluminare → Iluminare frontală",
+    ]);
+    const lightingSettings = catalog.categories[4]?.items[0]?.groups[0]?.sections.find(
+      (item) => item.id === "technical-settings",
+    )?.settingLines;
+    expect(lightingSettings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Pas module LED",
+          valueDisplay: "100 mm",
+        }),
+      ]),
+    );
+    expect(JSON.stringify(catalog)).not.toMatch(/RETURN_CANT/);
+    expect(JSON.stringify(catalog)).not.toMatch(/adminProducts/);
   });
 });
 

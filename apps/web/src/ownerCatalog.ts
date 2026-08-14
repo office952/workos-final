@@ -1,7 +1,10 @@
-import type {
-  ComponentRoleProjection,
-  GovernanceProjection,
-  ImplementationState,
+import {
+  adminEditClassLabel,
+  type AdminReadiness,
+  type ComponentRoleProjection,
+  type GovernanceProjection,
+  type ImplementationState,
+  type ProductSystemAdminProjection,
 } from "@workos-final/domain";
 
 export type CatalogFact = {
@@ -153,6 +156,414 @@ export function buildComponentCatalog(
             ],
           })),
         })),
+      },
+    ],
+  };
+}
+
+export function buildProductSystemAdminCatalog(
+  admin: ProductSystemAdminProjection,
+): OwnerCatalog {
+  const componentItems = groupVariantsByRole(admin);
+  const settingItems = admin.variants
+    .filter((variant) => variant.technicalSettings.length > 0)
+    .map((variant) => ({
+      id: `settings:${variant.variantId}`,
+      label: variant.label,
+      kindLabel: "Setări variantă",
+      summary: `Setările tehnice aparțin variantei, nu produsului.`,
+      groups: [
+        {
+          id: variant.variantId,
+          kindLabel: "Variantă",
+          title: variant.label,
+          sections: [
+            {
+              id: "technical-settings",
+              title: "Setări tehnice",
+              settingLines: variant.technicalSettings.map((setting) => ({
+                label: setting.label,
+                valueDisplay: setting.valueDisplay,
+                statusLabel: setting.statusLabel,
+                sourceLabel: setting.sourceLabel,
+                administrationLabel: setting.administrationLabel,
+              })),
+            },
+            {
+              id: "used-by",
+              title: "Produse care o folosesc",
+              lines:
+                variant.usedByLabels.length === 0
+                  ? ["niciun produs încă"]
+                  : [...variant.usedByLabels],
+            },
+          ],
+        },
+      ],
+    }));
+
+  return {
+    categories: [
+      {
+        id: "families",
+        label: "Familii",
+        kindLabel: "Categorie",
+        items: admin.families.map((family) => ({
+          id: `family:${family.id}`,
+          label: family.label,
+          kindLabel: "Familie",
+          summary: family.description,
+          groups: [
+            {
+              id: family.id,
+              kindLabel: "Familie",
+              title: family.label,
+              sections: [
+                {
+                  id: "general",
+                  title: "General",
+                  facts: [
+                    { label: "Etichetă", value: family.label },
+                    { label: "Categorii", value: String(family.categoryIds.length) },
+                    { label: "Produse", value: String(family.productCodes.length) },
+                  ],
+                  lines: family.categoryIds.map(
+                    (id) =>
+                      admin.categories.find((item) => item.id === id)?.label ?? id,
+                  ),
+                },
+                readinessSection(family.readiness),
+                {
+                  id: "technical",
+                  title: "Tehnic",
+                  technical: true,
+                  facts: [{ label: "Identitate stabilă", value: family.id }],
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "categories",
+        label: "Categorii",
+        kindLabel: "Categorie",
+        items: admin.categories.map((category) => ({
+          id: `category:${category.id}`,
+          label: category.label,
+          kindLabel: "Categorie",
+          summary: category.parentLabel
+            ? `În ${category.familyLabel}, sub ${category.parentLabel}.`
+            : `În ${category.familyLabel}.`,
+          groups: [
+            {
+              id: category.id,
+              kindLabel: "Categorie",
+              title: category.label,
+              sections: [
+                {
+                  id: "general",
+                  title: "General",
+                  facts: [
+                    { label: "Etichetă", value: category.label },
+                    { label: "Familie", value: category.familyLabel },
+                    { label: "Părinte", value: category.parentLabel ?? "rădăcină" },
+                    {
+                      label: "Subcategorii",
+                      value: String(category.childCategoryIds.length),
+                    },
+                    { label: "Produse", value: String(category.productCodes.length) },
+                  ],
+                  lines:
+                    category.productCodes.length === 0
+                      ? ["Niciun produs în această categorie."]
+                      : category.productCodes.map(
+                          (code) =>
+                            admin.products.find((item) => item.code === code)?.label ??
+                            code,
+                        ),
+                },
+                readinessSection(category.readiness),
+                {
+                  id: "technical",
+                  title: "Tehnic",
+                  technical: true,
+                  facts: [{ label: "Identitate stabilă", value: category.id }],
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "products",
+        label: "Produse",
+        kindLabel: "Categorie",
+        items: admin.products.map((product) => ({
+          id: `product:${product.code}`,
+          label: product.label,
+          kindLabel: "Produs",
+          summary: product.description,
+          groups: [
+            {
+              id: product.code,
+              kindLabel: "Produs",
+              title: product.label,
+              sections: [
+                {
+                  id: "general",
+                  title: "General",
+                  facts: [
+                    { label: "Etichetă", value: product.label },
+                    { label: "Familie", value: product.familyLabel },
+                    { label: "Categorie", value: product.categoryLabel },
+                    { label: "Stare șablon", value: product.templateStatus },
+                    {
+                      label: "Formular",
+                      value: product.formBound
+                        ? "Schemă de configurare legată"
+                        : "fără formular",
+                    },
+                  ],
+                },
+                {
+                  id: "composition",
+                  title: "Compoziție",
+                  lines: product.composition.map(
+                    (line) => `${line.roleLabel} → ${line.variantLabel}`,
+                  ),
+                },
+                {
+                  id: "gaps",
+                  title: "Zone nerezolvate",
+                  lines:
+                    product.unresolvedAreas.length > 0
+                      ? product.unresolvedAreas
+                      : ["Nicio zonă nerezolvată înregistrată"],
+                },
+                readinessSection(product.readiness),
+                {
+                  id: "technical",
+                  title: "Tehnic",
+                  technical: true,
+                  facts: [
+                    { label: "Identitate stabilă", value: product.code },
+                    { label: "Schemă formular", value: product.formSchemaId },
+                  ],
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "product-components",
+        label: "Componente de produs",
+        kindLabel: "Categorie",
+        items: componentItems,
+      },
+      ...(settingItems.length > 0
+        ? [
+            {
+              id: "technical-settings",
+              label: "Setări tehnice",
+              kindLabel: "Categorie",
+              items: settingItems,
+            },
+          ]
+        : []),
+      {
+        id: "compositions",
+        label: "Compoziții",
+        kindLabel: "Categorie",
+        items: admin.products.map((product) => ({
+          id: `composition:${product.code}`,
+          label: product.label,
+          kindLabel: "Compoziție",
+          groups: [
+            {
+              id: product.code,
+              kindLabel: "Produs",
+              title: product.label,
+              sections: [
+                {
+                  id: "composition",
+                  title: "Compoziție",
+                  lines: product.composition.map(
+                    (line) => `${line.roleLabel} → ${line.variantLabel}`,
+                  ),
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "lifecycle",
+        label: "Stare și lifecycle",
+        kindLabel: "Categorie",
+        items: [
+          ...admin.families.map((family) =>
+            lifecycleItem(`life:family:${family.id}`, "Familie", family.label, family.readiness),
+          ),
+          ...admin.categories.map((category) =>
+            lifecycleItem(
+              `life:category:${category.id}`,
+              "Categorie",
+              category.label,
+              category.readiness,
+            ),
+          ),
+          ...admin.products.map((product) =>
+            lifecycleItem(`life:product:${product.code}`, "Produs", product.label, product.readiness),
+          ),
+          ...admin.variants.map((variant) =>
+            lifecycleItem(
+              `life:variant:${variant.variantId}`,
+              "Variantă",
+              variant.label,
+              variant.readiness,
+            ),
+          ),
+        ],
+      },
+    ],
+  };
+}
+
+function groupVariantsByRole(admin: ProductSystemAdminProjection): CatalogItem[] {
+  const roles: {
+    role: string;
+    label: string;
+    variants: ProductSystemAdminProjection["variants"][number][];
+  }[] = [];
+  for (const variant of admin.variants) {
+    const existing = roles.find((item) => item.role === variant.role);
+    if (existing) {
+      existing.variants.push(variant);
+      continue;
+    }
+    roles.push({ role: variant.role, label: variant.roleLabel, variants: [variant] });
+  }
+
+  return roles.map((role) => ({
+    id: role.role,
+    label: role.label,
+    kindLabel: "Componentă",
+    groups: role.variants.map((variant) => ({
+      id: variant.variantId,
+      kindLabel: "Variantă",
+      title: variant.label,
+      sections: [
+        {
+          id: "general",
+          title: "General",
+          facts: [
+            { label: "Variantă", value: variant.label },
+            { label: "Rol", value: variant.roleLabel },
+            {
+              label: "Calcul independent",
+              value: variant.independentCalculation ? "Da" : "Nu",
+            },
+          ],
+        },
+        {
+          id: "calculation",
+          title: "Calcul",
+          facts: [
+            { label: "Măsurare", value: variant.measurement },
+            { label: "Cantitate", value: variant.quantity },
+          ],
+        },
+        ...(variant.technicalSettings.length > 0
+          ? [
+              {
+                id: "technical-settings",
+                title: "Setări tehnice",
+                settingLines: variant.technicalSettings.map((setting) => ({
+                  label: setting.label,
+                  valueDisplay: setting.valueDisplay,
+                  statusLabel: setting.statusLabel,
+                  sourceLabel: setting.sourceLabel,
+                  administrationLabel: setting.administrationLabel,
+                })),
+              },
+            ]
+          : []),
+        {
+          id: "resources",
+          title: "Resurse / cost",
+          facts: [
+            { label: "Cost intern", value: variant.resourceReadiness },
+            {
+              label: "Referințe resursă",
+              value:
+                variant.resourceReferences.length === 0
+                  ? "nicio referință de resursă"
+                  : variant.resourceReferences.map((item) => item.label).join("; "),
+            },
+          ],
+          lines: ["Tarifele rămân la Resurse / Cost."],
+        },
+        {
+          id: "used-by",
+          title: "Produse care o folosesc",
+          lines:
+            variant.usedByLabels.length === 0
+              ? ["niciun produs încă"]
+              : [...variant.usedByLabels],
+        },
+        {
+          id: "gaps",
+          title: "Lipsă",
+          lines: variant.gaps.length > 0 ? variant.gaps : ["Nicio lipsă înregistrată"],
+        },
+        readinessSection(variant.readiness),
+        {
+          id: "technical",
+          title: "Tehnic",
+          technical: true,
+          facts: [{ label: "Identitate stabilă", value: variant.variantId }],
+        },
+      ],
+    })),
+  }));
+}
+
+function readinessSection(readiness: AdminReadiness): CatalogDetailSection {
+  return {
+    id: "lifecycle",
+    title: "Stare și eligibilitate",
+    facts: [
+      { label: "Stare", value: readiness.lifecycleLabel },
+      { label: "Poate fi retrasă", value: readiness.canRetire ? "Da" : "Nu" },
+      { label: "Poate fi ștearsă", value: readiness.canDelete ? "Da" : "Nu" },
+    ],
+    lines: [
+      ...readiness.deleteBlockers.map((item) => `Ștergere blocată: ${item}`),
+      ...readiness.retireBlockers.map((item) => `Retragere blocată: ${item}`),
+      ...readiness.editClasses.map((item) => adminEditClassLabel(item)),
+      ...readiness.futureTransitions,
+    ],
+  };
+}
+
+function lifecycleItem(
+  id: string,
+  kindLabel: string,
+  label: string,
+  readiness: AdminReadiness,
+): CatalogItem {
+  return {
+    id,
+    label,
+    kindLabel,
+    groups: [
+      {
+        id,
+        kindLabel,
+        title: label,
+        sections: [readinessSection(readiness)],
       },
     ],
   };

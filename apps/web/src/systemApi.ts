@@ -1,6 +1,6 @@
 import type {
-  ComponentRoleProjection,
   GovernanceProjection,
+  ProductSystemAdminProjection,
 } from "@workos-final/domain";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -9,15 +9,12 @@ async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function fetchComponentArchitecture(): Promise<
-  ComponentRoleProjection[]
-> {
-  const response = await fetch(`${baseUrl}/api/components`);
+export async function fetchProductSystemAdministration(): Promise<ProductSystemAdminProjection> {
+  const response = await fetch(`${baseUrl}/api/product-system-admin`);
   if (!response.ok) {
-    throw new Error("components_unavailable");
+    throw new Error("product_system_admin_unavailable");
   }
-  const body = await readJson<{ roles: ComponentRoleProjection[] }>(response);
-  return body.roles;
+  return readJson<ProductSystemAdminProjection>(response);
 }
 
 export async function fetchSystemGovernance(): Promise<GovernanceProjection> {

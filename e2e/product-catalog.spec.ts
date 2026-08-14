@@ -97,4 +97,8 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/settings-product-confirm.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/admin-product-review-confirm.png",
+    fullPage: true,
+  });
 });

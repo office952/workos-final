@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
-import type { ComponentRoleProjection } from "@workos-final/domain";
+import type { ProductSystemAdminProjection } from "@workos-final/domain";
 import { OwnerCatalogView } from "./OwnerCatalogView";
-import { buildComponentCatalog } from "./ownerCatalog";
-import { fetchComponentArchitecture } from "./systemApi";
+import { buildProductSystemAdminCatalog } from "./ownerCatalog";
+import { fetchProductSystemAdministration } from "./systemApi";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "ready"; roles: ComponentRoleProjection[] };
+  | { kind: "ready"; admin: ProductSystemAdminProjection };
 
 export function ComponentsPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
 
   useEffect(() => {
     let cancelled = false;
-    void fetchComponentArchitecture()
-      .then((roles) => {
+    void fetchProductSystemAdministration()
+      .then((admin) => {
         if (!cancelled) {
-          setPage({ kind: "ready", roles });
+          setPage({ kind: "ready", admin });
         }
       })
       .catch(() => {
@@ -31,17 +31,17 @@ export function ComponentsPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă componentele…</p>;
+    return <p>Se încarcă sistemul de produs…</p>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca componentele.</p>;
+    return <p>Nu s-a putut încărca fundația sistemului de produs.</p>;
   }
 
   return (
     <OwnerCatalogView
-      catalog={buildComponentCatalog(page.roles)}
+      catalog={buildProductSystemAdminCatalog(page.admin)}
       title="Module și componente"
-      lead="Catalogul componentelor de produs. Proiectează contractele existente; nu le editează."
+      lead="Fundație read-only a sistemului de produs. Proiectează catalogul, compoziția, componentele și eligibilitatea; nu editează și nu salvează."
     />
   );
 }
