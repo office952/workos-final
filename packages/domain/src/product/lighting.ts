@@ -13,6 +13,13 @@ const LIGHTING_UNAVAILABLE = [
 export const lightingFrontLedContract: ComponentCalculationContract = {
   variantId: "LIGHTING_FRONT_LED",
   role: "LIGHTING",
+  profile: {
+    measurement: "none",
+    quantityUnit: null,
+    independentCalculation: true,
+    eic: "unavailable",
+    structuralGaps: LIGHTING_UNAVAILABLE,
+  },
   collectMeasurements() {
     return [];
   },

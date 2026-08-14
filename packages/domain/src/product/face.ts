@@ -14,6 +14,8 @@ export function faceAreaSquareMeters(areaMm2: number): number {
   return squareMetersFromMm2(areaMm2);
 }
 
+const FACE_GAPS = ["Geometrie din Analyzer", "Debitare CNC"] as const;
+
 function faceResult(
   status: ComponentCalculationResult["status"],
   quantities: ComponentCalculationResult["quantities"],
@@ -25,13 +27,20 @@ function faceResult(
     status,
     quantities,
     requirements,
-    unavailable: ["Geometrie din Analyzer", "Debitare CNC"],
+    unavailable: [...FACE_GAPS],
   };
 }
 
 export const facePlexiglas3mmContract: ComponentCalculationContract = {
   variantId: "FACE_PLEXIGLAS_3MM",
   role: "FACE",
+  profile: {
+    measurement: "confirmed_area_mm2",
+    quantityUnit: "m2",
+    independentCalculation: true,
+    eic: "material",
+    structuralGaps: FACE_GAPS,
+  },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const area = values[FACE_AREA_FIELD];
     if (typeof area !== "number") {

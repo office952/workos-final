@@ -8,6 +8,8 @@ import { squareMetersFromMm2 } from "./units.js";
 
 export const BACK_COMPONENT_ID = "BACK";
 
+const BACK_GAPS = ["Debitare CNC"] as const;
+
 function backResult(
   status: ComponentCalculationResult["status"],
   quantities: ComponentCalculationResult["quantities"],
@@ -19,13 +21,20 @@ function backResult(
     status,
     quantities,
     requirements,
-    unavailable: ["Debitare CNC"],
+    unavailable: [...BACK_GAPS],
   };
 }
 
 export const backForex10mmContract: ComponentCalculationContract = {
   variantId: "BACK_FOREX_10MM",
   role: "BACK",
+  profile: {
+    measurement: "supplied_area_mm2",
+    quantityUnit: "m2",
+    independentCalculation: true,
+    eic: "material",
+    structuralGaps: BACK_GAPS,
+  },
   collectMeasurements() {
     return [];
   },

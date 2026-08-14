@@ -17,6 +17,8 @@ export function volumeLinearMeters(perimeterMm: number): number {
   return linearMetersFromMm(perimeterMm);
 }
 
+const VOLUME_GAPS = ["Geometrie din Analyzer"] as const;
+
 function volumeResult(
   status: ComponentCalculationResult["status"],
   quantities: ComponentCalculationResult["quantities"],
@@ -28,13 +30,20 @@ function volumeResult(
     status,
     quantities,
     requirements,
-    unavailable: ["Geometrie din Analyzer"],
+    unavailable: [...VOLUME_GAPS],
   };
 }
 
 export const volumeAluminium06Contract: ComponentCalculationContract = {
   variantId: "VOLUME_ALUMINIUM_06",
   role: "VOLUME",
+  profile: {
+    measurement: "confirmed_perimeter_mm",
+    quantityUnit: "m",
+    independentCalculation: true,
+    eic: "material_and_operation",
+    structuralGaps: VOLUME_GAPS,
+  },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const perimeter = values[VOLUME_PERIMETER_FIELD];
     if (typeof perimeter !== "number") {

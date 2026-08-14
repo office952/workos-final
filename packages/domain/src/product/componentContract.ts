@@ -27,9 +27,26 @@ export type ComponentCalculationResult = {
   unavailable: readonly string[];
 };
 
+export type ComponentMeasurementKind =
+  | "confirmed_area_mm2"
+  | "confirmed_perimeter_mm"
+  | "supplied_area_mm2"
+  | "none";
+
+export type ComponentEicReadiness = "material" | "material_and_operation" | "unavailable";
+
+export type ComponentContractProfile = {
+  measurement: ComponentMeasurementKind;
+  quantityUnit: "m" | "m2" | null;
+  independentCalculation: boolean;
+  eic: ComponentEicReadiness;
+  structuralGaps: readonly string[];
+};
+
 export type ComponentCalculationContract = {
   variantId: ComponentVariantId;
   role: ComponentRole;
+  profile: ComponentContractProfile;
   collectMeasurements(values: DraftValues): TechnicalMeasurement[];
   calculate(input: ComponentCalculationInput): ComponentCalculationResult;
 };

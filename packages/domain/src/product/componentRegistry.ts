@@ -5,6 +5,17 @@ import { lightingFrontLedContract } from "./lighting.js";
 import type { ComponentVariantId } from "./types.js";
 import { volumeAluminium06Contract } from "./volume.js";
 
+export const COMPONENT_VARIANT_IDS = [
+  "FACE_PLEXIGLAS_3MM",
+  "VOLUME_ALUMINIUM_06",
+  "BACK_FOREX_10MM",
+  "LIGHTING_FRONT_LED",
+] as const satisfies readonly ComponentVariantId[];
+
+export function listComponentContracts(): ComponentCalculationContract[] {
+  return COMPONENT_VARIANT_IDS.map((id) => getComponentContract(id));
+}
+
 export function getComponentContract(
   variantId: ComponentVariantId,
 ): ComponentCalculationContract {

@@ -8,6 +8,17 @@ export {
   type CapabilityStatus,
 } from "./capabilities.js";
 export {
+  IMPLEMENTATION_STATES,
+  implementationStateLabel,
+  projectSystemGovernance,
+  type AuthorityRecord,
+  type GovernanceProjection,
+  type ImplementationState,
+  type OwnerGate,
+  type RoadmapItem,
+  type SystemBoundary,
+} from "./governance/index.js";
+export {
   BACK_COMPONENT_ID,
   CANONICAL_PRODUCT_CODE,
   FACE_AREA_FIELD,
@@ -39,11 +50,13 @@ export {
   productCategories,
   productFamilies,
   productTemplates,
+  projectComponentArchitecture,
   projectProductCatalog,
   selectedComponentIds,
   volumeLinearMeters,
   type CatalogTreeNode,
   type ComponentCalculationContract,
+  type ComponentRoleProjection,
   type ComponentRuntimeStatus,
   type ComponentSummary,
   type ComponentVariantId,

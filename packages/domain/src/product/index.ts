@@ -20,7 +20,15 @@ export {
   isFieldVisible,
   selectedComponentIds,
 } from "./compiler.js";
-export { getComponentContract } from "./componentRegistry.js";
+export {
+  COMPONENT_VARIANT_IDS,
+  getComponentContract,
+  listComponentContracts,
+} from "./componentRegistry.js";
+export {
+  COMPONENT_ROLES,
+  projectComponentArchitecture,
+} from "./componentProjection.js";
 export { BACK_COMPONENT_ID, backForex10mmContract } from "./back.js";
 export {
   FACE_AREA_FIELD,
@@ -49,8 +57,13 @@ export type {
   ComponentCalculationContract,
   ComponentCalculationInput,
   ComponentCalculationResult,
+  ComponentContractProfile,
   SharedCalculationContext,
 } from "./componentContract.js";
+export type {
+  ComponentRoleProjection,
+  ComponentVariantProjection,
+} from "./componentProjection.js";
 export type {
   CatalogTreeNode,
   ComponentCalculationStatus,
