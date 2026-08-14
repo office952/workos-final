@@ -24,6 +24,8 @@ describe("operational process projection", () => {
       "FINISHING",
       "ASSEMBLY",
       "ELECTRICAL",
+      "QUALITY_CONTROL",
+      "PACKING",
     ]);
     const forming = admin.processes.find((item) => item.id === FORM_ALUMINIUM_PROFILE_ID);
     expect(forming?.requiredCapabilityLabel).toBe("Formare profil");

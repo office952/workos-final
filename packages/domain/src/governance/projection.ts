@@ -352,6 +352,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "letters-critical-process-completion",
+        label: "Traseu tehnologic Letters V1",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "process-admin-write",
         label: "Write administrare procese",
         state: "NOT_IMPLEMENTED",

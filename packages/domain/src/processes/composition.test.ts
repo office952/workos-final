@@ -14,9 +14,17 @@ import {
 import {
   APPLY_SURFACE_FINISH_ID,
   BOND_LETTER_BODY_ID,
+  CLOSE_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  INSPECT_FINISHED_LETTER_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
+  PACK_PRODUCT_ID,
+  PAINT_RAL_ID,
   PLACE_LED_MODULES_ID,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  WIRE_LIGHTING_ID,
 } from "./catalog.js";
 import {
   composeProductProcesses,
@@ -98,17 +106,66 @@ describe("letters process composition", () => {
     expect(composition.completeness).toBe("BLOCKED");
   });
 
-  it("does not treat painted volume as vinyl and records the missing paint process", () => {
+  it("does not treat painted volume as vinyl and composes RAL after closure", () => {
     const composition = composeProductProcesses(frontlitPlexiAl06Template, {
       "face.finish": "none",
       "volume.finish": "painted",
     });
+    const paint = composition.nodes.find(
+      (item) => item.id === compositionNodeId("VOLUME", PAINT_RAL_ID),
+    );
+    const close = composition.nodes.find(
+      (item) => item.id === compositionNodeId("BODY", CLOSE_LETTER_BODY_ID),
+    );
     expect(
       composition.nodes.some((item) => item.processId === APPLY_SURFACE_FINISH_ID),
     ).toBe(false);
-    expect(composition.missingProcesses[0]?.id).toBe("paint-volume");
-    expect(composition.missingProcesses[0]?.classification).toBe(
-      "UNKNOWN_OWNER_DECISION",
+    expect(paint?.condition).toEqual({
+      kind: "fieldEquals",
+      fieldId: "volume.finish",
+      value: "painted",
+    });
+    expect(paint?.dependsOn).toEqual([close?.id]);
+    expect(composition.derivedOrder.indexOf(close?.id ?? "")).toBeLessThan(
+      composition.derivedOrder.indexOf(paint?.id ?? ""),
+    );
+    expect(composition.missingProcesses).toEqual([]);
+  });
+
+  it("keeps electrical stages distinct and closes the body only after ignition", () => {
+    const composition = composeProductProcesses(frontlitPlexiAl06Template, noneFinish);
+    const placeLed = compositionNodeId("LIGHTING", PLACE_LED_MODULES_ID);
+    const wire = compositionNodeId("LIGHTING", WIRE_LIGHTING_ID);
+    const psu = compositionNodeId("LIGHTING", INSTALL_OR_CONNECT_PSU_ID);
+    const ignition = compositionNodeId("LIGHTING", TEST_LIGHTING_IGNITION_ID);
+    const close = compositionNodeId("BODY", CLOSE_LETTER_BODY_ID);
+    const uniformity = compositionNodeId("LIGHTING", TEST_ILLUMINATION_UNIFORMITY_ID);
+    const inspect = compositionNodeId("PRODUCT", INSPECT_FINISHED_LETTER_ID);
+    const pack = compositionNodeId("PRODUCT", PACK_PRODUCT_ID);
+    expect(composition.nodes.find((item) => item.id === wire)?.dependsOn).toEqual([
+      placeLed,
+    ]);
+    expect(composition.nodes.find((item) => item.id === psu)?.dependsOn).toEqual([wire]);
+    expect(composition.nodes.find((item) => item.id === ignition)?.dependsOn).toEqual([
+      wire,
+      psu,
+    ]);
+    expect(composition.nodes.find((item) => item.id === close)?.dependsOn).toEqual([
+      compositionNodeId("BODY", BOND_LETTER_BODY_ID),
+      compositionNodeId("BACK", CUT_SHEET_CNC_ID),
+      ignition,
+    ]);
+    expect(composition.derivedOrder.indexOf(ignition)).toBeLessThan(
+      composition.derivedOrder.indexOf(close),
+    );
+    expect(composition.derivedOrder.indexOf(close)).toBeLessThan(
+      composition.derivedOrder.indexOf(uniformity),
+    );
+    expect(composition.nodes.find((item) => item.id === pack)?.dependsOn).toEqual([
+      inspect,
+    ]);
+    expect(composition.nodes.find((item) => item.id === psu)?.nodeReadiness).toBe(
+      "REQUIRED_BLOCKED",
     );
   });
 

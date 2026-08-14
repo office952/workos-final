@@ -3,7 +3,12 @@ import {
   APPLY_SURFACE_FINISH_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
+  PAINT_RAL_ID,
   PLACE_LED_MODULES_ID,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  WIRE_LIGHTING_ID,
   getOperationalProcess,
 } from "./catalog.js";
 
@@ -41,6 +46,11 @@ const VOLUME_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
     condition: { kind: "fieldEquals", fieldId: "volume.finish", value: "vinyl" },
     reason: "Volumul colantat cere aplicare de folie înainte de formare.",
   },
+  {
+    processId: PAINT_RAL_ID,
+    condition: { kind: "fieldEquals", fieldId: "volume.finish", value: "painted" },
+    reason: "Volumul vopsit cere vopsire RAL după asamblare, nu înainte de formare.",
+  },
 ];
 
 const BACK_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
@@ -56,6 +66,26 @@ const LIGHTING_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
     processId: PLACE_LED_MODULES_ID,
     condition: { kind: "always" },
     reason: "Produsul cu iluminare față cere montarea modulelor LED.",
+  },
+  {
+    processId: WIRE_LIGHTING_ID,
+    condition: { kind: "always" },
+    reason: "Cablarea este o operație distinctă de montarea modulelor.",
+  },
+  {
+    processId: INSTALL_OR_CONNECT_PSU_ID,
+    condition: { kind: "always" },
+    reason: "Sursa trebuie pregătită pentru probă și colet, fără dimensionare aici.",
+  },
+  {
+    processId: TEST_LIGHTING_IGNITION_ID,
+    condition: { kind: "always" },
+    reason: "Proba de aprindere se face cu corpul încă deschis.",
+  },
+  {
+    processId: TEST_ILLUMINATION_UNIFORMITY_ID,
+    condition: { kind: "always" },
+    reason: "Uniformitatea se verifică după închiderea corpului.",
   },
 ];
 
@@ -139,6 +169,9 @@ function fieldEqualsLabel(fieldId: string, value: string): string {
   }
   if (fieldId === "volume.finish" && value === "vinyl") {
     return "Finisaj volum: Colantat";
+  }
+  if (fieldId === "volume.finish" && value === "painted") {
+    return "Finisaj volum: Vopsit";
   }
   return `${fieldId} = ${value}`;
 }

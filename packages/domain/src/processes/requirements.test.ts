@@ -28,6 +28,11 @@ describe("component process requirements", () => {
       resolvedProcessRequirementsForType("ALUMINIUM_VOLUME", {
         "volume.finish": "painted",
       }).map((item) => item.processId),
-    ).toEqual(["FORM_ALUMINIUM_PROFILE"]);
+    ).toEqual(["FORM_ALUMINIUM_PROFILE", "PAINT_RAL"]);
+    expect(
+      resolvedProcessRequirementsForType("ALUMINIUM_VOLUME", {
+        "volume.finish": "painted",
+      }).some((item) => item.processId === "APPLY_SURFACE_FINISH"),
+    ).toBe(false);
   });
 });

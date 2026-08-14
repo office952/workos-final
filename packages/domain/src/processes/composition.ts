@@ -10,9 +10,17 @@ import type {
 import {
   APPLY_SURFACE_FINISH_ID,
   BOND_LETTER_BODY_ID,
+  CLOSE_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  INSPECT_FINISHED_LETTER_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
+  PACK_PRODUCT_ID,
+  PAINT_RAL_ID,
   PLACE_LED_MODULES_ID,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  WIRE_LIGHTING_ID,
   getOperationalProcess,
   type OperationalProcess,
 } from "./catalog.js";
@@ -28,6 +36,7 @@ export const PROCESS_COMPOSITION_SCOPES = [
   "BACK",
   "LIGHTING",
   "BODY",
+  "PRODUCT",
 ] as const;
 export type ProcessCompositionScope = (typeof PROCESS_COMPOSITION_SCOPES)[number];
 
@@ -82,6 +91,14 @@ export type ProductProcessComposition = {
   completeness: CompositionCompleteness;
   completenessLabel: string;
   completenessReasons: readonly string[];
+  technologicalProcessCompleteness: CompositionCompleteness;
+  technologicalProcessCompletenessLabel: string;
+  lightingCalculationReadiness: "BLOCKED";
+  lightingCalculationReadinessLabel: string;
+  costCompleteness: "PARTIAL";
+  costCompletenessLabel: string;
+  executionReadiness: "NOT_IMPLEMENTED";
+  executionReadinessLabel: string;
   nodes: readonly ProcessCompositionNode[];
   derivedOrder: readonly string[];
   missingProcesses: readonly MissingProcessGap[];
@@ -133,17 +150,23 @@ export function composeProductProcesses(
   );
   const connected = applyProductDependencies(withProduct);
   const derivedOrder = topologicalOrder(connected);
-  const missingProcesses = missingProcessesFor(merged);
-  const { completeness, completenessReasons } = compositionCompleteness(
-    connected,
-    missingProcesses,
-  );
+  const missingProcesses = missingProcessesFor();
+  const { completeness, completenessReasons, technological } =
+    compositionCompleteness(connected, missingProcesses);
   return {
     productCode: template.code,
     productLabel: template.label,
     completeness,
     completenessLabel: completenessLabel(completeness),
     completenessReasons,
+    technologicalProcessCompleteness: technological,
+    technologicalProcessCompletenessLabel: completenessLabel(technological),
+    lightingCalculationReadiness: "BLOCKED",
+    lightingCalculationReadinessLabel: "Blocat",
+    costCompleteness: "PARTIAL",
+    costCompletenessLabel: "Parțială",
+    executionReadiness: "NOT_IMPLEMENTED",
+    executionReadinessLabel: "Neimplementat",
     nodes: sortNodes(connected),
     derivedOrder,
     missingProcesses,
@@ -182,7 +205,7 @@ export function lettersProcessCompositionInspections(
     {
       id: "letters-volume-painted",
       label: "Volum vopsit",
-      summary: "Vopsirea nu este același proces cu aplicarea de folie.",
+      summary: "Vopsire RAL după asamblare. Nu este aplicare de folie.",
       values: { "face.finish": "none", "volume.finish": "painted" },
     },
   ].map((branch) => ({
@@ -195,23 +218,57 @@ function addProductComposition(
   nodes: ProcessCompositionNode[],
   selectedComponentIds: readonly string[],
 ): ProcessCompositionNode[] {
+  const extra: ProcessCompositionNode[] = [];
   if (
-    !selectedComponentIds.includes("FACE") ||
-    !selectedComponentIds.includes("VOLUME")
+    selectedComponentIds.includes("FACE") &&
+    selectedComponentIds.includes("VOLUME")
   ) {
-    return nodes;
+    extra.push(
+      toNode({
+        scope: "BODY",
+        typeId: null,
+        processId: BOND_LETTER_BODY_ID,
+        condition: { kind: "always" },
+        reason: "Corpul se lipește după fața pregătită și volumul format.",
+        dependsOn: [],
+      }),
+    );
   }
-  return [
-    ...nodes,
+  if (
+    selectedComponentIds.includes("FACE") &&
+    selectedComponentIds.includes("VOLUME") &&
+    selectedComponentIds.includes("BACK")
+  ) {
+    extra.push(
+      toNode({
+        scope: "BODY",
+        typeId: null,
+        processId: CLOSE_LETTER_BODY_ID,
+        condition: { kind: "always" },
+        reason: "Spatele se prinde mecanic după lucrul intern din corp.",
+        dependsOn: [],
+      }),
+    );
+  }
+  extra.push(
     toNode({
-      scope: "BODY",
+      scope: "PRODUCT",
       typeId: null,
-      processId: BOND_LETTER_BODY_ID,
+      processId: INSPECT_FINISHED_LETTER_ID,
       condition: { kind: "always" },
-      reason: "Corpul se lipește după fața pregătită și volumul format.",
+      reason: "Controlul final verifică corpul, finisajul și închiderea.",
       dependsOn: [],
     }),
-  ];
+    toNode({
+      scope: "PRODUCT",
+      typeId: null,
+      processId: PACK_PRODUCT_ID,
+      condition: { kind: "always" },
+      reason: "Ambalarea urmează după controlul final.",
+      dependsOn: [],
+    }),
+  );
+  return [...nodes, ...extra];
 }
 
 function applyProductDependencies(
@@ -233,6 +290,20 @@ function explicitDependencies(
   const faceVinyl = compositionNodeId("FACE", APPLY_SURFACE_FINISH_ID);
   const volumeVinyl = compositionNodeId("VOLUME", APPLY_SURFACE_FINISH_ID);
   const volumeForm = compositionNodeId("VOLUME", FORM_ALUMINIUM_PROFILE_ID);
+  const volumePaint = compositionNodeId("VOLUME", PAINT_RAL_ID);
+  const backCut = compositionNodeId("BACK", CUT_SHEET_CNC_ID);
+  const bond = compositionNodeId("BODY", BOND_LETTER_BODY_ID);
+  const close = compositionNodeId("BODY", CLOSE_LETTER_BODY_ID);
+  const placeLed = compositionNodeId("LIGHTING", PLACE_LED_MODULES_ID);
+  const wire = compositionNodeId("LIGHTING", WIRE_LIGHTING_ID);
+  const psu = compositionNodeId("LIGHTING", INSTALL_OR_CONNECT_PSU_ID);
+  const testIgnition = compositionNodeId("LIGHTING", TEST_LIGHTING_IGNITION_ID);
+  const testUniformity = compositionNodeId(
+    "LIGHTING",
+    TEST_ILLUMINATION_UNIFORMITY_ID,
+  );
+  const inspect = compositionNodeId("PRODUCT", INSPECT_FINISHED_LETTER_ID);
+  const pack = compositionNodeId("PRODUCT", PACK_PRODUCT_ID);
 
   if (node.id === faceVinyl && ids.has(faceCut)) {
     deps.push(faceCut);
@@ -240,18 +311,49 @@ function explicitDependencies(
   if (node.id === volumeForm && ids.has(volumeVinyl)) {
     deps.push(volumeVinyl);
   }
-  if (node.id === compositionNodeId("BODY", BOND_LETTER_BODY_ID)) {
-    if (ids.has(faceCut)) {
-      deps.push(faceCut);
-    }
-    if (ids.has(faceVinyl)) {
-      deps.push(faceVinyl);
-    }
-    if (ids.has(volumeForm)) {
-      deps.push(volumeForm);
-    }
+  if (node.id === bond) {
+    pushIfPresent(deps, ids, faceCut, faceVinyl, volumeForm);
+  }
+  if (node.id === placeLed) {
+    pushIfPresent(deps, ids, backCut);
+  }
+  if (node.id === wire) {
+    pushIfPresent(deps, ids, placeLed);
+  }
+  if (node.id === psu) {
+    pushIfPresent(deps, ids, wire);
+  }
+  if (node.id === testIgnition) {
+    pushIfPresent(deps, ids, wire, psu);
+  }
+  if (node.id === close) {
+    pushIfPresent(deps, ids, bond, backCut, testIgnition);
+  }
+  if (node.id === volumePaint) {
+    pushIfPresent(deps, ids, close);
+  }
+  if (node.id === testUniformity) {
+    pushIfPresent(deps, ids, close, volumePaint);
+  }
+  if (node.id === inspect) {
+    pushIfPresent(deps, ids, testUniformity, volumePaint, close);
+  }
+  if (node.id === pack) {
+    pushIfPresent(deps, ids, inspect);
   }
   return deps;
+}
+
+function pushIfPresent(
+  deps: string[],
+  ids: ReadonlySet<string>,
+  ...candidates: string[]
+): void {
+  for (const id of candidates) {
+    if (ids.has(id)) {
+      deps.push(id);
+    }
+  }
 }
 
 function toNode(input: {
@@ -315,7 +417,7 @@ function nodeBlockers(
       "Prețul CNC nu este modelat.",
     ];
   }
-  if (process.id === PLACE_LED_MODULES_ID) {
+  if (process.id === PLACE_LED_MODULES_ID || process.id === INSTALL_OR_CONNECT_PSU_ID) {
     return [
       "Iluminarea nu este calculabilă.",
       "Regula de rezervă PSU nu este stabilită.",
@@ -324,61 +426,8 @@ function nodeBlockers(
   return [process.readinessNote];
 }
 
-function missingProcessesFor(values: DraftValues): MissingProcessGap[] {
-  const gaps: MissingProcessGap[] = [
-    {
-      id: "electrical-wiring",
-      label: "Cablare electrică",
-      classification: "LATER",
-      classificationLabel: missingClassificationLabel("LATER"),
-      note: "Nu este necesară pentru fundația de compunere. Rămâne după iluminarea calculabilă.",
-    },
-    {
-      id: "psu-installation",
-      label: "Montare sursă de alimentare",
-      classification: "BLOCKED",
-      classificationLabel: missingClassificationLabel("BLOCKED"),
-      note: "Blocat de aceeași decizie PSU ca iluminarea.",
-    },
-    {
-      id: "body-closure",
-      label: "Închidere corp / prindere spate",
-      classification: "LATER",
-      classificationLabel: missingClassificationLabel("LATER"),
-      note: "Nu există încă proces de închidere. Spatele este debitat, nu prins în graf.",
-    },
-    {
-      id: "functional-test",
-      label: "Probă funcțională",
-      classification: "LATER",
-      classificationLabel: missingClassificationLabel("LATER"),
-      note: "Nu este modelată în V1.",
-    },
-    {
-      id: "quality-control",
-      label: "Control calitate",
-      classification: "LATER",
-      classificationLabel: missingClassificationLabel("LATER"),
-      note: "Nu este modelată în V1.",
-    },
-    {
-      id: "packing",
-      label: "Ambalare",
-      classification: "LATER",
-      classificationLabel: missingClassificationLabel("LATER"),
-      note: "Nu este modelată în V1.",
-    },
-  ];
-  if (values["volume.finish"] === "painted") {
-    gaps.unshift({
-      id: "paint-volume",
-      label: "Vopsire volum",
-      classification: "UNKNOWN_OWNER_DECISION",
-      classificationLabel: missingClassificationLabel("UNKNOWN_OWNER_DECISION"),
-      note: "Vopsirea nu este Aplicare folie. Ordinea față de formare nu este decisă canonic.",
-    });
-  }
-  return gaps;
+function missingProcessesFor(): MissingProcessGap[] {
+  return [];
 }
 
 function compositionCompleteness(
@@ -387,6 +436,7 @@ function compositionCompleteness(
 ): {
   completeness: CompositionCompleteness;
   completenessReasons: string[];
+  technological: CompositionCompleteness;
 } {
   const reasons: string[] = [];
   if (nodes.some((item) => item.nodeReadiness === "REQUIRED_BLOCKED")) {
@@ -401,15 +451,23 @@ function compositionCompleteness(
   if (missing.some((item) => item.classification === "BLOCKED")) {
     reasons.push("Există procese lipsă blocate.");
   }
+  const technological: CompositionCompleteness = missing.some(
+    (item) => item.classification === "UNKNOWN_OWNER_DECISION",
+  )
+    ? "PARTIAL"
+    : nodes.some((item) => item.nodeReadiness === "REQUIRED_INCOMPLETE")
+      ? "PARTIAL"
+      : "READY";
   if (reasons.some((item) => item.includes("blocat") || item.includes("blocate"))) {
-    return { completeness: "BLOCKED", completenessReasons: reasons };
+    return { completeness: "BLOCKED", completenessReasons: reasons, technological };
   }
   if (reasons.length > 0) {
-    return { completeness: "PARTIAL", completenessReasons: reasons };
+    return { completeness: "PARTIAL", completenessReasons: reasons, technological };
   }
   return {
     completeness: "READY",
     completenessReasons: ["Toate procesele necesare sunt pregătite."],
+    technological,
   };
 }
 
@@ -470,6 +528,8 @@ function scopeLabel(scope: ProcessCompositionScope): string {
       return "Iluminare";
     case "BODY":
       return "Corp";
+    case "PRODUCT":
+      return "Produs";
     default: {
       const _exhaustive: never = scope;
       return _exhaustive;
@@ -502,25 +562,6 @@ function completenessLabel(completeness: CompositionCompleteness): string {
       return "Blocat";
     default: {
       const _exhaustive: never = completeness;
-      return _exhaustive;
-    }
-  }
-}
-
-function missingClassificationLabel(
-  classification: MissingProcessClassification,
-): string {
-  switch (classification) {
-    case "REQUIRED_FOR_V1":
-      return "Necesar pentru V1";
-    case "LATER":
-      return "Mai târziu";
-    case "BLOCKED":
-      return "Blocat";
-    case "UNKNOWN_OWNER_DECISION":
-      return "Decizie owner";
-    default: {
-      const _exhaustive: never = classification;
       return _exhaustive;
     }
   }

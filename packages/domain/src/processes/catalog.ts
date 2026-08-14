@@ -7,6 +7,8 @@ export const PROCESS_CATEGORIES = [
   "FINISHING",
   "ASSEMBLY",
   "ELECTRICAL",
+  "QUALITY_CONTROL",
+  "PACKING",
 ] as const;
 export type ProcessCategory = (typeof PROCESS_CATEGORIES)[number];
 
@@ -27,6 +29,9 @@ export const PRODUCTION_CAPABILITY_CLASS_IDS = [
   "MANUAL_ASSEMBLY",
   "VINYL_APPLICATION",
   "ELECTRICAL_ASSEMBLY",
+  "PAINTING",
+  "QUALITY_CONTROL",
+  "PACKAGING",
 ] as const;
 export type ProductionCapabilityClassId =
   (typeof PRODUCTION_CAPABILITY_CLASS_IDS)[number];
@@ -64,6 +69,14 @@ export const FORM_ALUMINIUM_PROFILE_ID = "FORM_ALUMINIUM_PROFILE";
 export const APPLY_SURFACE_FINISH_ID = "APPLY_SURFACE_FINISH";
 export const BOND_LETTER_BODY_ID = "BOND_LETTER_BODY";
 export const PLACE_LED_MODULES_ID = "PLACE_LED_MODULES";
+export const PAINT_RAL_ID = "PAINT_RAL";
+export const WIRE_LIGHTING_ID = "WIRE_LIGHTING";
+export const INSTALL_OR_CONNECT_PSU_ID = "INSTALL_OR_CONNECT_PSU";
+export const TEST_LIGHTING_IGNITION_ID = "TEST_LIGHTING_IGNITION";
+export const CLOSE_LETTER_BODY_ID = "CLOSE_LETTER_BODY";
+export const TEST_ILLUMINATION_UNIFORMITY_ID = "TEST_ILLUMINATION_UNIFORMITY";
+export const INSPECT_FINISHED_LETTER_ID = "INSPECT_FINISHED_LETTER";
+export const PACK_PRODUCT_ID = "PACK_PRODUCT";
 
 export const productionCapabilityClasses: readonly ProductionCapabilityClass[] = [
   {
@@ -94,6 +107,24 @@ export const productionCapabilityClasses: readonly ProductionCapabilityClass[] =
     id: "ELECTRICAL_ASSEMBLY",
     label: "Asamblare electrică",
     description: "Post de lucru pentru montaj electric. Nu este un utilaj concret.",
+    kind: "WORKSTATION",
+  },
+  {
+    id: "PAINTING",
+    label: "Vopsire",
+    description: "Post de vopsire RAL. Nu este o cabină sau un pistol concret.",
+    kind: "WORKSTATION",
+  },
+  {
+    id: "QUALITY_CONTROL",
+    label: "Control calitate",
+    description: "Capabilitate de verificare. Nu este un angajat.",
+    kind: "HUMAN_SKILL",
+  },
+  {
+    id: "PACKAGING",
+    label: "Ambalare",
+    description: "Post de ambalare. Nu este un utilaj concret.",
     kind: "WORKSTATION",
   },
 ];
@@ -142,13 +173,13 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote:
-      "Doar colant. Vopsirea este o tehnologie diferită și nu este încă un proces compus.",
+      "Doar colant. Vopsirea RAL este procesul PAINT_RAL, după asamblare.",
   },
   {
     id: BOND_LETTER_BODY_ID,
     label: "Lipire față-volum",
     description:
-      "Asamblare manuală a corpului. Fără angajat numit. Compunerea de produs adaugă dependențele față/volum.",
+      "Lipire față de volum format. Adezivul (cianoacrilat + activator) este detaliu de lucru, nu identitate de proces și nu stoc.",
     category: "ASSEMBLY",
     requiredCapabilityId: "MANUAL_ASSEMBLY",
     applicableTypeIds: ["PLEXIGLAS_FACE", "ALUMINIUM_VOLUME"],
@@ -162,7 +193,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     id: PLACE_LED_MODULES_ID,
     label: "Montare module LED",
     description:
-      "Montaj electric al modulelor LED. Blocat până când iluminarea este calculabilă.",
+      "Montaj module LED pe spate/interior. Bandă + adeziv/activator sunt detaliu de prindere, nu un proces separat de lipire.",
     category: "ELECTRICAL",
     requiredCapabilityId: "ELECTRICAL_ASSEMBLY",
     applicableTypeIds: ["LIGHTING_FRONT_LED"],
@@ -172,6 +203,120 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     readiness: "BLOCKED",
     readinessNote:
       "Iluminarea rămâne incompletă: rezerva PSU nu este decisă. Procesul este rezervat, nu executabil.",
+  },
+  {
+    id: PAINT_RAL_ID,
+    label: "Vopsire RAL",
+    description:
+      "Vopsire volum după asamblare: mascare față, vopsire, uscare, demascare. Nu este aplicare de folie.",
+    category: "FINISHING",
+    requiredCapabilityId: "PAINTING",
+    applicableTypeIds: ["ALUMINIUM_VOLUME"],
+    outcome: "Volum vopsit RAL, față protejată și curată",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote:
+      "Traseu cunoscut. Fără material de vopsea și fără rețetă de cost în acest build.",
+  },
+  {
+    id: WIRE_LIGHTING_ID,
+    label: "Cablare electrică",
+    description:
+      "Cablare locală după montarea modulelor. Nu calculează numărul de LED și nu este montarea sursei.",
+    category: "ELECTRICAL",
+    requiredCapabilityId: "ELECTRICAL_ASSEMBLY",
+    applicableTypeIds: ["LIGHTING_FRONT_LED"],
+    outcome: "Cablaj local pregătit pentru probă",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote: "Proces cunoscut. Fără rețetă de labor.",
+  },
+  {
+    id: INSTALL_OR_CONNECT_PSU_ID,
+    label: "Pregătire sursă de alimentare",
+    description:
+      "Conectare/pregătire PSU pentru probă și livrare în colet. Nu montează o sursă pe literă și nu decide puterea.",
+    category: "ELECTRICAL",
+    requiredCapabilityId: "ELECTRICAL_ASSEMBLY",
+    applicableTypeIds: ["LIGHTING_FRONT_LED"],
+    outcome: "Sursă pregătită pentru probă și colet",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "BLOCKED",
+    readinessNote:
+      "Dimensionarea PSU rămâne blocată de rezerva nesetată. Procesul există, cantitatea nu.",
+  },
+  {
+    id: TEST_LIGHTING_IGNITION_ID,
+    label: "Probă aprindere",
+    description:
+      "Probă electrică de aprindere, înainte de închiderea corpului. Nu este controlul de uniformitate.",
+    category: "ELECTRICAL",
+    requiredCapabilityId: "ELECTRICAL_ASSEMBLY",
+    applicableTypeIds: ["LIGHTING_FRONT_LED"],
+    outcome: "Aprindere verificată cu acces în corp",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote: "Proces cunoscut. Fără telemetrie de măsură.",
+  },
+  {
+    id: CLOSE_LETTER_BODY_ID,
+    label: "Închidere corp",
+    description:
+      "Prindere mecanică demontabilă a spatelui de corp. Nu este lipire permanentă a spatelui.",
+    category: "ASSEMBLY",
+    requiredCapabilityId: "MANUAL_ASSEMBLY",
+    applicableTypeIds: ["FOREX_BACK"],
+    outcome: "Corp închis, accesibil ulterior prin demontare",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote: "Fără SKU de șurub și fără stoc în acest build.",
+  },
+  {
+    id: TEST_ILLUMINATION_UNIFORMITY_ID,
+    label: "Probă uniformitate",
+    description:
+      "Verificare vizuală a iluminării după închiderea corpului. Nu este proba de aprindere.",
+    category: "QUALITY_CONTROL",
+    requiredCapabilityId: "QUALITY_CONTROL",
+    applicableTypeIds: ["LIGHTING_FRONT_LED"],
+    outcome: "Uniformitate vizuală verificată",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote: "Proces cunoscut. Fără măsurători instrumentale.",
+  },
+  {
+    id: INSPECT_FINISHED_LETTER_ID,
+    label: "Control calitate final",
+    description:
+      "Verificare vizuală a corpului, finisajului și închiderii înainte de ambalare.",
+    category: "QUALITY_CONTROL",
+    requiredCapabilityId: "QUALITY_CONTROL",
+    applicableTypeIds: [],
+    outcome: "Produs acceptat vizual",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote: "Nu este un QC generic fără rezultat.",
+  },
+  {
+    id: PACK_PRODUCT_ID,
+    label: "Ambalare",
+    description:
+      "Ambalare după controlul final. Sursa de alimentare, dacă e cazul, pleacă în colet.",
+    category: "PACKING",
+    requiredCapabilityId: "PACKAGING",
+    applicableTypeIds: [],
+    outcome: "Produs ambalat pentru predare",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "PLANNED",
+    readinessNote: "Fără material de ambalare și fără tarif în acest build.",
   },
 ];
 
@@ -215,6 +360,10 @@ export function processCategoryLabel(category: ProcessCategory): string {
       return "Asamblare";
     case "ELECTRICAL":
       return "Electric";
+    case "QUALITY_CONTROL":
+      return "Control calitate";
+    case "PACKING":
+      return "Ambalare";
     default: {
       const _exhaustive: never = category;
       return _exhaustive;

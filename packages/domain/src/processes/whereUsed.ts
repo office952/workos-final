@@ -2,6 +2,7 @@ import { getComponentType } from "../product/componentTypes.js";
 import { productTemplates } from "../product/frontlitPlexiAl06.js";
 import type { ComponentRole, ComponentTypeId } from "../product/types.js";
 import { getOperationalProcess } from "./catalog.js";
+import { lettersProcessCompositionInspections } from "./composition.js";
 
 export type ProcessUse = {
   processId: string;
@@ -18,7 +19,7 @@ export function processWhereUsed(processId: string): ProcessUse[] {
   if (!process) {
     return [];
   }
-  return productTemplates.flatMap((template) =>
+  const typeUses = productTemplates.flatMap((template) =>
     template.components
       .filter((component) => process.applicableTypeIds.includes(component.typeId))
       .map((component) => {
@@ -36,6 +37,28 @@ export function processWhereUsed(processId: string): ProcessUse[] {
         };
       }),
   );
+  if (typeUses.length > 0) {
+    return typeUses;
+  }
+  return productTemplates.flatMap((template) => {
+    const used = lettersProcessCompositionInspections(template).some((item) =>
+      item.composition.nodes.some((node) => node.processId === processId),
+    );
+    if (!used) {
+      return [];
+    }
+    return [
+      {
+        processId,
+        typeId: template.components[0]?.typeId ?? "PLEXIGLAS_FACE",
+        role: "FACE",
+        typeLabel: template.label,
+        productCode: template.code,
+        productLabel: template.label,
+        displayLine: `${template.label} — produs`,
+      },
+    ];
+  });
 }
 
 function componentRoleLabel(role: ComponentRole): string {

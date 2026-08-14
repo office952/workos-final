@@ -4,10 +4,18 @@ import { RETURN_CANT_FORMING_ID } from "../resources/catalog.js";
 import {
   APPLY_SURFACE_FINISH_ID,
   BOND_LETTER_BODY_ID,
+  CLOSE_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  INSPECT_FINISHED_LETTER_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
+  PACK_PRODUCT_ID,
+  PAINT_RAL_ID,
   PLACE_LED_MODULES_ID,
   PROCESS_CATEGORIES,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  WIRE_LIGHTING_ID,
   getOperationalProcess,
   getProductionCapability,
   operationalProcesses,
@@ -27,6 +35,14 @@ describe("operational process catalog", () => {
       APPLY_SURFACE_FINISH_ID,
       BOND_LETTER_BODY_ID,
       PLACE_LED_MODULES_ID,
+      PAINT_RAL_ID,
+      WIRE_LIGHTING_ID,
+      INSTALL_OR_CONNECT_PSU_ID,
+      TEST_LIGHTING_IGNITION_ID,
+      CLOSE_LETTER_BODY_ID,
+      TEST_ILLUMINATION_UNIFORMITY_ID,
+      INSPECT_FINISHED_LETTER_ID,
+      PACK_PRODUCT_ID,
     ]);
   });
 
@@ -65,12 +81,18 @@ describe("operational process catalog", () => {
     ]);
     expect(processesForType("FOREX_BACK").map((item) => item.id)).toEqual([
       CUT_SHEET_CNC_ID,
+      CLOSE_LETTER_BODY_ID,
     ]);
     expect(processesForType("ALUMINIUM_VOLUME").map((item) => item.id)).toEqual([
       FORM_ALUMINIUM_PROFILE_ID,
       APPLY_SURFACE_FINISH_ID,
       BOND_LETTER_BODY_ID,
+      PAINT_RAL_ID,
     ]);
+    expect(getOperationalProcess(PAINT_RAL_ID)?.requiredCapabilityId).toBe("PAINTING");
+    expect(getOperationalProcess(APPLY_SURFACE_FINISH_ID)?.requiredCapabilityId).not.toBe(
+      "PAINTING",
+    );
     expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.applicableTypeIds).toEqual([
       "PLEXIGLAS_FACE",
       "FOREX_BACK",
