@@ -37,4 +37,6 @@ Generalize from real products, not from theory.
 
 PHASE 1 — Platform Shell + capability boundaries
 
-Capability boundary kernel started. Phase 1 is not complete.
+Capability boundary kernel: present.
+Platform shell: present.
+Phase 1 is complete only after Owner verdict. Phase 2 is not started.

@@ -7,11 +7,11 @@ type HealthStatusProps = {
 export function HealthStatus({ state }: HealthStatusProps) {
   switch (state.kind) {
     case "loading":
-      return <p>Se verifică conexiunea cu backend-ul…</p>;
+      return <p className="status-loading">Se verifică conexiunea cu backend-ul…</p>;
     case "connected":
-      return <p>Backend conectat</p>;
+      return <p className="status-ok">Backend conectat</p>;
     case "unavailable":
-      return <p>Backend indisponibil</p>;
+      return <p className="status-bad">Backend indisponibil</p>;
     default: {
       const _exhaustive: never = state;
       return _exhaustive;

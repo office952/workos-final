@@ -5,7 +5,7 @@ It is not a cleanup or fork of previous WorkOS repositories.
 
 ## Current position
 
-PHASE 0 — Repository Foundation.
+PHASE 1 — Platform Shell + capability boundaries.
 
 Do not implement the next product phase without an explicit Owner GO.
 
@@ -24,4 +24,4 @@ Do not implement the next product phase without an explicit Owner GO.
 
 ## Bootstrap proof
 
-The current app only proves that the web talks to a real `GET /api/health` and shows the result in Romanian.
+The current app proves a platform shell around a real `GET /api/health` projection in Romanian.

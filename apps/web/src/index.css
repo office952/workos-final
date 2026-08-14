@@ -1,6 +1,14 @@
 :root {
-  color: #1a1a1a;
-  background: #f6f4f0;
+  --bg: #f4f2ee;
+  --surface: #fffcf7;
+  --ink: #1c1b18;
+  --muted: #5c5852;
+  --line: #ddd8cf;
+  --accent: #2f4a3c;
+  --ok: #2d5a3d;
+  --bad: #8a3b2e;
+  color: var(--ink);
+  background: var(--bg);
   font-family: "Segoe UI", Arial, sans-serif;
   line-height: 1.5;
 }
@@ -13,10 +21,52 @@ body {
   margin: 0;
 }
 
-main {
-  max-width: 40rem;
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header-inner {
+  max-width: 56rem;
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.app-brand {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 650;
+}
+
+.app-nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+  padding-bottom: 0.15rem;
+  border-bottom: 2px solid transparent;
+}
+
+.app-nav a[aria-current="page"] {
+  border-bottom-color: var(--accent);
+}
+
+.app-content {
+  flex: 1;
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
 }
 
 h1,
@@ -25,15 +75,32 @@ h2 {
 }
 
 h1 {
-  margin: 0 0 2rem;
-  font-size: 2rem;
-}
-
-h2 {
   margin: 0 0 0.75rem;
-  font-size: 1.125rem;
+  font-size: 1.75rem;
 }
 
-p {
+.page-lead {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+}
+
+.status-ok,
+.status-bad,
+.status-loading {
   margin: 0;
+}
+
+.status-ok {
+  color: var(--ok);
+}
+
+.status-bad {
+  color: var(--bad);
+}
+
+@media (max-width: 40rem) {
+  .app-header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
