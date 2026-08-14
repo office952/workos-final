@@ -14,3 +14,5 @@ UI must not hardcode business truth: product fields, materials, formulas, pricin
 Do not build a standalone calculator and a separate full-product calculator for the same component. The same geometry, resources, formulas, and technical truth apply in isolation and in composition.
 
 Unselected module = silent. Selected module = independently validatable and calculable, and owns or receives all required truth.
+
+Adjustable technical values live in Product System component settings, not in documentation, Intake, or anonymous code literals. See `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md`.

@@ -1,5 +1,7 @@
 # WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1
 
+Current correction: LED pitch is now a canonical `LIGHTING_FRONT_LED` technical setting. PSU reserve remains unresolved. LIGHTING remains UNAVAILABLE. See `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md`.
+
 TASK = Realign first canonical product to reusable component-first calculation
 
 BASELINE = ecaf70f8c0bb58e59f2dc8eb3b35a8f433333cc0

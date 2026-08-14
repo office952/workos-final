@@ -9,7 +9,7 @@ Hierarchical product catalog plus first canonical LETTERS product.
 FACE / VOLUME / BACK / LIGHTING are reusable component calculation contracts.
 Owner-facing projections: Module și componente, Guvernanța sistemului.
 ProductTemplate composes variants. ProductAggregate orchestrates. EIC is generic.
-LIGHTING remains unavailable until LED pitch and PSU reserve are owner-decided.
+LIGHTING remains unavailable: LED pitch is a canonical component setting; PSU reserve remains owner-undecided.
 
 ```text
 FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
@@ -29,6 +29,7 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 - Operator-facing UI is in Romanian. Internal code and contracts may stay in English.
 - Modular product law: an unselected module is silent. A selected module is independently validatable and calculable. Complete product is composition of the same contracts. No hidden parallel calculators.
 - Technical quantity, resource identity, internal cost evidence, EIC, and commercial price stay separate. Rates live only in Resources/Cost.
+- Adjustable technical values live in canonical Product System component settings. Documentation explains them. Calculation code consumes them. Intake does not administer them.
 - Confirm the exact reviewed definition. Do not recompile a later draft at confirm time.
 - Catalog organization (family / recursive category) is not product technical truth.
 - ProductTemplate is the configurable product. Do not invent a parallel Product entity without Owner GO.
@@ -40,4 +41,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, owner-facing component and governance projections, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, and lighting left explicitly unavailable until pitch and PSU reserve are decided.
+The current app has a platform shell, a real health check, a product catalog, owner-facing component and governance projections, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, canonical component technical settings, and lighting left unavailable because PSU reserve is still owner-undecided.

@@ -1,0 +1,19 @@
+---
+description: Adjustable technical values live in canonical component settings
+alwaysApply: true
+---
+
+# Technical settings single-truth
+
+Active technical values live in canonical Product System component settings.
+Documentation explains them. Calculation code consumes them. Intake does not administer them.
+
+For any adjustable technical or business parameter: one canonical active value, one owner, typed identity, visible source, projected to Product System UI.
+
+Do not scatter the same active value through docs, Intake fields, or anonymous code literals.
+
+Software implementation constants stay in code. Not every constant needs a setting.
+
+When a canonical setting exists, retire old active sources. Do not keep compatibility copies.
+
+Do not add fake admin Edit/Save until persistence, validation, versioning, and owner authorization exist.
