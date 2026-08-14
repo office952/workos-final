@@ -16,7 +16,7 @@ Kinds: `PRODUCT_FAMILY`, `PRODUCT_CATEGORY`, `PRODUCT_TEMPLATE`, `COMPONENT_TYPE
 
 ## What remains code
 
-Roles, constructive type IDs, catalog relationships, composition, formulas, compiler, reviewId, technical settings, resources, and calculations stay typed contracts.
+Roles, constructive type IDs, catalog relationships, composition, formulas, compiler, reviewId, technical settings, resources, and calculations stay typed contracts. Resources / Cost remains typed until a specific resource field is writable.
 
 ## Runtime authority
 

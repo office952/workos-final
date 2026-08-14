@@ -108,7 +108,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Product System | Family, category, template, composition, variants, component technical settings, allowed configuration | Purchase rates, commercial price, execution actuals, attendance |
 | Form / Intake | Schema, fields, visibility, order-specific operator input | System technical settings, formulas, rates, Product Truth |
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
-| Resources / Cost | Resource identity, cost evidence, operational recipes, EIC | Customer price, Product Truth, attendance, pontaj-as-price |
+| Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Customer price, stock, Product Truth, attendance, pontaj-as-price |
 | Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice |
 | People | Employee master, attendance / Pontaj, payments, advances | Execution session, labor recipe / cost basis, Product Truth |
@@ -133,18 +133,21 @@ Lifecycle: `DRAFT` / `ACTIVE` / `RETIRED` for catalog and settings versions. Tem
 
 ## Resources / Cost
 
-Separate four facts:
+Canonical law: `docs/architecture/RESOURCES_AND_COST_CANON.md`.
+
+Separate facts:
 
 1. Resource identity
-2. Resource cost evidence
-3. Component applicability (which component demands the resource)
-4. Quantity demand (owned by the component calculation)
+2. Material family vs purchasable specification
+3. Resource cost evidence
+4. Component applicability (which component demands the resource)
+5. Quantity demand (owned by the component calculation)
 
-Do not merge internal cost with Commercial.
+Do not merge internal cost with Commercial. Do not put stock here.
 
-Future admin surfaces live under Resources, not under Product System and not under a global Settings page.
+Admin inspection lives under `/admin` → Resurse și cost intern. No resource write yet.
 
-Pilot today: four resources and four cost-evidence rows. Operational processes, labor recipes, and workcenters are planned.
+Current live catalog: Plexiglas 3 mm opal, Forex 10 mm, aluminium return profile 0.6 mm, forming service. Operational processes, labor recipes, and workcenters remain planned.
 
 ## People / Angajați
 
@@ -280,15 +283,10 @@ Inside Administrare, use catalog navigation (category → item → detail), not 
 ```text
 Administrare
 ├── Sistem produs
-├── Resurse și cost intern
-├── Persoane
-├── Utilaje și capacitate
-├── Execuție
-├── Pontaj
-└── Setări platformă          (cross-cutting only; does not own domain truth)
+└── Resurse și cost intern
 ```
 
-Labels are proposals. Do not ship empty admin categories.
+Later domains (Persoane, Utilaje, Execuție, Pontaj, Setări platformă) stay off this catalog until they have real truth. Do not ship empty admin categories.
 
 ## Operator vs admin surfaces
 
@@ -296,7 +294,7 @@ Labels are proposals. Do not ship empty admin categories.
 |---|---|---|
 | Operator | Daily workflow | `/products` configure → review → confirm |
 | Owner projection | System honesty / inspection | `/components`, `/governance` |
-| Admin | Configure system truth | `/admin` — display-label write only |
+| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources inspection |
 
 Do not mix system configuration into daily workflow.
 

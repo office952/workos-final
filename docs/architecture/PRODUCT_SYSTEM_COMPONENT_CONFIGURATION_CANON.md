@@ -64,4 +64,4 @@ Material, thickness, depth, area, and rates are not technical settings.
 
 Configuration resolves to a resource identity. Resources own the rate.
 
-Current FACE resource `plexiglas_face_3mm` is the 3 mm opal sheet. It is still too coarse for a full materials catalog. Do not invent SKUs here.
+FACE 3 mm opal resolves to `plexiglas_3mm_opal` in the Plexiglas family. See `docs/architecture/RESOURCES_AND_COST_CANON.md`. Do not invent SKUs here.

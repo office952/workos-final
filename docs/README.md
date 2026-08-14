@@ -10,6 +10,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings single-truth law
 - `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration law
 - `docs/architecture/PRODUCT_SYSTEM_PERSISTENCE_CANON.md` — persisted display metadata and first write path
+- `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity, material family/spec, cost evidence
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
@@ -19,6 +20,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_PRODUCT_SYSTEM_ADMIN_FOUNDATION_V1.md` — read-only Product System administration foundation
 - `docs/worklog/WORKOS_FINAL_COMPONENT_CONFIGURATION_MODEL_REALIGNMENT_AND_CLEANUP_V1.md` — role/type/configuration realignment
 - `docs/worklog/WORKOS_FINAL_PRODUCT_SYSTEM_PERSISTENCE_AND_FIRST_WRITE_PATH_V1.md` — first persisted display-label write
+- `docs/worklog/WORKOS_FINAL_RESOURCES_AND_COST_CATALOG_FOUNDATION_V1.md` — Resources / Cost catalog foundation
 
 ## Historical evidence
 

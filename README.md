@@ -6,9 +6,9 @@ This is not a cleanup of previous WorkOS code and not a fork of workflow-adv.
 
 ## Current status
 
-Product catalog plus first canonical LETTERS product, with FACE / VOLUME / BACK / LIGHTING as roles, reusable constructive types, Product System inspection on `/components`, persisted display-label administration on `/admin`, owner-facing governance, canonical component technical settings, and lighting left incomplete because PSU reserve is still owner-undecided.
+Product catalog plus first canonical LETTERS product, with FACE / VOLUME / BACK / LIGHTING as roles, reusable constructive types, Product System inspection on `/components`, persisted display-label administration on `/admin`, Resources / Cost inspection on `/admin/resources`, owner-facing governance, canonical component technical settings, and lighting left incomplete because PSU reserve is still owner-undecided.
 
-The app has a platform shell, a real health check, a hierarchical product catalog, and a schema-driven configuration flow for the first canonical product. Product System display labels persist in local SQLite after bootstrap. Technical settings, lifecycle, and commercial price are not writable yet.
+The app has a platform shell, a real health check, a hierarchical product catalog, and a schema-driven configuration flow for the first canonical product. Product System display labels persist in local SQLite after bootstrap. Resources remain a typed catalog. Technical settings, lifecycle, resource cost, and commercial price are not writable yet.
 
 ## Prerequisites
 
