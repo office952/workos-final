@@ -41,7 +41,7 @@ export function ProcessesAdminPage() {
     <OwnerCatalogView
       catalog={buildProcessesCatalog(page.admin)}
       title="Procese operaționale"
-      lead="Inspecție a felului în care se lucrează. Procesul cere o capabilitate, nu un utilaj. Nu se editează aici. Execuția și prețul nu aparțin acestui catalog."
+      lead="Inspecție a felului în care se lucrează și a traseului tehnologic al produsului. Procesul cere o capabilitate, nu un utilaj. Compunerea nu este un plan de execuție. Nu se editează aici."
     />
   );
 }

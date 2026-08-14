@@ -2,7 +2,9 @@ import {
   compileAggregate,
   compileDefinition,
   compileEic,
+  composeProductProcesses,
   confirmReviewedDefinition,
+  lettersProcessCompositionInspections,
   type DraftConfiguration,
   type DraftValue,
   type DraftValues,
@@ -69,6 +71,24 @@ export function registerProductRoutes(
       return c.json({ error: "not_found" }, 404);
     }
     return c.json({ template, formSchema });
+  });
+
+  app.get("/api/products/:productCode/process-composition", (c) => {
+    const productCode = c.req.param("productCode");
+    const template = runtime.present().template(productCode);
+    if (!template) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const faceFinish = c.req.query("faceFinish");
+    const volumeFinish = c.req.query("volumeFinish");
+    const values: DraftValues = {
+      ...(faceFinish ? { "face.finish": faceFinish } : {}),
+      ...(volumeFinish ? { "volume.finish": volumeFinish } : {}),
+    };
+    return c.json({
+      composition: composeProductProcesses(template, values),
+      inspections: lettersProcessCompositionInspections(template),
+    });
   });
 
   app.post("/api/products/:productCode/compile", async (c) => {

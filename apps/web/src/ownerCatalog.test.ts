@@ -135,12 +135,16 @@ describe("product system admin catalog presentation", () => {
           label: "Referințe resursă",
           value: "Plexiglas 3 mm opal",
         }),
-        expect.objectContaining({
-          label: "Procese operaționale",
-          value: "Debitare foaie CNC; Aplicare finisaj; Lipire față-volum",
-        }),
       ]),
     );
+    expect(
+      catalog.categories[3]?.items[0]?.groups[0]?.sections.find(
+        (item) => item.id === "processes",
+      )?.lines,
+    ).toEqual([
+      "Debitare foaie CNC",
+      "Aplicare folie (Finisaj față: Colantat)",
+    ]);
     expect(
       catalog.categories[3]?.items[1]?.groups[0]?.sections.find(
         (item) => item.id === "resources",
@@ -296,7 +300,13 @@ describe("processes catalog presentation", () => {
     expect(catalog.categories.map((item) => item.id)).toEqual([
       "categories",
       "processes",
+      "compositions",
       "capabilities",
+    ]);
+    expect(catalog.categories[2]?.items.map((item) => item.label)).toEqual([
+      "Fără finisaj",
+      "Colantat față și volum",
+      "Volum vopsit",
     ]);
     expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
       "Debitare",
@@ -320,7 +330,7 @@ describe("processes catalog presentation", () => {
         }),
       ]),
     );
-    expect(catalog.categories[2]?.items[0]?.label).toBe("Debitare CNC");
+    expect(catalog.categories[3]?.items[0]?.label).toBe("Debitare CNC");
     expect(
       catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget),
     ).toBe(true);

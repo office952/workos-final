@@ -123,6 +123,41 @@ describe("system projection API", () => {
     ).toBe("return_cant_forming");
     expect(body.capabilities.map((item) => item.id)).toContain("CNC_ROUTING");
     expect(JSON.stringify(body)).not.toMatch(/machineId|ExecutionPlan|employeeId/);
+    expect(
+      (body as { compositions?: Array<{ id: string }> }).compositions?.map(
+        (item) => item.id,
+      ),
+    ).toEqual([
+      "letters-finish-none",
+      "letters-finish-vinyl",
+      "letters-volume-painted",
+    ]);
+  });
+
+  it("projects letters process composition without mutating the product", async () => {
+    const response = await createApp().request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/process-composition?faceFinish=vinyl&volumeFinish=vinyl`,
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      composition: {
+        completeness: string;
+        nodes: Array<{ id: string; processId: string }>;
+      };
+    };
+    expect(body.composition.completeness).toBe("BLOCKED");
+    expect(body.composition.nodes.map((item) => item.id)).toContain(
+      "FACE:CUT_SHEET_CNC",
+    );
+    expect(body.composition.nodes.map((item) => item.id)).toContain(
+      "BACK:CUT_SHEET_CNC",
+    );
+    expect(body.composition.nodes.map((item) => item.id)).toContain(
+      "BODY:BOND_LETTER_BODY",
+    );
+    expect(JSON.stringify(body)).not.toMatch(
+      /machineId|employeeId|ExecutionPlan|ExecutionTask/,
+    );
   });
 
   it("projects governance without an active freeze or commercial", async () => {

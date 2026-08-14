@@ -1,6 +1,5 @@
 import {
   adminEditClassLabel,
-  getOperationalProcess,
   type AdminReadiness,
   type AdminTypeRecord,
   type ComponentRoleProjection,
@@ -699,14 +698,12 @@ function typeDetailSections(type: ComponentTypeProjection): CatalogDetailSection
       title: "Resurse / cost",
       facts: [{ label: "Cost intern", value: type.eic }],
     },
-    ...(type.processIds.length > 0
+    ...(type.processRequirements.length > 0
       ? [
           {
             id: "processes",
-            title: "Procese operaționale",
-            lines: type.processIds.map(
-              (id) => getOperationalProcess(id)?.label ?? id,
-            ),
+            title: "Procese necesare",
+            lines: type.processRequirements.map((item) => item.label),
           },
         ]
       : []),
@@ -785,16 +782,18 @@ function adminTypeSections(type: AdminTypeRecord): CatalogDetailSection[] {
               ? "nicio referință de resursă"
               : type.resourceReferences.map((item) => item.label).join("; "),
         },
-        {
-          label: "Procese operaționale",
-          value:
-            type.processReferences.length === 0
-              ? "niciun proces încă"
-              : type.processReferences.map((item) => item.label).join("; "),
-        },
       ],
       lines: ["Tarifele rămân la Resurse / Cost. Procesele nu dețin prețul."],
     },
+    ...(type.processReferences.length > 0
+      ? [
+          {
+            id: "processes",
+            title: "Procese necesare",
+            lines: type.processReferences.map((item) => item.label),
+          },
+        ]
+      : []),
     {
       id: "used-by",
       title: "Produse care o folosesc",
