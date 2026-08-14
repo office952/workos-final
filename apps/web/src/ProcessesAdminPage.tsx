@@ -41,7 +41,7 @@ export function ProcessesAdminPage() {
     <OwnerCatalogView
       catalog={buildProcessesCatalog(page.admin)}
       title="Procese operaționale"
-      lead="Inspecție a felului în care se lucrează și a traseului tehnologic al produsului. Procesul cere o capabilitate, nu un utilaj. Compunerea nu este un plan de execuție. Nu se editează aici."
+      lead="Inspecție a felului în care se lucrează și a traseului tehnologic Letters. Folie și vopsire RAL sunt trasee diferite. Compunerea nu este un plan de execuție. Nu se editează aici."
     />
   );
 }

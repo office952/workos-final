@@ -112,6 +112,14 @@ describe("system projection API", () => {
       "APPLY_SURFACE_FINISH",
       "BOND_LETTER_BODY",
       "PLACE_LED_MODULES",
+      "PAINT_RAL",
+      "WIRE_LIGHTING",
+      "INSTALL_OR_CONNECT_PSU",
+      "TEST_LIGHTING_IGNITION",
+      "CLOSE_LETTER_BODY",
+      "TEST_ILLUMINATION_UNIFORMITY",
+      "INSPECT_FINISHED_LETTER",
+      "PACK_PRODUCT",
     ]);
     expect(
       body.processes.find((item) => item.id === "FORM_ALUMINIUM_PROFILE")

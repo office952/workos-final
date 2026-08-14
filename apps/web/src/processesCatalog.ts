@@ -1,5 +1,5 @@
 import type { OperationalProcessesAdminProjection } from "@workos-final/domain";
-import type { CatalogDetailSection, OwnerCatalog } from "./ownerCatalog";
+import type { CatalogDetailSection, CatalogGroup, OwnerCatalog } from "./ownerCatalog";
 
 export function buildProcessesCatalog(
   admin: OperationalProcessesAdminProjection,
@@ -51,14 +51,7 @@ export function buildProcessesCatalog(
           label: inspection.label,
           kindLabel: "Compunere de procese",
           summary: `${inspection.composition.productLabel}. ${inspection.summary}`,
-          groups: [
-            {
-              id: inspection.id,
-              kindLabel: "Configurație inspectată",
-              title: inspection.label,
-              sections: compositionSections(inspection.composition),
-            },
-          ],
+          groups: compositionGroups(inspection.composition),
         })),
       },
       {
@@ -172,83 +165,119 @@ function processSections(
   ];
 }
 
-function compositionSections(
+function compositionGroups(
   composition: OperationalProcessesAdminProjection["compositions"][number]["composition"],
-): CatalogDetailSection[] {
+): CatalogGroup[] {
   const byScope = (scope: string) =>
-    composition.nodes.filter((item) => item.scope === scope);
-  return [
-    {
-      id: "readiness",
-      title: "Stare",
-      facts: [{ label: "Pregătire", value: composition.completenessLabel }],
-      lines: [...composition.completenessReasons],
-    },
-    {
-      id: "order",
-      title: "Ordine derivată",
-      lines: composition.derivedOrder.map((id) => {
-        const node = composition.nodes.find((item) => item.id === id);
-        if (!node) {
-          return id;
-        }
-        const deps =
-          node.dependsOn.length === 0
-            ? "fără dependență"
-            : `depinde de ${node.dependsOn
-                .map((dep) => composition.nodes.find((item) => item.id === dep)?.processLabel ?? dep)
-                .join(", ")}`;
-        return `${node.scopeLabel} — ${node.processLabel} (${deps})`;
-      }),
-    },
-    ...(["FACE", "VOLUME", "BACK", "LIGHTING", "BODY"] as const).flatMap((scope) => {
-      const nodes = [...byScope(scope)].sort(
-        (left, right) =>
-          composition.derivedOrder.indexOf(left.id) -
-          composition.derivedOrder.indexOf(right.id),
-      );
-      return nodes.map((node) => ({
-        id: node.id,
-        title:
-          nodes.length === 1
-            ? node.scopeLabel
-            : `${node.scopeLabel} — ${node.processLabel}`,
+    [...composition.nodes.filter((item) => item.scope === scope)].sort(
+      (left, right) =>
+        composition.derivedOrder.indexOf(left.id) -
+        composition.derivedOrder.indexOf(right.id),
+    );
+  const readiness: CatalogGroup = {
+    id: "readiness",
+    kindLabel: "Stare",
+    title: "Pregătire",
+    sections: [
+      {
+        id: "readiness",
+        title: "Stare",
         facts: [
-          { label: "Proces", value: node.processLabel },
-          { label: "Stare", value: node.nodeReadinessLabel },
-          ...(node.conditionLabel
-            ? [{ label: "Condiție", value: node.conditionLabel }]
-            : []),
-          ...(node.dependsOn.length > 0
-            ? [
-                {
-                  label: "Depinde de",
-                  value: node.dependsOn
-                    .map(
-                      (dep) =>
-                        composition.nodes.find((item) => item.id === dep)?.processLabel ??
-                        dep,
-                    )
-                    .join("; "),
-                },
-              ]
-            : []),
+          { label: "Pregătire", value: composition.completenessLabel },
+          {
+            label: "Traseu tehnologic",
+            value: composition.technologicalProcessCompletenessLabel,
+          },
+          {
+            label: "Calcul iluminare",
+            value: composition.lightingCalculationReadinessLabel,
+          },
+          { label: "Cost intern", value: composition.costCompletenessLabel },
+          { label: "Execuție", value: composition.executionReadinessLabel },
         ],
-        lines: [node.reason, ...node.blockers],
-      }));
+        lines: [...composition.completenessReasons],
+      },
+      {
+        id: "order",
+        title: "Ordine derivată",
+        lines: composition.derivedOrder.map((id) => {
+          const node = composition.nodes.find((item) => item.id === id);
+          if (!node) {
+            return id;
+          }
+          const deps =
+            node.dependsOn.length === 0
+              ? "fără dependență"
+              : `depinde de ${node.dependsOn
+                  .map(
+                    (dep) =>
+                      composition.nodes.find((item) => item.id === dep)?.processLabel ??
+                      dep,
+                  )
+                  .join(", ")}`;
+          return `${node.scopeLabel} — ${node.processLabel} (${deps})`;
+        }),
+      },
+      ...(composition.missingProcesses.length > 0
+        ? [
+            {
+              id: "gaps",
+              title: "Procese lipsă",
+              lines: composition.missingProcesses.map(
+                (item) => `${item.label} — ${item.classificationLabel}. ${item.note}`,
+              ),
+            },
+          ]
+        : []),
+      {
+        id: "technical",
+        title: "Tehnic",
+        technical: true,
+        facts: [{ label: "Produs", value: composition.productCode }],
+      },
+    ],
+  };
+  const scopes = ["FACE", "VOLUME", "BACK", "LIGHTING", "BODY", "PRODUCT"] as const;
+  return [
+    readiness,
+    ...scopes.flatMap((scope) => {
+      const nodes = byScope(scope);
+      if (nodes.length === 0) {
+        return [];
+      }
+      return [
+        {
+          id: `scope:${scope}`,
+          kindLabel: "Etapă",
+          title: nodes[0]?.scopeLabel ?? scope,
+          sections: nodes.map((node) => ({
+            id: node.id,
+            title: node.processLabel,
+            facts: [
+              { label: "Proces", value: node.processLabel },
+              { label: "Stare", value: node.nodeReadinessLabel },
+              ...(node.conditionLabel
+                ? [{ label: "Condiție", value: node.conditionLabel }]
+                : []),
+              ...(node.dependsOn.length > 0
+                ? [
+                    {
+                      label: "Depinde de",
+                      value: node.dependsOn
+                        .map(
+                          (dep) =>
+                            composition.nodes.find((item) => item.id === dep)
+                              ?.processLabel ?? dep,
+                        )
+                        .join("; "),
+                    },
+                  ]
+                : []),
+            ],
+            lines: [node.reason, ...node.blockers],
+          })),
+        },
+      ];
     }),
-    {
-      id: "gaps",
-      title: "Procese lipsă",
-      lines: composition.missingProcesses.map(
-        (item) => `${item.label} — ${item.classificationLabel}. ${item.note}`,
-      ),
-    },
-    {
-      id: "technical",
-      title: "Tehnic",
-      technical: true,
-      facts: [{ label: "Produs", value: composition.productCode }],
-    },
   ];
 }

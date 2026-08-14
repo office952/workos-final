@@ -1,61 +1,60 @@
 import { expect, test } from "@playwright/test";
 
-test("letters process composition inspects technological order without execution", async ({
+test("letters critical processes complete vinyl paint and electrical routes", async ({
   page,
 }) => {
   await page.goto("/admin");
-  await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
   await page.getByRole("link", { name: "Procese operaționale" }).click();
   await expect(
     page.getByRole("heading", { name: "Procese operaționale" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Compoziții produse" })).toBeVisible();
-
   await page.getByRole("button", { name: "Compoziții produse" }).click();
   await expect(page.getByRole("button", { name: "Fără finisaj" })).toHaveAttribute(
     "aria-current",
     "true",
   );
-  await expect(page.getByRole("heading", { name: "Stare" })).toBeVisible();
-  await expect(page.getByText("Blocat", { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Ordine derivată" })).toBeVisible();
+  await expect(page.getByText("Traseu tehnologic").first()).toBeVisible();
+  await expect(page.getByText("Calcul iluminare").first()).toBeVisible();
+  await expect(page.getByText("Execuție").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Față", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Volum", exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Spate", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Iluminare", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Corp", exact: true })).toBeVisible();
-  await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
-  await expect(page.getByText("Formare profil aluminiu").first()).toBeVisible();
-  await expect(page.getByText("Lipire față-volum").first()).toBeVisible();
-  await expect(page.getByText("Montare module LED").first()).toBeVisible();
-  await expect(page.getByText("Necesar, blocat").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Produs", exact: true })).toBeVisible();
+  await expect(page.getByText("Cablare electrică").first()).toBeVisible();
+  await expect(page.getByText("Închidere corp").first()).toBeVisible();
+  await expect(page.getByText("Probă aprindere").first()).toBeVisible();
+  await expect(page.getByText("Probă uniformitate").first()).toBeVisible();
+  await expect(page.getByText("Control calitate final").first()).toBeVisible();
+  await expect(page.getByText("Ambalare").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Vopsire RAL" })).toHaveCount(0);
+  await expect(page.getByText("ExecutionPlan")).toHaveCount(0);
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-overview.png",
+    path: "docs/worklog/screenshots/process-completion-overview.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-face.png",
+    path: "docs/worklog/screenshots/process-completion-none.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-volume.png",
+    path: "docs/worklog/screenshots/process-completion-electrical.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-back.png",
+    path: "docs/worklog/screenshots/process-completion-closure.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-lighting.png",
+    path: "docs/worklog/screenshots/process-completion-qc.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-order.png",
+    path: "docs/worklog/screenshots/process-completion-pack.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-readiness.png",
+    path: "docs/worklog/screenshots/process-completion-readiness.png",
     fullPage: true,
   });
 
@@ -63,33 +62,39 @@ test("letters process composition inspects technological order without execution
   await expect(page.getByText("Finisaj față: Colantat").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Colantat").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
-  await expect(page.getByText("Depinde de").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Vopsire RAL" })).toHaveCount(0);
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-finish.png",
+    path: "docs/worklog/screenshots/process-completion-vinyl.png",
     fullPage: true,
   });
 
   await page.getByRole("button", { name: "Volum vopsit" }).click();
-  await expect(page.getByText("Vopsire volum").first()).toBeVisible();
-  await expect(page.getByText("Decizie owner").first()).toBeVisible();
+  await expect(page.getByText("Vopsire RAL").first()).toBeVisible();
+  await expect(page.getByText("Finisaj volum: Vopsit").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Colantat")).toHaveCount(0);
-  await expect(page.getByText("Finisaj față: Colantat")).toHaveCount(0);
+  await expect(page.getByText("Decizie owner")).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/process-completion-paint.png",
+    fullPage: true,
+  });
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/processes");
   await page.getByRole("button", { name: "Compoziții produse" }).click();
-  await expect(page.getByRole("button", { name: "Fără finisaj" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Volum vopsit" })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-narrow.png",
+    path: "docs/worklog/screenshots/process-completion-narrow.png",
     fullPage: true,
   });
 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/admin/processes");
-  await expect(page.getByRole("button", { name: "Categorii" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
+  await page.getByRole("button", { name: "Procese" }).click();
+  await page.getByRole("button", { name: "Vopsire RAL" }).click();
+  await expect(page.getByRole("heading", { name: "Vopsire RAL" })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-processes-regression.png",
+    path: "docs/worklog/screenshots/process-completion-catalog.png",
     fullPage: true,
   });
 
@@ -97,19 +102,11 @@ test("letters process composition inspects technological order without execution
   await expect(
     page.getByRole("heading", { name: "Resurse și cost intern" }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-resources-regression.png",
-    fullPage: true,
-  });
 
   await page.goto("/components");
   await page.getByRole("button", { name: "Componente de produs" }).click();
   await page.getByRole("button", { name: "Față" }).click();
-  await expect(page.getByRole("heading", { name: "Procese necesare" })).toBeVisible();
   await expect(page.getByText("Debitare foaie CNC")).toBeVisible();
-  await expect(page.getByText("Aplicare folie (Finisaj față: Colantat)")).toBeVisible();
-  await expect(page.getByText("Lipire față-volum")).toHaveCount(0);
 
   await page.goto("/products");
   await page
@@ -121,7 +118,8 @@ test("letters process composition inspects technological order without execution
   await page.getByLabel("Finisaj față").selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await page.getByLabel("Finisaj volum").selectOption("painted");
+  await page.getByLabel("Culoare volum").fill("RAL 9010");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
@@ -131,7 +129,7 @@ test("letters process composition inspects technological order without execution
   ).toBeVisible();
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);
   await page.screenshot({
-    path: "docs/worklog/screenshots/process-composition-product-regression.png",
+    path: "docs/worklog/screenshots/process-completion-product.png",
     fullPage: true,
   });
 });

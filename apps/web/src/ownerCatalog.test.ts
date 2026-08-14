@@ -314,6 +314,8 @@ describe("processes catalog presentation", () => {
       "Finisare",
       "Asamblare",
       "Electric",
+      "Control calitate",
+      "Ambalare",
     ]);
     expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
       "Formare profil aluminiu",
