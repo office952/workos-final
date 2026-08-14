@@ -215,8 +215,7 @@ button:disabled {
 
 .catalog-family,
 .catalog-category,
-.catalog-product,
-.info-card {
+.catalog-product {
   margin: 0;
   padding: 1rem 1.1rem 1.15rem;
   border: 1px solid var(--line);
@@ -233,9 +232,7 @@ button:disabled {
 }
 
 .catalog-family h2,
-.catalog-category h3,
-.info-card h2,
-.info-card h3 {
+.catalog-category h3 {
   margin: 0 0 0.5rem;
 }
 
@@ -257,15 +254,85 @@ button:disabled {
   font-size: 1.05rem;
 }
 
-.card-grid {
+.owner-catalog {
   display: grid;
-  gap: 1rem;
+  grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
 }
 
-.variant-block {
+.owner-catalog-nav {
+  padding: 0.9rem 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.owner-catalog-nav nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.owner-catalog-items-label {
+  margin-top: 1rem;
+}
+
+.owner-catalog-category,
+.owner-catalog-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid transparent;
+  border-left: 2px solid transparent;
+  padding: 0.4rem 0.55rem;
+}
+
+.owner-catalog-category.is-current,
+.owner-catalog-item.is-current {
+  border-left-color: var(--accent);
+  font-weight: 650;
+}
+
+.owner-catalog-detail,
+.owner-catalog-group {
+  padding: 1rem 1.1rem 1.15rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.owner-catalog-group {
+  margin-top: 0.9rem;
+}
+
+.owner-catalog-group.is-inline {
+  margin-top: 0.35rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.owner-catalog-section {
   margin-top: 0.85rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--line);
+}
+
+.owner-catalog-section h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.owner-catalog-facts {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.owner-catalog-facts dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.owner-catalog-facts dd {
+  margin: 0;
 }
 
 .authority-list {
@@ -307,10 +374,6 @@ button:disabled {
   color: var(--bad);
 }
 
-.info-card + .info-card {
-  margin-top: 1rem;
-}
-
 details {
   margin-top: 0.75rem;
 }
@@ -320,9 +383,18 @@ details summary {
   color: var(--muted);
 }
 
-@media (max-width: 40rem) {
+@media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .app-nav {
+    width: 100%;
+    gap: 0.55rem 0.9rem;
+  }
+
+  .owner-catalog {
+    grid-template-columns: 1fr;
   }
 }

@@ -13,7 +13,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Familie", { exact: true })).toBeVisible();
   await expect(page.getByText("Produs", { exact: true })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/owner-surfaces-products.png",
+    path: "docs/worklog/screenshots/ia-products.png",
     fullPage: true,
   });
 
@@ -59,7 +59,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByLabel("Textul literelor")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Modifică configurația" })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/owner-surfaces-review.png",
+    path: "docs/worklog/screenshots/ia-product-review.png",
     fullPage: true,
   });
 
