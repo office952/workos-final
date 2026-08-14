@@ -118,6 +118,7 @@ export function FormRenderer({
                   value={values[field.id]}
                   onChange={(value) => onChange(field.id, value)}
                 />
+                {field.hint ? <p className="field-hint">{field.hint}</p> : null}
               </div>
             ))}
           </fieldset>

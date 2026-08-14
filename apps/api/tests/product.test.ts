@@ -11,6 +11,7 @@ async function readBody(response: Response): Promise<JsonObject> {
 const readyValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
+  "face.confirmedAreaMm2": 250000,
   "returnCant.depthMm": "60",
   "returnCant.finish": "none",
   "returnCant.confirmedPerimeterMm": 12500,
@@ -138,7 +139,29 @@ describe("product configuration API", () => {
     expect(truth.status).toBe("CONFIRMED_IN_RUNTIME");
     expect((aggregate.quantities as Array<{ value: number }>)[0]?.value).toBe(12.5);
     expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.total).toBe(312.5);
+    expect(eic.total).toBe(320.5);
     expect(eic.currency).toBe("EUR");
+    expect((eic.excludedComponentLabels as string[])).toEqual(["Iluminare"]);
+  });
+
+  it("does not let a draft override product-fixed identity", async () => {
+    const response = await createApp().request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          values: {
+            ...readyValues,
+            "face.material": "aluminum",
+            "lighting.mode": "halo",
+          },
+        }),
+      },
+    );
+    const body = await readBody(response);
+    const definition = body.definition as { values: Record<string, unknown> };
+    expect(definition.values["face.material"]).toBe("plexiglas");
+    expect(definition.values["lighting.mode"]).toBe("front_lit");
   });
 });

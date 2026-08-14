@@ -148,6 +148,12 @@ h1 {
   width: auto;
 }
 
+.field-hint {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
 .action-row {
   margin: 1.5rem 0;
 }

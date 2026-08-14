@@ -25,6 +25,24 @@ function formatQuantity(value: number): string {
   return value.toLocaleString("ro-RO", { maximumFractionDigits: 2 });
 }
 
+function formatUnit(unit: string): string {
+  switch (unit) {
+    case "m2":
+      return "m²";
+    case "mm2":
+      return "mm²";
+    default:
+      return unit;
+  }
+}
+
+function measurementCopy(value: number, unit: string): string {
+  if (unit === "mm2") {
+    return `Suprafață confirmată: ${value} mm² (introdusă de operator)`;
+  }
+  return `Perimetru confirmat: ${value} mm (introdus de operator)`;
+}
+
 function formatMoney(value: number): string {
   return value.toLocaleString("ro-RO", {
     minimumFractionDigits: 2,
@@ -145,23 +163,27 @@ export function ProductConfigurationPage() {
         </div>
       ) : null}
 
-      <FormRenderer
-        template={template}
-        schema={formSchema}
-        values={values}
-        onChange={(fieldId, value) => {
-          setValues((current) => ({ ...current, [fieldId]: value }));
-          setDefinition(null);
-          setConfirmed(null);
-          setConfirmNotice(null);
-        }}
-      />
+      {confirmed ? null : (
+        <>
+          <FormRenderer
+            template={template}
+            schema={formSchema}
+            values={values}
+            onChange={(fieldId, value) => {
+              setValues((current) => ({ ...current, [fieldId]: value }));
+              setDefinition(null);
+              setConfirmed(null);
+              setConfirmNotice(null);
+            }}
+          />
 
-      <div className="action-row">
-        <button type="button" onClick={() => void handleCompile()} disabled={busy}>
-          Verifică configurația
-        </button>
-      </div>
+          <div className="action-row">
+            <button type="button" onClick={() => void handleCompile()} disabled={busy}>
+              Verifică configurația
+            </button>
+          </div>
+        </>
+      )}
 
       {confirmNotice ? <p className="notice notice-blocked">{confirmNotice}</p> : null}
 
@@ -227,20 +249,22 @@ export function ProductConfigurationPage() {
           <p>
             {confirmed.aggregate.productLabel}: {confirmed.aggregate.inscription}
           </p>
-          {confirmed.aggregate.components.map((component) => (
-            <div key={component.id}>
-              <h3>{component.label}</h3>
-              <ul>
-                {component.details.map((detail) => (
-                  <li key={detail}>{detail}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {confirmed.aggregate.components
+            .filter((component) => component.details.length > 0)
+            .map((component) => (
+              <div key={component.id}>
+                <h3>{component.label}</h3>
+                <ul>
+                  {component.details.map((detail) => (
+                    <li key={detail}>{detail}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
           {confirmed.truth.measurements.map((measurement) => (
             <p key={measurement.fieldId}>
-              Perimetru confirmat: {measurement.value} mm (introdus de operator)
+              {measurementCopy(measurement.value, measurement.unit)}
             </p>
           ))}
 
@@ -251,7 +275,8 @@ export function ProductConfigurationPage() {
             <ul>
               {confirmed.aggregate.quantities.map((quantity) => (
                 <li key={quantity.id}>
-                  {quantity.label}: {formatQuantity(quantity.value)} {quantity.unit}
+                  {quantity.label}: {formatQuantity(quantity.value)}{" "}
+                  {formatUnit(quantity.unit)}
                 </li>
               ))}
             </ul>
@@ -264,22 +289,26 @@ export function ProductConfigurationPage() {
             <ul>
               {confirmed.eic.lines.map((line) => (
                 <li key={`${line.label}-need`}>
-                  {line.label}: {formatQuantity(line.quantity)} {line.unit}
+                  {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)}
                 </li>
               ))}
             </ul>
           )}
 
           <h3>Cost intern estimat</h3>
-          <p>Costul intern al produsului este parțial. Este calculat doar pentru cant.</p>
+          <p>
+            Costul intern al produsului este parțial. Include față, cant și spate.
+            Iluminarea nu este calculată: numărul de module LED necesită geometrie de
+            contur, nu o estimare inventată.
+          </p>
           {confirmed.eic.lines.length === 0 ? (
             <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
           ) : (
             <ul>
               {confirmed.eic.lines.map((line) => (
                 <li key={`${line.label}-cost`}>
-                  {line.label}: {formatQuantity(line.quantity)} {line.unit} ×{" "}
-                  {formatMoney(line.rate)} {line.currency}/{line.unit} ={" "}
+                  {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)} ×{" "}
+                  {formatMoney(line.rate)} {line.currency}/{formatUnit(line.unit)} ={" "}
                   {formatMoney(line.cost)} {line.currency}
                 </li>
               ))}
@@ -287,8 +316,8 @@ export function ProductConfigurationPage() {
           )}
           {confirmed.eic.lines.length > 0 ? (
             <p>
-              Total cost intern estimat (doar cant): {formatMoney(confirmed.eic.total)}{" "}
-              {confirmed.eic.currency}
+              Total cost intern estimat (fără iluminare):{" "}
+              {formatMoney(confirmed.eic.total)} {confirmed.eic.currency}
             </p>
           ) : null}
           <p>
@@ -298,6 +327,17 @@ export function ProductConfigurationPage() {
           <p className="page-lead">
             Indisponibil acum: {confirmed.aggregate.unavailable.join(", ")}.
           </p>
+          <div className="action-row">
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmed(null);
+                setDefinition(null);
+              }}
+            >
+              Modifică configurația
+            </button>
+          </div>
         </div>
       ) : null}
     </section>
