@@ -37,7 +37,7 @@ Generalize from real products, not from theory.
 
 Product catalog hierarchy established.
 First canonical product established.
-FACE / VOLUME / BACK / LIGHTING are component calculation contracts.
+FACE / VOLUME / BACK / LIGHTING are component roles with reusable constructive types.
 Owner-facing projections exist for components, governance, and the read-only Product System administration foundation.
 ProductAggregate orchestrates. EIC consumes generic requirements.
 LIGHTING remains technically partial: LED pitch is a canonical component setting; PSU reserve remains unresolved.
@@ -62,6 +62,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 |---|---|
 | Product System spine (catalog, template, form, truth, aggregate) | DONE / FOUNDATION |
 | Component-first calculation + technical settings law | DONE / FOUNDATION |
+| Component role / type / configuration law | DONE / FOUNDATION |
 | Owner projections (components, governance) | DONE / FOUNDATION |
 | Cross-system administration map | DONE / FOUNDATION |
 | Product System administration foundation (read-only) | DONE / FOUNDATION |

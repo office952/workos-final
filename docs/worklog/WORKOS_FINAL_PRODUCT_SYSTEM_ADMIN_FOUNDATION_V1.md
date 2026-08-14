@@ -109,6 +109,10 @@ Write path, persistence, and global Administrare remain unimplemented.
 
 No persistence. No editing. LIGHTING still UNAVAILABLE. PSU reserve still unresolved.
 
+## Later correction
+
+Component IDs `FACE_PLEXIGLAS_3MM`, `VOLUME_ALUMINIUM_06`, and `BACK_FOREX_10MM` were later migrated to constructive types. See `docs/worklog/WORKOS_FINAL_COMPONENT_CONFIGURATION_MODEL_REALIGNMENT_AND_CLEANUP_V1.md`.
+
 ## Next
 
 Owner chooses the first real write path, then persistence. Not another theoretical audit.

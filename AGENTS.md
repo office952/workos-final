@@ -6,11 +6,11 @@ It is not a cleanup or fork of previous WorkOS repositories.
 ## Current position
 
 Hierarchical product catalog plus first canonical LETTERS product.
-FACE / VOLUME / BACK / LIGHTING are reusable component calculation contracts.
+FACE / VOLUME / BACK / LIGHTING are stable component roles. Constructive types and product configuration are separate. See `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md`.
 Owner-facing projections: Module și componente, Guvernanța sistemului.
 `/components` hosts the read-only Product System administration foundation. Do not add a global Administrare nav item until the first real write path exists.
 Cross-system domain and administration map is canonical; do not invent a second admin model per domain.
-ProductTemplate composes variants. ProductAggregate orchestrates. EIC is generic.
+ProductTemplate composes roles/types and owns allowed/fixed configuration. ProductAggregate orchestrates. EIC is generic.
 LIGHTING remains unavailable: LED pitch is a canonical component setting; PSU reserve remains owner-undecided.
 
 ```text

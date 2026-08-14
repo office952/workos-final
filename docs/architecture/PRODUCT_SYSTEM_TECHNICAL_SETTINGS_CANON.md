@@ -78,6 +78,8 @@ Normal setting changes must not require code modification. That lifecycle is not
 
 ## FIRST SETTINGS
 
+`LIGHTING_FRONT_LED` is a constructive lighting type, not the LIGHTING role itself.
+
 Variant `LIGHTING_FRONT_LED` currently has two settings:
 
 - `ledPitchMm` — Pas module LED — resolved, configurable, owner-confirmed

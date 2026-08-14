@@ -337,7 +337,8 @@ Settings versions: keep previous active values as history after a new version is
 | System | Classification |
 |---|---|
 | Product catalog, first template, form, compiler, aggregate | IMPLEMENTED_CURRENT |
-| Component-first FACE / VOLUME / BACK / LIGHTING contracts | IMPLEMENTED_CURRENT |
+| Component-first FACE / VOLUME / BACK / LIGHTING roles + constructive types | IMPLEMENTED_CURRENT |
+| Product System component configuration law (role / type / configuration) | IMPLEMENTED_CURRENT |
 | Component technical settings (typed, read-only projection) | IMPLEMENTED_CURRENT |
 | Owner surfaces `/components`, `/governance` | IMPLEMENTED_CURRENT |
 | Product System administration foundation (read-only projection on `/components`) | IMPLEMENTED_CURRENT |
