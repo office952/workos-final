@@ -36,6 +36,17 @@ function formatUnit(unit: string): string {
   }
 }
 
+function lightingUnavailableReason(aggregate: ProductAggregate): string {
+  const lighting = aggregate.componentStatuses.find((item) => item.id === "LIGHTING");
+  if (!lighting || lighting.status !== "UNAVAILABLE") {
+    return "";
+  }
+  if (lighting.unavailable.length === 0) {
+    return " Iluminarea nu este calculată.";
+  }
+  return ` Iluminarea nu este calculată: ${lighting.unavailable.join("; ")}.`;
+}
+
 function measurementCopy(value: number, unit: string): string {
   if (unit === "mm2") {
     return `Suprafață confirmată: ${value} mm² (introdusă de operator)`;
@@ -311,8 +322,7 @@ export function ProductConfigurationPage() {
           <h3>Cost intern estimat</h3>
           <p>
             Costul intern al produsului este parțial. Include față, volum și spate.
-            Iluminarea nu este calculată: regula de pas LED și regula de rezervă PSU
-            nu sunt stabilite.
+            {lightingUnavailableReason(confirmed.aggregate)}
           </p>
           {confirmed.eic.lines.length === 0 ? (
             <p>Costul intern nu este disponibil pentru componentele necalculate.</p>

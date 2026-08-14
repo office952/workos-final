@@ -24,10 +24,14 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
     path: "docs/worklog/screenshots/ia-components-initial.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-components-catalog.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Față" }).click();
   await expect(page.getByText("Calcul independent")).toBeVisible();
-  await expect(page.getByText("Folosită de")).toBeVisible();
+  await expect(page.getByText("Produse care o folosesc")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ia-components-face.png",
     fullPage: true,
@@ -39,13 +43,36 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
 
   await page.getByRole("button", { name: "Iluminare" }).click();
   await expect(page.getByText("Indisponibil", { exact: true })).toBeVisible();
-  await expect(page.getByText("Regula de pas LED nu este stabilită")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Setări tehnice" })).toBeVisible();
+  await expect(page.getByText("Pas module LED")).toBeVisible();
+  await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Confirmat de owner")).toBeVisible();
+  await expect(page.getByText("Configurabil").first()).toBeVisible();
+  await expect(page.getByText("Rezervă sursă de alimentare")).toBeVisible();
+  await expect(page.getByText("Nesetat")).toBeVisible();
+  await expect(page.getByText("Necesită decizie owner").first()).toBeVisible();
+  await expect(page.getByText("Regula de rezervă PSU nu este stabilită")).toBeVisible();
+  await expect(page.getByText("Regula de pas LED nu este stabilită")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Editează" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Salvează" })).toHaveCount(0);
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-lighting.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-lighting-technical.png",
+    fullPage: true,
+  });
 
   await page.setViewportSize({ width: 720, height: 1100 });
   await expect(page.getByRole("button", { name: "Componente de produs" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ia-components-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-lighting-narrow.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -63,8 +90,13 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
     page.getByRole("heading", { name: "Cine deține adevărul", exact: true, level: 3 }),
   ).toHaveCount(0);
   await expect(page.getByText("Fără Commercial silent.")).toHaveCount(0);
+  await expect(page.getByText("Setări tehnice de componentă")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ia-governance-initial.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-governance.png",
     fullPage: true,
   });
   await page.screenshot({

@@ -29,9 +29,33 @@ describe("component catalog presentation", () => {
   it("keeps products-using derived and accepts extra categories without rewrite", () => {
     const catalog = buildComponentCatalog(projectComponentArchitecture());
     const usedBy = catalog.categories[0]?.items[0]?.groups[0]?.sections
-      .find((item) => item.id === "general")
-      ?.facts?.find((item) => item.label === "Folosită de")?.value;
+      .find((item) => item.id === "used-by")
+      ?.lines?.[0];
     expect(usedBy).toContain("Litere volumetrice luminoase");
+    const lightingSettings = catalog.categories[0]?.items[3]?.groups[0]?.sections.find(
+      (item) => item.id === "technical-settings",
+    )?.settingLines;
+    expect(lightingSettings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Pas module LED",
+          valueDisplay: "100 mm",
+          statusLabel: "Setat",
+          sourceLabel: "Confirmat de owner",
+          administrationLabel: "Configurabil",
+        }),
+        expect.objectContaining({
+          label: "Rezervă sursă de alimentare",
+          valueDisplay: "Nesetat",
+          statusLabel: "Necesită decizie owner",
+        }),
+      ]),
+    );
+    expect(
+      catalog.categories[0]?.items[0]?.groups[0]?.sections.find(
+        (item) => item.id === "technical-settings",
+      ),
+    ).toBeUndefined();
     const extended = {
       categories: [
         ...catalog.categories,

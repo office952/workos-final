@@ -15,12 +15,21 @@ export type CatalogStatusLine = {
   note?: string;
 };
 
+export type CatalogSettingLine = {
+  label: string;
+  valueDisplay: string;
+  statusLabel: string;
+  sourceLabel: string;
+  administrationLabel: string;
+};
+
 export type CatalogDetailSection = {
   id: string;
   title: string;
   facts?: readonly CatalogFact[];
   lines?: readonly string[];
   statusLines?: readonly CatalogStatusLine[];
+  settingLines?: readonly CatalogSettingLine[];
   technical?: boolean;
 };
 
@@ -79,24 +88,26 @@ export function buildComponentCatalog(
                 facts: [
                   { label: "Variantă", value: variant.label },
                   {
-                    label: "Folosită de",
-                    value:
-                      variant.usedBy.length === 0
-                        ? "niciun produs încă"
-                        : variant.usedBy
-                            .map((item) =>
-                              item.inputNote
-                                ? `${item.productLabel} (${item.inputNote})`
-                                : item.productLabel,
-                            )
-                            .join("; "),
-                  },
-                  {
                     label: "Calcul independent",
                     value: variant.independentCalculation ? "Da" : "Nu",
                   },
                 ],
               },
+              ...(variant.technicalSettings.length > 0
+                ? [
+                    {
+                      id: "technical-settings",
+                      title: "Setări tehnice",
+                      settingLines: variant.technicalSettings.map((setting) => ({
+                        label: setting.label,
+                        valueDisplay: setting.valueDisplay,
+                        statusLabel: setting.statusLabel,
+                        sourceLabel: setting.sourceLabel,
+                        administrationLabel: setting.administrationLabel,
+                      })),
+                    },
+                  ]
+                : []),
               {
                 id: "calculation",
                 title: "Calcul",
@@ -109,6 +120,18 @@ export function buildComponentCatalog(
                 id: "resources",
                 title: "Resurse / cost",
                 facts: [{ label: "Cost intern", value: variant.eic }],
+              },
+              {
+                id: "used-by",
+                title: "Produse care o folosesc",
+                lines:
+                  variant.usedBy.length === 0
+                    ? ["niciun produs încă"]
+                    : variant.usedBy.map((item) =>
+                        item.inputNote
+                          ? `${item.productLabel} (${item.inputNote})`
+                          : item.productLabel,
+                      ),
               },
               {
                 id: "gaps",

@@ -180,6 +180,30 @@ function SectionBody({
           ))}
         </ul>
       ) : null}
+      {section.settingLines ? (
+        <ul className="authority-list">
+          {section.settingLines.map((line) => (
+            <li key={line.label}>
+              <div className="authority-head">
+                <strong>{line.label}</strong>
+                <span
+                  className={
+                    line.statusLabel === "Setat"
+                      ? "state-pill state-implemented"
+                      : "state-pill state-planned"
+                  }
+                >
+                  {line.statusLabel}
+                </span>
+              </div>
+              <p className="owner-catalog-setting-value">{line.valueDisplay}</p>
+              <p>
+                {line.sourceLabel}. {line.administrationLabel}.
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </>
   );
 }

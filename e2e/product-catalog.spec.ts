@@ -33,6 +33,9 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Material spate: Forex 10 mm")).toBeVisible();
   await expect(page.getByText("Iluminare: Iluminare frontală")).toBeVisible();
   await expect(page.getByLabel("Include iluminare")).toHaveCount(0);
+  await expect(page.getByLabel("Pas module LED")).toHaveCount(0);
+  await expect(page.getByLabel("Rezervă sursă de alimentare")).toHaveCount(0);
+  await expect(page.getByText("Setări tehnice")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByText("Mai sunt informații de completat.")).toBeVisible();
@@ -51,6 +54,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/owner-surfaces-configure.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-product-configure.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByRole("heading", { name: "Verificare înainte de confirmare" })).toBeVisible();
@@ -60,6 +67,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByRole("button", { name: "Modifică configurația" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ia-product-review.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-product-review.png",
     fullPage: true,
   });
 
@@ -72,12 +83,18 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     page.getByText("Total cost intern estimat (fără iluminare): 320,50 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Costul intern al produsului este parțial")).toBeVisible();
+  await expect(page.getByText("Regula de rezervă PSU nu este stabilită").first()).toBeVisible();
+  await expect(page.getByText("regula de pas LED")).toHaveCount(0);
   await expect(page.getByText("Neincluse încă în costul intern pilot: Iluminare")).toBeVisible();
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
   await expect(page.getByText("Lungime cant")).toHaveCount(0);
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/owner-surfaces-confirm.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/settings-product-confirm.png",
     fullPage: true,
   });
 });
