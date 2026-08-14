@@ -11,7 +11,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     page.getByRole("heading", { name: "Litere și semne volumetrice luminoase" }),
   ).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/technical-completion-catalog.png",
+    path: "docs/worklog/screenshots/component-first-catalog.png",
     fullPage: true,
   });
 
@@ -43,10 +43,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await page.getByLabel("Culoare față").fill("alb");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj cant").selectOption("none");
+  await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.screenshot({
-    path: "docs/worklog/screenshots/technical-completion-configure.png",
+    path: "docs/worklog/screenshots/component-first-configure.png",
     fullPage: true,
   });
 
@@ -54,13 +54,13 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByRole("heading", { name: "Verificare înainte de confirmare" })).toBeVisible();
   await expect(page.getByText("Suprafață confirmată (mm²): 250000")).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/technical-completion-review.png",
+    path: "docs/worklog/screenshots/component-first-review.png",
     fullPage: true,
   });
 
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
-  await expect(page.getByText("Lungime cant: 12,5 m")).toBeVisible();
+  await expect(page.getByText("Lungime volum: 12,5 m")).toBeVisible();
   await expect(page.getByText("Suprafață față: 0,25 m²")).toBeVisible();
   await expect(page.getByText("Suprafață spate: 0,25 m²")).toBeVisible();
   await expect(
@@ -68,9 +68,11 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   ).toBeVisible();
   await expect(page.getByText("Costul intern al produsului este parțial")).toBeVisible();
   await expect(page.getByText("Neincluse încă în costul intern pilot: Iluminare")).toBeVisible();
+  await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
+  await expect(page.getByText("Lungime cant")).toHaveCount(0);
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await page.screenshot({
-    path: "docs/worklog/screenshots/technical-completion-confirm.png",
+    path: "docs/worklog/screenshots/component-first-confirm.png",
     fullPage: true,
   });
 });

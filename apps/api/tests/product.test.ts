@@ -12,9 +12,9 @@ const readyValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
   "face.confirmedAreaMm2": 250000,
-  "returnCant.depthMm": "60",
-  "returnCant.finish": "none",
-  "returnCant.confirmedPerimeterMm": 12500,
+  "volume.depthMm": "60",
+  "volume.finish": "none",
+  "volume.confirmedPerimeterMm": 12500,
 };
 
 async function compileReady() {
@@ -137,7 +137,13 @@ describe("product configuration API", () => {
     const aggregate = body.aggregate as JsonObject;
     const eic = body.eic as JsonObject;
     expect(truth.status).toBe("CONFIRMED_IN_RUNTIME");
-    expect((aggregate.quantities as Array<{ value: number }>)[0]?.value).toBe(12.5);
+    const quantities = aggregate.quantities as Array<{
+      componentId: string;
+      value: number;
+    }>;
+    expect(quantities.find((item) => item.componentId === "VOLUME")?.value).toBe(12.5);
+    expect(quantities.find((item) => item.componentId === "FACE")?.value).toBe(0.25);
+    expect(quantities.find((item) => item.componentId === "BACK")?.value).toBe(0.25);
     expect(eic.completeness).toBe("PARTIAL");
     expect(eic.total).toBe(320.5);
     expect(eic.currency).toBe("EUR");

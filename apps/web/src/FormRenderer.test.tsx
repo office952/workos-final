@@ -16,11 +16,12 @@ const template: ProductTemplate = {
   formSchemaId: "sample-form",
   status: "PILOT",
   components: [
-    { id: "FACE", label: "Față", required: true },
+    { id: "FACE", label: "Față", required: true, variantId: "FACE_PLEXIGLAS_3MM" },
     {
       id: "LIGHTING",
       label: "Iluminare",
       required: false,
+      variantId: "LIGHTING_FRONT_LED",
       selectionFieldId: "extra.selected",
     },
   ],

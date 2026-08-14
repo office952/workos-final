@@ -297,9 +297,9 @@ export function ProductConfigurationPage() {
 
           <h3>Cost intern estimat</h3>
           <p>
-            Costul intern al produsului este parțial. Include față, cant și spate.
-            Iluminarea nu este calculată: numărul de module LED necesită geometrie de
-            contur, nu o estimare inventată.
+            Costul intern al produsului este parțial. Include față, volum și spate.
+            Iluminarea nu este calculată: regula de pas LED și regula de rezervă PSU
+            nu sunt stabilite.
           </p>
           {confirmed.eic.lines.length === 0 ? (
             <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
