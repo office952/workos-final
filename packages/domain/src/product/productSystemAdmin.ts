@@ -1,4 +1,7 @@
-import { getOperationalProcess } from "../processes/catalog.js";
+import {
+  processRequirementReferenceLabel,
+  processRequirementsForType,
+} from "../processes/requirements.js";
 import { getResource } from "../resources/catalog.js";
 import { categoryHasCycle } from "./catalog.js";
 import { listComponentContracts } from "./componentRegistry.js";
@@ -327,10 +330,12 @@ export function projectProductSystemAdministration(
         id,
         label: getResource(id)?.label ?? id,
       })),
-      processReferences: (type?.processIds ?? []).map((id) => ({
-        id,
-        label: getOperationalProcess(id)?.label ?? id,
-      })),
+      processReferences: processRequirementsForType(contract.typeId).map(
+        (requirement) => ({
+          id: requirement.processId,
+          label: processRequirementReferenceLabel(requirement),
+        }),
+      ),
       gaps: type?.gaps ?? contract.profile.structuralGaps,
       readiness: readiness({
         retireBlockers: blockers([

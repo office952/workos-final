@@ -1,4 +1,12 @@
+import {
+  CANONICAL_PRODUCT_CODE,
+  getProductTemplate,
+} from "../product/frontlitPlexiAl06.js";
 import { getResource } from "../resources/catalog.js";
+import {
+  lettersProcessCompositionInspections,
+  type ProcessCompositionInspection,
+} from "./composition.js";
 import {
   getProductionCapability,
   operationalProcesses,
@@ -46,6 +54,7 @@ export type OperationalProcessesAdminProjection = {
   }[];
   processes: readonly ProcessAdminRecord[];
   capabilities: readonly CapabilityAdminRecord[];
+  compositions: readonly ProcessCompositionInspection[];
   writeState: "NOT_IMPLEMENTED";
 };
 
@@ -63,8 +72,14 @@ export function projectOperationalProcessesAdministration(): OperationalProcesse
       kindLabel: productionCapabilityKindLabel(capability.kind),
       processes: processesForCapability(capability.id).map(toAdminRecord),
     })),
+    compositions: lettersCompositions(),
     writeState: "NOT_IMPLEMENTED",
   };
+}
+
+function lettersCompositions(): ProcessCompositionInspection[] {
+  const template = getProductTemplate(CANONICAL_PRODUCT_CODE);
+  return template ? lettersProcessCompositionInspections(template) : [];
 }
 
 function toAdminRecord(process: OperationalProcess): ProcessAdminRecord {

@@ -157,6 +157,7 @@ export function projectSystemGovernance(): GovernanceProjection {
           "definiția reutilizabilă a procesului",
           "clasa de capabilitate cerută",
           "aplicabilitatea pe tip constructiv",
+          "compunerea tehnologică de procese pentru produs / componentă",
         ],
         state: "IMPLEMENTED",
       },
@@ -346,8 +347,18 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "letters-process-composition",
+        label: "Compunere procese Letters",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "process-admin-write",
         label: "Write administrare procese",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "execution-plan",
+        label: "ExecutionPlan",
         state: "NOT_IMPLEMENTED",
       },
       {

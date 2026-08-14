@@ -1,4 +1,8 @@
-import { processesForType } from "../processes/catalog.js";
+import {
+  alwaysProcessIdsForType,
+  processRequirementReferenceLabel,
+  processRequirementsForType,
+} from "../processes/requirements.js";
 import { listComponentContracts } from "./componentRegistry.js";
 import type { ComponentEicReadiness, ComponentMeasurementKind } from "./componentContract.js";
 import {
@@ -62,6 +66,7 @@ export type ComponentTypeProjection = {
   technicalSettings: readonly ComponentTechnicalSettingProjection[];
   resourceIds: readonly string[];
   processIds: readonly string[];
+  processRequirements: readonly { processId: string; label: string }[];
 };
 
 export type ComponentRoleProjection = {
@@ -294,7 +299,13 @@ export function projectComponentArchitecture(
           configurations: configurationsFor(contract.typeId, templates),
           technicalSettings: projectTechnicalSettings(contract.typeId),
           resourceIds: liveResourceIdsForType(contract.typeId),
-          processIds: processesForType(contract.typeId).map((item) => item.id),
+          processIds: alwaysProcessIdsForType(contract.typeId),
+          processRequirements: processRequirementsForType(contract.typeId).map(
+            (requirement) => ({
+              processId: requirement.processId,
+              label: processRequirementReferenceLabel(requirement),
+            }),
+          ),
         };
       }),
   }));

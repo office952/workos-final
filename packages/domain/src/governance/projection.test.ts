@@ -52,6 +52,13 @@ describe("system governance projection", () => {
       governance.roadmap.find((item) => item.id === "operational-processes")?.state,
     ).toBe("IMPLEMENTED");
     expect(
+      governance.roadmap.find((item) => item.id === "letters-process-composition")
+        ?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "execution-plan")?.state,
+    ).toBe("NOT_IMPLEMENTED");
+    expect(
       governance.roadmap.find((item) => item.id === "process-admin-write")?.state,
     ).toBe("NOT_IMPLEMENTED");
     expect(

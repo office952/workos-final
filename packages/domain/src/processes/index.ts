@@ -29,9 +29,32 @@ export {
   type ProductionCapabilityKind,
 } from "./catalog.js";
 export {
+  composeProductProcesses,
+  composeProductProcessesFromTruth,
+  composeTypeProcessNodes,
+  compositionNodeId,
+  lettersProcessCompositionInspections,
+  topologicalOrder,
+  type CompositionCompleteness,
+  type CompositionNodeReadiness,
+  type MissingProcessGap,
+  type ProcessCompositionInspection,
+  type ProcessCompositionNode,
+  type ProductProcessComposition,
+} from "./composition.js";
+export {
   projectOperationalProcessesAdministration,
   type CapabilityAdminRecord,
   type OperationalProcessesAdminProjection,
   type ProcessAdminRecord,
 } from "./projection.js";
+export {
+  alwaysProcessIdsForType,
+  processConditionLabel,
+  processRequirementReferenceLabel,
+  processRequirementsForType,
+  resolvedProcessRequirementsForType,
+  type ComponentProcessRequirement,
+  type ProcessRequirementCondition,
+} from "./requirements.js";
 export { processWhereUsed, type ProcessUse } from "./whereUsed.js";

@@ -131,24 +131,24 @@ export const operationalProcesses: readonly OperationalProcess[] = [
   },
   {
     id: APPLY_SURFACE_FINISH_ID,
-    label: "Aplicare finisaj",
+    label: "Aplicare folie",
     description:
-      "Aplicare de finisaj pe suprafață când comanda alege un finisaj. Reutilizabil pe față și volum.",
+      "Aplicare de folie/colant. Nu este vopsire. Reutilizabil pe față și volum când finisajul este colantat.",
     category: "FINISHING",
     requiredCapabilityId: "VINYL_APPLICATION",
     applicableTypeIds: ["PLEXIGLAS_FACE", "ALUMINIUM_VOLUME"],
-    outcome: "Suprafață finisată",
+    outcome: "Suprafață colantată",
     resourceIds: [],
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote:
-      "Finisajul există ca configurație de comandă. Rețeta de serviciu/labor nu este modelată.",
+      "Doar colant. Vopsirea este o tehnologie diferită și nu este încă un proces compus.",
   },
   {
     id: BOND_LETTER_BODY_ID,
     label: "Lipire față-volum",
     description:
-      "Asamblare manuală a corpului. Fără angajat numit. Compunerea de produs decide mai târziu dependențele.",
+      "Asamblare manuală a corpului. Fără angajat numit. Compunerea de produs adaugă dependențele față/volum.",
     category: "ASSEMBLY",
     requiredCapabilityId: "MANUAL_ASSEMBLY",
     applicableTypeIds: ["PLEXIGLAS_FACE", "ALUMINIUM_VOLUME"],

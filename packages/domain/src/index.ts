@@ -141,6 +141,8 @@ export {
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
   PLACE_LED_MODULES_ID,
+  composeProductProcesses,
+  lettersProcessCompositionInspections,
   getOperationalProcess,
   getProductionCapability,
   operationalProcesses,
@@ -150,5 +152,7 @@ export {
   projectOperationalProcessesAdministration,
   type OperationalProcess,
   type OperationalProcessesAdminProjection,
+  type ProcessCompositionInspection,
   type ProductionCapabilityClass,
+  type ProductProcessComposition,
 } from "./processes/index.js";

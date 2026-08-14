@@ -34,6 +34,17 @@ describe("operational process projection", () => {
     expect(admin.capabilities.find((item) => item.id === "CNC_ROUTING")?.processes[0]?.id).toBe(
       CUT_SHEET_CNC_ID,
     );
+    expect(admin.compositions.map((item) => item.id)).toEqual([
+      "letters-finish-none",
+      "letters-finish-vinyl",
+      "letters-volume-painted",
+    ]);
+    expect(admin.compositions[0]?.composition.completeness).toBe("BLOCKED");
+    expect(
+      admin.compositions[0]?.composition.nodes.some(
+        (item) => item.id === "FACE:CUT_SHEET_CNC",
+      ),
+    ).toBe(true);
     expect(JSON.stringify(admin)).not.toMatch(/machineId|ExecutionPlan|Preț client/);
   });
 });
