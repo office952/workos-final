@@ -32,7 +32,7 @@ Live kinds:
 - `SERVICE` — operational/process cost consumed, not a physical material
 
 Do not force labor recipes, operational processes, workcenters, or machines into the same entity.
-Those remain planned catalogs.
+Operational Processes now have their own canon: `docs/architecture/OPERATIONAL_PROCESSES_CANON.md`.
 
 ## Material family vs specification
 
@@ -116,7 +116,7 @@ Where-used is derived from live type resolution and product composition.
 
 - Inventory / stock / availability
 - Supplier / purchase orders
-- Operational processes
+- Operational process identity (owned by Operational Processes)
 - Workcenters
 - Machines
 - Labor recipes

@@ -41,6 +41,7 @@ FACE / VOLUME / BACK / LIGHTING are component roles with reusable constructive t
 Owner-facing projections exist for components, governance, Product System administration, and Resources / Cost inspection. Display labels are persisted.
 ProductAggregate orchestrates. EIC consumes generic requirements.
 Resources now separate material family, specification, service, and cost evidence.
+Operational Processes now separate HOW work is done from WHAT is consumed.
 LIGHTING remains technically partial: LED pitch is a canonical component setting; PSU reserve remains unresolved.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
@@ -69,7 +70,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Product System administration foundation (inspection) | DONE / FOUNDATION |
 | Product System first real admin write path (display label) | DONE / FOUNDATION |
 | Resources / Cost catalog foundation (identity, family/spec, service, cost evidence) | DONE / FOUNDATION |
-| Resources admin write | NOT_IMPLEMENTED |
+| Operational Processes foundation (process + capability class) | DONE / FOUNDATION |
+| Resources admin write / process admin write | NOT_IMPLEMENTED |
 | Lighting calculation | V1 REQUIRED after PSU owner decision |
 | People, Machines, Pontaj, Execution | LATER |
 | Commercial, Quote Snapshot, Order Snapshot | LATER |

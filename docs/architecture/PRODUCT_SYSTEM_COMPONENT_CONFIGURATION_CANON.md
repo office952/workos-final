@@ -65,3 +65,5 @@ Material, thickness, depth, area, and rates are not technical settings.
 Configuration resolves to a resource identity. Resources own the rate.
 
 FACE 3 mm opal resolves to `plexiglas_3mm_opal` in the Plexiglas family. See `docs/architecture/RESOURCES_AND_COST_CANON.md`. Do not invent SKUs here.
+
+How work is performed belongs to Operational Processes, not to the calculation contract. See `docs/architecture/OPERATIONAL_PROCESSES_CANON.md`.

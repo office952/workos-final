@@ -7,6 +7,8 @@ This document does not store adjustable runtime values.
 Related current canons:
 
 - `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings single-truth
+- `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity and cost evidence
+- `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition and capability class
 - `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — construction order and finalization status
 - `packages/domain/src/capabilities.ts` — frozen capability IDs (kernel status remains PLANNED by design)
 - `packages/domain/src/governance/projection.ts` — honest implemented vs planned runtime projection
@@ -70,12 +72,14 @@ WorkOS Final
 │   ├── Form schema
 │   ├── ProductDefinition / ProductTruth
 │   └── ProductAggregate
-├── Resources / Cost                        FOUNDATION_ONLY (pilot catalog + EIC)
+├── Resources / Cost                        FOUNDATION_ONLY (catalog + EIC)
 │   ├── Resource identity
 │   ├── Cost evidence / rates
-│   ├── Operational processes               PLANNED
-│   ├── Labor / service recipes             PLANNED
-│   └── Workcenters                         PLANNED
+│   └── Labor / service recipes             PLANNED
+├── Operational Processes                   FOUNDATION_ONLY (typed catalog)
+│   ├── Process definition
+│   ├── Production capability class
+│   └── Component applicability
 ├── Governance / owner projections          IMPLEMENTED_CURRENT (read-only)
 ├── Analyzer                                NOT_IMPLEMENTED (separate app; proposal only)
 ├── Commercial                              PLANNED
@@ -108,7 +112,8 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Product System | Family, category, template, composition, variants, component technical settings, allowed configuration | Purchase rates, commercial price, execution actuals, attendance |
 | Form / Intake | Schema, fields, visibility, order-specific operator input | System technical settings, formulas, rates, Product Truth |
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
-| Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Customer price, stock, Product Truth, attendance, pontaj-as-price |
+| Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
+| Operational Processes | Process definition, required capability class, type applicability | Resource price, ExecutionTask, machine identity, employee |
 | Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice |
 | People | Employee master, attendance / Pontaj, payments, advances | Execution session, labor recipe / cost basis, Product Truth |
@@ -147,7 +152,7 @@ Do not merge internal cost with Commercial. Do not put stock here.
 
 Admin inspection lives under `/admin` → Resurse și cost intern. No resource write yet.
 
-Current live catalog: Plexiglas 3 mm opal, Forex 10 mm, aluminium return profile 0.6 mm, forming service. Operational processes, labor recipes, and workcenters remain planned.
+Current live catalog: Plexiglas 3 mm opal, Forex 10 mm, aluminium return profile 0.6 mm, forming service. Labor recipes remain planned. Operational processes are a separate foundation.
 
 ## People / Angajați
 
@@ -283,7 +288,8 @@ Inside Administrare, use catalog navigation (category → item → detail), not 
 ```text
 Administrare
 ├── Sistem produs
-└── Resurse și cost intern
+├── Resurse și cost intern
+└── Procese operaționale
 ```
 
 Later domains (Persoane, Utilaje, Execuție, Pontaj, Setări platformă) stay off this catalog until they have real truth. Do not ship empty admin categories.
@@ -294,7 +300,7 @@ Later domains (Persoane, Utilaje, Execuție, Pontaj, Setări platformă) stay of
 |---|---|---|
 | Operator | Daily workflow | `/products` configure → review → confirm |
 | Owner projection | System honesty / inspection | `/components`, `/governance` |
-| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources inspection |
+| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources and Processes inspection |
 
 Do not mix system configuration into daily workflow.
 
@@ -343,7 +349,8 @@ Settings versions: keep previous active values as history after a new version is
 | Pilot resource catalog + partial EIC | FOUNDATION_ONLY |
 | Settings edit / persistence / versioning | PLANNED |
 | Global Administrare nav / display-label write | IMPLEMENTED_CURRENT |
-| Operational processes, labor recipes, workcenters | PLANNED |
+| Operational Processes foundation (typed catalog + capability class) | DONE / FOUNDATION |
+| Process admin write, labor recipes, workcenters | PLANNED / NOT_IMPLEMENTED |
 | Machines, People, Pontaj, Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
