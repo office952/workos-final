@@ -76,10 +76,11 @@ WorkOS Final
 │   ├── Resource identity
 │   ├── Cost evidence / rates
 │   └── Labor / service recipes             PLANNED
-├── Operational Processes                   FOUNDATION_ONLY (typed catalog)
+├── Operational Processes                   FOUNDATION_ONLY (typed catalog + Letters composition)
 │   ├── Process definition
 │   ├── Production capability class
-│   └── Component applicability
+│   ├── Component process requirements
+│   └── Product process composition         FOUNDATION_ONLY (deterministic, not ExecutionPlan)
 ├── Governance / owner projections          IMPLEMENTED_CURRENT (read-only)
 ├── Analyzer                                NOT_IMPLEMENTED (separate app; proposal only)
 ├── Commercial                              PLANNED
@@ -113,7 +114,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Form / Intake | Schema, fields, visibility, order-specific operator input | System technical settings, formulas, rates, Product Truth |
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
-| Operational Processes | Process definition, required capability class, type applicability | Resource price, ExecutionTask, machine identity, employee |
+| Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
 | Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice |
 | People | Employee master, attendance / Pontaj, payments, advances | Execution session, labor recipe / cost basis, Product Truth |

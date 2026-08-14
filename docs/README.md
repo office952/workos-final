@@ -11,7 +11,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration law
 - `docs/architecture/PRODUCT_SYSTEM_PERSISTENCE_CANON.md` — persisted display metadata and first write path
 - `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity, material family/spec, cost evidence
-- `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition and shop-floor capability class
+- `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition, shop-floor capability class, and Letters process composition
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
@@ -23,6 +23,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_PRODUCT_SYSTEM_PERSISTENCE_AND_FIRST_WRITE_PATH_V1.md` — first persisted display-label write
 - `docs/worklog/WORKOS_FINAL_RESOURCES_AND_COST_CATALOG_FOUNDATION_V1.md` — Resources / Cost catalog foundation
 - `docs/worklog/WORKOS_FINAL_OPERATIONAL_PROCESSES_FOUNDATION_V1.md` — Operational Processes foundation
+- `docs/worklog/WORKOS_FINAL_LETTERS_PROCESS_COMPOSITION_V1.md` — Letters process composition
 
 ## Historical evidence
 

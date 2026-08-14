@@ -1,6 +1,6 @@
 # Operational Processes canon
 
-Canonical current law for reusable operational process definitions and shop-floor capability classes.
+Canonical current law for reusable operational process definitions, shop-floor capability classes, and product/component process composition.
 Runtime wins if this document disagrees.
 
 ## Permanent separation
@@ -48,11 +48,35 @@ Kinds in this foundation: MACHINE, WORKSTATION, HUMAN_SKILL.
 
 A process is reusable. `CUT_SHEET_CNC` applies to FACE and BACK.
 
-ProductTemplate / component composition will later choose required processes.
-Dependencies belong to that composition, not to a global 1/2/3 sequence.
+```text
+PROCESS DEFINITION
+  ≠ PROCESS COMPOSITION
+  ≠ EXECUTION INSTANCE
+```
 
-There must be exactly one future process-composition source. It compiles into ExecutionPlan.
-Rejected parallel authorities: dossier task rules, Intake dry-run tasks, separate product-graph task lists.
+Process definition says HOW work can be performed.
+Process composition says which processes a resolved product/component configuration requires, under what conditions, and what depends on what.
+ExecutionPlan is a later instance for a frozen concrete order. It is not implemented.
+
+There is exactly one composition authority: the typed compiler in `packages/domain/src/processes/`.
+Rejected parallel authorities: dossier task rules, Intake dry-run tasks, frontend task arrays, ProductTemplate local operation lists, separate product-graph task lists.
+
+Ownership:
+
+```text
+Component type
+  → process requirement contract (same standalone and in a product)
+Product process composition
+  → collects selected type requirements
+  → adds cross-component nodes and dependency edges
+```
+
+`BOND_LETTER_BODY` is a product-level BODY node. It is not a FACE or VOLUME type requirement.
+Node identity is `scope:processId` (example: `FACE:CUT_SHEET_CNC` and `BACK:CUT_SHEET_CNC`). `processId` alone is not unique.
+
+Dependencies are explicit edges. A derived topological order may be shown for readability. Global `sequence: 1,2,3` is not authority.
+
+`APPLY_SURFACE_FINISH` means vinyl/folie only. Painted volume is not this process.
 
 ## Resource / cost boundary
 
@@ -78,13 +102,17 @@ They are linked, not merged.
 | `BOND_LETTER_BODY` | ASSEMBLY | MANUAL_ASSEMBLY | FACE, VOLUME | PLANNED |
 | `PLACE_LED_MODULES` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | BLOCKED |
 
-QC, packing, installation prep, and a full Letters DAG are not modelled.
+QC, packing, closure, electrical wiring, PSU installation, and paint remain missing-process gaps, not silent omissions.
+
+Letters composition completeness is currently BLOCKED (lighting required but technically blocked; CNC/finish/bond incomplete).
 
 ## Persistence and administration
 
-Typed catalog is authority. No process write. No SQLite process table.
+Typed catalog and typed composition compiler are authority. No process write. No composition graph DB. No SQLite process table.
 
-`/admin` → Procese operaționale is inspection: Categorii, Procese, Capabilități necesare.
+`/admin` → Procese operaționale is inspection: Categorii, Procese, Compoziții produse, Capabilități necesare.
+`GET /api/products/:productCode/process-composition` is read-only.
+`/components` shows the type process-requirement contract, not the full product graph.
 `/products` does not administer processes.
 
 ## Reserved, not implemented

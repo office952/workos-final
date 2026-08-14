@@ -8,7 +8,7 @@ It is not a cleanup or fork of previous WorkOS repositories.
 Hierarchical product catalog plus first canonical LETTERS product.
 FACE / VOLUME / BACK / LIGHTING are stable component roles. Constructive types and product configuration are separate. See `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md`.
 Owner-facing projections: Module și componente, Guvernanța sistemului, Administrare.
-`/components` is the Product System inspection surface. `/admin` is the owner surface: Product System display-label write, Resources / Cost inspection, and Operational Processes inspection. The first persisted write is display-label only.
+`/components` is the Product System inspection surface. `/admin` is the owner surface: Product System display-label write, Resources / Cost inspection, and Operational Processes inspection including Letters process composition. The first persisted write is display-label only.
 Cross-system domain and administration map is canonical; do not invent a second admin model per domain.
 ProductTemplate composes roles/types and owns allowed/fixed configuration. ProductAggregate orchestrates. EIC is generic.
 LIGHTING remains unavailable: LED pitch is a canonical component setting; PSU reserve remains owner-undecided.
@@ -44,4 +44,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, Product System inspection on `/components`, persisted display-label administration on `/admin`, Resources / Cost inspection under `/admin/resources`, Operational Processes inspection under `/admin/processes`, owner-facing governance, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, a reusable material-family/specification catalog, a typed operational-process catalog with shop-floor capability classes, canonical component technical settings, and lighting left unavailable because PSU reserve is still owner-undecided.
+The current app has a platform shell, a real health check, a product catalog, Product System inspection on `/components`, persisted display-label administration on `/admin`, Resources / Cost inspection under `/admin/resources`, Operational Processes inspection under `/admin/processes` including Letters process composition, owner-facing governance, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK calculations with partial internal EIC, a reusable material-family/specification catalog, a typed operational-process catalog with shop-floor capability classes, a deterministic Letters process-composition compiler, canonical component technical settings, and lighting left unavailable because PSU reserve is still owner-undecided.
