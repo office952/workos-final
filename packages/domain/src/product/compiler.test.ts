@@ -40,14 +40,16 @@ describe("canonical product", () => {
   });
 
   it("fixes product identity and keeps lighting required", () => {
-    expect(frontlitPlexiAl06Template.fixedValues["face.material"]).toBe(
+    expect(frontlitPlexiAl06Template.fixedValues["face.materialFamily"]).toBe(
       "plexiglas",
     );
     expect(frontlitPlexiAl06Template.fixedValues["face.thicknessMm"]).toBe(3);
+    expect(frontlitPlexiAl06Template.fixedValues["face.opticalType"]).toBe("opal");
     expect(frontlitPlexiAl06Template.fixedValues["back.thicknessMm"]).toBe(10);
-    expect(frontlitPlexiAl06Template.fixedValues["volume.material"]).toBe(
-      "aluminum_0_6",
+    expect(frontlitPlexiAl06Template.fixedValues["volume.materialFamily"]).toBe(
+      "aluminium",
     );
+    expect(frontlitPlexiAl06Template.fixedValues["volume.thicknessMm"]).toBe(0.6);
     expect(frontlitPlexiAl06Template.fixedValues["lighting.mode"]).toBe(
       "front_lit",
     );
@@ -109,8 +111,9 @@ describe("module law", () => {
       draft(readyValues),
     );
     expect(definition.values["lighting.mode"]).toBe("front_lit");
-    expect(definition.values["face.material"]).toBe("plexiglas");
-    expect(definition.values["volume.material"]).toBe("aluminum_0_6");
+    expect(definition.values["face.materialFamily"]).toBe("plexiglas");
+    expect(definition.values["face.opticalType"]).toBe("opal");
+    expect(definition.values["volume.materialFamily"]).toBe("aluminium");
   });
 
   it("keeps product-fixed identity when the draft tries to change it", () => {
@@ -119,11 +122,13 @@ describe("module law", () => {
       frontlitPlexiAl06FormSchema,
       draft({
         ...readyValues,
-        "face.material": "aluminum",
+        "face.materialFamily": "aluminum",
+        "face.opticalType": "transparent",
         "lighting.mode": "halo",
       }),
     );
-    expect(definition.values["face.material"]).toBe("plexiglas");
+    expect(definition.values["face.materialFamily"]).toBe("plexiglas");
+    expect(definition.values["face.opticalType"]).toBe("opal");
     expect(definition.values["lighting.mode"]).toBe("front_lit");
   });
 });

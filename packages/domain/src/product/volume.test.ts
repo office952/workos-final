@@ -6,21 +6,21 @@ import {
 import {
   VOLUME_COMPONENT_ID,
   VOLUME_PERIMETER_FIELD,
-  volumeAluminium06Contract,
+  aluminiumVolumeContract,
   volumeLinearMeters,
 } from "./volume.js";
 
-describe("VOLUME_ALUMINIUM_06", () => {
+describe("ALUMINIUM_VOLUME", () => {
   it("converts confirmed perimeter in one path", () => {
     expect(volumeLinearMeters(12500)).toBe(12.5);
   });
 
   it("builds volume quantity and resource demand without a product", () => {
-    const measurements = volumeAluminium06Contract.collectMeasurements({
+    const measurements = aluminiumVolumeContract.collectMeasurements({
       [VOLUME_PERIMETER_FIELD]: 12500,
       "volume.depthMm": "60",
     });
-    const result = volumeAluminium06Contract.calculate({
+    const result = aluminiumVolumeContract.calculate({
       values: { "volume.depthMm": "60" },
       measurements,
       shared: {},
@@ -52,7 +52,7 @@ describe("VOLUME_ALUMINIUM_06", () => {
   });
 
   it("does not invent a VOLUME quantity without measurement", () => {
-    const result = volumeAluminium06Contract.calculate({
+    const result = aluminiumVolumeContract.calculate({
       values: {},
       measurements: [],
       shared: {},

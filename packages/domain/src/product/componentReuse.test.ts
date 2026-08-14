@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { compileEic } from "../resources/eic.js";
 import { getComponentContract } from "./componentRegistry.js";
-import { FACE_AREA_FIELD, facePlexiglas3mmContract } from "./face.js";
+import { FACE_AREA_FIELD, plexiglasFaceContract } from "./face.js";
 import {
   compileAggregate,
   compileDefinition,
@@ -16,9 +16,12 @@ import type { ProductAggregate, ProductTemplate, ProductTruth } from "./types.js
 
 describe("component reuse", () => {
   it("uses the same FACE contract independently and from the canonical product", () => {
-    const independent = facePlexiglas3mmContract.calculate({
-      values: {},
-      measurements: facePlexiglas3mmContract.collectMeasurements({
+    const independent = plexiglasFaceContract.calculate({
+      values: {
+        "face.thicknessMm": 3,
+        "face.opticalType": "opal",
+      },
+      measurements: plexiglasFaceContract.collectMeasurements({
         [FACE_AREA_FIELD]: 250000,
       }),
       shared: {},
@@ -51,7 +54,7 @@ describe("component reuse", () => {
     );
     const fromProduct = aggregate.quantities.find((item) => item.componentId === "FACE");
 
-    expect(getComponentContract("FACE_PLEXIGLAS_3MM")).toBe(facePlexiglas3mmContract);
+    expect(getComponentContract("PLEXIGLAS_FACE")).toBe(plexiglasFaceContract);
     expect(fromProduct).toEqual(independent.quantities[0]);
   });
 
@@ -71,14 +74,16 @@ describe("component reuse", () => {
       selectedComponentIds: ["FACE", "VOLUME"],
       values: {
         "root.inscription": "TEST",
+        "face.thicknessMm": 3,
+        "face.opticalType": "opal",
         "face.confirmedAreaMm2": 250000,
         "volume.confirmedPerimeterMm": 12500,
       },
       measurements: [
-        ...facePlexiglas3mmContract.collectMeasurements({
+        ...plexiglasFaceContract.collectMeasurements({
           [FACE_AREA_FIELD]: 250000,
         }),
-        ...getComponentContract("VOLUME_ALUMINIUM_06").collectMeasurements({
+        ...getComponentContract("ALUMINIUM_VOLUME").collectMeasurements({
           "volume.confirmedPerimeterMm": 12500,
         }),
       ],
@@ -120,14 +125,14 @@ describe("component reuse", () => {
         {
           id: "VOLUME",
           label: "Volum",
-          variantId: "VOLUME_ALUMINIUM_06",
+          typeId: "ALUMINIUM_VOLUME",
           status: "CALCULATED",
           unavailable: [],
         },
         {
           id: "OTHER",
           label: "Altceva",
-          variantId: "LIGHTING_FRONT_LED",
+          typeId: "LIGHTING_FRONT_LED",
           status: "UNAVAILABLE",
           unavailable: ["lipsă"],
         },

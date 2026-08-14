@@ -10,8 +10,8 @@ describe("system projection API", () => {
       roles: Array<{
         role: string;
         label: string;
-        variants: Array<{
-          variantId: string;
+        types: Array<{
+          typeId: string;
           eic: string;
           usedBy: Array<{ productCode: string }>;
           technicalSettings: Array<{ id: string; valueDisplay: string }>;
@@ -30,11 +30,11 @@ describe("system projection API", () => {
       "Spate",
       "Iluminare",
     ]);
-    expect(body.roles[0]?.variants[0]?.usedBy[0]?.productCode).toBe(
+    expect(body.roles[0]?.types[0]?.usedBy[0]?.productCode).toBe(
       CANONICAL_PRODUCT_CODE,
     );
-    expect(body.roles[3]?.variants[0]?.eic).toBe("Indisponibil");
-    expect(body.roles[3]?.variants[0]?.technicalSettings).toEqual([
+    expect(body.roles[3]?.types[0]?.eic).toBe("Indisponibil");
+    expect(body.roles[3]?.types[0]?.technicalSettings).toEqual([
       expect.objectContaining({ id: "ledPitchMm", valueDisplay: "100 mm" }),
       expect.objectContaining({ id: "psuReservePercent", valueDisplay: "Nesetat" }),
     ]);
@@ -48,24 +48,24 @@ describe("system projection API", () => {
       families: Array<{ id: string; productCodes: string[] }>;
       products: Array<{
         code: string;
-        composition: Array<{ variantId: string }>;
+        composition: Array<{ typeId: string }>;
       }>;
-      variants: Array<{
-        variantId: string;
+      types: Array<{
+        typeId: string;
         usedByProductCodes: string[];
         technicalSettings: Array<{ id: string }>;
       }>;
     };
     expect(body.families[0]?.id).toBe("LIGHTED_VOLUMETRIC_SIGNS");
     expect(body.families[0]?.productCodes).toEqual([CANONICAL_PRODUCT_CODE]);
-    expect(body.products[0]?.composition.map((item) => item.variantId)).toEqual([
-      "FACE_PLEXIGLAS_3MM",
-      "VOLUME_ALUMINIUM_06",
-      "BACK_FOREX_10MM",
+    expect(body.products[0]?.composition.map((item) => item.typeId)).toEqual([
+      "PLEXIGLAS_FACE",
+      "ALUMINIUM_VOLUME",
+      "FOREX_BACK",
       "LIGHTING_FRONT_LED",
     ]);
     expect(
-      body.variants.find((item) => item.variantId === "LIGHTING_FRONT_LED")
+      body.types.find((item) => item.typeId === "LIGHTING_FRONT_LED")
         ?.usedByProductCodes,
     ).toEqual([CANONICAL_PRODUCT_CODE]);
   });

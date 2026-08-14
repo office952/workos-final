@@ -21,10 +21,20 @@ export {
   selectedComponentIds,
 } from "./compiler.js";
 export {
-  COMPONENT_VARIANT_IDS,
+  COMPONENT_TYPE_IDS,
   getComponentContract,
   listComponentContracts,
 } from "./componentRegistry.js";
+export {
+  ATTRIBUTE_OWNERSHIPS,
+  attributeKindLabel,
+  attributeOwnershipLabel,
+  componentTypes,
+  getComponentType,
+  listComponentTypesForRole,
+  liveResourceIdsForType,
+  resolveTypeResources,
+} from "./componentTypes.js";
 export {
   COMPONENT_ROLES,
   projectComponentArchitecture,
@@ -36,12 +46,12 @@ export {
   computeCategoryDepth,
   projectProductSystemAdministration,
 } from "./productSystemAdmin.js";
-export { BACK_COMPONENT_ID, backForex10mmContract } from "./back.js";
+export { BACK_COMPONENT_ID, forexBackContract } from "./back.js";
 export {
   FACE_AREA_FIELD,
   FACE_COMPONENT_ID,
   faceAreaSquareMeters,
-  facePlexiglas3mmContract,
+  plexiglasFaceContract,
 } from "./face.js";
 export {
   CANONICAL_PRODUCT_CODE,
@@ -59,13 +69,13 @@ export {
   PSU_RESERVE_SETTING_ID,
   componentTechnicalSettingsRegistry,
   createTechnicalSettingsRegistry,
-  listVariantTechnicalSettings,
+  listTypeTechnicalSettings,
   projectTechnicalSettings,
 } from "./technicalSettings.js";
 export {
   VOLUME_COMPONENT_ID,
   VOLUME_PERIMETER_FIELD,
-  volumeAluminium06Contract,
+  aluminiumVolumeContract,
   volumeLinearMeters,
 } from "./volume.js";
 export type {
@@ -76,9 +86,18 @@ export type {
   SharedCalculationContext,
 } from "./componentContract.js";
 export type {
+  ComponentConfigurationAttribute,
+  ComponentProductConfiguration,
   ComponentRoleProjection,
-  ComponentVariantProjection,
+  ComponentTypeProjection,
 } from "./componentProjection.js";
+export type {
+  AttributeOwnership,
+  ComponentAttributeDefinition,
+  ComponentAttributeKind,
+  ComponentTypeDefinition,
+  ResourceResolution,
+} from "./componentTypes.js";
 export type {
   ComponentTechnicalSettingDefinition,
   ComponentTechnicalSettingProjection,
@@ -91,7 +110,7 @@ export type {
   AdminLifecycleState,
   AdminProductRecord,
   AdminReadiness,
-  AdminVariantRecord,
+  AdminTypeRecord,
   ProductSystemAdminProjection,
 } from "./productSystemAdmin.js";
 export type {
@@ -99,9 +118,9 @@ export type {
   ComponentCalculationStatus,
   ComponentInputMapping,
   ComponentRole,
+  ComponentTypeId,
   ComponentRuntimeStatus,
   ComponentSummary,
-  ComponentVariantId,
   DraftConfiguration,
   DraftValue,
   DraftValues,

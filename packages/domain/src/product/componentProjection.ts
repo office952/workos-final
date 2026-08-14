@@ -1,11 +1,19 @@
 import { listComponentContracts } from "./componentRegistry.js";
 import type { ComponentEicReadiness, ComponentMeasurementKind } from "./componentContract.js";
+import {
+  attributeKindLabel,
+  attributeOwnershipLabel,
+  getComponentType,
+  liveResourceIdsForType,
+  type AttributeOwnership,
+  type ComponentTypeId,
+} from "./componentTypes.js";
 import { productTemplates } from "./frontlitPlexiAl06.js";
 import {
   projectTechnicalSettings,
   type ComponentTechnicalSettingProjection,
 } from "./technicalSettings.js";
-import type { ComponentRole, ComponentVariantId, ProductTemplate } from "./types.js";
+import type { ComponentRole, DraftValues, ProductTemplate } from "./types.js";
 
 export const COMPONENT_ROLES: readonly ComponentRole[] = [
   "FACE",
@@ -20,23 +28,41 @@ export type ComponentProductUse = {
   inputNote: string | null;
 };
 
-export type ComponentVariantProjection = {
-  variantId: ComponentVariantId;
+export type ComponentConfigurationAttribute = {
+  id: string;
   label: string;
+  valueDisplay: string;
+  ownership: AttributeOwnership;
+  ownershipLabel: string;
+  kindLabel: string;
+};
+
+export type ComponentProductConfiguration = {
+  productCode: string;
+  productLabel: string;
+  attributes: readonly ComponentConfigurationAttribute[];
+};
+
+export type ComponentTypeProjection = {
+  typeId: ComponentTypeId;
+  label: string;
+  description: string;
   independentCalculation: boolean;
   measurement: string;
   quantity: string;
   eic: string;
   gaps: readonly string[];
   usedBy: readonly ComponentProductUse[];
+  configurations: readonly ComponentProductConfiguration[];
   technicalSettings: readonly ComponentTechnicalSettingProjection[];
+  resourceIds: readonly string[];
 };
 
 export type ComponentRoleProjection = {
   role: ComponentRole;
   label: string;
   owns: readonly string[];
-  variants: readonly ComponentVariantProjection[];
+  types: readonly ComponentTypeProjection[];
 };
 
 function measurementCopy(kind: ComponentMeasurementKind): string {
@@ -141,34 +167,6 @@ function roleLabel(role: ComponentRole): string {
   }
 }
 
-function identityValue(template: ProductTemplate, factId: string): string | undefined {
-  return template.identityFacts.find((item) => item.id === factId)?.value;
-}
-
-function variantLabel(variantId: ComponentVariantId, role: ComponentRole): string {
-  for (const template of productTemplates) {
-    const used = template.components.some((item) => item.variantId === variantId);
-    if (!used) {
-      continue;
-    }
-    switch (role) {
-      case "FACE":
-        return identityValue(template, "face.material") ?? variantId;
-      case "VOLUME":
-        return identityValue(template, "volume.material") ?? variantId;
-      case "BACK":
-        return identityValue(template, "back.material") ?? variantId;
-      case "LIGHTING":
-        return identityValue(template, "lighting") ?? variantId;
-      default: {
-        const _exhaustive: never = role;
-        return _exhaustive;
-      }
-    }
-  }
-  return variantId;
-}
-
 function inputNote(template: ProductTemplate, role: ComponentRole): string | null {
   const component = template.components.find((item) => item.id === role);
   const source = component?.inputMapping?.confirmedAreaMm2FromComponentId;
@@ -180,15 +178,75 @@ function inputNote(template: ProductTemplate, role: ComponentRole): string | nul
   return `Primește suprafața de la ${sourceLabel} în acest produs`;
 }
 
-function productsUsing(variantId: ComponentVariantId, role: ComponentRole): ComponentProductUse[] {
+function productsUsing(typeId: ComponentTypeId, role: ComponentRole): ComponentProductUse[] {
   return productTemplates
-    .filter((template) =>
-      template.components.some((item) => item.variantId === variantId),
-    )
+    .filter((template) => template.components.some((item) => item.typeId === typeId))
     .map((template) => ({
       productCode: template.code,
       productLabel: template.label,
       inputNote: inputNote(template, role),
+    }));
+}
+
+function displayAttributeValue(
+  id: string,
+  values: DraftValues,
+  ownership: AttributeOwnership,
+): string {
+  const value = values[id];
+  if (value === undefined || value === null || value === "") {
+    if (ownership === "CONFIGURABLE_BY_ORDER") {
+      return "ales pe comandă";
+    }
+    if (ownership === "MEASUREMENT") {
+      return "confirmată de operator";
+    }
+    return "nerezolvat în produsul curent";
+  }
+  if (id.endsWith("thicknessMm") || id.endsWith("depthMm")) {
+    return `${value} mm`;
+  }
+  if (id === "face.opticalType" && value === "opal") {
+    return "Opal";
+  }
+  if (id === "face.materialFamily" && value === "plexiglas") {
+    return "Plexiglas";
+  }
+  if (id === "volume.materialFamily" && value === "aluminium") {
+    return "Aluminiu";
+  }
+  if (id === "back.materialFamily" && value === "forex") {
+    return "Forex";
+  }
+  if (id === "lighting.mode" && value === "front_lit") {
+    return "Iluminare frontală";
+  }
+  return String(value);
+}
+
+function configurationsFor(
+  typeId: ComponentTypeId,
+): ComponentProductConfiguration[] {
+  const type = getComponentType(typeId);
+  return productTemplates
+    .filter((template) => template.components.some((item) => item.typeId === typeId))
+    .map((template) => ({
+      productCode: template.code,
+      productLabel: template.label,
+      attributes: type.attributes
+        .filter((attribute) => attribute.ownership !== "TECHNICAL_SETTING")
+        .map((attribute) => ({
+          id: attribute.id,
+          label: attribute.label,
+          valueDisplay: displayAttributeValue(
+            attribute.id,
+            template.fixedValues,
+            attribute.ownership,
+          ),
+          ownership: attribute.ownership,
+          ownershipLabel: attributeOwnershipLabel(attribute.ownership),
+          kindLabel: attributeKindLabel(attribute.kind),
+        })),
     }));
 }
 
@@ -198,18 +256,24 @@ export function projectComponentArchitecture(): ComponentRoleProjection[] {
     role,
     label: roleLabel(role),
     owns: ownsCopy(role),
-    variants: contracts
+    types: contracts
       .filter((contract) => contract.role === role)
-      .map((contract) => ({
-        variantId: contract.variantId,
-        label: variantLabel(contract.variantId, role),
-        independentCalculation: contract.profile.independentCalculation,
-        measurement: measurementCopy(contract.profile.measurement),
-        quantity: quantityCopy(contract.profile.quantityUnit),
-        eic: eicCopy(contract.profile.eic),
-        gaps: contract.profile.structuralGaps,
-        usedBy: productsUsing(contract.variantId, role),
-        technicalSettings: projectTechnicalSettings(contract.variantId),
-      })),
+      .map((contract) => {
+        const type = getComponentType(contract.typeId);
+        return {
+          typeId: contract.typeId,
+          label: type.label,
+          description: type.description,
+          independentCalculation: contract.profile.independentCalculation,
+          measurement: measurementCopy(contract.profile.measurement),
+          quantity: quantityCopy(contract.profile.quantityUnit),
+          eic: eicCopy(contract.profile.eic),
+          gaps: contract.profile.structuralGaps,
+          usedBy: productsUsing(contract.typeId, role),
+          configurations: configurationsFor(contract.typeId),
+          technicalSettings: projectTechnicalSettings(contract.typeId),
+          resourceIds: liveResourceIdsForType(contract.typeId),
+        };
+      }),
   }));
 }

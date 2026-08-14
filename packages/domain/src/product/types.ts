@@ -2,10 +2,10 @@ import type { ResourceRequirement } from "../resources/requirement.js";
 
 export type ComponentId = "FACE" | "VOLUME" | "BACK" | "LIGHTING" | "ROOT";
 export type ComponentRole = "FACE" | "VOLUME" | "BACK" | "LIGHTING";
-export type ComponentVariantId =
-  | "FACE_PLEXIGLAS_3MM"
-  | "VOLUME_ALUMINIUM_06"
-  | "BACK_FOREX_10MM"
+export type ComponentTypeId =
+  | "PLEXIGLAS_FACE"
+  | "ALUMINIUM_VOLUME"
+  | "FOREX_BACK"
   | "LIGHTING_FRONT_LED";
 export type ComponentCalculationStatus =
   | "CALCULATED"
@@ -15,7 +15,7 @@ export type ComponentCalculationStatus =
 export type ComponentRuntimeStatus = {
   id: string;
   label: string;
-  variantId: ComponentVariantId;
+  typeId: ComponentTypeId;
   status: ComponentCalculationStatus;
   unavailable: readonly string[];
 };
@@ -66,7 +66,7 @@ export type ProductComponent = {
   id: string;
   label: string;
   required: boolean;
-  variantId: ComponentVariantId;
+  typeId: ComponentTypeId;
   selectionFieldId?: string;
   inputMapping?: ComponentInputMapping;
 };

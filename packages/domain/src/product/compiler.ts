@@ -1,7 +1,7 @@
 import { getProductFamily } from "./catalog.js";
 import type { SharedCalculationContext } from "./componentContract.js";
 import { getComponentContract } from "./componentRegistry.js";
-import { listVariantTechnicalSettings } from "./technicalSettings.js";
+import { listTypeTechnicalSettings } from "./technicalSettings.js";
 import type {
   DraftConfiguration,
   DraftValue,
@@ -179,7 +179,7 @@ function collectMeasurements(
   return template.components
     .filter((component) => selectedIds.includes(component.id))
     .flatMap((component) =>
-      getComponentContract(component.variantId).collectMeasurements(values),
+      getComponentContract(component.typeId).collectMeasurements(values),
     );
 }
 
@@ -272,11 +272,11 @@ export function compileAggregate(
   const calculations = template.components
     .filter((component) => truth.selectedComponentIds.includes(component.id))
     .map((component) => {
-      const result = getComponentContract(component.variantId).calculate({
+      const result = getComponentContract(component.typeId).calculate({
         values: truth.values,
         measurements: truth.measurements,
         shared: sharedContextFor(component, truth.measurements),
-        technicalSettings: listVariantTechnicalSettings(component.variantId),
+        technicalSettings: listTypeTechnicalSettings(component.typeId),
       });
       return { component, result };
     });
@@ -292,7 +292,7 @@ export function compileAggregate(
     componentStatuses: calculations.map(({ component, result }) => ({
       id: component.id,
       label: component.label,
-      variantId: result.variantId,
+      typeId: result.typeId,
       status: result.status,
       unavailable: result.unavailable,
     })),

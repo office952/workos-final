@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { FOREX_BACK_SHEET_ID } from "../resources/catalog.js";
-import { BACK_COMPONENT_ID, backForex10mmContract } from "./back.js";
+import { BACK_COMPONENT_ID, forexBackContract } from "./back.js";
 
-describe("BACK_FOREX_10MM", () => {
+describe("FOREX_BACK", () => {
   it("owns supplied-area to quantity and forex demand without a product", () => {
-    const result = backForex10mmContract.calculate({
-      values: {},
+    const result = forexBackContract.calculate({
+      values: { "back.thicknessMm": 10 },
       measurements: [],
       shared: { confirmedAreaMm2: 250000 },
       technicalSettings: [],
@@ -29,8 +29,8 @@ describe("BACK_FOREX_10MM", () => {
   });
 
   it("does not assume FACE area unless composition supplies it", () => {
-    const result = backForex10mmContract.calculate({
-      values: {},
+    const result = forexBackContract.calculate({
+      values: { "back.thicknessMm": 10 },
       measurements: [],
       shared: {},
       technicalSettings: [],

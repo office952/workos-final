@@ -1,9 +1,9 @@
-import { PLEXIGLAS_FACE_SHEET_ID } from "../resources/catalog.js";
 import type {
   ComponentCalculationContract,
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
+import { resolveTypeResources } from "./componentTypes.js";
 import type { DraftValues, TechnicalMeasurement } from "./types.js";
 import { squareMetersFromMm2 } from "./units.js";
 
@@ -20,19 +20,20 @@ function faceResult(
   status: ComponentCalculationResult["status"],
   quantities: ComponentCalculationResult["quantities"],
   requirements: ComponentCalculationResult["requirements"],
+  extraUnavailable: readonly string[] = [],
 ): ComponentCalculationResult {
   return {
-    variantId: "FACE_PLEXIGLAS_3MM",
+    typeId: "PLEXIGLAS_FACE",
     role: "FACE",
     status,
     quantities,
     requirements,
-    unavailable: [...FACE_GAPS],
+    unavailable: [...FACE_GAPS, ...extraUnavailable],
   };
 }
 
-export const facePlexiglas3mmContract: ComponentCalculationContract = {
-  variantId: "FACE_PLEXIGLAS_3MM",
+export const plexiglasFaceContract: ComponentCalculationContract = {
+  typeId: "PLEXIGLAS_FACE",
   role: "FACE",
   profile: {
     measurement: "confirmed_area_mm2",
@@ -40,7 +41,6 @@ export const facePlexiglas3mmContract: ComponentCalculationContract = {
     independentCalculation: true,
     eic: "material",
     structuralGaps: FACE_GAPS,
-    resourceIds: [PLEXIGLAS_FACE_SHEET_ID],
   },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const area = values[FACE_AREA_FIELD];
@@ -66,6 +66,19 @@ export const facePlexiglas3mmContract: ComponentCalculationContract = {
       return faceResult("MISSING_MEASUREMENT", [], []);
     }
     const squareMeters = faceAreaSquareMeters(area.value);
+    const resolved = resolveTypeResources("PLEXIGLAS_FACE", input.values);
+    const requirements = resolved.flatMap((item) =>
+      item.status === "RESOLVED"
+        ? [
+            {
+              componentId: FACE_COMPONENT_ID,
+              resourceId: item.resourceId,
+              quantity: squareMeters,
+              unit: "m2" as const,
+            },
+          ]
+        : [],
+    );
     return faceResult(
       "CALCULATED",
       [
@@ -78,14 +91,8 @@ export const facePlexiglas3mmContract: ComponentCalculationContract = {
           basis: "confirmed_area",
         },
       ],
-      [
-        {
-          componentId: FACE_COMPONENT_ID,
-          resourceId: PLEXIGLAS_FACE_SHEET_ID,
-          quantity: squareMeters,
-          unit: "m2",
-        },
-      ],
+      requirements,
+      resolved.flatMap((item) => (item.status === "UNRESOLVED" ? [item.reason] : [])),
     );
   },
 };

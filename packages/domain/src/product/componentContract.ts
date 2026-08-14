@@ -1,9 +1,9 @@
 import type { ResourceRequirement } from "../resources/requirement.js";
 import type { ComponentTechnicalSettingDefinition } from "./technicalSettings.js";
+import type { ComponentTypeId } from "./componentTypes.js";
 import type {
   ComponentCalculationStatus,
   ComponentRole,
-  ComponentVariantId,
   DraftValues,
   TechnicalMeasurement,
   TechnicalQuantity,
@@ -21,7 +21,7 @@ export type ComponentCalculationInput = {
 };
 
 export type ComponentCalculationResult = {
-  variantId: ComponentVariantId;
+  typeId: ComponentTypeId;
   role: ComponentRole;
   status: ComponentCalculationStatus;
   quantities: readonly TechnicalQuantity[];
@@ -43,11 +43,10 @@ export type ComponentContractProfile = {
   independentCalculation: boolean;
   eic: ComponentEicReadiness;
   structuralGaps: readonly string[];
-  resourceIds: readonly string[];
 };
 
 export type ComponentCalculationContract = {
-  variantId: ComponentVariantId;
+  typeId: ComponentTypeId;
   role: ComponentRole;
   profile: ComponentContractProfile;
   collectMeasurements(values: DraftValues): TechnicalMeasurement[];

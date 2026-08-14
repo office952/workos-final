@@ -25,7 +25,7 @@ function volumeResult(
   requirements: ComponentCalculationResult["requirements"],
 ): ComponentCalculationResult {
   return {
-    variantId: "VOLUME_ALUMINIUM_06",
+    typeId: "ALUMINIUM_VOLUME",
     role: "VOLUME",
     status,
     quantities,
@@ -34,8 +34,8 @@ function volumeResult(
   };
 }
 
-export const volumeAluminium06Contract: ComponentCalculationContract = {
-  variantId: "VOLUME_ALUMINIUM_06",
+export const aluminiumVolumeContract: ComponentCalculationContract = {
+  typeId: "ALUMINIUM_VOLUME",
   role: "VOLUME",
   profile: {
     measurement: "confirmed_perimeter_mm",
@@ -43,7 +43,6 @@ export const volumeAluminium06Contract: ComponentCalculationContract = {
     independentCalculation: true,
     eic: "material_and_operation",
     structuralGaps: VOLUME_GAPS,
-    resourceIds: [ALUMINIUM_RETURN_PROFILE_ID, RETURN_CANT_FORMING_ID],
   },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const perimeter = values[VOLUME_PERIMETER_FIELD];

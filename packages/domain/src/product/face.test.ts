@@ -1,19 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { PLEXIGLAS_FACE_SHEET_ID } from "../resources/catalog.js";
-import { FACE_AREA_FIELD, FACE_COMPONENT_ID, facePlexiglas3mmContract } from "./face.js";
+import { FACE_AREA_FIELD, FACE_COMPONENT_ID, plexiglasFaceContract } from "./face.js";
 
-describe("FACE_PLEXIGLAS_3MM", () => {
+const currentFaceConfig = {
+  "face.thicknessMm": 3,
+  "face.opticalType": "opal",
+};
+
+describe("PLEXIGLAS_FACE", () => {
   it("converts confirmed area to quantity and plexiglas demand without a product", () => {
-    const measurements = facePlexiglas3mmContract.collectMeasurements({
+    const measurements = plexiglasFaceContract.collectMeasurements({
       [FACE_AREA_FIELD]: 250000,
     });
-    const result = facePlexiglas3mmContract.calculate({
-      values: {},
+    const result = plexiglasFaceContract.calculate({
+      values: currentFaceConfig,
       measurements,
       shared: {},
       technicalSettings: [],
     });
     expect(result.status).toBe("CALCULATED");
+    expect(result.typeId).toBe("PLEXIGLAS_FACE");
     expect(result.quantities).toEqual([
       expect.objectContaining({
         componentId: FACE_COMPONENT_ID,
@@ -32,8 +38,8 @@ describe("FACE_PLEXIGLAS_3MM", () => {
   });
 
   it("does not invent a FACE quantity without measurement", () => {
-    const result = facePlexiglas3mmContract.calculate({
-      values: {},
+    const result = plexiglasFaceContract.calculate({
+      values: currentFaceConfig,
       measurements: [],
       shared: {},
       technicalSettings: [],

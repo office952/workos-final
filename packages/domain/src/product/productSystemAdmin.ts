@@ -7,9 +7,13 @@ import {
   productFamilies,
 } from "./catalog.js";
 import { listComponentContracts } from "./componentRegistry.js";
-import { projectComponentArchitecture } from "./componentProjection.js";
+import {
+  projectComponentArchitecture,
+  type ComponentProductConfiguration,
+} from "./componentProjection.js";
+import { type ComponentTypeId } from "./componentTypes.js";
 import { getFormSchema, productTemplates } from "./frontlitPlexiAl06.js";
-import type { ComponentRole, ComponentVariantId, ProductCategory } from "./types.js";
+import type { ComponentRole, ProductCategory } from "./types.js";
 import type { ComponentTechnicalSettingProjection } from "./technicalSettings.js";
 
 export const ADMIN_LIFECYCLE_STATES = ["DRAFT", "ACTIVE", "RETIRED"] as const;
@@ -19,6 +23,8 @@ export const ADMIN_EDIT_CLASSES = [
   "DISPLAY_EDITABLE",
   "STRUCTURE_EDITABLE",
   "TECHNICAL_SETTING_EDITABLE",
+  "PRODUCT_CONFIGURATION",
+  "MATERIAL_CONFIGURATION",
   "LIFECYCLE_MANAGED",
   "CODE_CONTRACT_ONLY",
 ] as const;
@@ -60,8 +66,8 @@ export type AdminCategoryRecord = {
 export type AdminCompositionLine = {
   role: ComponentRole;
   roleLabel: string;
-  variantId: ComponentVariantId;
-  variantLabel: string;
+  typeId: ComponentTypeId;
+  typeLabel: string;
 };
 
 export type AdminProductRecord = {
@@ -82,9 +88,10 @@ export type AdminProductRecord = {
   readiness: AdminReadiness;
 };
 
-export type AdminVariantRecord = {
-  variantId: ComponentVariantId;
+export type AdminTypeRecord = {
+  typeId: ComponentTypeId;
   label: string;
+  description: string;
   role: ComponentRole;
   roleLabel: string;
   usedByProductCodes: readonly string[];
@@ -92,6 +99,7 @@ export type AdminVariantRecord = {
   independentCalculation: boolean;
   measurement: string;
   quantity: string;
+  configurations: readonly ComponentProductConfiguration[];
   technicalSettings: readonly ComponentTechnicalSettingProjection[];
   resourceReadiness: string;
   resourceReferences: readonly { id: string; label: string }[];
@@ -103,7 +111,7 @@ export type ProductSystemAdminProjection = {
   families: readonly AdminFamilyRecord[];
   categories: readonly AdminCategoryRecord[];
   products: readonly AdminProductRecord[];
-  variants: readonly AdminVariantRecord[];
+  types: readonly AdminTypeRecord[];
 };
 
 export function adminLifecycleLabel(state: AdminLifecycleState): string {
@@ -129,6 +137,10 @@ export function adminEditClassLabel(kind: AdminEditClass): string {
       return "Structură (plasare / compoziție)";
     case "TECHNICAL_SETTING_EDITABLE":
       return "Setare tehnică";
+    case "PRODUCT_CONFIGURATION":
+      return "Configurație de produs";
+    case "MATERIAL_CONFIGURATION":
+      return "Identitate / proprietate material";
     case "LIFECYCLE_MANAGED":
       return "Lifecycle (retragere)";
     case "CODE_CONTRACT_ONLY":
@@ -227,18 +239,18 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
     const form = getFormSchema(template.formSchemaId);
     const composition = template.components.map((component) => {
       const role = roles.find((item) => item.role === component.id);
-      const variant = role?.variants.find((item) => item.variantId === component.variantId);
+      const type = role?.types.find((item) => item.typeId === component.typeId);
       return {
         role: component.id as ComponentRole,
         roleLabel: component.label,
-        variantId: component.variantId,
-        variantLabel: variant?.label ?? component.variantId,
+        typeId: component.typeId,
+        typeLabel: type?.label ?? component.typeId,
       };
     });
     const unresolvedAreas = unique(
       composition.flatMap((line) => {
         const role = roles.find((item) => item.role === line.role);
-        return role?.variants.find((item) => item.variantId === line.variantId)?.gaps ?? [];
+        return role?.types.find((item) => item.typeId === line.typeId)?.gaps ?? [];
       }),
     );
     return {
@@ -262,7 +274,7 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
           "Produsul este plasat în catalogul operator.",
           form ? "Produsul are o schemă de formular legată." : null,
           template.components.length > 0
-            ? `Produsul compune ${countLabel(template.components.length, "variantă", "variante")}.`
+            ? `Produsul compune ${countLabel(template.components.length, "tip constructiv", "tipuri constructive")}.`
             : null,
         ]),
         canRetire: true,
@@ -272,50 +284,63 @@ export function projectProductSystemAdministration(): ProductSystemAdminProjecti
     };
   });
 
-  const variants = contracts.map((contract) => {
+  const types = contracts.map((contract) => {
     const role = roles.find((item) => item.role === contract.role);
-    const variant = role?.variants.find((item) => item.variantId === contract.variantId);
-    const usedByProductCodes = (variant?.usedBy ?? []).map((item) => item.productCode);
+    const type = role?.types.find((item) => item.typeId === contract.typeId);
+    const usedByProductCodes = (type?.usedBy ?? []).map((item) => item.productCode);
     const used = usedByProductCodes.length > 0;
-    const hasSettings = (variant?.technicalSettings.length ?? 0) > 0;
+    const hasSettings = (type?.technicalSettings.length ?? 0) > 0;
     return {
-      variantId: contract.variantId,
-      label: variant?.label ?? contract.variantId,
+      typeId: contract.typeId,
+      label: type?.label ?? contract.typeId,
+      description: type?.description ?? "",
       role: contract.role,
       roleLabel: role?.label ?? contract.role,
       usedByProductCodes,
-      usedByLabels: (variant?.usedBy ?? []).map((item) =>
+      usedByLabels: (type?.usedBy ?? []).map((item) =>
         item.inputNote ? `${item.productLabel} (${item.inputNote})` : item.productLabel,
       ),
-      independentCalculation: variant?.independentCalculation ?? false,
-      measurement: variant?.measurement ?? "",
-      quantity: variant?.quantity ?? "",
-      technicalSettings: variant?.technicalSettings ?? [],
-      resourceReadiness: variant?.eic ?? "",
-      resourceReferences: contract.profile.resourceIds.map((id) => ({
+      independentCalculation: type?.independentCalculation ?? false,
+      measurement: type?.measurement ?? "",
+      quantity: type?.quantity ?? "",
+      configurations: type?.configurations ?? [],
+      technicalSettings: type?.technicalSettings ?? [],
+      resourceReadiness: type?.eic ?? "",
+      resourceReferences: (type?.resourceIds ?? []).map((id) => ({
         id,
         label: getResource(id)?.label ?? id,
       })),
-      gaps: variant?.gaps ?? contract.profile.structuralGaps,
+      gaps: type?.gaps ?? contract.profile.structuralGaps,
       readiness: readiness({
         retireBlockers: blockers([
           used
-            ? `Varianta este folosită de ${countLabel(usedByProductCodes.length, "produs", "produse")}.`
+            ? `Tipul este folosit de ${countLabel(usedByProductCodes.length, "produs", "produse")}.`
             : null,
         ]),
         deleteBlockers: blockers([
           used
-            ? `Varianta este folosită de ${countLabel(usedByProductCodes.length, "produs", "produse")}.`
+            ? `Tipul este folosit de ${countLabel(usedByProductCodes.length, "produs", "produse")}.`
             : null,
         ]),
         editClasses: hasSettings
-          ? ["DISPLAY_EDITABLE", "TECHNICAL_SETTING_EDITABLE", "CODE_CONTRACT_ONLY"]
-          : ["DISPLAY_EDITABLE", "CODE_CONTRACT_ONLY"],
+          ? [
+              "DISPLAY_EDITABLE",
+              "PRODUCT_CONFIGURATION",
+              "MATERIAL_CONFIGURATION",
+              "TECHNICAL_SETTING_EDITABLE",
+              "CODE_CONTRACT_ONLY",
+            ]
+          : [
+              "DISPLAY_EDITABLE",
+              "PRODUCT_CONFIGURATION",
+              "MATERIAL_CONFIGURATION",
+              "CODE_CONTRACT_ONLY",
+            ],
       }),
     };
   });
 
-  return { families, categories, products, variants };
+  return { families, categories, products, types };
 }
 
 function readiness(input: {

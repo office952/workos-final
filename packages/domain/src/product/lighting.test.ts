@@ -5,12 +5,12 @@ import {
   PSU_RESERVE_SETTING_ID,
   createTechnicalSettingsRegistry,
   lightingFrontLedTechnicalSettings,
-  listVariantTechnicalSettings,
+  listTypeTechnicalSettings,
 } from "./technicalSettings.js";
 
 describe("LIGHTING_FRONT_LED", () => {
   it("consumes canonical settings and stays unavailable without inventing quantities", () => {
-    const technicalSettings = listVariantTechnicalSettings("LIGHTING_FRONT_LED");
+    const technicalSettings = listTypeTechnicalSettings("LIGHTING_FRONT_LED");
     const pitch = technicalSettings.find((item) => item.id === LED_PITCH_SETTING_ID);
     const reserve = technicalSettings.find((item) => item.id === PSU_RESERVE_SETTING_ID);
     expect(pitch?.resolution).toEqual({ status: "RESOLVED", value: 100 });
@@ -49,7 +49,7 @@ describe("LIGHTING_FRONT_LED", () => {
       values: {},
       measurements: [],
       shared: {},
-      technicalSettings: registry.listByVariant("LIGHTING_FRONT_LED"),
+      technicalSettings: registry.listByType("LIGHTING_FRONT_LED"),
     });
     expect(result.status).toBe("UNAVAILABLE");
     expect(result.quantities).toEqual([]);

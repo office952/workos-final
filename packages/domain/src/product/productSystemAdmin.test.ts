@@ -42,10 +42,10 @@ describe("product system administration projection", () => {
     expect(product?.categoryId).toBe("FRONT_LIT_VOLUMETRIC_LETTERS");
     expect(product?.formSchemaId).toBe("prd-letters-frontlit-plexi-al06-form-v1");
     expect(product?.formBound).toBe(true);
-    expect(product?.composition.map((item) => item.variantId)).toEqual([
-      "FACE_PLEXIGLAS_3MM",
-      "VOLUME_ALUMINIUM_06",
-      "BACK_FOREX_10MM",
+    expect(product?.composition.map((item) => item.typeId)).toEqual([
+      "PLEXIGLAS_FACE",
+      "ALUMINIUM_VOLUME",
+      "FOREX_BACK",
       "LIGHTING_FRONT_LED",
     ]);
     expect(product?.readiness.canDelete).toBe(false);
@@ -53,7 +53,7 @@ describe("product system administration projection", () => {
     expect(product?.readiness.editClasses).toContain("DISPLAY_EDITABLE");
     expect(product?.unresolvedAreas).toContain("Regula de rezervă PSU nu este stabilită");
 
-    const lighting = admin.variants.find((item) => item.variantId === "LIGHTING_FRONT_LED");
+    const lighting = admin.types.find((item) => item.typeId === "LIGHTING_FRONT_LED");
     expect(lighting?.usedByProductCodes).toEqual([CANONICAL_PRODUCT_CODE]);
     expect(lighting?.usedByLabels[0]).toContain("Litere volumetrice luminoase");
     expect(lighting?.independentCalculation).toBe(true);
@@ -70,7 +70,7 @@ describe("product system administration projection", () => {
       ...admin.families.map((item) => item.id),
       ...admin.categories.map((item) => item.id),
       ...admin.products.map((item) => item.code),
-      ...admin.variants.map((item) => item.variantId),
+      ...admin.types.map((item) => item.typeId),
     ];
     expect(new Set(ids).size).toBe(ids.length);
   });

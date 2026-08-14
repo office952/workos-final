@@ -1,4 +1,4 @@
-import type { ComponentVariantId } from "./types.js";
+import type { ComponentTypeId } from "./componentTypes.js";
 
 export const LED_PITCH_SETTING_ID = "ledPitchMm";
 export const PSU_RESERVE_SETTING_ID = "psuReservePercent";
@@ -21,7 +21,7 @@ export type TechnicalSettingResolution =
 
 export type ComponentTechnicalSettingDefinition = {
   readonly id: string;
-  readonly variantId: ComponentVariantId;
+  readonly typeId: ComponentTypeId;
   readonly label: string;
   readonly description: string;
   readonly valueType: TechnicalSettingValueType;
@@ -50,10 +50,10 @@ export type ComponentTechnicalSettingProjection = {
 export type TechnicalSettingsRegistry = {
   readonly definitions: readonly ComponentTechnicalSettingDefinition[];
   get(
-    variantId: ComponentVariantId,
+    typeId: ComponentTypeId,
     id: string,
   ): ComponentTechnicalSettingDefinition | undefined;
-  listByVariant(variantId: ComponentVariantId): readonly ComponentTechnicalSettingDefinition[];
+  listByType(typeId: ComponentTypeId): readonly ComponentTechnicalSettingDefinition[];
 };
 
 export function createTechnicalSettingsRegistry(
@@ -62,7 +62,7 @@ export function createTechnicalSettingsRegistry(
   const seen = new Set<string>();
   for (const setting of definitions) {
     validateSetting(setting);
-    const key = settingKey(setting.variantId, setting.id);
+    const key = settingKey(setting.typeId, setting.id);
     if (seen.has(key)) {
       throw new Error(`Duplicate technical setting: ${key}`);
     }
@@ -71,13 +71,11 @@ export function createTechnicalSettingsRegistry(
 
   return {
     definitions,
-    get(variantId, id) {
-      return definitions.find(
-        (item) => item.variantId === variantId && item.id === id,
-      );
+    get(typeId, id) {
+      return definitions.find((item) => item.typeId === typeId && item.id === id);
     },
-    listByVariant(variantId) {
-      return definitions.filter((item) => item.variantId === variantId);
+    listByType(typeId) {
+      return definitions.filter((item) => item.typeId === typeId);
     },
   };
 }
@@ -86,7 +84,7 @@ export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSetti
   [
     {
       id: LED_PITCH_SETTING_ID,
-      variantId: "LIGHTING_FRONT_LED",
+      typeId: "LIGHTING_FRONT_LED",
       label: "Pas module LED",
       description:
         "Distanța aproximativă curentă între modulele LED. Parametru tehnic configurabil, nu o lege fizică imuabilă.",
@@ -101,7 +99,7 @@ export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSetti
     },
     {
       id: PSU_RESERVE_SETTING_ID,
-      variantId: "LIGHTING_FRONT_LED",
+      typeId: "LIGHTING_FRONT_LED",
       label: "Rezervă sursă de alimentare",
       description:
         "Rezerva sursei de alimentare pentru iluminarea frontală. Fără valoare numerică până la decizia ownerului.",
@@ -119,10 +117,10 @@ export const componentTechnicalSettingsRegistry = createTechnicalSettingsRegistr
   lightingFrontLedTechnicalSettings,
 );
 
-export function listVariantTechnicalSettings(
-  variantId: ComponentVariantId,
+export function listTypeTechnicalSettings(
+  typeId: ComponentTypeId,
 ): readonly ComponentTechnicalSettingDefinition[] {
-  return componentTechnicalSettingsRegistry.listByVariant(variantId);
+  return componentTechnicalSettingsRegistry.listByType(typeId);
 }
 
 export function unresolvedSettingReasons(
@@ -139,9 +137,9 @@ export function unresolvedSettingReasons(
 }
 
 export function projectTechnicalSettings(
-  variantId: ComponentVariantId,
+  typeId: ComponentTypeId,
 ): readonly ComponentTechnicalSettingProjection[] {
-  return listVariantTechnicalSettings(variantId).map(projectTechnicalSetting);
+  return listTypeTechnicalSettings(typeId).map(projectTechnicalSetting);
 }
 
 export function projectTechnicalSetting(
@@ -160,8 +158,8 @@ export function projectTechnicalSetting(
   };
 }
 
-function settingKey(variantId: ComponentVariantId, id: string): string {
-  return `${variantId}:${id}`;
+function settingKey(typeId: ComponentTypeId, id: string): string {
+  return `${typeId}:${id}`;
 }
 
 function validateSetting(setting: ComponentTechnicalSettingDefinition): void {

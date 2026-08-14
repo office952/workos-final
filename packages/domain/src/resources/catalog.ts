@@ -6,6 +6,10 @@ export type ResourceDefinition = {
   label: string;
   kind: ResourceKind;
   unit: ResourceUnit;
+  materialProperties?: {
+    opticalType?: "opal";
+    thicknessMm?: number;
+  };
 };
 
 export type CostEvidence = {
@@ -38,9 +42,13 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
   },
   {
     id: PLEXIGLAS_FACE_SHEET_ID,
-    label: "Plexiglas față 3 mm",
+    label: "Plexiglas față 3 mm opal",
     kind: "material",
     unit: "m2",
+    materialProperties: {
+      opticalType: "opal",
+      thicknessMm: 3,
+    },
   },
   {
     id: FOREX_BACK_SHEET_ID,

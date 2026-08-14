@@ -6,7 +6,7 @@ import type {
 import {
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
-  listVariantTechnicalSettings,
+  listTypeTechnicalSettings,
   unresolvedSettingReasons,
 } from "./technicalSettings.js";
 
@@ -27,15 +27,14 @@ function lightingGaps(
 }
 
 export const lightingFrontLedContract: ComponentCalculationContract = {
-  variantId: "LIGHTING_FRONT_LED",
+  typeId: "LIGHTING_FRONT_LED",
   role: "LIGHTING",
   profile: {
     measurement: "none",
     quantityUnit: null,
     independentCalculation: true,
     eic: "unavailable",
-    structuralGaps: lightingGaps(listVariantTechnicalSettings("LIGHTING_FRONT_LED")),
-    resourceIds: [],
+    structuralGaps: lightingGaps(listTypeTechnicalSettings("LIGHTING_FRONT_LED")),
   },
   collectMeasurements() {
     return [];
@@ -43,7 +42,7 @@ export const lightingFrontLedContract: ComponentCalculationContract = {
   calculate(input: ComponentCalculationInput): ComponentCalculationResult {
     const unavailable = lightingGaps(input.technicalSettings);
     return {
-      variantId: "LIGHTING_FRONT_LED",
+      typeId: "LIGHTING_FRONT_LED",
       role: "LIGHTING",
       status: "UNAVAILABLE",
       quantities: [],

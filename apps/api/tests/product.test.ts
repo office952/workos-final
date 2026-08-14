@@ -159,7 +159,8 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           values: {
             ...readyValues,
-            "face.material": "aluminum",
+            "face.materialFamily": "aluminum",
+            "face.opticalType": "transparent",
             "lighting.mode": "halo",
           },
         }),
@@ -167,7 +168,8 @@ describe("product configuration API", () => {
     );
     const body = await readBody(response);
     const definition = body.definition as { values: Record<string, unknown> };
-    expect(definition.values["face.material"]).toBe("plexiglas");
+    expect(definition.values["face.materialFamily"]).toBe("plexiglas");
+    expect(definition.values["face.opticalType"]).toBe("opal");
     expect(definition.values["lighting.mode"]).toBe("front_lit");
   });
 });

@@ -4,7 +4,7 @@ import {
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
   createTechnicalSettingsRegistry,
-  listVariantTechnicalSettings,
+  listTypeTechnicalSettings,
   projectTechnicalSettings,
   unresolvedSettingReasons,
   type ComponentTechnicalSettingDefinition,
@@ -12,7 +12,7 @@ import {
 
 function fixtureSetting(
   overrides: Partial<ComponentTechnicalSettingDefinition> &
-    Pick<ComponentTechnicalSettingDefinition, "id" | "variantId" | "resolution" | "classification">,
+    Pick<ComponentTechnicalSettingDefinition, "id" | "typeId" | "resolution" | "classification">,
 ): ComponentTechnicalSettingDefinition {
   return {
     label: overrides.label ?? overrides.id,
@@ -31,29 +31,29 @@ describe("technical settings registry", () => {
     const registry = createTechnicalSettingsRegistry([
       fixtureSetting({
         id: "wasteFactor",
-        variantId: "FACE_PLEXIGLAS_3MM",
+        typeId: "PLEXIGLAS_FACE",
         classification: "OWNER_CONFIRMED",
         resolution: { status: "RESOLVED", value: 1.1 },
       }),
       fixtureSetting({
         id: "cncToleranceMm",
-        variantId: "FACE_PLEXIGLAS_3MM",
+        typeId: "PLEXIGLAS_FACE",
         classification: "OWNER_DECISION_REQUIRED",
         resolution: { status: "UNRESOLVED", reason: "OWNER_DECISION_REQUIRED" },
       }),
     ]);
 
-    expect(registry.get("FACE_PLEXIGLAS_3MM", "wasteFactor")?.resolution).toEqual({
+    expect(registry.get("PLEXIGLAS_FACE", "wasteFactor")?.resolution).toEqual({
       status: "RESOLVED",
       value: 1.1,
     });
-    expect(registry.listByVariant("FACE_PLEXIGLAS_3MM").map((item) => item.id)).toEqual([
+    expect(registry.listByType("PLEXIGLAS_FACE").map((item) => item.id)).toEqual([
       "wasteFactor",
       "cncToleranceMm",
     ]);
-    expect(registry.listByVariant("LIGHTING_FRONT_LED")).toEqual([]);
+    expect(registry.listByType("LIGHTING_FRONT_LED")).toEqual([]);
     expect(
-      unresolvedSettingReasons(registry.listByVariant("FACE_PLEXIGLAS_3MM"), [
+      unresolvedSettingReasons(registry.listByType("PLEXIGLAS_FACE"), [
         "wasteFactor",
         "cncToleranceMm",
       ]),
@@ -63,13 +63,13 @@ describe("technical settings registry", () => {
       createTechnicalSettingsRegistry([
         fixtureSetting({
           id: "wasteFactor",
-          variantId: "FACE_PLEXIGLAS_3MM",
+          typeId: "PLEXIGLAS_FACE",
           classification: "OWNER_CONFIRMED",
           resolution: { status: "RESOLVED", value: 1 },
         }),
         fixtureSetting({
           id: "wasteFactor",
-          variantId: "FACE_PLEXIGLAS_3MM",
+          typeId: "PLEXIGLAS_FACE",
           classification: "OWNER_CONFIRMED",
           resolution: { status: "RESOLVED", value: 2 },
         }),
@@ -82,7 +82,7 @@ describe("technical settings registry", () => {
       createTechnicalSettingsRegistry([
         fixtureSetting({
           id: "broken",
-          variantId: "VOLUME_ALUMINIUM_06",
+          typeId: "ALUMINIUM_VOLUME",
           classification: "OWNER_CONFIRMED",
           resolution: { status: "UNRESOLVED", reason: "OWNER_DECISION_REQUIRED" },
         }),
@@ -93,7 +93,7 @@ describe("technical settings registry", () => {
 
 describe("canonical lighting settings", () => {
   it("owns LED pitch once and leaves PSU reserve unset", () => {
-    const settings = listVariantTechnicalSettings("LIGHTING_FRONT_LED");
+    const settings = listTypeTechnicalSettings("LIGHTING_FRONT_LED");
     expect(settings.map((item) => item.id)).toEqual([
       LED_PITCH_SETTING_ID,
       PSU_RESERVE_SETTING_ID,

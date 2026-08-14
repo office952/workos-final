@@ -1,9 +1,9 @@
-import { FOREX_BACK_SHEET_ID } from "../resources/catalog.js";
 import type {
   ComponentCalculationContract,
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
+import { resolveTypeResources } from "./componentTypes.js";
 import { squareMetersFromMm2 } from "./units.js";
 
 export const BACK_COMPONENT_ID = "BACK";
@@ -14,19 +14,20 @@ function backResult(
   status: ComponentCalculationResult["status"],
   quantities: ComponentCalculationResult["quantities"],
   requirements: ComponentCalculationResult["requirements"],
+  extraUnavailable: readonly string[] = [],
 ): ComponentCalculationResult {
   return {
-    variantId: "BACK_FOREX_10MM",
+    typeId: "FOREX_BACK",
     role: "BACK",
     status,
     quantities,
     requirements,
-    unavailable: [...BACK_GAPS],
+    unavailable: [...BACK_GAPS, ...extraUnavailable],
   };
 }
 
-export const backForex10mmContract: ComponentCalculationContract = {
-  variantId: "BACK_FOREX_10MM",
+export const forexBackContract: ComponentCalculationContract = {
+  typeId: "FOREX_BACK",
   role: "BACK",
   profile: {
     measurement: "supplied_area_mm2",
@@ -34,7 +35,6 @@ export const backForex10mmContract: ComponentCalculationContract = {
     independentCalculation: true,
     eic: "material",
     structuralGaps: BACK_GAPS,
-    resourceIds: [FOREX_BACK_SHEET_ID],
   },
   collectMeasurements() {
     return [];
@@ -45,6 +45,19 @@ export const backForex10mmContract: ComponentCalculationContract = {
       return backResult("MISSING_MEASUREMENT", [], []);
     }
     const squareMeters = squareMetersFromMm2(areaMm2);
+    const resolved = resolveTypeResources("FOREX_BACK", input.values);
+    const requirements = resolved.flatMap((item) =>
+      item.status === "RESOLVED"
+        ? [
+            {
+              componentId: BACK_COMPONENT_ID,
+              resourceId: item.resourceId,
+              quantity: squareMeters,
+              unit: "m2" as const,
+            },
+          ]
+        : [],
+    );
     return backResult(
       "CALCULATED",
       [
@@ -57,14 +70,8 @@ export const backForex10mmContract: ComponentCalculationContract = {
           basis: "confirmed_area",
         },
       ],
-      [
-        {
-          componentId: BACK_COMPONENT_ID,
-          resourceId: FOREX_BACK_SHEET_ID,
-          quantity: squareMeters,
-          unit: "m2",
-        },
-      ],
+      requirements,
+      resolved.flatMap((item) => (item.status === "UNRESOLVED" ? [item.reason] : [])),
     );
   },
 };

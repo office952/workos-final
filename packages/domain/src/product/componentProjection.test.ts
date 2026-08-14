@@ -22,26 +22,35 @@ describe("component architecture projection", () => {
 
   it("derives products using a variant from templates, not a hardcoded list", () => {
     const face = projectComponentArchitecture().find((item) => item.role === "FACE");
-    expect(face?.variants[0]?.variantId).toBe("FACE_PLEXIGLAS_3MM");
-    expect(face?.variants[0]?.usedBy).toEqual([
+    expect(face?.types[0]?.typeId).toBe("PLEXIGLAS_FACE");
+    expect(face?.types[0]?.label).toBe("Plexiglas");
+    expect(face?.types[0]?.usedBy).toEqual([
       expect.objectContaining({
         productCode: CANONICAL_PRODUCT_CODE,
         productLabel:
           "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
       }),
     ]);
-    expect(face?.variants[0]?.independentCalculation).toBe(true);
+    expect(face?.types[0]?.independentCalculation).toBe(true);
+    expect(
+      face?.types[0]?.configurations[0]?.attributes.find((item) => item.id === "face.opticalType"),
+    ).toEqual(
+      expect.objectContaining({
+        valueDisplay: "Opal",
+        ownership: "MATERIAL_IDENTITY",
+      }),
+    );
   });
 
   it("keeps lighting unavailable and projects canonical technical settings", () => {
     const lighting = projectComponentArchitecture().find(
       (item) => item.role === "LIGHTING",
     );
-    expect(lighting?.variants[0]?.eic).toBe("Indisponibil");
-    expect(lighting?.variants[0]?.gaps).toEqual([
+    expect(lighting?.types[0]?.eic).toBe("Indisponibil");
+    expect(lighting?.types[0]?.gaps).toEqual([
       "Regula de rezervă PSU nu este stabilită",
     ]);
-    expect(lighting?.variants[0]?.technicalSettings).toEqual([
+    expect(lighting?.types[0]?.technicalSettings).toEqual([
       expect.objectContaining({
         id: "ledPitchMm",
         valueDisplay: "100 mm",
@@ -55,13 +64,13 @@ describe("component architecture projection", () => {
       }),
     ]);
     expect(
-      projectComponentArchitecture().find((item) => item.role === "FACE")?.variants[0]
+      projectComponentArchitecture().find((item) => item.role === "FACE")?.types[0]
         ?.technicalSettings,
     ).toEqual([]);
   });
 
   it("shows BACK receiving FACE area from current product composition", () => {
     const back = projectComponentArchitecture().find((item) => item.role === "BACK");
-    expect(back?.variants[0]?.usedBy[0]?.inputNote).toMatch(/Față/);
+    expect(back?.types[0]?.usedBy[0]?.inputNote).toMatch(/Față/);
   });
 });

@@ -1,36 +1,31 @@
-import { backForex10mmContract } from "./back.js";
+import { forexBackContract } from "./back.js";
 import type { ComponentCalculationContract } from "./componentContract.js";
-import { facePlexiglas3mmContract } from "./face.js";
+import { plexiglasFaceContract } from "./face.js";
 import { lightingFrontLedContract } from "./lighting.js";
-import type { ComponentVariantId } from "./types.js";
-import { volumeAluminium06Contract } from "./volume.js";
+import { COMPONENT_TYPE_IDS, type ComponentTypeId } from "./componentTypes.js";
+import { aluminiumVolumeContract } from "./volume.js";
 
-export const COMPONENT_VARIANT_IDS = [
-  "FACE_PLEXIGLAS_3MM",
-  "VOLUME_ALUMINIUM_06",
-  "BACK_FOREX_10MM",
-  "LIGHTING_FRONT_LED",
-] as const satisfies readonly ComponentVariantId[];
+export { COMPONENT_TYPE_IDS };
 
 export function listComponentContracts(): ComponentCalculationContract[] {
-  return COMPONENT_VARIANT_IDS.map((id) => getComponentContract(id));
+  return COMPONENT_TYPE_IDS.map((id) => getComponentContract(id));
 }
 
 export function getComponentContract(
-  variantId: ComponentVariantId,
+  typeId: ComponentTypeId,
 ): ComponentCalculationContract {
-  switch (variantId) {
-    case "FACE_PLEXIGLAS_3MM":
-      return facePlexiglas3mmContract;
-    case "VOLUME_ALUMINIUM_06":
-      return volumeAluminium06Contract;
-    case "BACK_FOREX_10MM":
-      return backForex10mmContract;
+  switch (typeId) {
+    case "PLEXIGLAS_FACE":
+      return plexiglasFaceContract;
+    case "ALUMINIUM_VOLUME":
+      return aluminiumVolumeContract;
+    case "FOREX_BACK":
+      return forexBackContract;
     case "LIGHTING_FRONT_LED":
       return lightingFrontLedContract;
     default: {
-      const _exhaustive: never = variantId;
-      throw new Error(`Unknown component variant: ${_exhaustive}`);
+      const _exhaustive: never = typeId;
+      throw new Error(`Unknown component type: ${_exhaustive}`);
     }
   }
 }
