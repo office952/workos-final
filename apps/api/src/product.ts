@@ -1,12 +1,14 @@
 import {
   compileAggregate,
   compileDefinition,
-  confirmTruth,
+  compileEic,
+  confirmReviewedDefinition,
   getFormSchemaForTemplate,
   getProductTemplate,
   type DraftConfiguration,
   type DraftValue,
   type DraftValues,
+  type ProductDefinition,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 
@@ -37,6 +39,20 @@ function readDraft(templateCode: string, body: unknown): DraftConfiguration {
   return { templateCode, values };
 }
 
+function readReviewedDefinition(body: unknown): {
+  definition: ProductDefinition | null;
+  reviewId: string;
+} {
+  if (typeof body !== "object" || body === null) {
+    return { definition: null, reviewId: "" };
+  }
+  const payload = body as { definition?: ProductDefinition; reviewId?: string };
+  return {
+    definition: payload.definition ?? null,
+    reviewId: typeof payload.reviewId === "string" ? payload.reviewId : "",
+  };
+}
+
 export function registerProductRoutes(app: Hono): void {
   app.get("/api/product-templates/:templateCode", (c) => {
     const templateCode = c.req.param("templateCode");
@@ -61,7 +77,7 @@ export function registerProductRoutes(app: Hono): void {
       formSchema,
       readDraft(templateCode, await c.req.json()),
     );
-    return c.json({ definition });
+    return c.json({ definition, reviewId: definition.reviewId });
   });
 
   app.post("/api/product-templates/:templateCode/confirm", async (c) => {
@@ -72,19 +88,25 @@ export function registerProductRoutes(app: Hono): void {
       return c.json({ error: "not_found" }, 404);
     }
 
-    const definition = compileDefinition(
-      template,
-      formSchema,
-      readDraft(templateCode, await c.req.json()),
-    );
-    const confirmed = confirmTruth(definition);
-    if ("ok" in confirmed) {
-      return c.json({ error: "not_ready", definition }, 422);
+    const { definition, reviewId } = readReviewedDefinition(await c.req.json());
+    if (!definition || definition.templateCode !== templateCode) {
+      return c.json({ error: "review_required" }, 400);
     }
 
+    const confirmed = confirmReviewedDefinition(definition, reviewId);
+    if ("ok" in confirmed) {
+      const status = confirmed.reason === "review_mismatch" ? 409 : 422;
+      return c.json(
+        { error: confirmed.reason, definition: confirmed.definition },
+        status,
+      );
+    }
+
+    const aggregate = compileAggregate(confirmed, template, formSchema);
     return c.json({
       truth: confirmed,
-      aggregate: compileAggregate(confirmed, template, formSchema),
+      aggregate,
+      eic: compileEic(aggregate),
     });
   });
 }

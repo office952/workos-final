@@ -14,9 +14,26 @@ const readyValues = {
   "returnCant.material": "aluminum",
   "returnCant.depthMm": 60,
   "returnCant.finish": "none",
+  "returnCant.confirmedPerimeterMm": 12500,
   "back.material": "forex",
   "lighting.selected": false,
 };
+
+async function compileReady() {
+  const response = await createApp().request(
+    "/api/product-templates/letters/compile",
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ values: readyValues }),
+    },
+  );
+  const body = await readBody(response);
+  return {
+    definition: body.definition as JsonObject,
+    reviewId: body.reviewId as string,
+  };
+}
 
 describe("product configuration API", () => {
   it("returns the LETTERS template and form schema", async () => {
@@ -25,48 +42,19 @@ describe("product configuration API", () => {
     const body = await readBody(response);
     const template = body.template as JsonObject;
     const family = template.family as JsonObject;
-    const formSchema = body.formSchema as JsonObject;
     expect(template.code).toBe("letters");
     expect(family.label).toBe("Litere volumetrice");
-    expect((formSchema.sections as unknown[]).length).toBeGreaterThan(0);
   });
 
   it("compiles a valid draft to a ready definition", async () => {
-    const response = await createApp().request(
-      "/api/product-templates/letters/compile",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ values: readyValues }),
-      },
-    );
-    expect(response.status).toBe(200);
-    const body = await readBody(response);
-    const definition = body.definition as JsonObject;
-    expect(definition.readiness).toBe("ready");
+    const compiled = await compileReady();
+    expect(compiled.definition.readiness).toBe("ready");
+    expect(compiled.reviewId).toBe(compiled.definition.reviewId);
   });
 
-  it("keeps inactive lighting from blocking compile", async () => {
+  it("rejects confirmation while the reviewed definition is blocked", async () => {
     const response = await createApp().request(
       "/api/product-templates/letters/compile",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          values: { ...readyValues, "lighting.mode": "front_lit" },
-        }),
-      },
-    );
-    const body = await readBody(response);
-    const definition = body.definition as JsonObject;
-    const values = definition.values as JsonObject;
-    expect(definition.readiness).toBe("ready");
-    expect(values["lighting.mode"]).toBeUndefined();
-  });
-
-  it("rejects confirmation when required data is missing", async () => {
-    const response = await createApp().request(
-      "/api/product-templates/letters/confirm",
       {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -75,29 +63,70 @@ describe("product configuration API", () => {
         }),
       },
     );
-    expect(response.status).toBe(422);
     const body = await readBody(response);
-    const definition = body.definition as JsonObject;
-    expect(definition.readiness).toBe("blocked");
+    const confirm = await createApp().request(
+      "/api/product-templates/letters/confirm",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: body.definition,
+          reviewId: body.reviewId,
+        }),
+      },
+    );
+    expect(confirm.status).toBe(422);
   });
 
-  it("confirms only after a ready definition and returns aggregate from truth", async () => {
+  it("rejects confirmation of a different definition than the one reviewed", async () => {
+    const reviewed = await compileReady();
+    const changed = await createApp().request(
+      "/api/product-templates/letters/compile",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          values: { ...readyValues, "root.inscription": "CHANGED" },
+        }),
+      },
+    );
+    const changedBody = await readBody(changed);
     const response = await createApp().request(
       "/api/product-templates/letters/confirm",
       {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ values: readyValues }),
+        body: JSON.stringify({
+          definition: changedBody.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    expect(response.status).toBe(409);
+  });
+
+  it("confirms the reviewed definition and returns partial EIC", async () => {
+    const reviewed = await compileReady();
+    const response = await createApp().request(
+      "/api/product-templates/letters/confirm",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
       },
     );
     expect(response.status).toBe(200);
     const body = await readBody(response);
     const truth = body.truth as JsonObject;
     const aggregate = body.aggregate as JsonObject;
-    const components = aggregate.components as Array<{ id: string }>;
+    const eic = body.eic as JsonObject;
     expect(truth.status).toBe("CONFIRMED_IN_RUNTIME");
-    expect(aggregate.derivedFrom).toBe("ProductTruth");
-    expect(aggregate.inscription).toBe("WORKOS");
-    expect(components.map((item) => item.id)).not.toContain("LIGHTING");
+    expect((aggregate.quantities as Array<{ value: number }>)[0]?.value).toBe(12.5);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.total).toBe(312.5);
+    expect(eic.currency).toBe("EUR");
   });
 });

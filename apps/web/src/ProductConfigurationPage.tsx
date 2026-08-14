@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import type {
   DraftValues,
+  EicResult,
   ProductAggregate,
   ProductDefinition,
   ProductTruth,
@@ -9,7 +10,7 @@ import type {
 import { FormRenderer } from "./FormRenderer";
 import {
   compileConfiguration,
-  confirmConfiguration,
+  confirmReviewedConfiguration,
   fetchTemplateProjection,
   type TemplateProjection,
 } from "./productApi";
@@ -19,6 +20,17 @@ type PageState =
   | { kind: "missing" }
   | { kind: "error" }
   | { kind: "ready"; projection: TemplateProjection };
+
+function formatQuantity(value: number): string {
+  return value.toLocaleString("ro-RO", { maximumFractionDigits: 2 });
+}
+
+function formatMoney(value: number): string {
+  return value.toLocaleString("ro-RO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 export function ProductConfigurationPage() {
   const { templateCode = "" } = useParams();
@@ -30,7 +42,9 @@ export function ProductConfigurationPage() {
   const [confirmed, setConfirmed] = useState<{
     truth: ProductTruth;
     aggregate: ProductAggregate;
+    eic: EicResult;
   } | null>(null);
+  const [confirmNotice, setConfirmNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -38,6 +52,7 @@ export function ProductConfigurationPage() {
     setPage({ kind: "loading" });
     setDefinition(null);
     setConfirmed(null);
+    setConfirmNotice(null);
 
     void fetchTemplateProjection(templateCode)
       .then((projection) => {
@@ -72,6 +87,7 @@ export function ProductConfigurationPage() {
   async function handleCompile() {
     setBusy(true);
     setConfirmed(null);
+    setConfirmNotice(null);
     try {
       setDefinition(await compileConfiguration(templateCode, values));
     } catch {
@@ -82,12 +98,26 @@ export function ProductConfigurationPage() {
   }
 
   async function handleConfirm() {
+    if (!definition) {
+      return;
+    }
     setBusy(true);
+    setConfirmNotice(null);
     try {
-      const result = await confirmConfiguration(templateCode, values);
+      const result = await confirmReviewedConfiguration(templateCode, definition);
       if (result.ok) {
-        setConfirmed({ truth: result.truth, aggregate: result.aggregate });
+        setConfirmed({
+          truth: result.truth,
+          aggregate: result.aggregate,
+          eic: result.eic,
+        });
         setDefinition(null);
+      } else if (result.reason === "review_mismatch") {
+        setDefinition(null);
+        setConfirmed(null);
+        setConfirmNotice(
+          "Configurația verificată nu mai corespunde. Verificați din nou.",
+        );
       } else {
         setDefinition(result.definition);
         setConfirmed(null);
@@ -112,6 +142,7 @@ export function ProductConfigurationPage() {
           setValues((current) => ({ ...current, [fieldId]: value }));
           setDefinition(null);
           setConfirmed(null);
+          setConfirmNotice(null);
         }}
       />
 
@@ -120,6 +151,8 @@ export function ProductConfigurationPage() {
           Verifică configurația
         </button>
       </div>
+
+      {confirmNotice ? <p className="notice notice-blocked">{confirmNotice}</p> : null}
 
       {definition?.readiness === "blocked" ? (
         <div className="notice notice-blocked">
@@ -165,6 +198,12 @@ export function ProductConfigurationPage() {
                 );
               })}
           </ul>
+          {definition.measurements.length > 0 ? (
+            <p>
+              Măsurătorile de mai sus sunt introduse de operator. Nu sunt geometrie
+              calculată de WorkOS.
+            </p>
+          ) : null}
           <button type="button" onClick={() => void handleConfirm()} disabled={busy}>
             Confirmă configurația
           </button>
@@ -187,6 +226,64 @@ export function ProductConfigurationPage() {
               </ul>
             </div>
           ))}
+
+          {confirmed.truth.measurements.map((measurement) => (
+            <p key={measurement.fieldId}>
+              Perimetru confirmat: {measurement.value} mm (introdus de operator)
+            </p>
+          ))}
+
+          <h3>Cantitate tehnică</h3>
+          {confirmed.aggregate.quantities.length === 0 ? (
+            <p>Cantitatea tehnică nu poate fi calculată fără măsurătoare confirmată.</p>
+          ) : (
+            <ul>
+              {confirmed.aggregate.quantities.map((quantity) => (
+                <li key={quantity.id}>
+                  {quantity.label}: {formatQuantity(quantity.value)} {quantity.unit}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h3>Resurse necesare</h3>
+          {confirmed.eic.lines.length === 0 ? (
+            <p>Nu există încă o cerere de resurse pentru acest produs.</p>
+          ) : (
+            <ul>
+              {confirmed.eic.lines.map((line) => (
+                <li key={`${line.label}-need`}>
+                  {line.label}: {formatQuantity(line.quantity)} {line.unit}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h3>Cost intern estimat</h3>
+          <p>Costul intern al produsului este parțial. Este calculat doar pentru cant.</p>
+          {confirmed.eic.lines.length === 0 ? (
+            <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
+          ) : (
+            <ul>
+              {confirmed.eic.lines.map((line) => (
+                <li key={`${line.label}-cost`}>
+                  {line.label}: {formatQuantity(line.quantity)} {line.unit} ×{" "}
+                  {formatMoney(line.rate)} {line.currency}/{line.unit} ={" "}
+                  {formatMoney(line.cost)} {line.currency}
+                </li>
+              ))}
+            </ul>
+          )}
+          {confirmed.eic.lines.length > 0 ? (
+            <p>
+              Total cost intern estimat (doar cant): {formatMoney(confirmed.eic.total)}{" "}
+              {confirmed.eic.currency}
+            </p>
+          ) : null}
+          <p>
+            Neincluse încă în costul intern pilot:{" "}
+            {confirmed.eic.excludedComponentLabels.join(", ")}.
+          </p>
           <p className="page-lead">
             Indisponibil acum: {confirmed.aggregate.unavailable.join(", ")}.
           </p>

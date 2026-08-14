@@ -1,10 +1,11 @@
 import type {
   DraftValues,
-  FormSchema,
+  EicResult,
   ProductAggregate,
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  FormSchema,
 } from "@workos-final/domain";
 
 export type TemplateProjection = {
@@ -50,32 +51,50 @@ export async function compileConfiguration(
   return body.definition;
 }
 
-export async function confirmConfiguration(
+export async function confirmReviewedConfiguration(
   templateCode: string,
-  values: DraftValues,
+  definition: ProductDefinition,
 ): Promise<
-  | { ok: true; truth: ProductTruth; aggregate: ProductAggregate }
-  | { ok: false; definition: ProductDefinition }
+  | {
+      ok: true;
+      truth: ProductTruth;
+      aggregate: ProductAggregate;
+      eic: EicResult;
+    }
+  | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
 > {
   const response = await fetch(
     `${baseUrl}/api/product-templates/${templateCode}/confirm`,
     {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ values }),
+      body: JSON.stringify({
+        definition,
+        reviewId: definition.reviewId,
+      }),
     },
   );
   const body = await readJson<{
     truth?: ProductTruth;
     aggregate?: ProductAggregate;
+    eic?: EicResult;
     definition?: ProductDefinition;
+    error?: string;
   }>(response);
 
-  if (response.status === 422 && body.definition) {
-    return { ok: false, definition: body.definition };
+  if (response.status === 409 && body.definition) {
+    return { ok: false, reason: "review_mismatch", definition: body.definition };
   }
-  if (!response.ok || !body.truth || !body.aggregate) {
+  if (response.status === 422 && body.definition) {
+    return { ok: false, reason: "not_ready", definition: body.definition };
+  }
+  if (!response.ok || !body.truth || !body.aggregate || !body.eic) {
     throw new Error("confirm_unavailable");
   }
-  return { ok: true, truth: body.truth, aggregate: body.aggregate };
+  return {
+    ok: true,
+    truth: body.truth,
+    aggregate: body.aggregate,
+    eic: body.eic,
+  };
 }
