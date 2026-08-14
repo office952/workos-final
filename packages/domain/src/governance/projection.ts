@@ -197,6 +197,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Catalogul de resurse și evidența de cost intern",
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
+      "Harta canonică de domenii și administrare",
     ],
     ownerGates: [
       { id: "scope", statement: "Doar ownerul autorizează domeniul de implementare." },
@@ -221,6 +222,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Tarifele trăiesc doar în Resurse / Cost.",
       "Valorile tehnice ajustabile trăiesc în setările canonice ale variantei, nu în documentație, Intake sau literali ascunși.",
       "Documentația explică; calculul consumă; Intake nu administrează setările de sistem.",
+      "Fiecare domeniu deține setările sale. Nu există un Settings global care deține tot adevărul.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -242,6 +244,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "component-settings",
         label: "Setări tehnice de componentă",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "admin-map",
+        label: "Hartă de administrare cross-sistem",
         state: "IMPLEMENTED",
       },
       { id: "lighting", label: "Iluminare calculabilă", state: "NOT_IMPLEMENTED" },

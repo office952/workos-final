@@ -26,6 +26,12 @@ describe("system governance projection", () => {
     expect(governance.sources).toContain(
       "Setările tehnice canonice ale variantelor de componentă",
     );
+    expect(governance.sources).toContain(
+      "Harta canonică de domenii și administrare",
+    );
+    expect(governance.roadmap.find((item) => item.id === "admin-map")?.state).toBe(
+      "IMPLEMENTED",
+    );
     expect(
       governance.boundaries.find((item) => item.id === "intake-settings")?.statement,
     ).toMatch(/Intake nu deține setările tehnice/);
