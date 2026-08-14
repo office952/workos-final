@@ -82,17 +82,8 @@ function lightingSettingGaps(
   return unresolvedSettingReasons(settings, LIGHTING_REQUIRED_SETTING_IDS);
 }
 
-function lightingUnavailable(
-  knownLedLoadW: number | undefined,
-): string[] {
-  if (knownLedLoadW === undefined) {
-    return [...LIGHTING_MISSING_PREREQUISITES];
-  }
-  return [
-    LIGHTING_MISSING_LED_GEOMETRY,
-    LIGHTING_MISSING_LED_LOAD,
-    LIGHTING_MISSING_PSU_SELECTION,
-  ];
+function lightingUnavailable(): string[] {
+  return [...LIGHTING_MISSING_PREREQUISITES];
 }
 
 export const lightingFrontLedContract: ComponentCalculationContract = {
@@ -126,36 +117,20 @@ export const lightingFrontLedContract: ComponentCalculationContract = {
       };
     }
 
-    const reservePercent = resolvedSettingValue(
-      input.technicalSettings,
-      PSU_RESERVE_SETTING_ID,
-    );
-    if (reservePercent === undefined) {
+    if (
+      resolvedSettingValue(input.technicalSettings, PSU_RESERVE_SETTING_ID) ===
+      undefined
+    ) {
       throw new Error("lighting reserve setting passed gap check without a resolved value");
     }
-
-    const knownLedLoadW = input.shared.totalLedLoadW;
-    const quantities =
-      knownLedLoadW === undefined
-        ? []
-        : [
-            {
-              componentId: LIGHTING_COMPONENT_ID,
-              id: "minimumRequiredPsuCapacityW",
-              label: "Capacitate minimă sursă",
-              value: requiredPsuCapacityW(knownLedLoadW, reservePercent),
-              unit: "W" as const,
-              basis: "calculated_from_settings" as const,
-            },
-          ];
 
     return {
       typeId: "LIGHTING_FRONT_LED",
       role: "LIGHTING",
       status: "PARTIAL",
-      quantities,
+      quantities: [],
       requirements: [],
-      unavailable: lightingUnavailable(knownLedLoadW),
+      unavailable: lightingUnavailable(),
     };
   },
 };

@@ -72,8 +72,17 @@ describe("system governance projection", () => {
       governance.roadmap.find((item) => item.id === "technical-settings-write")
         ?.state,
     ).toBe("NOT_IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "lighting-foundation")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(governance.roadmap.find((item) => item.id === "lighting-foundation")?.label).toBe(
+      "Fundație calcul iluminare",
+    );
     expect(governance.roadmap.find((item) => item.id === "lighting")?.state).toBe(
       "PLANNED",
+    );
+    expect(governance.roadmap.find((item) => item.id === "lighting")?.label).toBe(
+      "Calcul complet iluminare",
     );
     expect(
       governance.authorities.find((item) => item.id === "AUTHORIZATION")?.state,

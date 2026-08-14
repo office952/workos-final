@@ -1,7 +1,8 @@
-import type { SharedCalculationContext } from "./componentContract.js";
-import { getComponentContract } from "./componentRegistry.js";
+import {
+  collectComponentMeasurements,
+  evaluateProductComponents,
+} from "./componentEvaluation.js";
 import type { DisplayLabelCatalog } from "./displayMetadata.js";
-import { listTypeTechnicalSettings } from "./technicalSettings.js";
 import type {
   DraftConfiguration,
   DraftValue,
@@ -10,11 +11,9 @@ import type {
   FormSchema,
   MissingInput,
   ProductAggregate,
-  ProductComponent,
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
-  TechnicalMeasurement,
   VisibilityRule,
 } from "./types.js";
 
@@ -135,7 +134,7 @@ export function compileDefinition(
     }
   }
 
-  const measurements = collectMeasurements(template, selectedIds, values);
+  const measurements = collectComponentMeasurements(template, selectedIds, values);
   const compiled: ProductDefinition = {
     templateCode: template.code,
     templateVersion: template.version,
@@ -169,32 +168,6 @@ export function definitionReviewId(definition: ProductDefinition): string {
     hash = Math.imul(hash, 16777619);
   }
   return (hash >>> 0).toString(16);
-}
-
-function collectMeasurements(
-  template: ProductTemplate,
-  selectedIds: readonly string[],
-  values: DraftValues,
-): TechnicalMeasurement[] {
-  return template.components
-    .filter((component) => selectedIds.includes(component.id))
-    .flatMap((component) =>
-      getComponentContract(component.typeId).collectMeasurements(values),
-    );
-}
-
-function sharedContextFor(
-  component: ProductComponent,
-  measurements: readonly TechnicalMeasurement[],
-): SharedCalculationContext {
-  const sourceId = component.inputMapping?.confirmedAreaMm2FromComponentId;
-  if (!sourceId) {
-    return {};
-  }
-  const area = measurements.find(
-    (item) => item.componentId === sourceId && item.unit === "mm2",
-  );
-  return area ? { confirmedAreaMm2: area.value } : {};
 }
 
 function uniqueUnavailable(values: readonly string[]): string[] {
@@ -270,17 +243,12 @@ export function compileAggregate(
       };
     });
 
-  const calculations = template.components
-    .filter((component) => truth.selectedComponentIds.includes(component.id))
-    .map((component) => {
-      const result = getComponentContract(component.typeId).calculate({
-        values: truth.values,
-        measurements: truth.measurements,
-        shared: sharedContextFor(component, truth.measurements),
-        technicalSettings: listTypeTechnicalSettings(component.typeId),
-      });
-      return { component, result };
-    });
+  const calculations = evaluateProductComponents({
+    template,
+    selectedComponentIds: truth.selectedComponentIds,
+    values: truth.values,
+    measurements: truth.measurements,
+  });
 
   return {
     derivedFrom: "ProductTruth",

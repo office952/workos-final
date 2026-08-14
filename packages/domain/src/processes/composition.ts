@@ -1,19 +1,24 @@
 import type { ComponentCalculationResult } from "../product/componentContract.js";
+import {
+  collectComponentMeasurements,
+  evaluateProductComponents,
+  lightingEvaluationFrom,
+  type ComponentEvaluation,
+} from "../product/componentEvaluation.js";
 import { getComponentType } from "../product/componentTypes.js";
 import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
 import {
   LIGHTING_MISSING_LED_GEOMETRY,
   LIGHTING_MISSING_PSU_CAPACITY,
   LIGHTING_MISSING_PSU_SELECTION,
-  lightingFrontLedContract,
 } from "../product/lighting.js";
-import { listTypeTechnicalSettings } from "../product/technicalSettings.js";
 import type {
   ComponentRole,
   ComponentTypeId,
   DraftValues,
   ProductTemplate,
   ProductTruth,
+  TechnicalMeasurement,
 } from "../product/types.js";
 import {
   APPLY_SURFACE_FINISH_ID,
@@ -128,6 +133,11 @@ export type ProcessCompositionInspection = {
   composition: ProductProcessComposition;
 };
 
+export type ProcessCompositionOptions = {
+  readonly measurements?: readonly TechnicalMeasurement[];
+  readonly evaluations?: readonly ComponentEvaluation[];
+};
+
 export function compositionNodeId(
   scope: ProcessCompositionScope,
   processId: string,
@@ -139,7 +149,7 @@ export function composeTypeProcessNodes(
   scope: ComponentRole,
   typeId: ComponentTypeId,
   values: DraftValues,
-  lightingResult: ComponentCalculationResult = inspectLighting(values),
+  lightingResult?: ComponentCalculationResult,
 ): ProcessCompositionNode[] {
   return resolvedProcessRequirementsForType(typeId, values).map((requirement) =>
     toNode({
@@ -157,9 +167,22 @@ export function composeTypeProcessNodes(
 export function composeProductProcesses(
   template: ProductTemplate,
   values: DraftValues,
+  options: ProcessCompositionOptions = {},
 ): ProductProcessComposition {
   const merged: DraftValues = { ...template.fixedValues, ...values };
-  const lightingResult = inspectLighting(merged);
+  const selectedIds = template.components.map((item) => item.id);
+  const measurements =
+    options.measurements ??
+    collectComponentMeasurements(template, selectedIds, merged);
+  const evaluations =
+    options.evaluations ??
+    evaluateProductComponents({
+      template,
+      selectedComponentIds: selectedIds,
+      values: merged,
+      measurements,
+    });
+  const lightingResult = requireLightingEvaluation(evaluations);
   const nodes = template.components.flatMap((component) =>
     composeTypeProcessNodes(
       component.id as ComponentRole,
@@ -207,7 +230,16 @@ export function composeProductProcessesFromTruth(
   if (truth.templateCode !== template.code) {
     throw new Error(`process_composition_template_mismatch:${truth.templateCode}`);
   }
-  return composeProductProcesses(template, truth.values);
+  const evaluations = evaluateProductComponents({
+    template,
+    selectedComponentIds: truth.selectedComponentIds,
+    values: truth.values,
+    measurements: truth.measurements,
+  });
+  return composeProductProcesses(template, truth.values, {
+    measurements: truth.measurements,
+    evaluations,
+  });
 }
 
 export function lettersProcessCompositionInspections(
@@ -388,13 +420,14 @@ function pushIfPresent(
   }
 }
 
-function inspectLighting(values: DraftValues): ComponentCalculationResult {
-  return lightingFrontLedContract.calculate({
-    values,
-    measurements: [],
-    shared: {},
-    technicalSettings: listTypeTechnicalSettings("LIGHTING_FRONT_LED"),
-  });
+function requireLightingEvaluation(
+  evaluations: readonly ComponentEvaluation[],
+): ComponentCalculationResult {
+  const lighting = lightingEvaluationFrom(evaluations);
+  if (!lighting) {
+    throw new Error("lighting_evaluation_missing");
+  }
+  return lighting;
 }
 
 function lightingReadinessFrom(
@@ -437,7 +470,7 @@ function toNode(input: {
   condition: ProcessRequirementCondition;
   reason: string;
   dependsOn: readonly string[];
-  lightingResult: ComponentCalculationResult;
+  lightingResult?: ComponentCalculationResult;
 }): ProcessCompositionNode {
   const process = getOperationalProcess(input.processId);
   if (!process) {
@@ -482,7 +515,7 @@ function nodeReadinessFor(process: OperationalProcess): CompositionNodeReadiness
 function nodeBlockers(
   process: OperationalProcess,
   readiness: CompositionNodeReadiness,
-  lightingResult: ComponentCalculationResult,
+  lightingResult?: ComponentCalculationResult,
 ): string[] {
   if (readiness === "REQUIRED") {
     return [];
@@ -494,6 +527,9 @@ function nodeBlockers(
     ];
   }
   if (process.id === PLACE_LED_MODULES_ID) {
+    if (!lightingResult) {
+      return [process.readinessNote];
+    }
     return lightingResult.unavailable.includes(LIGHTING_MISSING_LED_GEOMETRY)
       ? [LIGHTING_MISSING_LED_GEOMETRY]
       : lightingResult.unavailable.length > 0
@@ -501,6 +537,9 @@ function nodeBlockers(
         : [process.readinessNote];
   }
   if (process.id === INSTALL_OR_CONNECT_PSU_ID) {
+    if (!lightingResult) {
+      return [process.readinessNote];
+    }
     const capacityKnown = lightingResult.quantities.some(
       (item) => item.id === "minimumRequiredPsuCapacityW",
     );

@@ -16,7 +16,6 @@ export type ComponentInspectionLine = {
 
 export type SharedCalculationContext = {
   confirmedAreaMm2?: number;
-  totalLedLoadW?: number;
 };
 
 export type ComponentCalculationInput = {

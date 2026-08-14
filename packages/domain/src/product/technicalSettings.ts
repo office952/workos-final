@@ -91,7 +91,7 @@ export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSetti
       valueType: "number",
       unit: "mm",
       resolution: { status: "RESOLVED", value: 100 },
-      source: "owner technical decision",
+      source: "OWNER_CONFIRMED",
       classification: "OWNER_CONFIRMED",
       configurable: true,
       unresolvedReason: "Regula de pas LED nu este stabilită",

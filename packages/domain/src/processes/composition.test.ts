@@ -1,9 +1,22 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   compileAggregate,
   compileDefinition,
   confirmReviewedDefinition,
 } from "../product/compiler.js";
+import {
+  evaluateProductComponents,
+  lightingEvaluationFrom,
+} from "../product/componentEvaluation.js";
+import {
+  LIGHTING_MISSING_LED_GEOMETRY,
+  LIGHTING_MISSING_LED_LOAD,
+  LIGHTING_MISSING_PSU_CAPACITY,
+  LIGHTING_MISSING_PSU_SELECTION,
+} from "../product/lighting.js";
 import { compileEic } from "../resources/eic.js";
 import { seededDisplayLabelCatalog } from "../product/displayMetadata.js";
 import {
@@ -240,5 +253,76 @@ describe("letters process composition", () => {
     expect(fromTruth.nodes.some((item) => item.processId === CUT_SHEET_CNC_ID)).toBe(
       true,
     );
+    const lighting = lightingEvaluationFrom(
+      evaluateProductComponents({
+        template: frontlitPlexiAl06Template,
+        selectedComponentIds: truth.selectedComponentIds,
+        values: truth.values,
+        measurements: truth.measurements,
+      }),
+    );
+    expect(fromTruth.lightingCalculationReadiness).toBe("PARTIAL");
+    expect(aggregate.componentStatuses.find((item) => item.id === "LIGHTING")?.unavailable).toEqual(
+      lighting?.unavailable,
+    );
+  });
+
+  it("projects process readiness from a supplied canonical Lighting result", () => {
+    const compositionSource = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "composition.ts"),
+      "utf8",
+    );
+    expect(compositionSource).not.toMatch(/lightingFrontLedContract/);
+    expect(compositionSource).not.toMatch(/inspectLighting/);
+
+    const lightingComponent = frontlitPlexiAl06Template.components.find(
+      (item) => item.id === "LIGHTING",
+    );
+    if (!lightingComponent) {
+      throw new Error("expected lighting component");
+    }
+    const composition = composeProductProcesses(frontlitPlexiAl06Template, noneFinish, {
+      evaluations: [
+        {
+          component: lightingComponent,
+          result: {
+            typeId: "LIGHTING_FRONT_LED",
+            role: "LIGHTING",
+            status: "PARTIAL",
+            quantities: [
+              {
+                componentId: "LIGHTING",
+                id: "minimumRequiredPsuCapacityW",
+                label: "Capacitate minimă sursă",
+                value: 125,
+                unit: "W",
+                basis: "calculated_from_settings",
+              },
+            ],
+            requirements: [],
+            unavailable: [
+              LIGHTING_MISSING_LED_GEOMETRY,
+              LIGHTING_MISSING_LED_LOAD,
+              LIGHTING_MISSING_PSU_SELECTION,
+            ],
+          },
+        },
+      ],
+    });
+    const placeLed = composition.nodes.find(
+      (item) => item.id === compositionNodeId("LIGHTING", PLACE_LED_MODULES_ID),
+    );
+    const psu = composition.nodes.find(
+      (item) => item.id === compositionNodeId("LIGHTING", INSTALL_OR_CONNECT_PSU_ID),
+    );
+    expect(placeLed?.nodeReadiness).toBe("REQUIRED_BLOCKED");
+    expect(placeLed?.blockers).toEqual([LIGHTING_MISSING_LED_GEOMETRY]);
+    expect(psu?.nodeReadiness).toBe("REQUIRED_BLOCKED");
+    expect(psu?.blockers).toEqual([
+      "Capacitatea minimă a sursei este cunoscută. Selecția fizică a sursei rămâne indisponibilă.",
+      LIGHTING_MISSING_PSU_SELECTION,
+    ]);
+    expect(psu?.blockers).not.toContain(LIGHTING_MISSING_PSU_CAPACITY);
+    expect(composition.lightingCalculationReadiness).toBe("PARTIAL");
   });
 });

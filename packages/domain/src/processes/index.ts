@@ -50,6 +50,7 @@ export {
   type MissingProcessGap,
   type ProcessCompositionInspection,
   type ProcessCompositionNode,
+  type ProcessCompositionOptions,
   type ProductProcessComposition,
 } from "./composition.js";
 export {

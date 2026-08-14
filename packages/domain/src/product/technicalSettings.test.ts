@@ -99,6 +99,7 @@ describe("canonical lighting settings", () => {
       PSU_RESERVE_SETTING_ID,
     ]);
     expect(settings[0]?.resolution).toEqual({ status: "RESOLVED", value: 100 });
+    expect(settings[0]?.source).toBe("OWNER_CONFIRMED");
     expect(settings[1]?.resolution).toEqual({ status: "RESOLVED", value: 25 });
     expect(settings[1]?.source).toBe("OWNER_CONFIRMED");
     expect(settings[1]?.configurable).toBe(true);

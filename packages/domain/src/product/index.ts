@@ -37,6 +37,12 @@ export {
   selectedComponentIds,
 } from "./compiler.js";
 export {
+  collectComponentMeasurements,
+  evaluateProductComponents,
+  lightingEvaluationFrom,
+} from "./componentEvaluation.js";
+export type { ComponentEvaluation } from "./componentEvaluation.js";
+export {
   COMPONENT_TYPE_IDS,
   getComponentContract,
   listComponentContracts,
