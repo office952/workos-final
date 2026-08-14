@@ -1,5 +1,6 @@
 import type {
   GovernanceProjection,
+  OperationalProcessesAdminProjection,
   ProductSystemAdminProjection,
   ProductSystemEntityKind,
   ResourcesAdminProjection,
@@ -48,6 +49,14 @@ export async function patchDisplayLabel(input: {
     throw new Error("display_label_write_failed");
   }
   return { displayLabel: body.displayLabel, revision: body.revision };
+}
+
+export async function fetchOperationalProcessesAdministration(): Promise<OperationalProcessesAdminProjection> {
+  const response = await fetch(`${baseUrl}/api/operational-processes`);
+  if (!response.ok) {
+    throw new Error("operational_processes_unavailable");
+  }
+  return readJson<OperationalProcessesAdminProjection>(response);
 }
 
 export async function fetchResourcesAdministration(): Promise<ResourcesAdminProjection> {

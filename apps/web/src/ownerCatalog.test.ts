@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   projectComponentArchitecture,
   projectProductSystemAdministration,
+  projectOperationalProcessesAdministration,
   projectResourcesAdministration,
   projectSystemGovernance,
   seededDisplayLabelCatalog,
@@ -12,6 +13,7 @@ import {
   buildProductSystemAdminCatalog,
   buildProductSystemAdministrationCatalog,
 } from "./ownerCatalog";
+import { buildProcessesCatalog } from "./processesCatalog";
 import { buildResourcesCatalog } from "./resourcesCatalog";
 
 describe("component catalog presentation", () => {
@@ -132,6 +134,10 @@ describe("product system admin catalog presentation", () => {
         expect.objectContaining({
           label: "Referințe resursă",
           value: "Plexiglas 3 mm opal",
+        }),
+        expect.objectContaining({
+          label: "Procese operaționale",
+          value: "Debitare foaie CNC; Aplicare finisaj; Lipire față-volum",
         }),
       ]),
     );
@@ -281,5 +287,43 @@ describe("resources catalog presentation", () => {
       true,
     );
     expect(JSON.stringify(catalog)).not.toMatch(/Preț client|ofertă|TVA/i);
+  });
+});
+
+describe("processes catalog presentation", () => {
+  it("groups categories processes and capabilities without write targets", () => {
+    const catalog = buildProcessesCatalog(projectOperationalProcessesAdministration());
+    expect(catalog.categories.map((item) => item.id)).toEqual([
+      "categories",
+      "processes",
+      "capabilities",
+    ]);
+    expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
+      "Debitare",
+      "Formare",
+      "Finisare",
+      "Asamblare",
+      "Electric",
+    ]);
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Formare profil aluminiu",
+    );
+    expect(
+      catalog.categories[1]?.items
+        .find((item) => item.id === "process:FORM_ALUMINIUM_PROFILE")
+        ?.groups[0]?.sections.find((item) => item.id === "resources")?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Referințe",
+          value: "Formare profil aluminiu",
+        }),
+      ]),
+    );
+    expect(catalog.categories[2]?.items[0]?.label).toBe("Debitare CNC");
+    expect(
+      catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget),
+    ).toBe(true);
+    expect(JSON.stringify(catalog)).not.toMatch(/machineId|ExecutionPlan|Preț client/);
   });
 });

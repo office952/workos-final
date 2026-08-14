@@ -93,6 +93,38 @@ describe("system projection API", () => {
     expect(JSON.stringify(body)).not.toMatch(/plexiglas_face_3mm|forex_back_10mm/);
   });
 
+  it("projects operational processes from the typed catalog", async () => {
+    const response = await createApp().request("/api/operational-processes");
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      writeState: string;
+      processes: Array<{
+        id: string;
+        requiredCapabilityId: string;
+        resourceLinks: Array<{ id: string }>;
+      }>;
+      capabilities: Array<{ id: string }>;
+    };
+    expect(body.writeState).toBe("NOT_IMPLEMENTED");
+    expect(body.processes.map((item) => item.id)).toEqual([
+      "CUT_SHEET_CNC",
+      "FORM_ALUMINIUM_PROFILE",
+      "APPLY_SURFACE_FINISH",
+      "BOND_LETTER_BODY",
+      "PLACE_LED_MODULES",
+    ]);
+    expect(
+      body.processes.find((item) => item.id === "FORM_ALUMINIUM_PROFILE")
+        ?.requiredCapabilityId,
+    ).toBe("PROFILE_FORMING");
+    expect(
+      body.processes.find((item) => item.id === "FORM_ALUMINIUM_PROFILE")
+        ?.resourceLinks[0]?.id,
+    ).toBe("return_cant_forming");
+    expect(body.capabilities.map((item) => item.id)).toContain("CNC_ROUTING");
+    expect(JSON.stringify(body)).not.toMatch(/machineId|ExecutionPlan|employeeId/);
+  });
+
   it("projects governance without an active freeze or commercial", async () => {
     const response = await createApp().request("/api/governance");
     expect(response.status).toBe(200);

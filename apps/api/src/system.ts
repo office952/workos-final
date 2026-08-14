@@ -1,4 +1,5 @@
 import {
+  projectOperationalProcessesAdministration,
   projectResourcesAdministration,
   projectSystemGovernance,
 } from "@workos-final/domain";
@@ -19,6 +20,10 @@ export function registerSystemProjectionRoutes(
 
   app.get("/api/resources-admin", (c) => {
     return c.json(projectResourcesAdministration());
+  });
+
+  app.get("/api/operational-processes", (c) => {
+    return c.json(projectOperationalProcessesAdministration());
   });
 
   app.get("/api/governance", (c) => {

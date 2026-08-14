@@ -5,6 +5,7 @@ import { ComponentsPage } from "./ComponentsPage";
 import { GovernancePage } from "./GovernancePage";
 import { ProductCatalogPage } from "./ProductCatalogPage";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
+import { ProcessesAdminPage } from "./ProcessesAdminPage";
 import { ProductSystemAdminPage } from "./ProductSystemAdminPage";
 import { ResourcesAdminPage } from "./ResourcesAdminPage";
 import { SystemStatusPage } from "./SystemStatusPage";
@@ -29,6 +30,7 @@ export function App() {
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
         <Route path="/admin/resources" element={<ResourcesAdminPage />} />
+        <Route path="/admin/processes" element={<ProcessesAdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>

@@ -5,8 +5,8 @@ export function AdminHomePage() {
     <section>
       <h1>Administrare</h1>
       <p className="page-lead">
-        Sistemul de produs poate edita eticheta afișată. Resursele și costul
-        intern sunt deocamdată doar inspecție.
+        Sistemul de produs poate edita eticheta afișată. Resursele și procesele
+        operaționale sunt deocamdată doar inspecție.
       </p>
       <article className="catalog-family">
         <p className="catalog-kind">Sistem</p>
@@ -30,6 +30,18 @@ export function AdminHomePage() {
         <p className="catalog-product-desc">
           Familii de material, specificații, servicii și dovezi de cost intern.
           Fără stoc, fără preț client, fără write.
+        </p>
+      </article>
+      <article className="catalog-family">
+        <p className="catalog-kind">Sistem</p>
+        <h2>
+          <Link className="catalog-product-link" to="/admin/processes">
+            Procese operaționale
+          </Link>
+        </h2>
+        <p className="catalog-product-desc">
+          Cum se lucrează: debitare, formare, finisare, asamblare. Cere o
+          capabilitate, nu un utilaj. Fără execuție, fără write.
         </p>
       </article>
     </section>

@@ -30,6 +30,9 @@ test("admin display-label write persists and propagates", async ({
     await expect(
       page.getByRole("link", { name: "Resurse și cost intern" }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Procese operaționale" }),
+    ).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-home.png",
       fullPage: true,
