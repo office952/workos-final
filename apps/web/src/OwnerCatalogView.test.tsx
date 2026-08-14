@@ -18,7 +18,7 @@ const catalog: OwnerCatalog = {
           summary: "Deține suprafața.",
           groups: [
             {
-              id: "FACE_PLEXIGLAS_3MM",
+              id: "PLEXIGLAS_FACE",
               kindLabel: "Variantă",
               title: "Plexiglas 3 mm",
               sections: [

@@ -68,16 +68,16 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
     }),
   ).toBeVisible();
   await expect(page.getByText("Schemă de configurare legată")).toBeVisible();
-  await expect(page.getByText("Față → Plexiglas 3 mm")).toBeVisible();
-  await expect(page.getByText("Iluminare → Iluminare frontală")).toBeVisible();
+  await expect(page.getByText("Față → Plexiglas")).toBeVisible();
+  await expect(page.getByText("Iluminare → Iluminare frontală cu module LED")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-detail.png",
     fullPage: true,
   });
 
   await page.getByRole("button", { name: "Compoziții" }).click();
-  await expect(page.getByText("Volum → Aluminiu 0,6 mm")).toBeVisible();
-  await expect(page.getByText("Spate → Forex 10 mm")).toBeVisible();
+  await expect(page.getByText("Volum → Aluminiu")).toBeVisible();
+  await expect(page.getByText("Spate → Forex")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-composition.png",
     fullPage: true,
@@ -89,18 +89,43 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Spate" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Iluminare" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Față" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Plexiglas 3 mm" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Față" }).click();
+  await expect(page.getByText("Tip constructiv").first()).toBeVisible();
+  await expect(page.getByText("Opal", { exact: true })).toBeVisible();
+  await expect(page.getByText("3 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Identitate / proprietate material").first()).toBeVisible();
   await expect(page.getByText("Calcul independent")).toBeVisible();
   await expect(page.getByText("Produse care o folosesc")).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-face.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-model-overview.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/ia-components-face.png",
     fullPage: true,
   });
 
   await page.getByRole("button", { name: "Volum" }).click();
-  await expect(page.getByRole("heading", { name: "Aluminiu 0,6 mm" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Plexiglas 3 mm" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Aluminiu", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toHaveCount(0);
+  await expect(page.getByText("0.6 mm", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-volume.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Spate" }).click();
+  await expect(page.getByRole("heading", { name: "Forex", exact: true })).toBeVisible();
+  await expect(page.getByText("10 mm", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-back.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Iluminare" }).click();
   await expect(page.getByText("Indisponibil", { exact: true })).toBeVisible();
@@ -120,6 +145,10 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Șterge" })).toHaveCount(0);
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
   await page.screenshot({
+    path: "docs/worklog/screenshots/config-lighting.png",
+    fullPage: true,
+  });
+  await page.screenshot({
     path: "docs/worklog/screenshots/admin-lighting-variant.png",
     fullPage: true,
   });
@@ -131,7 +160,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.getByRole("button", { name: "Setări tehnice" }).click();
   await expect(page.getByText("Pas module LED")).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
-  await expect(page.getByText("Setările tehnice aparțin variantei, nu produsului.")).toBeVisible();
+  await expect(page.getByText("Setările tehnice aparțin tipului constructiv, nu produsului.")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-lighting-settings.png",
     fullPage: true,
@@ -158,6 +187,10 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Stare și lifecycle" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-narrow.png",
     fullPage: true,
   });
   await page.screenshot({

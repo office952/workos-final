@@ -28,7 +28,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     }),
   ).toBeVisible();
-  await expect(page.getByText("Material față: Plexiglas 3 mm")).toBeVisible();
+  await expect(page.getByText("Material față: Plexiglas 3 mm opal")).toBeVisible();
   await expect(page.getByText("Material volum: Aluminiu 0,6 mm")).toBeVisible();
   await expect(page.getByText("Material spate: Forex 10 mm")).toBeVisible();
   await expect(page.getByText("Iluminare: Iluminare frontală")).toBeVisible();
@@ -58,6 +58,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/settings-product-configure.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-product-configure.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByRole("heading", { name: "Verificare înainte de confirmare" })).toBeVisible();
@@ -71,6 +75,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/settings-product-review.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-product-review.png",
     fullPage: true,
   });
 
@@ -99,6 +107,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-review-confirm.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/config-product-confirm.png",
     fullPage: true,
   });
 });

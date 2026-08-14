@@ -1,7 +1,9 @@
 import {
   adminEditClassLabel,
   type AdminReadiness,
+  type AdminTypeRecord,
   type ComponentRoleProjection,
+  type ComponentTypeProjection,
   type GovernanceProjection,
   type ImplementationState,
   type ProductSystemAdminProjection,
@@ -80,80 +82,11 @@ export function buildComponentCatalog(
           label: role.label,
           kindLabel: "Componentă",
           summary: `Deține: ${role.owns.join("; ")}.`,
-          groups: role.variants.map((variant) => ({
-            id: variant.variantId,
-            kindLabel: "Variantă",
-            title: variant.label,
-            sections: [
-              {
-                id: "general",
-                title: "General",
-                facts: [
-                  { label: "Variantă", value: variant.label },
-                  {
-                    label: "Calcul independent",
-                    value: variant.independentCalculation ? "Da" : "Nu",
-                  },
-                ],
-              },
-              ...(variant.technicalSettings.length > 0
-                ? [
-                    {
-                      id: "technical-settings",
-                      title: "Setări tehnice",
-                      settingLines: variant.technicalSettings.map((setting) => ({
-                        label: setting.label,
-                        valueDisplay: setting.valueDisplay,
-                        statusLabel: setting.statusLabel,
-                        sourceLabel: setting.sourceLabel,
-                        administrationLabel: setting.administrationLabel,
-                      })),
-                    },
-                  ]
-                : []),
-              {
-                id: "calculation",
-                title: "Calcul",
-                facts: [
-                  { label: "Măsurare", value: variant.measurement },
-                  { label: "Cantitate", value: variant.quantity },
-                ],
-              },
-              {
-                id: "resources",
-                title: "Resurse / cost",
-                facts: [{ label: "Cost intern", value: variant.eic }],
-              },
-              {
-                id: "used-by",
-                title: "Produse care o folosesc",
-                lines:
-                  variant.usedBy.length === 0
-                    ? ["niciun produs încă"]
-                    : variant.usedBy.map((item) =>
-                        item.inputNote
-                          ? `${item.productLabel} (${item.inputNote})`
-                          : item.productLabel,
-                      ),
-              },
-              {
-                id: "gaps",
-                title: "Lipsă",
-                lines:
-                  variant.gaps.length > 0
-                    ? variant.gaps
-                    : ["Nicio lipsă înregistrată"],
-              },
-              {
-                id: "technical",
-                title: "Tehnic",
-                technical: true,
-                facts: [
-                  { label: "Rol", value: role.role },
-                  { label: "Variantă internă", value: variant.variantId },
-                ],
-              },
-            ],
+          groups: role.types.map((type) => ({
+            id: type.typeId,
+            kindLabel: "Tip constructiv",
+            title: type.label,
+            sections: typeDetailSections(type),
           })),
         })),
       },
@@ -164,24 +97,24 @@ export function buildComponentCatalog(
 export function buildProductSystemAdminCatalog(
   admin: ProductSystemAdminProjection,
 ): OwnerCatalog {
-  const componentItems = groupVariantsByRole(admin);
-  const settingItems = admin.variants
-    .filter((variant) => variant.technicalSettings.length > 0)
-    .map((variant) => ({
-      id: `settings:${variant.variantId}`,
-      label: variant.label,
-      kindLabel: "Setări variantă",
-      summary: `Setările tehnice aparțin variantei, nu produsului.`,
+  const componentItems = groupTypesByRole(admin);
+  const settingItems = admin.types
+    .filter((type) => type.technicalSettings.length > 0)
+    .map((type) => ({
+      id: `settings:${type.typeId}`,
+      label: type.label,
+      kindLabel: "Setări tip",
+      summary: "Setările tehnice aparțin tipului constructiv, nu produsului.",
       groups: [
         {
-          id: variant.variantId,
-          kindLabel: "Variantă",
-          title: variant.label,
+          id: type.typeId,
+          kindLabel: "Tip constructiv",
+          title: type.label,
           sections: [
             {
               id: "technical-settings",
               title: "Setări tehnice",
-              settingLines: variant.technicalSettings.map((setting) => ({
+              settingLines: type.technicalSettings.map((setting) => ({
                 label: setting.label,
                 valueDisplay: setting.valueDisplay,
                 statusLabel: setting.statusLabel,
@@ -193,9 +126,9 @@ export function buildProductSystemAdminCatalog(
               id: "used-by",
               title: "Produse care o folosesc",
               lines:
-                variant.usedByLabels.length === 0
+                type.usedByLabels.length === 0
                   ? ["niciun produs încă"]
-                  : [...variant.usedByLabels],
+                  : [...type.usedByLabels],
             },
           ],
         },
@@ -330,7 +263,7 @@ export function buildProductSystemAdminCatalog(
                   id: "composition",
                   title: "Compoziție",
                   lines: product.composition.map(
-                    (line) => `${line.roleLabel} → ${line.variantLabel}`,
+                    (line) => `${line.roleLabel} → ${line.typeLabel}`,
                   ),
                 },
                 {
@@ -390,7 +323,7 @@ export function buildProductSystemAdminCatalog(
                   id: "composition",
                   title: "Compoziție",
                   lines: product.composition.map(
-                    (line) => `${line.roleLabel} → ${line.variantLabel}`,
+                    (line) => `${line.roleLabel} → ${line.typeLabel}`,
                   ),
                 },
               ],
@@ -417,13 +350,8 @@ export function buildProductSystemAdminCatalog(
           ...admin.products.map((product) =>
             lifecycleItem(`life:product:${product.code}`, "Produs", product.label, product.readiness),
           ),
-          ...admin.variants.map((variant) =>
-            lifecycleItem(
-              `life:variant:${variant.variantId}`,
-              "Variantă",
-              variant.label,
-              variant.readiness,
-            ),
+          ...admin.types.map((type) =>
+            lifecycleItem(`life:type:${type.typeId}`, "Tip constructiv", type.label, type.readiness),
           ),
         ],
       },
@@ -431,102 +359,196 @@ export function buildProductSystemAdminCatalog(
   };
 }
 
-function groupVariantsByRole(admin: ProductSystemAdminProjection): CatalogItem[] {
+function groupTypesByRole(admin: ProductSystemAdminProjection): CatalogItem[] {
   const roles: {
     role: string;
     label: string;
-    variants: ProductSystemAdminProjection["variants"][number][];
+    types: AdminTypeRecord[];
   }[] = [];
-  for (const variant of admin.variants) {
-    const existing = roles.find((item) => item.role === variant.role);
+  for (const type of admin.types) {
+    const existing = roles.find((item) => item.role === type.role);
     if (existing) {
-      existing.variants.push(variant);
+      existing.types.push(type);
       continue;
     }
-    roles.push({ role: variant.role, label: variant.roleLabel, variants: [variant] });
+    roles.push({ role: type.role, label: type.roleLabel, types: [type] });
   }
 
   return roles.map((role) => ({
     id: role.role,
     label: role.label,
-    kindLabel: "Componentă",
-    groups: role.variants.map((variant) => ({
-      id: variant.variantId,
-      kindLabel: "Variantă",
-      title: variant.label,
-      sections: [
+    kindLabel: "Rol",
+    summary: "Rolul rămâne stabil. Tipul constructiv și configurația pot varia.",
+    groups: role.types.map((type) => ({
+      id: type.typeId,
+      kindLabel: "Tip constructiv",
+      title: type.label,
+      sections: adminTypeSections(type),
+    })),
+  }));
+}
+
+function typeDetailSections(type: ComponentTypeProjection): CatalogDetailSection[] {
+  return [
+    {
+      id: "general",
+      title: "General",
+      facts: [
+        { label: "Rol", value: "funcție în produs" },
+        { label: "Tip constructiv", value: type.label },
         {
-          id: "general",
-          title: "General",
-          facts: [
-            { label: "Variantă", value: variant.label },
-            { label: "Rol", value: variant.roleLabel },
-            {
-              label: "Calcul independent",
-              value: variant.independentCalculation ? "Da" : "Nu",
-            },
-          ],
-        },
-        {
-          id: "calculation",
-          title: "Calcul",
-          facts: [
-            { label: "Măsurare", value: variant.measurement },
-            { label: "Cantitate", value: variant.quantity },
-          ],
-        },
-        ...(variant.technicalSettings.length > 0
-          ? [
-              {
-                id: "technical-settings",
-                title: "Setări tehnice",
-                settingLines: variant.technicalSettings.map((setting) => ({
-                  label: setting.label,
-                  valueDisplay: setting.valueDisplay,
-                  statusLabel: setting.statusLabel,
-                  sourceLabel: setting.sourceLabel,
-                  administrationLabel: setting.administrationLabel,
-                })),
-              },
-            ]
-          : []),
-        {
-          id: "resources",
-          title: "Resurse / cost",
-          facts: [
-            { label: "Cost intern", value: variant.resourceReadiness },
-            {
-              label: "Referințe resursă",
-              value:
-                variant.resourceReferences.length === 0
-                  ? "nicio referință de resursă"
-                  : variant.resourceReferences.map((item) => item.label).join("; "),
-            },
-          ],
-          lines: ["Tarifele rămân la Resurse / Cost."],
-        },
-        {
-          id: "used-by",
-          title: "Produse care o folosesc",
-          lines:
-            variant.usedByLabels.length === 0
-              ? ["niciun produs încă"]
-              : [...variant.usedByLabels],
-        },
-        {
-          id: "gaps",
-          title: "Lipsă",
-          lines: variant.gaps.length > 0 ? variant.gaps : ["Nicio lipsă înregistrată"],
-        },
-        readinessSection(variant.readiness),
-        {
-          id: "technical",
-          title: "Tehnic",
-          technical: true,
-          facts: [{ label: "Identitate stabilă", value: variant.variantId }],
+          label: "Calcul independent",
+          value: type.independentCalculation ? "Da" : "Nu",
         },
       ],
-    })),
+      lines: [type.description],
+    },
+    ...configurationSections(type.configurations),
+    ...(type.technicalSettings.length > 0
+      ? [
+          {
+            id: "technical-settings",
+            title: "Setări tehnice",
+            settingLines: type.technicalSettings.map((setting) => ({
+              label: setting.label,
+              valueDisplay: setting.valueDisplay,
+              statusLabel: setting.statusLabel,
+              sourceLabel: setting.sourceLabel,
+              administrationLabel: setting.administrationLabel,
+            })),
+          },
+        ]
+      : []),
+    {
+      id: "calculation",
+      title: "Calcul",
+      facts: [
+        { label: "Măsurare", value: type.measurement },
+        { label: "Cantitate", value: type.quantity },
+      ],
+    },
+    {
+      id: "resources",
+      title: "Resurse / cost",
+      facts: [{ label: "Cost intern", value: type.eic }],
+    },
+    {
+      id: "used-by",
+      title: "Produse care o folosesc",
+      lines:
+        type.usedBy.length === 0
+          ? ["niciun produs încă"]
+          : type.usedBy.map((item) =>
+              item.inputNote ? `${item.productLabel} (${item.inputNote})` : item.productLabel,
+            ),
+    },
+    {
+      id: "gaps",
+      title: "Lipsă",
+      lines: type.gaps.length > 0 ? type.gaps : ["Nicio lipsă înregistrată"],
+    },
+    {
+      id: "technical",
+      title: "Tehnic",
+      technical: true,
+      facts: [{ label: "Identitate tip", value: type.typeId }],
+    },
+  ];
+}
+
+function adminTypeSections(type: AdminTypeRecord): CatalogDetailSection[] {
+  return [
+    {
+      id: "general",
+      title: "General",
+      facts: [
+        { label: "Rol", value: type.roleLabel },
+        { label: "Tip constructiv", value: type.label },
+        {
+          label: "Calcul independent",
+          value: type.independentCalculation ? "Da" : "Nu",
+        },
+      ],
+      lines: [type.description],
+    },
+    ...configurationSections(type.configurations),
+    ...(type.technicalSettings.length > 0
+      ? [
+          {
+            id: "technical-settings",
+            title: "Setări tehnice",
+            settingLines: type.technicalSettings.map((setting) => ({
+              label: setting.label,
+              valueDisplay: setting.valueDisplay,
+              statusLabel: setting.statusLabel,
+              sourceLabel: setting.sourceLabel,
+              administrationLabel: setting.administrationLabel,
+            })),
+          },
+        ]
+      : []),
+    {
+      id: "calculation",
+      title: "Calcul",
+      facts: [
+        { label: "Măsurare", value: type.measurement },
+        { label: "Cantitate", value: type.quantity },
+      ],
+    },
+    {
+      id: "resources",
+      title: "Resurse / cost",
+      facts: [
+        { label: "Cost intern", value: type.resourceReadiness },
+        {
+          label: "Referințe resursă",
+          value:
+            type.resourceReferences.length === 0
+              ? "nicio referință de resursă"
+              : type.resourceReferences.map((item) => item.label).join("; "),
+        },
+      ],
+      lines: ["Tarifele rămân la Resurse / Cost."],
+    },
+    {
+      id: "used-by",
+      title: "Produse care o folosesc",
+      lines:
+        type.usedByLabels.length === 0 ? ["niciun produs încă"] : [...type.usedByLabels],
+    },
+    {
+      id: "gaps",
+      title: "Lipsă",
+      lines: type.gaps.length > 0 ? type.gaps : ["Nicio lipsă înregistrată"],
+    },
+    readinessSection(type.readiness),
+    {
+      id: "technical",
+      title: "Tehnic",
+      technical: true,
+      facts: [{ label: "Identitate tip", value: type.typeId }],
+    },
+  ];
+}
+
+function configurationSections(
+  configurations: AdminTypeRecord["configurations"],
+): CatalogDetailSection[] {
+  if (configurations.length === 0) {
+    return [];
+  }
+  return configurations.map((configuration) => ({
+    id: `configuration:${configuration.productCode}`,
+    title: "Atribute / configurație",
+    facts: configuration.attributes
+      .filter((attribute) => attribute.ownership !== "MEASUREMENT")
+      .map((attribute) => ({
+        label: `${attribute.label} (${attribute.ownershipLabel})`,
+        value: attribute.valueDisplay,
+      })),
+    lines: configuration.attributes
+      .filter((attribute) => attribute.kindLabel.includes("Culoare de finisaj"))
+      .map(() => "Culoarea aplicată nu este aceeași cu proprietatea optică a materialului."),
   }));
 }
 

@@ -22,8 +22,8 @@ describe("component catalog presentation", () => {
       "LIGHTING",
     ]);
     expect(catalog.categories[0]?.items[0]?.kindLabel).toBe("Componentă");
-    expect(catalog.categories[0]?.items[0]?.groups[0]?.kindLabel).toBe("Variantă");
-    expect(catalog.categories[0]?.items[0]?.groups[0]?.title).toBe("Plexiglas 3 mm");
+    expect(catalog.categories[0]?.items[0]?.groups[0]?.kindLabel).toBe("Tip constructiv");
+    expect(catalog.categories[0]?.items[0]?.groups[0]?.title).toBe("Plexiglas");
     expect(
       catalog.categories[0]?.items[3]?.groups[0]?.sections.find((item) => item.id === "resources")
         ?.facts?.[0]?.value,
@@ -114,11 +114,26 @@ describe("product system admin catalog presentation", () => {
     expect(
       catalog.categories[5]?.items[0]?.groups[0]?.sections[0]?.lines,
     ).toEqual([
-      "Față → Plexiglas 3 mm",
-      "Volum → Aluminiu 0,6 mm",
-      "Spate → Forex 10 mm",
-      "Iluminare → Iluminare frontală",
+      "Față → Plexiglas",
+      "Volum → Aluminiu",
+      "Spate → Forex",
+      "Iluminare → Iluminare frontală cu module LED",
     ]);
+    const faceConfig = catalog.categories[3]?.items[0]?.groups[0]?.sections.find(
+      (item) => item.id.startsWith("configuration:"),
+    )?.facts;
+    expect(faceConfig).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Proprietate optică (Identitate / proprietate material)",
+          value: "Opal",
+        }),
+        expect.objectContaining({
+          label: "Grosime (Fixat de produs)",
+          value: "3 mm",
+        }),
+      ]),
+    );
     const lightingSettings = catalog.categories[4]?.items[0]?.groups[0]?.sections.find(
       (item) => item.id === "technical-settings",
     )?.settingLines;
