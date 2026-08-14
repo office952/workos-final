@@ -3,16 +3,18 @@ import {
   projectComponentArchitecture,
   projectProductSystemAdministration,
   projectSystemGovernance,
+  seededDisplayLabelCatalog,
 } from "@workos-final/domain";
 import {
   buildComponentCatalog,
   buildGovernanceCatalog,
   buildProductSystemAdminCatalog,
+  buildProductSystemAdministrationCatalog,
 } from "./ownerCatalog";
 
 describe("component catalog presentation", () => {
   it("places FACE VOLUME BACK LIGHTING under product components", () => {
-    const catalog = buildComponentCatalog(projectComponentArchitecture());
+    const catalog = buildComponentCatalog(projectComponentArchitecture(seededDisplayLabelCatalog()));
     expect(catalog.categories.map((item) => item.id)).toEqual(["product-components"]);
     expect(catalog.categories[0]?.label).toBe("Componente de produs");
     expect(catalog.categories[0]?.items.map((item) => item.id)).toEqual([
@@ -32,7 +34,7 @@ describe("component catalog presentation", () => {
   });
 
   it("keeps products-using derived and accepts extra categories without rewrite", () => {
-    const catalog = buildComponentCatalog(projectComponentArchitecture());
+    const catalog = buildComponentCatalog(projectComponentArchitecture(seededDisplayLabelCatalog()));
     const usedBy = catalog.categories[0]?.items[0]?.groups[0]?.sections
       .find((item) => item.id === "used-by")
       ?.lines?.[0];
@@ -76,7 +78,7 @@ describe("component catalog presentation", () => {
 
 describe("product system admin catalog presentation", () => {
   it("groups derived families categories products settings and lifecycle", () => {
-    const catalog = buildProductSystemAdminCatalog(projectProductSystemAdministration());
+    const catalog = buildProductSystemAdminCatalog(projectProductSystemAdministration(seededDisplayLabelCatalog()));
     expect(catalog.categories.map((item) => item.id)).toEqual([
       "families",
       "categories",
@@ -184,5 +186,34 @@ describe("governance catalog presentation", () => {
         .find((item) => item.id === "gates")
         ?.groups[0]?.sections[0]?.lines,
     ).toEqual(governance.ownerGates.map((item) => item.statement));
+  });
+});
+
+describe("product system administration catalog", () => {
+  it("exposes display-label edit targets only on writable entities", () => {
+    const catalog = buildProductSystemAdministrationCatalog(
+      projectProductSystemAdministration(seededDisplayLabelCatalog()),
+    );
+    expect(catalog.categories.map((item) => item.id)).toEqual([
+      "families",
+      "categories",
+      "products",
+      "constructive-types",
+      "technical-settings",
+      "compositions",
+      "lifecycle",
+    ]);
+    expect(catalog.categories[0]?.items[0]?.editTarget).toEqual({
+      entityKind: "PRODUCT_FAMILY",
+      entityId: "LIGHTED_VOLUMETRIC_SIGNS",
+      displayLabel: "Litere și semne volumetrice luminoase",
+      revision: 1,
+      identityLabel: "LIGHTED_VOLUMETRIC_SIGNS",
+    });
+    expect(catalog.categories[3]?.items[0]?.editTarget?.entityId).toBe(
+      "PLEXIGLAS_FACE",
+    );
+    expect(catalog.categories[4]?.items[0]?.editTarget).toBeUndefined();
+    expect(catalog.categories[5]?.items[0]?.editTarget).toBeUndefined();
   });
 });

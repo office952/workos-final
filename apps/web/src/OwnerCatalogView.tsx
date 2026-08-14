@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { CatalogCategory, CatalogItem, OwnerCatalog } from "./ownerCatalog";
 import { StatePill } from "./StatePill";
 
@@ -6,9 +6,15 @@ type OwnerCatalogViewProps = {
   catalog: OwnerCatalog;
   title: string;
   lead: string;
+  renderItemActions?: (item: CatalogItem) => ReactNode;
 };
 
-export function OwnerCatalogView({ catalog, title, lead }: OwnerCatalogViewProps) {
+export function OwnerCatalogView({
+  catalog,
+  title,
+  lead,
+  renderItemActions,
+}: OwnerCatalogViewProps) {
   const firstCategory = catalog.categories[0];
   const [categoryId, setCategoryId] = useState(firstCategory?.id ?? "");
   const selectedCategory =
@@ -77,7 +83,12 @@ export function OwnerCatalogView({ catalog, title, lead }: OwnerCatalogViewProps
             ))}
           </nav>
         </aside>
-        {selectedItem ? <CatalogDetail item={selectedItem} /> : null}
+        {selectedItem ? (
+          <CatalogDetail
+            item={selectedItem}
+            actions={renderItemActions?.(selectedItem)}
+          />
+        ) : null}
       </div>
     </section>
   );
@@ -104,12 +115,19 @@ function CategoryButton({
   );
 }
 
-function CatalogDetail({ item }: { item: CatalogItem }) {
+function CatalogDetail({
+  item,
+  actions,
+}: {
+  item: CatalogItem;
+  actions?: ReactNode;
+}) {
   return (
     <article className="owner-catalog-detail">
       <p className="catalog-kind">{item.kindLabel}</p>
       <h2>{item.label}</h2>
       {item.summary ? <p className="page-lead">{item.summary}</p> : null}
+      {actions}
       {item.groups.map((group) => {
         const hideChrome = group.title === item.label;
         return (

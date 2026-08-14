@@ -7,7 +7,16 @@ import {
   type GovernanceProjection,
   type ImplementationState,
   type ProductSystemAdminProjection,
+  type ProductSystemEntityKind,
 } from "@workos-final/domain";
+
+export type CatalogEditTarget = {
+  entityKind: ProductSystemEntityKind;
+  entityId: string;
+  displayLabel: string;
+  revision: number;
+  identityLabel: string;
+};
 
 export type CatalogFact = {
   label: string;
@@ -51,6 +60,7 @@ export type CatalogItem = {
   kindLabel: string;
   summary?: string;
   groups: readonly CatalogGroup[];
+  editTarget?: CatalogEditTarget;
 };
 
 export type CatalogCategory = {
@@ -356,6 +366,262 @@ export function buildProductSystemAdminCatalog(
         ],
       },
     ],
+  };
+}
+
+export function buildProductSystemAdministrationCatalog(
+  admin: ProductSystemAdminProjection,
+): OwnerCatalog {
+  return {
+    categories: [
+      {
+        id: "families",
+        label: "Familii",
+        kindLabel: "Catalog",
+        items: admin.families.map((family) => ({
+          id: `family:${family.id}`,
+          label: family.label,
+          kindLabel: "Familie",
+          summary: family.description,
+          editTarget: {
+            entityKind: "PRODUCT_FAMILY" as const,
+            entityId: family.id,
+            displayLabel: family.label,
+            revision: family.displayRevision,
+            identityLabel: family.id,
+          },
+          groups: [
+            {
+              id: family.id,
+              kindLabel: "Familie",
+              title: family.label,
+              sections: [
+                {
+                  id: "general",
+                  title: "General",
+                  facts: [
+                    { label: "Etichetă afișată", value: family.label },
+                    { label: "Categorii", value: String(family.categoryIds.length) },
+                    { label: "Produse", value: String(family.productCodes.length) },
+                  ],
+                },
+                readinessSection(family.readiness),
+                {
+                  id: "technical",
+                  title: "Tehnic",
+                  technical: true,
+                  facts: [{ label: "Identitate stabilă", value: family.id }],
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "categories",
+        label: "Categorii",
+        kindLabel: "Catalog",
+        items: admin.categories.map((category) => ({
+          id: `category:${category.id}`,
+          label: category.label,
+          kindLabel: "Categorie",
+          summary: category.parentLabel
+            ? `În ${category.familyLabel}, sub ${category.parentLabel}.`
+            : `În ${category.familyLabel}.`,
+          editTarget: {
+            entityKind: "PRODUCT_CATEGORY" as const,
+            entityId: category.id,
+            displayLabel: category.label,
+            revision: category.displayRevision,
+            identityLabel: category.id,
+          },
+          groups: [
+            {
+              id: category.id,
+              kindLabel: "Categorie",
+              title: category.label,
+              sections: [
+                {
+                  id: "general",
+                  title: "General",
+                  facts: [
+                    { label: "Etichetă afișată", value: category.label },
+                    { label: "Familie", value: category.familyLabel },
+                    { label: "Părinte", value: category.parentLabel ?? "rădăcină" },
+                  ],
+                },
+                readinessSection(category.readiness),
+                {
+                  id: "technical",
+                  title: "Tehnic",
+                  technical: true,
+                  facts: [{ label: "Identitate stabilă", value: category.id }],
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "products",
+        label: "Produse",
+        kindLabel: "Catalog",
+        items: admin.products.map((product) => ({
+          id: `product:${product.code}`,
+          label: product.label,
+          kindLabel: "Produs",
+          summary: product.description,
+          editTarget: {
+            entityKind: "PRODUCT_TEMPLATE" as const,
+            entityId: product.code,
+            displayLabel: product.label,
+            revision: product.displayRevision,
+            identityLabel: product.code,
+          },
+          groups: [
+            {
+              id: product.code,
+              kindLabel: "Produs",
+              title: product.label,
+              sections: [
+                {
+                  id: "general",
+                  title: "General",
+                  facts: [
+                    { label: "Etichetă afișată", value: product.label },
+                    { label: "Familie", value: product.familyLabel },
+                    { label: "Categorie", value: product.categoryLabel },
+                  ],
+                },
+                {
+                  id: "composition",
+                  title: "Compoziție",
+                  lines: product.composition.map(
+                    (line) => `${line.roleLabel} → ${line.typeLabel}`,
+                  ),
+                },
+                readinessSection(product.readiness),
+                {
+                  id: "technical",
+                  title: "Tehnic",
+                  technical: true,
+                  facts: [{ label: "Identitate stabilă", value: product.code }],
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "constructive-types",
+        label: "Tipuri constructive",
+        kindLabel: "Componente",
+        items: admin.types.map((type) => ({
+          id: `type:${type.typeId}`,
+          label: type.label,
+          kindLabel: "Tip constructiv",
+          summary: type.description,
+          editTarget: {
+            entityKind: "COMPONENT_TYPE" as const,
+            entityId: type.typeId,
+            displayLabel: type.label,
+            revision: type.displayRevision,
+            identityLabel: type.typeId,
+          },
+          groups: [
+            {
+              id: type.typeId,
+              kindLabel: "Tip constructiv",
+              title: type.label,
+              sections: adminTypeSections(type),
+            },
+          ],
+        })),
+      },
+      {
+        id: "technical-settings",
+        label: "Setări tehnice",
+        kindLabel: "Referință",
+        items: admin.types
+          .filter((type) => type.technicalSettings.length > 0)
+          .map((type) => ({
+            id: `settings:${type.typeId}`,
+            label: type.label,
+            kindLabel: "Setări tip",
+            summary: "Setările tehnice nu sunt editabile în acest write path.",
+            groups: [
+              {
+                id: type.typeId,
+                kindLabel: "Tip constructiv",
+                title: type.label,
+                sections: [
+                  {
+                    id: "technical-settings",
+                    title: "Setări tehnice",
+                    settingLines: type.technicalSettings.map((setting) => ({
+                      label: setting.label,
+                      valueDisplay: setting.valueDisplay,
+                      statusLabel: setting.statusLabel,
+                      sourceLabel: setting.sourceLabel,
+                      administrationLabel: setting.administrationLabel,
+                    })),
+                  },
+                ],
+              },
+            ],
+          })),
+      },
+      {
+        id: "compositions",
+        label: "Compoziții",
+        kindLabel: "Referință",
+        items: admin.products.map((product) => ({
+          id: `composition:${product.code}`,
+          label: product.label,
+          kindLabel: "Compoziție",
+          groups: [
+            {
+              id: product.code,
+              kindLabel: "Produs",
+              title: product.label,
+              sections: [
+                {
+                  id: "composition",
+                  title: "Compoziție",
+                  lines: product.composition.map(
+                    (line) => `${line.roleLabel} → ${line.typeLabel}`,
+                  ),
+                },
+              ],
+            },
+          ],
+        })),
+      },
+      {
+        id: "lifecycle",
+        label: "Stare și lifecycle",
+        kindLabel: "Referință",
+        items: [
+          ...admin.families.map((family) =>
+            lifecycleItem(`life:family:${family.id}`, "Familie", family.label, family.readiness),
+          ),
+          ...admin.categories.map((category) =>
+            lifecycleItem(
+              `life:category:${category.id}`,
+              "Categorie",
+              category.label,
+              category.readiness,
+            ),
+          ),
+          ...admin.products.map((product) =>
+            lifecycleItem(`life:product:${product.code}`, "Produs", product.label, product.readiness),
+          ),
+          ...admin.types.map((type) =>
+            lifecycleItem(`life:type:${type.typeId}`, "Tip constructiv", type.label, type.readiness),
+          ),
+        ],
+      },
+    ].filter((category) => category.items.length > 0),
   };
 }
 

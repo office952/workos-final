@@ -388,6 +388,18 @@ details summary {
   color: var(--muted);
 }
 
+.display-label-editor {
+  margin: 0.85rem 0 1.1rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.display-label-current {
+  margin: 0 0 0.65rem;
+  font-weight: 650;
+}
+
 @media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;

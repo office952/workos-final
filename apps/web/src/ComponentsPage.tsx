@@ -41,7 +41,7 @@ export function ComponentsPage() {
     <OwnerCatalogView
       catalog={buildProductSystemAdminCatalog(page.admin)}
       title="Module și componente"
-      lead="Fundație read-only a sistemului de produs. Proiectează catalogul, compoziția, componentele și eligibilitatea; nu editează și nu salvează."
+      lead="Proiecție de inspecție a sistemului de produs. Editarea etichetelor se face în Administrare."
     />
   );
 }

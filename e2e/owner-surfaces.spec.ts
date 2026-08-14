@@ -13,9 +13,11 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
 
   await page.getByRole("link", { name: "Module și componente" }).click();
   await expect(page.getByRole("heading", { name: "Module și componente" })).toBeVisible();
-  await expect(page.getByText("Fundație read-only a sistemului de produs")).toBeVisible();
+  await expect(
+    page.getByText("Proiecție de inspecție a sistemului de produs"),
+  ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Categorii catalog" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Administrare" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Administrare" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Familii" })).toHaveAttribute(
     "aria-current",
     "true",
