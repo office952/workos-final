@@ -22,6 +22,7 @@ describe("component reuse", () => {
         [FACE_AREA_FIELD]: 250000,
       }),
       shared: {},
+      technicalSettings: [],
     });
 
     const definition = compileDefinition(

@@ -12,11 +12,23 @@ describe("system governance projection", () => {
       governance.authorities.map((item) => [item.id, item]),
     );
     expect(byId.PRODUCT?.state).toBe("IMPLEMENTED");
+    expect(byId.COMPONENT_TECHNICAL_SETTINGS?.state).toBe("IMPLEMENTED");
+    expect(byId.COMPONENT_TECHNICAL_SETTINGS?.owns).toEqual(
+      expect.arrayContaining([
+        "parametrii tehnici reutilizabili activi pentru variantele de componentă",
+      ]),
+    );
     expect(byId.COMMERCIAL?.state).toBe("NOT_IMPLEMENTED");
     expect(byId.EXECUTION?.state).toBe("NOT_IMPLEMENTED");
     expect(byId.ANALYZER?.state).toBe("NOT_IMPLEMENTED");
     expect(governance.freeze.state).toBe("PLANNED");
     expect(governance.freeze.note).toMatch(/Nu este activă/);
+    expect(governance.sources).toContain(
+      "Setările tehnice canonice ale variantelor de componentă",
+    );
+    expect(
+      governance.boundaries.find((item) => item.id === "intake-settings")?.statement,
+    ).toMatch(/Intake nu deține setările tehnice/);
     expect(implementationStateLabel("NOT_IMPLEMENTED")).toBe("Neimplementat");
   });
 

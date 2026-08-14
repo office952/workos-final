@@ -103,6 +103,18 @@ export function projectSystemGovernance(): GovernanceProjection {
           "calculul cantității",
           "cererea de resurse",
           "starea de disponibilitate",
+          "consumul setărilor tehnice, nu valorile ajustabile",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "COMPONENT_TECHNICAL_SETTINGS",
+        label: "Setări tehnice de componentă",
+        owns: [
+          "parametrii tehnici reutilizabili activi pentru variantele de componentă",
+          "metadatele parametrilor",
+          "valorile tehnice configurate",
+          "starea rezolvat / nerezolvat",
         ],
         state: "IMPLEMENTED",
       },
@@ -163,9 +175,24 @@ export function projectSystemGovernance(): GovernanceProjection {
         statement: "Nu există persistență de business, migrări sau seed-uri.",
         state: "NOT_IMPLEMENTED",
       },
+      {
+        id: "intake-settings",
+        label: "Intake",
+        statement:
+          "Intake nu deține setările tehnice de sistem. Nu administrează pasul LED sau rezerva PSU.",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "documentation-values",
+        label: "Documentație",
+        statement:
+          "Documentația explică setările. Nu este autoritatea valorii active.",
+        state: "IMPLEMENTED",
+      },
     ],
     sources: [
       "Contractele de componentă din domeniu",
+      "Setările tehnice canonice ale variantelor de componentă",
       "ProductTemplate și catalogul de produse",
       "Catalogul de resurse și evidența de cost intern",
       "Compilatorul de definiție / adevăr / agregat",
@@ -192,6 +219,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       "O faptă de business are un singur proprietar.",
       "UI poate codifica experiența, nu adevărul de business.",
       "Tarifele trăiesc doar în Resurse / Cost.",
+      "Valorile tehnice ajustabile trăiesc în setările canonice ale variantei, nu în documentație, Intake sau literali ascunși.",
+      "Documentația explică; calculul consumă; Intake nu administrează setările de sistem.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -208,6 +237,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "partial-eic",
         label: "EIC parțial față / volum / spate",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "component-settings",
+        label: "Setări tehnice de componentă",
         state: "IMPLEMENTED",
       },
       { id: "lighting", label: "Iluminare calculabilă", state: "NOT_IMPLEMENTED" },

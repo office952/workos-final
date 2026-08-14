@@ -1,4 +1,5 @@
 import type { ResourceRequirement } from "../resources/requirement.js";
+import type { ComponentTechnicalSettingDefinition } from "./technicalSettings.js";
 import type {
   ComponentCalculationStatus,
   ComponentRole,
@@ -16,6 +17,7 @@ export type ComponentCalculationInput = {
   values: DraftValues;
   measurements: readonly TechnicalMeasurement[];
   shared: SharedCalculationContext;
+  technicalSettings: readonly ComponentTechnicalSettingDefinition[];
 };
 
 export type ComponentCalculationResult = {

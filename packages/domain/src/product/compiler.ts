@@ -1,6 +1,7 @@
 import { getProductFamily } from "./catalog.js";
 import type { SharedCalculationContext } from "./componentContract.js";
 import { getComponentContract } from "./componentRegistry.js";
+import { listVariantTechnicalSettings } from "./technicalSettings.js";
 import type {
   DraftConfiguration,
   DraftValue,
@@ -275,6 +276,7 @@ export function compileAggregate(
         values: truth.values,
         measurements: truth.measurements,
         shared: sharedContextFor(component, truth.measurements),
+        technicalSettings: listVariantTechnicalSettings(component.variantId),
       });
       return { component, result };
     });

@@ -11,6 +11,7 @@ describe("FACE_PLEXIGLAS_3MM", () => {
       values: {},
       measurements,
       shared: {},
+      technicalSettings: [],
     });
     expect(result.status).toBe("CALCULATED");
     expect(result.quantities).toEqual([
@@ -35,6 +36,7 @@ describe("FACE_PLEXIGLAS_3MM", () => {
       values: {},
       measurements: [],
       shared: {},
+      technicalSettings: [],
     });
     expect(result.status).toBe("MISSING_MEASUREMENT");
     expect(result.quantities).toEqual([]);

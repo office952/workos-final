@@ -24,6 +24,7 @@ describe("VOLUME_ALUMINIUM_06", () => {
       values: { "volume.depthMm": "60" },
       measurements,
       shared: {},
+      technicalSettings: [],
     });
     expect(result.status).toBe("CALCULATED");
     expect(result.quantities).toEqual([
@@ -55,6 +56,7 @@ describe("VOLUME_ALUMINIUM_06", () => {
       values: {},
       measurements: [],
       shared: {},
+      technicalSettings: [],
     });
     expect(result.status).toBe("MISSING_MEASUREMENT");
     expect(result.quantities).toEqual([]);

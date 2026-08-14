@@ -48,6 +48,14 @@ export {
 } from "./frontlitPlexiAl06.js";
 export { LIGHTING_COMPONENT_ID, lightingFrontLedContract } from "./lighting.js";
 export {
+  LED_PITCH_SETTING_ID,
+  PSU_RESERVE_SETTING_ID,
+  componentTechnicalSettingsRegistry,
+  createTechnicalSettingsRegistry,
+  listVariantTechnicalSettings,
+  projectTechnicalSettings,
+} from "./technicalSettings.js";
+export {
   VOLUME_COMPONENT_ID,
   VOLUME_PERIMETER_FIELD,
   volumeAluminium06Contract,
@@ -64,6 +72,11 @@ export type {
   ComponentRoleProjection,
   ComponentVariantProjection,
 } from "./componentProjection.js";
+export type {
+  ComponentTechnicalSettingDefinition,
+  ComponentTechnicalSettingProjection,
+  TechnicalSettingsRegistry,
+} from "./technicalSettings.js";
 export type {
   CatalogTreeNode,
   ComponentCalculationStatus,

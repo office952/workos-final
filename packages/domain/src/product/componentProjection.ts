@@ -1,6 +1,10 @@
 import { listComponentContracts } from "./componentRegistry.js";
 import type { ComponentEicReadiness, ComponentMeasurementKind } from "./componentContract.js";
 import { productTemplates } from "./frontlitPlexiAl06.js";
+import {
+  projectTechnicalSettings,
+  type ComponentTechnicalSettingProjection,
+} from "./technicalSettings.js";
 import type { ComponentRole, ComponentVariantId, ProductTemplate } from "./types.js";
 
 export const COMPONENT_ROLES: readonly ComponentRole[] = [
@@ -25,6 +29,7 @@ export type ComponentVariantProjection = {
   eic: string;
   gaps: readonly string[];
   usedBy: readonly ComponentProductUse[];
+  technicalSettings: readonly ComponentTechnicalSettingProjection[];
 };
 
 export type ComponentRoleProjection = {
@@ -103,7 +108,8 @@ function ownsCopy(role: ComponentRole): readonly string[] {
     case "LIGHTING":
       return [
         "Contractul de calcul",
-        "Starea de indisponibilitate",
+        "Consumul setărilor tehnice",
+        "Starea de disponibilitate",
       ];
     default: {
       const _exhaustive: never = role;
@@ -203,6 +209,7 @@ export function projectComponentArchitecture(): ComponentRoleProjection[] {
         eic: eicCopy(contract.profile.eic),
         gaps: contract.profile.structuralGaps,
         usedBy: productsUsing(contract.variantId, role),
+        technicalSettings: projectTechnicalSettings(contract.variantId),
       })),
   }));
 }

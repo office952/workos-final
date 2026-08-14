@@ -33,15 +33,31 @@ describe("component architecture projection", () => {
     expect(face?.variants[0]?.independentCalculation).toBe(true);
   });
 
-  it("keeps lighting unavailable with the real unresolved reasons", () => {
+  it("keeps lighting unavailable and projects canonical technical settings", () => {
     const lighting = projectComponentArchitecture().find(
       (item) => item.role === "LIGHTING",
     );
     expect(lighting?.variants[0]?.eic).toBe("Indisponibil");
     expect(lighting?.variants[0]?.gaps).toEqual([
-      "Regula de pas LED nu este stabilită",
       "Regula de rezervă PSU nu este stabilită",
     ]);
+    expect(lighting?.variants[0]?.technicalSettings).toEqual([
+      expect.objectContaining({
+        id: "ledPitchMm",
+        valueDisplay: "100 mm",
+        statusLabel: "Setat",
+        sourceLabel: "Confirmat de owner",
+      }),
+      expect.objectContaining({
+        id: "psuReservePercent",
+        valueDisplay: "Nesetat",
+        statusLabel: "Necesită decizie owner",
+      }),
+    ]);
+    expect(
+      projectComponentArchitecture().find((item) => item.role === "FACE")?.variants[0]
+        ?.technicalSettings,
+    ).toEqual([]);
   });
 
   it("shows BACK receiving FACE area from current product composition", () => {

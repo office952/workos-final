@@ -223,6 +223,9 @@ describe("ProductTruth and ProductAggregate", () => {
         }),
       ]),
     );
+    expect(aggregate.unavailable).toContain("Regula de rezervă PSU nu este stabilită");
+    expect(aggregate.unavailable).not.toContain("Regula de pas LED nu este stabilită");
+    expect(JSON.stringify(aggregate)).not.toMatch(/ledPitchMm|psuReservePercent/);
     expect(JSON.stringify(aggregate)).not.toMatch(/quote|markup/i);
     expect(JSON.stringify(aggregate)).not.toMatch(/RETURN_CANT|Lungime cant|"Cant"/);
   });

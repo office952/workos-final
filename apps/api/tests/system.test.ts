@@ -14,6 +14,7 @@ describe("system projection API", () => {
           variantId: string;
           eic: string;
           usedBy: Array<{ productCode: string }>;
+          technicalSettings: Array<{ id: string; valueDisplay: string }>;
         }>;
       }>;
     };
@@ -33,6 +34,10 @@ describe("system projection API", () => {
       CANONICAL_PRODUCT_CODE,
     );
     expect(body.roles[3]?.variants[0]?.eic).toBe("Indisponibil");
+    expect(body.roles[3]?.variants[0]?.technicalSettings).toEqual([
+      expect.objectContaining({ id: "ledPitchMm", valueDisplay: "100 mm" }),
+      expect.objectContaining({ id: "psuReservePercent", valueDisplay: "Nesetat" }),
+    ]);
     expect(JSON.stringify(body)).not.toMatch(/RETURN_CANT/);
   });
 
@@ -43,6 +48,9 @@ describe("system projection API", () => {
       authorities: Array<{ id: string; state: string }>;
       freeze: { state: string };
     };
+    expect(
+      body.authorities.find((item) => item.id === "COMPONENT_TECHNICAL_SETTINGS")?.state,
+    ).toBe("IMPLEMENTED");
     expect(body.authorities.find((item) => item.id === "COMMERCIAL")?.state).toBe(
       "NOT_IMPLEMENTED",
     );

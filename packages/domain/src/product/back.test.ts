@@ -8,6 +8,7 @@ describe("BACK_FOREX_10MM", () => {
       values: {},
       measurements: [],
       shared: { confirmedAreaMm2: 250000 },
+      technicalSettings: [],
     });
     expect(result.status).toBe("CALCULATED");
     expect(result.quantities).toEqual([
@@ -32,6 +33,7 @@ describe("BACK_FOREX_10MM", () => {
       values: {},
       measurements: [],
       shared: {},
+      technicalSettings: [],
     });
     expect(result.status).toBe("MISSING_MEASUREMENT");
     expect(result.quantities).toEqual([]);
