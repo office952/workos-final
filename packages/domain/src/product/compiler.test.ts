@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   compileAggregate,
   compileDefinition,
-  confirmTruth,
+  confirmReviewedDefinition,
   selectedComponentIds,
 } from "./compiler.js";
 import { lettersFormSchema, lettersTemplate } from "./letters.js";
@@ -19,6 +19,7 @@ const readyValues = {
   "returnCant.material": "aluminum",
   "returnCant.depthMm": 60,
   "returnCant.finish": "none",
+  "returnCant.confirmedPerimeterMm": 12500,
   "back.material": "forex",
   "lighting.selected": false,
 };
@@ -141,34 +142,74 @@ describe("ProductTruth and ProductAggregate", () => {
       lettersFormSchema,
       draft({ ...readyValues, "root.inscription": "" }),
     );
-    const result = confirmTruth(definition);
-    expect(result).toEqual({ ok: false, definition });
+    const result = confirmReviewedDefinition(definition, definition.reviewId);
+    expect(result).toMatchObject({ ok: false, reason: "not_ready" });
   });
 
-  it("confirms only the active scope and derives aggregate from truth", () => {
+  it("confirms the exact reviewed definition, not a later draft", () => {
+    const reviewed = compileDefinition(
+      lettersTemplate,
+      lettersFormSchema,
+      draft(readyValues),
+    );
+    const changed = compileDefinition(
+      lettersTemplate,
+      lettersFormSchema,
+      draft({ ...readyValues, "root.inscription": "CHANGED" }),
+    );
+    const rejected = confirmReviewedDefinition(changed, reviewed.reviewId);
+    expect(rejected).toMatchObject({ ok: false, reason: "review_mismatch" });
+
+    const truth = confirmReviewedDefinition(
+      reviewed,
+      reviewed.reviewId,
+      "2026-08-14T18:00:00.000Z",
+    );
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    expect(truth.values["root.inscription"]).toBe("WORKOS");
+    expect(truth.measurements[0]?.value).toBe(12500);
+    expect(truth.measurements[0]?.source).toBe("OPERATOR_MANUAL");
+
+    const aggregate = compileAggregate(truth, lettersTemplate, lettersFormSchema);
+    expect(aggregate.quantities[0]).toMatchObject({
+      componentId: "RETURN_CANT",
+      value: 12.5,
+      unit: "m",
+    });
+    expect(JSON.stringify(aggregate)).not.toMatch(/quote|markup/i);
+  });
+
+  it("blocks when the confirmed perimeter is missing", () => {
+    const definition = compileDefinition(
+      lettersTemplate,
+      lettersFormSchema,
+      draft({ ...readyValues, "returnCant.confirmedPerimeterMm": null }),
+    );
+    expect(definition.readiness).toBe("blocked");
+    expect(
+      definition.missing.some(
+        (item) => item.fieldId === "returnCant.confirmedPerimeterMm",
+      ),
+    ).toBe(true);
+  });
+
+  it("does not invent a quantity without confirmed measurement", () => {
     const definition = compileDefinition(
       lettersTemplate,
       lettersFormSchema,
       draft(readyValues),
     );
-    const truth = confirmTruth(definition, "2026-08-14T18:00:00.000Z");
-    expect("ok" in truth ? truth.ok : true).toBe(true);
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
     if ("ok" in truth) {
       throw new Error("expected confirmed truth");
     }
-    expect(truth.status).toBe("CONFIRMED_IN_RUNTIME");
-    expect(truth.selectedComponentIds).not.toContain("LIGHTING");
-    expect(truth.values["lighting.mode"]).toBeUndefined();
-
-    const aggregate = compileAggregate(truth, lettersTemplate, lettersFormSchema);
-    expect(aggregate.derivedFrom).toBe("ProductTruth");
-    expect(aggregate.inscription).toBe("WORKOS");
-    expect(aggregate.components.map((item) => item.id)).toEqual([
-      "FACE",
-      "RETURN_CANT",
-      "BACK",
-    ]);
-    expect(aggregate.unavailable.join(" ")).toMatch(/Preț/);
-    expect(JSON.stringify(aggregate)).not.toMatch(/price|EIC|quote/i);
+    const aggregate = compileAggregate(
+      { ...truth, measurements: [] },
+      lettersTemplate,
+      lettersFormSchema,
+    );
+    expect(aggregate.quantities).toEqual([]);
   });
 });

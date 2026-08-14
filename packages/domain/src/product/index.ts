@@ -1,7 +1,8 @@
 export {
   compileAggregate,
   compileDefinition,
-  confirmTruth,
+  confirmReviewedDefinition,
+  definitionReviewId,
   isFieldVisible,
   selectedComponentIds,
 } from "./compiler.js";
@@ -15,6 +16,11 @@ export {
   lettersTemplate,
   productTemplates,
 } from "./letters.js";
+export {
+  RETURN_CANT_COMPONENT_ID,
+  RETURN_CANT_PERIMETER_FIELD,
+  returnCantLinearMeters,
+} from "./returnCant.js";
 export type {
   ComponentSummary,
   DraftConfiguration,
@@ -33,5 +39,7 @@ export type {
   ProductFamilyId,
   ProductTemplate,
   ProductTruth,
+  TechnicalMeasurement,
+  TechnicalQuantity,
   VisibilityRule,
 } from "./types.js";

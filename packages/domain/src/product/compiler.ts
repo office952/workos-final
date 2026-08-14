@@ -1,3 +1,8 @@
+import {
+  RETURN_CANT_COMPONENT_ID,
+  RETURN_CANT_PERIMETER_FIELD,
+  returnCantLinearMeters,
+} from "./returnCant.js";
 import type {
   DraftConfiguration,
   DraftValue,
@@ -9,6 +14,7 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  TechnicalMeasurement,
   VisibilityRule,
 } from "./types.js";
 
@@ -126,32 +132,92 @@ export function compileDefinition(
     }
   }
 
-  return {
+  const measurements = collectMeasurements(selectedIds, values);
+  const compiled: ProductDefinition = {
     templateCode: template.code,
     templateVersion: template.version,
     familyId: template.family.id,
     selectedComponentIds: selectedIds,
     values,
+    measurements,
+    reviewId: "",
     readiness: missing.length === 0 ? "ready" : "blocked",
     missing,
   };
+  compiled.reviewId = definitionReviewId(compiled);
+  return compiled;
 }
 
-export function confirmTruth(
-  definition: ProductDefinition,
+export function definitionReviewId(definition: ProductDefinition): string {
+  const canonical = JSON.stringify({
+    templateCode: definition.templateCode,
+    templateVersion: definition.templateVersion,
+    selectedComponentIds: [...definition.selectedComponentIds],
+    values: Object.fromEntries(
+      Object.entries(definition.values).sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    ),
+    measurements: definition.measurements,
+  });
+  let hash = 2166136261;
+  for (let index = 0; index < canonical.length; index += 1) {
+    hash ^= canonical.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16);
+}
+
+function collectMeasurements(
+  selectedIds: readonly string[],
+  values: DraftValues,
+): TechnicalMeasurement[] {
+  if (!selectedIds.includes(RETURN_CANT_COMPONENT_ID)) {
+    return [];
+  }
+  const perimeter = values[RETURN_CANT_PERIMETER_FIELD];
+  if (typeof perimeter !== "number") {
+    return [];
+  }
+  return [
+    {
+      componentId: RETURN_CANT_COMPONENT_ID,
+      fieldId: RETURN_CANT_PERIMETER_FIELD,
+      value: perimeter,
+      unit: "mm",
+      source: "OPERATOR_MANUAL",
+      confirmed: true,
+    },
+  ];
+}
+
+export function confirmReviewedDefinition(
+  reviewed: ProductDefinition,
+  reviewId: string,
   confirmedAt = new Date().toISOString(),
-): ProductTruth | { ok: false; definition: ProductDefinition } {
-  if (definition.readiness !== "ready") {
-    return { ok: false, definition };
+):
+  | ProductTruth
+  | {
+      ok: false;
+      reason: "not_ready" | "review_mismatch";
+      definition: ProductDefinition;
+    } {
+  if (definitionReviewId(reviewed) !== reviewId) {
+    return { ok: false, reason: "review_mismatch", definition: reviewed };
+  }
+  if (reviewed.readiness !== "ready") {
+    return { ok: false, reason: "not_ready", definition: reviewed };
   }
 
   return {
     status: "CONFIRMED_IN_RUNTIME",
-    templateCode: definition.templateCode,
-    templateVersion: definition.templateVersion,
-    familyId: definition.familyId,
-    selectedComponentIds: definition.selectedComponentIds,
-    values: definition.values,
+    templateCode: reviewed.templateCode,
+    templateVersion: reviewed.templateVersion,
+    familyId: reviewed.familyId,
+    selectedComponentIds: reviewed.selectedComponentIds,
+    values: reviewed.values,
+    measurements: reviewed.measurements,
+    reviewId,
     confirmedAt,
   };
 }
@@ -199,10 +265,34 @@ export function compileAggregate(
     familyLabel: template.family.label,
     inscription,
     components,
+    quantities: returnCantQuantities(truth),
     unavailable: [
       "Geometrie din Analyzer",
-      "Consumuri de material",
-      "Preț și cost",
+      "Cost intern față",
+      "Cost intern spate",
+      "Cost intern iluminare",
     ],
   };
+}
+
+function returnCantQuantities(truth: ProductTruth) {
+  if (!truth.selectedComponentIds.includes(RETURN_CANT_COMPONENT_ID)) {
+    return [];
+  }
+  const measurement = truth.measurements.find(
+    (item) => item.fieldId === RETURN_CANT_PERIMETER_FIELD,
+  );
+  if (!measurement) {
+    return [];
+  }
+  return [
+    {
+      componentId: RETURN_CANT_COMPONENT_ID,
+      id: "return_cant_linear",
+      label: "Lungime cant",
+      value: returnCantLinearMeters(measurement.value),
+      unit: "m" as const,
+      basis: "confirmed_perimeter" as const,
+    },
+  ];
 }

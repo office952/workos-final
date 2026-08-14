@@ -129,6 +129,15 @@ export const lettersFormSchema: FormSchema = {
             values: ["vinyl", "painted"],
           },
         },
+        {
+          id: "returnCant.confirmedPerimeterMm",
+          componentId: "RETURN_CANT",
+          label: "Perimetru confirmat (mm)",
+          type: "number",
+          required: true,
+          min: 1,
+          visibleWhen: { kind: "always" },
+        },
       ],
     },
     {

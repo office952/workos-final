@@ -76,12 +76,23 @@ export type MissingInput = {
   componentId: string;
 };
 
+export type TechnicalMeasurement = {
+  componentId: string;
+  fieldId: string;
+  value: number;
+  unit: "mm";
+  source: "OPERATOR_MANUAL";
+  confirmed: true;
+};
+
 export type ProductDefinition = {
   templateCode: string;
   templateVersion: string;
   familyId: ProductFamilyId;
   selectedComponentIds: readonly string[];
   values: DraftValues;
+  measurements: readonly TechnicalMeasurement[];
+  reviewId: string;
   readiness: "ready" | "blocked";
   missing: readonly MissingInput[];
 };
@@ -93,6 +104,8 @@ export type ProductTruth = {
   familyId: ProductFamilyId;
   selectedComponentIds: readonly string[];
   values: DraftValues;
+  measurements: readonly TechnicalMeasurement[];
+  reviewId: string;
   confirmedAt: string;
 };
 
@@ -102,11 +115,21 @@ export type ComponentSummary = {
   details: readonly string[];
 };
 
+export type TechnicalQuantity = {
+  componentId: string;
+  id: string;
+  label: string;
+  value: number;
+  unit: "m";
+  basis: "confirmed_perimeter";
+};
+
 export type ProductAggregate = {
   derivedFrom: "ProductTruth";
   productLabel: string;
   familyLabel: string;
   inscription: string;
   components: readonly ComponentSummary[];
+  quantities: readonly TechnicalQuantity[];
   unavailable: readonly string[];
 };
