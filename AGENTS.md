@@ -5,7 +5,7 @@ It is not a cleanup or fork of previous WorkOS repositories.
 
 ## Current position
 
-PHASE 1 — Platform Shell + capability boundaries.
+PHASE 2–6 LETTERS configuration spine (pilot). Phase 7+ is not started.
 
 Do not implement the next product phase without an explicit Owner GO.
 
@@ -24,4 +24,4 @@ Do not implement the next product phase without an explicit Owner GO.
 
 ## Bootstrap proof
 
-The current app proves a platform shell around a real `GET /api/health` projection in Romanian.
+The current app has a platform shell, a real health check, and a LETTERS configuration spine: schema-driven form → compile → explicit confirm → runtime Product Truth → ProductAggregate.

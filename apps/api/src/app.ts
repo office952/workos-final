@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { registerProductRoutes } from "./product.js";
 
 export const HEALTH_SERVICE_NAME = "workos-final-api" as const;
 
@@ -30,6 +31,8 @@ export function createApp(): Hono {
     };
     return c.json(body);
   });
+
+  registerProductRoutes(app);
 
   return app;
 }

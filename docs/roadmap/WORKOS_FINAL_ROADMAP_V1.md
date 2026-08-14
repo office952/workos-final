@@ -35,8 +35,7 @@ Generalize from real products, not from theory.
 
 ## Current position
 
-PHASE 1 — Platform Shell + capability boundaries
-
-Capability boundary kernel: present.
-Platform shell: present.
-Phase 1 is complete only after Owner verdict. Phase 2 is not started.
+Configuration Spine V1 validated for LETTERS pilot.
+Phases 2–6 now have a first vertical implementation.
+General platform completion remains pending broader product coverage/generalization.
+Phase 7+ is not started.

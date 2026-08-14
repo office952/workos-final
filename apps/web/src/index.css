@@ -98,6 +98,99 @@ h1 {
   color: var(--bad);
 }
 
+.app-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.form-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-section {
+  margin: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.form-section legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.form-row {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+}
+
+.form-row-inline {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.form-row input,
+.form-row select {
+  width: 100%;
+  max-width: 24rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.form-row-inline input {
+  width: auto;
+}
+
+.action-row {
+  margin: 1.5rem 0;
+}
+
+button {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.notice {
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.notice-blocked {
+  border-color: #e3c4be;
+}
+
+.notice-ok {
+  border-color: #c9d7cc;
+}
+
+.notice h2,
+.notice h3 {
+  margin: 0 0 0.6rem;
+}
+
+.notice ul {
+  margin: 0.6rem 0 1rem;
+  padding-left: 1.2rem;
+}
+
 @media (max-width: 40rem) {
   .app-header-inner {
     align-items: flex-start;

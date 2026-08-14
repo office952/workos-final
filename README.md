@@ -6,11 +6,9 @@ This is not a cleanup of previous WorkOS code and not a fork of workflow-adv.
 
 ## Current status
 
-PHASE 0 — Repository Foundation.
+LETTERS configuration spine (Phases 2–6 pilot).
 
-The repo has a development loop: a typed API health endpoint, a React page that calls it, lint/typecheck/unit/build, and a real browser smoke test.
-
-No product system, business database, or commercial flow exists yet.
+The app has a platform shell, a real health check, and a schema-driven LETTERS configuration flow. No business database, pricing, or commercial flow exists yet.
 
 ## Prerequisites
 
@@ -34,6 +32,7 @@ pnpm dev:web
 
 - API: `http://127.0.0.1:8787/api/health`
 - Web: `http://127.0.0.1:5173`
+- Produse: `http://127.0.0.1:5173/products/letters`
 
 In development the web app proxies `/api` to the API. Optional override: `VITE_API_BASE_URL`.
 

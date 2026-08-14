@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.0",
+    "@workos-final/domain": "workspace:*",
     "hono": "^4.9.0"
   },
   "devDependencies": {
