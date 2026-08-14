@@ -19,6 +19,7 @@ function draft(values: DraftConfiguration["values"]): DraftConfiguration {
 const readyValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
+  "face.confirmedAreaMm2": 250000,
   "returnCant.depthMm": "60",
   "returnCant.finish": "none",
   "returnCant.confirmedPerimeterMm": 12500,
@@ -42,6 +43,8 @@ describe("canonical product", () => {
     expect(frontlitPlexiAl06Template.fixedValues["face.material"]).toBe(
       "plexiglas",
     );
+    expect(frontlitPlexiAl06Template.fixedValues["face.thicknessMm"]).toBe(3);
+    expect(frontlitPlexiAl06Template.fixedValues["back.thicknessMm"]).toBe(10);
     expect(frontlitPlexiAl06Template.fixedValues["returnCant.material"]).toBe(
       "aluminum_0_6",
     );
@@ -107,6 +110,20 @@ describe("module law", () => {
     expect(definition.values["lighting.mode"]).toBe("front_lit");
     expect(definition.values["face.material"]).toBe("plexiglas");
     expect(definition.values["returnCant.material"]).toBe("aluminum_0_6");
+  });
+
+  it("keeps product-fixed identity when the draft tries to change it", () => {
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      draft({
+        ...readyValues,
+        "face.material": "aluminum",
+        "lighting.mode": "halo",
+      }),
+    );
+    expect(definition.values["face.material"]).toBe("plexiglas");
+    expect(definition.values["lighting.mode"]).toBe("front_lit");
   });
 });
 
@@ -183,11 +200,25 @@ describe("ProductTruth and ProductAggregate", () => {
       frontlitPlexiAl06Template,
       frontlitPlexiAl06FormSchema,
     );
-    expect(aggregate.quantities[0]).toMatchObject({
-      componentId: "RETURN_CANT",
-      value: 12.5,
-      unit: "m",
-    });
+    expect(aggregate.quantities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          componentId: "RETURN_CANT",
+          value: 12.5,
+          unit: "m",
+        }),
+        expect.objectContaining({
+          componentId: "FACE",
+          value: 0.25,
+          unit: "m2",
+        }),
+        expect.objectContaining({
+          componentId: "BACK",
+          value: 0.25,
+          unit: "m2",
+        }),
+      ]),
+    );
     expect(JSON.stringify(aggregate)).not.toMatch(/quote|markup/i);
   });
 
@@ -202,6 +233,18 @@ describe("ProductTruth and ProductAggregate", () => {
       definition.missing.some(
         (item) => item.fieldId === "returnCant.confirmedPerimeterMm",
       ),
+    ).toBe(true);
+  });
+
+  it("blocks when the confirmed face area is missing", () => {
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      draft({ ...readyValues, "face.confirmedAreaMm2": null }),
+    );
+    expect(definition.readiness).toBe("blocked");
+    expect(
+      definition.missing.some((item) => item.fieldId === "face.confirmedAreaMm2"),
     ).toBe(true);
   });
 

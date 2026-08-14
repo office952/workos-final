@@ -20,6 +20,7 @@ import { applyRequirement, compileEic, resourceRequirements } from "./eic.js";
 const readyValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
+  "face.confirmedAreaMm2": 250000,
   "returnCant.depthMm": "60",
   "returnCant.finish": "none",
   "returnCant.confirmedPerimeterMm": 12500,
@@ -63,13 +64,13 @@ describe("EIC", () => {
   it("multiplies confirmed quantity by catalog rates and stays partial", () => {
     const { aggregate } = confirmedSpine();
     const requirements = resourceRequirements(aggregate);
-    expect(requirements).toHaveLength(2);
+    expect(requirements).toHaveLength(4);
     const eic = compileEic(aggregate);
     expect(eic.completeness).toBe("PARTIAL");
     expect(eic.currency).toBe("EUR");
-    expect(eic.lines.map((line) => line.cost)).toEqual([125, 187.5]);
-    expect(eic.total).toBe(312.5);
-    expect(eic.excludedComponentLabels).toEqual(["Față", "Spate", "Iluminare"]);
+    expect(eic.lines.map((line) => line.cost)).toEqual([125, 187.5, 4, 4]);
+    expect(eic.total).toBe(320.5);
+    expect(eic.excludedComponentLabels).toEqual(["Iluminare"]);
     expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote/i);
   });
 

@@ -22,6 +22,7 @@ export type FormField = {
   options?: readonly FieldOption[];
   visibleWhen: VisibilityRule;
   min?: number;
+  hint?: string;
 };
 
 export type FormSection = {
@@ -97,7 +98,7 @@ export type TechnicalMeasurement = {
   componentId: string;
   fieldId: string;
   value: number;
-  unit: "mm";
+  unit: "mm" | "mm2";
   source: "OPERATOR_MANUAL";
   confirmed: true;
 };
@@ -137,8 +138,8 @@ export type TechnicalQuantity = {
   id: string;
   label: string;
   value: number;
-  unit: "m";
-  basis: "confirmed_perimeter";
+  unit: "m" | "m2";
+  basis: "confirmed_perimeter" | "confirmed_area";
 };
 
 export type ProductAggregate = {

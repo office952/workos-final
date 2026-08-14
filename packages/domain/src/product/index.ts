@@ -20,6 +20,12 @@ export {
   isFieldVisible,
   selectedComponentIds,
 } from "./compiler.js";
+export { BACK_COMPONENT_ID } from "./back.js";
+export {
+  FACE_AREA_FIELD,
+  FACE_COMPONENT_ID,
+  faceAreaSquareMeters,
+} from "./face.js";
 export {
   CANONICAL_PRODUCT_CODE,
   formSchemas,

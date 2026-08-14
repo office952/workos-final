@@ -1,4 +1,10 @@
+import { BACK_COMPONENT_ID } from "./back.js";
 import { getProductFamily } from "./catalog.js";
+import {
+  FACE_AREA_FIELD,
+  FACE_COMPONENT_ID,
+  faceAreaSquareMeters,
+} from "./face.js";
 import {
   RETURN_CANT_COMPONENT_ID,
   RETURN_CANT_PERIMETER_FIELD,
@@ -16,6 +22,7 @@ import type {
   ProductTemplate,
   ProductTruth,
   TechnicalMeasurement,
+  TechnicalQuantity,
   VisibilityRule,
 } from "./types.js";
 
@@ -176,23 +183,30 @@ function collectMeasurements(
   selectedIds: readonly string[],
   values: DraftValues,
 ): TechnicalMeasurement[] {
-  if (!selectedIds.includes(RETURN_CANT_COMPONENT_ID)) {
-    return [];
-  }
+  const measurements: TechnicalMeasurement[] = [];
   const perimeter = values[RETURN_CANT_PERIMETER_FIELD];
-  if (typeof perimeter !== "number") {
-    return [];
-  }
-  return [
-    {
+  if (selectedIds.includes(RETURN_CANT_COMPONENT_ID) && typeof perimeter === "number") {
+    measurements.push({
       componentId: RETURN_CANT_COMPONENT_ID,
       fieldId: RETURN_CANT_PERIMETER_FIELD,
       value: perimeter,
       unit: "mm",
       source: "OPERATOR_MANUAL",
       confirmed: true,
-    },
-  ];
+    });
+  }
+  const area = values[FACE_AREA_FIELD];
+  if (selectedIds.includes(FACE_COMPONENT_ID) && typeof area === "number") {
+    measurements.push({
+      componentId: FACE_COMPONENT_ID,
+      fieldId: FACE_AREA_FIELD,
+      value: area,
+      unit: "mm2",
+      source: "OPERATOR_MANUAL",
+      confirmed: true,
+    });
+  }
+  return measurements;
 }
 
 export function confirmReviewedDefinition(
@@ -269,34 +283,56 @@ export function compileAggregate(
     familyLabel: getProductFamily(template.familyId)?.label ?? "",
     inscription,
     components,
-    quantities: returnCantQuantities(truth),
+    quantities: technicalQuantities(truth),
     unavailable: [
       "Geometrie din Analyzer",
-      "Cost intern față",
-      "Cost intern spate",
+      "Debitare CNC",
       "Cost intern iluminare",
     ],
   };
 }
 
-function returnCantQuantities(truth: ProductTruth) {
-  if (!truth.selectedComponentIds.includes(RETURN_CANT_COMPONENT_ID)) {
-    return [];
+function technicalQuantities(truth: ProductTruth): TechnicalQuantity[] {
+  const quantities: TechnicalQuantity[] = [];
+  if (truth.selectedComponentIds.includes(RETURN_CANT_COMPONENT_ID)) {
+    const perimeter = truth.measurements.find(
+      (item) => item.fieldId === RETURN_CANT_PERIMETER_FIELD,
+    );
+    if (perimeter) {
+      quantities.push({
+        componentId: RETURN_CANT_COMPONENT_ID,
+        id: "return_cant_linear",
+        label: "Lungime cant",
+        value: returnCantLinearMeters(perimeter.value),
+        unit: "m",
+        basis: "confirmed_perimeter",
+      });
+    }
   }
-  const measurement = truth.measurements.find(
-    (item) => item.fieldId === RETURN_CANT_PERIMETER_FIELD,
-  );
-  if (!measurement) {
-    return [];
+
+  const area = truth.measurements.find((item) => item.fieldId === FACE_AREA_FIELD);
+  if (area) {
+    const squareMeters = faceAreaSquareMeters(area.value);
+    if (truth.selectedComponentIds.includes(FACE_COMPONENT_ID)) {
+      quantities.push({
+        componentId: FACE_COMPONENT_ID,
+        id: "face_area",
+        label: "Suprafață față",
+        value: squareMeters,
+        unit: "m2",
+        basis: "confirmed_area",
+      });
+    }
+    if (truth.selectedComponentIds.includes(BACK_COMPONENT_ID)) {
+      quantities.push({
+        componentId: BACK_COMPONENT_ID,
+        id: "back_area",
+        label: "Suprafață spate",
+        value: squareMeters,
+        unit: "m2",
+        basis: "confirmed_area",
+      });
+    }
   }
-  return [
-    {
-      componentId: RETURN_CANT_COMPONENT_ID,
-      id: "return_cant_linear",
-      label: "Lungime cant",
-      value: returnCantLinearMeters(measurement.value),
-      unit: "m" as const,
-      basis: "confirmed_perimeter" as const,
-    },
-  ];
+  return quantities;
 }

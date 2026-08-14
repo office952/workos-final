@@ -8,7 +8,10 @@ export {
   type CapabilityStatus,
 } from "./capabilities.js";
 export {
+  BACK_COMPONENT_ID,
   CANONICAL_PRODUCT_CODE,
+  FACE_AREA_FIELD,
+  FACE_COMPONENT_ID,
   FRONT_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
   FULL_ALUMINIUM_VOLUMETRIC_LETTERS_CATEGORY_ID,
   HALO_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
@@ -18,6 +21,7 @@ export {
   buildCatalogTree,
   categoryHasCycle,
   compileAggregate,
+  faceAreaSquareMeters,
   compileDefinition,
   confirmReviewedDefinition,
   definitionReviewId,
@@ -62,6 +66,8 @@ export {
 } from "./product/index.js";
 export {
   ALUMINIUM_RETURN_PROFILE_ID,
+  FOREX_BACK_SHEET_ID,
+  PLEXIGLAS_FACE_SHEET_ID,
   RETURN_CANT_FORMING_ID,
   compileEic,
   costEvidence,
