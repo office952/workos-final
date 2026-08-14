@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLEXIGLAS_FACE_SHEET_ID } from "../resources/catalog.js";
+import { PLEXIGLAS_3MM_OPAL_ID } from "../resources/catalog.js";
 import { FACE_AREA_FIELD, FACE_COMPONENT_ID, plexiglasFaceContract } from "./face.js";
 
 const currentFaceConfig = {
@@ -30,7 +30,7 @@ describe("PLEXIGLAS_FACE", () => {
     expect(result.requirements).toEqual([
       {
         componentId: FACE_COMPONENT_ID,
-        resourceId: PLEXIGLAS_FACE_SHEET_ID,
+        resourceId: PLEXIGLAS_3MM_OPAL_ID,
         quantity: 0.25,
         unit: "m2",
       },

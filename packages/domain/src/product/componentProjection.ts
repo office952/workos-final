@@ -106,7 +106,7 @@ function eicCopy(readiness: ComponentEicReadiness): string {
     case "material":
       return "Disponibil: material";
     case "material_and_operation":
-      return "Disponibil: material și operație";
+      return "Disponibil: material și serviciu";
     case "unavailable":
       return "Indisponibil";
     default: {

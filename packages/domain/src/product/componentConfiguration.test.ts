@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLEXIGLAS_FACE_SHEET_ID } from "../resources/catalog.js";
+import { PLEXIGLAS_3MM_OPAL_ID } from "../resources/catalog.js";
 import { forexBackContract } from "./back.js";
 import {
   attributeOwnershipLabel,
@@ -51,10 +51,10 @@ describe("component configuration model", () => {
     expect(opal5.typeId).toBe("PLEXIGLAS_FACE");
     expect(opal3.quantities[0]?.value).toBe(0.25);
     expect(opal5.quantities[0]?.value).toBe(0.25);
-    expect(opal3.requirements[0]?.resourceId).toBe(PLEXIGLAS_FACE_SHEET_ID);
+    expect(opal3.requirements[0]?.resourceId).toBe(PLEXIGLAS_3MM_OPAL_ID);
     expect(opal5.requirements).toEqual([]);
     expect(opal5.unavailable).toContain(
-      "Nicio resursă canonică pentru această configurație de față.",
+      "Nicio specificație de Plexiglas pentru această configurație.",
     );
   });
 

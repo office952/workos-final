@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FOREX_BACK_SHEET_ID } from "../resources/catalog.js";
+import { FOREX_10MM_ID } from "../resources/catalog.js";
 import { BACK_COMPONENT_ID, forexBackContract } from "./back.js";
 
 describe("FOREX_BACK", () => {
@@ -21,7 +21,7 @@ describe("FOREX_BACK", () => {
     expect(result.requirements).toEqual([
       {
         componentId: BACK_COMPONENT_ID,
-        resourceId: FOREX_BACK_SHEET_ID,
+        resourceId: FOREX_10MM_ID,
         quantity: 0.25,
         unit: "m2",
       },

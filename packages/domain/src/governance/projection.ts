@@ -137,7 +137,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "RESOURCES_COST",
         label: "Resurse / cost intern",
-        owns: ["identitatea resursei", "evidența de cost intern / tarife"],
+        owns: [
+          "identitatea resursei",
+          "familia și specificația de material",
+          "evidența de cost intern / tarife",
+        ],
         state: "IMPLEMENTED",
       },
       {
@@ -200,6 +204,13 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "NOT_IMPLEMENTED",
       },
       {
+        id: "inventory",
+        label: "Stoc",
+        statement:
+          "Nu există stoc, lot, rezervare sau mișcare. Catalogul de resurse este consumabil ulterior de Inventory.",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
         id: "intake-settings",
         label: "Intake",
         statement:
@@ -218,7 +229,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Contractele de componentă din domeniu",
       "Setările tehnice canonice ale variantelor de componentă",
       "ProductTemplate și catalogul de produse",
-      "Catalogul de resurse și evidența de cost intern",
+      "Catalogul canonic de resurse și cost intern",
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
       "Harta canonică de domenii și administrare",
@@ -250,7 +261,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Documentația explică; calculul consumă; Intake nu administrează setările de sistem.",
       "Fiecare domeniu deține setările sale. Nu există un Settings global care deține tot adevărul.",
       "Eticheta de afișare persistată este autoritatea runtime după bootstrap. Codul rămâne default de inițializare, nu a doua valoare activă.",
-      "Setările tehnice și lifecycle-ul nu au write persistat.",
+      "Setările tehnice, lifecycle-ul și resursele nu au write persistat.",
+      "Identitatea resursei, specificația, dovada de cost, cererea de componentă și prețul client rămân separate.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -293,6 +305,26 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "display-label-write",
         label: "Write etichetă afișată",
         state: "IMPLEMENTED",
+      },
+      {
+        id: "resources-catalog-foundation",
+        label: "Fundație catalog resurse / cost",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "resource-admin-write",
+        label: "Write administrare resurse",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "inventory",
+        label: "Stoc / disponibilitate",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "operational-processes",
+        label: "Procese operaționale",
+        state: "PLANNED",
       },
       {
         id: "administrare-nav",

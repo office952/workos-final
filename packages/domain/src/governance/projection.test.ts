@@ -42,6 +42,19 @@ describe("system governance projection", () => {
       governance.roadmap.find((item) => item.id === "display-label-write")?.state,
     ).toBe("IMPLEMENTED");
     expect(
+      governance.roadmap.find((item) => item.id === "resources-catalog-foundation")
+        ?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "resource-admin-write")?.state,
+    ).toBe("NOT_IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "operational-processes")?.state,
+    ).toBe("PLANNED");
+    expect(
+      governance.boundaries.find((item) => item.id === "inventory")?.state,
+    ).toBe("NOT_IMPLEMENTED");
+    expect(
       governance.roadmap.find((item) => item.id === "technical-settings-write")
         ?.state,
     ).toBe("NOT_IMPLEMENTED");

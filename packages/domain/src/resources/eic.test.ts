@@ -11,6 +11,7 @@ import {
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
 import {
+  PLEXIGLAS_3MM_OPAL_ID,
   costEvidence,
   getCostEvidence,
   getResource,
@@ -89,5 +90,20 @@ describe("EIC", () => {
         unit: "m",
       }),
     ).toThrow(/Unknown resource missing_resource/);
+  });
+
+  it("rejects unit mismatch and stays generic", () => {
+    expect(() =>
+      applyRequirement({
+        componentId: "FACE",
+        resourceId: PLEXIGLAS_3MM_OPAL_ID,
+        quantity: 1,
+        unit: "m",
+      }),
+    ).toThrow(/Unit mismatch/);
+    const { aggregate } = confirmedSpine();
+    const eic = compileEic(aggregate);
+    expect(JSON.stringify(eic)).not.toMatch(/FACE|VOLUME|BACK|LIGHTING/);
+    expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote|VAT/i);
   });
 });

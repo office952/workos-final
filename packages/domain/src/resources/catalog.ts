@@ -1,15 +1,32 @@
-export type ResourceKind = "material" | "operation";
+export const RESOURCE_KINDS = ["MATERIAL", "SERVICE"] as const;
+export type ResourceKind = (typeof RESOURCE_KINDS)[number];
+
+export const MATERIAL_FAMILY_IDS = ["PLEXIGLAS", "FOREX", "ALUMINIUM"] as const;
+export type MaterialFamilyId = (typeof MATERIAL_FAMILY_IDS)[number];
+
 export type ResourceUnit = "m" | "m2";
+export type MaterialForm = "sheet" | "profile";
+
+export type MaterialFamily = {
+  id: MaterialFamilyId;
+  label: string;
+  description: string;
+};
+
+export type MaterialSpecification = {
+  familyId: MaterialFamilyId;
+  form: MaterialForm;
+  thicknessMm?: number;
+  opticalType?: "opal";
+};
 
 export type ResourceDefinition = {
   id: string;
   label: string;
   kind: ResourceKind;
   unit: ResourceUnit;
-  materialProperties?: {
-    opticalType?: "opal";
-    thicknessMm?: number;
-  };
+  familyId?: MaterialFamilyId;
+  specification?: MaterialSpecification;
 };
 
 export type CostEvidence = {
@@ -22,39 +39,72 @@ export type CostEvidence = {
   note: string;
 };
 
+export const PLEXIGLAS_3MM_OPAL_ID = "plexiglas_3mm_opal";
+export const FOREX_10MM_ID = "forex_10mm";
 export const ALUMINIUM_RETURN_PROFILE_ID = "aluminium_return_profile";
 export const RETURN_CANT_FORMING_ID = "return_cant_forming";
-export const PLEXIGLAS_FACE_SHEET_ID = "plexiglas_face_3mm";
-export const FOREX_BACK_SHEET_ID = "forex_back_10mm";
+
+export const materialFamilies: readonly MaterialFamily[] = [
+  {
+    id: "PLEXIGLAS",
+    label: "Plexiglas",
+    description: "Familie de foi PMMA. Grosimea și proprietatea optică sunt specificație, nu familia.",
+  },
+  {
+    id: "FOREX",
+    label: "Forex",
+    description: "Familie de foi PVC expandat. Grosimea este specificație.",
+  },
+  {
+    id: "ALUMINIUM",
+    label: "Aluminiu",
+    description: "Familie de aluminiu. Tabla, profilul și grosimea sunt specificație.",
+  },
+];
 
 export const resourceCatalog: readonly ResourceDefinition[] = [
   {
-    id: ALUMINIUM_RETURN_PROFILE_ID,
-    label: "Profil aluminiu volum",
-    kind: "material",
-    unit: "m",
-  },
-  {
-    id: RETURN_CANT_FORMING_ID,
-    label: "Formare volum",
-    kind: "operation",
-    unit: "m",
-  },
-  {
-    id: PLEXIGLAS_FACE_SHEET_ID,
-    label: "Plexiglas față 3 mm opal",
-    kind: "material",
+    id: PLEXIGLAS_3MM_OPAL_ID,
+    label: "Plexiglas 3 mm opal",
+    kind: "MATERIAL",
     unit: "m2",
-    materialProperties: {
-      opticalType: "opal",
+    familyId: "PLEXIGLAS",
+    specification: {
+      familyId: "PLEXIGLAS",
+      form: "sheet",
       thicknessMm: 3,
+      opticalType: "opal",
     },
   },
   {
-    id: FOREX_BACK_SHEET_ID,
-    label: "Forex spate 10 mm",
-    kind: "material",
+    id: FOREX_10MM_ID,
+    label: "Forex 10 mm",
+    kind: "MATERIAL",
     unit: "m2",
+    familyId: "FOREX",
+    specification: {
+      familyId: "FOREX",
+      form: "sheet",
+      thicknessMm: 10,
+    },
+  },
+  {
+    id: ALUMINIUM_RETURN_PROFILE_ID,
+    label: "Profil aluminiu 0,6 mm",
+    kind: "MATERIAL",
+    unit: "m",
+    familyId: "ALUMINIUM",
+    specification: {
+      familyId: "ALUMINIUM",
+      form: "profile",
+      thicknessMm: 0.6,
+    },
+  },
+  {
+    id: RETURN_CANT_FORMING_ID,
+    label: "Formare profil aluminiu",
+    kind: "SERVICE",
+    unit: "m",
   },
 ];
 
@@ -75,10 +125,10 @@ export const costEvidence: readonly CostEvidence[] = [
     perUnit: "m",
     source: "PILOT_INTERNAL_EVIDENCE",
     classification: "AI_DECISION",
-    note: "Generic forming is not an exact match to RETURN_PROFILE_MACHINE_FORMING 5 EUR/ml. Keep temporarily.",
+    note: "Service/process cost for forming aluminium profile. Not a physical material. Not an exact match to RETURN_PROFILE_MACHINE_FORMING 5 EUR/ml. Keep temporarily.",
   },
   {
-    resourceId: PLEXIGLAS_FACE_SHEET_ID,
+    resourceId: PLEXIGLAS_3MM_OPAL_ID,
     amount: 16,
     currency: "EUR",
     perUnit: "m2",
@@ -87,7 +137,7 @@ export const costEvidence: readonly CostEvidence[] = [
     note: "Legacy MAT-ACP-FATA-LITERE: plexiglas 3 mm PMMA opal = 16 EUR/mp purchase, no markup. Waste not folded into unit cost.",
   },
   {
-    resourceId: FOREX_BACK_SHEET_ID,
+    resourceId: FOREX_10MM_ID,
     amount: 16,
     currency: "EUR",
     perUnit: "m2",
@@ -97,10 +147,121 @@ export const costEvidence: readonly CostEvidence[] = [
   },
 ];
 
+export function getMaterialFamily(id: string): MaterialFamily | undefined {
+  return materialFamilies.find((item) => item.id === id);
+}
+
 export function getResource(id: string): ResourceDefinition | undefined {
   return resourceCatalog.find((item) => item.id === id);
 }
 
 export function getCostEvidence(resourceId: string): CostEvidence | undefined {
   return costEvidence.find((item) => item.resourceId === resourceId);
+}
+
+export function listMaterialSpecifications(
+  familyId: MaterialFamilyId,
+): ResourceDefinition[] {
+  return resourceCatalog.filter(
+    (item) => item.kind === "MATERIAL" && item.familyId === familyId,
+  );
+}
+
+export function listServiceResources(): ResourceDefinition[] {
+  return resourceCatalog.filter((item) => item.kind === "SERVICE");
+}
+
+export function matchMaterialSpecification(
+  familyId: MaterialFamilyId,
+  query: {
+    thicknessMm?: number;
+    opticalType?: "opal";
+    form?: MaterialForm;
+  },
+): ResourceDefinition | undefined {
+  return matchMaterialSpecificationIn(resourceCatalog, familyId, query);
+}
+
+export function matchMaterialSpecificationIn(
+  catalog: readonly ResourceDefinition[],
+  familyId: MaterialFamilyId,
+  query: {
+    thicknessMm?: number;
+    opticalType?: "opal";
+    form?: MaterialForm;
+  },
+): ResourceDefinition | undefined {
+  return catalog.find((item) => {
+    if (item.kind !== "MATERIAL" || item.familyId !== familyId) {
+      return false;
+    }
+    const spec = item.specification;
+    if (!spec) {
+      return false;
+    }
+    if (query.thicknessMm !== undefined && spec.thicknessMm !== query.thicknessMm) {
+      return false;
+    }
+    if (query.opticalType !== undefined && spec.opticalType !== query.opticalType) {
+      return false;
+    }
+    if (query.form !== undefined && spec.form !== query.form) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function resourceKindLabel(kind: ResourceKind): string {
+  switch (kind) {
+    case "MATERIAL":
+      return "Material";
+    case "SERVICE":
+      return "Serviciu";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
+export function resourceUnitLabel(unit: ResourceUnit): string {
+  switch (unit) {
+    case "m":
+      return "m";
+    case "m2":
+      return "m²";
+    default: {
+      const _exhaustive: never = unit;
+      return _exhaustive;
+    }
+  }
+}
+
+export function costSourceLabel(source: CostEvidence["source"]): string {
+  switch (source) {
+    case "PILOT_INTERNAL_EVIDENCE":
+      return "Evidență internă de pilot";
+    case "OWNER_CONFIRMED_PURCHASE":
+      return "Achiziție confirmată de owner";
+    default: {
+      const _exhaustive: never = source;
+      return _exhaustive;
+    }
+  }
+}
+
+export function costClassificationLabel(
+  classification: CostEvidence["classification"],
+): string {
+  switch (classification) {
+    case "AI_DECISION":
+      return "Decizie AI / pilot";
+    case "OWNER_CONFIRMED":
+      return "Confirmat de owner";
+    default: {
+      const _exhaustive: never = classification;
+      return _exhaustive;
+    }
+  }
 }

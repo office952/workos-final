@@ -1,12 +1,9 @@
-import {
-  ALUMINIUM_RETURN_PROFILE_ID,
-  RETURN_CANT_FORMING_ID,
-} from "../resources/catalog.js";
 import type {
   ComponentCalculationContract,
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
+import { resolveTypeResources } from "./componentTypes.js";
 import type { DraftValues, TechnicalMeasurement } from "./types.js";
 import { linearMetersFromMm } from "./units.js";
 
@@ -23,6 +20,7 @@ function volumeResult(
   status: ComponentCalculationResult["status"],
   quantities: ComponentCalculationResult["quantities"],
   requirements: ComponentCalculationResult["requirements"],
+  extraUnavailable: readonly string[] = [],
 ): ComponentCalculationResult {
   return {
     typeId: "ALUMINIUM_VOLUME",
@@ -30,7 +28,7 @@ function volumeResult(
     status,
     quantities,
     requirements,
-    unavailable: [...VOLUME_GAPS],
+    unavailable: [...VOLUME_GAPS, ...extraUnavailable],
   };
 }
 
@@ -68,6 +66,7 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
       return volumeResult("MISSING_MEASUREMENT", [], []);
     }
     const meters = volumeLinearMeters(perimeter.value);
+    const resolutions = resolveTypeResources("ALUMINIUM_VOLUME", input.values);
     return volumeResult(
       "CALCULATED",
       [
@@ -80,20 +79,17 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
           basis: "confirmed_perimeter",
         },
       ],
-      [
-        {
+      resolutions
+        .filter((item) => item.status === "RESOLVED")
+        .map((item) => ({
           componentId: VOLUME_COMPONENT_ID,
-          resourceId: ALUMINIUM_RETURN_PROFILE_ID,
+          resourceId: item.resourceId,
           quantity: meters,
-          unit: "m",
-        },
-        {
-          componentId: VOLUME_COMPONENT_ID,
-          resourceId: RETURN_CANT_FORMING_ID,
-          quantity: meters,
-          unit: "m",
-        },
-      ],
+          unit: "m" as const,
+        })),
+      resolutions.flatMap((item) =>
+        item.status === "UNRESOLVED" ? [item.reason] : [],
+      ),
     );
   },
 };

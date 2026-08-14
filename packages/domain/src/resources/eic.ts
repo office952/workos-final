@@ -34,6 +34,9 @@ export function applyRequirement(requirement: ResourceRequirement): EicLine {
   if (!resource || !evidence) {
     throw new Error(`Unknown resource ${requirement.resourceId}`);
   }
+  if (requirement.unit !== resource.unit || requirement.unit !== evidence.perUnit) {
+    throw new Error(`Unit mismatch for ${requirement.resourceId}`);
+  }
   return {
     resourceId: requirement.resourceId,
     label: resource.label,

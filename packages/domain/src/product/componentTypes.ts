@@ -1,10 +1,11 @@
 import {
-  ALUMINIUM_RETURN_PROFILE_ID,
-  FOREX_BACK_SHEET_ID,
-  PLEXIGLAS_FACE_SHEET_ID,
-  RETURN_CANT_FORMING_ID,
-} from "../resources/catalog.js";
+  liveResourceIdsForType,
+  resolveResourcesForType,
+  type ResourceResolution,
+} from "../resources/resolve.js";
 import type { ComponentRole, ComponentTypeId, DraftValues } from "./types.js";
+
+export type { ResourceResolution };
 
 export type { ComponentTypeId };
 
@@ -49,10 +50,6 @@ export type ComponentTypeDefinition = {
   description: string;
   attributes: readonly ComponentAttributeDefinition[];
 };
-
-export type ResourceResolution =
-  | { status: "RESOLVED"; resourceId: string }
-  | { status: "UNRESOLVED"; reason: string };
 
 export const componentTypes: readonly ComponentTypeDefinition[] = [
   {
@@ -253,60 +250,7 @@ export function resolveTypeResources(
   typeId: ComponentTypeId,
   values: DraftValues,
 ): ResourceResolution[] {
-  switch (typeId) {
-    case "PLEXIGLAS_FACE":
-      return [resolvePlexiglasFaceResource(values)];
-    case "ALUMINIUM_VOLUME":
-      return [
-        { status: "RESOLVED", resourceId: ALUMINIUM_RETURN_PROFILE_ID },
-        { status: "RESOLVED", resourceId: RETURN_CANT_FORMING_ID },
-      ];
-    case "FOREX_BACK":
-      return [resolveForexBackResource(values)];
-    case "LIGHTING_FRONT_LED":
-      return [];
-    default: {
-      const _exhaustive: never = typeId;
-      return _exhaustive;
-    }
-  }
+  return resolveResourcesForType(typeId, values);
 }
 
-export function liveResourceIdsForType(typeId: ComponentTypeId): readonly string[] {
-  switch (typeId) {
-    case "PLEXIGLAS_FACE":
-      return [PLEXIGLAS_FACE_SHEET_ID];
-    case "ALUMINIUM_VOLUME":
-      return [ALUMINIUM_RETURN_PROFILE_ID, RETURN_CANT_FORMING_ID];
-    case "FOREX_BACK":
-      return [FOREX_BACK_SHEET_ID];
-    case "LIGHTING_FRONT_LED":
-      return [];
-    default: {
-      const _exhaustive: never = typeId;
-      return _exhaustive;
-    }
-  }
-}
-
-function resolvePlexiglasFaceResource(values: DraftValues): ResourceResolution {
-  const thickness = values["face.thicknessMm"];
-  const optical = values["face.opticalType"];
-  if (thickness === 3 && optical === "opal") {
-    return { status: "RESOLVED", resourceId: PLEXIGLAS_FACE_SHEET_ID };
-  }
-  return {
-    status: "UNRESOLVED",
-    reason: "Nicio resursă canonică pentru această configurație de față.",
-  };
-}
-
-function resolveForexBackResource(values: DraftValues): ResourceResolution {
-  if (values["back.thicknessMm"] === 10) {
-    return { status: "RESOLVED", resourceId: FOREX_BACK_SHEET_ID };
-  }
-  return {
-    status: "UNRESOLVED",
-    reason: "Nicio resursă canonică pentru această grosime de spate.",
-  };
-}
+export { liveResourceIdsForType };
