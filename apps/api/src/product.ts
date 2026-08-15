@@ -6,6 +6,7 @@ import {
   composeProductProcesses,
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
+  freezeAcceptedProductionSnapshot,
   lettersProcessCompositionInspections,
   type DraftConfiguration,
   type DraftValue,
@@ -111,46 +112,105 @@ export function registerProductRoutes(
   });
 
   app.post("/api/products/:productCode/confirm", async (c) => {
-    const productCode = c.req.param("productCode");
-    const presented = runtime.present();
-    const template = presented.template(productCode);
-    const formSchema = presented.formSchema(productCode);
-    if (!template || !formSchema) {
-      return c.json({ error: "not_found" }, 404);
-    }
-
-    const { definition, reviewId } = readReviewedDefinition(await c.req.json());
-    if (!definition || definition.templateCode !== productCode) {
-      return c.json({ error: "review_required" }, 400);
-    }
-
-    const confirmed = confirmReviewedDefinition(definition, reviewId);
-    if ("ok" in confirmed) {
-      const status = confirmed.reason === "review_mismatch" ? 409 : 422;
-      return c.json(
-        { error: confirmed.reason, definition: confirmed.definition },
-        status,
-      );
-    }
-
-    const aggregate = compileAggregate(
-      confirmed,
-      template,
-      formSchema,
-      runtime.labels(),
+    const compiled = compileAcceptedProduct(
+      runtime,
+      c.req.param("productCode"),
+      await c.req.json(),
     );
-    const composition = composeProductProcessesFromTruth(confirmed, template);
-    const eic = compileEic(aggregate, composition);
+    if (!compiled.ok) {
+      return c.json(compiled.body, compiled.status);
+    }
     return c.json({
-      truth: confirmed,
-      aggregate,
-      eic,
+      truth: compiled.truth,
+      aggregate: compiled.aggregate,
+      eic: compiled.eic,
       executionPlanPreview: compileExecutionPlanPreview(
-        confirmed,
-        aggregate,
-        template,
-        eic,
+        compiled.truth,
+        compiled.aggregate,
+        compiled.template,
+        compiled.eic,
       ),
     });
   });
+
+  app.post("/api/products/:productCode/accepted-production-snapshot", async (c) => {
+    const compiled = compileAcceptedProduct(
+      runtime,
+      c.req.param("productCode"),
+      await c.req.json(),
+    );
+    if (!compiled.ok) {
+      return c.json(compiled.body, compiled.status);
+    }
+    const frozen = freezeAcceptedProductionSnapshot(
+      compiled.truth,
+      compiled.aggregate,
+      compiled.composition,
+      compiled.eic,
+    );
+    const stored = runtime.acceptProductionSnapshot(frozen);
+    return c.json({
+      created: stored.created,
+      snapshot: stored.snapshot,
+    });
+  });
+
+  app.get(
+    "/api/products/:productCode/accepted-production-snapshots/:snapshotId",
+    (c) => {
+      const snapshot = runtime.readProductionSnapshot(c.req.param("snapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      return c.json({ snapshot });
+    },
+  );
+}
+
+function compileAcceptedProduct(
+  runtime: ProductSystemRuntime,
+  productCode: string,
+  body: unknown,
+) {
+  const presented = runtime.present();
+  const template = presented.template(productCode);
+  const formSchema = presented.formSchema(productCode);
+  if (!template || !formSchema) {
+    return { ok: false as const, status: 404 as const, body: { error: "not_found" } };
+  }
+
+  const { definition, reviewId } = readReviewedDefinition(body);
+  if (!definition || definition.templateCode !== productCode) {
+    return {
+      ok: false as const,
+      status: 400 as const,
+      body: { error: "review_required" },
+    };
+  }
+
+  const confirmed = confirmReviewedDefinition(definition, reviewId);
+  if ("ok" in confirmed) {
+    return {
+      ok: false as const,
+      status: (confirmed.reason === "review_mismatch" ? 409 : 422) as 409 | 422,
+      body: { error: confirmed.reason, definition: confirmed.definition },
+    };
+  }
+
+  const aggregate = compileAggregate(
+    confirmed,
+    template,
+    formSchema,
+    runtime.labels(),
+  );
+  const composition = composeProductProcessesFromTruth(confirmed, template);
+  const eic = compileEic(aggregate, composition);
+  return {
+    ok: true as const,
+    template,
+    truth: confirmed,
+    aggregate,
+    composition,
+    eic,
+  };
 }

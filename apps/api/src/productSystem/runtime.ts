@@ -1,9 +1,17 @@
-import { presentProductSystem, type DisplayLabelCatalog } from "@workos-final/domain";
+import {
+  presentProductSystem,
+  type AcceptedProductionSnapshot,
+  type DisplayLabelCatalog,
+} from "@workos-final/domain";
 import {
   openSqliteDatabase,
   resolveProductSystemSqlitePath,
   type SqliteDatabase,
 } from "../persistence/sqlite.js";
+import {
+  getAcceptedProductionSnapshot,
+  insertAcceptedProductionSnapshot,
+} from "../production/store.js";
 import {
   bootstrapProductSystemDisplayStore,
   loadDisplayLabelCatalog,
@@ -21,6 +29,11 @@ export type ProductSystemRuntime = {
     displayLabel: unknown,
     expectedRevision?: number,
   ): DisplayLabelWriteResult;
+  acceptProductionSnapshot(snapshot: AcceptedProductionSnapshot): {
+    created: boolean;
+    snapshot: AcceptedProductionSnapshot;
+  };
+  readProductionSnapshot(snapshotId: string): AcceptedProductionSnapshot | null;
   close(): void;
 };
 
@@ -45,6 +58,12 @@ export function createProductSystemRuntime(
         displayLabel,
         expectedRevision,
       );
+    },
+    acceptProductionSnapshot(snapshot) {
+      return insertAcceptedProductionSnapshot(db, snapshot);
+    },
+    readProductionSnapshot(snapshotId) {
+      return getAcceptedProductionSnapshot(db, snapshotId);
     },
     close() {
       db.close();

@@ -1,4 +1,5 @@
 import type {
+  AcceptedProductionSnapshot,
   CatalogTreeNode,
   DraftValues,
   EicResult,
@@ -110,5 +111,46 @@ export async function confirmReviewedConfiguration(
     aggregate: body.aggregate,
     eic: body.eic,
     executionPlanPreview: body.executionPlanPreview,
+  };
+}
+
+export async function acceptProductionSnapshot(
+  productCode: string,
+  definition: ProductDefinition,
+): Promise<
+  | { ok: true; created: boolean; snapshot: AcceptedProductionSnapshot }
+  | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
+> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/accepted-production-snapshot`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        definition,
+        reviewId: definition.reviewId,
+      }),
+    },
+  );
+  const body = await readJson<{
+    created?: boolean;
+    snapshot?: AcceptedProductionSnapshot;
+    definition?: ProductDefinition;
+    error?: string;
+  }>(response);
+
+  if (response.status === 409 && body.definition) {
+    return { ok: false, reason: "review_mismatch", definition: body.definition };
+  }
+  if (response.status === 422 && body.definition) {
+    return { ok: false, reason: "not_ready", definition: body.definition };
+  }
+  if (!response.ok || !body.snapshot) {
+    throw new Error("snapshot_unavailable");
+  }
+  return {
+    ok: true,
+    created: Boolean(body.created),
+    snapshot: body.snapshot,
   };
 }

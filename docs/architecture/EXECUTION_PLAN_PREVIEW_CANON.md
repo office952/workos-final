@@ -11,13 +11,14 @@ Confirmed Product Truth
     → Process Composition
       → Execution Plan Preview
 
-Future frozen Order truth
-  → persisted ExecutionPlan
+Accepted Production Snapshot
+  → future persisted ExecutionPlan
     → ExecutionTasks
 ```
 
 The preview consumes current confirmed Product Truth because it is deterministic and non-persistent.
-Mutable/current truth is not the permanent persisted Execution source.
+Persisted Execution must consume an Accepted Production Snapshot, not live mutable configuration.
+See `docs/architecture/ACCEPTED_PRODUCTION_SNAPSHOT_CANON.md`.
 
 ## What this is
 

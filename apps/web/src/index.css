@@ -427,6 +427,13 @@ details summary {
   margin: 0.2rem 0;
 }
 
+.production-snapshot {
+  margin: 1.5rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
 @media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;

@@ -405,6 +405,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "accepted-production-snapshot",
+        label: "Snapshot producție acceptat",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "execution-plan",
         label: "ExecutionPlan",
         state: "NOT_IMPLEMENTED",
@@ -507,7 +512,7 @@ export function projectSystemGovernance(): GovernanceProjection {
     freeze: {
       label: "Politică de freeze",
       state: "PLANNED",
-      note: "Nu există infrastructură de freeze în runtime. Nu este activă.",
+      note: "Nu este activă. Freeze-ul comercial / ofertă / comandă rămâne planificat. Snapshot-ul de producție acceptat este separat.",
     },
     capabilityKernelNote:
       "Nucleul de capabilități păstrează identificatorii înghețați. Statusul kernel PLANNED nu înseamnă că primul produs nu există; înseamnă că nucleul nu a fost promovat la ACTIVE.",

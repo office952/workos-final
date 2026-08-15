@@ -182,4 +182,60 @@ describe("product configuration API", () => {
     expect(definition.values["face.opticalType"]).toBe("opal");
     expect(definition.values["lighting.mode"]).toBe("front_lit");
   });
+
+  it("freezes an accepted production snapshot idempotently without tasks", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const payload = {
+      definition: reviewed.definition,
+      reviewId: reviewed.reviewId,
+    };
+    const first = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    const firstBody = await readBody(first);
+    const snapshot = firstBody.snapshot as JsonObject;
+    expect(first.status).toBe(200);
+    expect(firstBody.created).toBe(true);
+    expect(snapshot.status).toBe("ACCEPTED");
+    expect(snapshot.eic).toEqual(
+      expect.objectContaining({ total: 595, completeness: "PARTIAL" }),
+    );
+    expect((snapshot.operations as unknown[]).length).toBe(12);
+    expect(JSON.stringify(snapshot)).not.toMatch(
+      /ExecutionTask|eligibleProviders|assignedProvider|startTask/,
+    );
+
+    const second = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    const secondBody = await readBody(second);
+    expect(second.status).toBe(200);
+    expect(secondBody.created).toBe(false);
+    expect((secondBody.snapshot as JsonObject).snapshotId).toBe(snapshot.snapshotId);
+    expect((secondBody.snapshot as JsonObject).createdAt).toBe(snapshot.createdAt);
+
+    const read = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}`,
+    );
+    expect(read.status).toBe(200);
+    const readBodyJson = await readBody(read);
+    expect((readBodyJson.snapshot as JsonObject).contentHash).toBe(snapshot.contentHash);
+
+    const mutate = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}`,
+      { method: "PATCH", headers: { "content-type": "application/json" }, body: "{}" },
+    );
+    expect(mutate.status).toBe(404);
+  });
 });

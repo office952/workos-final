@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   eicLineGroupLabel,
+  type AcceptedProductionSnapshot,
   type DraftValues,
   type EicLine,
   type EicLineGroup,
@@ -13,6 +14,7 @@ import {
 } from "@workos-final/domain";
 import { FormRenderer } from "./FormRenderer";
 import {
+  acceptProductionSnapshot,
   compileConfiguration,
   confirmReviewedConfiguration,
   fetchTemplateProjection,
@@ -93,6 +95,9 @@ export function ProductConfigurationPage() {
     aggregate: ProductAggregate;
     eic: EicResult;
     executionPlanPreview: ExecutionPlanPreview;
+    definition: ProductDefinition;
+    snapshot?: AcceptedProductionSnapshot;
+    snapshotReused?: boolean;
   } | null>(null);
   const [confirmNotice, setConfirmNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -161,6 +166,7 @@ export function ProductConfigurationPage() {
           aggregate: result.aggregate,
           eic: result.eic,
           executionPlanPreview: result.executionPlanPreview,
+          definition,
         });
         setDefinition(null);
       } else if (result.reason === "review_mismatch") {
@@ -172,6 +178,37 @@ export function ProductConfigurationPage() {
       } else {
         setDefinition(result.definition);
         setConfirmed(null);
+      }
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAcceptProduction() {
+    if (!confirmed) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await acceptProductionSnapshot(productCode, confirmed.definition);
+      if (result.ok) {
+        setConfirmed({
+          ...confirmed,
+          snapshot: result.snapshot,
+          snapshotReused: !result.created,
+        });
+      } else if (result.reason === "review_mismatch") {
+        setConfirmed(null);
+        setDefinition(null);
+        setConfirmNotice(
+          "Configurația verificată nu mai corespunde. Verificați din nou.",
+        );
+      } else {
+        setConfirmed(null);
+        setDefinition(result.definition);
       }
     } catch {
       setPage({ kind: "error" });
@@ -389,9 +426,15 @@ export function ProductConfigurationPage() {
             Indisponibil acum: {confirmed.aggregate.unavailable.join(", ")}.
           </p>
 
-          <ExecutionPlanPreviewSection preview={confirmed.executionPlanPreview} />
+          <ExecutionPlanPreviewSection
+            preview={confirmed.executionPlanPreview}
+            basedOnSnapshot={Boolean(confirmed.snapshot)}
+          />
 
           <div className="action-row">
+            <button type="button" onClick={() => void handleAcceptProduction()} disabled={busy}>
+              Acceptă pentru producție
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -402,6 +445,13 @@ export function ProductConfigurationPage() {
               Modifică configurația
             </button>
           </div>
+
+          {confirmed.snapshot ? (
+            <AcceptedProductionSnapshotSection
+              snapshot={confirmed.snapshot}
+              reused={Boolean(confirmed.snapshotReused)}
+            />
+          ) : null}
         </div>
       ) : null}
     </section>
@@ -410,12 +460,15 @@ export function ProductConfigurationPage() {
 
 function ExecutionPlanPreviewSection({
   preview,
+  basedOnSnapshot,
 }: {
   preview: ExecutionPlanPreview;
+  basedOnSnapshot: boolean;
 }) {
   return (
     <div className="production-plan">
       <h3>Plan de producție</h3>
+      {basedOnSnapshot ? <p>Plan bazat pe snapshot acceptat</p> : null}
       <p>
         {preview.summary.productLabel}: {preview.summary.inscription}
       </p>
@@ -466,6 +519,33 @@ function ExecutionPlanPreviewSection({
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+function AcceptedProductionSnapshotSection({
+  snapshot,
+  reused,
+}: {
+  snapshot: AcceptedProductionSnapshot;
+  reused: boolean;
+}) {
+  return (
+    <div className="production-snapshot">
+      <h3>{reused ? "Snapshot deja acceptat" : "Snapshot producție creat"}</h3>
+      <ul>
+        <li>Referință: {snapshot.snapshotId}</li>
+        <li>Produs: {snapshot.productLabel}</li>
+        <li>
+          Acceptat: {new Date(snapshot.createdAt).toLocaleString("ro-RO")}
+        </li>
+        <li>Operații: {snapshot.operations.length}</li>
+        <li>
+          Cost intern curent: {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
+          {snapshot.eic.completeness === "PARTIAL" ? " (parțial)" : ""}
+        </li>
+        <li>Stare: Acceptat / înghețat</li>
+      </ul>
     </div>
   );
 }

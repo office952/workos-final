@@ -88,8 +88,9 @@ WorkOS Final
 │   ├── Commercial rules / customer price
 │   ├── Quote Snapshot
 │   └── Order Snapshot
-├── Execution                               PREVIEW_ONLY
+├── Execution                               SNAPSHOT_READY
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
+│   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
 │   ├── ExecutionPlan                       NOT_IMPLEMENTED
 │   ├── Operations / tasks / dependencies   NOT_IMPLEMENTED
 │   ├── Assignments                         NOT_IMPLEMENTED
@@ -208,7 +209,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview is IMPLEMENTED_CURRENT. Persisted ExecutionPlan, ExecutionTask, assignment, and MachineRun are NOT_IMPLEMENTED.
+Read-only preview and Accepted Production Snapshot are IMPLEMENTED_CURRENT. Persisted ExecutionPlan, ExecutionTask, assignment, and MachineRun are NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -219,10 +220,17 @@ Confirmed Product Truth
 → Execution Plan Preview
 ```
 
-Future persisted feed remains:
+Accepted freeze:
 
 ```text
-Order Snapshot (frozen)
+Confirmed Product Truth
+→ Accepted Production Snapshot
+```
+
+Future persisted feed:
+
+```text
+Accepted Production Snapshot
 → ExecutionPlan
 → Tasks / Operations
 → Employee assignment
@@ -232,7 +240,7 @@ Order Snapshot (frozen)
 → Reporting
 ```
 
-The preview consumes current confirmed Product Truth because it is deterministic and non-persistent. Persisted Execution must later consume frozen order truth plus ProductAggregate / EIC. It does not rebuild Product Truth and does not reprice accepted commercial totals.
+The preview consumes current confirmed Product Truth because it is deterministic and non-persistent. Persisted Execution must consume the accepted production snapshot. It does not rebuild Product Truth and does not reprice accepted commercial totals. This snapshot is not a customer Order.
 
 ## Commercial
 
@@ -371,6 +379,7 @@ Settings versions: keep previous active values as history after a new version is
 | Workcenters / Machines capability-provider foundation | DONE / FOUNDATION |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | Execution Plan Preview | IMPLEMENTED_CURRENT |
+| Accepted Production Snapshot | IMPLEMENTED_CURRENT |
 | People, Pontaj, persisted Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |

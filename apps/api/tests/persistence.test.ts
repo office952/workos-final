@@ -2,7 +2,18 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { seedDisplayLabelRecords } from "@workos-final/domain";
+import {
+  CANONICAL_PRODUCT_CODE,
+  compileAggregate,
+  compileDefinition,
+  compileEic,
+  composeProductProcessesFromTruth,
+  confirmReviewedDefinition,
+  freezeAcceptedProductionSnapshot,
+  frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06Template,
+  seedDisplayLabelRecords,
+} from "@workos-final/domain";
 import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 
@@ -51,7 +62,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(1);
+    expect(count.count).toBe(2);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -59,7 +70,64 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(1);
+    expect(again.count).toBe(2);
+    second.close();
+  });
+
+  it("persists an accepted production snapshot without an update path", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const snapshot = freezeAcceptedProductionSnapshot(
+      truth,
+      aggregate,
+      composition,
+      compileEic(aggregate, composition),
+      { createdAt: "2026-08-15T14:00:00.000Z" },
+    );
+    const created = first.acceptProductionSnapshot(snapshot);
+    const again = first.acceptProductionSnapshot({
+      ...snapshot,
+      createdAt: "2026-08-15T18:00:00.000Z",
+    });
+    expect(created.created).toBe(true);
+    expect(again.created).toBe(false);
+    expect(again.snapshot.createdAt).toBe("2026-08-15T14:00:00.000Z");
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readProductionSnapshot(snapshot.snapshotId);
+    expect(stored?.eic.total).toBe(595);
+    expect(stored?.usedTechnicalSettings.find((item) => item.id === "ledPitchMm")?.value).toBe(
+      100,
+    );
+    expect(stored?.createdAt).toBe("2026-08-15T14:00:00.000Z");
+    expect(second).not.toHaveProperty("updateProductionSnapshot");
     second.close();
   });
 });

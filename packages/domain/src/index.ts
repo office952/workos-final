@@ -201,3 +201,10 @@ export {
   type ExecutionPlanPreview,
   type ExecutionPlanPreviewOperation,
 } from "./execution/index.js";
+export {
+  ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
+  freezeAcceptedProductionSnapshot,
+  productionWorkFromSnapshot,
+  type AcceptedProductionSnapshot,
+  type FrozenProductionWork,
+} from "./production/index.js";

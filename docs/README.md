@@ -15,6 +15,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition, shop-floor capability class, and Letters process composition
 - `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` — workcenter, machine, and capability-provider law
 - `docs/architecture/EXECUTION_PLAN_PREVIEW_CANON.md` — read-only production-plan preview law
+- `docs/architecture/ACCEPTED_PRODUCTION_SNAPSHOT_CANON.md` — frozen accepted production snapshot law
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
@@ -38,6 +39,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_LETTERS_LIGHTING_CALCULATION_COMPLETION_V1.md` — Letters Lighting resource calculation functional V1
 - `docs/worklog/WORKOS_FINAL_LETTERS_FUNCTIONAL_EIC_COMPLETION_V1.md` — Letters functional internal-cost recipes and EIC
 - `docs/worklog/WORKOS_FINAL_LETTERS_EXECUTION_PLAN_PREVIEW_V1.md` — Letters Execution Plan Preview
+- `docs/worklog/WORKOS_FINAL_ACCEPTED_PRODUCTION_SNAPSHOT_V1.md` — accepted production snapshot
 
 ## Historical evidence
 
