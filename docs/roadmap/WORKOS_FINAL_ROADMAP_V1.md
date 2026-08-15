@@ -46,6 +46,7 @@ Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClas
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan.
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none EIC is 595.00 EUR PARTIAL because Analyzer geometry is still missing. Values are calibratable development configuration, not final workshop rates.
+A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. Persisted Execution remains NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text
@@ -84,8 +85,9 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Resources admin write / process admin write | NOT_IMPLEMENTED |
 | Lighting resource calculation | IMPLEMENTED_CURRENT / functional V1 |
 | Letters functional internal-cost recipes / EIC | IMPLEMENTED_CURRENT / functional V1 |
+| Letters Execution Plan Preview | IMPLEMENTED_CURRENT |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
-| People, Pontaj, Execution | LATER |
+| People, Pontaj, persisted Execution | LATER |
 | Commercial, Quote Snapshot, Order Snapshot | LATER |
 | Reporting, Documents, ACM, Logo | LATER |
 

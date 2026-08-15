@@ -88,11 +88,12 @@ WorkOS Final
 │   ├── Commercial rules / customer price
 │   ├── Quote Snapshot
 │   └── Order Snapshot
-├── Execution                               PLANNED
-│   ├── ExecutionPlan
-│   ├── Operations / tasks / dependencies
-│   ├── Assignments
-│   └── Actuals / MachineRun
+├── Execution                               PREVIEW_ONLY
+│   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
+│   ├── ExecutionPlan                       NOT_IMPLEMENTED
+│   ├── Operations / tasks / dependencies   NOT_IMPLEMENTED
+│   ├── Assignments                         NOT_IMPLEMENTED
+│   └── Actuals / MachineRun                NOT_IMPLEMENTED
 ├── People / Angajați                       PLANNED
 │   ├── Employee master
 │   ├── Role / skill / availability
@@ -207,7 +208,18 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Not implemented. Eventual feed:
+Read-only preview is IMPLEMENTED_CURRENT. Persisted ExecutionPlan, ExecutionTask, assignment, and MachineRun are NOT_IMPLEMENTED.
+
+Preview feed:
+
+```text
+Confirmed Product Truth
+→ ProductAggregate
+→ Process Composition
+→ Execution Plan Preview
+```
+
+Future persisted feed remains:
 
 ```text
 Order Snapshot (frozen)
@@ -220,7 +232,7 @@ Order Snapshot (frozen)
 → Reporting
 ```
 
-Execution consumes frozen order truth plus ProductAggregate / EIC. It does not rebuild Product Truth and does not reprice accepted commercial totals.
+The preview consumes current confirmed Product Truth because it is deterministic and non-persistent. Persisted Execution must later consume frozen order truth plus ProductAggregate / EIC. It does not rebuild Product Truth and does not reprice accepted commercial totals.
 
 ## Commercial
 
@@ -358,7 +370,8 @@ Settings versions: keep previous active values as history after a new version is
 | Process admin write, labor recipes | PLANNED / NOT_IMPLEMENTED |
 | Workcenters / Machines capability-provider foundation | DONE / FOUNDATION |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
-| People, Pontaj, Execution | PLANNED |
+| Execution Plan Preview | IMPLEMENTED_CURRENT |
+| People, Pontaj, persisted Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
@@ -402,7 +415,7 @@ Recommended rank:
 
 3. **Lifecycle retire** later, when more live entities exist.
 
-Do not start People, Pontaj, Execution, or Commercial next. They depend on later snapshots and would recreate isolated systems. Workcenters / Machines foundation exists; capacity planning and Execution selection do not.
+Do not start People, Pontaj, Commercial, or persisted Execution from mutable truth. The read-only Execution Plan Preview already exists. Capacity planning and concrete provider selection do not.
 
 ## Owner decisions
 

@@ -400,6 +400,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "NOT_IMPLEMENTED",
       },
       {
+        id: "execution-plan-preview",
+        label: "Plan de producție (preview)",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "execution-plan",
         label: "ExecutionPlan",
         state: "NOT_IMPLEMENTED",

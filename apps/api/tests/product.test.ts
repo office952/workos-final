@@ -148,6 +148,16 @@ describe("product configuration API", () => {
     expect(eic.total).toBe(595);
     expect(eic.currency).toBe("EUR");
     expect((eic.excludedComponentLabels as string[])).toEqual([]);
+    const preview = body.executionPlanPreview as JsonObject;
+    expect(preview.status).toBe("PREVIEW");
+    expect(preview.operationCount).toBeGreaterThan(0);
+    expect(preview.summary).toEqual(
+      expect.objectContaining({
+        internalCostTotal: 595,
+        internalCostCompleteness: "PARTIAL",
+      }),
+    );
+    expect(JSON.stringify(preview)).not.toMatch(/ExecutionTask|startTask|assignedTo/);
   });
 
   it("does not let a draft override product-fixed identity", async () => {

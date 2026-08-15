@@ -6,6 +6,7 @@ import {
   type EicLine,
   type EicLineGroup,
   type EicResult,
+  type ExecutionPlanPreview,
   type ProductAggregate,
   type ProductDefinition,
   type ProductTruth,
@@ -91,6 +92,7 @@ export function ProductConfigurationPage() {
     truth: ProductTruth;
     aggregate: ProductAggregate;
     eic: EicResult;
+    executionPlanPreview: ExecutionPlanPreview;
   } | null>(null);
   const [confirmNotice, setConfirmNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -158,6 +160,7 @@ export function ProductConfigurationPage() {
           truth: result.truth,
           aggregate: result.aggregate,
           eic: result.eic,
+          executionPlanPreview: result.executionPlanPreview,
         });
         setDefinition(null);
       } else if (result.reason === "review_mismatch") {
@@ -385,6 +388,9 @@ export function ProductConfigurationPage() {
           <p className="page-lead">
             Indisponibil acum: {confirmed.aggregate.unavailable.join(", ")}.
           </p>
+
+          <ExecutionPlanPreviewSection preview={confirmed.executionPlanPreview} />
+
           <div className="action-row">
             <button
               type="button"
@@ -399,5 +405,67 @@ export function ProductConfigurationPage() {
         </div>
       ) : null}
     </section>
+  );
+}
+
+function ExecutionPlanPreviewSection({
+  preview,
+}: {
+  preview: ExecutionPlanPreview;
+}) {
+  return (
+    <div className="production-plan">
+      <h3>Plan de producție</h3>
+      <p>
+        {preview.summary.productLabel}: {preview.summary.inscription}
+      </p>
+      <ul>
+        <li>Operații: {preview.summary.operationCount}</li>
+        <li>Pregătite: {preview.summary.readyCount}</li>
+        <li>Incomplete: {preview.summary.incompleteCount}</li>
+        <li>Fără furnizor: {preview.summary.noProviderCount}</li>
+        <li>
+          Cost intern curent: {formatMoney(preview.summary.internalCostTotal)}{" "}
+          {preview.summary.internalCostCurrency}
+          {preview.summary.internalCostCompleteness === "PARTIAL" ? " (parțial)" : ""}
+        </li>
+      </ul>
+      <p className="page-lead">{preview.summary.analyzerNote}</p>
+      <ol className="production-ops">
+        {preview.operations.map((operation) => (
+          <li key={operation.id} className="production-op">
+            <h4>
+              {operation.seqLabel}. {operation.processLabel}
+            </h4>
+            <p>Componentă: {operation.scopeLabel}</p>
+            {operation.quantities.map((quantity) => (
+              <p key={`${operation.id}-${quantity.label}`}>
+                Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
+              </p>
+            ))}
+            {operation.resources.map((resource) => (
+              <p key={`${operation.id}-${resource.label}`}>
+                Resursă: {resource.label}: {formatQuantity(resource.quantity)}{" "}
+                {formatUnit(resource.unit)}
+              </p>
+            ))}
+            <p>Capabilitate: {operation.requiredCapabilityLabel}</p>
+            <p>
+              Furnizori disponibili:{" "}
+              {operation.eligibleProviders.length === 0
+                ? "Fără furnizor configurat"
+                : operation.eligibleProviders.map((item) => item.label).join("; ")}
+            </p>
+            <p>
+              {operation.canStart
+                ? "Poate începe"
+                : `Depinde de: ${operation.dependsOnLabels.join("; ")}`}
+            </p>
+            {operation.parallelEligible ? <p>Poate rula în paralel</p> : null}
+            <p>Stare: {operation.readinessLabel}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

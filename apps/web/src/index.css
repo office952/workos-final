@@ -400,6 +400,33 @@ details summary {
   font-weight: 650;
 }
 
+.production-plan {
+  margin: 1.5rem 0 0;
+}
+
+.production-ops {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.production-op {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.production-op h4 {
+  margin: 0 0 0.45rem;
+}
+
+.production-op p {
+  margin: 0.2rem 0;
+}
+
 @media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;

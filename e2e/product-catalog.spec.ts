@@ -119,6 +119,9 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
   await expect(page.getByText("Lungime cant")).toHaveCount(0);
   await expect(page.getByText("Preț client")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByText("Aplicare folie").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/owner-surfaces-confirm.png",
     fullPage: true,

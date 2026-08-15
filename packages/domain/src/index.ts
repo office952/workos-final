@@ -194,3 +194,10 @@ export {
   type Workcenter,
   type WorkcentersAdminProjection,
 } from "./workcenters/index.js";
+export {
+  compileExecutionPlanPreview,
+  executionOperationReadinessLabel,
+  projectExecutionPlanPreview,
+  type ExecutionPlanPreview,
+  type ExecutionPlanPreviewOperation,
+} from "./execution/index.js";

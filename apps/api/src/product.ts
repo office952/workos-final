@@ -2,6 +2,7 @@ import {
   compileAggregate,
   compileDefinition,
   compileEic,
+  compileExecutionPlanPreview,
   composeProductProcesses,
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
@@ -138,12 +139,17 @@ export function registerProductRoutes(
       formSchema,
       runtime.labels(),
     );
+    const composition = composeProductProcessesFromTruth(confirmed, template);
+    const eic = compileEic(aggregate, composition);
     return c.json({
       truth: confirmed,
       aggregate,
-      eic: compileEic(
+      eic,
+      executionPlanPreview: compileExecutionPlanPreview(
+        confirmed,
         aggregate,
-        composeProductProcessesFromTruth(confirmed, template),
+        template,
+        eic,
       ),
     });
   });

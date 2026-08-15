@@ -2,6 +2,7 @@ import type {
   CatalogTreeNode,
   DraftValues,
   EicResult,
+  ExecutionPlanPreview,
   FormSchema,
   ProductAggregate,
   ProductDefinition,
@@ -67,6 +68,7 @@ export async function confirmReviewedConfiguration(
       truth: ProductTruth;
       aggregate: ProductAggregate;
       eic: EicResult;
+      executionPlanPreview: ExecutionPlanPreview;
     }
   | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
 > {
@@ -82,6 +84,7 @@ export async function confirmReviewedConfiguration(
     truth?: ProductTruth;
     aggregate?: ProductAggregate;
     eic?: EicResult;
+    executionPlanPreview?: ExecutionPlanPreview;
     definition?: ProductDefinition;
     error?: string;
   }>(response);
@@ -92,7 +95,13 @@ export async function confirmReviewedConfiguration(
   if (response.status === 422 && body.definition) {
     return { ok: false, reason: "not_ready", definition: body.definition };
   }
-  if (!response.ok || !body.truth || !body.aggregate || !body.eic) {
+  if (
+    !response.ok ||
+    !body.truth ||
+    !body.aggregate ||
+    !body.eic ||
+    !body.executionPlanPreview
+  ) {
     throw new Error("confirm_unavailable");
   }
   return {
@@ -100,5 +109,6 @@ export async function confirmReviewedConfiguration(
     truth: body.truth,
     aggregate: body.aggregate,
     eic: body.eic,
+    executionPlanPreview: body.executionPlanPreview,
   };
 }
