@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
   BOND_LETTER_BODY_ID,
+  CUT_CONTOUR_PLOTTER_ID,
+  CUT_LASER_SHEET_ID,
+  CUT_METAL_STOCK_ID,
   CUT_SHEET_CNC_ID,
+  CUT_STYROFOAM_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  LAMINATE_RIGID_PLATE_ID,
+  LAMINATE_WIDE_FORMAT_ID,
   operationalProcesses,
   PAINT_RAL_ID,
+  PRINT_WIDE_FORMAT_ID,
+  WELD_ALUMINIUM_JOIN_ID,
+  WELD_STEEL_JOIN_ID,
 } from "../processes/catalog.js";
 import { composeProductProcesses } from "../processes/composition.js";
 import {
@@ -317,6 +326,14 @@ describe("live shop-floor map", () => {
     ]);
     expect(coverageForCapability("WELD_STEEL")).toBe("COVERED");
     expect(coverageForCapability("WELD_ALUMINIUM")).toBe("COVERED");
+    expect(providersForProcess(WELD_STEEL_JOIN_ID).map((item) => item.id)).toEqual([
+      MCH_WELD_STEEL_ID,
+    ]);
+    expect(providersForProcess(WELD_ALUMINIUM_JOIN_ID).map((item) => item.id)).toEqual([
+      MCH_WELD_ALU_ID,
+    ]);
+    expect(recipeGapForProcess(WELD_STEEL_JOIN_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(recipeGapForProcess(WELD_ALUMINIUM_JOIN_ID)).toBe("SERVICE_RECIPE_MISSING");
   });
 
   it("maps metal cutting and CNC without collapsing machine into workcenter or process", () => {
@@ -414,6 +431,43 @@ describe("live shop-floor map", () => {
     const cncMachine = admin.machines.find((item) => item.id === MCH_CNC_4020_ID);
     expect(cncMachine?.processLabels).toContain("Debitare foaie CNC");
     expect(cncMachine?.recipeRows[0]?.state).toBe("SERVICE_RECIPE_MISSING");
+    const steelMachine = admin.machines.find((item) => item.id === MCH_WELD_STEEL_ID);
+    expect(steelMachine?.processLabels).toEqual(["Îmbinare sudură oțel"]);
+    expect(steelMachine?.recipeRows[0]?.state).toBe("SERVICE_RECIPE_MISSING");
+    expect(
+      admin.workcenters.find((item) => item.id === WC_WELDING_ID)?.processLabels,
+    ).toEqual(["Îmbinare sudură oțel", "Îmbinare sudură aluminiu"]);
+    expect(providersForProcess(PRINT_WIDE_FORMAT_ID).map((item) => item.id)).toEqual([
+      "MCH-EPSON-60800",
+    ]);
+    expect(providersForProcess(LAMINATE_WIDE_FORMAT_ID).map((item) => item.id)).toEqual([
+      "MCH-LAMINATOR-XPRO",
+    ]);
+    expect(providersForProcess(LAMINATE_RIGID_PLATE_ID).map((item) => item.id)).toEqual([
+      "MCH-RIGID-FILM-LAMINATOR",
+    ]);
+    expect(providersForProcess(CUT_CONTOUR_PLOTTER_ID).map((item) => item.id)).toEqual([
+      "MCH-CUTTER-PLOTTER",
+    ]);
+    expect(providersForProcess(CUT_LASER_SHEET_ID).map((item) => item.id)).toEqual([
+      "MCH-LASER-CNC",
+    ]);
+    expect(providersForProcess(CUT_STYROFOAM_ID).map((item) => item.id)).toEqual([
+      "MCH-STYRO-CUTTER",
+    ]);
+    expect(providersForProcess(CUT_METAL_STOCK_ID).map((item) => item.id)).toEqual([
+      MCH_METAL_CUTTER_AUTO_ID,
+    ]);
+    expect(recipeGapForProcess(PRINT_WIDE_FORMAT_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(recipeGapForProcess(CUT_CONTOUR_PLOTTER_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(admin.processCoverage.some((item) => item.processId === WELD_STEEL_JOIN_ID)).toBe(
+      true,
+    );
+    expect(
+      admin.lettersCoverage.compositions.flatMap((item) =>
+        item.processes.map((process) => process.processId),
+      ),
+    ).not.toContain(WELD_STEEL_JOIN_ID);
     expect(recipeGapForProcess(FORM_ALUMINIUM_PROFILE_ID)).toBe("CANONICAL_COST_EXISTS");
     expect(recipeGapForProcess(BOND_LETTER_BODY_ID)).toBe("LABOR_RECIPE_MISSING");
     expect(admin.serviceMap.some((item) => item.providerId === MCH_WELD_STEEL_ID)).toBe(

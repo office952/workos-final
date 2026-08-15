@@ -101,6 +101,16 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
 
+  await expect(page.getByRole("button", { name: "Îmbinare sudură oțel" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Printare format mare" })).toBeVisible();
+  await page.getByRole("button", { name: "Îmbinare sudură oțel" }).click();
+  await expect(page.getByRole("heading", { name: "Îmbinare sudură oțel" })).toBeVisible();
+  await expect(page.getByText("Lipsă").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-weld-missing-recipe.png",
+    fullPage: true,
+  });
+
   await page.getByRole("button", { name: "Debitare foaie CNC" }).click();
   await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
   await expect(page.getByText("Lipsă").first()).toBeVisible();

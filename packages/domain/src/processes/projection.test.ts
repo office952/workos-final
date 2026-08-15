@@ -21,6 +21,8 @@ describe("operational process projection", () => {
     expect(admin.categories.map((item) => item.id)).toEqual([
       "CUTTING",
       "FORMING",
+      "WELDING",
+      "PRINTING",
       "FINISHING",
       "ASSEMBLY",
       "ELECTRICAL",
@@ -56,6 +58,10 @@ describe("operational process projection", () => {
     expect(forming?.providerCoverage).toBe("COVERED");
     expect(forming?.providerCoverageLabel).toBe("Acoperită");
     expect(forming?.providers.map((item) => item.id)).toEqual(["MCH-CNC-CANT-LITERE"]);
+    const steelWeld = admin.processes.find((item) => item.id === "WELD_STEEL_JOIN");
+    expect(steelWeld?.recipeState).toBe("SERVICE_RECIPE_MISSING");
+    expect(steelWeld?.providerCoverage).toBe("COVERED");
+    expect(steelWeld?.usedBy).toEqual([]);
     const bonding = admin.processes.find((item) => item.id === "BOND_LETTER_BODY");
     expect(bonding?.providerCoverage).toBe("COVERED");
     expect(bonding?.providers.map((item) => item.id)).toEqual([

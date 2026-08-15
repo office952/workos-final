@@ -12,7 +12,16 @@ import {
   PACK_PRODUCT_ID,
   PAINT_RAL_ID,
   PLACE_LED_MODULES_ID,
+  PRINT_WIDE_FORMAT_ID,
   PROCESS_CATEGORIES,
+  CUT_CONTOUR_PLOTTER_ID,
+  CUT_LASER_SHEET_ID,
+  CUT_METAL_STOCK_ID,
+  CUT_STYROFOAM_ID,
+  LAMINATE_RIGID_PLATE_ID,
+  LAMINATE_WIDE_FORMAT_ID,
+  WELD_ALUMINIUM_JOIN_ID,
+  WELD_STEEL_JOIN_ID,
   TEST_ILLUMINATION_UNIFORMITY_ID,
   TEST_LIGHTING_IGNITION_ID,
   WIRE_LIGHTING_ID,
@@ -43,6 +52,15 @@ describe("operational process catalog", () => {
       TEST_ILLUMINATION_UNIFORMITY_ID,
       INSPECT_FINISHED_LETTER_ID,
       PACK_PRODUCT_ID,
+      WELD_STEEL_JOIN_ID,
+      WELD_ALUMINIUM_JOIN_ID,
+      CUT_METAL_STOCK_ID,
+      PRINT_WIDE_FORMAT_ID,
+      LAMINATE_WIDE_FORMAT_ID,
+      LAMINATE_RIGID_PLATE_ID,
+      CUT_CONTOUR_PLOTTER_ID,
+      CUT_LASER_SHEET_ID,
+      CUT_STYROFOAM_ID,
     ]);
   });
 
@@ -58,7 +76,7 @@ describe("operational process catalog", () => {
 
   it("requires a capability class and never a machine or employee identity", () => {
     expect(JSON.stringify(operationalProcesses)).not.toMatch(
-      /machineId|machineCode|employeeId|orderId|assigned/i,
+      /machineId|machineCode|employeeId|orderId|assigned|hourlyRate|EUR|MCH-|WC_|CNC_ROUTER|WELDING_BANNER/i,
     );
     expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.requiredCapabilityId).toBe(
       "CNC_ROUTING",
@@ -134,5 +152,71 @@ describe("operational process catalog", () => {
     );
     expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.readiness).toBe("KNOWN_PROCESS");
     expect(getOperationalProcess(PLACE_LED_MODULES_ID)?.readiness).toBe("BLOCKED");
+  });
+
+  it("keeps steel and aluminium welding as distinct reusable shop-floor processes", () => {
+    const steel = getOperationalProcess(WELD_STEEL_JOIN_ID);
+    const aluminium = getOperationalProcess(WELD_ALUMINIUM_JOIN_ID);
+    expect(steel?.requiredCapabilityId).toBe("WELD_STEEL");
+    expect(aluminium?.requiredCapabilityId).toBe("WELD_ALUMINIUM");
+    expect(steel?.category).toBe("WELDING");
+    expect(aluminium?.category).toBe("WELDING");
+    expect(steel?.applicableTypeIds).toEqual([]);
+    expect(aluminium?.applicableTypeIds).toEqual([]);
+    expect(steel?.resourceIds).toEqual([]);
+    expect(processesForType("ALUMINIUM_VOLUME").map((item) => item.id)).not.toContain(
+      WELD_STEEL_JOIN_ID,
+    );
+    expect(processesForType("ALUMINIUM_VOLUME").map((item) => item.id)).not.toContain(
+      WELD_ALUMINIUM_JOIN_ID,
+    );
+  });
+
+  it("keeps plotter cutting distinct from vinyl application and print lamination", () => {
+    expect(getOperationalProcess(CUT_CONTOUR_PLOTTER_ID)?.requiredCapabilityId).toBe(
+      "PLOTTER_CUTTING",
+    );
+    expect(getOperationalProcess(APPLY_SURFACE_FINISH_ID)?.requiredCapabilityId).toBe(
+      "VINYL_APPLICATION",
+    );
+    expect(getOperationalProcess(LAMINATE_WIDE_FORMAT_ID)?.requiredCapabilityId).toBe(
+      "LAMINATION",
+    );
+    expect(getOperationalProcess(LAMINATE_RIGID_PLATE_ID)?.requiredCapabilityId).toBe(
+      "RIGID_FILM_LAMINATION",
+    );
+    expect(getOperationalProcess(PRINT_WIDE_FORMAT_ID)?.requiredCapabilityId).toBe("PRINTING");
+    expect(getOperationalProcess(CUT_METAL_STOCK_ID)?.requiredCapabilityId).toBe(
+      "METAL_CUTTING",
+    );
+    expect(getOperationalProcess(CUT_LASER_SHEET_ID)?.requiredCapabilityId).toBe(
+      "LASER_CUTTING",
+    );
+    expect(getOperationalProcess(CUT_STYROFOAM_ID)?.requiredCapabilityId).toBe(
+      "STYRO_CUTTING",
+    );
+    expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.requiredCapabilityId).toBe("CNC_ROUTING");
+  });
+
+  it("keeps shop-floor catalog processes out of Letters type demand", () => {
+    const lettersTypeProcessIds = [
+      ...processesForType("PLEXIGLAS_FACE"),
+      ...processesForType("ALUMINIUM_VOLUME"),
+      ...processesForType("FOREX_BACK"),
+      ...processesForType("LIGHTING_FRONT_LED"),
+    ].map((item) => item.id);
+    expect(lettersTypeProcessIds).not.toEqual(
+      expect.arrayContaining([
+        WELD_STEEL_JOIN_ID,
+        WELD_ALUMINIUM_JOIN_ID,
+        CUT_METAL_STOCK_ID,
+        PRINT_WIDE_FORMAT_ID,
+        LAMINATE_WIDE_FORMAT_ID,
+        LAMINATE_RIGID_PLATE_ID,
+        CUT_CONTOUR_PLOTTER_ID,
+        CUT_LASER_SHEET_ID,
+        CUT_STYROFOAM_ID,
+      ]),
+    );
   });
 });

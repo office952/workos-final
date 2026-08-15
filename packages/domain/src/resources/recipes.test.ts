@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   BOND_LETTER_BODY_ID,
+  CUT_CONTOUR_PLOTTER_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
   INSPECT_FINISHED_LETTER_ID,
   operationalProcesses,
   PAINT_RAL_ID,
+  PRINT_WIDE_FORMAT_ID,
+  WELD_ALUMINIUM_JOIN_ID,
+  WELD_STEEL_JOIN_ID,
 } from "../processes/catalog.js";
 import { coverageForCapability, providersForProcess } from "../workcenters/providers.js";
 import { recipeGapForProcess } from "../workcenters/recipeGap.js";
@@ -81,5 +85,27 @@ describe("cost recipes", () => {
     expect(processesMissingRecipe("SERVICE")).toContain(CUT_SHEET_CNC_ID);
     expect(processesMissingRecipe("LABOR")).toContain(BOND_LETTER_BODY_ID);
     expect(processesMissingRecipe("SERVICE")).not.toContain(FORM_ALUMINIUM_PROFILE_ID);
+  });
+
+  it("derives service recipe gaps for new shop-floor processes without inventing recipes", () => {
+    expect(recipeForProcess(WELD_STEEL_JOIN_ID)).toBeUndefined();
+    expect(recipeGapForProcess(WELD_STEEL_JOIN_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(recipeGapForProcess(WELD_ALUMINIUM_JOIN_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(recipeGapForProcess(PRINT_WIDE_FORMAT_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(recipeGapForProcess(CUT_CONTOUR_PLOTTER_ID)).toBe("SERVICE_RECIPE_MISSING");
+    expect(expectedRecipeKindForProcess(WELD_STEEL_JOIN_ID)).toBe("SERVICE");
+    expect(providersForProcess(WELD_STEEL_JOIN_ID).map((item) => item.id)).toEqual([
+      "MCH-WELD-STEEL",
+    ]);
+    expect(providersForProcess(WELD_ALUMINIUM_JOIN_ID).map((item) => item.id)).toEqual([
+      "MCH-WELD-ALU",
+    ]);
+    expect(providersForProcess(PRINT_WIDE_FORMAT_ID).map((item) => item.id)).toEqual([
+      "MCH-EPSON-60800",
+    ]);
+    expect(providersForProcess(CUT_CONTOUR_PLOTTER_ID).map((item) => item.id)).toEqual([
+      "MCH-CUTTER-PLOTTER",
+    ]);
+    expect(costRecipes.map((item) => item.id)).toEqual([RCP_PROFILE_FORMING_ID]);
   });
 });

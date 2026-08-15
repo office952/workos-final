@@ -76,7 +76,7 @@ Read-only. No prices added.
 `FORM_ALUMINIUM_PROFILE` = `CANONICAL_COST_EXISTS` via `return_cant_forming`.
 CNC and other machine processes = `SERVICE_RECIPE_MISSING`.
 Manual / vinyl / QC = `LABOR_RECIPE_MISSING`.
-Welding and other new capabilities without Operational Processes = `NOT_APPLICABLE`.
+Welding and other new capabilities without Operational Processes = `NOT_APPLICABLE` at this build. Later completed in `WORKOS_FINAL_REAL_SHOPFLOOR_OPERATIONAL_PROCESS_COMPLETION_V1`.
 
 ## Boundaries kept
 

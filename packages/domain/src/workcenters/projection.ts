@@ -213,11 +213,18 @@ function toWorkcenterRecord(
     ...workcenter,
     lifecycleLabel: providerLifecycleLabel(workcenter.lifecycle),
     capabilityLabels: workcenter.capabilityIds.map(capabilityLabel),
-    processLabels: uniqueLines(
-      workcenter.capabilityIds.flatMap((capabilityId) =>
+    processLabels: uniqueLines([
+      ...workcenter.capabilityIds.flatMap((capabilityId) =>
         processesForCapability(capabilityId).map((item) => item.label),
       ),
-    ),
+      ...registry.machines
+        .filter((item) => item.workcenterId === workcenter.id)
+        .flatMap((machine) =>
+          machine.capabilityIds.flatMap((capabilityId) =>
+            processesForCapability(capabilityId).map((item) => item.label),
+          ),
+        ),
+    ]),
     machineLabels: registry.machines
       .filter((item) => item.workcenterId === workcenter.id)
       .map((item) => item.label),

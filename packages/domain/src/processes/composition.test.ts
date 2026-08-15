@@ -253,6 +253,14 @@ describe("letters process composition", () => {
     expect(fromTruth.nodes.some((item) => item.processId === CUT_SHEET_CNC_ID)).toBe(
       true,
     );
+    expect(fromTruth.nodes.map((item) => item.processId)).not.toEqual(
+      expect.arrayContaining([
+        "WELD_STEEL_JOIN",
+        "WELD_ALUMINIUM_JOIN",
+        "PRINT_WIDE_FORMAT",
+        "CUT_CONTOUR_PLOTTER",
+      ]),
+    );
     const lighting = lightingEvaluationFrom(
       evaluateProductComponents({
         template: frontlitPlexiAl06Template,

@@ -420,6 +420,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "shopfloor-process-completion",
+        label: "Catalog procese atelier reale",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "machines",
         label: "Catalog utilaje",
         state: "IMPLEMENTED",

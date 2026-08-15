@@ -177,7 +177,7 @@ Do not put named employees on product templates. Templates may require a skill o
 
 Foundation implemented. See `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md`.
 
-Processes must require a **capability class**, not a hardcoded machine identity. The live shop-floor map includes the accepted assembly tables plus real welding, metal-cutting, CNC, forming, electrical, print and related stations. Capacity planning is not implemented.
+Processes must require a **capability class**, not a hardcoded machine identity. The live shop-floor map includes the accepted assembly tables plus real welding, metal-cutting, CNC, forming, electrical, print and related stations. Those real capabilities now have reusable Operational Processes. Capacity planning is not implemented.
 
 ```text
 OperationalProcess → requires Capability class

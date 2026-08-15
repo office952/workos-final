@@ -4,6 +4,8 @@ import { RETURN_CANT_FORMING_ID } from "../resources/catalog.js";
 export const PROCESS_CATEGORIES = [
   "CUTTING",
   "FORMING",
+  "WELDING",
+  "PRINTING",
   "FINISHING",
   "ASSEMBLY",
   "ELECTRICAL",
@@ -86,6 +88,15 @@ export const CLOSE_LETTER_BODY_ID = "CLOSE_LETTER_BODY";
 export const TEST_ILLUMINATION_UNIFORMITY_ID = "TEST_ILLUMINATION_UNIFORMITY";
 export const INSPECT_FINISHED_LETTER_ID = "INSPECT_FINISHED_LETTER";
 export const PACK_PRODUCT_ID = "PACK_PRODUCT";
+export const WELD_STEEL_JOIN_ID = "WELD_STEEL_JOIN";
+export const WELD_ALUMINIUM_JOIN_ID = "WELD_ALUMINIUM_JOIN";
+export const CUT_METAL_STOCK_ID = "CUT_METAL_STOCK";
+export const PRINT_WIDE_FORMAT_ID = "PRINT_WIDE_FORMAT";
+export const LAMINATE_WIDE_FORMAT_ID = "LAMINATE_WIDE_FORMAT";
+export const LAMINATE_RIGID_PLATE_ID = "LAMINATE_RIGID_PLATE";
+export const CUT_CONTOUR_PLOTTER_ID = "CUT_CONTOUR_PLOTTER";
+export const CUT_LASER_SHEET_ID = "CUT_LASER_SHEET";
+export const CUT_STYROFOAM_ID = "CUT_STYROFOAM";
 
 export const productionCapabilityClasses: readonly ProductionCapabilityClass[] = [
   {
@@ -384,6 +395,135 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     readiness: "PLANNED",
     readinessNote: "Fără material de ambalare și fără tarif în acest build.",
   },
+  {
+    id: WELD_STEEL_JOIN_ID,
+    label: "Îmbinare sudură oțel",
+    description:
+      "Îmbinare prin sudură oțel. Nu este sudură aluminiu și nu este un aparat concret.",
+    category: "WELDING",
+    requiredCapabilityId: "WELD_STEEL",
+    applicableTypeIds: [],
+    outcome: "Îmbinare oțel sudată",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote:
+      "Operație de atelier cunoscută. Nu este cerută de Letters. Fără rețetă de cost.",
+  },
+  {
+    id: WELD_ALUMINIUM_JOIN_ID,
+    label: "Îmbinare sudură aluminiu",
+    description:
+      "Îmbinare prin sudură aluminiu. Nu este sudură oțel și nu este un aparat concret.",
+    category: "WELDING",
+    requiredCapabilityId: "WELD_ALUMINIUM",
+    applicableTypeIds: [],
+    outcome: "Îmbinare aluminiu sudată",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote:
+      "Operație de atelier cunoscută. Nu este cerută de Letters. Fără rețetă de cost.",
+  },
+  {
+    id: CUT_METAL_STOCK_ID,
+    label: "Debitare semifabricat metalic",
+    description:
+      "Debitare de semifabricat metalic. Nu este debitare CNC de foi și nu este sudură.",
+    category: "CUTTING",
+    requiredCapabilityId: "METAL_CUTTING",
+    applicableTypeIds: [],
+    outcome: "Semifabricat metalic debitat",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote:
+      "Operație de atelier cunoscută. Fără dimensiune de masă, fără grosime-limită și fără tarif.",
+  },
+  {
+    id: PRINT_WIDE_FORMAT_ID,
+    label: "Printare format mare",
+    description:
+      "Print de format mare. Nu este materialul de print și nu este laminarea.",
+    category: "PRINTING",
+    requiredCapabilityId: "PRINTING",
+    applicableTypeIds: [],
+    outcome: "Suport printat",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote: "Operație de atelier cunoscută. Fără rețetă de print și fără cerere Letters.",
+  },
+  {
+    id: LAMINATE_WIDE_FORMAT_ID,
+    label: "Laminare print",
+    description:
+      "Laminare de media printată. Nu este aplicare de colant pe litere și nu este laminare pe plăci rigide.",
+    category: "PRINTING",
+    requiredCapabilityId: "LAMINATION",
+    applicableTypeIds: [],
+    outcome: "Print laminat",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote: "Operație de atelier cunoscută. Fără rețetă de laminare.",
+  },
+  {
+    id: LAMINATE_RIGID_PLATE_ID,
+    label: "Aplicare folie pe plăci rigide",
+    description:
+      "Aplicare de folie pe plăci rigide. Nu înlocuiește aplicarea manuală de colant pe litere.",
+    category: "FINISHING",
+    requiredCapabilityId: "RIGID_FILM_LAMINATION",
+    applicableTypeIds: [],
+    outcome: "Placă rigidă cu folie aplicată",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote:
+      "Operație de atelier cunoscută. Distinctă de APPLY_SURFACE_FINISH. Fără rețetă.",
+  },
+  {
+    id: CUT_CONTOUR_PLOTTER_ID,
+    label: "Decupare contur plotter",
+    description:
+      "Decupare contur / vinyl pe plotter. Nu este aplicarea foliei și nu este debitare CNC.",
+    category: "CUTTING",
+    requiredCapabilityId: "PLOTTER_CUTTING",
+    applicableTypeIds: [],
+    outcome: "Contur decupat pe plotter",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote: "Operație de atelier cunoscută. Distinctă de aplicarea de colant.",
+  },
+  {
+    id: CUT_LASER_SHEET_ID,
+    label: "Debitare foaie laser",
+    description: "Debitare laser. Nu este debitare CNC de foi și nu este debitare metale.",
+    category: "CUTTING",
+    requiredCapabilityId: "LASER_CUTTING",
+    applicableTypeIds: [],
+    outcome: "Geometrie debitată laser",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote: "Operație de atelier cunoscută. Fără matrice de materiale și fără tarif.",
+  },
+  {
+    id: CUT_STYROFOAM_ID,
+    label: "Debitare bloc polistiren",
+    description:
+      "Debitare polistiren. Nu este debitare CNC de foi și nu este debitare metale.",
+    category: "CUTTING",
+    requiredCapabilityId: "STYRO_CUTTING",
+    applicableTypeIds: [],
+    outcome: "Polistiren debitat",
+    resourceIds: [],
+    lifecycle: "ACTIVE",
+    readiness: "KNOWN_PROCESS",
+    readinessNote: "Operație de atelier cunoscută. Fără cerere Letters și fără tarif.",
+  },
 ];
 
 export function getProductionCapability(
@@ -420,6 +560,10 @@ export function processCategoryLabel(category: ProcessCategory): string {
       return "Debitare";
     case "FORMING":
       return "Formare";
+    case "WELDING":
+      return "Sudură";
+    case "PRINTING":
+      return "Print / finisare";
     case "FINISHING":
       return "Finisare";
     case "ASSEMBLY":

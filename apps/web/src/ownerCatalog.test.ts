@@ -290,6 +290,12 @@ describe("resources catalog presentation", () => {
     expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Serviciu");
     expect(catalog.categories[2]?.items[0]?.label).toBe("Formare profil aluminiu");
     expect(catalog.categories[2]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
+    expect(catalog.categories[2]?.items.map((item) => item.label)).toContain(
+      "Îmbinare sudură oțel",
+    );
+    expect(catalog.categories[2]?.items.map((item) => item.label)).toContain(
+      "Printare format mare",
+    );
     expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
       "Lipire față-volum",
     );
@@ -322,6 +328,8 @@ describe("processes catalog presentation", () => {
     expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
       "Debitare",
       "Formare",
+      "Sudură",
+      "Print / finisare",
       "Finisare",
       "Asamblare",
       "Electric",
@@ -330,6 +338,15 @@ describe("processes catalog presentation", () => {
     ]);
     expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
       "Formare profil aluminiu",
+    );
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Îmbinare sudură oțel",
+    );
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Printare format mare",
+    );
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Decupare contur plotter",
     );
     expect(
       catalog.categories[1]?.items

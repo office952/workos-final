@@ -120,6 +120,15 @@ describe("system projection API", () => {
       "TEST_ILLUMINATION_UNIFORMITY",
       "INSPECT_FINISHED_LETTER",
       "PACK_PRODUCT",
+      "WELD_STEEL_JOIN",
+      "WELD_ALUMINIUM_JOIN",
+      "CUT_METAL_STOCK",
+      "PRINT_WIDE_FORMAT",
+      "LAMINATE_WIDE_FORMAT",
+      "LAMINATE_RIGID_PLATE",
+      "CUT_CONTOUR_PLOTTER",
+      "CUT_LASER_SHEET",
+      "CUT_STYROFOAM",
     ]);
     expect(
       body.processes.find((item) => item.id === "FORM_ALUMINIUM_PROFILE")
@@ -204,6 +213,9 @@ describe("system projection API", () => {
     );
     expect(body.composition.nodes.map((item) => item.id)).toContain(
       "BODY:BOND_LETTER_BODY",
+    );
+    expect(body.composition.nodes.map((item) => item.processId)).not.toEqual(
+      expect.arrayContaining(["WELD_STEEL_JOIN", "PRINT_WIDE_FORMAT"]),
     );
     expect(JSON.stringify(body)).not.toMatch(
       /machineId|employeeId|ExecutionPlan|ExecutionTask/,

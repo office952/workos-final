@@ -63,7 +63,8 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await expect(page.getByRole("heading", { name: "Stație sudură" })).toBeVisible();
   await expect(page.getByText("Aparat sudură oțel").first()).toBeVisible();
   await expect(page.getByText("Aparat sudură aluminiu").first()).toBeVisible();
-  await expect(page.getByText("niciun proces încă").first()).toBeVisible();
+  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
+  await expect(page.getByText("Îmbinare sudură aluminiu").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-welding.png",
     fullPage: true,
@@ -146,7 +147,8 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await expect(page.getByRole("heading", { name: "Aparat sudură oțel" })).toBeVisible();
   await expect(page.getByText("Sudură oțel").first()).toBeVisible();
   await expect(page.getByText("Stație sudură").first()).toBeVisible();
-  await expect(page.getByText("Fără proces operațional încă").first()).toBeVisible();
+  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
+  await expect(page.getByText("Rețetă serviciu: Lipsă").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-welding-machines.png",
     fullPage: true,
@@ -174,7 +176,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await page.getByRole("button", { name: "Sudură oțel" }).click();
   await expect(page.getByRole("heading", { name: "Sudură oțel" })).toBeVisible();
   await expect(page.getByText("Aparat sudură oțel").first()).toBeVisible();
-  await expect(page.getByText("niciun proces încă").first()).toBeVisible();
+  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Acoperire procese" }).click();
   await expect(
@@ -197,8 +199,16 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await expect(page.getByRole("heading", { name: "Hartă procese / rețete" })).toBeVisible();
   await expect(page.getByText("Aceasta nu este o interfață de preț.")).toBeVisible();
   await expect(page.getByRole("button", { name: "CNC 4020" })).toBeVisible();
+  await page.getByRole("button", { name: "Aparat sudură oțel" }).click();
+  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
+  await page.getByRole("button", { name: "Imprimantă Epson" }).click();
+  await expect(page.getByText("Printare format mare").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-recipe-gaps.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-service-map.png",
     fullPage: true,
   });
 

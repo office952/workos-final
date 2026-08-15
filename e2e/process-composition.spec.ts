@@ -36,9 +36,15 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await expect(page.getByText("Ambalare").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Vopsire RAL" })).toHaveCount(0);
+  await expect(page.getByText("Îmbinare sudură oțel")).toHaveCount(0);
+  await expect(page.getByText("Printare format mare")).toHaveCount(0);
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/process-completion-overview.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-letters-composition.png",
     fullPage: true,
   });
   await page.screenshot({

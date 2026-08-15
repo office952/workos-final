@@ -453,7 +453,7 @@ function serviceMapOverviewItem(admin: WorkcentersAdminProjection): CatalogItem 
             ],
             lines: [
               "Aceasta nu este o interfață de preț. Arată doar dacă există rețetă de cost, de serviciu sau de labor.",
-              "Sudura, printul și celelalte capabilități noi nu au încă procese operaționale dedicate.",
+              "Sudura, printul și celelalte operații de atelier au acum proces operațional. Rețeta de cost poate lipsi în continuare.",
             ],
           },
         ],

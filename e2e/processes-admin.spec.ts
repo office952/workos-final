@@ -24,8 +24,18 @@ test("processes admin inspects capability-bound operational processes", async ({
     "true",
   );
   await expect(page.getByRole("heading", { name: "Debitare", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Formare", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sudură", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Print / finisare", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
   await expect(page.getByText("Debitare CNC", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Sudură", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Sudură", exact: true })).toBeVisible();
+  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
+  await page.getByRole("button", { name: "Print / finisare", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Print / finisare", exact: true })).toBeVisible();
+  await expect(page.getByText("Printare format mare").first()).toBeVisible();
+  await page.getByRole("button", { name: "Debitare", exact: true }).click();
   await expect(page.getByRole("button", { name: "Editează" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-home.png",
@@ -33,6 +43,10 @@ test("processes admin inspects capability-bound operational processes", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-catalog.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-categories.png",
     fullPage: true,
   });
   await page.screenshot({
@@ -64,6 +78,50 @@ test("processes admin inspects capability-bound operational processes", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-resource-link.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Îmbinare sudură oțel" }).click();
+  await expect(page.getByRole("heading", { name: "Îmbinare sudură oțel" })).toBeVisible();
+  await expect(page.getByText("Sudură oțel", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Rețetă serviciu: Lipsă").first()).toBeVisible();
+  await expect(page.getByText("Aparat sudură oțel").first()).toBeVisible();
+  await expect(page.getByText("nicio utilizare derivată încă").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-weld-steel.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Îmbinare sudură aluminiu" }).click();
+  await expect(page.getByRole("heading", { name: "Îmbinare sudură aluminiu" })).toBeVisible();
+  await expect(page.getByText("Sudură aluminiu", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Aparat sudură aluminiu").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-weld-aluminium.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Printare format mare" }).click();
+  await expect(page.getByRole("heading", { name: "Printare format mare" })).toBeVisible();
+  await expect(page.getByText("Rețetă serviciu: Lipsă").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-print.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Decupare contur plotter" }).click();
+  await expect(page.getByRole("heading", { name: "Decupare contur plotter" })).toBeVisible();
+  await expect(page.getByText("Decupare plotter", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Rețetă serviciu: Lipsă").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-plotter.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Debitare foaie laser" }).click();
+  await expect(page.getByRole("heading", { name: "Debitare foaie laser" })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-laser.png",
     fullPage: true,
   });
 

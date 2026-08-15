@@ -100,6 +100,8 @@ They are linked, not merged.
 
 ## Current live / known set
 
+Letters-used processes:
+
 | Process | Category | Capability | Types | Readiness |
 |---|---|---|---|---|
 | `CUT_SHEET_CNC` | CUTTING | CNC_ROUTING | FACE, BACK | KNOWN_PROCESS |
@@ -116,8 +118,31 @@ They are linked, not merged.
 | `INSPECT_FINISHED_LETTER` | QUALITY_CONTROL | QUALITY_CONTROL | product | PLANNED |
 | `PACK_PRODUCT` | PACKING | PACKAGING | product | PLANNED |
 
+Reusable shop-floor processes. They exist because real equipment and operations exist. They are not Letters demand:
+
+| Process | Category | Capability | Current provider (derived) | Recipe |
+|---|---|---|---|---|
+| `WELD_STEEL_JOIN` | WELDING | WELD_STEEL | `MCH-WELD-STEEL` | SERVICE missing |
+| `WELD_ALUMINIUM_JOIN` | WELDING | WELD_ALUMINIUM | `MCH-WELD-ALU` | SERVICE missing |
+| `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | `MCH-METAL-CUTTER-AUTO` | SERVICE missing |
+| `PRINT_WIDE_FORMAT` | PRINTING | PRINTING | `MCH-EPSON-60800` | SERVICE missing |
+| `LAMINATE_WIDE_FORMAT` | PRINTING | LAMINATION | `MCH-LAMINATOR-XPRO` | SERVICE missing |
+| `LAMINATE_RIGID_PLATE` | FINISHING | RIGID_FILM_LAMINATION | `MCH-RIGID-FILM-LAMINATOR` | SERVICE missing |
+| `CUT_CONTOUR_PLOTTER` | CUTTING | PLOTTER_CUTTING | `MCH-CUTTER-PLOTTER` | SERVICE missing |
+| `CUT_LASER_SHEET` | CUTTING | LASER_CUTTING | `MCH-LASER-CNC` | SERVICE missing |
+| `CUT_STYROFOAM` | CUTTING | STYRO_CUTTING | `MCH-STYRO-CUTTER` | SERVICE missing |
+
+```text
+CATALOG OF POSSIBLE OPERATIONS
+  ≠ PRODUCT PROCESS COMPOSITION
+```
+
+Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process; contour / V-groove / engraving were not added.
+
 Letters overall composition remains BLOCKED because Lighting calculation is PARTIAL: LED geometry, LED load, and physical PSU selection are still missing. PSU reserve is resolved (25%, owner-confirmed technical setting) and no longer blocks composition by itself.
 Technological process route is modeled. Cost remains PARTIAL. Execution remains absent.
+
+Recipe completeness is owned by `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`. A new process does not invent a recipe.
 
 Readiness is reported separately:
 
@@ -138,7 +163,7 @@ Typed catalog and typed composition compiler are authority. No process write. No
 ## Reserved, not implemented
 
 - ExecutionPlan / ExecutionTask
-- Workcenters / Machines / capacity
-- Labor recipes / employee wage
-- CNC pricing / geometry
+- Capacity planning / scheduling / MachineRun
+- Recipe prices, machine-hour rates, employee wages
+- CNC quantity / pricing
 - Process CRUD

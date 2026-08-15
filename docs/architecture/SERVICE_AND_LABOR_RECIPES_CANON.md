@@ -49,9 +49,9 @@ One active recipe:
 
 Quantity is consumed, not invented. Volume calculation remains the geometry authority.
 
-Missing recipes stay explicit. CNC, assembly, vinyl, QC, packing, print, and lamination have no activated recipe in this foundation.
+Missing recipes stay explicit. CNC, assembly, vinyl, QC, packing, welding, print, lamination, plotter, laser, styro, and metal cutting have no activated recipe in this foundation.
 
-Welding has no Operational Process, so no recipe.
+Those shop-floor operations now have Operational Processes. The recipe gap is `SERVICE_RECIPE_MISSING` or `LABOR_RECIPE_MISSING`, not `NOT_APPLICABLE`.
 
 ## Completeness vs providers
 

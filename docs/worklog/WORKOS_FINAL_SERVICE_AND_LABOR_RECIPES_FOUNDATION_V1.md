@@ -15,7 +15,7 @@ Quantity basis: volume perimeter (m). Geometry stays on Volume.
 
 CNC and other machine/workstation processes: `SERVICE_RECIPE_MISSING`.
 Manual assembly, vinyl, QC: `LABOR_RECIPE_MISSING`.
-Welding and other capabilities without a process: `NOT_APPLICABLE`.
+Welding and other capabilities without a process: `NOT_APPLICABLE` at this build. Later completed in `WORKOS_FINAL_REAL_SHOPFLOOR_OPERATIONAL_PROCESS_COMPLETION_V1`.
 
 Provider coverage is unchanged and independent.
 

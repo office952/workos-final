@@ -40,6 +40,8 @@ Additional workshop capabilities exist because real equipment exists. They are n
 
 `WELD_STEEL`, `WELD_ALUMINIUM`, `METAL_CUTTING`, `PRINTING`, `LAMINATION`, `LASER_CUTTING`, `STYRO_CUTTING`, `RIGID_FILM_LAMINATION`, `PLOTTER_CUTTING`.
 
+Each of those capabilities now has a reusable Operational Process. See `docs/architecture/OPERATIONAL_PROCESSES_CANON.md`. Provider coverage and recipe completeness remain independent.
+
 Workcenters / Machines consume those IDs. They do not recreate the capability catalog.
 
 Available shop-floor capability ≠ Letters-required capability. Welding machines do not add welding to Letters composition.
