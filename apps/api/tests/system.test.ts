@@ -153,6 +153,8 @@ describe("system projection API", () => {
       workcenters: unknown[];
       machines: unknown[];
       overview: {
+        workcenterCount: number;
+        coveredCapabilityCount: number;
         missingCapabilityCount: number;
         capacityPlanningState: string;
         executionState: string;
@@ -160,9 +162,13 @@ describe("system projection API", () => {
       lettersCoverage: { missingCapabilityIds: string[] };
     };
     expect(body.writeState).toBe("NOT_IMPLEMENTED");
-    expect(body.workcenters).toEqual([]);
+    expect(
+      (body.workcenters as Array<{ id: string }>).map((item) => item.id),
+    ).toEqual(["WC_ASSEMBLY_01", "WC_ASSEMBLY_02"]);
     expect(body.machines).toEqual([]);
-    expect(body.overview.missingCapabilityCount).toBe(8);
+    expect(body.overview.missingCapabilityCount).toBe(7);
+    expect(body.overview.workcenterCount).toBe(2);
+    expect(body.overview.coveredCapabilityCount).toBe(1);
     expect(body.overview.capacityPlanningState).toBe("NOT_IMPLEMENTED");
     expect(body.overview.executionState).toBe("NOT_IMPLEMENTED");
     expect(body.lettersCoverage.missingCapabilityIds).toContain("CNC_ROUTING");

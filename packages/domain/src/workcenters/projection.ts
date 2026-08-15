@@ -32,6 +32,7 @@ export type ProviderSummary = {
 export type WorkcenterAdminRecord = Workcenter & {
   lifecycleLabel: string;
   capabilityLabels: readonly string[];
+  processLabels: readonly string[];
   machineLabels: readonly string[];
   usedBy: readonly string[];
 };
@@ -169,6 +170,11 @@ function toWorkcenterRecord(
     ...workcenter,
     lifecycleLabel: providerLifecycleLabel(workcenter.lifecycle),
     capabilityLabels: workcenter.capabilityIds.map(capabilityLabel),
+    processLabels: uniqueLines(
+      workcenter.capabilityIds.flatMap((capabilityId) =>
+        processesForCapability(capabilityId).map((item) => item.label),
+      ),
+    ),
     machineLabels: registry.machines
       .filter((item) => item.workcenterId === workcenter.id)
       .map((item) => item.label),

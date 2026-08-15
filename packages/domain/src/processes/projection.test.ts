@@ -50,6 +50,12 @@ describe("operational process projection", () => {
     expect(forming?.providerCoverage).toBe("NO_PROVIDER");
     expect(forming?.providerCoverageLabel).toBe("Fără furnizor");
     expect(forming?.providers).toEqual([]);
+    const bonding = admin.processes.find((item) => item.id === "BOND_LETTER_BODY");
+    expect(bonding?.providerCoverage).toBe("COVERED");
+    expect(bonding?.providers.map((item) => item.id)).toEqual([
+      "WC_ASSEMBLY_01",
+      "WC_ASSEMBLY_02",
+    ]);
     expect(JSON.stringify(admin)).not.toMatch(/machineId|ExecutionPlan|Preț client/);
   });
 });

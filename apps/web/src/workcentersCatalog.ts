@@ -93,8 +93,9 @@ function overviewItem(admin: WorkcentersAdminProjection): CatalogItem {
               { label: "Write administrare", value: "Neimplementat" },
             ],
             lines: [
-              "Nu există ore-mașină, calendar de disponibilitate sau tarif pe utilaj.",
-              "Identitățile de atelier rămân goale până sunt confirmate. Nu inventăm utilaje.",
+              "Nu există ore-mașină, calendar de disponibilitate, limită de sarcini sau limită de angajați.",
+              "Cele două mese de asamblare sunt zone canonice. Lucrul manual poate avea loc și în altă parte în hală, fără a modela locuri ad-hoc.",
+              "Utilajele rămân neconfirmate. Nu inventăm CNC sau cabină de vopsit.",
             ],
           },
         ],
@@ -163,6 +164,13 @@ function workcenterItem(
                   workcenter.capabilityLabels.length === 0
                     ? "nicio capabilitate"
                     : workcenter.capabilityLabels.join("; "),
+              },
+              {
+                label: "Procese care o cer",
+                value:
+                  workcenter.processLabels.length === 0
+                    ? "niciun proces încă"
+                    : workcenter.processLabels.join("; "),
               },
               {
                 label: "Utilaje în zonă",

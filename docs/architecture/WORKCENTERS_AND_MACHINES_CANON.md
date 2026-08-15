@@ -39,7 +39,18 @@ Workcenters / Machines consume those IDs. They do not recreate the capability ca
 
 The typed catalog is the authority. There is no write path and no SQLite persistence for this domain.
 
-Live Workcenter and Machine rows are empty until owner-confirmed identities exist. Legacy evidence named capabilities and stations conceptually, not stable shop assets such as `CNC-01`. A missing-provider map is preferred to fabricated assets.
+Owner-confirmed live Workcenters:
+
+- `WC_ASSEMBLY_01` — Masă asamblare 1
+- `WC_ASSEMBLY_02` — Masă asamblare 2
+
+Both are ACTIVE. Both provide only `MANUAL_ASSEMBLY`. They are two large assembly tables / canonical organizational reference areas. They are not the only physical places in the hall where manual work can occur. Ad-hoc hall space is not modeled as extra Workcenters.
+
+Do not encode `Infinity`, unlimited task counts, or employee limits. Capacity, task concurrency, and employee limits remain `NOT_MODELED`.
+
+Live Machines remain empty. Legacy machine identities such as `MCH-CNC-4020` stay evidence until a later owner confirmation.
+
+A missing-provider map is preferred to fabricated assets. Do not create a generic `WC_ASSEMBLY` alongside the two confirmed tables.
 
 Coverage statuses:
 
@@ -63,7 +74,7 @@ Execution / Scheduling will consume it.
 
 Product System and Operational Processes do not own capacity.
 
-This foundation does not implement capacity planning, calendars, free/busy, or online/offline state. Lifecycle (`ACTIVE` / `PLANNED` / `RETIRED`) is structural only.
+This foundation does not implement capacity planning, calendars, free/busy, online/offline state, task concurrency limits, or employee limits. Lifecycle (`ACTIVE` / `PLANNED` / `RETIRED`) is structural only.
 
 ## Execution boundary
 

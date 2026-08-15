@@ -235,7 +235,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "machines",
         label: "Utilaje / workcenter",
         statement:
-          "Există modelul canonic Workcenter / Utilaj și join-ul pe CapabilityClass. Catalogul live este gol până la identități confirmate. Planificarea de capacitate nu este implementată.",
+          "Există două mese de asamblare confirmate. Catalogul de utilaje este gol. Planificarea de capacitate nu este implementată.",
         state: "IMPLEMENTED",
       },
       {
@@ -406,6 +406,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "workcenters",
         label: "Workcenters",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "assembly-workcenters",
+        label: "Mese de asamblare confirmate",
         state: "IMPLEMENTED",
       },
       {

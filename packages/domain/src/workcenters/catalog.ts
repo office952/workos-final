@@ -90,7 +90,28 @@ export function createWorkcenterRegistry(
   };
 }
 
-export const workcenters: readonly Workcenter[] = [];
+export const WC_ASSEMBLY_01_ID = "WC_ASSEMBLY_01";
+export const WC_ASSEMBLY_02_ID = "WC_ASSEMBLY_02";
+
+const ASSEMBLY_TABLE_DESCRIPTION =
+  "Masă mare de asamblare. Zonă canonică de organizare, nu singurul loc din hală unde se poate lucra manual.";
+
+export const workcenters: readonly Workcenter[] = [
+  {
+    id: WC_ASSEMBLY_01_ID,
+    label: "Masă asamblare 1",
+    description: ASSEMBLY_TABLE_DESCRIPTION,
+    lifecycle: "ACTIVE",
+    capabilityIds: ["MANUAL_ASSEMBLY"],
+  },
+  {
+    id: WC_ASSEMBLY_02_ID,
+    label: "Masă asamblare 2",
+    description: ASSEMBLY_TABLE_DESCRIPTION,
+    lifecycle: "ACTIVE",
+    capabilityIds: ["MANUAL_ASSEMBLY"],
+  },
+];
 
 export const machines: readonly Machine[] = [];
 

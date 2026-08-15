@@ -2,6 +2,8 @@ export {
   PROVIDER_COVERAGE_STATUSES,
   PROVIDER_KINDS,
   PROVIDER_LIFECYCLES,
+  WC_ASSEMBLY_01_ID,
+  WC_ASSEMBLY_02_ID,
   createWorkcenterRegistry,
   machines,
   providerCoverageLabel,

@@ -363,8 +363,24 @@ describe("workcenters catalog presentation", () => {
       "capabilities",
       "coverage",
     ]);
-    expect(catalog.categories[1]?.items[0]?.label).toBe("Nicio zonă confirmată");
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toEqual([
+      "Masă asamblare 1",
+      "Masă asamblare 2",
+    ]);
     expect(catalog.categories[2]?.items[0]?.label).toBe("Niciun utilaj confirmat");
+    expect(
+      catalog.categories[3]?.items
+        .find((item) => item.id === "capability:MANUAL_ASSEMBLY")
+        ?.groups[0]?.sections.find((item) => item.id === "identity")?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Acoperire catalog", value: "Acoperită" }),
+        expect.objectContaining({
+          label: "Furnizori",
+          value: "Zonă / workcenter: Masă asamblare 1; Zonă / workcenter: Masă asamblare 2",
+        }),
+      ]),
+    );
     expect(catalog.categories[3]?.items.map((item) => item.label)).toContain("Debitare CNC");
     expect(catalog.categories[4]?.items[0]?.label).toBe("Letters — acoperire capabilități");
     expect(
@@ -372,6 +388,10 @@ describe("workcenters catalog presentation", () => {
         ?.facts,
     ).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          label: "Acoperite",
+          value: expect.stringContaining("Asamblare manuală"),
+        }),
         expect.objectContaining({
           label: "Fără furnizor",
           value: expect.stringContaining("Debitare CNC"),

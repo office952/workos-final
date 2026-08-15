@@ -162,6 +162,8 @@ export {
   type ProductProcessComposition,
 } from "./processes/index.js";
 export {
+  WC_ASSEMBLY_01_ID,
+  WC_ASSEMBLY_02_ID,
   createWorkcenterRegistry,
   lettersCapabilityCoverage,
   machines,

@@ -19,6 +19,8 @@ import {
 } from "../product/frontlitPlexiAl06.js";
 import { compileEic } from "../resources/eic.js";
 import {
+  WC_ASSEMBLY_01_ID,
+  WC_ASSEMBLY_02_ID,
   createWorkcenterRegistry,
   machines,
   workcenterRegistry,
@@ -43,14 +45,14 @@ const fixtureWorkcenters: readonly Workcenter[] = [
     capabilityIds: ["CNC_ROUTING"],
   },
   {
-    id: "WC_ASSEMBLY",
+    id: "WC_FIXTURE_ASSEMBLY",
     label: "Zonă asamblare (fixture)",
     description: "Manual work without a fake machine.",
     lifecycle: "ACTIVE",
     capabilityIds: ["MANUAL_ASSEMBLY"],
   },
   {
-    id: "WC_ASSEMBLY_ALT",
+    id: "WC_FIXTURE_ASSEMBLY_ALT",
     label: "Zonă asamblare planificată (fixture)",
     description: "Second provider for the same capability.",
     lifecycle: "PLANNED",
@@ -79,11 +81,24 @@ const fixtureMachines: readonly Machine[] = [
 const fixtureRegistry = createWorkcenterRegistry(fixtureWorkcenters, fixtureMachines);
 
 describe("workcenter registry", () => {
-  it("keeps live catalogs empty until owner-confirmed identities exist", () => {
-    expect(workcenters).toEqual([]);
+  it("activates exactly two owner-confirmed assembly workcenters", () => {
+    expect(workcenters.map((item) => item.id)).toEqual([
+      WC_ASSEMBLY_01_ID,
+      WC_ASSEMBLY_02_ID,
+    ]);
+    expect(workcenters.every((item) => item.lifecycle === "ACTIVE")).toBe(true);
+    expect(
+      workcenters.every(
+        (item) =>
+          item.capabilityIds.length === 1 && item.capabilityIds[0] === "MANUAL_ASSEMBLY",
+      ),
+    ).toBe(true);
     expect(machines).toEqual([]);
-    expect(workcenterRegistry.workcenters).toEqual([]);
-    expect(workcenterRegistry.machines).toEqual([]);
+    expect(workcenterRegistry.workcenters).toEqual(workcenters);
+    expect(JSON.stringify(workcenters)).not.toMatch(
+      /Infinity|unlimited|maxTasks|maxEmployees|taskConcurrency|employeeLimit/,
+    );
+    expect(workcenters.some((item) => item.id === "WC_ASSEMBLY")).toBe(false);
   });
 
   it("rejects duplicate ids, unknown capabilities, and broken workcenter refs", () => {
@@ -152,9 +167,9 @@ describe("capability providers", () => {
 
   it("lets a workcenter provide manual assembly without a machine", () => {
     const providers = providersForCapability("MANUAL_ASSEMBLY", fixtureRegistry);
-    expect(providers.some((item) => item.kind === "WORKCENTER" && item.id === "WC_ASSEMBLY")).toBe(
-      true,
-    );
+    expect(
+      providers.some((item) => item.kind === "WORKCENTER" && item.id === "WC_FIXTURE_ASSEMBLY"),
+    ).toBe(true);
     expect(providers.every((item) => item.kind !== "MACHINE")).toBe(true);
     expect(coverageForCapability("MANUAL_ASSEMBLY", fixtureRegistry)).toBe("COVERED");
   });
@@ -176,7 +191,7 @@ describe("capability providers", () => {
       "M_CNC_PROFILE",
     ]);
     expect(providersForCapability("MANUAL_ASSEMBLY", fixtureRegistry).map((item) => item.id)).toEqual(
-      ["WC_ASSEMBLY", "WC_ASSEMBLY_ALT"],
+      ["WC_FIXTURE_ASSEMBLY", "WC_FIXTURE_ASSEMBLY_ALT"],
     );
   });
 
@@ -184,12 +199,12 @@ describe("capability providers", () => {
     const futureTask = {
       processId: BOND_LETTER_BODY_ID,
       providerKind: "WORKCENTER" as const,
-      providerId: "WC_ASSEMBLY",
+      providerId: "WC_FIXTURE_ASSEMBLY",
     };
     expect(providersForProcess(futureTask.processId, fixtureRegistry).some((item) => item.id === futureTask.providerId)).toBe(
       true,
     );
-    expect(JSON.stringify(operationalProcesses)).not.toMatch(/WC_ASSEMBLY/);
+    expect(JSON.stringify(operationalProcesses)).not.toMatch(/WC_FIXTURE_ASSEMBLY|WC_ASSEMBLY_01|WC_ASSEMBLY_02/);
   });
 });
 
@@ -207,9 +222,17 @@ describe("letters capability coverage", () => {
       "QUALITY_CONTROL",
       "PACKAGING",
     ]);
-    expect(live.coveredCapabilityIds).toEqual([]);
+    expect(live.coveredCapabilityIds).toEqual(["MANUAL_ASSEMBLY"]);
     expect(live.plannedCapabilityIds).toEqual([]);
-    expect(live.missingCapabilityIds).toEqual(live.requiredCapabilityIds);
+    expect(live.missingCapabilityIds).toEqual([
+      "CNC_ROUTING",
+      "PROFILE_FORMING",
+      "VINYL_APPLICATION",
+      "ELECTRICAL_ASSEMBLY",
+      "PAINTING",
+      "QUALITY_CONTROL",
+      "PACKAGING",
+    ]);
   });
 
   it("compares Letters demand with a fixture catalog without claiming execution readiness", () => {
@@ -234,15 +257,40 @@ describe("letters capability coverage", () => {
 });
 
 describe("live workcenters projection", () => {
-  it("projects an honest empty shop-floor map", () => {
+  it("projects two live assembly tables and honest remaining gaps", () => {
     const admin = projectWorkcentersAdministration();
     expect(admin.writeState).toBe("NOT_IMPLEMENTED");
-    expect(admin.workcenters).toEqual([]);
+    expect(admin.workcenters.map((item) => item.id)).toEqual([
+      WC_ASSEMBLY_01_ID,
+      WC_ASSEMBLY_02_ID,
+    ]);
     expect(admin.machines).toEqual([]);
-    expect(admin.overview.missingCapabilityCount).toBe(8);
-    expect(admin.overview.coveredCapabilityCount).toBe(0);
-    expect(admin.capabilities.every((item) => item.coverage === "NO_PROVIDER")).toBe(true);
-    expect(admin.processCoverage.every((item) => item.coverage === "NO_PROVIDER")).toBe(true);
+    expect(admin.workcenters[0]?.processLabels).toEqual(
+      expect.arrayContaining(["Lipire față-volum", "Închidere corp"]),
+    );
+    expect(admin.overview.workcenterCount).toBe(2);
+    expect(admin.overview.machineCount).toBe(0);
+    expect(admin.overview.coveredCapabilityCount).toBe(1);
+    expect(admin.overview.missingCapabilityCount).toBe(7);
+    expect(admin.overview.capacityPlanningState).toBe("NOT_IMPLEMENTED");
+    expect(admin.overview.executionState).toBe("NOT_IMPLEMENTED");
+    const manual = admin.capabilities.find((item) => item.id === "MANUAL_ASSEMBLY");
+    expect(manual?.coverage).toBe("COVERED");
+    expect(manual?.providers.map((item) => item.id)).toEqual([
+      WC_ASSEMBLY_01_ID,
+      WC_ASSEMBLY_02_ID,
+    ]);
+    expect(providersForCapability("MANUAL_ASSEMBLY").map((item) => item.id)).toEqual([
+      WC_ASSEMBLY_01_ID,
+      WC_ASSEMBLY_02_ID,
+    ]);
+    expect(coverageForCapability("MANUAL_ASSEMBLY")).toBe("COVERED");
+    expect(providersForProcess(BOND_LETTER_BODY_ID).map((item) => item.id)).toEqual([
+      WC_ASSEMBLY_01_ID,
+      WC_ASSEMBLY_02_ID,
+    ]);
+    expect(JSON.stringify(operationalProcesses)).not.toMatch(/WC_ASSEMBLY_01|WC_ASSEMBLY_02|machineId/);
+    expect(JSON.stringify(admin)).not.toMatch(/WC_ASSEMBLY[^_]|Infinity|maxEmployees|taskConcurrency/);
     expect(JSON.stringify(admin)).not.toMatch(/CNC-01|Paint Booth|Assembly Station/);
     expect(JSON.stringify(admin)).not.toMatch(/ExecutionPlan|Preț client|machineHour/);
   });
