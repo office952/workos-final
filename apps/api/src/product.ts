@@ -3,6 +3,7 @@ import {
   compileDefinition,
   compileEic,
   composeProductProcesses,
+  composeProductProcessesFromTruth,
   confirmReviewedDefinition,
   lettersProcessCompositionInspections,
   type DraftConfiguration,
@@ -140,7 +141,10 @@ export function registerProductRoutes(
     return c.json({
       truth: confirmed,
       aggregate,
-      eic: compileEic(aggregate),
+      eic: compileEic(
+        aggregate,
+        composeProductProcessesFromTruth(confirmed, template),
+      ),
     });
   });
 }

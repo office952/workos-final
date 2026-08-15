@@ -89,7 +89,7 @@ Final inspection and packing are PRODUCT-scope nodes.
 A process may reference a Resource/Service. Forming references `return_cant_forming`.
 
 The process is not the price row. Resources / Cost remains monetary authority.
-EIC stays on ResourceRequirements. This foundation does not rewrite EIC.
+EIC stays generic. Required LETTERS processes now emit recipe requirements from existing Aggregate quantities. EIC does not branch on process or product.
 
 `return_cant_forming` is both:
 
@@ -139,8 +139,8 @@ CATALOG OF POSSIBLE OPERATIONS
 
 Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process; contour / V-groove / engraving were not added.
 
-Letters Lighting calculation is CALCULATED on the confirmed-perimeter path. `PLACE_LED_MODULES` and `INSTALL_OR_CONNECT_PSU` are no longer blocked for missing geometry or PSU catalog. They remain REQUIRED_INCOMPLETE because labor recipes are not in this build.
-Overall composition is PARTIAL. Cost remains PARTIAL. Execution remains absent.
+Letters Lighting calculation is CALCULATED on the confirmed-perimeter path. LETTERS CNC, assembly, vinyl, electrical, paint and packing now have functional recipes. Unrelated shop-floor processes still have no recipes.
+Overall composition is PARTIAL because Analyzer geometry is still missing. Cost remains PARTIAL for the same reason. Execution remains absent.
 
 Recipe completeness is owned by `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`. A new process does not invent a recipe.
 

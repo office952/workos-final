@@ -3,6 +3,7 @@ import type {
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
+import { MAT_VINYL_ORACAL_651_ID } from "../resources/catalog.js";
 import { resolveTypeResources } from "./componentTypes.js";
 import type { DraftValues, TechnicalMeasurement } from "./types.js";
 import { squareMetersFromMm2 } from "./units.js";
@@ -14,7 +15,7 @@ export function faceAreaSquareMeters(areaMm2: number): number {
   return squareMetersFromMm2(areaMm2);
 }
 
-const FACE_GAPS = ["Geometrie din Analyzer", "Debitare CNC"] as const;
+const FACE_GAPS = ["Geometrie din Analyzer"] as const;
 
 function faceResult(
   status: ComponentCalculationResult["status"],
@@ -67,18 +68,30 @@ export const plexiglasFaceContract: ComponentCalculationContract = {
     }
     const squareMeters = faceAreaSquareMeters(area.value);
     const resolved = resolveTypeResources("PLEXIGLAS_FACE", input.values);
-    const requirements = resolved.flatMap((item) =>
-      item.status === "RESOLVED"
+    const requirements = [
+      ...resolved.flatMap((item) =>
+        item.status === "RESOLVED"
+          ? [
+              {
+                componentId: FACE_COMPONENT_ID,
+                resourceId: item.resourceId,
+                quantity: squareMeters,
+                unit: "m2" as const,
+              },
+            ]
+          : [],
+      ),
+      ...(input.values["face.finish"] === "vinyl"
         ? [
             {
               componentId: FACE_COMPONENT_ID,
-              resourceId: item.resourceId,
+              resourceId: MAT_VINYL_ORACAL_651_ID,
               quantity: squareMeters,
               unit: "m2" as const,
             },
           ]
-        : [],
-    );
+        : []),
+    ];
     return faceResult(
       "CALCULATED",
       [

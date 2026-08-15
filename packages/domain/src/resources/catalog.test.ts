@@ -63,6 +63,17 @@ describe("resource catalog", () => {
       MAT_LED_PSU_12V_100W_ID,
       MAT_LED_PSU_12V_160W_ID,
       MAT_LED_PSU_12V_200W_ID,
+      "MAT-VINYL-ORACAL-651",
+      "SVC-CNC-FACE",
+      "SVC-CNC-BACK",
+      "LAB-VINYL-FACE",
+      "LAB-VINYL-VOLUME",
+      "LAB-BOND-LETTER-BODY",
+      "LAB-CLOSE-LETTER-BODY",
+      "SVC-PLACE-LED-MODULES",
+      "SVC-ELECTRICAL-FINISH",
+      "SVC-PAINT-RAL",
+      "SVC-PACK-PRODUCT",
     ]);
   });
 
@@ -74,7 +85,15 @@ describe("resource catalog", () => {
     expect(resourceKindLabel("SERVICE")).toBe("Serviciu");
     expect(listServiceResources().map((item) => item.id)).toEqual([
       RETURN_CANT_FORMING_ID,
+      "SVC-CNC-FACE",
+      "SVC-CNC-BACK",
+      "SVC-PLACE-LED-MODULES",
+      "SVC-ELECTRICAL-FINISH",
+      "SVC-PAINT-RAL",
+      "SVC-PACK-PRODUCT",
     ]);
+    expect(getResource("LAB-BOND-LETTER-BODY")?.kind).toBe("LABOR");
+    expect(resourceKindLabel("LABOR")).toBe("Manoperă");
   });
 
   it("separates material family from purchasable specification", () => {
@@ -83,6 +102,7 @@ describe("resource catalog", () => {
       "FOREX",
       "ALUMINIUM",
       "LED",
+      "VINYL",
     ]);
     const plexiglas = getResource(PLEXIGLAS_3MM_OPAL_ID);
     expect(plexiglas?.familyId).toBe("PLEXIGLAS");

@@ -106,8 +106,19 @@ describe("component configuration model", () => {
       technicalSettings: [],
     });
     expect(depth60.typeId).toBe(depth100.typeId);
-    expect(depth60.quantities).toEqual(depth100.quantities);
-    expect(depth60.requirements).toEqual(depth100.requirements);
+    expect(depth60.quantities.find((item) => item.id === "volume_linear")?.value).toBe(
+      depth100.quantities.find((item) => item.id === "volume_linear")?.value,
+    );
+    expect(depth60.quantities.find((item) => item.id === "volume_lateral")?.value).toBe(0.75);
+    expect(depth100.quantities.find((item) => item.id === "volume_lateral")?.value).toBe(1.25);
+    expect(
+      depth60.requirements.filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651"),
+    ).toEqual(
+      depth100.requirements.filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651"),
+    );
+    expect(depth100.requirements.some((item) => item.resourceId === "MAT-VINYL-ORACAL-651")).toBe(
+      true,
+    );
   });
 
   it("keeps BACK on one Forex contract when thickness changes", () => {

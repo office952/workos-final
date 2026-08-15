@@ -3,6 +3,7 @@ import type {
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
+import { MAT_VINYL_ORACAL_651_ID } from "../resources/catalog.js";
 import { resolveTypeResources } from "./componentTypes.js";
 import type { DraftValues, TechnicalMeasurement } from "./types.js";
 import { linearMetersFromMm } from "./units.js";
@@ -66,7 +67,30 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
       return volumeResult("MISSING_MEASUREMENT", [], []);
     }
     const meters = volumeLinearMeters(perimeter.value);
+    const depthMm = Number(input.values["volume.depthMm"]);
+    const lateralArea =
+      Number.isFinite(depthMm) && depthMm > 0 ? meters * (depthMm / 1000) : undefined;
     const resolutions = resolveTypeResources("ALUMINIUM_VOLUME", input.values);
+    const requirements = [
+      ...resolutions
+        .filter((item) => item.status === "RESOLVED")
+        .map((item) => ({
+          componentId: VOLUME_COMPONENT_ID,
+          resourceId: item.resourceId,
+          quantity: meters,
+          unit: "m" as const,
+        })),
+      ...(input.values["volume.finish"] === "vinyl" && lateralArea !== undefined
+        ? [
+            {
+              componentId: VOLUME_COMPONENT_ID,
+              resourceId: MAT_VINYL_ORACAL_651_ID,
+              quantity: lateralArea,
+              unit: "m2" as const,
+            },
+          ]
+        : []),
+    ];
     return volumeResult(
       "CALCULATED",
       [
@@ -78,15 +102,20 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
           unit: "m",
           basis: "confirmed_perimeter",
         },
+        ...(lateralArea === undefined
+          ? []
+          : [
+              {
+                componentId: VOLUME_COMPONENT_ID,
+                id: "volume_lateral",
+                label: "Suprafață laterală volum",
+                value: lateralArea,
+                unit: "m2" as const,
+                basis: "confirmed_perimeter" as const,
+              },
+            ]),
       ],
-      resolutions
-        .filter((item) => item.status === "RESOLVED")
-        .map((item) => ({
-          componentId: VOLUME_COMPONENT_ID,
-          resourceId: item.resourceId,
-          quantity: meters,
-          unit: "m" as const,
-        })),
+      requirements,
       resolutions.flatMap((item) =>
         item.status === "UNRESOLVED" ? [item.reason] : [],
       ),

@@ -1,8 +1,12 @@
+import type { ProductProcessComposition } from "../processes/composition.js";
 import type { ProductAggregate } from "../product/types.js";
-import { getCostEvidence, getResource, type ResourceUnit } from "./catalog.js";
+import { getCostEvidence, getResource, type ResourceKind, type ResourceUnit } from "./catalog.js";
 import type { ResourceRequirement } from "./requirement.js";
+import { collectRecipeRequirements } from "./recipes.js";
 
 export type { ResourceRequirement };
+
+export type EicLineGroup = "materials" | "services" | "labor" | "lighting";
 
 export type EicLine = {
   resourceId: string;
@@ -12,6 +16,8 @@ export type EicLine = {
   rate: number;
   currency: "EUR";
   cost: number;
+  kind: ResourceKind;
+  group: EicLineGroup;
 };
 
 export type EicResult = {
@@ -24,8 +30,12 @@ export type EicResult = {
 
 export function resourceRequirements(
   aggregate: ProductAggregate,
+  composition?: ProductProcessComposition,
 ): ResourceRequirement[] {
-  return [...aggregate.requirements];
+  const recipeRequirements = composition
+    ? collectRecipeRequirements(aggregate, composition)
+    : [];
+  return [...aggregate.requirements, ...recipeRequirements];
 }
 
 export function applyRequirement(requirement: ResourceRequirement): EicLine {
@@ -45,11 +55,16 @@ export function applyRequirement(requirement: ResourceRequirement): EicLine {
     rate: evidence.amount,
     currency: evidence.currency,
     cost: requirement.quantity * evidence.amount,
+    kind: resource.kind,
+    group: eicLineGroup(resource.kind, resource.familyId),
   };
 }
 
-export function compileEic(aggregate: ProductAggregate): EicResult {
-  const requirements = resourceRequirements(aggregate);
+export function compileEic(
+  aggregate: ProductAggregate,
+  composition?: ProductProcessComposition,
+): EicResult {
+  const requirements = resourceRequirements(aggregate, composition);
   const lines: EicLine[] = requirements.map(applyRequirement);
   const excludedComponentLabels = aggregate.componentStatuses
     .filter((item) => item.status !== "CALCULATED")
@@ -68,4 +83,42 @@ export function compileEic(aggregate: ProductAggregate): EicResult {
     total: lines.reduce((sum, line) => sum + line.cost, 0),
     excludedComponentLabels,
   };
+}
+
+export function eicLineGroup(
+  kind: ResourceKind,
+  familyId?: string,
+): EicLineGroup {
+  if (familyId === "LED") {
+    return "lighting";
+  }
+  switch (kind) {
+    case "MATERIAL":
+      return "materials";
+    case "SERVICE":
+      return "services";
+    case "LABOR":
+      return "labor";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
+export function eicLineGroupLabel(group: EicLineGroup): string {
+  switch (group) {
+    case "materials":
+      return "Materiale";
+    case "services":
+      return "Servicii";
+    case "labor":
+      return "Manoperă";
+    case "lighting":
+      return "Iluminare";
+    default: {
+      const _exhaustive: never = group;
+      return _exhaustive;
+    }
+  }
 }

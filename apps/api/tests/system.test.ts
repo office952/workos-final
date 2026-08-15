@@ -86,6 +86,7 @@ describe("system projection API", () => {
       "FOREX",
       "ALUMINIUM",
       "LED",
+      "VINYL",
     ]);
     expect(body.families[0]?.specifications[0]?.id).toBe("plexiglas_3mm_opal");
     expect(body.families[3]?.specifications.map((item) => item.id)).toEqual([
@@ -98,7 +99,7 @@ describe("system projection API", () => {
     expect(body.services[0]).toEqual(
       expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
     );
-    expect(body.costEvidence).toHaveLength(9);
+    expect(body.costEvidence).toHaveLength(20);
     expect(JSON.stringify(body)).not.toMatch(/plexiglas_face_3mm|forex_back_10mm/);
   });
 

@@ -27,7 +27,7 @@ describe("resources administration projection", () => {
     expect(resourceWhereUsed(RETURN_CANT_FORMING_ID)[0]?.role).toBe("VOLUME");
   });
 
-  it("projects family, specification, service and cost without a write path", () => {
+  it("projects family, specification, service, labor and cost without a write path", () => {
     const admin = projectResourcesAdministration();
     expect(admin.writeState).toBe("NOT_IMPLEMENTED");
     expect(admin.families.map((item) => item.id)).toEqual([
@@ -35,6 +35,7 @@ describe("resources administration projection", () => {
       "FOREX",
       "ALUMINIUM",
       "LED",
+      "VINYL",
     ]);
     const plexiglas = admin.materials.find((item) => item.id === PLEXIGLAS_3MM_OPAL_ID);
     expect(plexiglas?.familyLabel).toBe("Plexiglas");
@@ -50,33 +51,57 @@ describe("resources administration projection", () => {
     const psu160 = admin.materials.find((item) => item.id === MAT_LED_PSU_12V_160W_ID);
     expect(psu160?.capacityLabel).toBe("160 W");
     expect(psu160?.cost?.amountDisplay).toBe("20,00 EUR / buc");
-    expect(admin.services).toEqual([
-      expect.objectContaining({
-        id: RETURN_CANT_FORMING_ID,
-        kind: "SERVICE",
-        kindLabel: "Serviciu",
-        familyId: null,
-      }),
+    expect(admin.services.map((item) => item.id)).toEqual(
+      expect.arrayContaining([
+        RETURN_CANT_FORMING_ID,
+        "SVC-CNC-FACE",
+        "SVC-CNC-BACK",
+        "SVC-PLACE-LED-MODULES",
+        "SVC-ELECTRICAL-FINISH",
+        "SVC-PAINT-RAL",
+        "SVC-PACK-PRODUCT",
+      ]),
+    );
+    expect(admin.labor.map((item) => item.id)).toEqual([
+      "LAB-VINYL-FACE",
+      "LAB-VINYL-VOLUME",
+      "LAB-BOND-LETTER-BODY",
+      "LAB-CLOSE-LETTER-BODY",
     ]);
-    expect(admin.serviceRecipes).toEqual([
-      expect.objectContaining({
-        id: "RCP_PROFILE_FORMING",
-        kind: "SERVICE",
-        completenessLabel: "Configurată",
-        costEvidenceId: RETURN_CANT_FORMING_ID,
-      }),
+    expect(admin.serviceRecipes.map((item) => item.id)).toEqual(
+      expect.arrayContaining([
+        "RCP_PROFILE_FORMING",
+        "RCP_CNC_FACE",
+        "RCP_CNC_BACK",
+        "RCP_PLACE_LED_MODULES",
+        "RCP_ELECTRICAL_FINISH",
+        "RCP_PAINT_RAL",
+        "RCP_PACK_PRODUCT",
+      ]),
+    );
+    expect(admin.laborRecipes.map((item) => item.id)).toEqual([
+      "RCP_VINYL_FACE_LABOR",
+      "RCP_VINYL_VOLUME_LABOR",
+      "RCP_BOND_LETTER_BODY",
+      "RCP_CLOSE_LETTER_BODY",
     ]);
-    expect(admin.laborRecipes).toEqual([]);
-    expect(admin.missingServiceRecipes.map((item) => item.processId)).toContain(
+    expect(admin.missingServiceRecipes.map((item) => item.processId)).not.toContain(
       "CUT_SHEET_CNC",
     );
-    expect(admin.missingLaborRecipes.map((item) => item.processId)).toContain(
+    expect(admin.missingServiceRecipes.map((item) => item.processId)).toContain(
+      "WELD_STEEL_JOIN",
+    );
+    expect(admin.missingLaborRecipes.map((item) => item.processId)).not.toContain(
       "BOND_LETTER_BODY",
     );
-    expect(admin.costEvidence).toHaveLength(9);
+    expect(admin.missingLaborRecipes.map((item) => item.processId)).toContain(
+      "INSPECT_FINISHED_LETTER",
+    );
+    expect(admin.costEvidence).toHaveLength(20);
     expect(admin.costEvidence.map((item) => item.resourceId).sort()).toEqual(
       admin.materials
         .concat(admin.services)
+        .concat(admin.labor)
         .map((item) => item.id)
         .sort(),
     );

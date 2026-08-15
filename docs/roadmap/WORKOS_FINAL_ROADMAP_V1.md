@@ -44,7 +44,8 @@ Resources now separate material family, specification, service, and cost evidenc
 Operational Processes now separate HOW work is done from WHAT is consumed.
 Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClass. Two owner-confirmed assembly tables provide `MANUAL_ASSEMBLY`. Live machines remain empty. Capacity planning is not implemented.
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan.
-LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC. Recipe/labor remains PARTIAL. Values are calibratable development configuration.
+LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
+LETTERS Service/Labor recipes are functional V1. Canonical none/none EIC is 595.00 EUR PARTIAL because Analyzer geometry is still missing. Values are calibratable development configuration, not final workshop rates.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text
@@ -82,6 +83,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Real shop-floor Operational Process completion | DONE / FOUNDATION |
 | Resources admin write / process admin write | NOT_IMPLEMENTED |
 | Lighting resource calculation | IMPLEMENTED_CURRENT / functional V1 |
+| Letters functional internal-cost recipes / EIC | IMPLEMENTED_CURRENT / functional V1 |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | People, Pontaj, Execution | LATER |
 | Commercial, Quote Snapshot, Order Snapshot | LATER |

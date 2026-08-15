@@ -461,8 +461,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       },
       {
         id: "labor-recipes",
-        label: "Rețete labor / serviciu",
-        state: "PLANNED",
+        label: "Rețete labor / serviciu LETTERS",
+        state: "IMPLEMENTED",
       },
       {
         id: "cnc-pricing",

@@ -91,13 +91,22 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Lungime volum: 12,5 m")).toBeVisible();
   await expect(page.getByText("Suprafață față: 0,25 m²")).toBeVisible();
   await expect(page.getByText("Suprafață spate: 0,25 m²")).toBeVisible();
-  await expect(page.getByText("Module LED: 125 buc")).toBeVisible();
+  await expect(page.getByText("Module LED: 125 buc", { exact: true })).toBeVisible();
   await expect(page.getByText("Putere totală LED: 93,75 W")).toBeVisible();
   await expect(page.getByText("Necesar sursă cu rezervă: 117,19 W")).toBeVisible();
   await expect(page.getByText("Sursă selectată 160 W: 1 buc")).toBeVisible();
   await expect(page.getByText("Modul LED 12V: 125 buc", { exact: true })).toBeVisible();
   await expect(page.getByText("Sursă LED 12V 160W: 1 buc", { exact: true })).toBeVisible();
-  await expect(page.getByText("Total cost intern estimat: 403,00 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 598,50 EUR")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Materiale" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Servicii" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Manoperă" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Iluminare" }).first()).toBeVisible();
+  await expect(page.getByText("Folie Oracal 651: 0,25 m²", { exact: true })).toBeVisible();
+  await expect(page.getByText("Aplicare folie față: 0,25 m²", { exact: true })).toBeVisible();
+  await expect(page.getByText("Debitare CNC față: 12,5 m", { exact: true })).toBeVisible();
+  await expect(page.getByText("Lipire față-volum: 12,5 m", { exact: true })).toBeVisible();
+  await expect(page.getByText("Montare module LED: 125 buc", { exact: true })).toBeVisible();
   await expect(page.getByText("Costul intern al produsului este parțial")).toBeVisible();
   await expect(
     page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
@@ -150,9 +159,33 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/lighting-calc-eic.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-total.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-breakdown.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-cnc.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-assembly.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-lighting.png",
+    fullPage: true,
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
     path: "docs/worklog/screenshots/lighting-calc-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-narrow.png",
     fullPage: true,
   });
 });

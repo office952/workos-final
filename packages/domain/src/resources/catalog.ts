@@ -1,7 +1,7 @@
-export const RESOURCE_KINDS = ["MATERIAL", "SERVICE"] as const;
+export const RESOURCE_KINDS = ["MATERIAL", "SERVICE", "LABOR"] as const;
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];
 
-export const MATERIAL_FAMILY_IDS = ["PLEXIGLAS", "FOREX", "ALUMINIUM", "LED"] as const;
+export const MATERIAL_FAMILY_IDS = ["PLEXIGLAS", "FOREX", "ALUMINIUM", "LED", "VINYL"] as const;
 export type MaterialFamilyId = (typeof MATERIAL_FAMILY_IDS)[number];
 
 export type ResourceUnit = "m" | "m2" | "buc";
@@ -40,8 +40,8 @@ export type CostEvidence = {
   amount: number;
   currency: "EUR";
   perUnit: ResourceUnit;
-  source: "PILOT_INTERNAL_EVIDENCE" | "OWNER_CONFIRMED_PURCHASE";
-  classification: "AI_DECISION" | "OWNER_CONFIRMED";
+  source: "PILOT_INTERNAL_EVIDENCE" | "OWNER_CONFIRMED_PURCHASE" | "LEGACY_EVIDENCE";
+  classification: "AI_DECISION" | "OWNER_CONFIRMED" | "DEVELOPMENT_DEFAULT";
   note: string;
 };
 
@@ -54,6 +54,17 @@ export const MAT_LED_PSU_12V_60W_ID = "MAT-LED-PSU-12V-60W";
 export const MAT_LED_PSU_12V_100W_ID = "MAT-LED-PSU-12V-100W";
 export const MAT_LED_PSU_12V_160W_ID = "MAT-LED-PSU-12V-160W";
 export const MAT_LED_PSU_12V_200W_ID = "MAT-LED-PSU-12V-200W";
+export const MAT_VINYL_ORACAL_651_ID = "MAT-VINYL-ORACAL-651";
+export const SVC_CNC_FACE_ID = "SVC-CNC-FACE";
+export const SVC_CNC_BACK_ID = "SVC-CNC-BACK";
+export const LAB_VINYL_FACE_ID = "LAB-VINYL-FACE";
+export const LAB_VINYL_VOLUME_ID = "LAB-VINYL-VOLUME";
+export const LAB_BOND_LETTER_BODY_ID = "LAB-BOND-LETTER-BODY";
+export const LAB_CLOSE_LETTER_BODY_ID = "LAB-CLOSE-LETTER-BODY";
+export const SVC_PLACE_LED_MODULES_ID = "SVC-PLACE-LED-MODULES";
+export const SVC_ELECTRICAL_FINISH_ID = "SVC-ELECTRICAL-FINISH";
+export const SVC_PAINT_RAL_ID = "SVC-PAINT-RAL";
+export const SVC_PACK_PRODUCT_ID = "SVC-PACK-PRODUCT";
 
 export const materialFamilies: readonly MaterialFamily[] = [
   {
@@ -76,6 +87,12 @@ export const materialFamilies: readonly MaterialFamily[] = [
     label: "Iluminare LED",
     description:
       "Module LED și surse 12V. Puterea pe modul este setare tehnică; capacitatea sursei este specificație de resursă.",
+  },
+  {
+    id: "VINYL",
+    label: "Folie / colant",
+    description:
+      "Folie de aplicare. Materialul este separat de manopera de aplicare.",
   },
 ];
 
@@ -163,6 +180,74 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
     familyId: "LED",
     electrical: { voltageV: 12, capacityW: 200 },
   },
+  {
+    id: MAT_VINYL_ORACAL_651_ID,
+    label: "Folie Oracal 651",
+    kind: "MATERIAL",
+    unit: "m2",
+    familyId: "VINYL",
+    specification: { familyId: "VINYL", form: "sheet" },
+  },
+  {
+    id: SVC_CNC_FACE_ID,
+    label: "Debitare CNC față",
+    kind: "SERVICE",
+    unit: "m",
+  },
+  {
+    id: SVC_CNC_BACK_ID,
+    label: "Debitare CNC spate",
+    kind: "SERVICE",
+    unit: "m",
+  },
+  {
+    id: LAB_VINYL_FACE_ID,
+    label: "Aplicare folie față",
+    kind: "LABOR",
+    unit: "m2",
+  },
+  {
+    id: LAB_VINYL_VOLUME_ID,
+    label: "Aplicare folie volum",
+    kind: "LABOR",
+    unit: "m",
+  },
+  {
+    id: LAB_BOND_LETTER_BODY_ID,
+    label: "Lipire față-volum",
+    kind: "LABOR",
+    unit: "m",
+  },
+  {
+    id: LAB_CLOSE_LETTER_BODY_ID,
+    label: "Închidere corp",
+    kind: "LABOR",
+    unit: "m",
+  },
+  {
+    id: SVC_PLACE_LED_MODULES_ID,
+    label: "Montare module LED",
+    kind: "SERVICE",
+    unit: "buc",
+  },
+  {
+    id: SVC_ELECTRICAL_FINISH_ID,
+    label: "Pregătire electrică",
+    kind: "SERVICE",
+    unit: "buc",
+  },
+  {
+    id: SVC_PAINT_RAL_ID,
+    label: "Vopsire RAL",
+    kind: "SERVICE",
+    unit: "m",
+  },
+  {
+    id: SVC_PACK_PRODUCT_ID,
+    label: "Ambalare",
+    kind: "SERVICE",
+    unit: "m2",
+  },
 ];
 
 export const costEvidence: readonly CostEvidence[] = [
@@ -247,6 +332,105 @@ export const costEvidence: readonly CostEvidence[] = [
     classification: "OWNER_CONFIRMED",
     note: "Default de dezvoltare din catalogul owner 40 EUR/buc. De calibrat ulterior.",
   },
+  {
+    resourceId: MAT_VINYL_ORACAL_651_ID,
+    amount: 9,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy owner-confirmed Oracal 651 purchase 9 EUR/m². Default de dezvoltare, de calibrat.",
+  },
+  {
+    resourceId: SVC_CNC_FACE_ID,
+    amount: 3,
+    currency: "EUR",
+    perUnit: "m",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy CostEngine 1,5 EUR/ml/trecere × 2 treceri (debit + tesire) pe perimetrul literei. Default de dezvoltare.",
+  },
+  {
+    resourceId: SVC_CNC_BACK_ID,
+    amount: 4.5,
+    currency: "EUR",
+    perUnit: "m",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy CostEngine 1,5 EUR/ml/trecere × 3 treceri pe perimetrul literei. Default de dezvoltare.",
+  },
+  {
+    resourceId: LAB_VINYL_FACE_ID,
+    amount: 5,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy FACE_VINYL_APPLICATION_LABOR 5 EUR/m². Nu este costul foliei.",
+  },
+  {
+    resourceId: LAB_VINYL_VOLUME_ID,
+    amount: 1,
+    currency: "EUR",
+    perUnit: "m",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy RETURN_CANT_VINYL_APPLICATION_LABOR 1 EUR/ml. Nu este costul foliei.",
+  },
+  {
+    resourceId: LAB_BOND_LETTER_BODY_ID,
+    amount: 5,
+    currency: "EUR",
+    perUnit: "m",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy RETURN_PROFILE_FACE_BONDING 5 EUR/ml.",
+  },
+  {
+    resourceId: LAB_CLOSE_LETTER_BODY_ID,
+    amount: 2,
+    currency: "EUR",
+    perUnit: "m",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Nu există tarif intern owner pentru închidere. Default de dezvoltare, distinct de lipire. De calibrat.",
+  },
+  {
+    resourceId: SVC_PLACE_LED_MODULES_ID,
+    amount: 0.05,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy LED_ASSEMBLY 0,05 EUR/modul. Nu este prețul modulului.",
+  },
+  {
+    resourceId: SVC_ELECTRICAL_FINISH_ID,
+    amount: 2,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy ELECTRICAL_WIRING 2 EUR/produs. Acoperă cablare, sursă și probă de aprindere.",
+  },
+  {
+    resourceId: SVC_PAINT_RAL_ID,
+    amount: 4,
+    currency: "EUR",
+    perUnit: "m",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy generic PAINTING 4 EUR/ml după asamblare. Doar când volumul este vopsit.",
+  },
+  {
+    resourceId: SVC_PACK_PRODUCT_ID,
+    amount: 10,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Legacy PACKAGING 10 EUR/m² pe suprafața feței.",
+  },
 ];
 
 export function getMaterialFamily(id: string): MaterialFamily | undefined {
@@ -271,6 +455,10 @@ export function listMaterialSpecifications(
 
 export function listServiceResources(): ResourceDefinition[] {
   return resourceCatalog.filter((item) => item.kind === "SERVICE");
+}
+
+export function listLaborResources(): ResourceDefinition[] {
+  return resourceCatalog.filter((item) => item.kind === "LABOR");
 }
 
 export type PsuCapacityEntry = {
@@ -344,6 +532,8 @@ export function resourceKindLabel(kind: ResourceKind): string {
       return "Material";
     case "SERVICE":
       return "Serviciu";
+    case "LABOR":
+      return "Manoperă";
     default: {
       const _exhaustive: never = kind;
       return _exhaustive;
@@ -372,6 +562,8 @@ export function costSourceLabel(source: CostEvidence["source"]): string {
       return "Evidență internă de pilot";
     case "OWNER_CONFIRMED_PURCHASE":
       return "Achiziție confirmată de owner";
+    case "LEGACY_EVIDENCE":
+      return "Evidență legacy";
     default: {
       const _exhaustive: never = source;
       return _exhaustive;
@@ -387,6 +579,8 @@ export function costClassificationLabel(
       return "Decizie AI / pilot";
     case "OWNER_CONFIRMED":
       return "Confirmat de owner";
+    case "DEVELOPMENT_DEFAULT":
+      return "Default de dezvoltare";
     default: {
       const _exhaustive: never = classification;
       return _exhaustive;

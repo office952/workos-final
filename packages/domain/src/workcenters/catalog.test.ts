@@ -430,7 +430,7 @@ describe("live shop-floor map", () => {
     ]);
     const cncMachine = admin.machines.find((item) => item.id === MCH_CNC_4020_ID);
     expect(cncMachine?.processLabels).toContain("Debitare foaie CNC");
-    expect(cncMachine?.recipeRows[0]?.state).toBe("SERVICE_RECIPE_MISSING");
+    expect(cncMachine?.recipeRows[0]?.state).toBe("CANONICAL_COST_EXISTS");
     const steelMachine = admin.machines.find((item) => item.id === MCH_WELD_STEEL_ID);
     expect(steelMachine?.processLabels).toEqual(["Îmbinare sudură oțel"]);
     expect(steelMachine?.recipeRows[0]?.state).toBe("SERVICE_RECIPE_MISSING");
@@ -469,7 +469,7 @@ describe("live shop-floor map", () => {
       ),
     ).not.toContain(WELD_STEEL_JOIN_ID);
     expect(recipeGapForProcess(FORM_ALUMINIUM_PROFILE_ID)).toBe("CANONICAL_COST_EXISTS");
-    expect(recipeGapForProcess(BOND_LETTER_BODY_ID)).toBe("LABOR_RECIPE_MISSING");
+    expect(recipeGapForProcess(BOND_LETTER_BODY_ID)).toBe("CANONICAL_COST_EXISTS");
     expect(admin.serviceMap.some((item) => item.providerId === MCH_WELD_STEEL_ID)).toBe(
       true,
     );

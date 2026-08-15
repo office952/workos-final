@@ -8,7 +8,7 @@ import { squareMetersFromMm2 } from "./units.js";
 
 export const BACK_COMPONENT_ID = "BACK";
 
-const BACK_GAPS = ["Debitare CNC"] as const;
+const BACK_GAPS = [] as const;
 
 function backResult(
   status: ComponentCalculationResult["status"],

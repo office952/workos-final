@@ -43,6 +43,25 @@ export function buildResourcesCatalog(
         })),
       },
       {
+        id: "labor",
+        label: "Manoperă / cost intern",
+        kindLabel: "Categorie",
+        items: admin.labor.map((item) => ({
+          id: `labor:${item.id}`,
+          label: item.label,
+          kindLabel: item.kindLabel,
+          summary: "Cost de manoperă consumat, nu material fizic.",
+          groups: [
+            {
+              id: item.id,
+              kindLabel: item.kindLabel,
+              title: item.label,
+              sections: specificationSections(item),
+            },
+          ],
+        })),
+      },
+      {
         id: "service-recipes",
         label: "Rețete servicii",
         kindLabel: "Categorie",

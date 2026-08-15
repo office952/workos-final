@@ -55,6 +55,13 @@ test("processes admin inspects capability-bound operational processes", async ({
   });
 
   await page.getByRole("button", { name: "Procese" }).click();
+  await page.getByRole("button", { name: "Debitare foaie CNC" }).click();
+  await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
+  await expect(page.getByText("Rețetă: Configurată").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-process-recipe-state.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Formare profil aluminiu" }).click();
   await expect(
     page.getByRole("heading", { name: "Formare profil aluminiu" }).first(),
@@ -188,7 +195,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat: 403,00 EUR"),
+    page.getByText("Total cost intern estimat: 595,00 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);

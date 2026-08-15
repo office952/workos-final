@@ -162,7 +162,7 @@ test("admin display-label write persists and propagates", async ({
   });
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
-  await expect(page.getByText("403,00 EUR")).toBeVisible();
+  await expect(page.getByText("595,00 EUR")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-confirm.png",
     fullPage: true,

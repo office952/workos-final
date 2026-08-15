@@ -30,6 +30,7 @@ Live kinds:
 
 - `MATERIAL` — physical purchasable/costable material
 - `SERVICE` — operational/process cost consumed, not a physical material
+- `LABOR` — manual / human-skill internal cost, not a second copy of the material
 
 Do not force labor recipes, operational processes, workcenters, or machines into the same entity.
 Operational Processes now have their own canon: `docs/architecture/OPERATIONAL_PROCESSES_CANON.md`.
@@ -39,7 +40,7 @@ Service / Labor Recipes now have their own canon: `docs/architecture/SERVICE_AND
 
 ```text
 MATERIAL FAMILY
-  Plexiglas / Forex / Aluminium
+  Plexiglas / Forex / Aluminium / LED / Folie
     → RESOURCE SPECIFICATION
       current purchasable/costable row
         → COST EVIDENCE
@@ -57,6 +58,7 @@ Current live specifications:
 - Aluminium return profile 0.6 mm — profile, m
 - Modul LED 12V — buc
 - Sursă LED 12V 60 / 100 / 160 / 200 W — buc
+- Folie Oracal 651 — sheet, m² — only when vinyl is selected
 
 Typed units currently used: `m`, `m²`, `buc`.
 `buc` is the piece-count unit for LED modules and PSU units. It is not a generic arbitrary-unit engine.
@@ -116,6 +118,9 @@ Resource admin write is `NOT_IMPLEMENTED`.
 
 - Materiale
 - Servicii / cost operațional
+- Manoperă / cost intern
+- Rețete servicii
+- Rețete manoperă
 - Dovezi de cost
 
 Where-used is derived from live type resolution and product composition.

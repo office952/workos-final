@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import type {
-  DraftValues,
-  EicResult,
-  ProductAggregate,
-  ProductDefinition,
-  ProductTruth,
+import {
+  eicLineGroupLabel,
+  type DraftValues,
+  type EicLine,
+  type EicLineGroup,
+  type EicResult,
+  type ProductAggregate,
+  type ProductDefinition,
+  type ProductTruth,
 } from "@workos-final/domain";
 import { FormRenderer } from "./FormRenderer";
 import {
@@ -62,6 +65,20 @@ function formatMoney(value: number): string {
   return value.toLocaleString("ro-RO", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+  });
+}
+
+const EIC_GROUP_ORDER: readonly EicLineGroup[] = [
+  "materials",
+  "services",
+  "labor",
+  "lighting",
+];
+
+function eicGroups(eic: EicResult): Array<[EicLineGroup, EicLine[]]> {
+  return EIC_GROUP_ORDER.flatMap((group) => {
+    const lines = eic.lines.filter((line) => line.group === group);
+    return lines.length === 0 ? [] : [[group, lines]];
   });
 }
 
@@ -314,35 +331,44 @@ export function ProductConfigurationPage() {
           {confirmed.eic.lines.length === 0 ? (
             <p>Nu există încă o cerere de resurse pentru acest produs.</p>
           ) : (
-            <ul>
-              {confirmed.eic.lines.map((line) => (
-                <li key={`${line.label}-need`}>
-                  {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)}
-                </li>
-              ))}
-            </ul>
+            eicGroups(confirmed.eic).map(([group, lines]) => (
+              <div key={`need-${group}`}>
+                <h4>{eicLineGroupLabel(group)}</h4>
+                <ul>
+                  {lines.map((line) => (
+                    <li key={`${line.resourceId}-need`}>
+                      {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
 
           <h3>Cost intern estimat</h3>
           <p>
-            Costul intern al produsului este parțial. Include față, volum, spate
-            {confirmed.aggregate.componentStatuses.find((item) => item.id === "LIGHTING")
-              ?.status === "CALCULATED"
-              ? " și iluminare."
-              : ` și nu include încă iluminarea.${lightingUnavailableReason(confirmed.aggregate)}`}
+            Costul intern al produsului este parțial. Include materialele, serviciile,
+            manopera și iluminarea calculate. Rămâne de calibrat pe costurile reale de
+            atelier.
+            {lightingUnavailableReason(confirmed.aggregate)}
           </p>
           {confirmed.eic.lines.length === 0 ? (
             <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
           ) : (
-            <ul>
-              {confirmed.eic.lines.map((line) => (
-                <li key={`${line.label}-cost`}>
-                  {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)} ×{" "}
-                  {formatMoney(line.rate)} {line.currency}/{formatUnit(line.unit)} ={" "}
-                  {formatMoney(line.cost)} {line.currency}
-                </li>
-              ))}
-            </ul>
+            eicGroups(confirmed.eic).map(([group, lines]) => (
+              <div key={`cost-${group}`}>
+                <h4>{eicLineGroupLabel(group)}</h4>
+                <ul>
+                  {lines.map((line) => (
+                    <li key={`${line.resourceId}-cost`}>
+                      {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)} ×{" "}
+                      {formatMoney(line.rate)} {line.currency}/{formatUnit(line.unit)} ={" "}
+                      {formatMoney(line.cost)} {line.currency}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
           {confirmed.eic.lines.length > 0 ? (
             <p>

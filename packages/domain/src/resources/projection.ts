@@ -7,6 +7,7 @@ import {
   getCostEvidence,
   getMaterialFamily,
   getResource,
+  listLaborResources,
   listServiceResources,
   materialFamilies,
   resourceCatalog,
@@ -93,6 +94,7 @@ export type ResourcesAdminProjection = {
   })[];
   materials: readonly ResourceAdminRecord[];
   services: readonly ResourceAdminRecord[];
+  labor: readonly ResourceAdminRecord[];
   serviceRecipes: readonly RecipeAdminRecord[];
   laborRecipes: readonly RecipeAdminRecord[];
   missingServiceRecipes: readonly MissingRecipeAdminRecord[];
@@ -111,6 +113,7 @@ export function projectResourcesAdministration(): ResourcesAdminProjection {
     .filter((item) => item.kind === "MATERIAL")
     .map(toAdminRecord);
   const services = listServiceResources().map(toAdminRecord);
+  const labor = listLaborResources().map(toAdminRecord);
   return {
     families: materialFamilies.map((family) => ({
       ...family,
@@ -118,6 +121,7 @@ export function projectResourcesAdministration(): ResourcesAdminProjection {
     })),
     materials,
     services,
+    labor,
     serviceRecipes: recipesOfKind("SERVICE").map(toRecipeRecord),
     laborRecipes: recipesOfKind("LABOR").map(toRecipeRecord),
     missingServiceRecipes: processesMissingRecipe("SERVICE").map(toMissingRecipe),

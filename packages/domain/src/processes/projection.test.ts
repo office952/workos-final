@@ -37,8 +37,8 @@ describe("operational process projection", () => {
     expect(forming?.recipeId).toBe("RCP_PROFILE_FORMING");
     expect(forming?.recipeState).toBe("CANONICAL_COST_EXISTS");
     const cnc = admin.processes.find((item) => item.id === CUT_SHEET_CNC_ID);
-    expect(cnc?.recipeId).toBeNull();
-    expect(cnc?.recipeState).toBe("SERVICE_RECIPE_MISSING");
+    expect(cnc?.recipeId).toBe("RCP_CNC_FACE");
+    expect(cnc?.recipeState).toBe("CANONICAL_COST_EXISTS");
     expect(cnc?.providerCoverage).toBe("COVERED");
     expect(forming?.usedBy[0]?.displayLine).toContain("Volum / Aluminiu");
     expect(admin.capabilities.find((item) => item.id === "CNC_ROUTING")?.processes[0]?.id).toBe(

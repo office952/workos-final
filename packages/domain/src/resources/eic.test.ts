@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { composeProductProcessesFromTruth } from "../processes/composition.js";
 import {
   compileAggregate,
   compileDefinition,
@@ -10,8 +11,12 @@ import {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
+import type { DraftValues } from "../product/types.js";
 import {
+  MAT_LED_MODULE_ID,
+  MAT_LED_PSU_12V_160W_ID,
   PLEXIGLAS_3MM_OPAL_ID,
+  RETURN_CANT_FORMING_ID,
   costEvidence,
   getCostEvidence,
   getResource,
@@ -19,7 +24,7 @@ import {
 } from "./catalog.js";
 import { applyRequirement, compileEic, resourceRequirements } from "./eic.js";
 
-const readyValues = {
+const readyValues: DraftValues = {
   "root.inscription": "WORKOS",
   "face.finish": "none",
   "face.confirmedAreaMm2": 250000,
@@ -28,13 +33,13 @@ const readyValues = {
   "volume.confirmedPerimeterMm": 12500,
 };
 
-function confirmedSpine() {
+function confirmedSpine(values: DraftValues = readyValues) {
   const definition = compileDefinition(
     frontlitPlexiAl06Template,
     frontlitPlexiAl06FormSchema,
     {
       templateCode: CANONICAL_PRODUCT_CODE,
-      values: readyValues,
+      values,
     },
   );
   const truth = confirmReviewedDefinition(definition, definition.reviewId);
@@ -47,7 +52,14 @@ function confirmedSpine() {
     frontlitPlexiAl06FormSchema,
     seededDisplayLabelCatalog(),
   );
-  return { definition, truth, aggregate };
+  const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+  return { definition, truth, aggregate, composition };
+}
+
+function lineCost(eic: ReturnType<typeof compileEic>, resourceId: string): number {
+  return eic.lines
+    .filter((line) => line.resourceId === resourceId)
+    .reduce((sum, line) => sum + line.cost, 0);
 }
 
 describe("resource ownership", () => {
@@ -66,7 +78,7 @@ describe("resource ownership", () => {
 });
 
 describe("EIC", () => {
-  it("multiplies confirmed quantity by catalog rates and stays partial", () => {
+  it("multiplies confirmed quantity by catalog rates and stays partial without recipes", () => {
     const { aggregate } = confirmedSpine();
     const requirements = resourceRequirements(aggregate);
     expect(requirements).toHaveLength(6);
@@ -77,6 +89,56 @@ describe("EIC", () => {
     expect(eic.total).toBe(403);
     expect(eic.excludedComponentLabels).toEqual([]);
     expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote/i);
+  });
+
+  it("adds LETTERS recipes generically and stays partial for Analyzer geometry", () => {
+    const { aggregate, composition } = confirmedSpine();
+    const eic = compileEic(aggregate, composition);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.total).toBe(595);
+    expect(lineCost(eic, "SVC-CNC-FACE")).toBe(37.5);
+    expect(lineCost(eic, "SVC-CNC-BACK")).toBe(56.25);
+    expect(lineCost(eic, "LAB-BOND-LETTER-BODY")).toBe(62.5);
+    expect(lineCost(eic, "LAB-CLOSE-LETTER-BODY")).toBe(25);
+    expect(lineCost(eic, "SVC-PLACE-LED-MODULES")).toBe(6.25);
+    expect(lineCost(eic, "SVC-ELECTRICAL-FINISH")).toBe(2);
+    expect(lineCost(eic, "SVC-PACK-PRODUCT")).toBe(2.5);
+    expect(lineCost(eic, RETURN_CANT_FORMING_ID)).toBe(187.5);
+    expect(eic.lines.filter((line) => line.resourceId === RETURN_CANT_FORMING_ID)).toHaveLength(
+      1,
+    );
+    expect(lineCost(eic, MAT_LED_MODULE_ID) + lineCost(eic, MAT_LED_PSU_12V_160W_ID)).toBe(
+      82.5,
+    );
+    expect(eic.lines.some((line) => line.resourceId === "SVC-PAINT-RAL")).toBe(false);
+    expect(eic.lines.some((line) => line.resourceId === "MAT-VINYL-ORACAL-651")).toBe(false);
+    expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote|if process|LETTERS/i);
+  });
+
+  it("keeps vinyl material and application labor separate when vinyl is selected", () => {
+    const { aggregate, composition } = confirmedSpine({
+      ...readyValues,
+      "face.finish": "vinyl",
+      "face.color": "alb",
+    });
+    const eic = compileEic(aggregate, composition);
+    expect(lineCost(eic, "MAT-VINYL-ORACAL-651")).toBe(2.25);
+    expect(lineCost(eic, "LAB-VINYL-FACE")).toBe(1.25);
+    expect(eic.lines.filter((line) => line.resourceId === "MAT-VINYL-ORACAL-651")).toHaveLength(
+      1,
+    );
+    expect(eic.total).toBe(598.5);
+  });
+
+  it("costs RAL only when the volume finish is painted", () => {
+    const { aggregate, composition } = confirmedSpine({
+      ...readyValues,
+      "volume.finish": "painted",
+      "volume.color": "RAL 9010",
+    });
+    const eic = compileEic(aggregate, composition);
+    expect(lineCost(eic, "SVC-PAINT-RAL")).toBe(50);
+    expect(eic.total).toBe(645);
   });
 
   it("fails explicitly for an unknown resource", () => {

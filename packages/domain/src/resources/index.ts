@@ -15,6 +15,7 @@ export {
   getMaterialFamily,
   getResource,
   listMaterialSpecifications,
+  listLaborResources,
   listPsuCapacityCatalog,
   listServiceResources,
   matchMaterialSpecification,
@@ -35,8 +36,10 @@ export {
 } from "./catalog.js";
 export {
   compileEic,
+  eicLineGroupLabel,
   resourceRequirements,
   type EicLine,
+  type EicLineGroup,
   type EicResult,
   type ResourceRequirement,
 } from "./eic.js";
@@ -54,10 +57,12 @@ export {
   RECIPE_KINDS,
   RECIPE_LIFECYCLES,
   RECIPE_QUANTITY_BASES,
+  collectRecipeRequirements,
   costRecipes,
   expectedRecipeKindForProcess,
   getCostRecipe,
   recipeForProcess,
+  recipeForProcessScope,
   recipeKindLabel,
   recipeLifecycleLabel,
   recipeQuantityBasisLabel,

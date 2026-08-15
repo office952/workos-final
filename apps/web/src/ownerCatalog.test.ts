@@ -271,6 +271,7 @@ describe("resources catalog presentation", () => {
     expect(catalog.categories.map((item) => item.id)).toEqual([
       "materials",
       "services",
+      "labor",
       "service-recipes",
       "labor-recipes",
       "cost-evidence",
@@ -280,6 +281,7 @@ describe("resources catalog presentation", () => {
       "Forex",
       "Aluminiu",
       "Iluminare LED",
+      "Folie / colant",
     ]);
     expect(catalog.categories[0]?.items[0]?.groups[0]?.title).toBe(
       "Plexiglas 3 mm opal",
@@ -296,15 +298,24 @@ describe("resources catalog presentation", () => {
     );
     expect(catalog.categories[1]?.items[0]?.label).toBe("Formare profil aluminiu");
     expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Serviciu");
-    expect(catalog.categories[2]?.items[0]?.label).toBe("Formare profil aluminiu");
-    expect(catalog.categories[2]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
-    expect(catalog.categories[2]?.items.map((item) => item.label)).toContain(
-      "Îmbinare sudură oțel",
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Debitare CNC față",
     );
     expect(catalog.categories[2]?.items.map((item) => item.label)).toContain(
+      "Lipire față-volum",
+    );
+    expect(catalog.categories[3]?.items[0]?.label).toBe("Formare profil aluminiu");
+    expect(catalog.categories[3]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
+    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
+      "Îmbinare sudură oțel",
+    );
+    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
       "Printare format mare",
     );
     expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
+      "Debitare CNC față",
+    );
+    expect(catalog.categories[4]?.items.map((item) => item.label)).toContain(
       "Lipire față-volum",
     );
     expect(

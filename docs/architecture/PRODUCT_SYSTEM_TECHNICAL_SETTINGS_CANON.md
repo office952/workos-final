@@ -93,7 +93,7 @@ The Product System administration foundation projects these settings onto `/comp
 
 The Lighting calculator consumes these settings. It does not hardcode 0.75, 25 or 1.25.
 
-LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1. Quantity uses `volume.confirmedPerimeterMm`. PSU selection consumes the Resources catalog. Recipe/labor completeness remains PARTIAL.
+LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1. Quantity uses `volume.confirmedPerimeterMm`. PSU selection consumes the Resources catalog. LETTERS Service/Labor recipes are functional V1 with development rates. Final workshop calibration remains later.
 
 ## SYSTEM RETIREMENT PRINCIPLE
 

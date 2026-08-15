@@ -34,6 +34,13 @@ describe("ALUMINIUM_VOLUME", () => {
         unit: "m",
         label: "Lungime volum",
       }),
+      expect.objectContaining({
+        componentId: VOLUME_COMPONENT_ID,
+        id: "volume_lateral",
+        value: 0.75,
+        unit: "m2",
+        label: "Suprafață laterală volum",
+      }),
     ]);
     expect(result.requirements).toEqual([
       {

@@ -88,6 +88,11 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
 
+  await page.getByRole("button", { name: "Folie / colant" }).click();
+  await expect(page.getByRole("heading", { name: "Folie / colant", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Folie Oracal 651" })).toBeVisible();
+  await expect(page.getByText("9,00 EUR / m²")).toBeVisible();
+
   await page.getByRole("button", { name: "Servicii / cost operațional" }).click();
   await expect(
     page.getByRole("heading", { name: "Formare profil aluminiu" }).first(),
@@ -103,9 +108,14 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
 
+  await page.getByRole("button", { name: "Manoperă / cost intern" }).click();
+  await expect(page.getByRole("heading", { name: "Aplicare folie față" }).first()).toBeVisible();
+  await expect(page.getByText("Manoperă", { exact: true }).first()).toBeVisible();
+
   await page.getByRole("button", { name: "Rețete servicii" }).click();
   await expect(page.getByRole("button", { name: "Formare profil aluminiu" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Debitare foaie CNC" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Debitare CNC față" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Debitare CNC spate" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Formare profil aluminiu" })).toBeVisible();
   await expect(page.getByText("Rețetă serviciu").first()).toBeVisible();
   await expect(page.getByText("Configurată").first()).toBeVisible();
@@ -129,12 +139,17 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "Debitare foaie CNC" }).click();
-  await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
-  await expect(page.getByText("Lipsă").first()).toBeVisible();
-  await expect(page.getByText("Nu inventăm tarif pe oră sau pe utilaj.")).toBeVisible();
+  await page.getByRole("button", { name: "Debitare CNC față" }).click();
+  await expect(page.getByRole("heading", { name: "Debitare CNC față" })).toBeVisible();
+  await expect(page.getByText("Configurată").first()).toBeVisible();
+  await expect(page.getByText("3,00 EUR / m").first()).toBeVisible();
+  await expect(page.getByText("Nu inventăm tarif pe oră sau pe utilaj.")).toHaveCount(0);
   await page.screenshot({
-    path: "docs/worklog/screenshots/resources-cnc-missing-recipe.png",
+    path: "docs/worklog/screenshots/resources-cnc-recipe.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-admin-service-recipes.png",
     fullPage: true,
   });
 
@@ -143,9 +158,14 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Lipire față-volum" }).click();
   await expect(page.getByRole("heading", { name: "Lipire față-volum" })).toBeVisible();
   await expect(page.getByText("Rețetă manoperă").first()).toBeVisible();
-  await expect(page.getByText("Lipsă").first()).toBeVisible();
+  await expect(page.getByText("Configurată").first()).toBeVisible();
+  await expect(page.getByText("5,00 EUR / m").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-labor-recipes.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-admin-labor-recipes.png",
     fullPage: true,
   });
   await page.screenshot({
@@ -201,12 +221,16 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat: 403,00 EUR"),
+    page.getByText("Total cost intern estimat: 595,00 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Plexiglas 3 mm opal: 0,25 m²", { exact: true })).toBeVisible();
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-product-regression.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-eic-product-regression.png",
     fullPage: true,
   });
 });
