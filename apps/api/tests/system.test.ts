@@ -33,9 +33,10 @@ describe("system projection API", () => {
     expect(body.roles[0]?.types[0]?.usedBy[0]?.productCode).toBe(
       CANONICAL_PRODUCT_CODE,
     );
-    expect(body.roles[3]?.types[0]?.eic).toBe("Indisponibil");
+    expect(body.roles[3]?.types[0]?.eic).toBe("Disponibil: material");
     expect(body.roles[3]?.types[0]?.technicalSettings).toEqual([
       expect.objectContaining({ id: "ledPitchMm", valueDisplay: "100 mm" }),
+      expect.objectContaining({ id: "ledModulePowerW", valueDisplay: "0.75 W" }),
       expect.objectContaining({ id: "psuReservePercent", valueDisplay: "25 %" }),
     ]);
     expect(JSON.stringify(body)).not.toMatch(/RETURN_CANT/);
@@ -84,12 +85,20 @@ describe("system projection API", () => {
       "PLEXIGLAS",
       "FOREX",
       "ALUMINIUM",
+      "LED",
     ]);
     expect(body.families[0]?.specifications[0]?.id).toBe("plexiglas_3mm_opal");
+    expect(body.families[3]?.specifications.map((item) => item.id)).toEqual([
+      "MAT-LED-MODULE",
+      "MAT-LED-PSU-12V-60W",
+      "MAT-LED-PSU-12V-100W",
+      "MAT-LED-PSU-12V-160W",
+      "MAT-LED-PSU-12V-200W",
+    ]);
     expect(body.services[0]).toEqual(
       expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
     );
-    expect(body.costEvidence).toHaveLength(4);
+    expect(body.costEvidence).toHaveLength(9);
     expect(JSON.stringify(body)).not.toMatch(/plexiglas_face_3mm|forex_back_10mm/);
   });
 

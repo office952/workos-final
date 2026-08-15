@@ -143,7 +143,7 @@ describe("operational process catalog", () => {
     ).toBe(true);
   });
 
-  it("keeps lighting process blocked and forming as the live foundation", () => {
+  it("keeps lighting processes known and forming as the live foundation", () => {
     expect(getOperationalProcess(FORM_ALUMINIUM_PROFILE_ID)).toEqual(
       expect.objectContaining({
         lifecycle: "ACTIVE",
@@ -151,7 +151,8 @@ describe("operational process catalog", () => {
       }),
     );
     expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.readiness).toBe("KNOWN_PROCESS");
-    expect(getOperationalProcess(PLACE_LED_MODULES_ID)?.readiness).toBe("BLOCKED");
+    expect(getOperationalProcess(PLACE_LED_MODULES_ID)?.readiness).toBe("KNOWN_PROCESS");
+    expect(getOperationalProcess(INSTALL_OR_CONNECT_PSU_ID)?.readiness).toBe("KNOWN_PROCESS");
   });
 
   it("keeps steel and aluminium welding as distinct reusable shop-floor processes", () => {

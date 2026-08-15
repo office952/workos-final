@@ -489,7 +489,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Fundație calcul iluminare",
         state: "IMPLEMENTED",
       },
-      { id: "lighting", label: "Calcul complet iluminare", state: "PLANNED" },
+      { id: "lighting", label: "Calcul complet iluminare", state: "IMPLEMENTED" },
       { id: "commercial", label: "Commercial", state: "NOT_IMPLEMENTED" },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],

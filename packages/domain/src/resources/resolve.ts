@@ -2,6 +2,11 @@ import type { ComponentTypeId, DraftValues } from "../product/types.js";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
   FOREX_10MM_ID,
+  MAT_LED_MODULE_ID,
+  MAT_LED_PSU_12V_100W_ID,
+  MAT_LED_PSU_12V_160W_ID,
+  MAT_LED_PSU_12V_200W_ID,
+  MAT_LED_PSU_12V_60W_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
   matchMaterialSpecification,
@@ -42,7 +47,13 @@ export function liveResourceIdsForType(
     case "FOREX_BACK":
       return [FOREX_10MM_ID];
     case "LIGHTING_FRONT_LED":
-      return [];
+      return [
+        MAT_LED_MODULE_ID,
+        MAT_LED_PSU_12V_60W_ID,
+        MAT_LED_PSU_12V_100W_ID,
+        MAT_LED_PSU_12V_160W_ID,
+        MAT_LED_PSU_12V_200W_ID,
+      ];
     default: {
       const _exhaustive: never = typeId;
       return _exhaustive;

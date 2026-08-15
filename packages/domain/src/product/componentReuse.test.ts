@@ -107,7 +107,7 @@ describe("component reuse", () => {
       "CALCULATED",
     ]);
     const eic = compileEic(aggregate);
-    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.completeness).toBe("PARTIAL");
     expect(eic.total).toBe(316.5);
     expect(eic.excludedComponentLabels).toEqual([]);
   });

@@ -230,14 +230,26 @@ describe("ProductTruth and ProductAggregate", () => {
         }),
       ]),
     );
-    expect(aggregate.unavailable).toContain(
-      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
+    expect(aggregate.unavailable).not.toContain(
+      "Cantitatea de module LED nu poate fi calculată: lipsește perimetrul de volum confirmat",
     );
     expect(aggregate.componentStatuses.find((item) => item.id === "LIGHTING")?.status).toBe(
-      "PARTIAL",
+      "CALCULATED",
+    );
+    expect(aggregate.quantities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          componentId: "LIGHTING",
+          id: "ledModuleQuantity",
+          value: 125,
+          unit: "buc",
+        }),
+      ]),
     );
     expect(aggregate.unavailable).not.toContain("Regula de pas LED nu este stabilită");
-    expect(JSON.stringify(aggregate)).not.toMatch(/ledPitchMm|psuReservePercent/);
+    expect(JSON.stringify(aggregate)).not.toMatch(
+      /ledPitchMm|ledModulePowerW|psuReservePercent/,
+    );
     expect(JSON.stringify(aggregate)).not.toMatch(/quote|markup/i);
     expect(JSON.stringify(aggregate)).not.toMatch(/RETURN_CANT|Lungime cant|"Cant"/);
   });

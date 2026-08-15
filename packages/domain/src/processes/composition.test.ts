@@ -116,9 +116,7 @@ describe("letters process composition", () => {
       compositionNodeId("VOLUME", FORM_ALUMINIUM_PROFILE_ID),
     ]);
     expect(lighting?.nodeReadiness).toBe("REQUIRED_BLOCKED");
-    expect(lighting?.blockers).toEqual([
-      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
-    ]);
+    expect(lighting?.blockers).toEqual([LIGHTING_MISSING_LED_GEOMETRY]);
     expect(composition.lightingCalculationReadiness).toBe("PARTIAL");
     expect(composition.completeness).toBe("BLOCKED");
   });
@@ -185,8 +183,7 @@ describe("letters process composition", () => {
       "REQUIRED_BLOCKED",
     );
     expect(composition.nodes.find((item) => item.id === psu)?.blockers).toEqual([
-      "Capacitatea minimă a sursei nu poate fi calculată: sarcina LED nu este cunoscută",
-      "Selecția fizică a sursei nu este disponibilă: nu există catalog canonic de PSU",
+      LIGHTING_MISSING_PSU_CAPACITY,
     ]);
     expect(JSON.stringify(composition)).not.toMatch(/Regula de rezervă PSU/);
   });
@@ -247,7 +244,7 @@ describe("letters process composition", () => {
       seededDisplayLabelCatalog(),
     );
     const fromTruth = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
-    expect(compileEic(aggregate).total).toBe(320.5);
+    expect(compileEic(aggregate).total).toBe(403);
     expect(JSON.stringify(aggregate)).not.toMatch(/CUT_SHEET_CNC|derivedOrder/);
     expect(fromTruth.productCode).toBe(CANONICAL_PRODUCT_CODE);
     expect(fromTruth.nodes.some((item) => item.processId === CUT_SHEET_CNC_ID)).toBe(
@@ -269,7 +266,16 @@ describe("letters process composition", () => {
         measurements: truth.measurements,
       }),
     );
-    expect(fromTruth.lightingCalculationReadiness).toBe("PARTIAL");
+    expect(fromTruth.lightingCalculationReadiness).toBe("CALCULATED");
+    expect(fromTruth.nodes.find((item) => item.processId === PLACE_LED_MODULES_ID)?.nodeReadiness).toBe(
+      "REQUIRED_INCOMPLETE",
+    );
+    expect(fromTruth.nodes.find((item) => item.processId === INSTALL_OR_CONNECT_PSU_ID)?.nodeReadiness).toBe(
+      "REQUIRED_INCOMPLETE",
+    );
+    expect(aggregate.componentStatuses.find((item) => item.id === "LIGHTING")?.status).toBe(
+      "CALCULATED",
+    );
     expect(aggregate.componentStatuses.find((item) => item.id === "LIGHTING")?.unavailable).toEqual(
       lighting?.unavailable,
     );
@@ -300,8 +306,8 @@ describe("letters process composition", () => {
             quantities: [
               {
                 componentId: "LIGHTING",
-                id: "minimumRequiredPsuCapacityW",
-                label: "Capacitate minimă sursă",
+                id: "requiredPsuCapacityW",
+                label: "Necesar sursă cu rezervă",
                 value: 125,
                 unit: "W",
                 basis: "calculated_from_settings",

@@ -188,7 +188,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat (fără iluminare): 320,50 EUR"),
+    page.getByText("Total cost intern estimat: 403,00 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);

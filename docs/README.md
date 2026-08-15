@@ -34,6 +34,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_REAL_SHOPFLOOR_EQUIPMENT_AND_CAPABILITY_MAP_V1.md` — real shop-floor Workcenter / Machine / Capability map
 - `docs/worklog/WORKOS_FINAL_SERVICE_AND_LABOR_RECIPES_FOUNDATION_V1.md` — service / labor recipe foundation
 - `docs/worklog/WORKOS_FINAL_REAL_SHOPFLOOR_OPERATIONAL_PROCESS_COMPLETION_V1.md` — reusable shop-floor Operational Process catalog completion
+- `docs/worklog/WORKOS_FINAL_LETTERS_LIGHTING_CALCULATION_COMPLETION_V1.md` — Letters Lighting resource calculation functional V1
 
 ## Historical evidence
 

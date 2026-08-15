@@ -49,7 +49,10 @@ describe("operational process projection", () => {
       "letters-finish-vinyl",
       "letters-volume-painted",
     ]);
-    expect(admin.compositions[0]?.composition.completeness).toBe("BLOCKED");
+    expect(admin.compositions[0]?.composition.completeness).toBe("PARTIAL");
+    expect(admin.compositions[0]?.composition.lightingCalculationReadiness).toBe(
+      "CALCULATED",
+    );
     expect(
       admin.compositions[0]?.composition.nodes.some(
         (item) => item.id === "FACE:CUT_SHEET_CNC",

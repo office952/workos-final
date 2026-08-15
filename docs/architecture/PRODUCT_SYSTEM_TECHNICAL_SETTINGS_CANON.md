@@ -80,18 +80,20 @@ Normal setting changes must not require code modification. That lifecycle is not
 
 `LIGHTING_FRONT_LED` is a constructive lighting type, not the LIGHTING role itself.
 
-Variant `LIGHTING_FRONT_LED` currently has two settings:
+Variant `LIGHTING_FRONT_LED` currently has three settings:
 
 - `ledPitchMm` — Pas module LED — resolved, configurable, owner-confirmed, 100 mm
+- `ledModulePowerW` — Putere modul LED — resolved, configurable, owner-confirmed development default, 0.75 W
 - `psuReservePercent` — Rezervă sursă de alimentare — resolved, configurable, owner-confirmed, 25 percent
 
 The active numeric value lives in the typed domain setting, not in this document.
+`ledModulePowerW` is a functional-development default selected from production evidence. Final workshop calibration may change the value without rewriting the calculator.
 
 The Product System administration foundation projects these settings onto `/components`. It does not own a second settings registry.
 
-The Lighting calculator consumes these settings. It does not hardcode 25 or 1.25.
+The Lighting calculator consumes these settings. It does not hardcode 0.75, 25 or 1.25.
 
-LIGHTING calculation is PARTIAL. Settings are resolved. LED module quantity, LED load, and physical PSU selection remain unavailable until geometry, module watts, and a PSU catalog exist. Minimum PSU capacity is calculated only when LED load is known.
+LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1. Quantity uses `volume.confirmedPerimeterMm`. PSU selection consumes the Resources catalog. Recipe/labor completeness remains PARTIAL.
 
 ## SYSTEM RETIREMENT PRINCIPLE
 

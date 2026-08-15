@@ -138,7 +138,9 @@ describe("component configuration model", () => {
     expect(frontlitPlexiAl06Template.fixedValues.ledPitchMm).toBeUndefined();
     expect(
       frontlitPlexiAl06FormSchema.sections.flatMap((section) => section.fields).map((item) => item.id),
-    ).not.toEqual(expect.arrayContaining(["ledPitchMm", "psuReservePercent"]));
+    ).not.toEqual(
+      expect.arrayContaining(["ledPitchMm", "ledModulePowerW", "psuReservePercent"]),
+    );
     expect(
       getComponentType("LIGHTING_FRONT_LED").attributes.find((item) => item.id === "ledPitchMm")
         ?.ownership,

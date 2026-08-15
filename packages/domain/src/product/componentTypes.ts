@@ -165,7 +165,7 @@ export const componentTypes: readonly ComponentTypeDefinition[] = [
     role: "LIGHTING",
     label: "Iluminare frontală cu module LED",
     description:
-      "Tehnologie de iluminare. Pasul LED și rezerva de dimensionare a sursei sunt setări tehnice de sistem, nu resurse și nu alegeri de comandă.",
+      "Tehnologie de iluminare. Pasul LED, puterea pe modul și rezerva sursei sunt setări tehnice de sistem, nu resurse și nu alegeri de comandă.",
     attributes: [
       {
         id: "lighting.mode",
@@ -176,6 +176,12 @@ export const componentTypes: readonly ComponentTypeDefinition[] = [
       {
         id: "ledPitchMm",
         label: "Pas module LED",
+        ownership: "TECHNICAL_SETTING",
+        kind: "technology",
+      },
+      {
+        id: "ledModulePowerW",
+        label: "Putere modul LED",
         ownership: "TECHNICAL_SETTING",
         kind: "technology",
       },

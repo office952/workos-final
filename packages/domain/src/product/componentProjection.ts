@@ -99,12 +99,14 @@ function measurementCopy(kind: ComponentMeasurementKind): string {
   }
 }
 
-function quantityCopy(unit: "m" | "m2" | null): string {
+function quantityCopy(unit: "m" | "m2" | "buc" | null): string {
   switch (unit) {
     case "m":
       return "m";
     case "m2":
       return "m²";
+    case "buc":
+      return "buc";
     case null:
       return "Nicio cantitate tehnică";
     default: {
@@ -150,9 +152,9 @@ function ownsCopy(role: ComponentRole): readonly string[] {
       ];
     case "LIGHTING":
       return [
-        "Contractul de calcul",
-        "Consumul setărilor tehnice",
-        "Starea de disponibilitate",
+        "Cantitatea de module din perimetrul de volum",
+        "Sarcina electrică și selecția sursei",
+        "Cererea de resurse LED / PSU",
       ];
     default: {
       const _exhaustive: never = role;

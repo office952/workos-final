@@ -165,7 +165,7 @@ export type TechnicalQuantity = {
   id: string;
   label: string;
   value: number;
-  unit: "m" | "m2" | "W";
+  unit: "m" | "m2" | "W" | "buc";
   basis: "confirmed_perimeter" | "confirmed_area" | "calculated_from_settings";
 };
 

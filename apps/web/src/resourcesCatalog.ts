@@ -204,6 +204,12 @@ function specificationSections(
               ...(resource.opticalLabel
                 ? [{ label: "Proprietate optică", value: resource.opticalLabel }]
                 : []),
+              ...(resource.voltageLabel
+                ? [{ label: "Tensiune", value: resource.voltageLabel }]
+                : []),
+              ...(resource.capacityLabel
+                ? [{ label: "Capacitate", value: resource.capacityLabel }]
+                : []),
             ],
           },
         ]

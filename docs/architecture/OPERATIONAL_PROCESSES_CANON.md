@@ -108,9 +108,9 @@ Letters-used processes:
 | `FORM_ALUMINIUM_PROFILE` | FORMING | PROFILE_FORMING | VOLUME | IMPLEMENTED_PROCESS_FOUNDATION |
 | `APPLY_SURFACE_FINISH` | FINISHING | VINYL_APPLICATION | FACE, VOLUME | PLANNED |
 | `BOND_LETTER_BODY` | ASSEMBLY | MANUAL_ASSEMBLY | FACE, VOLUME | PLANNED |
-| `PLACE_LED_MODULES` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | BLOCKED |
+| `PLACE_LED_MODULES` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | KNOWN_PROCESS |
 | `WIRE_LIGHTING` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | PLANNED |
-| `INSTALL_OR_CONNECT_PSU` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | BLOCKED |
+| `INSTALL_OR_CONNECT_PSU` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | KNOWN_PROCESS |
 | `TEST_LIGHTING_IGNITION` | ELECTRICAL | ELECTRICAL_ASSEMBLY | LIGHTING | PLANNED |
 | `PAINT_RAL` | FINISHING | PAINTING | VOLUME | PLANNED |
 | `CLOSE_LETTER_BODY` | ASSEMBLY | MANUAL_ASSEMBLY | BACK | PLANNED |
@@ -139,8 +139,8 @@ CATALOG OF POSSIBLE OPERATIONS
 
 Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process; contour / V-groove / engraving were not added.
 
-Letters overall composition remains BLOCKED because Lighting calculation is PARTIAL: LED geometry, LED load, and physical PSU selection are still missing. PSU reserve is resolved (25%, owner-confirmed technical setting) and no longer blocks composition by itself.
-Technological process route is modeled. Cost remains PARTIAL. Execution remains absent.
+Letters Lighting calculation is CALCULATED on the confirmed-perimeter path. `PLACE_LED_MODULES` and `INSTALL_OR_CONNECT_PSU` are no longer blocked for missing geometry or PSU catalog. They remain REQUIRED_INCOMPLETE because labor recipes are not in this build.
+Overall composition is PARTIAL. Cost remains PARTIAL. Execution remains absent.
 
 Recipe completeness is owned by `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`. A new process does not invent a recipe.
 

@@ -35,7 +35,7 @@ describe("component catalog presentation", () => {
     expect(
       catalog.categories[0]?.items[3]?.groups[0]?.sections.find((item) => item.id === "resources")
         ?.facts?.[0]?.value,
-    ).toBe("Indisponibil");
+    ).toBe("Disponibil: material");
     expect(JSON.stringify(catalog)).not.toMatch(/RETURN_CANT/);
   });
 
@@ -53,6 +53,13 @@ describe("component catalog presentation", () => {
         expect.objectContaining({
           label: "Pas module LED",
           valueDisplay: "100 mm",
+          statusLabel: "Setat",
+          sourceLabel: "Confirmat de owner",
+          administrationLabel: "Configurabil",
+        }),
+        expect.objectContaining({
+          label: "Putere modul LED",
+          valueDisplay: "0.75 W",
           statusLabel: "Setat",
           sourceLabel: "Confirmat de owner",
           administrationLabel: "Configurabil",
@@ -272,6 +279,7 @@ describe("resources catalog presentation", () => {
       "Plexiglas",
       "Forex",
       "Aluminiu",
+      "Iluminare LED",
     ]);
     expect(catalog.categories[0]?.items[0]?.groups[0]?.title).toBe(
       "Plexiglas 3 mm opal",

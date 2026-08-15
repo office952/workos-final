@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { frontlitPlexiAl06FormSchema } from "./frontlitPlexiAl06.js";
 import {
+  LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
   createTechnicalSettingsRegistry,
@@ -92,22 +93,34 @@ describe("technical settings registry", () => {
 });
 
 describe("canonical lighting settings", () => {
-  it("owns LED pitch and owner-confirmed PSU reserve once", () => {
+  it("owns LED pitch, module power and owner-confirmed PSU reserve once", () => {
     const settings = listTypeTechnicalSettings("LIGHTING_FRONT_LED");
     expect(settings.map((item) => item.id)).toEqual([
       LED_PITCH_SETTING_ID,
+      LED_MODULE_POWER_SETTING_ID,
       PSU_RESERVE_SETTING_ID,
     ]);
     expect(settings[0]?.resolution).toEqual({ status: "RESOLVED", value: 100 });
     expect(settings[0]?.source).toBe("OWNER_CONFIRMED");
-    expect(settings[1]?.resolution).toEqual({ status: "RESOLVED", value: 25 });
-    expect(settings[1]?.source).toBe("OWNER_CONFIRMED");
+    expect(settings[1]?.resolution).toEqual({ status: "RESOLVED", value: 0.75 });
+    expect(settings[1]?.source).toBe("OWNER_CONFIRMED_DEVELOPMENT_DEFAULT");
     expect(settings[1]?.configurable).toBe(true);
+    expect(settings[2]?.resolution).toEqual({ status: "RESOLVED", value: 25 });
+    expect(settings[2]?.source).toBe("OWNER_CONFIRMED");
+    expect(settings[2]?.configurable).toBe(true);
     expect(projectTechnicalSettings("LIGHTING_FRONT_LED")).toEqual([
       {
         id: LED_PITCH_SETTING_ID,
         label: "Pas module LED",
         valueDisplay: "100 mm",
+        statusLabel: "Setat",
+        sourceLabel: "Confirmat de owner",
+        administrationLabel: "Configurabil",
+      },
+      {
+        id: LED_MODULE_POWER_SETTING_ID,
+        label: "Putere modul LED",
+        valueDisplay: "0.75 W",
         statusLabel: "Setat",
         sourceLabel: "Confirmat de owner",
         administrationLabel: "Configurabil",
@@ -128,9 +141,10 @@ describe("canonical lighting settings", () => {
       section.fields.map((field) => field.id),
     );
     expect(fieldIds).not.toContain(LED_PITCH_SETTING_ID);
+    expect(fieldIds).not.toContain(LED_MODULE_POWER_SETTING_ID);
     expect(fieldIds).not.toContain(PSU_RESERVE_SETTING_ID);
     expect(JSON.stringify(frontlitPlexiAl06FormSchema)).not.toMatch(
-      /ledPitch|psuReserve|Pas module LED|Rezervă sursă/,
+      /ledPitch|ledModulePower|psuReserve|Pas module LED|Putere modul LED|Rezervă sursă/,
     );
   });
 });

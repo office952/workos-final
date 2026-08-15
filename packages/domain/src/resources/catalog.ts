@@ -1,11 +1,16 @@
 export const RESOURCE_KINDS = ["MATERIAL", "SERVICE"] as const;
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];
 
-export const MATERIAL_FAMILY_IDS = ["PLEXIGLAS", "FOREX", "ALUMINIUM"] as const;
+export const MATERIAL_FAMILY_IDS = ["PLEXIGLAS", "FOREX", "ALUMINIUM", "LED"] as const;
 export type MaterialFamilyId = (typeof MATERIAL_FAMILY_IDS)[number];
 
-export type ResourceUnit = "m" | "m2";
+export type ResourceUnit = "m" | "m2" | "buc";
 export type MaterialForm = "sheet" | "profile";
+
+export type ElectricalSpecification = {
+  voltageV: number;
+  capacityW?: number;
+};
 
 export type MaterialFamily = {
   id: MaterialFamilyId;
@@ -27,6 +32,7 @@ export type ResourceDefinition = {
   unit: ResourceUnit;
   familyId?: MaterialFamilyId;
   specification?: MaterialSpecification;
+  electrical?: ElectricalSpecification;
 };
 
 export type CostEvidence = {
@@ -43,6 +49,11 @@ export const PLEXIGLAS_3MM_OPAL_ID = "plexiglas_3mm_opal";
 export const FOREX_10MM_ID = "forex_10mm";
 export const ALUMINIUM_RETURN_PROFILE_ID = "aluminium_return_profile";
 export const RETURN_CANT_FORMING_ID = "return_cant_forming";
+export const MAT_LED_MODULE_ID = "MAT-LED-MODULE";
+export const MAT_LED_PSU_12V_60W_ID = "MAT-LED-PSU-12V-60W";
+export const MAT_LED_PSU_12V_100W_ID = "MAT-LED-PSU-12V-100W";
+export const MAT_LED_PSU_12V_160W_ID = "MAT-LED-PSU-12V-160W";
+export const MAT_LED_PSU_12V_200W_ID = "MAT-LED-PSU-12V-200W";
 
 export const materialFamilies: readonly MaterialFamily[] = [
   {
@@ -59,6 +70,12 @@ export const materialFamilies: readonly MaterialFamily[] = [
     id: "ALUMINIUM",
     label: "Aluminiu",
     description: "Familie de aluminiu. Tabla, profilul și grosimea sunt specificație.",
+  },
+  {
+    id: "LED",
+    label: "Iluminare LED",
+    description:
+      "Module LED și surse 12V. Puterea pe modul este setare tehnică; capacitatea sursei este specificație de resursă.",
   },
 ];
 
@@ -106,6 +123,46 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
     kind: "SERVICE",
     unit: "m",
   },
+  {
+    id: MAT_LED_MODULE_ID,
+    label: "Modul LED 12V",
+    kind: "MATERIAL",
+    unit: "buc",
+    familyId: "LED",
+    electrical: { voltageV: 12 },
+  },
+  {
+    id: MAT_LED_PSU_12V_60W_ID,
+    label: "Sursă LED 12V 60W",
+    kind: "MATERIAL",
+    unit: "buc",
+    familyId: "LED",
+    electrical: { voltageV: 12, capacityW: 60 },
+  },
+  {
+    id: MAT_LED_PSU_12V_100W_ID,
+    label: "Sursă LED 12V 100W",
+    kind: "MATERIAL",
+    unit: "buc",
+    familyId: "LED",
+    electrical: { voltageV: 12, capacityW: 100 },
+  },
+  {
+    id: MAT_LED_PSU_12V_160W_ID,
+    label: "Sursă LED 12V 160W",
+    kind: "MATERIAL",
+    unit: "buc",
+    familyId: "LED",
+    electrical: { voltageV: 12, capacityW: 160 },
+  },
+  {
+    id: MAT_LED_PSU_12V_200W_ID,
+    label: "Sursă LED 12V 200W",
+    kind: "MATERIAL",
+    unit: "buc",
+    familyId: "LED",
+    electrical: { voltageV: 12, capacityW: 200 },
+  },
 ];
 
 export const costEvidence: readonly CostEvidence[] = [
@@ -145,6 +202,51 @@ export const costEvidence: readonly CostEvidence[] = [
     classification: "OWNER_CONFIRMED",
     note: "Legacy MAT-SPATE-PVC-LITERE: Forex 10 mm = 16 EUR/mp purchase, no markup. Waste not folded into unit cost.",
   },
+  {
+    resourceId: MAT_LED_MODULE_ID,
+    amount: 0.5,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "OWNER_CONFIRMED_PURCHASE",
+    classification: "OWNER_CONFIRMED",
+    note: "Default de dezvoltare din evidența owner 0,5 EUR/buc. De calibrat ulterior pe achiziția reală de atelier.",
+  },
+  {
+    resourceId: MAT_LED_PSU_12V_60W_ID,
+    amount: 12,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "OWNER_CONFIRMED_PURCHASE",
+    classification: "OWNER_CONFIRMED",
+    note: "Default de dezvoltare din catalogul owner 12 EUR/buc. De calibrat ulterior.",
+  },
+  {
+    resourceId: MAT_LED_PSU_12V_100W_ID,
+    amount: 16,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "OWNER_CONFIRMED_PURCHASE",
+    classification: "OWNER_CONFIRMED",
+    note: "Default de dezvoltare din catalogul owner 16 EUR/buc. De calibrat ulterior.",
+  },
+  {
+    resourceId: MAT_LED_PSU_12V_160W_ID,
+    amount: 20,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "OWNER_CONFIRMED_PURCHASE",
+    classification: "OWNER_CONFIRMED",
+    note: "Default de dezvoltare din catalogul owner 20 EUR/buc. De calibrat ulterior.",
+  },
+  {
+    resourceId: MAT_LED_PSU_12V_200W_ID,
+    amount: 40,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "OWNER_CONFIRMED_PURCHASE",
+    classification: "OWNER_CONFIRMED",
+    note: "Default de dezvoltare din catalogul owner 40 EUR/buc. De calibrat ulterior.",
+  },
 ];
 
 export function getMaterialFamily(id: string): MaterialFamily | undefined {
@@ -169,6 +271,30 @@ export function listMaterialSpecifications(
 
 export function listServiceResources(): ResourceDefinition[] {
   return resourceCatalog.filter((item) => item.kind === "SERVICE");
+}
+
+export type PsuCapacityEntry = {
+  resourceId: string;
+  label: string;
+  capacityW: number;
+  voltageV: number;
+};
+
+export function listPsuCapacityCatalog(): readonly PsuCapacityEntry[] {
+  return resourceCatalog.flatMap((item) => {
+    const capacityW = item.electrical?.capacityW;
+    if (capacityW === undefined || item.electrical === undefined) {
+      return [];
+    }
+    return [
+      {
+        resourceId: item.id,
+        label: item.label,
+        capacityW,
+        voltageV: item.electrical.voltageV,
+      },
+    ];
+  });
 }
 
 export function matchMaterialSpecification(
@@ -231,6 +357,8 @@ export function resourceUnitLabel(unit: ResourceUnit): string {
       return "m";
     case "m2":
       return "m²";
+    case "buc":
+      return "buc";
     default: {
       const _exhaustive: never = unit;
       return _exhaustive;

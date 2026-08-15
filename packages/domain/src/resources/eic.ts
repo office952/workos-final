@@ -54,9 +54,15 @@ export function compileEic(aggregate: ProductAggregate): EicResult {
   const excludedComponentLabels = aggregate.componentStatuses
     .filter((item) => item.status !== "CALCULATED")
     .map((item) => item.label);
+  const hasStructuralGaps = aggregate.componentStatuses.some(
+    (item) => item.unavailable.length > 0,
+  );
 
   return {
-    completeness: excludedComponentLabels.length === 0 ? "COMPLETE" : "PARTIAL",
+    completeness:
+      excludedComponentLabels.length === 0 && !hasStructuralGaps
+        ? "COMPLETE"
+        : "PARTIAL",
     currency: "EUR",
     lines,
     total: lines.reduce((sum, line) => sum + line.cost, 0),

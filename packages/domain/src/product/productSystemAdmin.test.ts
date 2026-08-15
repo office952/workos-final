@@ -52,8 +52,10 @@ describe("product system administration projection", () => {
     expect(product?.readiness.canDelete).toBe(false);
     expect(product?.readiness.canRetire).toBe(true);
     expect(product?.readiness.editClasses).toContain("DISPLAY_EDITABLE");
-    expect(product?.unresolvedAreas).toContain(
-      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
+    expect(product?.unresolvedAreas).toContain("Geometrie din Analyzer");
+    expect(product?.unresolvedAreas).toContain("Debitare CNC");
+    expect(product?.unresolvedAreas).not.toContain(
+      "Cantitatea de module LED nu poate fi calculată: lipsește perimetrul de volum confirmat",
     );
     expect(product?.unresolvedAreas).not.toContain("Regula de rezervă PSU nu este stabilită");
 
@@ -63,6 +65,7 @@ describe("product system administration projection", () => {
     expect(lighting?.independentCalculation).toBe(true);
     expect(lighting?.technicalSettings.map((item) => item.id)).toEqual([
       "ledPitchMm",
+      "ledModulePowerW",
       "psuReservePercent",
     ]);
     expect(lighting?.technicalSettings[0]?.valueDisplay).toBe("100 mm");

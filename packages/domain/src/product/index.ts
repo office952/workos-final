@@ -91,10 +91,13 @@ export {
   LIGHTING_MISSING_LED_LOAD,
   LIGHTING_MISSING_PSU_CAPACITY,
   LIGHTING_MISSING_PSU_SELECTION,
+  ledModuleQuantityFromPerimeter,
   lightingFrontLedContract,
   requiredPsuCapacityW,
 } from "./lighting.js";
+export { selectPsuUnits } from "./psuSelection.js";
 export {
+  LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
   componentTechnicalSettingsRegistry,

@@ -33,6 +33,8 @@ function formatUnit(unit: string): string {
       return "mm²";
     case "W":
       return "W";
+    case "buc":
+      return "buc";
     default:
       return unit;
   }
@@ -323,8 +325,11 @@ export function ProductConfigurationPage() {
 
           <h3>Cost intern estimat</h3>
           <p>
-            Costul intern al produsului este parțial. Include față, volum și spate.
-            {lightingUnavailableReason(confirmed.aggregate)}
+            Costul intern al produsului este parțial. Include față, volum, spate
+            {confirmed.aggregate.componentStatuses.find((item) => item.id === "LIGHTING")
+              ?.status === "CALCULATED"
+              ? " și iluminare."
+              : ` și nu include încă iluminarea.${lightingUnavailableReason(confirmed.aggregate)}`}
           </p>
           {confirmed.eic.lines.length === 0 ? (
             <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
@@ -341,14 +346,16 @@ export function ProductConfigurationPage() {
           )}
           {confirmed.eic.lines.length > 0 ? (
             <p>
-              Total cost intern estimat (fără iluminare):{" "}
-              {formatMoney(confirmed.eic.total)} {confirmed.eic.currency}
+              Total cost intern estimat: {formatMoney(confirmed.eic.total)}{" "}
+              {confirmed.eic.currency}
             </p>
           ) : null}
-          <p>
-            Neincluse încă în costul intern pilot:{" "}
-            {confirmed.eic.excludedComponentLabels.join(", ")}.
-          </p>
+          {confirmed.eic.excludedComponentLabels.length > 0 ? (
+            <p>
+              Neincluse încă în costul intern pilot:{" "}
+              {confirmed.eic.excludedComponentLabels.join(", ")}.
+            </p>
+          ) : null}
           <p className="page-lead">
             Indisponibil acum: {confirmed.aggregate.unavailable.join(", ")}.
           </p>

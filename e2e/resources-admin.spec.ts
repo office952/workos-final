@@ -70,6 +70,24 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
 
+  await page.getByRole("button", { name: "Iluminare LED" }).click();
+  await expect(page.getByRole("heading", { name: "Iluminare LED", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Modul LED 12V" })).toBeVisible();
+  await expect(page.getByText("0,50 EUR / buc")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sursă LED 12V 60W" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sursă LED 12V 100W" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sursă LED 12V 160W" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sursă LED 12V 200W" })).toBeVisible();
+  await expect(page.getByText("150 W")).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-led-resource.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-psu-resources.png",
+    fullPage: true,
+  });
+
   await page.getByRole("button", { name: "Servicii / cost operațional" }).click();
   await expect(
     page.getByRole("heading", { name: "Formare profil aluminiu" }).first(),
@@ -183,7 +201,7 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat (fără iluminare): 320,50 EUR"),
+    page.getByText("Total cost intern estimat: 403,00 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Plexiglas 3 mm opal: 0,25 m²", { exact: true })).toBeVisible();
   await expect(page.getByText("Preț client")).toHaveCount(0);

@@ -48,7 +48,7 @@ Applied vinyl/paint color is not the same fact as inherent material color or opt
 | FACE | `PLEXIGLAS_FACE` | 3 mm, opal |
 | VOLUME | `ALUMINIUM_VOLUME` | 0.6 mm; depth/finish by order |
 | BACK | `FOREX_BACK` | 10 mm |
-| LIGHTING | `LIGHTING_FRONT_LED` | technology fixed; LED pitch / PSU reserve are settings |
+| LIGHTING | `LIGHTING_FRONT_LED` | technology fixed; LED pitch / module power / PSU reserve are settings |
 
 Product code `PRD-LETTERS-FRONTLIT-PLEXI-AL06` is unchanged.
 
@@ -56,7 +56,7 @@ Display labels for families, categories, templates, and constructive types are p
 
 ## SETTINGS BOUNDARY
 
-LED pitch and PSU reserve stay technical settings on `LIGHTING_FRONT_LED`.
+LED pitch, module power and PSU reserve stay technical settings on `LIGHTING_FRONT_LED`.
 
 Material, thickness, depth, area, and rates are not technical settings.
 

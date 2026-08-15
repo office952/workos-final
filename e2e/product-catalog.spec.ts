@@ -91,18 +91,22 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Lungime volum: 12,5 m")).toBeVisible();
   await expect(page.getByText("Suprafață față: 0,25 m²")).toBeVisible();
   await expect(page.getByText("Suprafață spate: 0,25 m²")).toBeVisible();
-  await expect(
-    page.getByText("Total cost intern estimat (fără iluminare): 320,50 EUR"),
-  ).toBeVisible();
+  await expect(page.getByText("Module LED: 125 buc")).toBeVisible();
+  await expect(page.getByText("Putere totală LED: 93,75 W")).toBeVisible();
+  await expect(page.getByText("Necesar sursă cu rezervă: 117,19 W")).toBeVisible();
+  await expect(page.getByText("Sursă selectată 160 W: 1 buc")).toBeVisible();
+  await expect(page.getByText("Modul LED 12V: 125 buc", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sursă LED 12V 160W: 1 buc", { exact: true })).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 403,00 EUR")).toBeVisible();
   await expect(page.getByText("Costul intern al produsului este parțial")).toBeVisible();
   await expect(
-    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }).first(),
-  ).toBeVisible();
+    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
+  ).toHaveCount(0);
   await expect(page.getByText("Regula de rezervă PSU nu este stabilită")).toHaveCount(0);
   await expect(page.getByText("25 %")).toHaveCount(0);
   await expect(page.getByText("psuReservePercent")).toHaveCount(0);
   await expect(page.getByText("regula de pas LED")).toHaveCount(0);
-  await expect(page.getByText("Neincluse încă în costul intern pilot: Iluminare")).toBeVisible();
+  await expect(page.getByText("Neincluse încă în costul intern pilot: Iluminare")).toHaveCount(0);
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
   await expect(page.getByText("Lungime cant")).toHaveCount(0);
   await expect(page.getByText("Preț client")).toHaveCount(0);
@@ -124,6 +128,31 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/lighting-completion-confirm.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-product-result.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-modules.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-psu.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-resources.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-eic.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-narrow.png",
     fullPage: true,
   });
 });

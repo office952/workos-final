@@ -57,6 +57,8 @@ export type ResourceAdminRecord = {
   formLabel: string | null;
   thicknessLabel: string | null;
   opticalLabel: string | null;
+  voltageLabel: string | null;
+  capacityLabel: string | null;
   usedBy: readonly ResourceUseProjection[];
   cost: ResourceCostProjection | null;
 };
@@ -184,6 +186,14 @@ function toAdminRecord(resource: ResourceDefinition): ResourceAdminRecord {
     thicknessLabel:
       spec?.thicknessMm !== undefined ? `${spec.thicknessMm} mm` : null,
     opticalLabel: spec?.opticalType === "opal" ? "Opal" : null,
+    voltageLabel:
+      resource.electrical?.voltageV !== undefined
+        ? `${resource.electrical.voltageV} V`
+        : null,
+    capacityLabel:
+      resource.electrical?.capacityW !== undefined
+        ? `${resource.electrical.capacityW} W`
+        : null,
     usedBy: projectUses(resource.id),
     cost: evidence ? toCostProjection(evidence) : null,
   };

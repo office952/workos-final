@@ -104,7 +104,7 @@ describe("system governance projection", () => {
       "Fundație calcul iluminare",
     );
     expect(governance.roadmap.find((item) => item.id === "lighting")?.state).toBe(
-      "PLANNED",
+      "IMPLEMENTED",
     );
     expect(governance.roadmap.find((item) => item.id === "lighting")?.label).toBe(
       "Calcul complet iluminare",

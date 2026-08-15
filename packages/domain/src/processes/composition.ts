@@ -9,6 +9,7 @@ import { getComponentType } from "../product/componentTypes.js";
 import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
 import {
   LIGHTING_MISSING_LED_GEOMETRY,
+  LIGHTING_MISSING_LED_LOAD,
   LIGHTING_MISSING_PSU_CAPACITY,
   LIGHTING_MISSING_PSU_SELECTION,
 } from "../product/lighting.js";
@@ -269,7 +270,12 @@ export function lettersProcessCompositionInspections(
     },
   ].map((branch) => ({
     ...branch,
-    composition: composeProductProcesses(template, branch.values),
+    composition: composeProductProcesses(template, {
+      ...branch.values,
+      "face.confirmedAreaMm2": 250000,
+      "volume.depthMm": "60",
+      "volume.confirmedPerimeterMm": 12500,
+    }),
   }));
 }
 
@@ -476,7 +482,7 @@ function toNode(input: {
   if (!process) {
     throw new Error(`unknown_process:${input.processId}`);
   }
-  const nodeReadiness = nodeReadinessFor(process);
+  const nodeReadiness = nodeReadinessFor(process, input.lightingResult);
   return {
     id: compositionNodeId(input.scope, input.processId),
     processId: process.id,
@@ -496,7 +502,22 @@ function toNode(input: {
   };
 }
 
-function nodeReadinessFor(process: OperationalProcess): CompositionNodeReadiness {
+function nodeReadinessFor(
+  process: OperationalProcess,
+  lightingResult?: ComponentCalculationResult,
+): CompositionNodeReadiness {
+  if (process.id === PLACE_LED_MODULES_ID) {
+    return lightingResult?.unavailable.includes(LIGHTING_MISSING_LED_GEOMETRY)
+      ? "REQUIRED_BLOCKED"
+      : lightingHasModuleQuantity(lightingResult)
+        ? "REQUIRED_INCOMPLETE"
+        : "REQUIRED_BLOCKED";
+  }
+  if (process.id === INSTALL_OR_CONNECT_PSU_ID) {
+    return lightingHasPsuSelection(lightingResult)
+      ? "REQUIRED_INCOMPLETE"
+      : "REQUIRED_BLOCKED";
+  }
   switch (process.readiness) {
     case "BLOCKED":
       return "REQUIRED_BLOCKED";
@@ -510,6 +531,24 @@ function nodeReadinessFor(process: OperationalProcess): CompositionNodeReadiness
       return _exhaustive;
     }
   }
+}
+
+function lightingHasModuleQuantity(
+  lightingResult?: ComponentCalculationResult,
+): boolean {
+  return Boolean(
+    lightingResult?.quantities.some((item) => item.id === "ledModuleQuantity"),
+  );
+}
+
+function lightingHasPsuSelection(
+  lightingResult?: ComponentCalculationResult,
+): boolean {
+  return Boolean(
+    lightingResult?.requirements.some((item) =>
+      item.resourceId.startsWith("MAT-LED-PSU-"),
+    ),
+  );
 }
 
 function nodeBlockers(
@@ -527,28 +566,30 @@ function nodeBlockers(
     ];
   }
   if (process.id === PLACE_LED_MODULES_ID) {
-    if (!lightingResult) {
-      return [process.readinessNote];
+    if (!lightingResult || lightingResult.unavailable.includes(LIGHTING_MISSING_LED_GEOMETRY)) {
+      return [LIGHTING_MISSING_LED_GEOMETRY];
     }
-    return lightingResult.unavailable.includes(LIGHTING_MISSING_LED_GEOMETRY)
-      ? [LIGHTING_MISSING_LED_GEOMETRY]
-      : lightingResult.unavailable.length > 0
-        ? [...lightingResult.unavailable]
-        : [process.readinessNote];
+    return lightingResult.unavailable.length > 0
+      ? [...lightingResult.unavailable]
+      : [process.readinessNote];
   }
   if (process.id === INSTALL_OR_CONNECT_PSU_ID) {
     if (!lightingResult) {
-      return [process.readinessNote];
+      return [LIGHTING_MISSING_PSU_CAPACITY, LIGHTING_MISSING_PSU_SELECTION];
     }
     const capacityKnown = lightingResult.quantities.some(
-      (item) => item.id === "minimumRequiredPsuCapacityW",
+      (item) => item.id === "requiredPsuCapacityW",
     );
     const blockers: string[] = [];
-    if (capacityKnown) {
+    if (capacityKnown && lightingResult.unavailable.includes(LIGHTING_MISSING_PSU_SELECTION)) {
       blockers.push(
         "Capacitatea minimă a sursei este cunoscută. Selecția fizică a sursei rămâne indisponibilă.",
       );
-    } else if (lightingResult.unavailable.includes(LIGHTING_MISSING_PSU_CAPACITY)) {
+    } else if (
+      lightingResult.unavailable.includes(LIGHTING_MISSING_LED_GEOMETRY) ||
+      lightingResult.unavailable.includes(LIGHTING_MISSING_LED_LOAD) ||
+      lightingResult.unavailable.includes(LIGHTING_MISSING_PSU_CAPACITY)
+    ) {
       blockers.push(LIGHTING_MISSING_PSU_CAPACITY);
     }
     if (lightingResult.unavailable.includes(LIGHTING_MISSING_PSU_SELECTION)) {

@@ -44,7 +44,7 @@ export type ComponentEicReadiness = "material" | "material_and_operation" | "una
 
 export type ComponentContractProfile = {
   measurement: ComponentMeasurementKind;
-  quantityUnit: "m" | "m2" | null;
+  quantityUnit: "m" | "m2" | "buc" | null;
   independentCalculation: boolean;
   eic: ComponentEicReadiness;
   structuralGaps: readonly string[];

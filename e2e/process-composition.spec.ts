@@ -16,13 +16,16 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await expect(page.getByText("Traseu tehnologic").first()).toBeVisible();
   await expect(page.getByText("Calcul iluminare").first()).toBeVisible();
   await expect(page.getByText("Parțială").first()).toBeVisible();
+  await expect(page.getByText("Calculată").first()).toBeVisible();
   await expect(page.getByText("Regula de rezervă PSU")).toHaveCount(0);
   await expect(
-    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }).first(),
-  ).toBeVisible();
+    page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
+  ).toHaveCount(0);
   await expect(
-    page.getByText("Selecția fizică a sursei nu este disponibilă", { exact: false }).first(),
-  ).toBeVisible();
+    page.getByText("Selecția fizică a sursei nu este disponibilă", { exact: false }),
+  ).toHaveCount(0);
+  await expect(page.getByText("Montare module LED").first()).toBeVisible();
+  await expect(page.getByText("Pregătire sursă de alimentare").first()).toBeVisible();
   await expect(page.getByText("Execuție").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Față", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Iluminare", exact: true })).toBeVisible();
@@ -65,6 +68,14 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/lighting-completion-admin-processes.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-place-led.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-install-psu.png",
     fullPage: true,
   });
   await page.screenshot({
@@ -151,7 +162,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat (fără iluminare): 320,50 EUR"),
+    page.getByText("Total cost intern estimat: 403,00 EUR"),
   ).toBeVisible();
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);
   await page.screenshot({

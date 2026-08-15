@@ -55,6 +55,14 @@ Current live specifications:
 - Plexiglas 3 mm opal — sheet, m²
 - Forex 10 mm — sheet, m²
 - Aluminium return profile 0.6 mm — profile, m
+- Modul LED 12V — buc
+- Sursă LED 12V 60 / 100 / 160 / 200 W — buc
+
+Typed units currently used: `m`, `m²`, `buc`.
+`buc` is the piece-count unit for LED modules and PSU units. It is not a generic arbitrary-unit engine.
+
+LED module power is a Product System technical setting, not a resource SKU variant.
+PSU capacity and cost live on the resource. 150 W is not a live catalog row.
 
 Plexiglas 5 mm opal and Forex 5 mm are representable by the same matcher. They are not live catalog rows.
 

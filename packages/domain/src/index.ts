@@ -42,6 +42,7 @@ export {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
   getComponentContract,
+  LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
   LIGHTING_MISSING_LED_GEOMETRY,

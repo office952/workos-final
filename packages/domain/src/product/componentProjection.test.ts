@@ -51,23 +51,26 @@ describe("component architecture projection", () => {
     );
   });
 
-  it("keeps lighting partial and projects canonical technical settings", () => {
+  it("projects lighting calculation and canonical technical settings", () => {
     const lighting = projectComponentArchitecture(seededDisplayLabelCatalog()).find(
       (item) => item.role === "LIGHTING",
     );
-    expect(lighting?.types[0]?.eic).toBe("Indisponibil");
-    expect(lighting?.types[0]?.gaps).toEqual([
-      "Cantitatea de module LED nu poate fi calculată: pasul LED nu are o bază geometrică confirmată",
-      "Sarcina LED nu poate fi calculată: lipsesc cantitatea de module și puterea pe modul",
-      "Capacitatea minimă a sursei nu poate fi calculată: sarcina LED nu este cunoscută",
-      "Selecția fizică a sursei nu este disponibilă: nu există catalog canonic de PSU",
-    ]);
+    expect(lighting?.types[0]?.eic).toBe("Disponibil: material");
+    expect(lighting?.types[0]?.gaps).toEqual([]);
+    expect(lighting?.types[0]?.quantity).toBe("buc");
     expect(lighting?.types[0]?.technicalSettings).toEqual([
       expect.objectContaining({
         id: "ledPitchMm",
         valueDisplay: "100 mm",
         statusLabel: "Setat",
         sourceLabel: "Confirmat de owner",
+      }),
+      expect.objectContaining({
+        id: "ledModulePowerW",
+        valueDisplay: "0.75 W",
+        statusLabel: "Setat",
+        sourceLabel: "Confirmat de owner",
+        administrationLabel: "Configurabil",
       }),
       expect.objectContaining({
         id: "psuReservePercent",

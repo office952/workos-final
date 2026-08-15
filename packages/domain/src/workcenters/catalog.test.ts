@@ -516,9 +516,9 @@ describe("live shop-floor map", () => {
       seededDisplayLabelCatalog(),
     );
     const composition = composeProductProcesses(frontlitPlexiAl06Template, truth.values);
-    expect(compileEic(aggregate).total).toBe(320.5);
+    expect(compileEic(aggregate).total).toBe(403);
     expect(aggregate.componentStatuses.find((item) => item.id === "LIGHTING")?.status).toBe(
-      "PARTIAL",
+      "CALCULATED",
     );
     expect(composition.executionReadiness).toBe("NOT_IMPLEMENTED");
     expect(JSON.stringify(aggregate)).not.toMatch(/workcenter|machineId|Utilaje/);

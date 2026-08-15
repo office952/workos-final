@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
   FOREX_10MM_ID,
+  MAT_LED_MODULE_ID,
+  MAT_LED_PSU_12V_100W_ID,
+  MAT_LED_PSU_12V_160W_ID,
+  MAT_LED_PSU_12V_200W_ID,
+  MAT_LED_PSU_12V_60W_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
 } from "./catalog.js";
@@ -43,6 +48,13 @@ describe("resource resolution", () => {
       ALUMINIUM_RETURN_PROFILE_ID,
       RETURN_CANT_FORMING_ID,
     ]);
-    expect(liveResourceIdsForType("LIGHTING_FRONT_LED")).toEqual([]);
+    expect(liveResourceIdsForType("LIGHTING_FRONT_LED")).toEqual([
+      MAT_LED_MODULE_ID,
+      MAT_LED_PSU_12V_60W_ID,
+      MAT_LED_PSU_12V_100W_ID,
+      MAT_LED_PSU_12V_160W_ID,
+      MAT_LED_PSU_12V_200W_ID,
+    ]);
+    expect(resolveResourcesForType("LIGHTING_FRONT_LED", {})).toEqual([]);
   });
 });

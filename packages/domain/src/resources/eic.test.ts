@@ -69,13 +69,13 @@ describe("EIC", () => {
   it("multiplies confirmed quantity by catalog rates and stays partial", () => {
     const { aggregate } = confirmedSpine();
     const requirements = resourceRequirements(aggregate);
-    expect(requirements).toHaveLength(4);
+    expect(requirements).toHaveLength(6);
     const eic = compileEic(aggregate);
     expect(eic.completeness).toBe("PARTIAL");
     expect(eic.currency).toBe("EUR");
-    expect(eic.lines.map((line) => line.cost)).toEqual([4, 125, 187.5, 4]);
-    expect(eic.total).toBe(320.5);
-    expect(eic.excludedComponentLabels).toEqual(["Iluminare"]);
+    expect(eic.lines.map((line) => line.cost)).toEqual([4, 125, 187.5, 4, 62.5, 20]);
+    expect(eic.total).toBe(403);
+    expect(eic.excludedComponentLabels).toEqual([]);
     expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote/i);
   });
 

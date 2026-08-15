@@ -130,10 +130,12 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "Iluminare" }).click();
-  await expect(page.getByText("Indisponibil", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Disponibil: material", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Setări tehnice" })).toBeVisible();
   await expect(page.getByText("Pas module LED")).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Putere modul LED")).toBeVisible();
+  await expect(page.getByText("0.75 W", { exact: true })).toBeVisible();
   await expect(page.getByText("Confirmat de owner").first()).toBeVisible();
   await expect(page.getByText("Configurabil").first()).toBeVisible();
   await expect(page.getByText("Rezervă sursă de alimentare")).toBeVisible();
@@ -146,7 +148,8 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await expect(page.getByText("Rezultate calculate")).toBeVisible();
   await expect(
     page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
-  ).toBeVisible();
+  ).toHaveCount(0);
+  await expect(page.getByText("Modul LED 12V")).toBeVisible();
   await expect(
     page.getByText("Configurabil înseamnă că valoarea aparține tipului", { exact: false }),
   ).toBeVisible();
@@ -183,6 +186,8 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.getByRole("button", { name: "Setări tehnice" }).click();
   await expect(page.getByText("Pas module LED")).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Putere modul LED")).toBeVisible();
+  await expect(page.getByText("0.75 W", { exact: true })).toBeVisible();
   await expect(page.getByText("Setările tehnice aparțin tipului constructiv, nu produsului.")).toBeVisible();
   await expect(page.getByText("25 %", { exact: true })).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
@@ -193,6 +198,10 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/lighting-completion-settings.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/lighting-calc-settings.png",
     fullPage: true,
   });
   await page.screenshot({

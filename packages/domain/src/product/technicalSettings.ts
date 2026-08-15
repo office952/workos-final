@@ -1,10 +1,11 @@
 import type { ComponentTypeId } from "./componentTypes.js";
 
 export const LED_PITCH_SETTING_ID = "ledPitchMm";
+export const LED_MODULE_POWER_SETTING_ID = "ledModulePowerW";
 export const PSU_RESERVE_SETTING_ID = "psuReservePercent";
 
 export const TECHNICAL_SETTING_VALUE_TYPES = ["number"] as const;
-export const TECHNICAL_SETTING_UNITS = ["mm", "percent"] as const;
+export const TECHNICAL_SETTING_UNITS = ["mm", "percent", "W"] as const;
 export const TECHNICAL_SETTING_CLASSIFICATIONS = [
   "OWNER_CONFIRMED",
   "OWNER_DECISION_REQUIRED",
@@ -96,6 +97,22 @@ export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSetti
       configurable: true,
       unresolvedReason: "Regula de pas LED nu este stabilită",
       note: "Valoare activă canonică. Documentația explică; calculul consumă.",
+    },
+    {
+      id: LED_MODULE_POWER_SETTING_ID,
+      typeId: "LIGHTING_FRONT_LED",
+      label: "Putere modul LED",
+      description:
+        "Puterea electrică pe modul LED. Default de dezvoltare, configurabil, de calibrat ulterior pe specificația reală de atelier.",
+      valueType: "number",
+      unit: "W",
+      resolution: { status: "RESOLVED", value: 0.75 },
+      source: "OWNER_CONFIRMED_DEVELOPMENT_DEFAULT",
+      classification: "OWNER_CONFIRMED",
+      configurable: true,
+      unresolvedReason: "Puterea pe modul LED nu este stabilită",
+      note: "0,75 W este default-ul de producție V4/V6. Nu este adevăr etern. Calculatorul consumă setarea.",
+      constraints: { min: 0 },
     },
     {
       id: PSU_RESERVE_SETTING_ID,
@@ -209,6 +226,8 @@ function formatSettingValue(value: number, unit: TechnicalSettingUnit): string {
       return `${value} mm`;
     case "percent":
       return `${value} %`;
+    case "W":
+      return `${value} W`;
     default: {
       const _exhaustive: never = unit;
       return _exhaustive;

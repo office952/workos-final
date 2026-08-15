@@ -277,9 +277,9 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     outcome: "Module LED montate",
     resourceIds: [],
     lifecycle: "PLANNED",
-    readiness: "BLOCKED",
+    readiness: "KNOWN_PROCESS",
     readinessNote:
-      "Cantitatea de module LED nu este calculabilă: pasul LED nu are o bază geometrică confirmată.",
+      "Proces cunoscut. Cantitatea de module se calculează din perimetrul de volum. Fără rețetă de labor.",
   },
   {
     id: PAINT_RAL_ID,
@@ -321,9 +321,9 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     outcome: "Sursă pregătită pentru probă și colet",
     resourceIds: [],
     lifecycle: "PLANNED",
-    readiness: "BLOCKED",
+    readiness: "KNOWN_PROCESS",
     readinessNote:
-      "Capacitatea minimă a sursei depinde de sarcina LED. Selecția fizică a sursei nu are catalog canonic.",
+      "Proces cunoscut. Selecția sursei se calculează din catalogul 12V. Fără rețetă de labor.",
   },
   {
     id: TEST_LIGHTING_IGNITION_ID,

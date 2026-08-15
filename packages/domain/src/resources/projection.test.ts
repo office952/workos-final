@@ -3,6 +3,8 @@ import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
   FOREX_10MM_ID,
+  MAT_LED_MODULE_ID,
+  MAT_LED_PSU_12V_160W_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
 } from "./catalog.js";
@@ -32,6 +34,7 @@ describe("resources administration projection", () => {
       "PLEXIGLAS",
       "FOREX",
       "ALUMINIUM",
+      "LED",
     ]);
     const plexiglas = admin.materials.find((item) => item.id === PLEXIGLAS_3MM_OPAL_ID);
     expect(plexiglas?.familyLabel).toBe("Plexiglas");
@@ -39,6 +42,14 @@ describe("resources administration projection", () => {
     expect(plexiglas?.thicknessLabel).toBe("3 mm");
     expect(plexiglas?.usedBy[0]?.displayLine).toContain("Față / Plexiglas");
     expect(plexiglas?.cost?.amountDisplay).toBe("16,00 EUR / m²");
+    const ledModule = admin.materials.find((item) => item.id === MAT_LED_MODULE_ID);
+    expect(ledModule?.unitLabel).toBe("buc");
+    expect(ledModule?.voltageLabel).toBe("12 V");
+    expect(ledModule?.cost?.amountDisplay).toBe("0,50 EUR / buc");
+    expect(ledModule?.usedBy[0]?.role).toBe("LIGHTING");
+    const psu160 = admin.materials.find((item) => item.id === MAT_LED_PSU_12V_160W_ID);
+    expect(psu160?.capacityLabel).toBe("160 W");
+    expect(psu160?.cost?.amountDisplay).toBe("20,00 EUR / buc");
     expect(admin.services).toEqual([
       expect.objectContaining({
         id: RETURN_CANT_FORMING_ID,
@@ -62,7 +73,7 @@ describe("resources administration projection", () => {
     expect(admin.missingLaborRecipes.map((item) => item.processId)).toContain(
       "BOND_LETTER_BODY",
     );
-    expect(admin.costEvidence).toHaveLength(4);
+    expect(admin.costEvidence).toHaveLength(9);
     expect(admin.costEvidence.map((item) => item.resourceId).sort()).toEqual(
       admin.materials
         .concat(admin.services)
