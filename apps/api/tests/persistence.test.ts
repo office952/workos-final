@@ -12,6 +12,7 @@ import {
   freezeAcceptedProductionSnapshot,
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
+  materializeExecutionPlanFromSnapshot,
   seedDisplayLabelRecords,
 } from "@workos-final/domain";
 import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
@@ -62,7 +63,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(2);
+    expect(count.count).toBe(3);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -70,7 +71,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(2);
+    expect(again.count).toBe(3);
     second.close();
   });
 
@@ -128,6 +129,69 @@ describe("product system persistence", () => {
     );
     expect(stored?.createdAt).toBe("2026-08-15T14:00:00.000Z");
     expect(second).not.toHaveProperty("updateProductionSnapshot");
+    second.close();
+  });
+
+  it("persists an execution plan atomically and returns the same plan for one snapshot", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const snapshot = freezeAcceptedProductionSnapshot(
+      truth,
+      aggregate,
+      composition,
+      compileEic(aggregate, composition),
+      { createdAt: "2026-08-15T14:00:00.000Z" },
+    );
+    first.acceptProductionSnapshot(snapshot);
+    const created = first.persistExecutionPlan(
+      materializeExecutionPlanFromSnapshot(snapshot, {
+        createdAt: "2026-08-15T15:00:00.000Z",
+      }),
+    );
+    const again = first.persistExecutionPlan(
+      materializeExecutionPlanFromSnapshot(snapshot, {
+        createdAt: "2026-08-15T18:00:00.000Z",
+      }),
+    );
+    expect(created.created).toBe(true);
+    expect(created.record.tasks).toHaveLength(12);
+    expect(again.created).toBe(false);
+    expect(again.record.plan.planId).toBe(created.record.plan.planId);
+    expect(again.record.plan.createdAt).toBe("2026-08-15T15:00:00.000Z");
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readExecutionPlan(created.record.plan.planId);
+    expect(stored?.tasks).toHaveLength(12);
+    expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+    expect(stored?.tasks.every((item) => item.assignedProvider === null)).toBe(true);
+    expect(second).not.toHaveProperty("updateExecutionPlan");
     second.close();
   });
 });

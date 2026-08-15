@@ -13,3 +13,22 @@ export {
   type ExecutionPreviewResource,
   type ExecutionPreviewStatus,
 } from "./preview.js";
+export {
+  EXECUTION_PLAN_SCHEMA_VERSION,
+  EXECUTION_PLAN_STATUSES,
+  EXECUTION_TASK_STATUSES,
+  executionPlanIdFromSnapshot,
+  executionPlanStatusLabel,
+  executionTaskId,
+  executionTaskStatusLabel,
+  materializeExecutionPlanFromSnapshot,
+  projectExecutionPlanView,
+  type ExecutionEligibleProvider,
+  type ExecutionPlan,
+  type ExecutionPlanRecord,
+  type ExecutionPlanStatus,
+  type ExecutionPlanView,
+  type ExecutionTask,
+  type ExecutionTaskStatus,
+  type ExecutionTaskView,
+} from "./plan.js";

@@ -26,7 +26,9 @@ test("confirmed LETTERS product can freeze an accepted production snapshot", asy
   await expect(page.getByText("Total cost intern estimat: 595,00 EUR")).toBeVisible();
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   const snapshot = page.locator(".production-snapshot");
-  await expect(page.getByRole("heading", { name: "Snapshot producție creat" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Snapshot (producție creat|deja acceptat)/ }),
+  ).toBeVisible();
   await expect(snapshot.getByText("Stare: Acceptat / înghețat")).toBeVisible();
   await expect(snapshot.getByText("Operații: 12")).toBeVisible();
   await expect(snapshot.getByText("Cost intern curent: 595,00 EUR (parțial)")).toBeVisible();

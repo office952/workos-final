@@ -12,7 +12,7 @@ Confirmed Product Truth
   → Execution Plan Preview          live, read-only
 
 Accepted Production Snapshot        frozen, persisted
-  → future persisted ExecutionPlan
+  → ExecutionPlan
     → ExecutionTasks
 ```
 
@@ -37,7 +37,7 @@ Future persisted Execution must consume this snapshot. It must not reread mutabl
 
 Not a customer Order.
 Not Commercial or Quote.
-Not a persisted ExecutionPlan or ExecutionTask.
+Not an ExecutionPlan or ExecutionTask by itself.
 Not machine / people assignment.
 Not a workflow engine.
 
@@ -45,7 +45,8 @@ Not a workflow engine.
 
 `snapshotId = aps:{productCode}:{contentHash}`
 
-Content hash is deterministic and excludes `snapshotId` and `createdAt`.
+Content hash is SHA-256 of the canonical accepted content.
+It excludes `snapshotId`, `createdAt`, and `sourceConfirmedAt`.
 Same accepted configuration → same snapshot. A second accept returns the existing row.
 
 A correction creates a new snapshot. There is no update endpoint.

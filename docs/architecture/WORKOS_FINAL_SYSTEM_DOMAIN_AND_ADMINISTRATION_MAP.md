@@ -88,11 +88,11 @@ WorkOS Final
 │   ├── Commercial rules / customer price
 │   ├── Quote Snapshot
 │   └── Order Snapshot
-├── Execution                               SNAPSHOT_READY
+├── Execution                               PLANNED_ONLY
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
-│   ├── ExecutionPlan                       NOT_IMPLEMENTED
-│   ├── Operations / tasks / dependencies   NOT_IMPLEMENTED
+│   ├── ExecutionPlan                       IMPLEMENTED_CURRENT / PLANNED_ONLY
+│   ├── ExecutionTasks                      IMPLEMENTED_CURRENT / PLANNED_ONLY
 │   ├── Assignments                         NOT_IMPLEMENTED
 │   └── Actuals / MachineRun                NOT_IMPLEMENTED
 ├── People / Angajați                       PLANNED
@@ -209,7 +209,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview and Accepted Production Snapshot are IMPLEMENTED_CURRENT. Persisted ExecutionPlan, ExecutionTask, assignment, and MachineRun are NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, and planned ExecutionPlan / ExecutionTasks are IMPLEMENTED_CURRENT. Task lifecycle, assignment, and MachineRun are NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -380,6 +380,7 @@ Settings versions: keep previous active values as history after a new version is
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | Execution Plan Preview | IMPLEMENTED_CURRENT |
 | Accepted Production Snapshot | IMPLEMENTED_CURRENT |
+| Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT / PLANNED_ONLY |
 | People, Pontaj, persisted Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |

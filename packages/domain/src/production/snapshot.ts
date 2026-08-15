@@ -22,6 +22,7 @@ import {
   recipeForProcessScope,
 } from "../resources/recipes.js";
 import type { ResourceRequirement } from "../resources/requirement.js";
+import { sha256Hex } from "./digest.js";
 
 export const ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION = 1 as const;
 export const ACCEPTED_PRODUCTION_SNAPSHOT_STATUSES = ["ACCEPTED"] as const;
@@ -456,13 +457,7 @@ function quantityLabelForUnit(unit: string): string {
 }
 
 export function canonicalContentHash(value: unknown): string {
-  const canonical = stableStringify(value);
-  let hash = 2166136261;
-  for (let index = 0; index < canonical.length; index += 1) {
-    hash ^= canonical.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0).toString(16);
+  return sha256Hex(stableStringify(value));
 }
 
 function stableStringify(value: unknown): string {

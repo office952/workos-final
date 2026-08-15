@@ -8,6 +8,7 @@ import {
   type EicLineGroup,
   type EicResult,
   type ExecutionPlanPreview,
+  type ExecutionPlanView,
   type ProductAggregate,
   type ProductDefinition,
   type ProductTruth,
@@ -17,6 +18,7 @@ import {
   acceptProductionSnapshot,
   compileConfiguration,
   confirmReviewedConfiguration,
+  createExecutionPlan,
   fetchTemplateProjection,
   type TemplateProjection,
 } from "./productApi";
@@ -98,6 +100,8 @@ export function ProductConfigurationPage() {
     definition: ProductDefinition;
     snapshot?: AcceptedProductionSnapshot;
     snapshotReused?: boolean;
+    executionPlan?: ExecutionPlanView;
+    executionPlanReused?: boolean;
   } | null>(null);
   const [confirmNotice, setConfirmNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -210,6 +214,26 @@ export function ProductConfigurationPage() {
         setConfirmed(null);
         setDefinition(result.definition);
       }
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleCreateExecutionPlan() {
+    if (!confirmed?.snapshot) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createExecutionPlan(productCode, confirmed.snapshot.snapshotId);
+      setConfirmed({
+        ...confirmed,
+        executionPlan: result.executionPlan,
+        executionPlanReused: !result.created,
+      });
     } catch {
       setPage({ kind: "error" });
     } finally {
@@ -450,6 +474,15 @@ export function ProductConfigurationPage() {
             <AcceptedProductionSnapshotSection
               snapshot={confirmed.snapshot}
               reused={Boolean(confirmed.snapshotReused)}
+              onCreatePlan={() => void handleCreateExecutionPlan()}
+              busy={busy}
+            />
+          ) : null}
+
+          {confirmed.executionPlan ? (
+            <PersistedExecutionPlanSection
+              view={confirmed.executionPlan}
+              reused={Boolean(confirmed.executionPlanReused)}
             />
           ) : null}
         </div>
@@ -526,9 +559,13 @@ function ExecutionPlanPreviewSection({
 function AcceptedProductionSnapshotSection({
   snapshot,
   reused,
+  onCreatePlan,
+  busy,
 }: {
   snapshot: AcceptedProductionSnapshot;
   reused: boolean;
+  onCreatePlan: () => void;
+  busy: boolean;
 }) {
   return (
     <div className="production-snapshot">
@@ -546,6 +583,75 @@ function AcceptedProductionSnapshotSection({
         </li>
         <li>Stare: Acceptat / înghețat</li>
       </ul>
+      <div className="action-row">
+        <button type="button" onClick={onCreatePlan} disabled={busy}>
+          Creează planul de execuție
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PersistedExecutionPlanSection({
+  view,
+  reused,
+}: {
+  view: ExecutionPlanView;
+  reused: boolean;
+}) {
+  return (
+    <div className="execution-plan">
+      <h3>{reused ? "Plan de execuție deja creat" : "Plan de execuție"}</h3>
+      <ul>
+        <li>Referință: {view.plan.planId}</li>
+        <li>Produs: {view.plan.productLabel}</li>
+        <li>Snapshot: {view.plan.sourceSnapshotId}</li>
+        <li>Taskuri: {view.plan.taskCount}</li>
+        <li>Stare: {view.statusLabel}</li>
+        <li>
+          Creat: {new Date(view.plan.createdAt).toLocaleString("ro-RO")}
+        </li>
+        <li>
+          Cost intern din snapshot: {formatMoney(view.plan.eicTotal)}{" "}
+          {view.plan.eicCurrency}
+          {view.plan.eicCompleteness === "PARTIAL" ? " (parțial)" : ""}
+        </li>
+      </ul>
+      <ol className="production-ops">
+        {view.tasks.map((task) => (
+          <li key={task.taskId} className="production-op">
+            <h4>
+              {task.seqLabel}. {task.processLabel}
+            </h4>
+            <p>Componentă: {task.scopeLabel}</p>
+            {task.quantities.map((quantity) => (
+              <p key={`${task.taskId}-${quantity.label}`}>
+                Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
+              </p>
+            ))}
+            {task.resourceDemands.map((resource) => (
+              <p key={`${task.taskId}-${resource.label}`}>
+                Resursă: {resource.label}: {formatQuantity(resource.quantity)}{" "}
+                {formatUnit(resource.unit)}
+              </p>
+            ))}
+            <p>Capabilitate: {task.requiredCapabilityLabel}</p>
+            <p>
+              Furnizori disponibili:{" "}
+              {task.eligibleProviders.length === 0
+                ? "Fără furnizor configurat"
+                : task.eligibleProviders.map((item) => item.label).join("; ")}
+            </p>
+            <p>
+              {task.dependsOnLabels.length === 0
+                ? "Poate începe"
+                : `Depinde de: ${task.dependsOnLabels.join("; ")}`}
+            </p>
+            <p>Alocare: {task.assignmentLabel}</p>
+            <p>Stare: {task.statusLabel}</p>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

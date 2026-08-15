@@ -197,9 +197,17 @@ export {
 export {
   compileExecutionPlanPreview,
   executionOperationReadinessLabel,
+  executionPlanIdFromSnapshot,
+  executionTaskId,
+  materializeExecutionPlanFromSnapshot,
   projectExecutionPlanPreview,
+  projectExecutionPlanView,
+  type ExecutionPlan,
   type ExecutionPlanPreview,
   type ExecutionPlanPreviewOperation,
+  type ExecutionPlanRecord,
+  type ExecutionPlanView,
+  type ExecutionTask,
 } from "./execution/index.js";
 export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,

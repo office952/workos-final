@@ -412,6 +412,16 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "execution-plan",
         label: "ExecutionPlan",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "execution-tasks",
+        label: "ExecutionTasks",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "execution-task-lifecycle",
+        label: "Ciclu de viață task",
         state: "NOT_IMPLEMENTED",
       },
       {

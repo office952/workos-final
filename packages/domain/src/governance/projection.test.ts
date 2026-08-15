@@ -64,6 +64,13 @@ describe("system governance projection", () => {
     ).toBe("IMPLEMENTED");
     expect(
       governance.roadmap.find((item) => item.id === "execution-plan")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "execution-tasks")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "execution-task-lifecycle")
+        ?.state,
     ).toBe("NOT_IMPLEMENTED");
     expect(
       governance.authorities.find((item) => item.id === "WORKCENTERS_MACHINES")?.state,

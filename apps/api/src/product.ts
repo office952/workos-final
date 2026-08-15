@@ -8,6 +8,8 @@ import {
   confirmReviewedDefinition,
   freezeAcceptedProductionSnapshot,
   lettersProcessCompositionInspections,
+  materializeExecutionPlanFromSnapshot,
+  projectExecutionPlanView,
   type DraftConfiguration,
   type DraftValue,
   type DraftValues,
@@ -165,6 +167,31 @@ export function registerProductRoutes(
       return c.json({ snapshot });
     },
   );
+
+  app.post(
+    "/api/products/:productCode/accepted-production-snapshots/:snapshotId/execution-plan",
+    (c) => {
+      const snapshot = runtime.readProductionSnapshot(c.req.param("snapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const stored = runtime.persistExecutionPlan(
+        materializeExecutionPlanFromSnapshot(snapshot),
+      );
+      return c.json({
+        created: stored.created,
+        executionPlan: projectExecutionPlanView(stored.record),
+      });
+    },
+  );
+
+  app.get("/api/execution-plans/:planId", (c) => {
+    const record = runtime.readExecutionPlan(c.req.param("planId"));
+    if (!record) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    return c.json({ executionPlan: projectExecutionPlanView(record) });
+  });
 }
 
 function compileAcceptedProduct(

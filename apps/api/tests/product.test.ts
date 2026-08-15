@@ -238,4 +238,59 @@ describe("product configuration API", () => {
     );
     expect(mutate.status).toBe(404);
   });
+
+  it("materializes an idempotent planned execution plan from the frozen snapshot", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const payload = {
+      definition: reviewed.definition,
+      reviewId: reviewed.reviewId,
+    };
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    const snapshot = (await readBody(accepted)).snapshot as JsonObject;
+    const first = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const firstBody = await readBody(first);
+    const view = firstBody.executionPlan as {
+      plan: JsonObject;
+      tasks: Array<JsonObject>;
+    };
+    expect(first.status).toBe(200);
+    expect(firstBody.created).toBe(true);
+    expect(view.plan.status).toBe("PLANNED");
+    expect(view.plan.sourceSnapshotId).toBe(snapshot.snapshotId);
+    expect(view.plan.eicTotal).toBe(595);
+    expect(view.tasks).toHaveLength(12);
+    expect(view.tasks.every((item) => item.assignedProvider === null)).toBe(true);
+    expect(JSON.stringify(view)).not.toMatch(/startTask|employeeId|plannedStart|capacity/);
+
+    const second = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const secondBody = await readBody(second);
+    expect(secondBody.created).toBe(false);
+    expect((secondBody.executionPlan as { plan: JsonObject }).plan.planId).toBe(
+      view.plan.planId,
+    );
+
+    const read = await app.request(`/api/execution-plans/${view.plan.planId}`);
+    expect(read.status).toBe(200);
+    const readView = (await readBody(read)).executionPlan as { tasks: Array<JsonObject> };
+    expect(readView.tasks).toHaveLength(12);
+    expect(
+      readView.tasks.some((item) =>
+        JSON.stringify(item.eligibleProviders).includes("CNC 4020"),
+      ),
+    ).toBe(true);
+  });
 });

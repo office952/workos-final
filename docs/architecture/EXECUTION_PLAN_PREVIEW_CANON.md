@@ -12,7 +12,7 @@ Confirmed Product Truth
       → Execution Plan Preview
 
 Accepted Production Snapshot
-  → future persisted ExecutionPlan
+  → ExecutionPlan
     → ExecutionTasks
 ```
 

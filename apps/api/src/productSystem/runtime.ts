@@ -2,12 +2,18 @@ import {
   presentProductSystem,
   type AcceptedProductionSnapshot,
   type DisplayLabelCatalog,
+  type ExecutionPlanRecord,
 } from "@workos-final/domain";
 import {
   openSqliteDatabase,
   resolveProductSystemSqlitePath,
   type SqliteDatabase,
 } from "../persistence/sqlite.js";
+import {
+  getExecutionPlanBySnapshotId,
+  getExecutionPlanRecord,
+  insertExecutionPlanRecord,
+} from "../execution/store.js";
 import {
   getAcceptedProductionSnapshot,
   insertAcceptedProductionSnapshot,
@@ -34,6 +40,12 @@ export type ProductSystemRuntime = {
     snapshot: AcceptedProductionSnapshot;
   };
   readProductionSnapshot(snapshotId: string): AcceptedProductionSnapshot | null;
+  persistExecutionPlan(record: ExecutionPlanRecord): {
+    created: boolean;
+    record: ExecutionPlanRecord;
+  };
+  readExecutionPlan(planId: string): ExecutionPlanRecord | null;
+  readExecutionPlanBySnapshot(snapshotId: string): ExecutionPlanRecord | null;
   close(): void;
 };
 
@@ -64,6 +76,15 @@ export function createProductSystemRuntime(
     },
     readProductionSnapshot(snapshotId) {
       return getAcceptedProductionSnapshot(db, snapshotId);
+    },
+    persistExecutionPlan(record) {
+      return insertExecutionPlanRecord(db, record);
+    },
+    readExecutionPlan(planId) {
+      return getExecutionPlanRecord(db, planId);
+    },
+    readExecutionPlanBySnapshot(snapshotId) {
+      return getExecutionPlanBySnapshotId(db, snapshotId);
     },
     close() {
       db.close();

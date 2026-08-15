@@ -4,6 +4,7 @@ import type {
   DraftValues,
   EicResult,
   ExecutionPlanPreview,
+  ExecutionPlanView,
   FormSchema,
   ProductAggregate,
   ProductDefinition,
@@ -152,5 +153,26 @@ export async function acceptProductionSnapshot(
     ok: true,
     created: Boolean(body.created),
     snapshot: body.snapshot,
+  };
+}
+
+export async function createExecutionPlan(
+  productCode: string,
+  snapshotId: string,
+): Promise<{ created: boolean; executionPlan: ExecutionPlanView }> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/accepted-production-snapshots/${snapshotId}/execution-plan`,
+    { method: "POST" },
+  );
+  const body = await readJson<{
+    created?: boolean;
+    executionPlan?: ExecutionPlanView;
+  }>(response);
+  if (!response.ok || !body.executionPlan) {
+    throw new Error("execution_plan_unavailable");
+  }
+  return {
+    created: Boolean(body.created),
+    executionPlan: body.executionPlan,
   };
 }

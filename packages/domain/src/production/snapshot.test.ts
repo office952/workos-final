@@ -25,6 +25,7 @@ import {
 } from "../product/technicalSettings.js";
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
+import { sha256Hex } from "./digest.js";
 import {
   freezeAcceptedProductionSnapshot,
   productionWorkFromSnapshot,
@@ -83,13 +84,33 @@ describe("accepted production snapshot", () => {
     const second = freeze().snapshot;
     expect(first.snapshotId).toBe(second.snapshotId);
     expect(first.contentHash).toBe(second.contentHash);
-    expect(first.snapshotId).toMatch(/^aps:PRD-LETTERS-FRONTLIT-PLEXI-AL06:[0-9a-f]+$/);
+    expect(first.contentHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(first.snapshotId).toMatch(
+      /^aps:PRD-LETTERS-FRONTLIT-PLEXI-AL06:[0-9a-f]{64}$/,
+    );
     expect(first.status).toBe("ACCEPTED");
     expect(first.schemaVersion).toBe(1);
     expect(first.sourceReviewId).toBe(second.sourceReviewId);
     expect(first.operations).toHaveLength(12);
     expect(first.eic.total).toBe(595);
     expect(first.eic.completeness).toBe("PARTIAL");
+  });
+
+  it("uses a standard SHA-256 digest", () => {
+    expect(sha256Hex("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
+  });
+
+  it("changes the SHA-256 digest when accepted content changes", () => {
+    const none = freeze().snapshot;
+    const vinyl = freeze({
+      ...readyValues,
+      "face.finish": "vinyl",
+      "face.color": "alb",
+    }).snapshot;
+    expect(none.contentHash).toHaveLength(64);
+    expect(vinyl.contentHash).not.toBe(none.contentHash);
   });
 
   it("keeps createdAt out of the content identity", () => {
