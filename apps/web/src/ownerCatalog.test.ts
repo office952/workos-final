@@ -5,6 +5,7 @@ import {
   projectOperationalProcessesAdministration,
   projectResourcesAdministration,
   projectSystemGovernance,
+  projectWorkcentersAdministration,
   seededDisplayLabelCatalog,
 } from "@workos-final/domain";
 import {
@@ -15,6 +16,7 @@ import {
 } from "./ownerCatalog";
 import { buildProcessesCatalog } from "./processesCatalog";
 import { buildResourcesCatalog } from "./resourcesCatalog";
+import { buildWorkcentersCatalog } from "./workcentersCatalog";
 
 describe("component catalog presentation", () => {
   it("places FACE VOLUME BACK LIGHTING under product components", () => {
@@ -339,5 +341,55 @@ describe("processes catalog presentation", () => {
       catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget),
     ).toBe(true);
     expect(JSON.stringify(catalog)).not.toMatch(/machineId|ExecutionPlan|Preț client/);
+    expect(
+      catalog.categories[1]?.items
+        .find((item) => item.id === "process:FORM_ALUMINIUM_PROFILE")
+        ?.groups[0]?.sections.find((item) => item.id === "capability")?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Acoperire furnizor", value: "Fără furnizor" }),
+      ]),
+    );
+  });
+});
+
+describe("workcenters catalog presentation", () => {
+  it("groups overview workcenters machines capabilities and coverage without write targets", () => {
+    const catalog = buildWorkcentersCatalog(projectWorkcentersAdministration());
+    expect(catalog.categories.map((item) => item.id)).toEqual([
+      "overview",
+      "workcenters",
+      "machines",
+      "capabilities",
+      "coverage",
+    ]);
+    expect(catalog.categories[1]?.items[0]?.label).toBe("Nicio zonă confirmată");
+    expect(catalog.categories[2]?.items[0]?.label).toBe("Niciun utilaj confirmat");
+    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain("Debitare CNC");
+    expect(catalog.categories[4]?.items[0]?.label).toBe("Letters — acoperire capabilități");
+    expect(
+      catalog.categories[4]?.items[0]?.groups[0]?.sections.find((item) => item.id === "status")
+        ?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Fără furnizor",
+          value: expect.stringContaining("Debitare CNC"),
+        }),
+      ]),
+    );
+    expect(
+      catalog.categories[3]?.items
+        .find((item) => item.id === "capability:CNC_ROUTING")
+        ?.groups[0]?.sections.find((item) => item.id === "identity")?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Acoperire catalog", value: "Fără furnizor" }),
+      ]),
+    );
+    expect(catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget)).toBe(
+      true,
+    );
+    expect(JSON.stringify(catalog)).not.toMatch(/CNC-01|ExecutionPlan|Preț client|machineHour/);
   });
 });

@@ -12,6 +12,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/PRODUCT_SYSTEM_PERSISTENCE_CANON.md` — persisted display metadata and first write path
 - `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity, material family/spec, cost evidence
 - `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition, shop-floor capability class, and Letters process composition
+- `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` — workcenter, machine, and capability-provider law
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
@@ -27,6 +28,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_LETTERS_CRITICAL_PROCESS_COMPLETION_V1.md` — Letters critical process completion
 - `docs/worklog/WORKOS_FINAL_LIGHTING_COMPLETION_V1.md` — Lighting calculation consumes owner-confirmed PSU reserve 25%
 - `docs/worklog/WORKOS_FINAL_LIGHTING_SINGLE_TRUTH_ALIGNMENT_V1.md` — one Lighting evaluation path for Aggregate and processes
+- `docs/worklog/WORKOS_FINAL_WORKCENTERS_AND_MACHINES_FOUNDATION_V1.md` — capability-provider foundation without invented machines
 
 ## Historical evidence
 

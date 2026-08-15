@@ -2,6 +2,7 @@ import {
   projectOperationalProcessesAdministration,
   projectResourcesAdministration,
   projectSystemGovernance,
+  projectWorkcentersAdministration,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import type { ProductSystemRuntime } from "./productSystem/runtime.js";
@@ -24,6 +25,10 @@ export function registerSystemProjectionRoutes(
 
   app.get("/api/operational-processes", (c) => {
     return c.json(projectOperationalProcessesAdministration());
+  });
+
+  app.get("/api/workcenters", (c) => {
+    return c.json(projectWorkcentersAdministration());
   });
 
   app.get("/api/governance", (c) => {

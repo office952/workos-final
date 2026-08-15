@@ -81,9 +81,17 @@ export function buildProcessesCatalog(
                           ? "niciun proces încă"
                           : capability.processes.map((item) => item.label).join("; "),
                     },
+                    { label: "Acoperire furnizor", value: capability.providerCoverageLabel },
+                    {
+                      label: "Furnizori actuali",
+                      value:
+                        capability.providers.length === 0
+                          ? "niciun furnizor confirmat"
+                          : capability.providers.map((item) => item.label).join("; "),
+                    },
                   ],
                   lines: [
-                    "Workcenter / utilaj vor furniza ulterior această clasă. Procesul nu conține un utilaj concret.",
+                    "Procesul cere o clasă de capabilitate, nu un utilaj concret. Furnizorii se inspectează în Utilaje și capacitate.",
                   ],
                 },
                 {
@@ -122,8 +130,18 @@ function processSections(
       facts: [
         { label: "Clasă", value: process.requiredCapabilityLabel },
         { label: "Fel", value: process.requiredCapabilityKindLabel },
+        { label: "Acoperire furnizor", value: process.providerCoverageLabel },
+        {
+          label: "Furnizori actuali",
+          value:
+            process.providers.length === 0
+              ? "niciun furnizor confirmat"
+              : process.providers.map((item) => item.label).join("; "),
+        },
       ],
-      lines: ["Procesul cere o clasă de capabilitate, nu un utilaj sau un angajat."],
+      lines: [
+        "Procesul cere o clasă de capabilitate, nu un utilaj sau un angajat. Detaliul de catalog este în Utilaje și capacitate.",
+      ],
     },
     {
       id: "resources",
@@ -153,7 +171,7 @@ function processSections(
       lines: [
         "Write-ul de administrare nu este deschis.",
         "Nu există graf de execuție, asignări sau plan de lucru.",
-        "Workcenter și utilaj nu sunt implementate.",
+        "Acoperirea de furnizor se inspectează în Utilaje și capacitate.",
       ],
     },
     {

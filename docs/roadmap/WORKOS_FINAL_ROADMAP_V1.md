@@ -42,6 +42,7 @@ Owner-facing projections exist for components, governance, Product System admini
 ProductAggregate orchestrates. EIC consumes generic requirements.
 Resources now separate material family, specification, service, and cost evidence.
 Operational Processes now separate HOW work is done from WHAT is consumed.
+Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClass. Live provider rows are empty until identities are owner-confirmed. Capacity planning is not implemented.
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan.
 LIGHTING calculation is PARTIAL: LED pitch 100 mm and PSU reserve 25% are owner-confirmed configurable technical settings. Module quantity, LED load, and physical PSU selection remain unavailable.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
@@ -74,9 +75,11 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Operational Processes foundation (process + capability class) | DONE / FOUNDATION |
 | Letters process composition (requirements, conditions, dependencies) | DONE / FOUNDATION |
 | Letters critical technological process completion | DONE / FOUNDATION |
+| Workcenters / Machines capability-provider foundation | DONE / FOUNDATION |
 | Resources admin write / process admin write | NOT_IMPLEMENTED |
 | Lighting calculation | V1 REQUIRED after PSU owner decision |
-| People, Machines, Pontaj, Execution | LATER |
+| Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
+| People, Pontaj, Execution | LATER |
 | Commercial, Quote Snapshot, Order Snapshot | LATER |
 | Reporting, Documents, ACM, Logo | LATER |
 

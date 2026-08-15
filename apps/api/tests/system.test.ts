@@ -132,6 +132,9 @@ describe("system projection API", () => {
     expect(body.capabilities.map((item) => item.id)).toContain("CNC_ROUTING");
     expect(JSON.stringify(body)).not.toMatch(/machineId|ExecutionPlan|employeeId/);
     expect(
+      (body.processes[0] as { providerCoverage?: string }).providerCoverage,
+    ).toBe("NO_PROVIDER");
+    expect(
       (body as { compositions?: Array<{ id: string }> }).compositions?.map(
         (item) => item.id,
       ),
@@ -140,6 +143,30 @@ describe("system projection API", () => {
       "letters-finish-vinyl",
       "letters-volume-painted",
     ]);
+  });
+
+  it("projects workcenters administration from the typed catalog", async () => {
+    const response = await createApp().request("/api/workcenters");
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      writeState: string;
+      workcenters: unknown[];
+      machines: unknown[];
+      overview: {
+        missingCapabilityCount: number;
+        capacityPlanningState: string;
+        executionState: string;
+      };
+      lettersCoverage: { missingCapabilityIds: string[] };
+    };
+    expect(body.writeState).toBe("NOT_IMPLEMENTED");
+    expect(body.workcenters).toEqual([]);
+    expect(body.machines).toEqual([]);
+    expect(body.overview.missingCapabilityCount).toBe(8);
+    expect(body.overview.capacityPlanningState).toBe("NOT_IMPLEMENTED");
+    expect(body.overview.executionState).toBe("NOT_IMPLEMENTED");
+    expect(body.lettersCoverage.missingCapabilityIds).toContain("CNC_ROUTING");
+    expect(JSON.stringify(body)).not.toMatch(/CNC-01|machineHour|ExecutionPlan|Preț client/);
   });
 
   it("projects letters process composition without mutating the product", async () => {

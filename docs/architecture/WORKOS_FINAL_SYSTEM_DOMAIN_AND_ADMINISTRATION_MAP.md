@@ -96,10 +96,10 @@ WorkOS Final
 │   ├── Employee master
 │   ├── Role / skill / availability
 │   └── Attendance / Pontaj
-├── Machines / Utilaje                      PLANNED
-│   ├── Machine / machine type
-│   ├── Workcenter
-│   └── Capacity / availability
+├── Machines / Utilaje                      FOUNDATION
+│   ├── Machine / machine type              FOUNDATION (live catalog empty)
+│   ├── Workcenter                          FOUNDATION (live catalog empty)
+│   └── Capacity / availability             NOT_IMPLEMENTED
 ├── Reporting                               PLANNED (projection only)
 └── Documents                               PLANNED (output, not truth)
 ```
@@ -118,7 +118,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice |
 | People | Employee master, attendance / Pontaj, payments, advances | Execution session, labor recipe / cost basis, Product Truth |
-| Machines / Workcenters | Machine identity, type/capability class, workcenter, capacity/availability | Process definition on the product, commercial hourly price |
+| Machines / Workcenters | Machine identity, workcenter identity, capability-provider mapping | Process definition, commercial hourly price, capacity calendar, Execution selection |
 | Reporting | Read-only projections | Underlying business truth |
 | Documentation | Explanation, history, architecture | Active configurable values |
 | Analyzer | Geometric proposals after operator confirmation | Product Truth, settings, price |
@@ -174,12 +174,14 @@ Do not put named employees on product templates. Templates may require a skill o
 
 ## Machines / Utilaje
 
-Not implemented. Processes must require a **capability class** (machine type / workcenter class), not a hardcoded machine identity.
+Foundation implemented. See `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md`.
+
+Processes must require a **capability class**, not a hardcoded machine identity. Live Workcenter / Machine rows are empty until owner-confirmed identities exist. Capacity planning is not implemented.
 
 ```text
 OperationalProcess → requires Capability class
 Workcenter / Machine → provides Capability class
-Execution scheduling (later) → may pin a concrete machine
+Execution (later) → may pin a concrete provider
 ```
 
 Do not put machine SKU on ProductTemplate or EIC.
@@ -290,10 +292,11 @@ Inside Administrare, use catalog navigation (category → item → detail), not 
 Administrare
 ├── Sistem produs
 ├── Resurse și cost intern
-└── Procese operaționale
+├── Procese operaționale
+└── Utilaje și capacitate
 ```
 
-Later domains (Persoane, Utilaje, Execuție, Pontaj, Setări platformă) stay off this catalog until they have real truth. Do not ship empty admin categories.
+Persoane, Execuție, Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și capacitate is present because the capability-provider model exists; live asset rows remain empty on purpose. Do not invent machines to fill the catalog.
 
 ## Operator vs admin surfaces
 
@@ -301,7 +304,7 @@ Later domains (Persoane, Utilaje, Execuție, Pontaj, Setări platformă) stay of
 |---|---|---|
 | Operator | Daily workflow | `/products` configure → review → confirm |
 | Owner projection | System honesty / inspection | `/components`, `/governance` |
-| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources and Processes inspection |
+| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources, Processes and Workcenters inspection |
 
 Do not mix system configuration into daily workflow.
 
@@ -351,8 +354,10 @@ Settings versions: keep previous active values as history after a new version is
 | Settings edit / persistence / versioning | PLANNED |
 | Global Administrare nav / display-label write | IMPLEMENTED_CURRENT |
 | Operational Processes foundation (typed catalog + capability class) | DONE / FOUNDATION |
-| Process admin write, labor recipes, workcenters | PLANNED / NOT_IMPLEMENTED |
-| Machines, People, Pontaj, Execution | PLANNED |
+| Process admin write, labor recipes | PLANNED / NOT_IMPLEMENTED |
+| Workcenters / Machines capability-provider foundation | DONE / FOUNDATION |
+| Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
+| People, Pontaj, Execution | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
@@ -396,7 +401,7 @@ Recommended rank:
 
 3. **Lifecycle retire** later, when more live entities exist.
 
-Do not start People, Machines, Pontaj, Execution, or Commercial next. They depend on later snapshots and would recreate isolated systems.
+Do not start People, Pontaj, Execution, or Commercial next. They depend on later snapshots and would recreate isolated systems. Workcenters / Machines foundation exists; capacity planning and Execution selection do not.
 
 ## Owner decisions
 
@@ -410,6 +415,7 @@ Do not start People, Machines, Pontaj, Execution, or Commercial next. They depen
 - LED module wattage, geometric basis for module quantity, and PSU catalog policy
 - People before or after Execution (current roadmap keeps Execution first)
 - Attendance model (exception calendar vs daily grid)
-- Machine vs workcenter first inside Resources
+- Confirmed live workcenter / machine identities, if any
+- Capacity model after provider identities exist
 - Commercial measurement rules and snapshot schema
 - When to promote capability kernel statuses from PLANNED to ACTIVE

@@ -162,6 +162,16 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "WORKCENTERS_MACHINES",
+        label: "Utilaje și capacitate",
+        owns: [
+          "identitatea workcenter",
+          "identitatea utilajului",
+          "furnizarea de capabilități de producție",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
         id: "COMMERCIAL",
         label: "Commercial",
         owns: ["preț client", "ofertă", "comandă comercială"],
@@ -225,7 +235,33 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "machines",
         label: "Utilaje / workcenter",
         statement:
-          "Nu există catalog de utilaje sau workcenter. Procesul cere o clasă de capabilitate, nu un utilaj concret.",
+          "Există modelul canonic Workcenter / Utilaj și join-ul pe CapabilityClass. Catalogul live este gol până la identități confirmate. Planificarea de capacitate nu este implementată.",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "capacity-planning",
+        label: "Planificare capacitate",
+        statement:
+          "Workcenter / Utilaj vor deține ulterior modelul de capacitate. Nu există calendar, disponibilitate dinamică sau ore-mașină.",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "scheduling",
+        label: "Programare",
+        statement: "Nu există programare, asignare sau alegere de furnizor pentru un job.",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "machine-run",
+        label: "MachineRun",
+        statement: "Catalogul de utilaje nu stochează rulare reală pe comandă.",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "people-skills",
+        label: "Persoane / calificări",
+        statement:
+          "Un workcenter poate declara că stația susține o capabilitate umană. Calificarea angajatului rămâne adevăr viitor People.",
         state: "NOT_IMPLEMENTED",
       },
       {
@@ -249,6 +285,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "ProductTemplate și catalogul de produse",
       "Catalogul canonic de resurse și cost intern",
       "Catalogul canonic de procese operaționale",
+      "Catalogul canonic Workcenter / Utilaj și acoperirea de capabilitate",
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
       "Harta canonică de domenii și administrare",
@@ -282,7 +319,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Eticheta de afișare persistată este autoritatea runtime după bootstrap. Codul rămâne default de inițializare, nu a doua valoare activă.",
       "Setările tehnice, lifecycle-ul și resursele nu au write persistat.",
       "Identitatea resursei, specificația, dovada de cost, cererea de componentă și prețul client rămân separate.",
-      "Procesul operațional este HOW. Resursa este WHAT. Task-ul de execuție este instanța. Utilajul este WHO/WHERE ulterior.",
+      "Procesul operațional este HOW. Resursa este WHAT. Workcenter / utilaj furnizează capabilitatea. Task-ul de execuție alege ulterior furnizorul.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
     ],
@@ -369,11 +406,31 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "workcenters",
         label: "Workcenters",
-        state: "PLANNED",
+        state: "IMPLEMENTED",
       },
       {
         id: "machines",
         label: "Catalog utilaje",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "capacity-planning",
+        label: "Planificare capacitate",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "scheduling",
+        label: "Programare",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "machine-run",
+        label: "MachineRun",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "people-skills",
+        label: "Persoane / calificări",
         state: "NOT_IMPLEMENTED",
       },
       {

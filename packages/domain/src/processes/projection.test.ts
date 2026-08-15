@@ -47,6 +47,9 @@ describe("operational process projection", () => {
         (item) => item.id === "FACE:CUT_SHEET_CNC",
       ),
     ).toBe(true);
+    expect(forming?.providerCoverage).toBe("NO_PROVIDER");
+    expect(forming?.providerCoverageLabel).toBe("Fără furnizor");
+    expect(forming?.providers).toEqual([]);
     expect(JSON.stringify(admin)).not.toMatch(/machineId|ExecutionPlan|Preț client/);
   });
 });

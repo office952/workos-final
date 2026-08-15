@@ -5,8 +5,8 @@ export function AdminHomePage() {
     <section>
       <h1>Administrare</h1>
       <p className="page-lead">
-        Sistemul de produs poate edita eticheta afișată. Resursele și procesele
-        operaționale sunt deocamdată doar inspecție.
+        Sistemul de produs poate edita eticheta afișată. Resursele, procesele
+        operaționale și utilajele sunt deocamdată doar inspecție.
       </p>
       <article className="catalog-family">
         <p className="catalog-kind">Sistem</p>
@@ -42,6 +42,18 @@ export function AdminHomePage() {
         <p className="catalog-product-desc">
           Cum se lucrează: debitare, formare, finisare, asamblare. Cere o
           capabilitate, nu un utilaj. Fără execuție, fără write.
+        </p>
+      </article>
+      <article className="catalog-family">
+        <p className="catalog-kind">Sistem</p>
+        <h2>
+          <Link className="catalog-product-link" to="/admin/workcenters">
+            Utilaje și capacitate
+          </Link>
+        </h2>
+        <p className="catalog-product-desc">
+          Cine / unde poate furniza o capabilitate. Zone și utilaje rămân goale
+          până la identități confirmate. Fără programare, fără write.
         </p>
       </article>
     </section>

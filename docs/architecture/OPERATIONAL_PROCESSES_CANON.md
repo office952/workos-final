@@ -19,7 +19,7 @@ CAPABILITY CLASS
 EXECUTION TASK
   → later says THIS job must perform THIS process
 MACHINE / WORKCENTER
-  → later provides the capability and may be selected
+  → provides the capability; Execution later selects the provider
 EMPLOYEE
   → later says WHO performs or assists
 ```
@@ -38,8 +38,10 @@ Shop-floor capability is not the architectural kernel in `capabilities.ts`.
 
 ```text
 OperationalProcess → requires CapabilityClass
-Workcenter / Machine → later provides CapabilityClass
+Workcenter / Machine → provides CapabilityClass
 Execution → later selects the concrete provider
+
+See `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md`. The process definition does not store provider IDs. The join is derived.
 ```
 
 Kinds in this foundation: MACHINE, WORKSTATION, HUMAN_SKILL.

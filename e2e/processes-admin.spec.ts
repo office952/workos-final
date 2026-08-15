@@ -9,7 +9,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await expect(page.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Procese operaționale" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Persoane" })).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Utilaje" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Utilaje și capacitate" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-admin-home.png",
     fullPage: true,
@@ -75,7 +75,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await expect(page.getByRole("heading", { name: "Debitare CNC", exact: true })).toBeVisible();
   await expect(page.getByText("Utilaj / stație de mașină")).toBeVisible();
   await expect(
-    page.getByText("Workcenter / utilaj vor furniza ulterior această clasă"),
+    page.getByText("Furnizorii se inspectează în Utilaje și capacitate"),
   ).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-capability.png",

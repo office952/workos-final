@@ -4,6 +4,7 @@ import type {
   ProductSystemAdminProjection,
   ProductSystemEntityKind,
   ResourcesAdminProjection,
+  WorkcentersAdminProjection,
 } from "@workos-final/domain";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -65,6 +66,14 @@ export async function fetchResourcesAdministration(): Promise<ResourcesAdminProj
     throw new Error("resources_admin_unavailable");
   }
   return readJson<ResourcesAdminProjection>(response);
+}
+
+export async function fetchWorkcentersAdministration(): Promise<WorkcentersAdminProjection> {
+  const response = await fetch(`${baseUrl}/api/workcenters`);
+  if (!response.ok) {
+    throw new Error("workcenters_admin_unavailable");
+  }
+  return readJson<WorkcentersAdminProjection>(response);
 }
 
 export async function fetchSystemGovernance(): Promise<GovernanceProjection> {

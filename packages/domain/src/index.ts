@@ -161,3 +161,16 @@ export {
   type ProductionCapabilityClass,
   type ProductProcessComposition,
 } from "./processes/index.js";
+export {
+  createWorkcenterRegistry,
+  lettersCapabilityCoverage,
+  machines,
+  projectWorkcentersAdministration,
+  providersForCapability,
+  providersForProcess,
+  workcenterRegistry,
+  workcenters,
+  type Machine,
+  type Workcenter,
+  type WorkcentersAdminProjection,
+} from "./workcenters/index.js";
