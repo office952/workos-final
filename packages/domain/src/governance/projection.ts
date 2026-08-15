@@ -141,6 +141,7 @@ export function projectSystemGovernance(): GovernanceProjection {
           "identitatea resursei",
           "familia și specificația de material",
           "evidența de cost intern / tarife",
+          "rețetele de serviciu și manoperă",
         ],
         state: "IMPLEMENTED",
       },
@@ -426,6 +427,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "service-labor-recipes",
         label: "Rețete serviciu / labor",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "recipe-admin-write",
+        label: "Write administrare rețete",
         state: "NOT_IMPLEMENTED",
       },
       {

@@ -80,6 +80,50 @@ test("resources admin inspects material family specification and cost", async ({
     path: "docs/worklog/screenshots/resources-service.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-overview.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Rețete servicii" }).click();
+  await expect(page.getByRole("button", { name: "Formare profil aluminiu" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Debitare foaie CNC" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Formare profil aluminiu" })).toBeVisible();
+  await expect(page.getByText("Rețetă serviciu").first()).toBeVisible();
+  await expect(page.getByText("Configurată").first()).toBeVisible();
+  await expect(page.getByText("Perimetru volum (m)").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-service-recipes.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-forming-recipe.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Debitare foaie CNC" }).click();
+  await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
+  await expect(page.getByText("Lipsă").first()).toBeVisible();
+  await expect(page.getByText("Nu inventăm tarif pe oră sau pe utilaj.")).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-cnc-missing-recipe.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Rețete manoperă" }).click();
+  await expect(page.getByRole("button", { name: "Lipire față-volum" })).toBeVisible();
+  await page.getByRole("button", { name: "Lipire față-volum" }).click();
+  await expect(page.getByRole("heading", { name: "Lipire față-volum" })).toBeVisible();
+  await expect(page.getByText("Rețetă manoperă").first()).toBeVisible();
+  await expect(page.getByText("Lipsă").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-labor-recipes.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/resources-assembly-missing-labor.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Dovezi de cost" }).click();
   await expect(page.getByText("Dovadă de cost intern").first()).toBeVisible();

@@ -41,7 +41,7 @@ export function ResourcesAdminPage() {
     <OwnerCatalogView
       catalog={buildResourcesCatalog(page.admin)}
       title="Resurse și cost intern"
-      lead="Inspecție a identității de resursă, a specificației și a dovezii de cost intern. Nu se editează aici. Prețul client nu aparține acestui catalog."
+      lead="Inspecție a identității de resursă, a rețetelor de serviciu / manoperă și a dovezii de cost intern. Nu se editează aici. Prețul client nu aparține acestui catalog."
     />
   );
 }

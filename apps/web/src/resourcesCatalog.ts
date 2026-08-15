@@ -43,6 +43,27 @@ export function buildResourcesCatalog(
         })),
       },
       {
+        id: "service-recipes",
+        label: "Rețete servicii",
+        kindLabel: "Categorie",
+        items: [
+          ...admin.serviceRecipes.map(recipeItem),
+          ...admin.missingServiceRecipes.map(missingRecipeItem),
+        ],
+      },
+      {
+        id: "labor-recipes",
+        label: "Rețete manoperă",
+        kindLabel: "Categorie",
+        items:
+          admin.laborRecipes.length === 0 && admin.missingLaborRecipes.length === 0
+            ? []
+            : [
+                ...admin.laborRecipes.map(recipeItem),
+                ...admin.missingLaborRecipes.map(missingRecipeItem),
+              ],
+      },
+      {
         id: "cost-evidence",
         label: "Dovezi de cost",
         kindLabel: "Categorie",
@@ -62,6 +83,94 @@ export function buildResourcesCatalog(
         })),
       },
     ].filter((category) => category.items.length > 0),
+  };
+}
+
+function recipeItem(
+  recipe: ResourcesAdminProjection["serviceRecipes"][number],
+): OwnerCatalog["categories"][number]["items"][number] {
+  return {
+    id: `recipe:${recipe.id}`,
+    label: recipe.label,
+    kindLabel: recipe.kindLabel,
+    summary: recipe.description,
+    groups: [
+      {
+        id: recipe.id,
+        kindLabel: recipe.kindLabel,
+        title: recipe.label,
+        sections: [
+          {
+            id: "identity",
+            title: "Identitate",
+            facts: [
+              { label: "Fel", value: recipe.kindLabel },
+              { label: "Stare", value: recipe.lifecycleLabel },
+              { label: "Completitudine", value: recipe.completenessLabel },
+              { label: "Bază cantitate", value: recipe.quantityBasisLabel },
+              { label: "Unitate", value: recipe.unitLabel },
+              {
+                label: "Procese",
+                value:
+                  recipe.processLabels.length === 0
+                    ? "niciun proces"
+                    : recipe.processLabels.join("; "),
+              },
+              { label: "Evidență de cost", value: recipe.costEvidenceLabel },
+              {
+                label: "Valoare internă",
+                value: recipe.cost?.amountDisplay ?? "fără dovadă activă",
+              },
+            ],
+            lines: [
+              recipe.description,
+              "Rețeta spune CUM se formează costul intern. Nu inventează geometria.",
+            ],
+          },
+          {
+            id: "technical",
+            title: "Tehnic",
+            technical: true,
+            facts: [
+              { label: "Identitate rețetă", value: recipe.id },
+              { label: "Identitate evidență", value: recipe.costEvidenceId },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function missingRecipeItem(
+  item: ResourcesAdminProjection["missingServiceRecipes"][number],
+): OwnerCatalog["categories"][number]["items"][number] {
+  return {
+    id: `missing-recipe:${item.processId}`,
+    label: item.processLabel,
+    kindLabel: item.kindLabel,
+    summary: "Rețetă neconfigurată. Furnizorul, dacă există, rămâne separat.",
+    groups: [
+      {
+        id: item.processId,
+        kindLabel: item.kindLabel,
+        title: item.processLabel,
+        sections: [
+          {
+            id: "gap",
+            title: "Gol de rețetă",
+            facts: [
+              { label: "Fel așteptat", value: item.kindLabel },
+              { label: "Completitudine", value: item.completenessLabel },
+            ],
+            lines: [
+              "Nu există rețetă canonică pentru acest proces. Nu inventăm tarif pe oră sau pe utilaj.",
+              "Acoperirea de furnizor se inspectează separat, în Utilaje și capacitate.",
+            ],
+          },
+        ],
+      },
+    ],
   };
 }
 

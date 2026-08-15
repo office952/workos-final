@@ -36,11 +36,32 @@ export {
 } from "./eic.js";
 export {
   projectResourcesAdministration,
+  type MissingRecipeAdminRecord,
+  type RecipeAdminRecord,
   type ResourceAdminRecord,
   type ResourceCostProjection,
   type ResourcesAdminProjection,
   type ResourceUseProjection,
 } from "./projection.js";
+export {
+  RCP_PROFILE_FORMING_ID,
+  RECIPE_KINDS,
+  RECIPE_LIFECYCLES,
+  RECIPE_QUANTITY_BASES,
+  costRecipes,
+  expectedRecipeKindForProcess,
+  getCostRecipe,
+  recipeForProcess,
+  recipeKindLabel,
+  recipeLifecycleLabel,
+  recipeQuantityBasisLabel,
+  resolveRecipeInternalCost,
+  type CostRecipe,
+  type RecipeCostResolution,
+  type RecipeKind,
+  type RecipeLifecycle,
+  type RecipeQuantityBasis,
+} from "./recipes.js";
 export {
   liveResourceIdsForType,
   resolveResourcesForType,

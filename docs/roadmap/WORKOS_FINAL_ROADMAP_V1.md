@@ -78,6 +78,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Workcenters / Machines capability-provider foundation | DONE / FOUNDATION |
 | Live assembly workcenters (`WC_ASSEMBLY_01`, `WC_ASSEMBLY_02`) | DONE / FOUNDATION |
 | Real shop-floor equipment and capability map | DONE / FOUNDATION |
+| Service / Labor Recipe foundation | DONE / FOUNDATION |
 | Resources admin write / process admin write | NOT_IMPLEMENTED |
 | Lighting calculation | V1 REQUIRED after PSU owner decision |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |

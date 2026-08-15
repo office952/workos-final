@@ -94,6 +94,16 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
     fullPage: true,
   });
 
+  await page.getByRole("button", { name: "Utilaje", exact: true }).click();
+  await page.getByRole("button", { name: "CNC Cant Litere" }).click();
+  await expect(page.getByRole("heading", { name: "CNC Cant Litere" })).toBeVisible();
+  await expect(page.getByText("Rețetă: Configurată").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-forming-recipe.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Zone / Workcenters" }).click();
+
   await page.getByRole("button", { name: "Montaj LED / electric" }).click();
   await expect(page.getByRole("heading", { name: "Montaj LED / electric" })).toBeVisible();
   await expect(page.getByText("Asamblare electrică").first()).toBeVisible();
@@ -118,7 +128,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await expect(page.getByRole("heading", { name: "CNC 4020" })).toBeVisible();
   await expect(page.getByText("Debitare CNC").first()).toBeVisible();
   await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
-  await expect(page.getByText("Rețetă de serviciu lipsește").first()).toBeVisible();
+  await expect(page.getByText("Rețetă serviciu: Lipsă").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-machines.png",
     fullPage: true,

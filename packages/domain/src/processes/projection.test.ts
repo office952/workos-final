@@ -32,6 +32,12 @@ describe("operational process projection", () => {
     expect(forming?.resourceLinks).toEqual([
       { id: RETURN_CANT_FORMING_ID, label: "Formare profil aluminiu" },
     ]);
+    expect(forming?.recipeId).toBe("RCP_PROFILE_FORMING");
+    expect(forming?.recipeState).toBe("CANONICAL_COST_EXISTS");
+    const cnc = admin.processes.find((item) => item.id === CUT_SHEET_CNC_ID);
+    expect(cnc?.recipeId).toBeNull();
+    expect(cnc?.recipeState).toBe("SERVICE_RECIPE_MISSING");
+    expect(cnc?.providerCoverage).toBe("COVERED");
     expect(forming?.usedBy[0]?.displayLine).toContain("Volum / Aluminiu");
     expect(admin.capabilities.find((item) => item.id === "CNC_ROUTING")?.processes[0]?.id).toBe(
       CUT_SHEET_CNC_ID,

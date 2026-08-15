@@ -33,6 +33,7 @@ Live kinds:
 
 Do not force labor recipes, operational processes, workcenters, or machines into the same entity.
 Operational Processes now have their own canon: `docs/architecture/OPERATIONAL_PROCESSES_CANON.md`.
+Service / Labor Recipes now have their own canon: `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`.
 
 ## Material family vs specification
 
@@ -119,5 +120,5 @@ Where-used is derived from live type resolution and product composition.
 - Operational process identity (owned by Operational Processes)
 - Workcenters
 - Machines
-- Labor recipes
+- Labor / service recipes — see `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`
 - Commercial price

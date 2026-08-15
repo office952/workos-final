@@ -264,6 +264,8 @@ describe("resources catalog presentation", () => {
     expect(catalog.categories.map((item) => item.id)).toEqual([
       "materials",
       "services",
+      "service-recipes",
+      "labor-recipes",
       "cost-evidence",
     ]);
     expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
@@ -286,6 +288,11 @@ describe("resources catalog presentation", () => {
     );
     expect(catalog.categories[1]?.items[0]?.label).toBe("Formare profil aluminiu");
     expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Serviciu");
+    expect(catalog.categories[2]?.items[0]?.label).toBe("Formare profil aluminiu");
+    expect(catalog.categories[2]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
+    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
+      "Lipire față-volum",
+    );
     expect(
       catalog.categories[0]?.items[0]?.groups[0]?.sections.find(
         (item) => item.id === "used-by",
@@ -334,6 +341,19 @@ describe("processes catalog presentation", () => {
           label: "Referințe",
           value: "Formare profil aluminiu",
         }),
+      ]),
+    );
+    expect(
+      catalog.categories[1]?.items
+        .find((item) => item.id === "process:FORM_ALUMINIUM_PROFILE")
+        ?.groups[0]?.sections.find((item) => item.id === "recipe")?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Rețetă",
+          value: "Formare profil aluminiu",
+        }),
+        expect.objectContaining({ label: "Stare rețetă", value: "Rețetă: Configurată" }),
       ]),
     );
     expect(catalog.categories[3]?.items[0]?.label).toBe("Debitare CNC");

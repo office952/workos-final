@@ -6,6 +6,7 @@ import {
   costSourceLabel,
   getCostEvidence,
   getMaterialFamily,
+  getResource,
   listServiceResources,
   materialFamilies,
   resourceCatalog,
@@ -15,6 +16,17 @@ import {
   type MaterialFamily,
   type ResourceDefinition,
 } from "./catalog.js";
+import { getOperationalProcess } from "../processes/catalog.js";
+import {
+  expectedRecipeKindForProcess,
+  processesMissingRecipe,
+  recipeKindLabel,
+  recipeLifecycleLabel,
+  recipeQuantityBasisLabel,
+  recipesOfKind,
+  type CostRecipe,
+  type RecipeKind,
+} from "./recipes.js";
 import { resourceWhereUsed, type ResourceUse } from "./whereUsed.js";
 
 export type ResourceUseProjection = ResourceUse & {
@@ -49,12 +61,40 @@ export type ResourceAdminRecord = {
   cost: ResourceCostProjection | null;
 };
 
+export type RecipeAdminRecord = {
+  id: string;
+  kind: RecipeKind;
+  kindLabel: string;
+  label: string;
+  description: string;
+  lifecycleLabel: string;
+  completenessLabel: string;
+  processLabels: readonly string[];
+  quantityBasisLabel: string;
+  unitLabel: string;
+  costEvidenceId: string;
+  costEvidenceLabel: string;
+  cost: ResourceCostProjection | null;
+};
+
+export type MissingRecipeAdminRecord = {
+  processId: string;
+  processLabel: string;
+  kind: RecipeKind;
+  kindLabel: string;
+  completenessLabel: string;
+};
+
 export type ResourcesAdminProjection = {
   families: readonly (MaterialFamily & {
     specifications: readonly ResourceAdminRecord[];
   })[];
   materials: readonly ResourceAdminRecord[];
   services: readonly ResourceAdminRecord[];
+  serviceRecipes: readonly RecipeAdminRecord[];
+  laborRecipes: readonly RecipeAdminRecord[];
+  missingServiceRecipes: readonly MissingRecipeAdminRecord[];
+  missingLaborRecipes: readonly MissingRecipeAdminRecord[];
   costEvidence: readonly (ResourceCostProjection & {
     resourceId: string;
     resourceLabel: string;
@@ -76,6 +116,10 @@ export function projectResourcesAdministration(): ResourcesAdminProjection {
     })),
     materials,
     services,
+    serviceRecipes: recipesOfKind("SERVICE").map(toRecipeRecord),
+    laborRecipes: recipesOfKind("LABOR").map(toRecipeRecord),
+    missingServiceRecipes: processesMissingRecipe("SERVICE").map(toMissingRecipe),
+    missingLaborRecipes: processesMissingRecipe("LABOR").map(toMissingRecipe),
     costEvidence: costEvidence.map((item) => {
       const resource = resourceCatalog.find((entry) => entry.id === item.resourceId);
       return {
@@ -87,6 +131,39 @@ export function projectResourcesAdministration(): ResourcesAdminProjection {
       };
     }),
     writeState: "NOT_IMPLEMENTED",
+  };
+}
+
+function toRecipeRecord(recipe: CostRecipe): RecipeAdminRecord {
+  const evidence = getCostEvidence(recipe.costEvidenceId);
+  const resource = getResource(recipe.costEvidenceId);
+  return {
+    id: recipe.id,
+    kind: recipe.kind,
+    kindLabel: recipeKindLabel(recipe.kind),
+    label: recipe.label,
+    description: recipe.description,
+    lifecycleLabel: recipeLifecycleLabel(recipe.lifecycle),
+    completenessLabel: evidence ? "Configurată" : "Parțială",
+    processLabels: recipe.processIds.map(
+      (processId) => getOperationalProcess(processId)?.label ?? processId,
+    ),
+    quantityBasisLabel: recipeQuantityBasisLabel(recipe.quantityBasis),
+    unitLabel: resourceUnitLabel(recipe.unit),
+    costEvidenceId: recipe.costEvidenceId,
+    costEvidenceLabel: resource?.label ?? recipe.costEvidenceId,
+    cost: evidence ? toCostProjection(evidence) : null,
+  };
+}
+
+function toMissingRecipe(processId: string): MissingRecipeAdminRecord {
+  const kind = expectedRecipeKindForProcess(processId) ?? "SERVICE";
+  return {
+    processId,
+    processLabel: getOperationalProcess(processId)?.label ?? processId,
+    kind,
+    kindLabel: recipeKindLabel(kind),
+    completenessLabel: "Lipsă",
   };
 }
 

@@ -47,6 +47,21 @@ describe("resources administration projection", () => {
         familyId: null,
       }),
     ]);
+    expect(admin.serviceRecipes).toEqual([
+      expect.objectContaining({
+        id: "RCP_PROFILE_FORMING",
+        kind: "SERVICE",
+        completenessLabel: "Configurată",
+        costEvidenceId: RETURN_CANT_FORMING_ID,
+      }),
+    ]);
+    expect(admin.laborRecipes).toEqual([]);
+    expect(admin.missingServiceRecipes.map((item) => item.processId)).toContain(
+      "CUT_SHEET_CNC",
+    );
+    expect(admin.missingLaborRecipes.map((item) => item.processId)).toContain(
+      "BOND_LETTER_BODY",
+    );
     expect(admin.costEvidence).toHaveLength(4);
     expect(admin.costEvidence.map((item) => item.resourceId).sort()).toEqual(
       admin.materials

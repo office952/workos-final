@@ -144,6 +144,24 @@ function processSections(
       ],
     },
     {
+      id: "recipe",
+      title: "Rețetă de cost",
+      facts: [
+        {
+          label: "Rețetă",
+          value: process.recipeLabel ?? "neconfigurată",
+        },
+        {
+          label: "Fel",
+          value: process.recipeKindLabel ?? "fără rețetă",
+        },
+        { label: "Stare rețetă", value: process.recipeStateLabel },
+      ],
+      lines: [
+        "Procesul rămâne adevăr tehnologic. Rețeta spune CUM se formează costul intern.",
+      ],
+    },
+    {
       id: "resources",
       title: "Resurse / serviciu referit",
       facts: [

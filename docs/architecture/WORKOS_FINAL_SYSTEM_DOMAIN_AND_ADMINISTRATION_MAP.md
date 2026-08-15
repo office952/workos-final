@@ -8,6 +8,7 @@ Related current canons:
 
 - `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings single-truth
 - `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity and cost evidence
+- `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md` — service / labor recipe layer
 - `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition and capability class
 - `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — construction order and finalization status
 - `packages/domain/src/capabilities.ts` — frozen capability IDs (kernel status remains PLANNED by design)
@@ -75,7 +76,7 @@ WorkOS Final
 ├── Resources / Cost                        FOUNDATION_ONLY (catalog + EIC)
 │   ├── Resource identity
 │   ├── Cost evidence / rates
-│   └── Labor / service recipes             PLANNED
+│   └── Labor / service recipes             FOUNDATION_ONLY
 ├── Operational Processes                   FOUNDATION_ONLY (typed catalog + Letters technological route)
 │   ├── Process definition
 │   ├── Production capability class

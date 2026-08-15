@@ -4,6 +4,12 @@ import {
 } from "../product/frontlitPlexiAl06.js";
 import { getResource } from "../resources/catalog.js";
 import {
+  recipeForProcess,
+  recipeKindLabel,
+  recipeLifecycleLabel,
+} from "../resources/recipes.js";
+import { recipeGapForProcess, recipeGapLabel } from "../workcenters/recipeGap.js";
+import {
   lettersProcessCompositionInspections,
   type ProcessCompositionInspection,
 } from "./composition.js";
@@ -46,6 +52,12 @@ export type ProcessAdminRecord = {
   readinessLabel: string;
   readinessNote: string;
   resourceLinks: readonly { id: string; label: string }[];
+  recipeId: string | null;
+  recipeLabel: string | null;
+  recipeKindLabel: string | null;
+  recipeLifecycleLabel: string | null;
+  recipeState: ReturnType<typeof recipeGapForProcess>;
+  recipeStateLabel: string;
   usedBy: readonly ProcessUse[];
   providerCoverage: ProviderCoverageStatus;
   providerCoverageLabel: string;
@@ -111,6 +123,8 @@ function lettersCompositions(): ProcessCompositionInspection[] {
 function toAdminRecord(process: OperationalProcess): ProcessAdminRecord {
   const capability = getProductionCapability(process.requiredCapabilityId);
   const coverage = processProviderCoverage(process.id);
+  const recipe = recipeForProcess(process.id);
+  const recipeState = recipeGapForProcess(process.id);
   return {
     id: process.id,
     label: process.label,
@@ -130,6 +144,12 @@ function toAdminRecord(process: OperationalProcess): ProcessAdminRecord {
       id,
       label: getResource(id)?.label ?? id,
     })),
+    recipeId: recipe?.id ?? null,
+    recipeLabel: recipe?.label ?? null,
+    recipeKindLabel: recipe ? recipeKindLabel(recipe.kind) : null,
+    recipeLifecycleLabel: recipe ? recipeLifecycleLabel(recipe.lifecycle) : null,
+    recipeState,
+    recipeStateLabel: recipeGapLabel(recipeState),
     usedBy: processWhereUsed(process.id),
     providerCoverage: coverage?.coverage ?? "NO_PROVIDER",
     providerCoverageLabel: coverage?.coverageLabel ?? providerCoverageLabel("NO_PROVIDER"),

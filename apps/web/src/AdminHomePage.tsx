@@ -28,8 +28,8 @@ export function AdminHomePage() {
           </Link>
         </h2>
         <p className="catalog-product-desc">
-          Familii de material, specificații, servicii și dovezi de cost intern.
-          Fără stoc, fără preț client, fără write.
+          Familii de material, specificații, rețete de serviciu / manoperă și
+          dovezi de cost intern. Fără stoc, fără preț client, fără write.
         </p>
       </article>
       <article className="catalog-family">

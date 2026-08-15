@@ -46,11 +46,16 @@ test("processes admin inspects capability-bound operational processes", async ({
     page.getByRole("heading", { name: "Formare profil aluminiu" }).first(),
   ).toBeVisible();
   await expect(page.getByText("Formare profil", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Rețetă: Configurată").first()).toBeVisible();
   await expect(page.getByText("Folosit de")).toBeVisible();
   await expect(page.getByText(/Volum \/ Aluminiu/)).toBeVisible();
   await expect(page.getByText("Resurse / Cost rămâne autoritatea monetară")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-forming.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/processes-recipe.png",
     fullPage: true,
   });
   await page.screenshot({

@@ -102,6 +102,8 @@ No machine-hour rates, labor recipes, or commercial money live on Machine or Wor
 
 Resources / Cost remains the monetary authority.
 
+Recipe completeness is owned by the Service / Labor Recipe registry. See `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`.
+
 The shop-floor map may project a read-only recipe/cost gap:
 
 `CANONICAL_COST_EXISTS` | `SERVICE_RECIPE_MISSING` | `LABOR_RECIPE_MISSING` | `RESOURCE_COST_MISSING` | `NOT_APPLICABLE` | `UNKNOWN`

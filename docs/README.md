@@ -11,6 +11,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration law
 - `docs/architecture/PRODUCT_SYSTEM_PERSISTENCE_CANON.md` — persisted display metadata and first write path
 - `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity, material family/spec, cost evidence
+- `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md` — service / labor recipe layer
 - `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition, shop-floor capability class, and Letters process composition
 - `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` — workcenter, machine, and capability-provider law
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
@@ -31,6 +32,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_WORKCENTERS_AND_MACHINES_FOUNDATION_V1.md` — capability-provider foundation without invented machines
 - `docs/worklog/WORKOS_FINAL_ASSEMBLY_WORKCENTERS_LIVE_COVERAGE_V1.md` — two owner-confirmed assembly tables provide MANUAL_ASSEMBLY
 - `docs/worklog/WORKOS_FINAL_REAL_SHOPFLOOR_EQUIPMENT_AND_CAPABILITY_MAP_V1.md` — real shop-floor Workcenter / Machine / Capability map
+- `docs/worklog/WORKOS_FINAL_SERVICE_AND_LABOR_RECIPES_FOUNDATION_V1.md` — service / labor recipe foundation
 
 ## Historical evidence
 

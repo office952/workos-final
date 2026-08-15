@@ -5,6 +5,10 @@ import {
   type ProductionCapabilityClassId,
 } from "../processes/catalog.js";
 import { getCostEvidence } from "../resources/catalog.js";
+import {
+  expectedRecipeKindForProcess,
+  recipeForProcess,
+} from "../resources/recipes.js";
 
 export const RECIPE_GAP_STATES = [
   "CANONICAL_COST_EXISTS",
@@ -28,11 +32,11 @@ export type RecipeGapRow = {
 export function recipeGapLabel(state: RecipeGapState): string {
   switch (state) {
     case "CANONICAL_COST_EXISTS":
-      return "Rețetă de cost canonică";
+      return "Rețetă: Configurată";
     case "SERVICE_RECIPE_MISSING":
-      return "Rețetă de serviciu lipsește";
+      return "Rețetă serviciu: Lipsă";
     case "LABOR_RECIPE_MISSING":
-      return "Rețetă de labor lipsește";
+      return "Rețetă manoperă: Lipsă";
     case "RESOURCE_COST_MISSING":
       return "Cost de resursă lipsește";
     case "NOT_APPLICABLE":
@@ -51,25 +55,20 @@ export function recipeGapForProcess(processId: string): RecipeGapState {
   if (!process) {
     return "UNKNOWN";
   }
-  if (process.resourceIds.length > 0) {
-    const missing = process.resourceIds.some((resourceId) => !getCostEvidence(resourceId));
-    return missing ? "RESOURCE_COST_MISSING" : "CANONICAL_COST_EXISTS";
+  const recipe = recipeForProcess(processId);
+  if (recipe) {
+    return getCostEvidence(recipe.costEvidenceId)
+      ? "CANONICAL_COST_EXISTS"
+      : "RESOURCE_COST_MISSING";
   }
-  const capability = getProductionCapability(process.requiredCapabilityId);
-  if (!capability) {
-    return "UNKNOWN";
+  const kind = expectedRecipeKindForProcess(processId);
+  if (kind === "LABOR") {
+    return "LABOR_RECIPE_MISSING";
   }
-  switch (capability.kind) {
-    case "HUMAN_SKILL":
-      return "LABOR_RECIPE_MISSING";
-    case "MACHINE":
-    case "WORKSTATION":
-      return "SERVICE_RECIPE_MISSING";
-    default: {
-      const _exhaustive: never = capability.kind;
-      return _exhaustive;
-    }
+  if (kind === "SERVICE") {
+    return "SERVICE_RECIPE_MISSING";
   }
+  return "UNKNOWN";
 }
 
 export function recipeGapsForCapability(
