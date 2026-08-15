@@ -133,7 +133,7 @@ describe("system projection API", () => {
     expect(JSON.stringify(body)).not.toMatch(/machineId|ExecutionPlan|employeeId/);
     expect(
       (body.processes[0] as { providerCoverage?: string }).providerCoverage,
-    ).toBe("NO_PROVIDER");
+    ).toBe("COVERED");
     expect(
       (body as { compositions?: Array<{ id: string }> }).compositions?.map(
         (item) => item.id,
@@ -164,14 +164,23 @@ describe("system projection API", () => {
     expect(body.writeState).toBe("NOT_IMPLEMENTED");
     expect(
       (body.workcenters as Array<{ id: string }>).map((item) => item.id),
-    ).toEqual(["WC_ASSEMBLY_01", "WC_ASSEMBLY_02"]);
-    expect(body.machines).toEqual([]);
-    expect(body.overview.missingCapabilityCount).toBe(7);
-    expect(body.overview.workcenterCount).toBe(2);
-    expect(body.overview.coveredCapabilityCount).toBe(1);
+    ).toEqual(
+      expect.arrayContaining(["WC_ASSEMBLY_01", "WC_ASSEMBLY_02", "WC_WELDING"]),
+    );
+    expect((body.workcenters as Array<{ id: string }>)[0]?.id).toBe("WC_ASSEMBLY_01");
+    expect((body.machines as Array<{ id: string }>).map((item) => item.id)).toContain(
+      "MCH-CNC-4020",
+    );
+    expect(body.overview.missingCapabilityCount).toBe(3);
+    expect(body.overview.workcenterCount).toBe(12);
+    expect(body.overview.coveredCapabilityCount).toBe(14);
     expect(body.overview.capacityPlanningState).toBe("NOT_IMPLEMENTED");
     expect(body.overview.executionState).toBe("NOT_IMPLEMENTED");
-    expect(body.lettersCoverage.missingCapabilityIds).toContain("CNC_ROUTING");
+    expect(body.lettersCoverage.missingCapabilityIds).toEqual([
+      "PAINTING",
+      "QUALITY_CONTROL",
+      "PACKAGING",
+    ]);
     expect(JSON.stringify(body)).not.toMatch(/CNC-01|machineHour|ExecutionPlan|Preț client/);
   });
 

@@ -235,7 +235,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "machines",
         label: "Utilaje / workcenter",
         statement:
-          "Există două mese de asamblare confirmate. Catalogul de utilaje este gol. Planificarea de capacitate nu este implementată.",
+          "Harta de atelier este live: mese de asamblare, sudură, debitare metale, CNC, formare, electric, print și celelalte utilaje reale. Planificarea de capacitate nu este implementată.",
         state: "IMPLEMENTED",
       },
       {
@@ -414,9 +414,19 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "real-shopfloor-map",
+        label: "Hartă reală de atelier",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "machines",
         label: "Catalog utilaje",
         state: "IMPLEMENTED",
+      },
+      {
+        id: "service-labor-recipes",
+        label: "Rețete serviciu / labor",
+        state: "NOT_IMPLEMENTED",
       },
       {
         id: "capacity-planning",

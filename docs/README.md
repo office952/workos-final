@@ -30,6 +30,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_LIGHTING_SINGLE_TRUTH_ALIGNMENT_V1.md` — one Lighting evaluation path for Aggregate and processes
 - `docs/worklog/WORKOS_FINAL_WORKCENTERS_AND_MACHINES_FOUNDATION_V1.md` — capability-provider foundation without invented machines
 - `docs/worklog/WORKOS_FINAL_ASSEMBLY_WORKCENTERS_LIVE_COVERAGE_V1.md` — two owner-confirmed assembly tables provide MANUAL_ASSEMBLY
+- `docs/worklog/WORKOS_FINAL_REAL_SHOPFLOOR_EQUIPMENT_AND_CAPABILITY_MAP_V1.md` — real shop-floor Workcenter / Machine / Capability map
 
 ## Historical evidence
 

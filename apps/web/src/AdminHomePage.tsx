@@ -52,8 +52,8 @@ export function AdminHomePage() {
           </Link>
         </h2>
         <p className="catalog-product-desc">
-          Cine / unde poate furniza o capabilitate. Zone și utilaje rămân goale
-          până la identități confirmate. Fără programare, fără write.
+          Cine / unde poate furniza o capabilitate. Hartă reală de atelier:
+          zone, utilaje și acoperire. Fără programare, fără write.
         </p>
       </article>
     </section>

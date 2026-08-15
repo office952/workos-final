@@ -47,6 +47,12 @@ export function buildWorkcentersCatalog(
           ),
         ],
       },
+      {
+        id: "service-map",
+        label: "Hartă procese / rețete",
+        kindLabel: "Categorie",
+        items: [serviceMapOverviewItem(admin), ...serviceMapProviderItems(admin)],
+      },
     ],
   };
 }
@@ -77,8 +83,21 @@ function overviewItem(admin: WorkcentersAdminProjection): CatalogItem {
                 label: "Capabilități fără furnizor",
                 value: String(admin.overview.missingCapabilityCount),
               },
+              {
+                label: "Rețete de cost canonice",
+                value: String(admin.overview.canonicalCostExistsCount),
+              },
+              {
+                label: "Rețete de serviciu lipsă",
+                value: String(admin.overview.serviceRecipeMissingCount),
+              },
+              {
+                label: "Rețete de labor lipsă",
+                value: String(admin.overview.laborRecipeMissingCount),
+              },
             ],
             lines: [
+              "Alege o zonă sau un utilaj din listă. Nu totul este desfășurat odată.",
               "Procesul cere o capabilitate. Workcenter sau utilajul o furnizează. Execuția alege ulterior furnizorul.",
               "Planificarea de capacitate nu este implementată. Acest catalog nu spune dacă un job poate rula acum.",
             ],
@@ -90,12 +109,13 @@ function overviewItem(admin: WorkcentersAdminProjection): CatalogItem {
               { label: "Planificare capacitate", value: "Neimplementat" },
               { label: "Programare", value: "Neimplementat" },
               { label: "Execuție", value: "Neimplementat" },
+              { label: "Persoane / calificări", value: "Neimplementat" },
               { label: "Write administrare", value: "Neimplementat" },
             ],
             lines: [
               "Nu există ore-mașină, calendar de disponibilitate, limită de sarcini sau limită de angajați.",
-              "Cele două mese de asamblare sunt zone canonice. Lucrul manual poate avea loc și în altă parte în hală, fără a modela locuri ad-hoc.",
-              "Utilajele rămân neconfirmate. Nu inventăm CNC sau cabină de vopsit.",
+              "Cele două mese de asamblare rămân neschimbate și furnizează doar asamblare manuală.",
+              "Sudura oțel și sudura aluminiu rămân eligibilități distincte. Nu există cabină de vopsit, QC sau ambalare ca stații dedicate.",
             ],
           },
         ],
@@ -228,6 +248,26 @@ function machineItem(
                   machine.capabilityLabels.length === 0
                     ? "nicio capabilitate"
                     : machine.capabilityLabels.join("; "),
+              },
+              {
+                label: "Procese susținute",
+                value:
+                  machine.processLabels.length === 0
+                    ? "niciun proces încă"
+                    : machine.processLabels.join("; "),
+              },
+              {
+                label: "Stare rețetă / cost",
+                value:
+                  machine.recipeRows.length === 0
+                    ? "fără relație"
+                    : machine.recipeRows
+                        .map((item) =>
+                          item.processLabel
+                            ? `${item.processLabel}: ${item.stateLabel}`
+                            : `${item.capabilityLabel}: ${item.stateLabel}`,
+                        )
+                        .join("; "),
               },
             ],
             lines: [machine.description],
@@ -373,12 +413,87 @@ function compositionCoverageItem(
                     ? "niciun furnizor"
                     : process.providers.map((item) => item.label).join("; "),
               },
+              { label: "Stare rețetă / cost", value: process.recipeStateLabel },
             ],
           }),
         ),
       },
     ],
   };
+}
+
+function serviceMapOverviewItem(admin: WorkcentersAdminProjection): CatalogItem {
+  return {
+    id: "service-map",
+    label: "Hartă procese / rețete",
+    kindLabel: "Inspecție",
+    summary: "Furnizor → capabilitate → proces → stare rețetă. Fără prețuri.",
+    groups: [
+      {
+        id: "service-map",
+        kindLabel: "Inspecție",
+        title: "Hartă procese / rețete",
+        sections: [
+          {
+            id: "status",
+            title: "Goluri de rețetă",
+            facts: [
+              {
+                label: "Rețete de cost canonice",
+                value: String(admin.overview.canonicalCostExistsCount),
+              },
+              {
+                label: "Rețete de serviciu lipsă",
+                value: String(admin.overview.serviceRecipeMissingCount),
+              },
+              {
+                label: "Rețete de labor lipsă",
+                value: String(admin.overview.laborRecipeMissingCount),
+              },
+            ],
+            lines: [
+              "Aceasta nu este o interfață de preț. Arată doar dacă există rețetă de cost, de serviciu sau de labor.",
+              "Sudura, printul și celelalte capabilități noi nu au încă procese operaționale dedicate.",
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function serviceMapProviderItems(
+  admin: WorkcentersAdminProjection,
+): CatalogItem[] {
+  const providerIds = [...new Set(admin.serviceMap.map((item) => item.providerId))];
+  return providerIds.map((providerId) => {
+    const rows = admin.serviceMap.filter((item) => item.providerId === providerId);
+    const first = rows[0];
+    return {
+      id: `service:${providerId}`,
+      label: first?.providerLabel ?? providerId,
+      kindLabel: first?.providerKindLabel ?? "Furnizor",
+      summary: first?.workcenterLabel
+        ? `${first.providerKindLabel} · ${first.workcenterLabel}`
+        : (first?.providerKindLabel ?? "Furnizor"),
+      groups: [
+        {
+          id: providerId,
+          kindLabel: first?.providerKindLabel ?? "Furnizor",
+          title: first?.providerLabel ?? providerId,
+          sections: rows.map((row) => ({
+            id: `${row.capabilityId}:${row.processId ?? "none"}`,
+            title: row.processLabel ?? row.capabilityLabel,
+            facts: [
+              { label: "Capabilitate", value: row.capabilityLabel },
+              { label: "Zonă", value: row.workcenterLabel ?? "fără zonă" },
+              { label: "Stare rețetă / cost", value: row.recipeStateLabel },
+            ],
+          })),
+        },
+      ],
+    };
+  });
 }
 
 function coverageList(

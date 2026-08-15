@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   BOND_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
+  FORM_ALUMINIUM_PROFILE_ID,
   operationalProcesses,
   PAINT_RAL_ID,
 } from "../processes/catalog.js";
@@ -19,8 +20,19 @@ import {
 } from "../product/frontlitPlexiAl06.js";
 import { compileEic } from "../resources/eic.js";
 import {
+  MCH_CNC_4020_ID,
+  MCH_CNC_CANT_LITERE_ID,
+  MCH_METAL_CUTTER_AUTO_ID,
+  MCH_WELD_ALU_ID,
+  MCH_WELD_STEEL_ID,
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
+  WC_CNC_ROUTING_ID,
+  WC_LED_ASSEMBLY_ID,
+  WC_LETTER_FORMING_ID,
+  WC_METAL_CUTTING_ID,
+  WC_VINYL_APPLICATION_ID,
+  WC_WELDING_ID,
   createWorkcenterRegistry,
   machines,
   workcenterRegistry,
@@ -28,6 +40,7 @@ import {
   type Machine,
   type Workcenter,
 } from "./catalog.js";
+import { recipeGapForProcess } from "./recipeGap.js";
 import { lettersCapabilityCoverage } from "./coverage.js";
 import { projectWorkcentersAdministration } from "./projection.js";
 import {
@@ -81,24 +94,47 @@ const fixtureMachines: readonly Machine[] = [
 const fixtureRegistry = createWorkcenterRegistry(fixtureWorkcenters, fixtureMachines);
 
 describe("workcenter registry", () => {
-  it("activates exactly two owner-confirmed assembly workcenters", () => {
-    expect(workcenters.map((item) => item.id)).toEqual([
+  it("preserves the two owner-confirmed assembly workcenters unchanged", () => {
+    const assembly = workcenters.filter(
+      (item) => item.id === WC_ASSEMBLY_01_ID || item.id === WC_ASSEMBLY_02_ID,
+    );
+    expect(assembly.map((item) => item.id)).toEqual([
       WC_ASSEMBLY_01_ID,
       WC_ASSEMBLY_02_ID,
     ]);
-    expect(workcenters.every((item) => item.lifecycle === "ACTIVE")).toBe(true);
+    expect(assembly.every((item) => item.lifecycle === "ACTIVE")).toBe(true);
     expect(
-      workcenters.every(
+      assembly.every(
         (item) =>
-          item.capabilityIds.length === 1 && item.capabilityIds[0] === "MANUAL_ASSEMBLY",
+          item.label.startsWith("Masă asamblare") &&
+          item.capabilityIds.length === 1 &&
+          item.capabilityIds[0] === "MANUAL_ASSEMBLY",
       ),
     ).toBe(true);
-    expect(machines).toEqual([]);
-    expect(workcenterRegistry.workcenters).toEqual(workcenters);
+    expect(assembly[0]?.label).toBe("Masă asamblare 1");
+    expect(assembly[1]?.label).toBe("Masă asamblare 2");
+    expect(workcenters.some((item) => item.id === "WC_ASSEMBLY")).toBe(false);
+    expect(machines.some((item) => item.id.startsWith("WA-"))).toBe(false);
     expect(JSON.stringify(workcenters)).not.toMatch(
       /Infinity|unlimited|maxTasks|maxEmployees|taskConcurrency|employeeLimit/,
     );
-    expect(workcenters.some((item) => item.id === "WC_ASSEMBLY")).toBe(false);
+  });
+
+  it("keeps unique live identities and valid machine workcenter references", () => {
+    const workcenterIds = workcenters.map((item) => item.id);
+    const machineIds = machines.map((item) => item.id);
+    expect(new Set(workcenterIds).size).toBe(workcenterIds.length);
+    expect(new Set(machineIds).size).toBe(machineIds.length);
+    expect(workcenterIds.some((id) => machineIds.includes(id))).toBe(false);
+    expect(workcenters.every((item) => item.lifecycle === "ACTIVE")).toBe(true);
+    expect(machines.every((item) => item.lifecycle === "ACTIVE")).toBe(true);
+    expect(
+      machines.every(
+        (item) => item.workcenterId !== null && workcenterIds.includes(item.workcenterId),
+      ),
+    ).toBe(true);
+    expect(workcenterRegistry.workcenters).toEqual(workcenters);
+    expect(workcenterRegistry.machines).toEqual(machines);
   });
 
   it("rejects duplicate ids, unknown capabilities, and broken workcenter refs", () => {
@@ -222,17 +258,23 @@ describe("letters capability coverage", () => {
       "QUALITY_CONTROL",
       "PACKAGING",
     ]);
-    expect(live.coveredCapabilityIds).toEqual(["MANUAL_ASSEMBLY"]);
-    expect(live.plannedCapabilityIds).toEqual([]);
-    expect(live.missingCapabilityIds).toEqual([
+    expect(live.coveredCapabilityIds).toEqual([
       "CNC_ROUTING",
       "PROFILE_FORMING",
+      "MANUAL_ASSEMBLY",
       "VINYL_APPLICATION",
       "ELECTRICAL_ASSEMBLY",
+    ]);
+    expect(live.plannedCapabilityIds).toEqual([]);
+    expect(live.missingCapabilityIds).toEqual([
       "PAINTING",
       "QUALITY_CONTROL",
       "PACKAGING",
     ]);
+    expect(live.requiredCapabilityIds).not.toContain("WELD_STEEL");
+    expect(live.requiredCapabilityIds).not.toContain("WELD_ALUMINIUM");
+    expect(live.requiredCapabilityIds).not.toContain("METAL_CUTTING");
+    expect(live.requiredCapabilityIds).not.toContain("PRINTING");
   });
 
   it("compares Letters demand with a fixture catalog without claiming execution readiness", () => {
@@ -256,22 +298,97 @@ describe("letters capability coverage", () => {
   });
 });
 
-describe("live workcenters projection", () => {
-  it("projects two live assembly tables and honest remaining gaps", () => {
+describe("live shop-floor map", () => {
+  it("maps welding machines to one workcenter with distinct steel and aluminium eligibility", () => {
+    const welding = workcenterRegistry.getWorkcenter(WC_WELDING_ID);
+    const steel = workcenterRegistry.getMachine(MCH_WELD_STEEL_ID);
+    const aluminium = workcenterRegistry.getMachine(MCH_WELD_ALU_ID);
+    expect(welding?.label).toBe("Stație sudură");
+    expect(welding?.capabilityIds).toEqual([]);
+    expect(steel?.workcenterId).toBe(WC_WELDING_ID);
+    expect(aluminium?.workcenterId).toBe(WC_WELDING_ID);
+    expect(steel?.capabilityIds).toEqual(["WELD_STEEL"]);
+    expect(aluminium?.capabilityIds).toEqual(["WELD_ALUMINIUM"]);
+    expect(providersForCapability("WELD_STEEL").map((item) => item.id)).toEqual([
+      MCH_WELD_STEEL_ID,
+    ]);
+    expect(providersForCapability("WELD_ALUMINIUM").map((item) => item.id)).toEqual([
+      MCH_WELD_ALU_ID,
+    ]);
+    expect(coverageForCapability("WELD_STEEL")).toBe("COVERED");
+    expect(coverageForCapability("WELD_ALUMINIUM")).toBe("COVERED");
+  });
+
+  it("maps metal cutting and CNC without collapsing machine into workcenter or process", () => {
+    expect(workcenterRegistry.getWorkcenter(WC_METAL_CUTTING_ID)?.capabilityIds).toEqual([]);
+    expect(workcenterRegistry.getMachine(MCH_METAL_CUTTER_AUTO_ID)?.capabilityIds).toEqual([
+      "METAL_CUTTING",
+    ]);
+    expect(providersForCapability("CNC_ROUTING").map((item) => item.id)).toEqual([
+      MCH_CNC_4020_ID,
+    ]);
+    expect(providersForCapability("PROFILE_FORMING").map((item) => item.id)).toEqual([
+      MCH_CNC_CANT_LITERE_ID,
+    ]);
+    expect(providersForProcess(CUT_SHEET_CNC_ID).map((item) => item.id)).toEqual([
+      MCH_CNC_4020_ID,
+    ]);
+    expect(workcenterRegistry.getMachine(MCH_CNC_4020_ID)?.workcenterId).toBe(
+      WC_CNC_ROUTING_ID,
+    );
+    expect(workcenterRegistry.getMachine(MCH_CNC_CANT_LITERE_ID)?.workcenterId).toBe(
+      WC_LETTER_FORMING_ID,
+    );
+    expect(JSON.stringify(operationalProcesses)).not.toMatch(
+      /MCH-CNC-4020|WC_CNC_ROUTING|machineId|workcenterId/,
+    );
+  });
+
+  it("lets electrical and vinyl stations provide capability without fake machines", () => {
+    expect(providersForCapability("ELECTRICAL_ASSEMBLY").map((item) => item.id)).toEqual([
+      WC_LED_ASSEMBLY_ID,
+    ]);
+    expect(providersForCapability("VINYL_APPLICATION").map((item) => item.id)).toEqual([
+      WC_VINYL_APPLICATION_ID,
+    ]);
+    expect(
+      workcenters
+        .find((item) => item.id === WC_ASSEMBLY_01_ID)
+        ?.capabilityIds.includes("ELECTRICAL_ASSEMBLY"),
+    ).toBe(false);
+    expect(
+      workcenters
+        .find((item) => item.id === WC_ASSEMBLY_02_ID)
+        ?.capabilityIds.includes("VINYL_APPLICATION"),
+    ).toBe(false);
+  });
+
+  it("projects the live shop-floor map and honest remaining Letters gaps", () => {
     const admin = projectWorkcentersAdministration();
     expect(admin.writeState).toBe("NOT_IMPLEMENTED");
-    expect(admin.workcenters.map((item) => item.id)).toEqual([
-      WC_ASSEMBLY_01_ID,
-      WC_ASSEMBLY_02_ID,
-    ]);
-    expect(admin.machines).toEqual([]);
+    expect(admin.overview.peopleState).toBe("NOT_IMPLEMENTED");
+    expect(admin.workcenters.map((item) => item.id)).toEqual(
+      expect.arrayContaining([
+        WC_ASSEMBLY_01_ID,
+        WC_ASSEMBLY_02_ID,
+        WC_WELDING_ID,
+        WC_METAL_CUTTING_ID,
+        WC_CNC_ROUTING_ID,
+        WC_LETTER_FORMING_ID,
+        WC_LED_ASSEMBLY_ID,
+      ]),
+    );
+    expect(admin.workcenters[0]?.id).toBe(WC_ASSEMBLY_01_ID);
+    expect(admin.workcenters[1]?.id).toBe(WC_ASSEMBLY_02_ID);
     expect(admin.workcenters[0]?.processLabels).toEqual(
       expect.arrayContaining(["Lipire față-volum", "Închidere corp"]),
     );
-    expect(admin.overview.workcenterCount).toBe(2);
-    expect(admin.overview.machineCount).toBe(0);
-    expect(admin.overview.coveredCapabilityCount).toBe(1);
-    expect(admin.overview.missingCapabilityCount).toBe(7);
+    expect(admin.overview.workcenterCount).toBe(workcenters.length);
+    expect(admin.overview.machineCount).toBe(machines.length);
+    expect(admin.overview.workcenterCount).toBe(12);
+    expect(admin.overview.machineCount).toBe(11);
+    expect(admin.overview.coveredCapabilityCount).toBe(14);
+    expect(admin.overview.missingCapabilityCount).toBe(3);
     expect(admin.overview.capacityPlanningState).toBe("NOT_IMPLEMENTED");
     expect(admin.overview.executionState).toBe("NOT_IMPLEMENTED");
     const manual = admin.capabilities.find((item) => item.id === "MANUAL_ASSEMBLY");
@@ -289,10 +406,30 @@ describe("live workcenters projection", () => {
       WC_ASSEMBLY_01_ID,
       WC_ASSEMBLY_02_ID,
     ]);
-    expect(JSON.stringify(operationalProcesses)).not.toMatch(/WC_ASSEMBLY_01|WC_ASSEMBLY_02|machineId/);
-    expect(JSON.stringify(admin)).not.toMatch(/WC_ASSEMBLY[^_]|Infinity|maxEmployees|taskConcurrency/);
+    expect(admin.lettersCoverage.missingCapabilityIds).toEqual([
+      "PAINTING",
+      "QUALITY_CONTROL",
+      "PACKAGING",
+    ]);
+    const cncMachine = admin.machines.find((item) => item.id === MCH_CNC_4020_ID);
+    expect(cncMachine?.processLabels).toContain("Debitare foaie CNC");
+    expect(cncMachine?.recipeRows[0]?.state).toBe("SERVICE_RECIPE_MISSING");
+    expect(recipeGapForProcess(FORM_ALUMINIUM_PROFILE_ID)).toBe("CANONICAL_COST_EXISTS");
+    expect(recipeGapForProcess(BOND_LETTER_BODY_ID)).toBe("LABOR_RECIPE_MISSING");
+    expect(admin.serviceMap.some((item) => item.providerId === MCH_WELD_STEEL_ID)).toBe(
+      true,
+    );
+    expect(JSON.stringify(operationalProcesses)).not.toMatch(
+      /WC_ASSEMBLY_01|WC_ASSEMBLY_02|machineId/,
+    );
+    expect(JSON.stringify(admin)).not.toMatch(
+      /WC_ASSEMBLY[^_]|Infinity|maxEmployees|taskConcurrency/,
+    );
     expect(JSON.stringify(admin)).not.toMatch(/CNC-01|Paint Booth|Assembly Station/);
-    expect(JSON.stringify(admin)).not.toMatch(/ExecutionPlan|Preț client|machineHour/);
+    expect(JSON.stringify(admin)).not.toMatch(/ExecutionPlan|Preț client|machineHour|hourlyRate/);
+    expect(JSON.stringify(admin)).not.toMatch(/employeeId|CNC_ROUTER[^_]|Paint Booth/);
+    expect(admin.workcenters.map((item) => item.label).join(" ")).not.toMatch(/WA-/);
+    expect(admin.machines.map((item) => item.label).join(" ")).not.toMatch(/WA-/);
   });
 
   it("keeps ProductTemplate, Aggregate, Lighting and EIC independent of providers", () => {

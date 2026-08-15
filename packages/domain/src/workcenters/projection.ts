@@ -19,6 +19,13 @@ import {
 } from "./catalog.js";
 import { lettersCapabilityCoverage } from "./coverage.js";
 import { coverageForCapability, providersForCapability } from "./providers.js";
+import {
+  recipeGapForProcess,
+  recipeGapLabel,
+  recipeGapsForCapability,
+  type RecipeGapRow,
+  type RecipeGapState,
+} from "./recipeGap.js";
 import { providerWhereUsed } from "./whereUsed.js";
 
 export type ProviderSummary = {
@@ -41,6 +48,8 @@ export type MachineAdminRecord = Machine & {
   lifecycleLabel: string;
   workcenterLabel: string | null;
   capabilityLabels: readonly string[];
+  processLabels: readonly string[];
+  recipeRows: readonly RecipeGapRow[];
   usedBy: readonly string[];
 };
 
@@ -62,7 +71,23 @@ export type ProcessCoverageAdminRecord = {
   capabilityLabel: string;
   coverage: ProviderCoverageStatus;
   coverageLabel: string;
+  recipeState: RecipeGapState;
+  recipeStateLabel: string;
   providers: readonly ProviderSummary[];
+};
+
+export type ServiceMapRow = {
+  providerKind: CapabilityProvider["kind"];
+  providerKindLabel: string;
+  providerId: string;
+  providerLabel: string;
+  workcenterLabel: string | null;
+  capabilityId: ProductionCapabilityClassId;
+  capabilityLabel: string;
+  processId: string | null;
+  processLabel: string | null;
+  recipeState: RecipeGapState;
+  recipeStateLabel: string;
 };
 
 export type WorkcentersAdminProjection = {
@@ -72,15 +97,20 @@ export type WorkcentersAdminProjection = {
     coveredCapabilityCount: number;
     plannedCapabilityCount: number;
     missingCapabilityCount: number;
+    canonicalCostExistsCount: number;
+    serviceRecipeMissingCount: number;
+    laborRecipeMissingCount: number;
     capacityPlanningState: "NOT_IMPLEMENTED";
     schedulingState: "NOT_IMPLEMENTED";
     executionState: "NOT_IMPLEMENTED";
+    peopleState: "NOT_IMPLEMENTED";
     writeState: "NOT_IMPLEMENTED";
   };
   workcenters: readonly WorkcenterAdminRecord[];
   machines: readonly MachineAdminRecord[];
   capabilities: readonly CapabilityProviderAdminRecord[];
   processCoverage: readonly ProcessCoverageAdminRecord[];
+  serviceMap: readonly ServiceMapRow[];
   lettersCoverage: {
     productCode: string;
     coveredCapabilityIds: readonly string[];
@@ -101,6 +131,10 @@ export function projectWorkcentersAdministration(
   const capabilityRecords = productionCapabilityClasses.map((capability) =>
     toCapabilityRecord(capability.id, registry),
   );
+  const processCoverage = operationalProcesses.map((process) =>
+    toProcessCoverage(process.id, process.label, process.requiredCapabilityId, registry),
+  );
+  const serviceMap = buildServiceMap(registry);
   const letters = lettersCapabilityCoverage(registry);
   return {
     overview: {
@@ -113,17 +147,26 @@ export function projectWorkcentersAdministration(
       ).length,
       missingCapabilityCount: capabilityRecords.filter((item) => item.coverage === "NO_PROVIDER")
         .length,
+      canonicalCostExistsCount: processCoverage.filter(
+        (item) => item.recipeState === "CANONICAL_COST_EXISTS",
+      ).length,
+      serviceRecipeMissingCount: processCoverage.filter(
+        (item) => item.recipeState === "SERVICE_RECIPE_MISSING",
+      ).length,
+      laborRecipeMissingCount: processCoverage.filter(
+        (item) => item.recipeState === "LABOR_RECIPE_MISSING",
+      ).length,
       capacityPlanningState: "NOT_IMPLEMENTED",
       schedulingState: "NOT_IMPLEMENTED",
       executionState: "NOT_IMPLEMENTED",
+      peopleState: "NOT_IMPLEMENTED",
       writeState: "NOT_IMPLEMENTED",
     },
     workcenters: registry.workcenters.map((item) => toWorkcenterRecord(item, registry)),
     machines: registry.machines.map((item) => toMachineRecord(item, registry)),
     capabilities: capabilityRecords,
-    processCoverage: operationalProcesses.map((process) =>
-      toProcessCoverage(process.id, process.label, process.requiredCapabilityId, registry),
-    ),
+    processCoverage,
+    serviceMap,
     lettersCoverage: {
       productCode: letters.productCode,
       coveredCapabilityIds: letters.coveredCapabilityIds,
@@ -195,6 +238,14 @@ function toMachineRecord(
       ? (registry.getWorkcenter(machine.workcenterId)?.label ?? machine.workcenterId)
       : null,
     capabilityLabels: machine.capabilityIds.map(capabilityLabel),
+    processLabels: uniqueLines(
+      machine.capabilityIds.flatMap((capabilityId) =>
+        processesForCapability(capabilityId).map((item) => item.label),
+      ),
+    ),
+    recipeRows: machine.capabilityIds.flatMap((capabilityId) =>
+      recipeGapsForCapability(capabilityId),
+    ),
     usedBy: uniqueLines(
       providerWhereUsed("MACHINE", machine.id, registry).map((item) => item.displayLine),
     ),
@@ -229,6 +280,7 @@ function toProcessCoverage(
   registry: WorkcenterRegistry,
 ): ProcessCoverageAdminRecord {
   const coverage = coverageForCapability(capabilityId, registry);
+  const recipeState = recipeGapForProcess(processId);
   return {
     processId,
     processLabel,
@@ -236,8 +288,56 @@ function toProcessCoverage(
     capabilityLabel: capabilityLabel(capabilityId),
     coverage,
     coverageLabel: providerCoverageLabel(coverage),
+    recipeState,
+    recipeStateLabel: recipeGapLabel(recipeState),
     providers: providersForCapability(capabilityId, registry).map(toProviderSummary),
   };
+}
+
+function buildServiceMap(registry: WorkcenterRegistry): ServiceMapRow[] {
+  const rows: ServiceMapRow[] = [];
+  for (const workcenter of registry.workcenters) {
+    for (const capabilityId of workcenter.capabilityIds) {
+      for (const gap of recipeGapsForCapability(capabilityId)) {
+        rows.push({
+          providerKind: "WORKCENTER",
+          providerKindLabel: providerKindLabel("WORKCENTER"),
+          providerId: workcenter.id,
+          providerLabel: workcenter.label,
+          workcenterLabel: workcenter.label,
+          capabilityId,
+          capabilityLabel: gap.capabilityLabel,
+          processId: gap.processId,
+          processLabel: gap.processLabel,
+          recipeState: gap.state,
+          recipeStateLabel: gap.stateLabel,
+        });
+      }
+    }
+  }
+  for (const machine of registry.machines) {
+    const workcenterLabel = machine.workcenterId
+      ? (registry.getWorkcenter(machine.workcenterId)?.label ?? machine.workcenterId)
+      : null;
+    for (const capabilityId of machine.capabilityIds) {
+      for (const gap of recipeGapsForCapability(capabilityId)) {
+        rows.push({
+          providerKind: "MACHINE",
+          providerKindLabel: providerKindLabel("MACHINE"),
+          providerId: machine.id,
+          providerLabel: machine.label,
+          workcenterLabel,
+          capabilityId,
+          capabilityLabel: gap.capabilityLabel,
+          processId: gap.processId,
+          processLabel: gap.processLabel,
+          recipeState: gap.state,
+          recipeStateLabel: gap.stateLabel,
+        });
+      }
+    }
+  }
+  return rows;
 }
 
 function toProviderSummary(provider: CapabilityProvider): ProviderSummary {

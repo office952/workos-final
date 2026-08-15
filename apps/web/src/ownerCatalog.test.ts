@@ -347,7 +347,7 @@ describe("processes catalog presentation", () => {
         ?.groups[0]?.sections.find((item) => item.id === "capability")?.facts,
     ).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Acoperire furnizor", value: "Fără furnizor" }),
+        expect.objectContaining({ label: "Acoperire furnizor", value: "Acoperită" }),
       ]),
     );
   });
@@ -362,12 +362,20 @@ describe("workcenters catalog presentation", () => {
       "machines",
       "capabilities",
       "coverage",
+      "service-map",
     ]);
-    expect(catalog.categories[1]?.items.map((item) => item.label)).toEqual([
-      "Masă asamblare 1",
-      "Masă asamblare 2",
-    ]);
-    expect(catalog.categories[2]?.items[0]?.label).toBe("Niciun utilaj confirmat");
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toEqual(
+      expect.arrayContaining([
+        "Masă asamblare 1",
+        "Masă asamblare 2",
+        "Stație sudură",
+        "Stație debitare metale",
+      ]),
+    );
+    expect(catalog.categories[1]?.items[0]?.label).toBe("Masă asamblare 1");
+    expect(catalog.categories[2]?.items.map((item) => item.label)).toEqual(
+      expect.arrayContaining(["CNC 4020", "Aparat sudură oțel", "Aparat sudură aluminiu"]),
+    );
     expect(
       catalog.categories[3]?.items
         .find((item) => item.id === "capability:MANUAL_ASSEMBLY")
@@ -394,7 +402,7 @@ describe("workcenters catalog presentation", () => {
         }),
         expect.objectContaining({
           label: "Fără furnizor",
-          value: expect.stringContaining("Debitare CNC"),
+          value: expect.stringContaining("Vopsire"),
         }),
       ]),
     );
@@ -404,7 +412,7 @@ describe("workcenters catalog presentation", () => {
         ?.groups[0]?.sections.find((item) => item.id === "identity")?.facts,
     ).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Acoperire catalog", value: "Fără furnizor" }),
+        expect.objectContaining({ label: "Acoperire catalog", value: "Acoperită" }),
       ]),
     );
     expect(catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget)).toBe(

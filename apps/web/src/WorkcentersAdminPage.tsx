@@ -41,7 +41,7 @@ export function WorkcentersAdminPage() {
     <OwnerCatalogView
       catalog={buildWorkcentersCatalog(page.admin)}
       title="Utilaje și capacitate"
-      lead="Inspecție a zonelor și utilajelor care pot furniza o capabilitate de producție. Planificarea de capacitate nu este implementată. Nu se editează aici."
+      lead="Inspecție a hărții reale de atelier: zone, utilaje, capabilități și goluri de rețetă. Planificarea de capacitate nu este implementată. Nu se editează aici."
     />
   );
 }

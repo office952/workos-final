@@ -47,9 +47,9 @@ describe("operational process projection", () => {
         (item) => item.id === "FACE:CUT_SHEET_CNC",
       ),
     ).toBe(true);
-    expect(forming?.providerCoverage).toBe("NO_PROVIDER");
-    expect(forming?.providerCoverageLabel).toBe("Fără furnizor");
-    expect(forming?.providers).toEqual([]);
+    expect(forming?.providerCoverage).toBe("COVERED");
+    expect(forming?.providerCoverageLabel).toBe("Acoperită");
+    expect(forming?.providers.map((item) => item.id)).toEqual(["MCH-CNC-CANT-LITERE"]);
     const bonding = admin.processes.find((item) => item.id === "BOND_LETTER_BODY");
     expect(bonding?.providerCoverage).toBe("COVERED");
     expect(bonding?.providers.map((item) => item.id)).toEqual([

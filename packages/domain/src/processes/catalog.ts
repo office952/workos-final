@@ -32,6 +32,15 @@ export const PRODUCTION_CAPABILITY_CLASS_IDS = [
   "PAINTING",
   "QUALITY_CONTROL",
   "PACKAGING",
+  "WELD_STEEL",
+  "WELD_ALUMINIUM",
+  "METAL_CUTTING",
+  "PRINTING",
+  "LAMINATION",
+  "LASER_CUTTING",
+  "STYRO_CUTTING",
+  "RIGID_FILM_LAMINATION",
+  "PLOTTER_CUTTING",
 ] as const;
 export type ProductionCapabilityClassId =
   (typeof PRODUCTION_CAPABILITY_CLASS_IDS)[number];
@@ -126,6 +135,63 @@ export const productionCapabilityClasses: readonly ProductionCapabilityClass[] =
     label: "Ambalare",
     description: "Post de ambalare. Nu este un utilaj concret.",
     kind: "WORKSTATION",
+  },
+  {
+    id: "WELD_STEEL",
+    label: "Sudură oțel",
+    description:
+      "Eligibilitate tehnică pentru sudură oțel. Nu este sudură aluminiu și nu este un aparat concret.",
+    kind: "MACHINE",
+  },
+  {
+    id: "WELD_ALUMINIUM",
+    label: "Sudură aluminiu",
+    description:
+      "Eligibilitate tehnică pentru sudură aluminiu. Nu este sudură oțel și nu este un aparat concret.",
+    kind: "MACHINE",
+  },
+  {
+    id: "METAL_CUTTING",
+    label: "Debitare metale",
+    description: "Eligibilitate de debitare metale. Nu este debitare CNC de foi.",
+    kind: "MACHINE",
+  },
+  {
+    id: "PRINTING",
+    label: "Print format mare",
+    description: "Eligibilitate de print. Nu este un model de imprimantă.",
+    kind: "MACHINE",
+  },
+  {
+    id: "LAMINATION",
+    label: "Laminare",
+    description: "Eligibilitate de laminare. Nu este aplicare manuală de colant.",
+    kind: "MACHINE",
+  },
+  {
+    id: "LASER_CUTTING",
+    label: "Debitare laser",
+    description: "Eligibilitate de debitare laser. Nu este debitare CNC de foi.",
+    kind: "MACHINE",
+  },
+  {
+    id: "STYRO_CUTTING",
+    label: "Debitare polistiren",
+    description: "Eligibilitate de debitare polistiren. Nu este debitare CNC de foi.",
+    kind: "MACHINE",
+  },
+  {
+    id: "RIGID_FILM_LAMINATION",
+    label: "Laminare folie pe plăci rigide",
+    description:
+      "Eligibilitate de aplicare folie pe plăci rigide. Nu înlocuiește aplicarea manuală de colant pe litere.",
+    kind: "MACHINE",
+  },
+  {
+    id: "PLOTTER_CUTTING",
+    label: "Decupare plotter",
+    description: "Eligibilitate de decupare contur / vinyl pe plotter. Nu este debitare CNC.",
+    kind: "MACHINE",
   },
 ];
 
