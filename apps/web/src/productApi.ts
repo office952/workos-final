@@ -176,3 +176,46 @@ export async function createExecutionPlan(
     executionPlan: body.executionPlan,
   };
 }
+
+export type TaskMutationFailure = {
+  ok: false;
+  error: string;
+};
+
+export async function assignExecutionTaskProvider(
+  taskId: string,
+  providerId: string,
+): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
+  return postTaskMutation(`/api/execution-tasks/${taskId}/provider`, { providerId });
+}
+
+export async function startExecutionTask(
+  taskId: string,
+): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
+  return postTaskMutation(`/api/execution-tasks/${taskId}/start`);
+}
+
+export async function completeExecutionTask(
+  taskId: string,
+): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
+  return postTaskMutation(`/api/execution-tasks/${taskId}/complete`);
+}
+
+async function postTaskMutation(
+  path: string,
+  body?: { providerId: string },
+): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "POST",
+    headers: body ? { "content-type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const payload = await readJson<{
+    executionPlan?: ExecutionPlanView;
+    error?: string;
+  }>(response);
+  if (!response.ok || !payload.executionPlan) {
+    return { ok: false, error: payload.error ?? "action_unavailable" };
+  }
+  return { ok: true, executionPlan: payload.executionPlan };
+}

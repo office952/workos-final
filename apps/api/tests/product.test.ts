@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { CANONICAL_PRODUCT_CODE } from "@workos-final/domain";
+import {
+  BOND_LETTER_BODY_ID,
+  CANONICAL_PRODUCT_CODE,
+  MCH_CNC_4020_ID,
+  PLACE_LED_MODULES_ID,
+  WC_ASSEMBLY_01_ID,
+  WC_ASSEMBLY_02_ID,
+} from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 
 type JsonObject = Record<string, unknown>;
@@ -292,5 +299,185 @@ describe("product configuration API", () => {
         JSON.stringify(item.eligibleProviders).includes("CNC 4020"),
       ),
     ).toBe(true);
+  });
+
+  it("assigns a provider and starts/completes a root task without mutating cost", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const payload = {
+      definition: reviewed.definition,
+      reviewId: reviewed.reviewId,
+    };
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    const snapshot = (await readBody(accepted)).snapshot as JsonObject;
+    const created = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const view = (await readBody(created)).executionPlan as {
+      plan: JsonObject;
+      progressStatus: string;
+      tasks: Array<JsonObject>;
+    };
+    const backCnc = view.tasks.find(
+      (item) =>
+        item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
+    ) as JsonObject;
+    const lighting = view.tasks.find(
+      (item) => item.processId === PLACE_LED_MODULES_ID,
+    ) as JsonObject;
+    const bond = view.tasks.find((item) => item.processId === BOND_LETTER_BODY_ID) as JsonObject;
+    const inspect = view.tasks.find(
+      (item) => item.processLabel === "Control calitate final",
+    ) as JsonObject;
+    const faceCnc = view.tasks.find(
+      (item) =>
+        item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Față",
+    ) as JsonObject;
+
+    const ineligible = await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: WC_ASSEMBLY_01_ID }),
+    });
+    expect(ineligible.status).toBe(422);
+    expect((await readBody(ineligible)).error).toBe("ineligible_provider");
+
+    const noProvider = await app.request(`/api/execution-tasks/${inspect.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+    });
+    expect(noProvider.status).toBe(422);
+
+    const assignCnc = await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+    });
+    expect(assignCnc.status).toBe(200);
+    const assignedView = (await readBody(assignCnc)).executionPlan as {
+      tasks: Array<JsonObject>;
+    };
+    expect(
+      (assignedView.tasks.find((item) => item.taskId === backCnc.taskId)?.assignedProvider as JsonObject)
+        .label,
+    ).toBe("CNC 4020");
+
+    const blockedLighting = await app.request(`/api/execution-tasks/${lighting.taskId}/start`, {
+      method: "POST",
+    });
+    expect(blockedLighting.status).toBe(422);
+
+    const assignLighting = await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: "WC_LED_ASSEMBLY" }),
+    });
+    expect(assignLighting.status).toBe(200);
+    const lightingStartBefore = await app.request(
+      `/api/execution-tasks/${lighting.taskId}/start`,
+      { method: "POST" },
+    );
+    expect(lightingStartBefore.status).toBe(409);
+    expect((await readBody(lightingStartBefore)).error).toBe("dependencies_incomplete");
+
+    const completeBeforeStart = await app.request(
+      `/api/execution-tasks/${backCnc.taskId}/complete`,
+      { method: "POST" },
+    );
+    expect(completeBeforeStart.status).toBe(409);
+
+    const beforeStart = Date.now();
+    const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
+      method: "POST",
+    });
+    const startedBody = await readBody(started);
+    const startedView = startedBody.executionPlan as {
+      progressStatus: string;
+      plan: JsonObject;
+      tasks: Array<JsonObject>;
+    };
+    const startedTask = startedView.tasks.find((item) => item.taskId === backCnc.taskId) as JsonObject;
+    expect(started.status).toBe(200);
+    expect(startedTask.status).toBe("IN_PROGRESS");
+    expect(typeof startedTask.startedAt).toBe("string");
+    expect(Date.parse(startedTask.startedAt as string)).toBeGreaterThanOrEqual(beforeStart - 1000);
+    expect(startedView.progressStatus).toBe("IN_PROGRESS");
+    expect(startedView.plan.eicTotal).toBe(595);
+    expect(startedView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+
+    const reassignAfterStart = await app.request(
+      `/api/execution-tasks/${backCnc.taskId}/provider`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+      },
+    );
+    expect(reassignAfterStart.status).toBe(409);
+
+    const assignFace = await app.request(`/api/execution-tasks/${faceCnc.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+    });
+    expect(assignFace.status).toBe(200);
+    const startFace = await app.request(`/api/execution-tasks/${faceCnc.taskId}/start`, {
+      method: "POST",
+    });
+    const parallel = (await readBody(startFace)).executionPlan as { tasks: Array<JsonObject> };
+    expect(
+      parallel.tasks.filter(
+        (item) =>
+          (item.taskId === backCnc.taskId || item.taskId === faceCnc.taskId) &&
+          item.status === "IN_PROGRESS",
+      ),
+    ).toHaveLength(2);
+
+    const completed = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+    });
+    const completedView = (await readBody(completed)).executionPlan as {
+      tasks: Array<JsonObject>;
+    };
+    const done = completedView.tasks.find((item) => item.taskId === backCnc.taskId) as JsonObject;
+    const released = completedView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
+    expect(done.status).toBe("COMPLETED");
+    expect(typeof done.completedAt).toBe("string");
+    expect(released.canStart).toBe(true);
+    expect(released.waitingFor).toEqual([]);
+
+    const restart = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
+      method: "POST",
+    });
+    expect(restart.status).toBe(409);
+
+    const firstAssembly = await app.request(`/api/execution-tasks/${bond.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: WC_ASSEMBLY_01_ID }),
+    });
+    expect(firstAssembly.status).toBe(200);
+    const secondAssembly = await app.request(`/api/execution-tasks/${bond.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: WC_ASSEMBLY_02_ID }),
+    });
+    const assemblyView = (await readBody(secondAssembly)).executionPlan as {
+      tasks: Array<JsonObject>;
+    };
+    expect(
+      (assemblyView.tasks.find((item) => item.taskId === bond.taskId)?.assignedProvider as JsonObject)
+        .label,
+    ).toBe("Masă asamblare 2");
+    expect(JSON.stringify(assemblyView)).not.toMatch(/employeeId|plannedStart|capacity|pontaj/);
   });
 });

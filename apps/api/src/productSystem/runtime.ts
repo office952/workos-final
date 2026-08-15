@@ -3,6 +3,7 @@ import {
   type AcceptedProductionSnapshot,
   type DisplayLabelCatalog,
   type ExecutionPlanRecord,
+  type TaskMutationResult,
 } from "@workos-final/domain";
 import {
   openSqliteDatabase,
@@ -13,6 +14,9 @@ import {
   getExecutionPlanBySnapshotId,
   getExecutionPlanRecord,
   insertExecutionPlanRecord,
+  persistAssignedProvider,
+  persistTaskComplete,
+  persistTaskStart,
 } from "../execution/store.js";
 import {
   getAcceptedProductionSnapshot,
@@ -46,6 +50,9 @@ export type ProductSystemRuntime = {
   };
   readExecutionPlan(planId: string): ExecutionPlanRecord | null;
   readExecutionPlanBySnapshot(snapshotId: string): ExecutionPlanRecord | null;
+  assignExecutionTaskProvider(taskId: string, providerId: string): TaskMutationResult;
+  startExecutionTask(taskId: string): TaskMutationResult;
+  completeExecutionTask(taskId: string): TaskMutationResult;
   close(): void;
 };
 
@@ -85,6 +92,15 @@ export function createProductSystemRuntime(
     },
     readExecutionPlanBySnapshot(snapshotId) {
       return getExecutionPlanBySnapshotId(db, snapshotId);
+    },
+    assignExecutionTaskProvider(taskId, providerId) {
+      return persistAssignedProvider(db, taskId, providerId);
+    },
+    startExecutionTask(taskId) {
+      return persistTaskStart(db, taskId, new Date().toISOString());
+    },
+    completeExecutionTask(taskId) {
+      return persistTaskComplete(db, taskId, new Date().toISOString());
     },
     close() {
       db.close();

@@ -88,12 +88,13 @@ WorkOS Final
 │   ├── Commercial rules / customer price
 │   ├── Quote Snapshot
 │   └── Order Snapshot
-├── Execution                               PLANNED_ONLY
+├── Execution                               IMPLEMENTED_CURRENT / BASIC
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
-│   ├── ExecutionPlan                       IMPLEMENTED_CURRENT / PLANNED_ONLY
-│   ├── ExecutionTasks                      IMPLEMENTED_CURRENT / PLANNED_ONLY
-│   ├── Assignments                         NOT_IMPLEMENTED
+│   ├── ExecutionPlan                       IMPLEMENTED_CURRENT
+│   ├── ExecutionTasks                      IMPLEMENTED_CURRENT
+│   ├── Provider assignment                 IMPLEMENTED_CURRENT / BASIC
+│   ├── Task lifecycle                      IMPLEMENTED_CURRENT / PLANNED → IN_PROGRESS → COMPLETED
 │   └── Actuals / MachineRun                NOT_IMPLEMENTED
 ├── People / Angajați                       PLANNED
 │   ├── Employee master
@@ -209,7 +210,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview, Accepted Production Snapshot, and planned ExecutionPlan / ExecutionTasks are IMPLEMENTED_CURRENT. Task lifecycle, assignment, and MachineRun are NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, and the minimal task lifecycle are IMPLEMENTED_CURRENT. People assignment, scheduling, capacity, and MachineRun remain NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -380,8 +381,9 @@ Settings versions: keep previous active values as history after a new version is
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | Execution Plan Preview | IMPLEMENTED_CURRENT |
 | Accepted Production Snapshot | IMPLEMENTED_CURRENT |
-| Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT / PLANNED_ONLY |
-| People, Pontaj, persisted Execution | PLANNED |
+| Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT |
+| Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
+| People, Pontaj, actual consumption / costing | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
@@ -425,7 +427,7 @@ Recommended rank:
 
 3. **Lifecycle retire** later, when more live entities exist.
 
-Do not start People, Pontaj, Commercial, or persisted Execution from mutable truth. The read-only Execution Plan Preview already exists. Capacity planning and concrete provider selection do not.
+Do not start People, Pontaj, or Commercial from mutable truth. Persisted Execution now assigns a provider and runs a minimal task lifecycle. Capacity planning and employee assignment do not.
 
 ## Owner decisions
 

@@ -16,7 +16,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` — workcenter, machine, and capability-provider law
 - `docs/architecture/EXECUTION_PLAN_PREVIEW_CANON.md` — read-only production-plan preview law
 - `docs/architecture/ACCEPTED_PRODUCTION_SNAPSHOT_CANON.md` — frozen accepted production snapshot law
-- `docs/architecture/EXECUTION_PLAN_AND_TASKS_CANON.md` — persisted planned ExecutionPlan / ExecutionTasks law
+- `docs/architecture/EXECUTION_PLAN_AND_TASKS_CANON.md` — persisted ExecutionPlan / ExecutionTasks and minimal lifecycle law
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
@@ -42,6 +42,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_LETTERS_EXECUTION_PLAN_PREVIEW_V1.md` — Letters Execution Plan Preview
 - `docs/worklog/WORKOS_FINAL_ACCEPTED_PRODUCTION_SNAPSHOT_V1.md` — accepted production snapshot
 - `docs/worklog/WORKOS_FINAL_LETTERS_PERSISTED_EXECUTION_PLAN_AND_TASKS_V1.md` — persisted ExecutionPlan and tasks
+- `docs/worklog/WORKOS_FINAL_LETTERS_MINIMAL_TASK_EXECUTION_V1.md` — provider assignment and minimal Start/Complete
 
 ## Historical evidence
 

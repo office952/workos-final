@@ -131,10 +131,17 @@ describe("persisted execution plan materialization", () => {
       "Masă asamblare 2",
     ]);
     expect(inspect?.eligibleProviders).toEqual([]);
+    expect(inspect?.canAssign).toBe(false);
+    expect(inspect?.canStart).toBe(false);
+    expect(cnc?.canAssign).toBe(true);
+    expect(cnc?.canStart).toBe(false);
     expect(pack?.assignmentLabel).toBe("Nealocat");
     expect(record.tasks.every((item) => item.assignedProvider === null)).toBe(true);
+    expect(record.tasks.every((item) => item.startedAt === null && item.completedAt === null)).toBe(
+      true,
+    );
     expect(JSON.stringify(record)).not.toMatch(
-      /startTask|completeTask|employeeId|plannedStart|capacity|pontaj/,
+      /employeeId|plannedStart|capacity|pontaj/,
     );
   });
 

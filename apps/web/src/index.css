@@ -435,6 +435,24 @@ details summary {
   background: #fff;
 }
 
+.task-actions {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.65rem;
+  align-items: end;
+}
+
+.task-actions label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.task-actions select {
+  min-width: 12rem;
+}
+
 @media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;

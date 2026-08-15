@@ -249,7 +249,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "scheduling",
         label: "Programare",
-        statement: "Nu există programare, asignare sau alegere de furnizor pentru un job.",
+        statement:
+          "Nu există programare, calendar sau capacitate. Alocarea de furnizor pe task există, fără People.",
         state: "NOT_IMPLEMENTED",
       },
       {
@@ -422,7 +423,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "execution-task-lifecycle",
         label: "Ciclu de viață task",
-        state: "NOT_IMPLEMENTED",
+        state: "IMPLEMENTED",
       },
       {
         id: "workcenters",

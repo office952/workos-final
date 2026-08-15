@@ -10,6 +10,8 @@ import {
   lettersProcessCompositionInspections,
   materializeExecutionPlanFromSnapshot,
   projectExecutionPlanView,
+  type TaskMutationError,
+  type TaskMutationResult,
   type DraftConfiguration,
   type DraftValue,
   type DraftValues,
@@ -192,6 +194,25 @@ export function registerProductRoutes(
     }
     return c.json({ executionPlan: projectExecutionPlanView(record) });
   });
+
+  app.post("/api/execution-tasks/:taskId/provider", async (c) => {
+    const providerId = readProviderId(await c.req.json());
+    if (!providerId) {
+      return c.json({ error: "invalid_payload" }, 400);
+    }
+    return respondTaskMutation(
+      c,
+      runtime.assignExecutionTaskProvider(c.req.param("taskId"), providerId),
+    );
+  });
+
+  app.post("/api/execution-tasks/:taskId/start", (c) => {
+    return respondTaskMutation(c, runtime.startExecutionTask(c.req.param("taskId")));
+  });
+
+  app.post("/api/execution-tasks/:taskId/complete", (c) => {
+    return respondTaskMutation(c, runtime.completeExecutionTask(c.req.param("taskId")));
+  });
 }
 
 function compileAcceptedProduct(
@@ -240,4 +261,48 @@ function compileAcceptedProduct(
     composition,
     eic,
   };
+}
+
+function readProviderId(body: unknown): string | null {
+  if (typeof body !== "object" || body === null || !("providerId" in body)) {
+    return null;
+  }
+  const value = (body as { providerId: unknown }).providerId;
+  if (typeof value !== "string") {
+    return null;
+  }
+  const providerId = value.trim();
+  return providerId.length > 0 ? providerId : null;
+}
+
+function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
+  switch (error) {
+    case "not_found":
+      return 404;
+    case "ineligible_provider":
+    case "missing_assignment":
+    case "provider_unavailable":
+      return 422;
+    case "reassignment_locked":
+    case "dependencies_incomplete":
+    case "invalid_transition":
+      return 409;
+    default: {
+      const _exhaustive: never = error;
+      return _exhaustive;
+    }
+  }
+}
+
+function respondTaskMutation(
+  c: { json: (body: unknown, status?: 200 | 404 | 409 | 422) => Response },
+  result: TaskMutationResult,
+) {
+  if (!result.ok) {
+    return c.json({ error: result.error }, mutationHttpStatus(result.error));
+  }
+  return c.json({
+    alreadyApplied: result.alreadyApplied,
+    executionPlan: projectExecutionPlanView(result.record),
+  });
 }

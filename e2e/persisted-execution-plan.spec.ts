@@ -52,7 +52,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await expect(
     plan.getByText("Furnizori disponibili: Masă asamblare 1; Masă asamblare 2").first(),
   ).toBeVisible();
-  await expect(plan.getByText("Fără furnizor configurat").first()).toBeVisible();
+  await expect(plan.getByText("Fără furnizor disponibil").first()).toBeVisible();
   await expect(plan.getByText("Montare module LED").first()).toBeVisible();
   await expect(plan.getByText("Resursă: Modul LED 12V: 125 buc").first()).toBeVisible();
   await expect(plan.getByText("Resursă: Sursă LED 12V 160W: 1 buc").first()).toBeVisible();

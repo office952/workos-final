@@ -1,4 +1,13 @@
-import type { ExecutionPlan, ExecutionPlanRecord, ExecutionTask } from "@workos-final/domain";
+import {
+  assignProviderToTask,
+  assignedProviderFromRow,
+  completeExecutionTask,
+  startExecutionTask,
+  type ExecutionPlan,
+  type ExecutionPlanRecord,
+  type ExecutionTask,
+  type TaskMutationResult,
+} from "@workos-final/domain";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 
 type PlanRow = {
@@ -33,6 +42,11 @@ type TaskRow = {
   created_at: string;
   quantities_json: string;
   resources_json: string;
+  assigned_provider_id: string | null;
+  assigned_provider_kind: string | null;
+  assigned_provider_label: string | null;
+  started_at: string | null;
+  completed_at: string | null;
 };
 
 type DependencyRow = {
@@ -101,8 +115,13 @@ export function insertExecutionPlanRecord(
         status,
         created_at,
         quantities_json,
-        resources_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        resources_json,
+        assigned_provider_id,
+        assigned_provider_kind,
+        assigned_provider_label,
+        started_at,
+        completed_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     );
     const insertDependency = db.prepare(
@@ -132,6 +151,11 @@ export function insertExecutionPlanRecord(
         task.createdAt,
         JSON.stringify(task.quantities),
         JSON.stringify(task.resourceDemands),
+        task.assignedProvider?.id ?? null,
+        task.assignedProvider?.kind ?? null,
+        task.assignedProvider?.label ?? null,
+        task.startedAt,
+        task.completedAt,
       );
       for (const dependencyId of task.dependsOnTaskIds) {
         insertDependency.run(record.plan.planId, task.taskId, dependencyId);
@@ -179,6 +203,129 @@ export function getExecutionPlanBySnapshotId(
     return null;
   }
   return hydrateRecord(db, planRow);
+}
+
+export function getExecutionPlanByTaskId(
+  db: SqliteDatabase,
+  taskId: string,
+): ExecutionPlanRecord | null {
+  const row = db
+    .prepare(
+      `
+      SELECT plan_id
+      FROM execution_tasks
+      WHERE task_id = ?
+    `,
+    )
+    .get(taskId) as { plan_id: string } | undefined;
+  if (!row) {
+    return null;
+  }
+  return getExecutionPlanRecord(db, row.plan_id);
+}
+
+export function persistAssignedProvider(
+  db: SqliteDatabase,
+  taskId: string,
+  providerId: string,
+): TaskMutationResult {
+  return applyMutation(db, taskId, (record) =>
+    assignProviderToTask(record, taskId, providerId),
+  );
+}
+
+export function persistTaskStart(
+  db: SqliteDatabase,
+  taskId: string,
+  startedAt: string,
+): TaskMutationResult {
+  return applyMutation(db, taskId, (record) =>
+    startExecutionTask(record, taskId, startedAt),
+  );
+}
+
+export function persistTaskComplete(
+  db: SqliteDatabase,
+  taskId: string,
+  completedAt: string,
+): TaskMutationResult {
+  return applyMutation(db, taskId, (record) =>
+    completeExecutionTask(record, taskId, completedAt),
+  );
+}
+
+function applyMutation(
+  db: SqliteDatabase,
+  taskId: string,
+  mutate: (record: ExecutionPlanRecord) => TaskMutationResult,
+): TaskMutationResult {
+  const run = db.transaction((): TaskMutationResult => {
+    const record = getExecutionPlanByTaskId(db, taskId);
+    if (!record) {
+      return { ok: false, error: "not_found" };
+    }
+    const result = mutate(record);
+    if (!result.ok || result.alreadyApplied) {
+      return result;
+    }
+    const next = result.record.tasks.find((task) => task.taskId === taskId);
+    if (!next) {
+      return { ok: false, error: "not_found" };
+    }
+    const written = writeTaskOperationalState(db, next, record.tasks.find((task) => task.taskId === taskId));
+    if (!written) {
+      const current = getExecutionPlanByTaskId(db, taskId);
+      if (!current) {
+        return { ok: false, error: "not_found" };
+      }
+      return mutate(current);
+    }
+    const stored = getExecutionPlanByTaskId(db, taskId);
+    if (!stored) {
+      return { ok: false, error: "not_found" };
+    }
+    return { ok: true, alreadyApplied: false, record: stored };
+  });
+  return run();
+}
+
+function writeTaskOperationalState(
+  db: SqliteDatabase,
+  next: ExecutionTask,
+  previous: ExecutionTask | undefined,
+): boolean {
+  const result = db
+    .prepare(
+      `
+      UPDATE execution_tasks
+      SET
+        assigned_provider_id = ?,
+        assigned_provider_kind = ?,
+        assigned_provider_label = ?,
+        status = ?,
+        started_at = ?,
+        completed_at = ?
+      WHERE task_id = ?
+        AND status = ?
+        AND IFNULL(assigned_provider_id, '') = ?
+        AND IFNULL(started_at, '') = ?
+        AND IFNULL(completed_at, '') = ?
+    `,
+    )
+    .run(
+      next.assignedProvider?.id ?? null,
+      next.assignedProvider?.kind ?? null,
+      next.assignedProvider?.label ?? null,
+      next.status,
+      next.startedAt,
+      next.completedAt,
+      next.taskId,
+      previous?.status ?? next.status,
+      previous?.assignedProvider?.id ?? "",
+      previous?.startedAt ?? "",
+      previous?.completedAt ?? "",
+    );
+  return result.changes === 1;
 }
 
 function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecord {
@@ -240,7 +387,13 @@ function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecor
       status: row.status,
       quantities: JSON.parse(row.quantities_json) as ExecutionTask["quantities"],
       resourceDemands: JSON.parse(row.resources_json) as ExecutionTask["resourceDemands"],
-      assignedProvider: null,
+      assignedProvider: assignedProviderFromRow(
+        row.assigned_provider_id,
+        row.assigned_provider_kind,
+        row.assigned_provider_label,
+      ),
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
       createdAt: row.created_at,
     })),
   };

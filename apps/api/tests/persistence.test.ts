@@ -13,6 +13,7 @@ import {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
   materializeExecutionPlanFromSnapshot,
+  MCH_CNC_4020_ID,
   seedDisplayLabelRecords,
 } from "@workos-final/domain";
 import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
@@ -63,7 +64,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(3);
+    expect(count.count).toBe(4);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -71,7 +72,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(3);
+    expect(again.count).toBe(4);
     second.close();
   });
 
@@ -192,6 +193,74 @@ describe("product system persistence", () => {
     expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(stored?.tasks.every((item) => item.assignedProvider === null)).toBe(true);
     expect(second).not.toHaveProperty("updateExecutionPlan");
+    second.close();
+  });
+
+  it("persists provider assignment and start/complete timestamps", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const snapshot = freezeAcceptedProductionSnapshot(
+      truth,
+      aggregate,
+      composition,
+      compileEic(aggregate, composition),
+      { createdAt: "2026-08-15T14:00:00.000Z" },
+    );
+    first.acceptProductionSnapshot(snapshot);
+    const created = first.persistExecutionPlan(
+      materializeExecutionPlanFromSnapshot(snapshot, {
+        createdAt: "2026-08-15T15:00:00.000Z",
+      }),
+    );
+    const backCnc = created.record.tasks.find(
+      (item) => item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
+    );
+    if (!backCnc) {
+      throw new Error("missing back cnc task");
+    }
+    const assigned = first.assignExecutionTaskProvider(backCnc.taskId, MCH_CNC_4020_ID);
+    expect(assigned.ok).toBe(true);
+    const started = first.startExecutionTask(backCnc.taskId);
+    expect(started.ok).toBe(true);
+    const completed = first.completeExecutionTask(backCnc.taskId);
+    expect(completed.ok).toBe(true);
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readExecutionPlan(created.record.plan.planId);
+    const task = stored?.tasks.find((item) => item.taskId === backCnc.taskId);
+    expect(task?.assignedProvider?.label).toBe("CNC 4020");
+    expect(task?.status).toBe("COMPLETED");
+    expect(task?.startedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(task?.completedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(stored?.plan.eicTotal).toBe(595);
+    expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     second.close();
   });
 });

@@ -9,6 +9,7 @@ import {
   type EicResult,
   type ExecutionPlanPreview,
   type ExecutionPlanView,
+  type ExecutionTaskView,
   type ProductAggregate,
   type ProductDefinition,
   type ProductTruth,
@@ -16,10 +17,13 @@ import {
 import { FormRenderer } from "./FormRenderer";
 import {
   acceptProductionSnapshot,
+  assignExecutionTaskProvider,
   compileConfiguration,
+  completeExecutionTask,
   confirmReviewedConfiguration,
   createExecutionPlan,
   fetchTemplateProjection,
+  startExecutionTask,
   type TemplateProjection,
 } from "./productApi";
 
@@ -234,6 +238,29 @@ export function ProductConfigurationPage() {
         executionPlan: result.executionPlan,
         executionPlanReused: !result.created,
       });
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function applyTaskMutation(
+    action: () => Promise<
+      { ok: true; executionPlan: ExecutionPlanView } | { ok: false; error: string }
+    >,
+  ) {
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await action();
+      if (!result.ok) {
+        setConfirmNotice(taskActionNotice(result.error));
+        return;
+      }
+      setConfirmed((current) =>
+        current ? { ...current, executionPlan: result.executionPlan } : current,
+      );
     } catch {
       setPage({ kind: "error" });
     } finally {
@@ -483,6 +510,14 @@ export function ProductConfigurationPage() {
             <PersistedExecutionPlanSection
               view={confirmed.executionPlan}
               reused={Boolean(confirmed.executionPlanReused)}
+              busy={busy}
+              onAssignProvider={(taskId, providerId) =>
+                void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
+              }
+              onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
+              onCompleteTask={(taskId) =>
+                void applyTaskMutation(() => completeExecutionTask(taskId))
+              }
             />
           ) : null}
         </div>
@@ -595,9 +630,17 @@ function AcceptedProductionSnapshotSection({
 function PersistedExecutionPlanSection({
   view,
   reused,
+  busy,
+  onAssignProvider,
+  onStartTask,
+  onCompleteTask,
 }: {
   view: ExecutionPlanView;
   reused: boolean;
+  busy: boolean;
+  onAssignProvider: (taskId: string, providerId: string) => void;
+  onStartTask: (taskId: string) => void;
+  onCompleteTask: (taskId: string) => void;
 }) {
   return (
     <div className="execution-plan">
@@ -619,39 +662,131 @@ function PersistedExecutionPlanSection({
       </ul>
       <ol className="production-ops">
         {view.tasks.map((task) => (
-          <li key={task.taskId} className="production-op">
-            <h4>
-              {task.seqLabel}. {task.processLabel}
-            </h4>
-            <p>Componentă: {task.scopeLabel}</p>
-            {task.quantities.map((quantity) => (
-              <p key={`${task.taskId}-${quantity.label}`}>
-                Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
-              </p>
-            ))}
-            {task.resourceDemands.map((resource) => (
-              <p key={`${task.taskId}-${resource.label}`}>
-                Resursă: {resource.label}: {formatQuantity(resource.quantity)}{" "}
-                {formatUnit(resource.unit)}
-              </p>
-            ))}
-            <p>Capabilitate: {task.requiredCapabilityLabel}</p>
-            <p>
-              Furnizori disponibili:{" "}
-              {task.eligibleProviders.length === 0
-                ? "Fără furnizor configurat"
-                : task.eligibleProviders.map((item) => item.label).join("; ")}
-            </p>
-            <p>
-              {task.dependsOnLabels.length === 0
-                ? "Poate începe"
-                : `Depinde de: ${task.dependsOnLabels.join("; ")}`}
-            </p>
-            <p>Alocare: {task.assignmentLabel}</p>
-            <p>Stare: {task.statusLabel}</p>
-          </li>
+          <ExecutionTaskCard
+            key={task.taskId}
+            task={task}
+            busy={busy}
+            onAssignProvider={onAssignProvider}
+            onStartTask={onStartTask}
+            onCompleteTask={onCompleteTask}
+          />
         ))}
       </ol>
     </div>
   );
+}
+
+function ExecutionTaskCard({
+  task,
+  busy,
+  onAssignProvider,
+  onStartTask,
+  onCompleteTask,
+}: {
+  task: ExecutionTaskView;
+  busy: boolean;
+  onAssignProvider: (taskId: string, providerId: string) => void;
+  onStartTask: (taskId: string) => void;
+  onCompleteTask: (taskId: string) => void;
+}) {
+  const [providerId, setProviderId] = useState(
+    task.assignedProvider?.id ?? task.eligibleProviders[0]?.id ?? "",
+  );
+
+  return (
+    <li className="production-op">
+      <h4>
+        {task.seqLabel}. {task.processLabel}
+      </h4>
+      <p>Componentă: {task.scopeLabel}</p>
+      {task.quantities.map((quantity) => (
+        <p key={`${task.taskId}-${quantity.label}`}>
+          Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
+        </p>
+      ))}
+      {task.resourceDemands.map((resource) => (
+        <p key={`${task.taskId}-${resource.label}`}>
+          Resursă: {resource.label}: {formatQuantity(resource.quantity)}{" "}
+          {formatUnit(resource.unit)}
+        </p>
+      ))}
+      <p>Capabilitate: {task.requiredCapabilityLabel}</p>
+      <p>
+        Furnizori disponibili:{" "}
+        {task.eligibleProviders.length === 0
+          ? "Fără furnizor disponibil"
+          : task.eligibleProviders.map((item) => item.label).join("; ")}
+      </p>
+      <p>
+        {task.dependsOnLabels.length === 0
+          ? "Fără dependențe"
+          : `Depinde de: ${task.dependsOnLabels.join("; ")}`}
+      </p>
+      {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join("; ")}</p> : null}
+      {task.assignedProvider ? <p>Alocat: {task.assignedProvider.label}</p> : <p>Alocare: Nealocat</p>}
+      <p>Stare: {task.statusLabel}</p>
+      {task.startedAt ? (
+        <p>Pornit la: {new Date(task.startedAt).toLocaleString("ro-RO")}</p>
+      ) : null}
+      {task.completedAt ? (
+        <p>Finalizat la: {new Date(task.completedAt).toLocaleString("ro-RO")}</p>
+      ) : null}
+      <div className="task-actions">
+        {task.canAssign ? (
+          <>
+            <label>
+              Alocare
+              <select
+                value={providerId}
+                onChange={(event) => setProviderId(event.target.value)}
+                disabled={busy}
+              >
+                {task.eligibleProviders.map((provider) => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={busy || providerId.length === 0}
+              onClick={() => onAssignProvider(task.taskId, providerId)}
+            >
+              Alocă
+            </button>
+          </>
+        ) : null}
+        {task.canStart ? (
+          <button type="button" disabled={busy} onClick={() => onStartTask(task.taskId)}>
+            Pornește
+          </button>
+        ) : null}
+        {task.canComplete ? (
+          <button type="button" disabled={busy} onClick={() => onCompleteTask(task.taskId)}>
+            Finalizează
+          </button>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
+function taskActionNotice(error: string): string {
+  switch (error) {
+    case "ineligible_provider":
+      return "Furnizorul ales nu este eligibil pentru această operație.";
+    case "reassignment_locked":
+      return "Alocarea nu mai poate fi schimbată după pornire.";
+    case "missing_assignment":
+      return "Taskul nu are furnizor alocat.";
+    case "provider_unavailable":
+      return "Furnizorul alocat nu mai este disponibil.";
+    case "dependencies_incomplete":
+      return "Taskul așteaptă alte operații.";
+    case "invalid_transition":
+      return "Tranziția nu este permisă.";
+    default:
+      return "Acțiunea nu a putut fi aplicată.";
+  }
 }

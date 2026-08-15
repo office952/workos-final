@@ -21,8 +21,12 @@ PHASE 8 = PILOT_VALIDATED
 COMMERCIAL = NOT_COMPLETE
 EXECUTION PLAN PREVIEW = IMPLEMENTED_CURRENT
 ACCEPTED PRODUCTION SNAPSHOT = IMPLEMENTED_CURRENT
-PERSISTED EXECUTION PLAN / TASKS = IMPLEMENTED_CURRENT / PLANNED_ONLY
-TASK LIFECYCLE = NOT_IMPLEMENTED
+PERSISTED EXECUTION PLAN / TASKS = IMPLEMENTED_CURRENT
+PROVIDER ASSIGNMENT = IMPLEMENTED_CURRENT / BASIC
+TASK LIFECYCLE = IMPLEMENTED_CURRENT / PLANNED → IN_PROGRESS → COMPLETED
+PEOPLE ASSIGNMENT = NOT_IMPLEMENTED
+SCHEDULING = NOT_IMPLEMENTED
+CAPACITY = NOT_IMPLEMENTED
 ```
 
 Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog product, or the next product phase without an explicit Owner GO.
@@ -48,4 +52,4 @@ Do not implement Commercial, Quote, ACM, Analyzer runtime, a second catalog prod
 
 ## Bootstrap proof
 
-The current app has a platform shell, a real health check, a product catalog, Product System inspection on `/components`, persisted display-label administration on `/admin`, Resources / Cost inspection under `/admin/resources` including LETTERS Service / Labor Recipes, Operational Processes inspection under `/admin/processes` including Letters process composition and reusable shop-floor operations for welding, print, lamination, plotter, laser, styro and metal cutting, Workcenters / Machines inspection under `/admin/workcenters` with the accepted assembly tables and the real shop-floor equipment map, owner-facing governance, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK / LIGHTING calculations, functional LETTERS internal-cost recipes through generic EIC, a reusable material-family/specification catalog, a typed operational-process catalog with shop-floor capability classes, a deterministic Letters process-composition compiler with vinyl, RAL, electrical, closure, QC and packing nodes, a derived capability-provider join, and canonical component technical settings. A read-only LETTERS Execution Plan Preview is available on the confirmed product result. An accepted production snapshot can freeze that technical truth. A persisted ExecutionPlan and planned ExecutionTasks can be materialized from that snapshot. Task lifecycle, assignment, capacity and People remain outside this path. Final workshop calibration remains later.
+The current app has a platform shell, a real health check, a product catalog, Product System inspection on `/components`, persisted display-label administration on `/admin`, Resources / Cost inspection under `/admin/resources` including LETTERS Service / Labor Recipes, Operational Processes inspection under `/admin/processes` including Letters process composition and reusable shop-floor operations for welding, print, lamination, plotter, laser, styro and metal cutting, Workcenters / Machines inspection under `/admin/workcenters` with the accepted assembly tables and the real shop-floor equipment map, owner-facing governance, one canonical front-lit plexi/aluminium letters product, component-owned FACE / VOLUME / BACK / LIGHTING calculations, functional LETTERS internal-cost recipes through generic EIC, a reusable material-family/specification catalog, a typed operational-process catalog with shop-floor capability classes, a deterministic Letters process-composition compiler with vinyl, RAL, electrical, closure, QC and packing nodes, a derived capability-provider join, and canonical component technical settings. A read-only LETTERS Execution Plan Preview is available on the confirmed product result. An accepted production snapshot can freeze that technical truth. A persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. An operator can assign an eligible Machine/Workcenter, then Start and Complete a task (`PLANNED → IN_PROGRESS → COMPLETED`). People, scheduling, capacity and actual costing remain outside this path. Final workshop calibration remains later.
