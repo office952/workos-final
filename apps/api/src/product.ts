@@ -3,6 +3,7 @@ import {
   compileDefinition,
   compileEic,
   compileExecutionPlanPreview,
+  projectCommercialPrice,
   composeProductProcesses,
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
@@ -132,6 +133,7 @@ export function registerProductRoutes(
       truth: compiled.truth,
       aggregate: compiled.aggregate,
       eic: compiled.eic,
+      commercialPrice: projectCommercialPrice(compiled.eic),
       executionPlanPreview: compileExecutionPlanPreview(
         compiled.truth,
         compiled.aggregate,

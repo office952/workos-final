@@ -183,6 +183,16 @@ describe("product configuration API", () => {
     expect(eic.total).toBe(382.5);
     expect(eic.currency).toBe("EUR");
     expect((eic.excludedComponentLabels as string[])).toEqual([]);
+    const commercialPrice = body.commercialPrice as JsonObject;
+    expect(commercialPrice.completeness).toBe("COMPLETE");
+    expect(commercialPrice.markupPercent).toBe(35);
+    expect(commercialPrice.vatPercent).toBe(21);
+    expect(commercialPrice.currency).toBe("EUR");
+    expect(commercialPrice.markupAmount).toBe(133.88);
+    expect(commercialPrice.netPrice).toBe(516.38);
+    expect(commercialPrice.vatAmount).toBe(108.44);
+    expect(commercialPrice.grossPrice).toBe(624.82);
+    expect(JSON.stringify(commercialPrice)).not.toMatch(/FACE|VOLUME|BACK|LIGHTING/);
     const preview = body.executionPlanPreview as JsonObject;
     expect(preview.status).toBe("PREVIEW");
     expect(preview.operationCount).toBeGreaterThan(0);
@@ -193,6 +203,41 @@ describe("product configuration API", () => {
       }),
     );
     expect(JSON.stringify(preview)).not.toMatch(/ExecutionTask|startTask|assignedTo/);
+  });
+
+  it("keeps commercial PARTIAL when planned EIC is PARTIAL", async () => {
+    const compiled = await createApp().request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          values: { ...readyValues, "volume.depthMm": "30" },
+        }),
+      },
+    );
+    const reviewed = await readBody(compiled);
+    const response = await createApp().request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/confirm`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    expect(response.status).toBe(200);
+    const body = await readBody(response);
+    const eic = body.eic as JsonObject;
+    const commercialPrice = body.commercialPrice as JsonObject;
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.total).toBe(345);
+    expect(commercialPrice.completeness).toBe("PARTIAL");
+    expect(commercialPrice.unavailableReasons).toEqual([
+      "Costul intern nu este complet pentru această configurație.",
+    ]);
   });
 
   it("does not let a draft override product-fixed identity", async () => {

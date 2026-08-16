@@ -1,6 +1,7 @@
 import type {
   AcceptedProductionSnapshot,
   CatalogTreeNode,
+  CommercialPriceProjection,
   DraftValues,
   EicResult,
   ExecutionPlanPreview,
@@ -70,6 +71,7 @@ export async function confirmReviewedConfiguration(
       truth: ProductTruth;
       aggregate: ProductAggregate;
       eic: EicResult;
+      commercialPrice: CommercialPriceProjection;
       executionPlanPreview: ExecutionPlanPreview;
     }
   | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
@@ -86,6 +88,7 @@ export async function confirmReviewedConfiguration(
     truth?: ProductTruth;
     aggregate?: ProductAggregate;
     eic?: EicResult;
+    commercialPrice?: CommercialPriceProjection;
     executionPlanPreview?: ExecutionPlanPreview;
     definition?: ProductDefinition;
     error?: string;
@@ -102,6 +105,7 @@ export async function confirmReviewedConfiguration(
     !body.truth ||
     !body.aggregate ||
     !body.eic ||
+    !body.commercialPrice ||
     !body.executionPlanPreview
   ) {
     throw new Error("confirm_unavailable");
@@ -111,6 +115,7 @@ export async function confirmReviewedConfiguration(
     truth: body.truth,
     aggregate: body.aggregate,
     eic: body.eic,
+    commercialPrice: body.commercialPrice,
     executionPlanPreview: body.executionPlanPreview,
   };
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import type {
   AcceptedProductionSnapshot,
+  CommercialPriceProjection,
   DraftValues,
   EicResult,
   ExecutionPlanPreview,
@@ -14,6 +15,7 @@ import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
 import { FormRenderer } from "./FormRenderer";
 import {
   AcceptedSnapshotSection,
+  CommercialPriceSection,
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
@@ -51,6 +53,7 @@ export function ProductConfigurationPage() {
     truth: ProductTruth;
     aggregate: ProductAggregate;
     eic: EicResult;
+    commercialPrice: CommercialPriceProjection;
     executionPlanPreview: ExecutionPlanPreview;
     definition: ProductDefinition;
     snapshot?: AcceptedProductionSnapshot;
@@ -126,6 +129,7 @@ export function ProductConfigurationPage() {
           truth: result.truth,
           aggregate: result.aggregate,
           eic: result.eic,
+          commercialPrice: result.commercialPrice,
           executionPlanPreview: result.executionPlanPreview,
           definition,
         });
@@ -278,6 +282,7 @@ export function ProductConfigurationPage() {
         <div className="confirmed-result">
           <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
           <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
+          <CommercialPriceSection price={confirmed.commercialPrice} />
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}
             basedOnSnapshot={Boolean(confirmed.snapshot)}

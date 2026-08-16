@@ -46,6 +46,7 @@ Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClas
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan. Composition cost completeness is a projection of EIC / cost-evidence completeness, not a hardcoded PARTIAL.
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none at 60 mm is 382.50 EUR COMPLETE on owner-confirmed workshop evidence. Aluminium 3 EUR/m is confirmed only for 60 mm; 30 / 80 / 100 mm stay PARTIAL. Forming is 5 EUR/m. Vinyl / RAL remain development evidence. Historical 595 snapshots stay frozen. Analyzer handoff is deferred; it is not the current planned-EIC blocker.
+Confirmed COMPLETE planned EIC now projects a customer price from one company Commercial policy. Canonical 60 mm none/none is 382.50 EUR internal → 624.82 EUR gross. Quote Snapshot is not implemented.
 A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, explicit task executor assignment, actual resource consumption, inventory stock movements, and actual internal cost projection are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, Operational Processes, and Stoc. HR, Pontaj, scheduling, capacity, reservations and purchasing remain NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
@@ -58,7 +59,7 @@ FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
 - PHASE 8 = PILOT_VALIDATED
 
 These phases are not universally COMPLETE.
-COMMERCIAL, Quote, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
+Commercial price rules are IMPLEMENTED_CURRENT / BASIC. Quote, Order, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
 
 ## Finalization map
 
@@ -97,7 +98,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | HR, Pontaj, reservations, purchasing | LATER |
-| Commercial, Quote Snapshot, Order Snapshot | LATER |
+| Commercial price rules foundation | IMPLEMENTED_CURRENT / BASIC |
+| Quote Snapshot, Order Snapshot | LATER |
 | Reporting, Documents, ACM, Logo | LATER |
 
 Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

@@ -20,7 +20,7 @@ Resources / Cost owns identity, technical/procurement specification, and interna
 
 Product / component owns whether a resource applies and the required quantity.
 
-Commercial later owns customer price.
+Commercial owns customer price. See `docs/architecture/COMMERCIAL_PRICE_RULES_CANON.md`.
 
 Inventory owns stock movement and derived balance. It does not own resource identity, lot, reservation, or valuation.
 
@@ -109,7 +109,8 @@ Used `PILOT_INTERNAL_EVIDENCE` or `LEGACY_EVIDENCE` keeps planned EIC PARTIAL.
 Not a procurement ledger. Future need: effective date, supplier/provenance, history.
 Do not overwrite destructively when that slice arrives.
 
-No customer price, markup, or VAT.
+No customer price, markup, or VAT inside Resources.
+Those belong to Commercial.
 No hourly or elapsed-time costing.
 
 ## Persistence

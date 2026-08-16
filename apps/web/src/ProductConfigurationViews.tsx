@@ -1,6 +1,8 @@
 import {
+  commercialCompletenessLabel,
   eicLineGroupLabel,
   type AcceptedProductionSnapshot,
+  type CommercialPriceProjection,
   type EicLine,
   type EicLineGroup,
   type EicResult,
@@ -276,6 +278,64 @@ export function EicSection({
           ))}
         </details>
       ) : null}
+    </section>
+  );
+}
+
+export function CommercialPriceSection({
+  price,
+}: {
+  price: CommercialPriceProjection;
+}) {
+  const statusLabel = commercialCompletenessLabel(price.completeness);
+  const statusTone = price.completeness === "COMPLETE" ? "ok" : "warn";
+  return (
+    <section className="result-section commercial-section">
+      <div className="commercial-summary">
+        <h3>Preț client</h3>
+        <StatusChip label={statusLabel} tone={statusTone} />
+      </div>
+      {price.completeness === "COMPLETE" &&
+      price.netPrice !== null &&
+      price.vatAmount !== null &&
+      price.grossPrice !== null ? (
+        <>
+          <p className="commercial-gross">
+            Preț final client: {formatMoney(price.grossPrice)} {price.currency}
+          </p>
+          <dl className="commercial-breakdown">
+            <div>
+              <dt>Cost intern</dt>
+              <dd>
+                {formatMoney(price.internalCost)} {price.internalCostCurrency}
+              </dd>
+            </div>
+            <div>
+              <dt>Adaos comercial</dt>
+              <dd>{price.markupPercent}%</dd>
+            </div>
+            <div>
+              <dt>Preț net</dt>
+              <dd>
+                {formatMoney(price.netPrice)} {price.currency}
+              </dd>
+            </div>
+            <div>
+              <dt>TVA</dt>
+              <dd>
+                {price.vatPercent}% · {formatMoney(price.vatAmount)} {price.currency}
+              </dd>
+            </div>
+          </dl>
+        </>
+      ) : (
+        <>
+          <p>Parțial / indisponibil pentru finalizare</p>
+          {price.unavailableReasons.length > 0 ? (
+            <p className="page-lead">{price.unavailableReasons.join(" ")}</p>
+          ) : null}
+        </>
+      )}
     </section>
   );
 }

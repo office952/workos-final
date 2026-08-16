@@ -280,6 +280,21 @@ export {
   type InventoryStockProjection,
 } from "./inventory/index.js";
 export {
+  COMMERCIAL_CURRENCY,
+  COMMERCIAL_ROUNDING,
+  DEFAULT_COMMERCIAL_POLICY,
+  DEFAULT_COMMERCIAL_POLICY_ID,
+  commercialCompletenessLabel,
+  projectCommercialPrice,
+  roundMoney,
+  validateCommercialPolicy,
+  type CommercialCostInput,
+  type CommercialPolicy,
+  type CommercialPolicyIssue,
+  type CommercialPriceCompleteness,
+  type CommercialPriceProjection,
+} from "./commercial/index.js";
+export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
   freezeAcceptedProductionSnapshot,
   productionWorkFromSnapshot,

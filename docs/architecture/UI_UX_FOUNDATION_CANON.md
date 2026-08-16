@@ -86,7 +86,7 @@ While editing, the form leads. Construction facts are a compact summary of suppl
 
 Review is a concise operator summary. Confirm is primary. Modify is secondary.
 
-After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → production preview → accept → persisted execution.
+After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → production preview → accept → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer.
 
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
 

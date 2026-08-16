@@ -18,7 +18,8 @@ describe("system governance projection", () => {
         "parametrii tehnici reutilizabili activi pentru variantele de componentă",
       ]),
     );
-    expect(byId.COMMERCIAL?.state).toBe("NOT_IMPLEMENTED");
+    expect(byId.COMMERCIAL?.state).toBe("IMPLEMENTED");
+    expect(byId.COMMERCIAL?.owns).toEqual(["preț client", "reguli comerciale"]);
     expect(byId.EXECUTION?.state).toBe("NOT_IMPLEMENTED");
     expect(byId.ANALYZER?.state).toBe("NOT_IMPLEMENTED");
     expect(governance.freeze.state).toBe("PLANNED");
@@ -172,8 +173,14 @@ describe("system governance projection", () => {
       "db",
       "invented",
     ]);
+    expect(
+      governance.roadmap.find((item) => item.id === "commercial-price-rules")?.state,
+    ).toBe("IMPLEMENTED");
     expect(governance.roadmap.find((item) => item.id === "commercial")?.state).toBe(
       "NOT_IMPLEMENTED",
+    );
+    expect(governance.boundaries.find((item) => item.id === "commercial")?.state).toBe(
+      "IMPLEMENTED",
     );
     expect(governance.roadmap.find((item) => item.id === "catalog")?.state).toBe(
       "IMPLEMENTED",

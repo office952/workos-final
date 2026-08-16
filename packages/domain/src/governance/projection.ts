@@ -184,8 +184,8 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "COMMERCIAL",
         label: "Commercial",
-        owns: ["preț client", "ofertă", "comandă comercială"],
-        state: "NOT_IMPLEMENTED",
+        owns: ["preț client", "reguli comerciale"],
+        state: "IMPLEMENTED",
       },
       {
         id: "EXECUTION",
@@ -211,8 +211,9 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "commercial",
         label: "Commercial",
-        statement: "Nu există preț client, ofertă sau reguli comerciale în runtime.",
-        state: "NOT_IMPLEMENTED",
+        statement:
+          "Prețul client este derivat din EIC planificat și politica comercială a companiei. Oferta și comanda nu sunt implementate.",
+        state: "IMPLEMENTED",
       },
       {
         id: "execution",
@@ -306,6 +307,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Catalogul canonic Workcenter / Utilaj și acoperirea de capabilitate",
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
+      "Politica comercială canonică a companiei",
       "Harta canonică de domenii și administrare",
       "Metadatele de afișare persistate ale Product System",
       "Proiecția de administrare Product System",
@@ -337,6 +339,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Eticheta de afișare persistată este autoritatea runtime după bootstrap. Codul rămâne default de inițializare, nu a doua valoare activă.",
       "Setările tehnice, lifecycle-ul și resursele nu au write persistat.",
       "Identitatea resursei, specificația, dovada de cost, cererea de componentă și prețul client rămân separate.",
+      "Commercial consumă EIC planificat. Nu recalculează cantități și nu repricează din costul real.",
       "Procesul operațional este HOW. Resursa este WHAT. Workcenter / utilaj furnizează capabilitatea. Task-ul de execuție alege ulterior furnizorul.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
@@ -552,7 +555,12 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       { id: "lighting", label: "Calcul complet iluminare", state: "IMPLEMENTED" },
-      { id: "commercial", label: "Commercial", state: "NOT_IMPLEMENTED" },
+      {
+        id: "commercial-price-rules",
+        label: "Reguli preț comercial",
+        state: "IMPLEMENTED",
+      },
+      { id: "commercial", label: "Ofertă / comandă", state: "NOT_IMPLEMENTED" },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],
     uiRules: [
@@ -564,7 +572,7 @@ export function projectSystemGovernance(): GovernanceProjection {
     freeze: {
       label: "Politică de freeze",
       state: "PLANNED",
-      note: "Nu este activă. Freeze-ul comercial / ofertă / comandă rămâne planificat. Snapshot-ul de producție acceptat este separat.",
+      note: "Nu este activă. Proiecția comercială V1 folosește politica curentă; nu este ofertă înghețată. Snapshot-ul de producție acceptat este separat.",
     },
     capabilityKernelNote:
       "Nucleul de capabilități păstrează identificatorii înghețați. Statusul kernel PLANNED nu înseamnă că primul produs nu există; înseamnă că nucleul nu a fost promovat la ACTIVE.",

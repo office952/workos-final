@@ -274,7 +274,8 @@ test("processes admin inspects capability-bound operational processes", async ({
   await expect(
     page.getByText("Total cost intern estimat: 382,50 EUR"),
   ).toBeVisible();
-  await expect(page.getByText("Preț client")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Preț client" })).toBeVisible();
+  await expect(page.getByText("Preț final client: 624,82 EUR")).toBeVisible();
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-product-regression.png",

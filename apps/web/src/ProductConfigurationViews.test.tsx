@@ -1,7 +1,9 @@
+import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type {
   AcceptedProductionSnapshot,
+  CommercialPriceProjection,
   EicResult,
   ProductAggregate,
   ProductDefinition,
@@ -10,6 +12,7 @@ import type {
 } from "@workos-final/domain";
 import {
   AcceptedSnapshotSection,
+  CommercialPriceSection,
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
@@ -183,6 +186,77 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Detalii cost intern").closest("details")).toHaveTextContent(
       "40,00 EUR/m²",
     );
+  });
+
+  it("renders complete commercial price from the projection only", () => {
+    const price: CommercialPriceProjection = {
+      internalCost: 382.5,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    render(<CommercialPriceSection price={price} />);
+    expect(screen.getByRole("heading", { name: "Preț client" })).toBeInTheDocument();
+    expect(screen.getByText("Complet")).toBeInTheDocument();
+    expect(screen.getByText("Preț final client: 624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("382,50 EUR")).toBeInTheDocument();
+    expect(screen.getByText("35%")).toBeInTheDocument();
+    expect(screen.getByText("516,38 EUR")).toBeInTheDocument();
+    expect(screen.getByText("21% · 108,44 EUR")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Discount")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Ajustare comercială")).not.toBeInTheDocument();
+  });
+
+  it("does not present a final customer price when commercial is partial", () => {
+    const price: CommercialPriceProjection = {
+      internalCost: 345,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "PARTIAL",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 120.75,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 465.75,
+      vatPercent: 21,
+      vatAmount: 97.81,
+      grossPrice: 563.56,
+      currency: "EUR",
+      completeness: "PARTIAL",
+      unavailableReasons: ["Costul intern nu este complet pentru această configurație."],
+    };
+    render(<CommercialPriceSection price={price} />);
+    expect(screen.getByRole("heading", { name: "Preț client" })).toBeInTheDocument();
+    expect(screen.getByText("Parțial")).toBeInTheDocument();
+    expect(screen.getByText("Parțial / indisponibil pentru finalizare")).toBeInTheDocument();
+    expect(
+      screen.getByText("Costul intern nu este complet pentru această configurație."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Preț final client: 563,56 EUR")).not.toBeInTheDocument();
+    expect(screen.queryByText("624,82 EUR")).not.toBeInTheDocument();
+  });
+
+  it("does not duplicate the commercial formula in the UI module", () => {
+    const source = readFileSync("src/ProductConfigurationViews.tsx", "utf8");
+    expect(source).not.toMatch(/markupPercent\s*[*/]/);
+    expect(source).not.toMatch(/vatPercent\s*[*/]/);
+    expect(source).not.toMatch(/projectCommercialPrice/);
+    expect(source).not.toMatch(/internalCost\s*\*/);
   });
 
   it("keeps snapshot reference in details", () => {

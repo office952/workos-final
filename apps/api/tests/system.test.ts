@@ -232,7 +232,7 @@ describe("system projection API", () => {
     );
   });
 
-  it("projects governance without an active freeze or commercial", async () => {
+  it("projects governance with commercial price rules and without quote freeze", async () => {
     const response = await createApp().request("/api/governance");
     expect(response.status).toBe(200);
     const body = (await response.json()) as {
@@ -243,7 +243,7 @@ describe("system projection API", () => {
       body.authorities.find((item) => item.id === "COMPONENT_TECHNICAL_SETTINGS")?.state,
     ).toBe("IMPLEMENTED");
     expect(body.authorities.find((item) => item.id === "COMMERCIAL")?.state).toBe(
-      "NOT_IMPLEMENTED",
+      "IMPLEMENTED",
     );
     expect(body.authorities.find((item) => item.id === "ANALYZER")?.state).toBe(
       "NOT_IMPLEMENTED",

@@ -122,17 +122,18 @@ export const capabilities: readonly CapabilityDefinition[] = [
   {
     id: "COMMERCIAL",
     responsibility:
-      "Will own customer commercial price, commercial rules, and quote/order freeze boundaries.",
-    owns: [
-      "customer commercial price",
-      "commercial rules",
-      "Quote Snapshot",
-      "Order commercial freeze boundaries",
+      "Owns customer commercial price and company commercial rules above planned EIC. Quote Snapshot and Order remain later.",
+    owns: ["customer commercial price", "commercial rules"],
+    doesNotOwn: [
+      "EIC authority",
+      "Product Template",
+      "execution actuals",
+      "resource rates",
+      "technical quantities",
     ],
-    doesNotOwn: ["EIC authority", "Product Template", "execution actuals"],
-    consumes: ["EIC", "Product Truth", "ProductAggregate"],
-    produces: ["commercial price", "Quote Snapshot", "Order commercial freeze"],
-    currentPhase: "LATER — Commercial",
+    consumes: ["planned EIC total", "EIC currency", "EIC completeness"],
+    produces: ["commercial price projection"],
+    currentPhase: "FOUNDATION — Commercial price rules",
     status: "PLANNED",
   },
   {

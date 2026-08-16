@@ -85,10 +85,10 @@ WorkOS Final
 │   └── Product process composition         FOUNDATION_ONLY (deterministic, not ExecutionPlan)
 ├── Governance / owner projections          IMPLEMENTED_CURRENT (read-only)
 ├── Analyzer                                NOT_IMPLEMENTED (separate app; proposal only)
-├── Commercial                              PLANNED
-│   ├── Commercial rules / customer price
-│   ├── Quote Snapshot
-│   └── Order Snapshot
+├── Commercial                              IMPLEMENTED_CURRENT / BASIC
+│   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
+│   ├── Quote Snapshot                      NOT_IMPLEMENTED
+│   └── Order Snapshot                      NOT_IMPLEMENTED
 ├── Execution                               IMPLEMENTED_CURRENT / BASIC
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
@@ -130,7 +130,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
+| Commercial | Customer price rules and current-policy customer-price projection. Quote Snapshot and Order remain later. | EIC authority, ProductTemplate, execution actuals, resource rates |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -277,18 +277,25 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Not implemented. Future law:
+Price rules foundation is implemented. Quote and Order are not.
 
 ```text
-mutable config
-→ confirmed Product Truth
-→ Quote Snapshot
-→ acceptance / freeze
-→ Order Snapshot
-→ execution consumes frozen order truth
+confirmed Product Truth
+→ Aggregate
+→ planned EIC
+→ Commercial Price Rules
+→ customer price projection
+→ [later] Quote Snapshot
+→ [later] Order Snapshot
 ```
 
+Company policy V1: EUR, markup 35%, VAT 21%, rounding 0.01. Discount and adjustment reserved at 0.
+Commercial consumes only planned EIC `{ total, currency, completeness }`.
+PARTIAL EIC keeps Commercial PARTIAL. Actual Internal Cost does not reprice the customer.
+The projection is current-policy output, not a frozen offer.
+
 EIC ≠ customer price. Product Truth confirmation ≠ Quote Snapshot. `reviewId` ≠ commercial freeze.
+See `docs/architecture/COMMERCIAL_PRICE_RULES_CANON.md`.
 
 ## Reporting
 
@@ -314,8 +321,9 @@ ProductTemplate + FormSchema
       → ProductAggregate
         → EIC
 
-[later] ProductTruth + EIC + Commercial rules
-  → Quote Snapshot
+ProductTruth + planned EIC + Commercial rules
+  → customer price projection
+  → [later] Quote Snapshot
     → Order Snapshot
       → ExecutionPlan
         → Tasks / Operations
@@ -386,7 +394,7 @@ Each domain owns its settings.
 | Employee cost profile / availability rules | People |
 | Planning policy parameters | Execution |
 | Pontaj rounding / allowed rules | People / Pontaj |
-| Commercial markup / VAT later | Commercial |
+| Commercial markup / VAT | Commercial company policy |
 
 A higher-level Administrare area may **navigate** these settings. It must not **own** them.
 
@@ -429,7 +437,8 @@ Settings versions: keep previous active values as history after a new version is
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
 | Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |
 | HR, Pontaj, reservations, purchasing | PLANNED |
-| Commercial, Quote Snapshot, Order Snapshot | PLANNED |
+| Commercial price rules | IMPLEMENTED_CURRENT / BASIC |
+| Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
 | Capability kernel promotion to ACTIVE | FOUNDATION_ONLY (IDs frozen) |

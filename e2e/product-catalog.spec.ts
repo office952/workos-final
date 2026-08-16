@@ -144,7 +144,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Neincluse încă în costul intern pilot: Iluminare")).toHaveCount(0);
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
   await expect(page.getByText("Lungime cant")).toHaveCount(0);
-  await expect(page.getByText("Preț client")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Preț client" })).toBeVisible();
+  await expect(page.locator(".commercial-section").getByText("Parțial", { exact: true })).toBeVisible();
+  await expect(page.getByText("Parțial / indisponibil pentru finalizare")).toBeVisible();
+  await expect(page.getByText("Preț final client")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
