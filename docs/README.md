@@ -65,6 +65,10 @@ Worklogs of earlier builds. They may use old names (`RETURN_CANT`, `/products/le
 - `docs/worklog/WORKOS_FINAL_PRODUCT_CATALOG_AND_FIRST_CANONICAL_PRODUCT_V1.md`
 - `docs/worklog/WORKOS_FINAL_FIRST_CANONICAL_PRODUCT_TECHNICAL_COMPLETION_V1.md`
 
+## Tooling (not product canon)
+
+- `docs/CURSOR_PLUGINS.md` — Cursor plugins installed for this workspace, when to use each one, and what not to install. This is editor tooling. It does not own product truth.
+
 ## Terminology
 
 Operator-facing product parts are **componente**: Față, Volum, Spate, Iluminare.
