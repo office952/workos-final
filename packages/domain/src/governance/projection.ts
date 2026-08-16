@@ -575,6 +575,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Snapshot comandă",
         state: "IMPLEMENTED",
       },
+      {
+        id: "frozen-production-input",
+        label: "Input producție înghețat",
+        state: "IMPLEMENTED",
+      },
       { id: "commercial", label: "Eliberare producție din comandă", state: "NOT_IMPLEMENTED" },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],
@@ -587,7 +592,7 @@ export function projectSystemGovernance(): GovernanceProjection {
     freeze: {
       label: "Politică de freeze",
       state: "PLANNED",
-      note: "Nu este activă. Snapshot-ul de ofertă acceptată poate fi transformat în snapshot de comandă. Eliberarea în producție din comandă rămâne planificată. Snapshot-ul de producție acceptat (pilot) este separat.",
+      note: "Nu este activă. Snapshot-ul de ofertă îngheață și evidența tehnică de producție copiată apoi în comandă. Eliberarea în producție din comandă rămâne planificată. Snapshot-ul de producție acceptat (pilot) este separat.",
     },
     capabilityKernelNote:
       "Nucleul de capabilități păstrează identificatorii înghețați. Statusul kernel PLANNED nu înseamnă că primul produs nu există; înseamnă că nucleul nu a fost promovat la ACTIVE.",

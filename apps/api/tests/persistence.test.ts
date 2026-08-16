@@ -167,13 +167,12 @@ describe("product system persistence", () => {
       frontlitPlexiAl06FormSchema,
       first.labels(),
     );
-    const eic = compileEic(
-      aggregate,
-      composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
-    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const eic = compileEic(aggregate, composition);
     const frozen = freezeQuoteSnapshot(
       truth,
       aggregate,
+      composition,
       eic,
       projectCommercialPrice(eic),
       { createdAt: "2026-08-17T00:00:00.000Z" },
@@ -198,6 +197,8 @@ describe("product system persistence", () => {
     expect(stored?.eic.total).toBe(382.5);
     expect(stored?.commercial.grossPrice).toBe(624.82);
     expect(stored?.commercial.policyVersion).toBe(1);
+    expect(stored?.productionInput.operations).toHaveLength(12);
+    expect(stored?.productionInput.contentHash).toBe(frozen.snapshot.productionInput.contentHash);
     expect(stored?.createdAt).toBe("2026-08-17T00:00:00.000Z");
     expect(second).not.toHaveProperty("updateQuoteSnapshot");
     second.close();
@@ -231,13 +232,12 @@ describe("product system persistence", () => {
       frontlitPlexiAl06FormSchema,
       first.labels(),
     );
-    const eic = compileEic(
-      aggregate,
-      composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
-    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const eic = compileEic(aggregate, composition);
     const frozen = freezeQuoteSnapshot(
       truth,
       aggregate,
+      composition,
       eic,
       projectCommercialPrice(eic),
       { createdAt: "2026-08-17T00:00:00.000Z" },
@@ -307,13 +307,12 @@ describe("product system persistence", () => {
       frontlitPlexiAl06FormSchema,
       first.labels(),
     );
-    const eic = compileEic(
-      aggregate,
-      composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
-    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const eic = compileEic(aggregate, composition);
     const frozen = freezeQuoteSnapshot(
       truth,
       aggregate,
+      composition,
       eic,
       projectCommercialPrice(eic),
       { createdAt: "2026-08-17T00:00:00.000Z" },
@@ -363,6 +362,8 @@ describe("product system persistence", () => {
     expect(stored?.commercial.grossPrice).toBe(624.82);
     expect(stored?.commercial.markupPercent).toBe(35);
     expect(stored?.commercial.vatPercent).toBe(21);
+    expect(stored?.productionInput.operations).toHaveLength(12);
+    expect(stored?.productionInput.contentHash).toBe(frozen.snapshot.productionInput.contentHash);
     expect(stored?.sourceAcceptanceId).toBe(recorded.decision.acceptanceId);
     expect(byQuote?.orderSnapshotId).toBe(order.snapshot.orderSnapshotId);
     expect(second.readQuoteSnapshot(frozen.snapshot.quoteSnapshotId)?.status).toBe(

@@ -1,5 +1,11 @@
 import { sha256Hex } from "../production/digest.js";
-import type { FrozenEicReference, FrozenQuantity } from "../production/snapshot.js";
+import {
+  FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
+  copyFrozenProductionInput,
+  type FrozenEicReference,
+  type FrozenProductionInput,
+  type FrozenQuantity,
+} from "../production/snapshot.js";
 import {
   QUOTE_ACCEPTANCE_SCHEMA_VERSION,
   type QuoteAcceptanceDecision,
@@ -39,6 +45,7 @@ export type OrderSnapshot = {
   quantities: readonly FrozenQuantity[];
   eic: FrozenEicReference;
   commercial: FrozenCommercialOffer;
+  productionInput: FrozenProductionInput;
 };
 
 export type OrderSnapshotResult =
@@ -60,7 +67,10 @@ export function freezeOrderSnapshot(
     quote.quoteSnapshotId.trim() === "" ||
     quote.contentHash.trim() === "" ||
     quote.eic.completeness !== "COMPLETE" ||
-    quote.commercial.completeness !== "COMPLETE"
+    quote.commercial.completeness !== "COMPLETE" ||
+    quote.productionInput.schemaVersion !== FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION ||
+    quote.productionInput.contentHash.trim() === "" ||
+    quote.productionInput.operations.length === 0
   ) {
     return {
       ok: false,
@@ -114,6 +124,7 @@ export function freezeOrderSnapshot(
       lines: quote.eic.lines.map((line) => ({ ...line })),
     },
     commercial: { ...quote.commercial },
+    productionInput: copyFrozenProductionInput(quote.productionInput),
   };
   const contentHash = sha256Hex(stableStringify(hashedContent));
   return {

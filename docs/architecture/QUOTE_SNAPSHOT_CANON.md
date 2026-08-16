@@ -10,9 +10,9 @@ Confirmed Product Truth
   → planned EIC
   → Commercial Price projection     live, current policy
 
-Quote Snapshot                      frozen commercial evidence
+Quote Snapshot + FrozenProductionInput
   → Quote Acceptance Decision       immutable commercial decision
-    → Order Snapshot                frozen commercial job root
+    → Order Snapshot copies FrozenProductionInput
       → [later] Production Release
 ```
 
@@ -27,13 +27,15 @@ An immutable historical copy of one offered configuration and price:
 - confirmed product identity and configuration
 - planned EIC used for the offer
 - Commercial policy id/version and calculated amounts
+- generic frozen production input (operations, requirements, used settings, used recipes) compiled at the same moment as EIC
 
 ## Acceptance
 
 Acceptance is a separate immutable decision (`qad:{quoteSnapshotId}`).
 It binds `quoteSnapshotId` + persisted `contentHash`.
 The Quote Snapshot stays `FROZEN`. Acceptance does not create Order or production.
-Order Snapshot is a later copy of this accepted freeze. See `docs/architecture/ORDER_SNAPSHOT_CANON.md`.
+Order Snapshot copies this accepted freeze, including the frozen production input.
+See `docs/architecture/ORDER_SNAPSHOT_CANON.md`.
 
 ## What this is not
 

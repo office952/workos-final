@@ -48,13 +48,12 @@ function frozenAcceptedQuote() {
     frontlitPlexiAl06FormSchema,
     seededDisplayLabelCatalog(),
   );
-  const eic = compileEic(
-    aggregate,
-    composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
-  );
+  const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+  const eic = compileEic(aggregate, composition);
   const frozen = freezeQuoteSnapshot(
     truth,
     aggregate,
+    composition,
     eic,
     projectCommercialPrice(eic),
     { createdAt: "2026-08-17T00:00:00.000Z" },
@@ -96,6 +95,8 @@ describe("order snapshot freeze", () => {
     expect(first.snapshot.commercial).toEqual(quote.commercial);
     expect(first.snapshot.commercial.grossPrice).toBe(624.82);
     expect(first.snapshot.truth.values["volume.depthMm"]).toBe("60");
+    expect(first.snapshot.productionInput.contentHash).toBe(quote.productionInput.contentHash);
+    expect(first.snapshot.productionInput.operations).toHaveLength(12);
     expect(first.snapshot.contentHash).toBe(second.snapshot.contentHash);
     expect(second.snapshot.createdAt).toBe("2026-08-17T12:00:00.000Z");
     expect(quote.status).toBe("FROZEN");

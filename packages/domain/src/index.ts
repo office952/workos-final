@@ -315,8 +315,12 @@ export {
 } from "./commercial/index.js";
 export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
+  FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
+  copyFrozenProductionInput,
   freezeAcceptedProductionSnapshot,
+  freezeProductionInput,
   productionWorkFromSnapshot,
   type AcceptedProductionSnapshot,
+  type FrozenProductionInput,
   type FrozenProductionWork,
 } from "./production/index.js";

@@ -191,6 +191,9 @@ describe("system governance projection", () => {
     expect(governance.roadmap.find((item) => item.id === "order-snapshot")?.state).toBe(
       "IMPLEMENTED",
     );
+    expect(
+      governance.roadmap.find((item) => item.id === "frozen-production-input")?.state,
+    ).toBe("IMPLEMENTED");
     expect(governance.roadmap.find((item) => item.id === "commercial")?.state).toBe(
       "NOT_IMPLEMENTED",
     );

@@ -46,13 +46,12 @@ function frozenGoldenQuote(): QuoteSnapshot {
     frontlitPlexiAl06FormSchema,
     seededDisplayLabelCatalog(),
   );
-  const eic = compileEic(
-    aggregate,
-    composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
-  );
+  const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+  const eic = compileEic(aggregate, composition);
   const frozen = freezeQuoteSnapshot(
     truth,
     aggregate,
+    composition,
     eic,
     projectCommercialPrice(eic),
     { createdAt: "2026-08-17T00:00:00.000Z" },

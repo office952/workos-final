@@ -1,5 +1,11 @@
-import type { FrozenEicReference, FrozenQuantity } from "../production/snapshot.js";
+import type { ProductProcessComposition } from "../processes/composition.js";
 import { sha256Hex } from "../production/digest.js";
+import {
+  freezeProductionInput,
+  type FrozenEicReference,
+  type FrozenProductionInput,
+  type FrozenQuantity,
+} from "../production/snapshot.js";
 import type { ProductAggregate, ProductTruth } from "../product/types.js";
 import type { EicResult } from "../resources/eic.js";
 import type { CommercialPriceProjection } from "./price.js";
@@ -52,6 +58,7 @@ export type QuoteSnapshot = {
   quantities: readonly FrozenQuantity[];
   eic: FrozenEicReference;
   commercial: FrozenCommercialOffer;
+  productionInput: FrozenProductionInput;
 };
 
 export type QuoteSnapshotResult =
@@ -65,6 +72,7 @@ const UNAVAILABLE_REASON = "Prețul client nu este disponibil pentru înghețare
 export function freezeQuoteSnapshot(
   truth: ProductTruth,
   aggregate: ProductAggregate,
+  composition: ProductProcessComposition,
   eic: EicResult,
   commercial: CommercialPriceProjection,
   options?: { createdAt?: string },
@@ -110,6 +118,7 @@ export function freezeQuoteSnapshot(
     },
     quantities: freezeQuantities(aggregate),
     eic: freezeEic(eic),
+    productionInput: freezeProductionInput(aggregate, composition),
     commercial: {
       policyId: commercial.policyId,
       policyVersion: commercial.policyVersion,

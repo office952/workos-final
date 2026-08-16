@@ -9,15 +9,17 @@ Runtime wins if this document disagrees.
 Confirmed Product Truth
   → planned EIC
   → Commercial Price projection
-  → Quote Snapshot
+  → Quote Snapshot + FrozenProductionInput
   → Quote Acceptance Decision
   → Order Snapshot                 frozen commercial job root
+    copies FrozenProductionInput
     → [later] Production Release
       → ExecutionPlan
 ```
 
 Order Snapshot answers: this exact accepted offer is now the canonical commercial job.
-It does not answer: what operations will the shop run?
+Frozen production input answers: what technical production evidence travels with that job.
+Order does not become an ExecutionPlan.
 
 ## What this is
 
@@ -91,20 +93,20 @@ Product Truth → Production Snapshot → Execution
 That path is workshop/technical. It is not customer-job release from Order.
 The future explicit action is **Eliberează pentru producție** from Order.
 
-## Frozen-production-input gap
+## Frozen production input
 
-Order copies Quote commercial/technical offer truth.
-Quote and Order do **not** freeze:
+Quote freeze also freezes a generic `FrozenProductionInput`:
 
 - operations
 - requirements
 - usedTechnicalSettings
 - usedRecipes
 
-Those belong to Production Release.
-Current Order payload is **not** sufficient to create Production Release without a later additive frozen technical payload or a live ProductTemplate / process / EIC reread.
-Live recompile after Order is forbidden.
-If Production Release is next, first align the frozen production input. Do not solve the gap by rereading live catalogs.
+Order copies that input. It does not recompile it.
+This is technical evidence for a future Production Release. It is not a second Product Truth, EIC, Commercial, or Order.
+
+Production Release must consume Order + this frozen input.
+It must not reread live ProductTemplate, process catalog, settings, recipes, Resources, EIC, or Commercial.
 
 ## Operator UI
 

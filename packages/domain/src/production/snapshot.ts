@@ -149,6 +149,17 @@ export type FrozenProductionWork = {
   eic: FrozenEicReference;
 };
 
+export const FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION = 1 as const;
+
+export type FrozenProductionInput = {
+  schemaVersion: typeof FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION;
+  requirements: readonly FrozenRequirement[];
+  operations: readonly FrozenProductionOperation[];
+  usedTechnicalSettings: readonly FrozenTechnicalSetting[];
+  usedRecipes: readonly FrozenRecipeTrace[];
+  contentHash: string;
+};
+
 export function freezeAcceptedProductionSnapshot(
   truth: ProductTruth,
   aggregate: ProductAggregate,
@@ -159,8 +170,7 @@ export function freezeAcceptedProductionSnapshot(
     technicalSettings?: readonly FrozenTechnicalSetting[];
   },
 ): AcceptedProductionSnapshot {
-  const operations = freezeOperations(composition, aggregate);
-  const usedRecipes = freezeRecipeTraces(composition, aggregate);
+  const productionInput = freezeProductionInput(aggregate, composition, options);
   const hashedContent = {
     schemaVersion: ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
     status: "ACCEPTED" as const,
@@ -177,11 +187,10 @@ export function freezeAcceptedProductionSnapshot(
       measurements: truth.measurements.map((item) => ({ ...item })),
     },
     quantities: freezeQuantities(aggregate.quantities),
-    requirements: freezeRequirements(aggregate.requirements),
-    operations,
-    usedTechnicalSettings:
-      options?.technicalSettings ?? usedTechnicalSettingsFromAggregate(aggregate),
-    usedRecipes,
+    requirements: productionInput.requirements,
+    operations: productionInput.operations,
+    usedTechnicalSettings: productionInput.usedTechnicalSettings,
+    usedRecipes: productionInput.usedRecipes,
     eic: freezeEic(eic),
   };
   const contentHash = canonicalContentHash(hashedContent);
@@ -207,6 +216,43 @@ export function productionWorkFromSnapshot(
     usedRecipes: snapshot.usedRecipes,
     eic: snapshot.eic,
   };
+}
+
+export function copyFrozenProductionInput(
+  input: FrozenProductionInput,
+): FrozenProductionInput {
+  return deepFreeze({
+    schemaVersion: input.schemaVersion,
+    requirements: input.requirements.map((item) => ({ ...item })),
+    operations: input.operations.map((item) => ({
+      ...item,
+      dependsOn: [...item.dependsOn],
+      quantities: item.quantities.map((quantity) => ({ ...quantity })),
+      resourceDemands: item.resourceDemands.map((demand) => ({ ...demand })),
+    })),
+    usedTechnicalSettings: input.usedTechnicalSettings.map((item) => ({ ...item })),
+    usedRecipes: input.usedRecipes.map((item) => ({ ...item })),
+    contentHash: input.contentHash,
+  });
+}
+
+export function freezeProductionInput(
+  aggregate: ProductAggregate,
+  composition: ProductProcessComposition,
+  options?: { technicalSettings?: readonly FrozenTechnicalSetting[] },
+): FrozenProductionInput {
+  const hashedContent = {
+    schemaVersion: FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
+    requirements: freezeRequirements(aggregate.requirements),
+    operations: freezeOperations(composition, aggregate),
+    usedTechnicalSettings:
+      options?.technicalSettings ?? usedTechnicalSettingsFromAggregate(aggregate),
+    usedRecipes: freezeRecipeTraces(composition, aggregate),
+  };
+  return deepFreeze({
+    ...hashedContent,
+    contentHash: canonicalContentHash(hashedContent),
+  });
 }
 
 export function usedTechnicalSettingsFromAggregate(

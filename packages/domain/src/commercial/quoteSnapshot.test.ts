@@ -47,14 +47,14 @@ function confirmedSpine(values: DraftValues = readyValues) {
   );
   const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
   const eic = compileEic(aggregate, composition);
-  return { truth, aggregate, eic };
+  return { truth, aggregate, composition, eic };
 }
 
 describe("quote snapshot freeze", () => {
   it("freezes the golden COMPLETE offer without production coupling", () => {
-    const { truth, aggregate, eic } = confirmedSpine();
+    const { truth, aggregate, composition, eic } = confirmedSpine();
     const commercial = projectCommercialPrice(eic);
-    const result = freezeQuoteSnapshot(truth, aggregate, eic, commercial, {
+    const result = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
       createdAt: "2026-08-17T00:00:00.000Z",
     });
     expect(result.ok).toBe(true);
@@ -96,6 +96,7 @@ describe("quote snapshot freeze", () => {
     const first = freezeQuoteSnapshot(
       firstSpine.truth,
       firstSpine.aggregate,
+      firstSpine.composition,
       firstSpine.eic,
       projectCommercialPrice(firstSpine.eic),
       { createdAt: "2026-08-17T00:00:00.000Z" },
@@ -103,6 +104,7 @@ describe("quote snapshot freeze", () => {
     const second = freezeQuoteSnapshot(
       secondSpine.truth,
       secondSpine.aggregate,
+      secondSpine.composition,
       secondSpine.eic,
       projectCommercialPrice(secondSpine.eic),
       { createdAt: "2026-08-17T12:00:00.000Z" },
@@ -117,14 +119,14 @@ describe("quote snapshot freeze", () => {
   });
 
   it("blocks PARTIAL EIC and commercial from becoming a frozen quote", () => {
-    const { truth, aggregate, eic } = confirmedSpine({
+    const { truth, aggregate, composition, eic } = confirmedSpine({
       ...readyValues,
       "volume.depthMm": "30",
     });
     const commercial = projectCommercialPrice(eic);
     expect(eic.completeness).toBe("PARTIAL");
     expect(commercial.completeness).toBe("PARTIAL");
-    expect(freezeQuoteSnapshot(truth, aggregate, eic, commercial)).toEqual({
+    expect(freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial)).toEqual({
       ok: false,
       error: "incomplete_offer",
       reasons: [
@@ -139,20 +141,21 @@ describe("quote snapshot freeze", () => {
     { "volume.depthMm": "80" },
     { "volume.depthMm": "100" },
   ])("blocks incomplete configuration %o", (overrides) => {
-    const { truth, aggregate, eic } = confirmedSpine({
+    const { truth, aggregate, composition, eic } = confirmedSpine({
       ...readyValues,
       ...overrides,
     });
     expect(
-      freezeQuoteSnapshot(truth, aggregate, eic, projectCommercialPrice(eic)).ok,
+      freezeQuoteSnapshot(truth, aggregate, composition, eic, projectCommercialPrice(eic)).ok,
     ).toBe(false);
   });
 
   it("does not reprice when the current commercial policy changes", () => {
-    const { truth, aggregate, eic } = confirmedSpine();
+    const { truth, aggregate, composition, eic } = confirmedSpine();
     const frozen = freezeQuoteSnapshot(
       truth,
       aggregate,
+      composition,
       eic,
       projectCommercialPrice(eic),
     );
@@ -175,10 +178,11 @@ describe("quote snapshot freeze", () => {
   });
 
   it("does not reprice when a later internal-cost total is supplied", () => {
-    const { truth, aggregate, eic } = confirmedSpine();
+    const { truth, aggregate, composition, eic } = confirmedSpine();
     const frozen = freezeQuoteSnapshot(
       truth,
       aggregate,
+      composition,
       eic,
       projectCommercialPrice(eic),
     );
@@ -186,6 +190,7 @@ describe("quote snapshot freeze", () => {
     const later = freezeQuoteSnapshot(
       truth,
       aggregate,
+      composition,
       laterEic,
       projectCommercialPrice(laterEic),
     );

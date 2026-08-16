@@ -181,6 +181,7 @@ export function registerProductRoutes(
     const frozen = freezeQuoteSnapshot(
       compiled.truth,
       compiled.aggregate,
+      compiled.composition,
       compiled.eic,
       commercialPrice,
     );

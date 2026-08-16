@@ -38,6 +38,7 @@ Future persisted Execution must consume this snapshot. It must not reread mutabl
 Not a customer Order.
 Not Commercial or Quote.
 The commercial job root is Order Snapshot. This snapshot remains the pilot workshop freeze until Production Release from Order exists.
+Quote/Order now carry the same generic `FrozenProductionInput` arrays (`operations`, `requirements`, `usedTechnicalSettings`, `usedRecipes`) via a shared freeze helper. That does not redesign this snapshot and does not make Quote or Order a Production Snapshot.
 Not an ExecutionPlan or ExecutionTask by itself.
 Not machine / people assignment.
 Not a workflow engine.

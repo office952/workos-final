@@ -89,7 +89,8 @@ WorkOS Final
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote acceptance                    IMPLEMENTED_CURRENT / BASIC
-│   └── Order Snapshot                      IMPLEMENTED_CURRENT / BASIC
+│   ├── Order Snapshot                      IMPLEMENTED_CURRENT / BASIC
+│   └── Frozen production input             IMPLEMENTED_CURRENT / BASIC
 ├── Execution                               IMPLEMENTED_CURRENT / BASIC
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
@@ -131,7 +132,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Production Release from Order remains later. | EIC authority, ProductTemplate, execution actuals, resource rates |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition. Production Release from Order remains later. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -278,7 +279,7 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Price rules, Quote Snapshot, Quote Acceptance, and Order Snapshot are implemented. Production Release from Order is not.
+Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, and frozen production-input alignment are implemented. Production Release from Order is not.
 
 ```text
 confirmed Product Truth
@@ -286,9 +287,9 @@ confirmed Product Truth
 → planned EIC
 → Commercial Price Rules
 → customer price projection
-→ Quote Snapshot
+→ Quote Snapshot + FrozenProductionInput
 → Quote Acceptance Decision
-→ Order Snapshot
+→ Order Snapshot copies FrozenProductionInput
 → [later] Production Release
 ```
 
@@ -327,9 +328,9 @@ ProductTemplate + FormSchema
 
 ProductTruth + planned EIC + Commercial rules
   → customer price projection
-  → Quote Snapshot
+  → Quote Snapshot + FrozenProductionInput
   → Quote Acceptance Decision
-    → Order Snapshot
+    → Order Snapshot copies FrozenProductionInput
       → [later] Production Release
         → ExecutionPlan
         → Tasks / Operations
@@ -447,6 +448,7 @@ Settings versions: keep previous active values as history after a new version is
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
+| Frozen production input | IMPLEMENTED_CURRENT / BASIC |
 | Production Release from Order | NOT_IMPLEMENTED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
