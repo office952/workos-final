@@ -52,7 +52,7 @@ describe("product system administration projection", () => {
     expect(product?.readiness.canDelete).toBe(false);
     expect(product?.readiness.canRetire).toBe(true);
     expect(product?.readiness.editClasses).toContain("DISPLAY_EDITABLE");
-    expect(product?.unresolvedAreas).toContain("Geometrie din Analyzer");
+    expect(product?.unresolvedAreas).not.toContain("Geometrie din Analyzer");
     expect(product?.unresolvedAreas).not.toContain("Debitare CNC");
     expect(product?.unresolvedAreas).not.toContain(
       "Cantitatea de module LED nu poate fi calculată: lipsește perimetrul de volum confirmat",

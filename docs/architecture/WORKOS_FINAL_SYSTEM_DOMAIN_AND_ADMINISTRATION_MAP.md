@@ -468,7 +468,7 @@ Recommended rank:
    Display-label persistence exists. Settings writes need versioning. Do not treat LED pitch or PSU reserve as automatic.
 
 2. **Lighting Resources / Cost completion**
-   PSU reserve is resolved. Remaining Lighting blockers are LED geometry, module watts, and PSU catalog identity/cost.
+   PSU reserve is resolved. Lighting quantity uses confirmed volume perimeter. Remaining Lighting gaps are workshop rate calibration, not missing Analyzer geometry.
 
 3. **Lifecycle retire** later, when more live entities exist.
 

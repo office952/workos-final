@@ -72,6 +72,7 @@ export { BACK_COMPONENT_ID, forexBackContract } from "./back.js";
 export {
   FACE_AREA_FIELD,
   FACE_COMPONENT_ID,
+  FACE_MISSING_AREA,
   faceAreaSquareMeters,
   plexiglasFaceContract,
 } from "./face.js";
@@ -108,6 +109,7 @@ export {
 } from "./technicalSettings.js";
 export {
   VOLUME_COMPONENT_ID,
+  VOLUME_MISSING_PERIMETER,
   VOLUME_PERIMETER_FIELD,
   aluminiumVolumeContract,
   volumeLinearMeters,

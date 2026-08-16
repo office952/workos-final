@@ -33,6 +33,11 @@ describe("component architecture projection", () => {
       }),
     ]);
     expect(face?.types[0]?.independentCalculation).toBe(true);
+    expect(face?.types[0]?.gaps).toEqual([]);
+    expect(
+      projectComponentArchitecture(seededDisplayLabelCatalog()).find((item) => item.role === "VOLUME")
+        ?.types[0]?.gaps,
+    ).toEqual([]);
     expect(face?.types[0]?.processIds).toEqual(["CUT_SHEET_CNC"]);
     expect(face?.types[0]?.processRequirements).toEqual([
       { processId: "CUT_SHEET_CNC", label: "Debitare foaie CNC" },

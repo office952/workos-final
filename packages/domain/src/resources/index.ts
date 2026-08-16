@@ -35,7 +35,10 @@ export {
   type ResourceUnit,
 } from "./catalog.js";
 export {
+  EIC_CALIBRATION_REASON,
+  EIC_GEOMETRY_CONFIRMED_LABEL,
   compileEic,
+  costEvidenceKeepsEicPartial,
   eicLineGroupLabel,
   resourceRequirements,
   type EicLine,

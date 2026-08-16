@@ -75,7 +75,7 @@ EIC may consume a resolved recipe only when the process is required, quantity ex
 
 EIC is generic. When process composition is supplied, it merges recipe requirements with component resource requirements.
 The forming recipe reuses the same `return_cant_forming` evidence. It does not add a second line.
-Canonical none/none fixture: 595.00 EUR PARTIAL. Analyzer geometry remains the honest PARTIAL reason.
+Canonical none/none fixture: 595.00 EUR PARTIAL. Honest PARTIAL reason is cost-evidence calibration (`DEVELOPMENT_DEFAULT` / legacy / pilot rates), not missing Analyzer geometry. Operator-confirmed FACE area and VOLUME perimeter are valid Product Truth.
 Final workshop calibration is later. Development rates are replaceable cost evidence, not OWNER_CONFIRMED.
 
 ## Boundaries

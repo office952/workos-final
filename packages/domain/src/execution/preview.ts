@@ -156,8 +156,7 @@ export function projectExecutionPlanPreview(
       internalCostTotal: eic.total,
       internalCostCurrency: eic.currency,
       internalCostCompleteness: eic.completeness,
-      analyzerNote:
-        "Geometrie confirmată de operator. Integrarea Analyzer urmează separat.",
+      analyzerNote: "",
     },
   };
 }

@@ -1,6 +1,12 @@
 import type { ProductProcessComposition } from "../processes/composition.js";
 import type { ProductAggregate } from "../product/types.js";
-import { getCostEvidence, getResource, type ResourceKind, type ResourceUnit } from "./catalog.js";
+import {
+  getCostEvidence,
+  getResource,
+  type CostEvidence,
+  type ResourceKind,
+  type ResourceUnit,
+} from "./catalog.js";
 import type { ResourceRequirement } from "./requirement.js";
 import { collectRecipeRequirements } from "./recipes.js";
 
@@ -20,8 +26,13 @@ export type EicLine = {
   group: EicLineGroup;
 };
 
+export const EIC_CALIBRATION_REASON = "Costuri încă în calibrare";
+export const EIC_GEOMETRY_CONFIRMED_LABEL = "Geometrie confirmată";
+
 export type EicResult = {
   completeness: "PARTIAL" | "COMPLETE";
+  completenessReasons: readonly string[];
+  geometryLabel: string | null;
   currency: "EUR";
   lines: readonly EicLine[];
   total: number;
@@ -69,20 +80,45 @@ export function compileEic(
   const excludedComponentLabels = aggregate.componentStatuses
     .filter((item) => item.status !== "CALCULATED")
     .map((item) => item.label);
-  const hasStructuralGaps = aggregate.componentStatuses.some(
-    (item) => item.unavailable.length > 0,
+  const measurementGaps = uniqueReasons(
+    aggregate.componentStatuses.flatMap((item) => item.unavailable),
+  );
+  const hasProvisionalCost = lines.some((line) => {
+    const evidence = getCostEvidence(line.resourceId);
+    return evidence !== undefined && costEvidenceKeepsEicPartial(evidence);
+  });
+  const completenessReasons = [
+    ...measurementGaps,
+    ...(hasProvisionalCost ? [EIC_CALIBRATION_REASON] : []),
+  ];
+  const geometryMissing = aggregate.componentStatuses.some(
+    (item) => item.status === "MISSING_MEASUREMENT",
   );
 
   return {
     completeness:
-      excludedComponentLabels.length === 0 && !hasStructuralGaps
+      completenessReasons.length === 0 && excludedComponentLabels.length === 0
         ? "COMPLETE"
         : "PARTIAL",
+    completenessReasons,
+    geometryLabel: geometryMissing ? null : EIC_GEOMETRY_CONFIRMED_LABEL,
     currency: "EUR",
     lines,
     total: lines.reduce((sum, line) => sum + line.cost, 0),
     excludedComponentLabels,
   };
+}
+
+export function costEvidenceKeepsEicPartial(evidence: CostEvidence): boolean {
+  return (
+    evidence.classification !== "OWNER_CONFIRMED" ||
+    evidence.source === "PILOT_INTERNAL_EVIDENCE" ||
+    evidence.source === "LEGACY_EVIDENCE"
+  );
+}
+
+function uniqueReasons(values: readonly string[]): string[] {
+  return [...new Set(values)];
 }
 
 export function eicLineGroup(

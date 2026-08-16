@@ -5,6 +5,7 @@ import {
 } from "../resources/catalog.js";
 import {
   VOLUME_COMPONENT_ID,
+  VOLUME_MISSING_PERIMETER,
   VOLUME_PERIMETER_FIELD,
   aluminiumVolumeContract,
   volumeLinearMeters,
@@ -56,6 +57,8 @@ describe("ALUMINIUM_VOLUME", () => {
         unit: "m",
       },
     ]);
+    expect(result.unavailable).toEqual([]);
+    expect(result.unavailable).not.toContain("Geometrie din Analyzer");
   });
 
   it("does not invent a VOLUME quantity without measurement", () => {
@@ -68,5 +71,7 @@ describe("ALUMINIUM_VOLUME", () => {
     expect(result.status).toBe("MISSING_MEASUREMENT");
     expect(result.quantities).toEqual([]);
     expect(result.requirements).toEqual([]);
+    expect(result.unavailable).toEqual([VOLUME_MISSING_PERIMETER]);
+    expect(result.unavailable).not.toContain("Geometrie din Analyzer");
   });
 });

@@ -140,7 +140,7 @@ CATALOG OF POSSIBLE OPERATIONS
 Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process; contour / V-groove / engraving were not added.
 
 Letters Lighting calculation is CALCULATED on the confirmed-perimeter path. LETTERS CNC, assembly, vinyl, electrical, paint and packing now have functional recipes. Unrelated shop-floor processes still have no recipes.
-Overall composition is PARTIAL because Analyzer geometry is still missing. Cost remains PARTIAL for the same reason. Execution remains absent.
+Confirmed manual FACE area and VOLUME perimeter are valid Product Truth. Cost remains PARTIAL because workshop rates are still in calibration, not because Analyzer is missing.
 
 Recipe completeness is owned by `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`. A new process does not invent a recipe.
 

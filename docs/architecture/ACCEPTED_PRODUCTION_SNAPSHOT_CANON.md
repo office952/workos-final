@@ -60,5 +60,5 @@ Provider eligibility stays a live concern until Execution materialization.
 ## Cost
 
 The snapshot stores the accepted EIC reference and the rates used that day.
-Canonical none/none remains 595.00 EUR PARTIAL because Analyzer provenance is still missing.
+Canonical none/none remains 595.00 EUR PARTIAL because cost evidence is still in workshop calibration. Operator-confirmed geometry is valid Product Truth. Analyzer provenance is not required.
 Calibration later does not rewrite an old snapshot.

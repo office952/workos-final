@@ -94,6 +94,10 @@ describe("accepted production snapshot", () => {
     expect(first.operations).toHaveLength(12);
     expect(first.eic.total).toBe(595);
     expect(first.eic.completeness).toBe("PARTIAL");
+    expect(first.truth.measurements.every((item) => item.source === "OPERATOR_MANUAL")).toBe(
+      true,
+    );
+    expect(JSON.stringify(first)).not.toMatch(/Geometrie din Analyzer/);
   });
 
   it("uses a standard SHA-256 digest", () => {

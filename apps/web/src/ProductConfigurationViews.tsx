@@ -211,12 +211,17 @@ export function EicSection({
       ) : (
         <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
       )}
-      <p className="page-lead">
-        Costul intern al produsului este parțial. Include materialele, serviciile,
-        manopera și iluminarea calculate. Rămâne de calibrat pe costurile reale de
-        atelier.
-        {lightingUnavailableReason(aggregate)}
-      </p>
+      {eic.geometryLabel ? <p className="page-lead">{eic.geometryLabel}.</p> : null}
+      {eic.completeness === "PARTIAL" ? (
+        <p className="page-lead">
+          Costul intern rămâne parțial
+          {eic.completenessReasons.length > 0
+            ? `: ${eic.completenessReasons.join("; ")}`
+            : ""}
+          .
+          {lightingUnavailableReason(aggregate)}
+        </p>
+      ) : null}
       {eic.excludedComponentLabels.length > 0 ? (
         <p>
           Neincluse încă în costul intern pilot: {eic.excludedComponentLabels.join(", ")}.
@@ -292,7 +297,9 @@ export function ProductionPreviewSection({
           {preview.summary.internalCostCompleteness === "PARTIAL" ? " (parțial)" : ""}
         </li>
       </ul>
-      <p className="page-lead">{preview.summary.analyzerNote}</p>
+      {preview.summary.analyzerNote ? (
+        <p className="page-lead">{preview.summary.analyzerNote}</p>
+      ) : null}
       <ol className="production-ops">
         {preview.operations.map((operation) => (
           <li key={operation.id} className="production-op preview-op">

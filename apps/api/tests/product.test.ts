@@ -177,6 +177,9 @@ describe("product configuration API", () => {
     expect(quantities.find((item) => item.componentId === "FACE")?.value).toBe(0.25);
     expect(quantities.find((item) => item.componentId === "BACK")?.value).toBe(0.25);
     expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.geometryLabel).toBe("Geometrie confirmată");
+    expect(eic.completenessReasons).toEqual(["Costuri încă în calibrare"]);
+    expect(JSON.stringify(eic)).not.toMatch(/Geometrie din Analyzer/);
     expect(eic.total).toBe(595);
     expect(eic.currency).toBe("EUR");
     expect((eic.excludedComponentLabels as string[])).toEqual([]);

@@ -22,7 +22,13 @@ import {
   getResource,
   resourceCatalog,
 } from "./catalog.js";
-import { applyRequirement, compileEic, resourceRequirements } from "./eic.js";
+import {
+  EIC_CALIBRATION_REASON,
+  EIC_GEOMETRY_CONFIRMED_LABEL,
+  applyRequirement,
+  compileEic,
+  resourceRequirements,
+} from "./eic.js";
 
 const readyValues: DraftValues = {
   "root.inscription": "WORKOS",
@@ -84,18 +90,23 @@ describe("EIC", () => {
     expect(requirements).toHaveLength(6);
     const eic = compileEic(aggregate);
     expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.geometryLabel).toBe(EIC_GEOMETRY_CONFIRMED_LABEL);
     expect(eic.currency).toBe("EUR");
     expect(eic.lines.map((line) => line.cost)).toEqual([4, 125, 187.5, 4, 62.5, 20]);
     expect(eic.total).toBe(403);
     expect(eic.excludedComponentLabels).toEqual([]);
-    expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote/i);
+    expect(JSON.stringify(eic)).not.toMatch(/Geometrie din Analyzer|customer|markup|quote/i);
   });
 
-  it("adds LETTERS recipes generically and stays partial for Analyzer geometry", () => {
+  it("adds LETTERS recipes generically and stays partial for cost calibration", () => {
     const { aggregate, composition } = confirmedSpine();
     const eic = compileEic(aggregate, composition);
     expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.geometryLabel).toBe(EIC_GEOMETRY_CONFIRMED_LABEL);
     expect(eic.total).toBe(595);
+    expect(JSON.stringify(eic)).not.toMatch(/Geometrie din Analyzer/);
     expect(lineCost(eic, "SVC-CNC-FACE")).toBe(37.5);
     expect(lineCost(eic, "SVC-CNC-BACK")).toBe(56.25);
     expect(lineCost(eic, "LAB-BOND-LETTER-BODY")).toBe(62.5);
@@ -139,6 +150,27 @@ describe("EIC", () => {
     const eic = compileEic(aggregate, composition);
     expect(lineCost(eic, "SVC-PAINT-RAL")).toBe(50);
     expect(eic.total).toBe(645);
+  });
+
+  it("reports honest missing geometry without an Analyzer gap", () => {
+    const { truth } = confirmedSpine();
+    const missing = compileAggregate(
+      { ...truth, measurements: [] },
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
+    );
+    const eic = compileEic(missing);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.geometryLabel).toBeNull();
+    expect(eic.completenessReasons).toEqual(
+      expect.arrayContaining(["Suprafață față neconfirmată", "Perimetru volum neconfirmat"]),
+    );
+    expect(eic.completenessReasons).not.toContain("Geometrie din Analyzer");
+    expect(eic.lines).toEqual([]);
+    expect(missing.unavailable).toEqual(
+      expect.arrayContaining(["Suprafață față neconfirmată", "Perimetru volum neconfirmat"]),
+    );
   });
 
   it("fails explicitly for an unknown resource", () => {

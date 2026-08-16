@@ -246,7 +246,11 @@ describe("ProductTruth and ProductAggregate", () => {
         }),
       ]),
     );
+    expect(aggregate.unavailable).toEqual([]);
+    expect(aggregate.unavailable).not.toContain("Geometrie din Analyzer");
     expect(aggregate.unavailable).not.toContain("Regula de pas LED nu este stabilită");
+    expect(truth.measurements.every((item) => item.source === "OPERATOR_MANUAL")).toBe(true);
+    expect(truth.measurements.every((item) => item.confirmed)).toBe(true);
     expect(JSON.stringify(aggregate)).not.toMatch(
       /ledPitchMm|ledModulePowerW|psuReservePercent/,
     );

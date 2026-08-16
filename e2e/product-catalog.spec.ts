@@ -132,7 +132,8 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Debitare CNC față: 12,5 m", { exact: true })).toBeVisible();
   await expect(page.getByText("Lipire față-volum: 12,5 m", { exact: true })).toBeVisible();
   await expect(page.getByText("Montare module LED: 125 buc", { exact: true })).toBeVisible();
-  await expect(page.getByText("Costul intern al produsului este parțial")).toBeVisible();
+  await expect(page.getByText("Costul intern rămâne parțial: Costuri încă în calibrare.")).toBeVisible();
+  await expect(page.locator(".eic-section").getByText("Geometrie confirmată.")).toBeVisible();
   await expect(
     page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
   ).toHaveCount(0);

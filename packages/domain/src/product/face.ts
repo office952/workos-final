@@ -10,12 +10,11 @@ import { squareMetersFromMm2 } from "./units.js";
 
 export const FACE_COMPONENT_ID = "FACE";
 export const FACE_AREA_FIELD = "face.confirmedAreaMm2";
+export const FACE_MISSING_AREA = "Suprafață față neconfirmată";
 
 export function faceAreaSquareMeters(areaMm2: number): number {
   return squareMetersFromMm2(areaMm2);
 }
-
-const FACE_GAPS = ["Geometrie din Analyzer"] as const;
 
 function faceResult(
   status: ComponentCalculationResult["status"],
@@ -29,7 +28,7 @@ function faceResult(
     status,
     quantities,
     requirements,
-    unavailable: [...FACE_GAPS, ...extraUnavailable],
+    unavailable: [...extraUnavailable],
   };
 }
 
@@ -41,7 +40,7 @@ export const plexiglasFaceContract: ComponentCalculationContract = {
     quantityUnit: "m2",
     independentCalculation: true,
     eic: "material",
-    structuralGaps: FACE_GAPS,
+    structuralGaps: [],
   },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const area = values[FACE_AREA_FIELD];
@@ -64,7 +63,7 @@ export const plexiglasFaceContract: ComponentCalculationContract = {
       (item) => item.fieldId === FACE_AREA_FIELD,
     );
     if (!area) {
-      return faceResult("MISSING_MEASUREMENT", [], []);
+      return faceResult("MISSING_MEASUREMENT", [], [], [FACE_MISSING_AREA]);
     }
     const squareMeters = faceAreaSquareMeters(area.value);
     const resolved = resolveTypeResources("PLEXIGLAS_FACE", input.values);

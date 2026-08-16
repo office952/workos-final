@@ -247,7 +247,8 @@ describe("execution plan preview", () => {
     expect(JSON.stringify(preview)).not.toMatch(
       /startTask|completeTask|assignedTo|capacity|pontaj|employeeId/,
     );
-    expect(preview.summary.analyzerNote).toMatch(/Geometrie confirmată de operator/);
+    expect(preview.summary.analyzerNote).toBe("");
+    expect(preview.summary.analyzerNote).not.toMatch(/Analyzer/);
     expect(preview.summary.noProviderCount).toBeGreaterThan(0);
     expect(preview.readiness).toBe("READY");
   });

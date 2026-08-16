@@ -10,12 +10,11 @@ import { linearMetersFromMm } from "./units.js";
 
 export const VOLUME_COMPONENT_ID = "VOLUME";
 export const VOLUME_PERIMETER_FIELD = "volume.confirmedPerimeterMm";
+export const VOLUME_MISSING_PERIMETER = "Perimetru volum neconfirmat";
 
 export function volumeLinearMeters(perimeterMm: number): number {
   return linearMetersFromMm(perimeterMm);
 }
-
-const VOLUME_GAPS = ["Geometrie din Analyzer"] as const;
 
 function volumeResult(
   status: ComponentCalculationResult["status"],
@@ -29,7 +28,7 @@ function volumeResult(
     status,
     quantities,
     requirements,
-    unavailable: [...VOLUME_GAPS, ...extraUnavailable],
+    unavailable: [...extraUnavailable],
   };
 }
 
@@ -41,7 +40,7 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
     quantityUnit: "m",
     independentCalculation: true,
     eic: "material_and_operation",
-    structuralGaps: VOLUME_GAPS,
+    structuralGaps: [],
   },
   collectMeasurements(values: DraftValues): TechnicalMeasurement[] {
     const perimeter = values[VOLUME_PERIMETER_FIELD];
@@ -64,7 +63,7 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
       (item) => item.fieldId === VOLUME_PERIMETER_FIELD,
     );
     if (!perimeter) {
-      return volumeResult("MISSING_MEASUREMENT", [], []);
+      return volumeResult("MISSING_MEASUREMENT", [], [], [VOLUME_MISSING_PERIMETER]);
     }
     const meters = volumeLinearMeters(perimeter.value);
     const depthMm = Number(input.values["volume.depthMm"]);

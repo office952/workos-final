@@ -39,7 +39,10 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
   await expect(page.getByText("Total cost intern estimat: 595,00 EUR")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
   await expect(page.getByText("Cost intern curent: 595,00 EUR (parțial)")).toBeVisible();
-  await expect(page.getByText("Geometrie confirmată de operator.")).toBeVisible();
+  await expect(page.locator(".eic-section").getByText("Geometrie confirmată.")).toBeVisible();
+  await expect(page.getByText("Costuri încă în calibrare")).toBeVisible();
+  await expect(page.getByText("Geometrie din Analyzer")).toHaveCount(0);
+  await expect(page.getByText("Analyzer")).toHaveCount(0);
   await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
   await expect(page.getByText("Componentă: Față").first()).toBeVisible();
   await expect(page.getByText("Furnizori disponibili: CNC 4020").first()).toBeVisible();

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { PLEXIGLAS_3MM_OPAL_ID } from "../resources/catalog.js";
-import { FACE_AREA_FIELD, FACE_COMPONENT_ID, plexiglasFaceContract } from "./face.js";
+import {
+  FACE_AREA_FIELD,
+  FACE_COMPONENT_ID,
+  FACE_MISSING_AREA,
+  plexiglasFaceContract,
+} from "./face.js";
 
 const currentFaceConfig = {
   "face.thicknessMm": 3,
@@ -35,6 +40,8 @@ describe("PLEXIGLAS_FACE", () => {
         unit: "m2",
       },
     ]);
+    expect(result.unavailable).toEqual([]);
+    expect(result.unavailable).not.toContain("Geometrie din Analyzer");
   });
 
   it("does not invent a FACE quantity without measurement", () => {
@@ -47,5 +54,7 @@ describe("PLEXIGLAS_FACE", () => {
     expect(result.status).toBe("MISSING_MEASUREMENT");
     expect(result.quantities).toEqual([]);
     expect(result.requirements).toEqual([]);
+    expect(result.unavailable).toEqual([FACE_MISSING_AREA]);
+    expect(result.unavailable).not.toContain("Geometrie din Analyzer");
   });
 });
