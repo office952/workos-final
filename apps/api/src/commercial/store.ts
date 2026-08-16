@@ -1,4 +1,5 @@
 import type {
+  OrderSnapshot,
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
@@ -146,4 +147,99 @@ function decisionFromRow(row: AcceptanceRow): QuoteAcceptanceDecision {
     quoteContentHash: row.quote_content_hash,
     acceptedAt: row.accepted_at,
   };
+}
+
+type OrderRow = {
+  order_snapshot_id: string;
+  payload: string;
+};
+
+export function insertOrderSnapshot(
+  db: SqliteDatabase,
+  snapshot: OrderSnapshot,
+): { created: boolean; snapshot: OrderSnapshot } {
+  const existing = getOrderSnapshotByAcceptanceId(db, snapshot.sourceAcceptanceId);
+  if (existing) {
+    return { created: false, snapshot: existing };
+  }
+
+  db.prepare(
+    `
+    INSERT INTO order_snapshots (
+      order_snapshot_id,
+      product_code,
+      source_quote_snapshot_id,
+      source_quote_content_hash,
+      source_acceptance_id,
+      content_hash,
+      schema_version,
+      created_at,
+      payload
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `,
+  ).run(
+    snapshot.orderSnapshotId,
+    snapshot.productCode,
+    snapshot.sourceQuoteSnapshotId,
+    snapshot.sourceQuoteContentHash,
+    snapshot.sourceAcceptanceId,
+    snapshot.contentHash,
+    snapshot.schemaVersion,
+    snapshot.createdAt,
+    JSON.stringify(snapshot),
+  );
+
+  return { created: true, snapshot };
+}
+
+export function getOrderSnapshot(
+  db: SqliteDatabase,
+  orderSnapshotId: string,
+): OrderSnapshot | null {
+  const row = db
+    .prepare(
+      `
+      SELECT order_snapshot_id, payload
+      FROM order_snapshots
+      WHERE order_snapshot_id = ?
+    `,
+    )
+    .get(orderSnapshotId) as OrderRow | undefined;
+  return row ? parseOrderSnapshot(row.payload) : null;
+}
+
+export function getOrderSnapshotByAcceptanceId(
+  db: SqliteDatabase,
+  sourceAcceptanceId: string,
+): OrderSnapshot | null {
+  const row = db
+    .prepare(
+      `
+      SELECT order_snapshot_id, payload
+      FROM order_snapshots
+      WHERE source_acceptance_id = ?
+    `,
+    )
+    .get(sourceAcceptanceId) as OrderRow | undefined;
+  return row ? parseOrderSnapshot(row.payload) : null;
+}
+
+export function getOrderSnapshotByQuoteSnapshotId(
+  db: SqliteDatabase,
+  quoteSnapshotId: string,
+): OrderSnapshot | null {
+  const row = db
+    .prepare(
+      `
+      SELECT order_snapshot_id, payload
+      FROM order_snapshots
+      WHERE source_quote_snapshot_id = ?
+    `,
+    )
+    .get(quoteSnapshotId) as OrderRow | undefined;
+  return row ? parseOrderSnapshot(row.payload) : null;
+}
+
+function parseOrderSnapshot(payload: string): OrderSnapshot {
+  return JSON.parse(payload) as OrderSnapshot;
 }

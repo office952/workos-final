@@ -10,6 +10,7 @@ import type {
   ProductAggregate,
   ProductDefinition,
   ProductTruth,
+  OrderSnapshot,
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
@@ -21,6 +22,7 @@ import {
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
+  OrderSnapshotSection,
   ProductionPreviewSection,
   QuoteSnapshotSection,
   ReadinessNotice,
@@ -35,8 +37,10 @@ import {
   confirmReviewedConfiguration,
   createExecutionPlan,
   acceptQuoteSnapshot,
+  createOrderSnapshot,
   createQuoteSnapshot,
   fetchTemplateProjection,
+  readOrderSnapshot,
   readQuoteAcceptance,
   startExecutionTask,
   type TemplateProjection,
@@ -65,6 +69,7 @@ export function ProductConfigurationPage() {
     quoteSnapshot?: QuoteSnapshot;
     quoteReused?: boolean;
     quoteAcceptance?: QuoteAcceptanceDecision;
+    orderSnapshot?: OrderSnapshot;
     snapshot?: AcceptedProductionSnapshot;
     snapshotReused?: boolean;
     executionPlan?: ExecutionPlanView;
@@ -171,11 +176,15 @@ export function ProductConfigurationPage() {
           productCode,
           result.quoteSnapshot.quoteSnapshotId,
         );
+        const orderSnapshot = quoteAcceptance
+          ? await readOrderSnapshot(productCode, result.quoteSnapshot.quoteSnapshotId)
+          : null;
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteReused: !result.created,
           quoteAcceptance: quoteAcceptance ?? undefined,
+          orderSnapshot: orderSnapshot ?? undefined,
         });
       } else if (result.reason === "review_mismatch") {
         setConfirmed(null);
@@ -209,14 +218,49 @@ export function ProductConfigurationPage() {
         confirmed.quoteSnapshot.quoteSnapshotId,
       );
       if (result.ok) {
+        const orderSnapshot = await readOrderSnapshot(
+          productCode,
+          result.quoteSnapshot.quoteSnapshotId,
+        );
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteAcceptance: result.acceptance,
+          orderSnapshot: orderSnapshot ?? undefined,
         });
       } else {
         setConfirmNotice(
           result.message ?? "Oferta nu poate fi acceptată din snapshot-ul curent.",
+        );
+      }
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleCreateOrder() {
+    if (!confirmed?.quoteSnapshot) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createOrderSnapshot(
+        productCode,
+        confirmed.quoteSnapshot.quoteSnapshotId,
+      );
+      if (result.ok) {
+        setConfirmed({
+          ...confirmed,
+          quoteSnapshot: result.quoteSnapshot,
+          quoteAcceptance: result.acceptance,
+          orderSnapshot: result.orderSnapshot,
+        });
+      } else {
+        setConfirmNotice(
+          result.message ?? "Comanda nu poate fi creată din oferta curentă.",
         );
       }
     } catch {
@@ -364,11 +408,16 @@ export function ProductConfigurationPage() {
             price={confirmed.commercialPrice}
             snapshot={confirmed.quoteSnapshot}
             acceptance={confirmed.quoteAcceptance}
+            order={confirmed.orderSnapshot}
             reused={Boolean(confirmed.quoteReused)}
             busy={busy}
             onFreeze={() => void handleFreezeQuote()}
             onAccept={() => void handleAcceptQuote()}
+            onCreateOrder={() => void handleCreateOrder()}
           />
+          {confirmed.orderSnapshot ? (
+            <OrderSnapshotSection snapshot={confirmed.orderSnapshot} />
+          ) : null}
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}
             basedOnSnapshot={Boolean(confirmed.snapshot)}
@@ -376,7 +425,11 @@ export function ProductConfigurationPage() {
 
           {confirmed.snapshot ? null : (
             <div className="lifecycle-cta">
-              <p className="page-lead">Îngheață configurația tehnică pentru execuție.</p>
+              <p className="page-lead">
+                {confirmed.orderSnapshot
+                  ? "Calea de atelier rămâne separată. Nu eliberează comanda în producție."
+                  : "Îngheață configurația tehnică pentru execuție."}
+              </p>
               <div className="action-row">
                 <button type="button" onClick={() => void handleAcceptProduction()} disabled={busy}>
                   Acceptă pentru producție

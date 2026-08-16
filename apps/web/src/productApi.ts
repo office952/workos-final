@@ -11,6 +11,7 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  OrderSnapshot,
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
@@ -270,6 +271,79 @@ export async function acceptQuoteSnapshot(
     created: Boolean(body.created),
     acceptance: body.acceptanceDecision,
     quoteSnapshot: body.quoteSnapshot,
+  };
+}
+
+export async function readOrderSnapshot(
+  productCode: string,
+  quoteSnapshotId: string,
+): Promise<OrderSnapshot | null> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}/order`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ orderSnapshot?: OrderSnapshot }>(response);
+  if (!response.ok || !body.orderSnapshot) {
+    throw new Error("order_unavailable");
+  }
+  return body.orderSnapshot;
+}
+
+export async function createOrderSnapshot(
+  productCode: string,
+  quoteSnapshotId: string,
+): Promise<
+  | {
+      ok: true;
+      created: boolean;
+      orderSnapshot: OrderSnapshot;
+      quoteSnapshot: QuoteSnapshot;
+      acceptance: QuoteAcceptanceDecision;
+    }
+  | {
+      ok: false;
+      reason: "not_found" | "quote_not_accepted" | "acceptance_mismatch" | "incompatible_order_source";
+      message?: string;
+    }
+> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}/order`,
+    { method: "POST" },
+  );
+  const body = await readJson<{
+    created?: boolean;
+    orderSnapshot?: OrderSnapshot;
+    quoteSnapshot?: QuoteSnapshot;
+    acceptanceDecision?: QuoteAcceptanceDecision;
+    error?: string;
+    reasons?: string[];
+  }>(response);
+  if (response.status === 404) {
+    return { ok: false, reason: "not_found" };
+  }
+  if (
+    response.status === 422 &&
+    (body.error === "quote_not_accepted" ||
+      body.error === "acceptance_mismatch" ||
+      body.error === "incompatible_order_source")
+  ) {
+    return {
+      ok: false,
+      reason: body.error,
+      message: body.reasons?.[0],
+    };
+  }
+  if (!response.ok || !body.orderSnapshot || !body.quoteSnapshot || !body.acceptanceDecision) {
+    throw new Error("order_unavailable");
+  }
+  return {
+    ok: true,
+    created: Boolean(body.created),
+    orderSnapshot: body.orderSnapshot,
+    quoteSnapshot: body.quoteSnapshot,
+    acceptance: body.acceptanceDecision,
   };
 }
 

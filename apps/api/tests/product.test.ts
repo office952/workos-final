@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   BOND_LETTER_BODY_ID,
@@ -384,6 +385,124 @@ describe("product configuration API", () => {
     );
     expect(missing.status).toBe(404);
     expect(mismatch.status).toBe(404);
+  });
+
+  it("creates an order snapshot from accepted quote without calculating or side effects", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quote = (await readBody(createdQuote)).quoteSnapshot as JsonObject;
+    const quoteId = quote.quoteSnapshotId as string;
+    const acceptPath = `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/acceptance`;
+    const accepted = await app.request(acceptPath, { method: "POST" });
+    const acceptance = (await readBody(accepted)).acceptanceDecision as JsonObject;
+    const orderPath = `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/order`;
+    const first = await app.request(orderPath, { method: "POST" });
+    const second = await app.request(orderPath, { method: "POST" });
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    const created = await readBody(first);
+    const reused = await readBody(second);
+    const order = created.orderSnapshot as JsonObject;
+    const commercial = order.commercial as JsonObject;
+    expect(created.created).toBe(true);
+    expect(reused.created).toBe(false);
+    expect((reused.orderSnapshot as JsonObject).orderSnapshotId).toBe(
+      order.orderSnapshotId,
+    );
+    expect((reused.orderSnapshot as JsonObject).createdAt).toBe(order.createdAt);
+    expect(order.status).toBe("FROZEN");
+    expect(order.sourceQuoteSnapshotId).toBe(quoteId);
+    expect(order.sourceQuoteContentHash).toBe(quote.contentHash);
+    expect(order.sourceAcceptanceId).toBe(acceptance.acceptanceId);
+    expect((order.eic as JsonObject).total).toBe(382.5);
+    expect(commercial.markupPercent).toBe(35);
+    expect(commercial.vatPercent).toBe(21);
+    expect(commercial.grossPrice).toBe(624.82);
+    expect(created.productionSnapshot).toBeUndefined();
+    expect(created.executionPlan).toBeUndefined();
+    expect((created.quoteSnapshot as JsonObject).status).toBe("FROZEN");
+
+    const byQuote = await app.request(orderPath);
+    expect(byQuote.status).toBe(200);
+    expect(((await readBody(byQuote)).orderSnapshot as JsonObject).commercial as JsonObject).toMatchObject({
+      grossPrice: 624.82,
+    });
+    const byId = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/${order.orderSnapshotId}`,
+    );
+    expect(byId.status).toBe(200);
+    expect(((await readBody(byId)).orderSnapshot as JsonObject).eic as JsonObject).toMatchObject({
+      total: 382.5,
+    });
+
+    const rereadQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}`,
+    );
+    expect(((await readBody(rereadQuote)).quoteSnapshot as JsonObject).status).toBe("FROZEN");
+    const rereadAcceptance = await app.request(acceptPath);
+    expect(((await readBody(rereadAcceptance)).acceptanceDecision as JsonObject).acceptanceId).toBe(
+      acceptance.acceptanceId,
+    );
+    expect((await app.request("/api/execution-plans/missing")).status).toBe(404);
+    const inventory = await app.request("/api/inventory");
+    const items = ((await readBody(inventory)).inventory as { items: Array<JsonObject> })
+      .items;
+    expect(items.every((item) => item.movementCount === 0)).toBe(true);
+  });
+
+  it("does not create an order from a frozen quote without acceptance", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quoteId = ((await readBody(createdQuote)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    const missingAcceptance = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/order`,
+      { method: "POST" },
+    );
+    const unknown = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/qts:missing/order`,
+      { method: "POST" },
+    );
+    const mismatch = await app.request(
+      `/api/products/other-product/quote-snapshots/${quoteId}/order`,
+      { method: "POST" },
+    );
+    expect(missingAcceptance.status).toBe(422);
+    expect((await readBody(missingAcceptance)).error).toBe("quote_not_accepted");
+    expect(unknown.status).toBe(404);
+    expect(mismatch.status).toBe(404);
+  });
+
+  it("does not compile or reprice on the order create path", () => {
+    const source = readFileSync(new URL("../src/product.ts", import.meta.url), "utf8");
+    const start = source.indexOf('"/api/products/:productCode/quote-snapshots/:quoteSnapshotId/order"');
+    const end = source.indexOf('"/api/products/:productCode/orders/:orderSnapshotId"');
+    const createPath = source.slice(start, end);
+    expect(createPath).toContain("freezeOrderSnapshot");
+    expect(createPath).not.toMatch(/compileDefinition|compileAggregate|compileEic/);
+    expect(createPath).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
   });
 
   it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {

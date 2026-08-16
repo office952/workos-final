@@ -13,6 +13,7 @@ import {
   type ProductIdentityFact,
   type ProductTemplate,
   type ProductTruth,
+  type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
 } from "@workos-final/domain";
@@ -346,18 +347,22 @@ export function QuoteSnapshotSection({
   price,
   snapshot,
   acceptance,
+  order,
   reused,
   busy,
   onFreeze,
   onAccept,
+  onCreateOrder,
 }: {
   price: CommercialPriceProjection;
   snapshot?: QuoteSnapshot;
   acceptance?: QuoteAcceptanceDecision;
+  order?: OrderSnapshot;
   reused: boolean;
   busy: boolean;
   onFreeze: () => void;
   onAccept: () => void;
+  onCreateOrder: () => void;
 }) {
   if (snapshot && acceptance) {
     return (
@@ -373,7 +378,16 @@ export function QuoteSnapshotSection({
           Acceptată {new Date(acceptance.acceptedAt).toLocaleString("ro-RO")} · Politică comercială v
           {snapshot.commercial.policyVersion}
         </p>
-        <p className="page-lead">Oferta acceptată nu a fost încă transformată în comandă.</p>
+        {order ? null : (
+          <>
+            <p className="page-lead">Oferta acceptată nu a fost încă transformată în comandă.</p>
+            <div className="action-row">
+              <button type="button" onClick={onCreateOrder} disabled={busy}>
+                Creează comanda
+              </button>
+            </div>
+          </>
+        )}
         <details className="snapshot-details">
           <summary>Detalii</summary>
           <ul>
@@ -471,6 +485,62 @@ export function QuoteSnapshotSection({
           Îngheață oferta
         </button>
       </div>
+    </section>
+  );
+}
+
+export function OrderSnapshotSection({ snapshot }: { snapshot: OrderSnapshot }) {
+  return (
+    <section className="result-section order-section">
+      <div className="commercial-summary">
+        <h3>Comandă creată</h3>
+        <StatusChip label="Creată" tone="ok" />
+      </div>
+      <p className="commercial-gross">
+        Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
+      </p>
+      <dl className="commercial-breakdown">
+        <div>
+          <dt>Cost intern</dt>
+          <dd>
+            {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
+          </dd>
+        </div>
+        <div>
+          <dt>Adaos comercial</dt>
+          <dd>
+            {snapshot.commercial.markupPercent}% ·{" "}
+            {formatMoney(snapshot.commercial.markupAmount)} {snapshot.commercial.currency}
+          </dd>
+        </div>
+        <div>
+          <dt>Preț net</dt>
+          <dd>
+            {formatMoney(snapshot.commercial.netPrice)} {snapshot.commercial.currency}
+          </dd>
+        </div>
+        <div>
+          <dt>TVA</dt>
+          <dd>
+            {snapshot.commercial.vatPercent}% ·{" "}
+            {formatMoney(snapshot.commercial.vatAmount)} {snapshot.commercial.currency}
+          </dd>
+        </div>
+      </dl>
+      <p>
+        Creată {new Date(snapshot.createdAt).toLocaleString("ro-RO")} · Ofertă acceptată{" "}
+        {new Date(snapshot.sourceAcceptedAt).toLocaleString("ro-RO")}
+      </p>
+      <p className="page-lead">Comanda nu a fost încă eliberată pentru producție.</p>
+      <details className="snapshot-details">
+        <summary>Detalii</summary>
+        <ul>
+          <li>Referință comandă: {snapshot.orderSnapshotId}</li>
+          <li>Ofertă sursă: {snapshot.sourceQuoteSnapshotId}</li>
+          <li>Produs: {snapshot.productLabel}</li>
+          <li>Stare: Înghețată</li>
+        </ul>
+      </details>
     </section>
   );
 }

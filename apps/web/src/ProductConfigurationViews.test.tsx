@@ -9,6 +9,7 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  OrderSnapshot,
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
@@ -16,6 +17,7 @@ import {
   AcceptedSnapshotSection,
   CommercialPriceSection,
   ConfirmedSummary,
+  OrderSnapshotSection,
   QuoteSnapshotSection,
   ConstructionFacts,
   EicSection,
@@ -281,6 +283,7 @@ describe("Product configuration views", () => {
         busy={false}
         onFreeze={() => undefined}
         onAccept={() => undefined}
+        onCreateOrder={() => undefined}
       />,
     );
     expect(screen.getByRole("button", { name: "Îngheață oferta" })).toBeInTheDocument();
@@ -291,6 +294,7 @@ describe("Product configuration views", () => {
         busy={false}
         onFreeze={() => undefined}
         onAccept={() => undefined}
+        onCreateOrder={() => undefined}
       />,
     );
     expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
@@ -326,6 +330,7 @@ describe("Product configuration views", () => {
         busy={false}
         onFreeze={() => undefined}
         onAccept={() => undefined}
+        onCreateOrder={() => undefined}
       />,
     );
     expect(screen.getByRole("heading", { name: "Ofertă salvată" })).toBeInTheDocument();
@@ -366,6 +371,7 @@ describe("Product configuration views", () => {
         busy={false}
         onFreeze={() => undefined}
         onAccept={() => undefined}
+        onCreateOrder={() => undefined}
       />,
     );
     expect(screen.getByRole("heading", { name: "Ofertă acceptată" })).toBeInTheDocument();
@@ -373,8 +379,78 @@ describe("Product configuration views", () => {
     expect(
       screen.getByText("Oferta acceptată nu a fost încă transformată în comandă."),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Creează comanda" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Acceptă oferta" })).not.toBeInTheDocument();
     expect(screen.queryByText("Comandă creată")).not.toBeInTheDocument();
+  });
+
+  it("renders frozen order values from the order snapshot only", () => {
+    const snapshot = {
+      quoteSnapshotId: "qts:hidden",
+      productLabel: "Litere",
+      createdAt: "2026-08-17T00:00:00.000Z",
+      commercial: {
+        policyVersion: 1,
+        markupPercent: 35,
+        markupAmount: 133.88,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+      },
+      eic: { total: 382.5, currency: "EUR" },
+    } as unknown as QuoteSnapshot;
+    const acceptance = {
+      acceptanceId: "qad:qts:hidden",
+      acceptedAt: "2026-08-17T01:00:00.000Z",
+    } as unknown as QuoteAcceptanceDecision;
+    const order = {
+      orderSnapshotId: "ord:qad:qts:hidden:hash",
+      createdAt: "2026-08-17T02:00:00.000Z",
+      sourceAcceptedAt: "2026-08-17T01:00:00.000Z",
+      sourceQuoteSnapshotId: "qts:hidden",
+      productLabel: "Litere",
+      commercial: {
+        markupPercent: 35,
+        markupAmount: 133.88,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+      },
+      eic: { total: 382.5, currency: "EUR" },
+    } as unknown as OrderSnapshot;
+    render(
+      <>
+        <QuoteSnapshotSection
+          price={{ completeness: "COMPLETE" } as CommercialPriceProjection}
+          snapshot={snapshot}
+          acceptance={acceptance}
+          order={order}
+          reused={false}
+          busy={false}
+          onFreeze={() => undefined}
+          onAccept={() => undefined}
+          onCreateOrder={() => undefined}
+        />
+        <OrderSnapshotSection snapshot={order} />
+      </>,
+    );
+    expect(screen.getByRole("heading", { name: "Ofertă acceptată" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Comandă creată" })).toBeInTheDocument();
+    expect(screen.getAllByText("Preț final: 624,82 EUR")).toHaveLength(2);
+    expect(screen.getByText("382,50 EUR")).toBeInTheDocument();
+    expect(screen.getByText("35% · 133,88 EUR")).toBeInTheDocument();
+    expect(screen.getByText("21% · 108,44 EUR")).toBeInTheDocument();
+    expect(
+      screen.getByText("Comanda nu a fost încă eliberată pentru producție."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Oferta acceptată nu a fost încă transformată în comandă."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Creează comanda" })).not.toBeInTheDocument();
   });
 
   it("does not duplicate the commercial formula in the UI module", () => {

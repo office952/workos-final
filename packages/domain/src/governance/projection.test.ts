@@ -24,6 +24,7 @@ describe("system governance projection", () => {
       "reguli comerciale",
       "snapshot ofertă",
       "acceptare ofertă",
+      "snapshot comandă",
     ]);
     expect(byId.EXECUTION?.state).toBe("NOT_IMPLEMENTED");
     expect(byId.ANALYZER?.state).toBe("NOT_IMPLEMENTED");
@@ -185,6 +186,9 @@ describe("system governance projection", () => {
       "IMPLEMENTED",
     );
     expect(governance.roadmap.find((item) => item.id === "quote-acceptance")?.state).toBe(
+      "IMPLEMENTED",
+    );
+    expect(governance.roadmap.find((item) => item.id === "order-snapshot")?.state).toBe(
       "IMPLEMENTED",
     );
     expect(governance.roadmap.find((item) => item.id === "commercial")?.state).toBe(

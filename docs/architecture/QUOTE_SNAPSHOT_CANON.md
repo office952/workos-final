@@ -12,7 +12,8 @@ Confirmed Product Truth
 
 Quote Snapshot                      frozen commercial evidence
   → Quote Acceptance Decision       immutable commercial decision
-    → [later] Order Snapshot
+    → Order Snapshot                frozen commercial job root
+      → [later] Production Release
 ```
 
 Quote Snapshot answers: what technical and commercial truth did we offer?
@@ -32,6 +33,7 @@ An immutable historical copy of one offered configuration and price:
 Acceptance is a separate immutable decision (`qad:{quoteSnapshotId}`).
 It binds `quoteSnapshotId` + persisted `contentHash`.
 The Quote Snapshot stays `FROZEN`. Acceptance does not create Order or production.
+Order Snapshot is a later copy of this accepted freeze. See `docs/architecture/ORDER_SNAPSHOT_CANON.md`.
 
 ## What this is not
 

@@ -184,7 +184,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "COMMERCIAL",
         label: "Commercial",
-        owns: ["preț client", "reguli comerciale", "snapshot ofertă", "acceptare ofertă"],
+        owns: ["preț client", "reguli comerciale", "snapshot ofertă", "acceptare ofertă", "snapshot comandă"],
         state: "IMPLEMENTED",
       },
       {
@@ -212,7 +212,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "commercial",
         label: "Commercial",
         statement:
-          "Prețul client este derivat din EIC planificat. Snapshot-ul de ofertă îngheață acel preț. Acceptarea ofertei este o decizie separată. Comanda nu este implementată.",
+          "Prețul client este derivat din EIC planificat. Snapshot-ul de ofertă îngheață acel preț. Acceptarea ofertei este o decizie separată. Snapshot-ul de comandă copiază oferta acceptată. Eliberarea în producție din comandă nu este implementată.",
         state: "IMPLEMENTED",
       },
       {
@@ -570,7 +570,12 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Acceptare ofertă",
         state: "IMPLEMENTED",
       },
-      { id: "commercial", label: "Comandă", state: "NOT_IMPLEMENTED" },
+      {
+        id: "order-snapshot",
+        label: "Snapshot comandă",
+        state: "IMPLEMENTED",
+      },
+      { id: "commercial", label: "Eliberare producție din comandă", state: "NOT_IMPLEMENTED" },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],
     uiRules: [
@@ -582,7 +587,7 @@ export function projectSystemGovernance(): GovernanceProjection {
     freeze: {
       label: "Politică de freeze",
       state: "PLANNED",
-      note: "Nu este activă. Snapshot-ul de ofertă poate fi acceptat ca decizie separată. Comanda și eliberarea în producție rămân planificate. Snapshot-ul de producție acceptat este separat.",
+      note: "Nu este activă. Snapshot-ul de ofertă acceptată poate fi transformat în snapshot de comandă. Eliberarea în producție din comandă rămâne planificată. Snapshot-ul de producție acceptat (pilot) este separat.",
     },
     capabilityKernelNote:
       "Nucleul de capabilități păstrează identificatorii înghețați. Statusul kernel PLANNED nu înseamnă că primul produs nu există; înseamnă că nucleul nu a fost promovat la ACTIVE.",

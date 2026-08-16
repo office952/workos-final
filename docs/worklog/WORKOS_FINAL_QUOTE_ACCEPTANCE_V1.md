@@ -30,4 +30,5 @@ After **Ofertă salvată**:
 
 ## Next
 
-Order Snapshot copies frozen Quote + this acceptance. No production release yet.
+Order Snapshot now copies frozen Quote + this acceptance.
+Production Release from Order remains later.

@@ -37,3 +37,14 @@ export {
   type QuoteAcceptanceError,
   type QuoteAcceptanceResult,
 } from "./quoteAcceptance.js";
+export {
+  ORDER_SNAPSHOT_ERRORS,
+  ORDER_SNAPSHOT_SCHEMA_VERSION,
+  ORDER_SNAPSHOT_STATUSES,
+  freezeOrderSnapshot,
+  orderSnapshotErrorLabel,
+  type OrderSnapshot,
+  type OrderSnapshotError,
+  type OrderSnapshotResult,
+  type OrderSnapshotStatus,
+} from "./orderSnapshot.js";

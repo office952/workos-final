@@ -10,6 +10,7 @@ import {
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
   freezeAcceptedProductionSnapshot,
+  freezeOrderSnapshot,
   freezeQuoteSnapshot,
   projectCommercialPrice,
   recordQuoteAcceptance,
@@ -69,7 +70,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(10);
+    expect(count.count).toBe(11);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -77,7 +78,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(10);
+    expect(again.count).toBe(11);
     second.close();
   });
 
@@ -275,6 +276,130 @@ describe("product system persistence", () => {
       624.82,
     );
     expect(second).not.toHaveProperty("updateQuoteAcceptance");
+    second.close();
+  });
+
+  it("persists one order snapshot from accepted quote without side effects", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const eic = compileEic(
+      aggregate,
+      composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
+    );
+    const frozen = freezeQuoteSnapshot(
+      truth,
+      aggregate,
+      eic,
+      projectCommercialPrice(eic),
+      { createdAt: "2026-08-17T00:00:00.000Z" },
+    );
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    first.persistQuoteSnapshot(frozen.snapshot);
+    const recorded = recordQuoteAcceptance(frozen.snapshot, {
+      acceptedAt: "2026-08-17T01:00:00.000Z",
+    });
+    expect(recorded.ok).toBe(true);
+    if (!recorded.ok) {
+      return;
+    }
+    first.persistQuoteAcceptance(recorded.decision);
+    const order = freezeOrderSnapshot(frozen.snapshot, recorded.decision, {
+      createdAt: "2026-08-17T02:00:00.000Z",
+    });
+    expect(order.ok).toBe(true);
+    if (!order.ok) {
+      return;
+    }
+    const created = first.persistOrderSnapshot(order.snapshot);
+    const again = first.persistOrderSnapshot({
+      ...order.snapshot,
+      createdAt: "2026-08-17T12:00:00.000Z",
+    });
+    expect(created.created).toBe(true);
+    expect(again.created).toBe(false);
+    expect(again.snapshot.createdAt).toBe("2026-08-17T02:00:00.000Z");
+    expect(again.snapshot.orderSnapshotId).toBe(order.snapshot.orderSnapshotId);
+    expect(first.readQuoteSnapshot(frozen.snapshot.quoteSnapshotId)?.status).toBe(
+      "FROZEN",
+    );
+    expect(first.readQuoteAcceptance(frozen.snapshot.quoteSnapshotId)?.acceptedAt).toBe(
+      "2026-08-17T01:00:00.000Z",
+    );
+    expect(first.readProductionSnapshot("missing")).toBeNull();
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readOrderSnapshot(order.snapshot.orderSnapshotId);
+    const byQuote = second.readOrderSnapshotByQuote(frozen.snapshot.quoteSnapshotId);
+    expect(stored?.eic.total).toBe(382.5);
+    expect(stored?.commercial.grossPrice).toBe(624.82);
+    expect(stored?.commercial.markupPercent).toBe(35);
+    expect(stored?.commercial.vatPercent).toBe(21);
+    expect(stored?.sourceAcceptanceId).toBe(recorded.decision.acceptanceId);
+    expect(byQuote?.orderSnapshotId).toBe(order.snapshot.orderSnapshotId);
+    expect(second.readQuoteSnapshot(frozen.snapshot.quoteSnapshotId)?.status).toBe(
+      "FROZEN",
+    );
+    expect(second).not.toHaveProperty("updateOrderSnapshot");
+    const db = openSqliteDatabase(sqlitePath);
+    const counts = {
+      orders: (db.prepare("SELECT COUNT(*) AS count FROM order_snapshots").get() as { count: number })
+        .count,
+      production: (
+        db.prepare("SELECT COUNT(*) AS count FROM accepted_production_snapshots").get() as {
+          count: number;
+        }
+      ).count,
+      plans: (db.prepare("SELECT COUNT(*) AS count FROM execution_plans").get() as { count: number })
+        .count,
+      tasks: (db.prepare("SELECT COUNT(*) AS count FROM execution_tasks").get() as { count: number })
+        .count,
+      movements: (
+        db.prepare("SELECT COUNT(*) AS count FROM inventory_movements").get() as { count: number }
+      ).count,
+      actuals: (
+        db.prepare("SELECT COUNT(*) AS count FROM execution_task_actual_consumption").get() as {
+          count: number;
+        }
+      ).count,
+    };
+    db.close();
+    expect(counts).toEqual({
+      orders: 1,
+      production: 0,
+      plans: 0,
+      tasks: 0,
+      movements: 0,
+      actuals: 0,
+    });
     second.close();
   });
 

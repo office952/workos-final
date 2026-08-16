@@ -3,6 +3,7 @@ import {
   compileDefinition,
   compileEic,
   compileExecutionPlanPreview,
+  freezeOrderSnapshot,
   freezeQuoteSnapshot,
   projectCommercialPrice,
   recordQuoteAcceptance,
@@ -244,6 +245,67 @@ export function registerProductRoutes(
       });
     },
   );
+
+  app.post(
+    "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/order",
+    (c) => {
+      const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const acceptance = runtime.readQuoteAcceptance(snapshot.quoteSnapshotId);
+      if (!acceptance) {
+        return c.json(
+          {
+            error: "quote_not_accepted",
+            reasons: ["Comanda poate fi creată doar dintr-o ofertă acceptată."],
+          },
+          422,
+        );
+      }
+      const frozen = freezeOrderSnapshot(snapshot, acceptance);
+      if (!frozen.ok) {
+        return c.json(
+          { error: frozen.error, reasons: frozen.reasons },
+          422,
+        );
+      }
+      const stored = runtime.persistOrderSnapshot(frozen.snapshot);
+      return c.json({
+        created: stored.created,
+        orderSnapshot: stored.snapshot,
+        quoteSnapshot: snapshot,
+        acceptanceDecision: acceptance,
+      });
+    },
+  );
+
+  app.get(
+    "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/order",
+    (c) => {
+      const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const orderSnapshot = runtime.readOrderSnapshotByQuote(snapshot.quoteSnapshotId);
+      if (!orderSnapshot) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      return c.json({
+        orderSnapshot,
+        quoteSnapshot: snapshot,
+        acceptanceDecision: runtime.readQuoteAcceptance(snapshot.quoteSnapshotId),
+      });
+    },
+  );
+
+  app.get("/api/products/:productCode/orders/:orderSnapshotId", (c) => {
+    const orderSnapshot = runtime.readOrderSnapshot(c.req.param("orderSnapshotId"));
+    if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    return c.json({ orderSnapshot });
+  });
 
   app.get(
     "/api/products/:productCode/accepted-production-snapshots/:snapshotId",
