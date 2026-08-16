@@ -10,6 +10,7 @@ import type {
   ProductAggregate,
   ProductDefinition,
   ProductTruth,
+  QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
 import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
@@ -33,8 +34,10 @@ import {
   completeExecutionTask,
   confirmReviewedConfiguration,
   createExecutionPlan,
+  acceptQuoteSnapshot,
   createQuoteSnapshot,
   fetchTemplateProjection,
+  readQuoteAcceptance,
   startExecutionTask,
   type TemplateProjection,
 } from "./productApi";
@@ -61,6 +64,7 @@ export function ProductConfigurationPage() {
     definition: ProductDefinition;
     quoteSnapshot?: QuoteSnapshot;
     quoteReused?: boolean;
+    quoteAcceptance?: QuoteAcceptanceDecision;
     snapshot?: AcceptedProductionSnapshot;
     snapshotReused?: boolean;
     executionPlan?: ExecutionPlanView;
@@ -163,10 +167,15 @@ export function ProductConfigurationPage() {
     try {
       const result = await createQuoteSnapshot(productCode, confirmed.definition);
       if (result.ok) {
+        const quoteAcceptance = await readQuoteAcceptance(
+          productCode,
+          result.quoteSnapshot.quoteSnapshotId,
+        );
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteReused: !result.created,
+          quoteAcceptance: quoteAcceptance ?? undefined,
         });
       } else if (result.reason === "review_mismatch") {
         setConfirmed(null);
@@ -179,6 +188,35 @@ export function ProductConfigurationPage() {
         setConfirmNotice(
           result.message ??
             "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.",
+        );
+      }
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAcceptQuote() {
+    if (!confirmed?.quoteSnapshot) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await acceptQuoteSnapshot(
+        productCode,
+        confirmed.quoteSnapshot.quoteSnapshotId,
+      );
+      if (result.ok) {
+        setConfirmed({
+          ...confirmed,
+          quoteSnapshot: result.quoteSnapshot,
+          quoteAcceptance: result.acceptance,
+        });
+      } else {
+        setConfirmNotice(
+          result.message ?? "Oferta nu poate fi acceptată din snapshot-ul curent.",
         );
       }
     } catch {
@@ -325,9 +363,11 @@ export function ProductConfigurationPage() {
           <QuoteSnapshotSection
             price={confirmed.commercialPrice}
             snapshot={confirmed.quoteSnapshot}
+            acceptance={confirmed.quoteAcceptance}
             reused={Boolean(confirmed.quoteReused)}
             busy={busy}
             onFreeze={() => void handleFreezeQuote()}
+            onAccept={() => void handleAcceptQuote()}
           />
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}

@@ -25,7 +25,8 @@ Commercial owns the company policy and the customer-price projection.
 Commercial does not own internal cost, resource rates, technical quantities, inventory, or actual consumption.
 
 Quote Snapshot freezes this projection as historical offer evidence.
-Future Order consumes an accepted quote. Customer acceptance is not implemented.
+Quote Acceptance records that the frozen offer was accepted, without repricing.
+Future Order consumes the accepted quote. Order is not implemented.
 
 ## Policy
 

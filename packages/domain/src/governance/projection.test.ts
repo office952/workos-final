@@ -23,6 +23,7 @@ describe("system governance projection", () => {
       "preț client",
       "reguli comerciale",
       "snapshot ofertă",
+      "acceptare ofertă",
     ]);
     expect(byId.EXECUTION?.state).toBe("NOT_IMPLEMENTED");
     expect(byId.ANALYZER?.state).toBe("NOT_IMPLEMENTED");
@@ -181,6 +182,9 @@ describe("system governance projection", () => {
       governance.roadmap.find((item) => item.id === "commercial-price-rules")?.state,
     ).toBe("IMPLEMENTED");
     expect(governance.roadmap.find((item) => item.id === "quote-snapshot")?.state).toBe(
+      "IMPLEMENTED",
+    );
+    expect(governance.roadmap.find((item) => item.id === "quote-acceptance")?.state).toBe(
       "IMPLEMENTED",
     );
     expect(governance.roadmap.find((item) => item.id === "commercial")?.state).toBe(

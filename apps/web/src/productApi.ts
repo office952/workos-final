@@ -11,6 +11,7 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
 
@@ -209,6 +210,65 @@ export async function createQuoteSnapshot(
   return {
     ok: true,
     created: Boolean(body.created),
+    quoteSnapshot: body.quoteSnapshot,
+  };
+}
+
+export async function readQuoteAcceptance(
+  productCode: string,
+  quoteSnapshotId: string,
+): Promise<QuoteAcceptanceDecision | null> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}/acceptance`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ acceptanceDecision?: QuoteAcceptanceDecision }>(response);
+  if (!response.ok || !body.acceptanceDecision) {
+    throw new Error("quote_acceptance_unavailable");
+  }
+  return body.acceptanceDecision;
+}
+
+export async function acceptQuoteSnapshot(
+  productCode: string,
+  quoteSnapshotId: string,
+): Promise<
+  | { ok: true; created: boolean; acceptance: QuoteAcceptanceDecision; quoteSnapshot: QuoteSnapshot }
+  | { ok: false; reason: "not_found" | "quote_not_acceptable" | "incompatible_quote"; message?: string }
+> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}/acceptance`,
+    { method: "POST" },
+  );
+  const body = await readJson<{
+    created?: boolean;
+    acceptanceDecision?: QuoteAcceptanceDecision;
+    quoteSnapshot?: QuoteSnapshot;
+    error?: string;
+    reasons?: string[];
+  }>(response);
+  if (response.status === 404) {
+    return { ok: false, reason: "not_found" };
+  }
+  if (
+    response.status === 422 &&
+    (body.error === "quote_not_acceptable" || body.error === "incompatible_quote")
+  ) {
+    return {
+      ok: false,
+      reason: body.error,
+      message: body.reasons?.[0],
+    };
+  }
+  if (!response.ok || !body.acceptanceDecision || !body.quoteSnapshot) {
+    throw new Error("quote_acceptance_unavailable");
+  }
+  return {
+    ok: true,
+    created: Boolean(body.created),
+    acceptance: body.acceptanceDecision,
     quoteSnapshot: body.quoteSnapshot,
   };
 }

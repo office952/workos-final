@@ -13,6 +13,7 @@ import {
   type ProductIdentityFact,
   type ProductTemplate,
   type ProductTruth,
+  type QuoteAcceptanceDecision,
   type QuoteSnapshot,
 } from "@workos-final/domain";
 import {
@@ -344,16 +345,47 @@ export function CommercialPriceSection({
 export function QuoteSnapshotSection({
   price,
   snapshot,
+  acceptance,
   reused,
   busy,
   onFreeze,
+  onAccept,
 }: {
   price: CommercialPriceProjection;
   snapshot?: QuoteSnapshot;
+  acceptance?: QuoteAcceptanceDecision;
   reused: boolean;
   busy: boolean;
   onFreeze: () => void;
+  onAccept: () => void;
 }) {
+  if (snapshot && acceptance) {
+    return (
+      <section className="result-section quote-section">
+        <div className="commercial-summary">
+          <h3>Ofertă acceptată</h3>
+          <StatusChip label="Acceptată" tone="ok" />
+        </div>
+        <p className="commercial-gross">
+          Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
+        </p>
+        <p>
+          Acceptată {new Date(acceptance.acceptedAt).toLocaleString("ro-RO")} · Politică comercială v
+          {snapshot.commercial.policyVersion}
+        </p>
+        <p className="page-lead">Oferta acceptată nu a fost încă transformată în comandă.</p>
+        <details className="snapshot-details">
+          <summary>Detalii</summary>
+          <ul>
+            <li>Referință ofertă: {snapshot.quoteSnapshotId}</li>
+            <li>Produs: {snapshot.productLabel}</li>
+            <li>Stare ofertă: Înghețată</li>
+          </ul>
+        </details>
+      </section>
+    );
+  }
+
   if (snapshot) {
     return (
       <section className="result-section quote-section">
@@ -397,6 +429,15 @@ export function QuoteSnapshotSection({
           Politică comercială v{snapshot.commercial.policyVersion} ·{" "}
           {new Date(snapshot.createdAt).toLocaleString("ro-RO")}
         </p>
+        <p className="page-lead">
+          Înregistrează faptul că această ofertă a fost acceptată. Nu creează comanda și nu pornește
+          producția.
+        </p>
+        <div className="action-row">
+          <button type="button" onClick={onAccept} disabled={busy}>
+            Acceptă oferta
+          </button>
+        </div>
         <details className="snapshot-details">
           <summary>Detalii</summary>
           <ul>

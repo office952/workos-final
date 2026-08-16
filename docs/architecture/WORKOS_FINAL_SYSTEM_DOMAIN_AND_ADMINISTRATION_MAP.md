@@ -88,7 +88,7 @@ WorkOS Final
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
-│   ├── Quote acceptance                    NOT_IMPLEMENTED
+│   ├── Quote acceptance                    IMPLEMENTED_CURRENT / BASIC
 │   └── Order Snapshot                      NOT_IMPLEMENTED
 ├── Execution                               IMPLEMENTED_CURRENT / BASIC
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
@@ -131,7 +131,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Commercial | Customer price rules, current-policy projection, and Quote Snapshot freeze. Order remains later. | EIC authority, ProductTemplate, execution actuals, resource rates |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, and Quote Acceptance. Order remains later. | EIC authority, ProductTemplate, execution actuals, resource rates |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -278,7 +278,7 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Price rules and Quote Snapshot are implemented. Customer acceptance and Order are not.
+Price rules, Quote Snapshot, and Quote Acceptance are implemented. Order is not.
 
 ```text
 confirmed Product Truth
@@ -287,7 +287,7 @@ confirmed Product Truth
 → Commercial Price Rules
 → customer price projection
 → Quote Snapshot
-→ [later] acceptance
+→ Quote Acceptance Decision
 → [later] Order Snapshot
 ```
 
@@ -327,8 +327,8 @@ ProductTemplate + FormSchema
 ProductTruth + planned EIC + Commercial rules
   → customer price projection
   → Quote Snapshot
-  → [later] acceptance / Order Snapshot
-    → Order Snapshot
+  → Quote Acceptance Decision
+    → [later] Order Snapshot
       → ExecutionPlan
         → Tasks / Operations
           → Employee assignment
@@ -443,7 +443,8 @@ Settings versions: keep previous active values as history after a new version is
 | HR, Pontaj, reservations, purchasing | PLANNED |
 | Commercial price rules | IMPLEMENTED_CURRENT / BASIC |
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
-| Quote acceptance, Order Snapshot | PLANNED |
+| Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
+| Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
 | Capability kernel promotion to ACTIVE | FOUNDATION_ONLY (IDs frozen) |

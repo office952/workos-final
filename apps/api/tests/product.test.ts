@@ -301,6 +301,91 @@ describe("product configuration API", () => {
     expect(items.every((item) => item.movementCount === 0)).toBe(true);
   });
 
+  it("records quote acceptance against a persisted snapshot without side effects", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quote = (await readBody(createdQuote)).quoteSnapshot as JsonObject;
+    const quoteId = quote.quoteSnapshotId as string;
+    const acceptPath = `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/acceptance`;
+    const first = await app.request(acceptPath, { method: "POST" });
+    const second = await app.request(acceptPath, { method: "POST" });
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    const created = await readBody(first);
+    const reused = await readBody(second);
+    const decision = created.acceptanceDecision as JsonObject;
+    expect(created.created).toBe(true);
+    expect(reused.created).toBe(false);
+    expect((reused.acceptanceDecision as JsonObject).acceptanceId).toBe(
+      decision.acceptanceId,
+    );
+    expect(decision.quoteSnapshotId).toBe(quoteId);
+    expect(decision.quoteContentHash).toBe(quote.contentHash);
+    expect(typeof decision.acceptedAt).toBe("string");
+    expect((created.quoteSnapshot as JsonObject).status).toBe("FROZEN");
+    expect((created.quoteSnapshot as JsonObject).commercial as JsonObject).toMatchObject({
+      grossPrice: 624.82,
+    });
+    expect(((created.quoteSnapshot as JsonObject).eic as JsonObject).total).toBe(382.5);
+    expect(created.orderSnapshot).toBeUndefined();
+
+    const read = await app.request(acceptPath);
+    expect(read.status).toBe(200);
+    expect(((await readBody(read)).acceptanceDecision as JsonObject).quoteContentHash).toBe(
+      quote.contentHash,
+    );
+
+    const rereadQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}`,
+    );
+    expect(((await readBody(rereadQuote)).quoteSnapshot as JsonObject).status).toBe("FROZEN");
+
+    expect((await app.request("/api/execution-plans/missing")).status).toBe(404);
+    const inventory = await app.request("/api/inventory");
+    const items = ((await readBody(inventory)).inventory as { items: Array<JsonObject> })
+      .items;
+    expect(items.every((item) => item.movementCount === 0)).toBe(true);
+  });
+
+  it("does not accept an unknown or mismatched quote snapshot", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quoteId = ((await readBody(createdQuote)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    const missing = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/qts:missing/acceptance`,
+      { method: "POST" },
+    );
+    const mismatch = await app.request(
+      `/api/products/other-product/quote-snapshots/${quoteId}/acceptance`,
+      { method: "POST" },
+    );
+    expect(missing.status).toBe(404);
+    expect(mismatch.status).toBe(404);
+  });
+
   it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {
     const compiled = await createApp().request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,

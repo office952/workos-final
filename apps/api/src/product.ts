@@ -5,6 +5,7 @@ import {
   compileExecutionPlanPreview,
   freezeQuoteSnapshot,
   projectCommercialPrice,
+  recordQuoteAcceptance,
   composeProductProcesses,
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
@@ -202,6 +203,47 @@ export function registerProductRoutes(
     }
     return c.json({ quoteSnapshot: snapshot });
   });
+
+  app.post(
+    "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/acceptance",
+    (c) => {
+      const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const recorded = recordQuoteAcceptance(snapshot);
+      if (!recorded.ok) {
+        return c.json(
+          { error: recorded.error, reasons: recorded.reasons },
+          422,
+        );
+      }
+      const stored = runtime.persistQuoteAcceptance(recorded.decision);
+      return c.json({
+        created: stored.created,
+        acceptanceDecision: stored.decision,
+        quoteSnapshot: snapshot,
+      });
+    },
+  );
+
+  app.get(
+    "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/acceptance",
+    (c) => {
+      const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const decision = runtime.readQuoteAcceptance(snapshot.quoteSnapshotId);
+      if (!decision) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      return c.json({
+        acceptanceDecision: decision,
+        quoteSnapshot: snapshot,
+      });
+    },
+  );
 
   app.get(
     "/api/products/:productCode/accepted-production-snapshots/:snapshotId",

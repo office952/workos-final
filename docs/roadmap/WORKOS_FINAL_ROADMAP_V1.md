@@ -59,7 +59,7 @@ FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
 - PHASE 8 = PILOT_VALIDATED
 
 These phases are not universally COMPLETE.
-Commercial price rules and Quote Snapshot are IMPLEMENTED_CURRENT / BASIC. Quote acceptance, Order, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
+Commercial price rules, Quote Snapshot, and Quote Acceptance are IMPLEMENTED_CURRENT / BASIC. Order, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
 
 ## Finalization map
 
@@ -100,7 +100,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | HR, Pontaj, reservations, purchasing | LATER |
 | Commercial price rules foundation | IMPLEMENTED_CURRENT / BASIC |
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
-| Quote acceptance, Order Snapshot | LATER |
+| Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
+| Order Snapshot | LATER |
 | Reporting, Documents, ACM, Logo | LATER |
 
 Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

@@ -28,3 +28,12 @@ export {
   type QuoteSnapshotResult,
   type QuoteSnapshotStatus,
 } from "./quoteSnapshot.js";
+export {
+  QUOTE_ACCEPTANCE_ERRORS,
+  QUOTE_ACCEPTANCE_SCHEMA_VERSION,
+  quoteAcceptanceErrorLabel,
+  recordQuoteAcceptance,
+  type QuoteAcceptanceDecision,
+  type QuoteAcceptanceError,
+  type QuoteAcceptanceResult,
+} from "./quoteAcceptance.js";

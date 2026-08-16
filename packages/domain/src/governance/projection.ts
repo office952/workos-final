@@ -184,7 +184,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "COMMERCIAL",
         label: "Commercial",
-        owns: ["preț client", "reguli comerciale", "snapshot ofertă"],
+        owns: ["preț client", "reguli comerciale", "snapshot ofertă", "acceptare ofertă"],
         state: "IMPLEMENTED",
       },
       {
@@ -212,7 +212,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "commercial",
         label: "Commercial",
         statement:
-          "Prețul client este derivat din EIC planificat. Snapshot-ul de ofertă îngheață acel preț. Acceptarea clientului și comanda nu sunt implementate.",
+          "Prețul client este derivat din EIC planificat. Snapshot-ul de ofertă îngheață acel preț. Acceptarea ofertei este o decizie separată. Comanda nu este implementată.",
         state: "IMPLEMENTED",
       },
       {
@@ -565,7 +565,12 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Snapshot ofertă",
         state: "IMPLEMENTED",
       },
-      { id: "commercial", label: "Acceptare ofertă / comandă", state: "NOT_IMPLEMENTED" },
+      {
+        id: "quote-acceptance",
+        label: "Acceptare ofertă",
+        state: "IMPLEMENTED",
+      },
+      { id: "commercial", label: "Comandă", state: "NOT_IMPLEMENTED" },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],
     uiRules: [
@@ -577,7 +582,7 @@ export function projectSystemGovernance(): GovernanceProjection {
     freeze: {
       label: "Politică de freeze",
       state: "PLANNED",
-      note: "Nu este activă. Snapshot-ul de ofertă îngheață prețul oferit. Acceptarea clientului și comanda rămân planificate. Snapshot-ul de producție acceptat este separat.",
+      note: "Nu este activă. Snapshot-ul de ofertă poate fi acceptat ca decizie separată. Comanda și eliberarea în producție rămân planificate. Snapshot-ul de producție acceptat este separat.",
     },
     capabilityKernelNote:
       "Nucleul de capabilități păstrează identificatorii înghețați. Statusul kernel PLANNED nu înseamnă că primul produs nu există; înseamnă că nucleul nu a fost promovat la ACTIVE.",

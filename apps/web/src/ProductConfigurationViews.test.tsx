@@ -9,6 +9,7 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
 import {
@@ -279,6 +280,7 @@ describe("Product configuration views", () => {
         reused={false}
         busy={false}
         onFreeze={() => undefined}
+        onAccept={() => undefined}
       />,
     );
     expect(screen.getByRole("button", { name: "Îngheață oferta" })).toBeInTheDocument();
@@ -288,6 +290,7 @@ describe("Product configuration views", () => {
         reused={false}
         busy={false}
         onFreeze={() => undefined}
+        onAccept={() => undefined}
       />,
     );
     expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
@@ -322,12 +325,56 @@ describe("Product configuration views", () => {
         reused={false}
         busy={false}
         onFreeze={() => undefined}
+        onAccept={() => undefined}
       />,
     );
     expect(screen.getByRole("heading", { name: "Ofertă salvată" })).toBeInTheDocument();
     expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
     expect(screen.getByText("Politică comercială v1", { exact: false })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Acceptă oferta" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Acceptă" })).not.toBeInTheDocument();
+  });
+
+  it("renders accepted quote from the frozen snapshot only", () => {
+    const snapshot = {
+      quoteSnapshotId: "qts:hidden",
+      productLabel: "Litere",
+      createdAt: "2026-08-17T00:00:00.000Z",
+      commercial: {
+        policyVersion: 1,
+        markupPercent: 35,
+        markupAmount: 133.88,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+      },
+      eic: { total: 382.5, currency: "EUR" },
+    } as unknown as QuoteSnapshot;
+    const acceptance = {
+      acceptanceId: "qad:qts:hidden",
+      acceptedAt: "2026-08-17T01:00:00.000Z",
+    } as unknown as QuoteAcceptanceDecision;
+    render(
+      <QuoteSnapshotSection
+        price={{ completeness: "COMPLETE" } as CommercialPriceProjection}
+        snapshot={snapshot}
+        acceptance={acceptance}
+        reused={false}
+        busy={false}
+        onFreeze={() => undefined}
+        onAccept={() => undefined}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "Ofertă acceptată" })).toBeInTheDocument();
+    expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
+    expect(
+      screen.getByText("Oferta acceptată nu a fost încă transformată în comandă."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Acceptă oferta" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Comandă creată")).not.toBeInTheDocument();
   });
 
   it("does not duplicate the commercial formula in the UI module", () => {

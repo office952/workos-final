@@ -7,6 +7,7 @@ import {
   type InventoryStockProjection,
   type Person,
   type PersonMutationResult,
+  type QuoteAcceptanceDecision,
   type QuoteSnapshot,
   type TaskCompletionInput,
   type TaskMutationResult,
@@ -38,7 +39,9 @@ import {
   persistRetiredPerson,
 } from "../people/store.js";
 import {
+  getQuoteAcceptanceBySnapshotId,
   getQuoteSnapshot,
+  insertQuoteAcceptance,
   insertQuoteSnapshot,
 } from "../commercial/store.js";
 import {
@@ -72,6 +75,11 @@ export type ProductSystemRuntime = {
     snapshot: QuoteSnapshot;
   };
   readQuoteSnapshot(quoteSnapshotId: string): QuoteSnapshot | null;
+  persistQuoteAcceptance(decision: QuoteAcceptanceDecision): {
+    created: boolean;
+    decision: QuoteAcceptanceDecision;
+  };
+  readQuoteAcceptance(quoteSnapshotId: string): QuoteAcceptanceDecision | null;
   persistExecutionPlan(record: ExecutionPlanRecord): {
     created: boolean;
     record: ExecutionPlanRecord;
@@ -129,6 +137,12 @@ export function createProductSystemRuntime(
     },
     readQuoteSnapshot(quoteSnapshotId) {
       return getQuoteSnapshot(db, quoteSnapshotId);
+    },
+    persistQuoteAcceptance(decision) {
+      return insertQuoteAcceptance(db, decision);
+    },
+    readQuoteAcceptance(quoteSnapshotId) {
+      return getQuoteAcceptanceBySnapshotId(db, quoteSnapshotId);
     },
     persistExecutionPlan(record) {
       return insertExecutionPlanRecord(db, record);

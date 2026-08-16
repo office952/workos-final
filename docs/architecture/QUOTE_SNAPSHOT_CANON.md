@@ -11,7 +11,7 @@ Confirmed Product Truth
   → Commercial Price projection     live, current policy
 
 Quote Snapshot                      frozen commercial evidence
-  → [later] customer acceptance
+  → Quote Acceptance Decision       immutable commercial decision
     → [later] Order Snapshot
 ```
 
@@ -27,9 +27,14 @@ An immutable historical copy of one offered configuration and price:
 - planned EIC used for the offer
 - Commercial policy id/version and calculated amounts
 
+## Acceptance
+
+Acceptance is a separate immutable decision (`qad:{quoteSnapshotId}`).
+It binds `quoteSnapshotId` + persisted `contentHash`.
+The Quote Snapshot stays `FROZEN`. Acceptance does not create Order or production.
+
 ## What this is not
 
-Not customer acceptance.
 Not an Order.
 Not a PDF.
 Not a Production Snapshot.

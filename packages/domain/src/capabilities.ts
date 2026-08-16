@@ -122,8 +122,13 @@ export const capabilities: readonly CapabilityDefinition[] = [
   {
     id: "COMMERCIAL",
     responsibility:
-      "Owns customer commercial price, company commercial rules, and Quote Snapshot freeze above planned EIC. Quote acceptance and Order remain later.",
-    owns: ["customer commercial price", "commercial rules", "Quote Snapshot"],
+      "Owns customer commercial price, company commercial rules, Quote Snapshot freeze, and Quote Acceptance above planned EIC. Order remains later.",
+    owns: [
+      "customer commercial price",
+      "commercial rules",
+      "Quote Snapshot",
+      "Quote Acceptance",
+    ],
     doesNotOwn: [
       "EIC authority",
       "Product Template",
@@ -132,7 +137,7 @@ export const capabilities: readonly CapabilityDefinition[] = [
       "technical quantities",
     ],
     consumes: ["planned EIC total", "EIC currency", "EIC completeness"],
-    produces: ["commercial price projection", "Quote Snapshot"],
+    produces: ["commercial price projection", "Quote Snapshot", "Quote Acceptance"],
     currentPhase: "FOUNDATION — Commercial price rules",
     status: "PLANNED",
   },
