@@ -38,9 +38,11 @@ import {
   createExecutionPlan,
   acceptQuoteSnapshot,
   createOrderSnapshot,
+  createProductionRelease,
   createQuoteSnapshot,
   fetchTemplateProjection,
   readOrderSnapshot,
+  readProductionRelease,
   readQuoteAcceptance,
   startExecutionTask,
   type TemplateProjection,
@@ -179,12 +181,17 @@ export function ProductConfigurationPage() {
         const orderSnapshot = quoteAcceptance
           ? await readOrderSnapshot(productCode, result.quoteSnapshot.quoteSnapshotId)
           : null;
+        const productionRelease = orderSnapshot
+          ? await readProductionRelease(productCode, orderSnapshot.orderSnapshotId)
+          : null;
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteReused: !result.created,
           quoteAcceptance: quoteAcceptance ?? undefined,
           orderSnapshot: orderSnapshot ?? undefined,
+          snapshot: productionRelease ?? confirmed.snapshot,
+          snapshotReused: productionRelease ? true : confirmed.snapshotReused,
         });
       } else if (result.reason === "review_mismatch") {
         setConfirmed(null);
@@ -222,11 +229,16 @@ export function ProductConfigurationPage() {
           productCode,
           result.quoteSnapshot.quoteSnapshotId,
         );
+        const productionRelease = orderSnapshot
+          ? await readProductionRelease(productCode, orderSnapshot.orderSnapshotId)
+          : null;
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteAcceptance: result.acceptance,
           orderSnapshot: orderSnapshot ?? undefined,
+          snapshot: productionRelease ?? confirmed.snapshot,
+          snapshotReused: productionRelease ? true : confirmed.snapshotReused,
         });
       } else {
         setConfirmNotice(
@@ -252,15 +264,51 @@ export function ProductConfigurationPage() {
         confirmed.quoteSnapshot.quoteSnapshotId,
       );
       if (result.ok) {
+        const productionRelease = await readProductionRelease(
+          productCode,
+          result.orderSnapshot.orderSnapshotId,
+        );
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteAcceptance: result.acceptance,
           orderSnapshot: result.orderSnapshot,
+          snapshot: productionRelease ?? confirmed.snapshot,
+          snapshotReused: productionRelease ? true : confirmed.snapshotReused,
         });
       } else {
         setConfirmNotice(
           result.message ?? "Comanda nu poate fi creată din oferta curentă.",
+        );
+      }
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleReleaseProduction() {
+    if (!confirmed?.orderSnapshot) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createProductionRelease(
+        productCode,
+        confirmed.orderSnapshot.orderSnapshotId,
+      );
+      if (result.ok) {
+        setConfirmed({
+          ...confirmed,
+          orderSnapshot: result.orderSnapshot,
+          snapshot: result.snapshot,
+          snapshotReused: !result.created,
+        });
+      } else {
+        setConfirmNotice(
+          result.message ?? "Comanda nu poate fi eliberată pentru producție.",
         );
       }
     } catch {
@@ -416,19 +464,33 @@ export function ProductConfigurationPage() {
             onCreateOrder={() => void handleCreateOrder()}
           />
           {confirmed.orderSnapshot ? (
-            <OrderSnapshotSection snapshot={confirmed.orderSnapshot} />
+            <OrderSnapshotSection
+              snapshot={confirmed.orderSnapshot}
+              release={
+                confirmed.snapshot?.sourceOrderSnapshotId ===
+                confirmed.orderSnapshot.orderSnapshotId
+                  ? confirmed.snapshot
+                  : undefined
+              }
+              busy={busy}
+              onRelease={
+                confirmed.snapshot?.sourceOrderSnapshotId ===
+                confirmed.orderSnapshot.orderSnapshotId
+                  ? undefined
+                  : () => void handleReleaseProduction()
+              }
+            />
           ) : null}
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}
             basedOnSnapshot={Boolean(confirmed.snapshot)}
           />
 
-          {confirmed.snapshot ? null : (
+          {confirmed.snapshot || confirmed.orderSnapshot ? null : (
             <div className="lifecycle-cta">
               <p className="page-lead">
-                {confirmed.orderSnapshot
-                  ? "Calea de atelier rămâne separată. Nu eliberează comanda în producție."
-                  : "Îngheață configurația tehnică pentru execuție."}
+                Atelier / test tehnic. Îngheață configurația tehnică pentru execuție, fără comandă
+                comercială.
               </p>
               <div className="action-row">
                 <button type="button" onClick={() => void handleAcceptProduction()} disabled={busy}>
@@ -448,9 +510,11 @@ export function ProductConfigurationPage() {
             </div>
           )}
 
-          {confirmed.snapshot ? (
+          {confirmed.snapshot &&
+          (!confirmed.orderSnapshot ||
+            confirmed.snapshot.sourceOrderSnapshotId === confirmed.orderSnapshot.orderSnapshotId) ? (
             <>
-              {confirmed.executionPlan ? null : (
+              {confirmed.executionPlan || confirmed.orderSnapshot ? null : (
                 <div className="action-row">
                   <button
                     type="button"

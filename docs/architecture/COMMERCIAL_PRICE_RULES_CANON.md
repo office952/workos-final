@@ -28,7 +28,7 @@ Quote Snapshot freezes this projection as historical offer evidence.
 Quote Acceptance records that the frozen offer was accepted, without repricing.
 Order Snapshot copies the accepted freeze and becomes the commercial job root.
 Quote also freezes generic production-input evidence used later for Release.
-Order copies that evidence. Order does not reprice. Production Release from Order is not implemented.
+Order copies that evidence. Order does not reprice. Production Release from Order copies the frozen planned EIC and does not reprice.
 
 ## Policy
 

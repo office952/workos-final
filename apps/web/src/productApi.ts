@@ -291,6 +291,74 @@ export async function readOrderSnapshot(
   return body.orderSnapshot;
 }
 
+export async function readProductionRelease(
+  productCode: string,
+  orderSnapshotId: string,
+): Promise<AcceptedProductionSnapshot | null> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/orders/${encodeURIComponent(orderSnapshotId)}/production-release`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ snapshot?: AcceptedProductionSnapshot }>(response);
+  if (!response.ok || !body.snapshot) {
+    throw new Error("production_release_unavailable");
+  }
+  return body.snapshot;
+}
+
+export async function createProductionRelease(
+  productCode: string,
+  orderSnapshotId: string,
+): Promise<
+  | {
+      ok: true;
+      created: boolean;
+      snapshot: AcceptedProductionSnapshot;
+      orderSnapshot: OrderSnapshot;
+    }
+  | {
+      ok: false;
+      reason: "not_found" | "incompatible_order_source" | "missing_production_input";
+      message?: string;
+    }
+> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/orders/${encodeURIComponent(orderSnapshotId)}/production-release`,
+    { method: "POST" },
+  );
+  const body = await readJson<{
+    created?: boolean;
+    snapshot?: AcceptedProductionSnapshot;
+    orderSnapshot?: OrderSnapshot;
+    error?: string;
+    reasons?: string[];
+  }>(response);
+  if (response.status === 404) {
+    return { ok: false, reason: "not_found" };
+  }
+  if (
+    response.status === 422 &&
+    (body.error === "incompatible_order_source" || body.error === "missing_production_input")
+  ) {
+    return {
+      ok: false,
+      reason: body.error,
+      message: body.reasons?.[0],
+    };
+  }
+  if (!response.ok || !body.snapshot || !body.orderSnapshot) {
+    throw new Error("production_release_unavailable");
+  }
+  return {
+    ok: true,
+    created: Boolean(body.created),
+    snapshot: body.snapshot,
+    orderSnapshot: body.orderSnapshot,
+  };
+}
+
 export async function createOrderSnapshot(
   productCode: string,
   quoteSnapshotId: string,

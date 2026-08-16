@@ -11,6 +11,7 @@ import {
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
   freezeAcceptedProductionSnapshot,
+  freezeProductionReleaseFromOrder,
   lettersProcessCompositionInspections,
   materializeExecutionPlanFromSnapshot,
   projectExecutionPlanView,
@@ -307,6 +308,47 @@ export function registerProductRoutes(
     }
     return c.json({ orderSnapshot });
   });
+
+  app.post(
+    "/api/products/:productCode/orders/:orderSnapshotId/production-release",
+    (c) => {
+      const orderSnapshot = runtime.readOrderSnapshot(c.req.param("orderSnapshotId"));
+      if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const frozen = freezeProductionReleaseFromOrder(orderSnapshot);
+      if (!frozen.ok) {
+        return c.json(
+          { error: frozen.error, reasons: frozen.reasons },
+          422,
+        );
+      }
+      const stored = runtime.acceptProductionSnapshot(frozen.snapshot);
+      return c.json({
+        created: stored.created,
+        snapshot: stored.snapshot,
+        orderSnapshot,
+      });
+    },
+  );
+
+  app.get(
+    "/api/products/:productCode/orders/:orderSnapshotId/production-release",
+    (c) => {
+      const orderSnapshot = runtime.readOrderSnapshot(c.req.param("orderSnapshotId"));
+      if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const snapshot = runtime.readProductionReleaseByOrder(orderSnapshot.orderSnapshotId);
+      if (!snapshot) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      return c.json({
+        snapshot,
+        orderSnapshot,
+      });
+    },
+  );
 
   app.get(
     "/api/products/:productCode/accepted-production-snapshots/:snapshotId",

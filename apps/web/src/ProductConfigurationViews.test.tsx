@@ -435,7 +435,7 @@ describe("Product configuration views", () => {
           onAccept={() => undefined}
           onCreateOrder={() => undefined}
         />
-        <OrderSnapshotSection snapshot={order} />
+        <OrderSnapshotSection snapshot={order} onRelease={() => undefined} />
       </>,
     );
     expect(screen.getByRole("heading", { name: "Ofertă acceptată" })).toBeInTheDocument();
@@ -447,10 +447,58 @@ describe("Product configuration views", () => {
     expect(
       screen.getByText("Comanda nu a fost încă eliberată pentru producție."),
     ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Eliberează pentru producție" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Acceptă pentru producție" })).not.toBeInTheDocument();
     expect(
       screen.queryByText("Oferta acceptată nu a fost încă transformată în comandă."),
     ).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Creează comanda" })).not.toBeInTheDocument();
+  });
+
+  it("shows the released commercial state without a second production accept action", () => {
+    const order = {
+      orderSnapshotId: "ord:qad:qts:hidden:hash",
+      createdAt: "2026-08-17T02:00:00.000Z",
+      sourceAcceptedAt: "2026-08-17T01:00:00.000Z",
+      sourceQuoteSnapshotId: "qts:hidden",
+      productLabel: "Litere",
+      commercial: {
+        markupPercent: 35,
+        markupAmount: 133.88,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+      },
+      eic: { total: 382.5, currency: "EUR" },
+    } as unknown as OrderSnapshot;
+    const release = {
+      snapshotId: "aps:released",
+      releaseSource: "ORDER",
+      sourceOrderSnapshotId: order.orderSnapshotId,
+      productLabel: "Litere",
+      createdAt: "2026-08-17T03:00:00.000Z",
+      operations: Array.from({ length: 12 }),
+      eic: { total: 382.5, currency: "EUR", completeness: "COMPLETE" },
+    } as unknown as AcceptedProductionSnapshot;
+    render(
+      <>
+        <OrderSnapshotSection snapshot={order} release={release} />
+        <AcceptedSnapshotSection
+          snapshot={release}
+          reused={false}
+          onCreatePlan={() => undefined}
+          busy={false}
+          hasExecutionPlan={false}
+        />
+      </>,
+    );
+    expect(screen.getByText("Eliberată pentru producție.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Eliberată pentru producție" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Eliberează pentru producție" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Acceptă pentru producție" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Creează planul de execuție" })).toBeInTheDocument();
   });
 
   it("does not duplicate the commercial formula in the UI module", () => {

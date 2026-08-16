@@ -50,6 +50,7 @@ import {
 } from "../commercial/store.js";
 import {
   getAcceptedProductionSnapshot,
+  getAcceptedProductionSnapshotByOrder,
   insertAcceptedProductionSnapshot,
 } from "../production/store.js";
 import {
@@ -74,6 +75,7 @@ export type ProductSystemRuntime = {
     snapshot: AcceptedProductionSnapshot;
   };
   readProductionSnapshot(snapshotId: string): AcceptedProductionSnapshot | null;
+  readProductionReleaseByOrder(orderSnapshotId: string): AcceptedProductionSnapshot | null;
   persistQuoteSnapshot(snapshot: QuoteSnapshot): {
     created: boolean;
     snapshot: QuoteSnapshot;
@@ -141,6 +143,9 @@ export function createProductSystemRuntime(
     },
     readProductionSnapshot(snapshotId) {
       return getAcceptedProductionSnapshot(db, snapshotId);
+    },
+    readProductionReleaseByOrder(orderSnapshotId) {
+      return getAcceptedProductionSnapshotByOrder(db, orderSnapshotId);
     },
     persistQuoteSnapshot(snapshot) {
       return insertQuoteSnapshot(db, snapshot);

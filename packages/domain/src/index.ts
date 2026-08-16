@@ -316,11 +316,18 @@ export {
 export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
   FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
+  PRODUCTION_RELEASE_SOURCES,
   copyFrozenProductionInput,
   freezeAcceptedProductionSnapshot,
   freezeProductionInput,
+  freezeProductionReleaseFromOrder,
+  isOrderProductionRelease,
+  productionReleaseErrorLabel,
   productionWorkFromSnapshot,
   type AcceptedProductionSnapshot,
   type FrozenProductionInput,
   type FrozenProductionWork,
+  type ProductionReleaseError,
+  type ProductionReleaseResult,
+  type ProductionReleaseSource,
 } from "./production/index.js";

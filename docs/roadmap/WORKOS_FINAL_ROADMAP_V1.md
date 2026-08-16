@@ -46,7 +46,7 @@ Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClas
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan. Composition cost completeness is a projection of EIC / cost-evidence completeness, not a hardcoded PARTIAL.
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none at 60 mm is 382.50 EUR COMPLETE on owner-confirmed workshop evidence. Aluminium 3 EUR/m is confirmed only for 60 mm; 30 / 80 / 100 mm stay PARTIAL. Forming is 5 EUR/m. Vinyl / RAL remain development evidence. Historical 595 snapshots stay frozen. Analyzer handoff is deferred; it is not the current planned-EIC blocker.
-Confirmed COMPLETE planned EIC now projects a customer price from one company Commercial policy. Canonical 60 mm none/none is 382.50 EUR internal → 624.82 EUR gross. That COMPLETE offer can be frozen as an immutable Quote Snapshot without Production Snapshot or execution. Quote freeze also freezes generic production-input evidence. An accepted Quote can freeze an Order Snapshot that copies those facts and that evidence. Production Release from Order is not implemented.
+Confirmed COMPLETE planned EIC now projects a customer price from one company Commercial policy. Canonical 60 mm none/none is 382.50 EUR internal → 624.82 EUR gross. That COMPLETE offer can be frozen as an immutable Quote Snapshot without Production Snapshot or execution. Quote freeze also freezes generic production-input evidence. An accepted Quote can freeze an Order Snapshot that copies those facts and that evidence. An Order can be released to production from that frozen input. Commercial ExecutionPlan from that Release remains a separate action.
 A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, explicit task executor assignment, actual resource consumption, inventory stock movements, and actual internal cost projection are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, Operational Processes, and Stoc. HR, Pontaj, scheduling, capacity, reservations and purchasing remain NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
@@ -59,7 +59,7 @@ FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
 - PHASE 8 = PILOT_VALIDATED
 
 These phases are not universally COMPLETE.
-Commercial price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, and frozen production-input alignment are IMPLEMENTED_CURRENT / BASIC. Production Release from Order, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
+Commercial price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, and Production Release from Order are IMPLEMENTED_CURRENT / BASIC. Commercial ExecutionPlan from Order Release, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
 
 ## Finalization map
 
@@ -103,7 +103,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Frozen production input alignment | IMPLEMENTED_CURRENT / BASIC |
-| Production Release from Order | NOT_IMPLEMENTED |
+| Production Release from Order | IMPLEMENTED_CURRENT / BASIC |
+| Execution from Order Release | NOT_IMPLEMENTED |
 | Reporting, Documents, ACM, Logo | LATER |
 
 Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

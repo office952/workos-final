@@ -10,6 +10,12 @@ export function insertAcceptedProductionSnapshot(
   db: SqliteDatabase,
   snapshot: AcceptedProductionSnapshot,
 ): { created: boolean; snapshot: AcceptedProductionSnapshot } {
+  if (snapshot.sourceOrderSnapshotId) {
+    const byOrder = getAcceptedProductionSnapshotByOrder(db, snapshot.sourceOrderSnapshotId);
+    if (byOrder) {
+      return { created: false, snapshot: byOrder };
+    }
+  }
   const existing = getAcceptedProductionSnapshotByHash(db, snapshot.contentHash);
   if (existing) {
     return { created: false, snapshot: existing };
@@ -24,8 +30,12 @@ export function insertAcceptedProductionSnapshot(
       content_hash,
       schema_version,
       created_at,
-      payload
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      payload,
+      source_order_snapshot_id,
+      source_order_content_hash,
+      source_production_input_hash,
+      release_source
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
   ).run(
     snapshot.snapshotId,
@@ -35,6 +45,10 @@ export function insertAcceptedProductionSnapshot(
     snapshot.schemaVersion,
     snapshot.createdAt,
     JSON.stringify(snapshot),
+    snapshot.sourceOrderSnapshotId ?? null,
+    snapshot.sourceOrderContentHash ?? null,
+    snapshot.sourceProductionInputHash ?? null,
+    snapshot.releaseSource ?? null,
   );
 
   return { created: true, snapshot };
@@ -69,6 +83,22 @@ export function getAcceptedProductionSnapshotByHash(
     `,
     )
     .get(contentHash) as StoredRow | undefined;
+  return row ? parseSnapshot(row.payload) : null;
+}
+
+export function getAcceptedProductionSnapshotByOrder(
+  db: SqliteDatabase,
+  orderSnapshotId: string,
+): AcceptedProductionSnapshot | null {
+  const row = db
+    .prepare(
+      `
+      SELECT snapshot_id, payload
+      FROM accepted_production_snapshots
+      WHERE source_order_snapshot_id = ?
+    `,
+    )
+    .get(orderSnapshotId) as StoredRow | undefined;
   return row ? parseSnapshot(row.payload) : null;
 }
 

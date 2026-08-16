@@ -94,6 +94,7 @@ WorkOS Final
 ├── Execution                               IMPLEMENTED_CURRENT / BASIC
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
+│   ├── Production Release from Order       IMPLEMENTED_CURRENT / BASIC
 │   ├── ExecutionPlan                       IMPLEMENTED_CURRENT
 │   ├── ExecutionTasks                      IMPLEMENTED_CURRENT
 │   ├── Provider assignment                 IMPLEMENTED_CURRENT / BASIC
@@ -132,7 +133,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition. Production Release from Order remains later. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -279,7 +280,7 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, and frozen production-input alignment are implemented. Production Release from Order is not.
+Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, and Production Release from Order are implemented. Commercial ExecutionPlan materialization remains a separate operator action.
 
 ```text
 confirmed Product Truth
@@ -290,7 +291,8 @@ confirmed Product Truth
 → Quote Snapshot + FrozenProductionInput
 → Quote Acceptance Decision
 → Order Snapshot copies FrozenProductionInput
-→ [later] Production Release
+→ Production Release Snapshot
+→ [later] ExecutionPlan
 ```
 
 Quote Snapshot does not require Production Snapshot.
@@ -331,8 +333,8 @@ ProductTruth + planned EIC + Commercial rules
   → Quote Snapshot + FrozenProductionInput
   → Quote Acceptance Decision
     → Order Snapshot copies FrozenProductionInput
-      → [later] Production Release
-        → ExecutionPlan
+      → Production Release Snapshot
+        → [later] ExecutionPlan
         → Tasks / Operations
           → Employee assignment
           → Machine / Workcenter allocation
@@ -449,7 +451,7 @@ Settings versions: keep previous active values as history after a new version is
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Frozen production input | IMPLEMENTED_CURRENT / BASIC |
-| Production Release from Order | NOT_IMPLEMENTED |
+| Production Release from Order | IMPLEMENTED_CURRENT / BASIC |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
 | Capability kernel promotion to ACTIVE | FOUNDATION_ONLY (IDs frozen) |

@@ -13,8 +13,8 @@ Confirmed Product Truth
   → Quote Acceptance Decision
   → Order Snapshot                 frozen commercial job root
     copies FrozenProductionInput
-    → [later] Production Release
-      → ExecutionPlan
+    → Production Release Snapshot  workshop authorization
+      → [later] ExecutionPlan
 ```
 
 Order Snapshot answers: this exact accepted offer is now the canonical commercial job.
@@ -91,7 +91,9 @@ Product Truth → Production Snapshot → Execution
 ```
 
 That path is workshop/technical. It is not customer-job release from Order.
-The future explicit action is **Eliberează pentru producție** from Order.
+The explicit commercial action is **Eliberează pentru producție** from Order.
+That creates one immutable Production Release Snapshot from Order + frozen production input.
+It does not start tasks, assign people/machines, or create an ExecutionPlan.
 
 ## Frozen production input
 
@@ -105,7 +107,7 @@ Quote freeze also freezes a generic `FrozenProductionInput`:
 Order copies that input. It does not recompile it.
 This is technical evidence for a future Production Release. It is not a second Product Truth, EIC, Commercial, or Order.
 
-Production Release must consume Order + this frozen input.
+Production Release consumes Order + this frozen input.
 It must not reread live ProductTemplate, process catalog, settings, recipes, Resources, EIC, or Commercial.
 
 ## Operator UI
@@ -113,7 +115,8 @@ It must not reread live ProductTemplate, process catalog, settings, recipes, Res
 After **Ofertă acceptată**:
 
 - Before Order: **Creează comanda**
-- After Order: **Comandă creată** and “Comanda nu a fost încă eliberată pentru producție.”
+- After Order: **Comandă creată** and **Eliberează pentru producție**
+- After Release: **Eliberată pentru producție**
 
 **Ofertă acceptată** stays visible.
-**Acceptă pentru producție** remains the separate pilot workshop action.
+**Acceptă pentru producție** remains only the Atelier / test tehnic path when no commercial Order exists.

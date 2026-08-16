@@ -122,7 +122,7 @@ export const capabilities: readonly CapabilityDefinition[] = [
   {
     id: "COMMERCIAL",
     responsibility:
-      "Owns customer commercial price, company commercial rules, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote freeze carries generic frozen production-input evidence that Order copies. That evidence is not a second Product Truth, EIC, or Commercial authority. Production Release from Order remains later.",
+      "Owns customer commercial price, company commercial rules, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote freeze carries generic frozen production-input evidence that Order copies. That evidence is not a second Product Truth, EIC, or Commercial authority. Production Release is workshop authorization, not a Commercial fact.",
     owns: [
       "customer commercial price",
       "commercial rules",
@@ -137,6 +137,7 @@ export const capabilities: readonly CapabilityDefinition[] = [
       "resource rates",
       "technical quantities",
       "production composition authority",
+      "Production Release",
     ],
     consumes: ["planned EIC total", "EIC currency", "EIC completeness"],
     produces: [
@@ -152,8 +153,9 @@ export const capabilities: readonly CapabilityDefinition[] = [
   {
     id: "EXECUTION",
     responsibility:
-      "Will own operational plans, assignments, machine runs, and execution actuals.",
+      "Will own operational plans, assignments, machine runs, and execution actuals. Owns Production Release as workshop authorization truth derived from Order.",
     owns: [
+      "Production Release",
       "ExecutionPlan",
       "operational tasks",
       "assignments",
@@ -166,8 +168,8 @@ export const capabilities: readonly CapabilityDefinition[] = [
       "Product Truth rewriting",
       "attendance truth",
     ],
-    consumes: ["Order commercial freeze", "ProductAggregate", "EIC"],
-    produces: ["ExecutionPlan", "operational actuals"],
+    consumes: ["Order commercial freeze", "frozen production input", "ProductAggregate", "EIC"],
+    produces: ["Production Release", "ExecutionPlan", "operational actuals"],
     currentPhase: "LATER — Execution",
     status: "PLANNED",
   },

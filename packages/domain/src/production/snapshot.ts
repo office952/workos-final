@@ -111,6 +111,9 @@ export type FrozenEicReference = {
   lines: readonly FrozenEicLine[];
 };
 
+export const PRODUCTION_RELEASE_SOURCES = ["PILOT", "ORDER"] as const;
+export type ProductionReleaseSource = (typeof PRODUCTION_RELEASE_SOURCES)[number];
+
 export type AcceptedProductionSnapshot = {
   snapshotId: string;
   schemaVersion: typeof ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION;
@@ -122,6 +125,10 @@ export type AcceptedProductionSnapshot = {
   sourceConfirmedAt: string;
   createdAt: string;
   contentHash: string;
+  releaseSource?: ProductionReleaseSource;
+  sourceOrderSnapshotId?: string;
+  sourceOrderContentHash?: string;
+  sourceProductionInputHash?: string;
   truth: {
     templateCode: string;
     templateVersion: string;

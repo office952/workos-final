@@ -59,10 +59,9 @@ test("creates an order from an accepted quote without releasing production", asy
     order.getByText("Comanda nu a fost încă eliberată pentru producție."),
   ).toBeVisible();
   await expect(quote.getByRole("button", { name: "Creează comanda" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Acceptă pentru producție" })).toBeVisible();
-  await expect(
-    page.getByText("Calea de atelier rămâne separată. Nu eliberează comanda în producție."),
-  ).toBeVisible();
+  await expect(order.getByRole("button", { name: "Eliberează pentru producție" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Acceptă pentru producție" })).toHaveCount(0);
+  await expect(page.getByText("Atelier / test tehnic")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Plan de execuție" })).toHaveCount(0);
   await order.screenshot({
     path: "docs/worklog/screenshots/letters-order-created.png",

@@ -505,6 +505,88 @@ describe("product configuration API", () => {
     expect(createPath).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
   });
 
+  it("releases production from a frozen order without live compile or side effects", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quoteId = ((await readBody(createdQuote)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/acceptance`,
+      { method: "POST" },
+    );
+    const createdOrder = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/order`,
+      { method: "POST" },
+    );
+    const order = (await readBody(createdOrder)).orderSnapshot as JsonObject;
+    const orderId = order.orderSnapshotId as string;
+    const releasePath = `/api/products/${CANONICAL_PRODUCT_CODE}/orders/${orderId}/production-release`;
+    const first = await app.request(releasePath, { method: "POST" });
+    const second = await app.request(releasePath, { method: "POST" });
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    const created = await readBody(first);
+    const reused = await readBody(second);
+    const snapshot = created.snapshot as JsonObject;
+    expect(created.created).toBe(true);
+    expect(reused.created).toBe(false);
+    expect((reused.snapshot as JsonObject).snapshotId).toBe(snapshot.snapshotId);
+    expect((reused.snapshot as JsonObject).createdAt).toBe(snapshot.createdAt);
+    expect(snapshot.releaseSource).toBe("ORDER");
+    expect(snapshot.sourceOrderSnapshotId).toBe(orderId);
+    expect(snapshot.sourceOrderContentHash).toBe(order.contentHash);
+    expect((snapshot.operations as unknown[]).length).toBe(12);
+    expect((snapshot.eic as JsonObject).total).toBe(382.5);
+    expect(created.executionPlan).toBeUndefined();
+    expect((created.orderSnapshot as JsonObject).commercial as JsonObject).toMatchObject({
+      grossPrice: 624.82,
+    });
+
+    const readBack = await app.request(releasePath);
+    expect(readBack.status).toBe(200);
+    expect(((await readBody(readBack)).snapshot as JsonObject).sourceOrderSnapshotId).toBe(orderId);
+    expect((await app.request("/api/execution-plans/missing")).status).toBe(404);
+    const inventory = await app.request("/api/inventory");
+    const items = ((await readBody(inventory)).inventory as { items: Array<JsonObject> }).items;
+    expect(items.every((item) => item.movementCount === 0)).toBe(true);
+    const unknown = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/ord:missing/production-release`,
+      { method: "POST" },
+    );
+    const mismatch = await app.request(
+      `/api/products/other-product/orders/${orderId}/production-release`,
+      { method: "POST" },
+    );
+    expect(unknown.status).toBe(404);
+    expect(mismatch.status).toBe(404);
+  });
+
+  it("does not compile or reprice on the production-release path", () => {
+    const source = readFileSync(new URL("../src/product.ts", import.meta.url), "utf8");
+    const start = source.indexOf(
+      '"/api/products/:productCode/orders/:orderSnapshotId/production-release"',
+    );
+    const end = source.indexOf(
+      '"/api/products/:productCode/accepted-production-snapshots/:snapshotId"',
+    );
+    const releasePath = source.slice(start, end);
+    expect(releasePath).toContain("freezeProductionReleaseFromOrder");
+    expect(releasePath).not.toMatch(/compileDefinition|compileAggregate|compileEic/);
+    expect(releasePath).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
+    expect(releasePath).not.toMatch(/freezeAcceptedProductionSnapshot|compileAcceptedProduct/);
+  });
+
   it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {
     const compiled = await createApp().request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,

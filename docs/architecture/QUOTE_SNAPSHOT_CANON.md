@@ -13,7 +13,7 @@ Confirmed Product Truth
 Quote Snapshot + FrozenProductionInput
   → Quote Acceptance Decision       immutable commercial decision
     → Order Snapshot copies FrozenProductionInput
-      → [later] Production Release
+      → Production Release Snapshot
 ```
 
 Quote Snapshot answers: what technical and commercial truth did we offer?

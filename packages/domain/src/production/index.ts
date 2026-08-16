@@ -2,6 +2,7 @@ export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
   ACCEPTED_PRODUCTION_SNAPSHOT_STATUSES,
   FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
+  PRODUCTION_RELEASE_SOURCES,
   canonicalContentHash,
   copyFrozenProductionInput,
   freezeAcceptedProductionSnapshot,
@@ -19,4 +20,13 @@ export {
   type FrozenRecipeTrace,
   type FrozenRequirement,
   type FrozenTechnicalSetting,
+  type ProductionReleaseSource,
 } from "./snapshot.js";
+export {
+  PRODUCTION_RELEASE_ERRORS,
+  freezeProductionReleaseFromOrder,
+  isOrderProductionRelease,
+  productionReleaseErrorLabel,
+  type ProductionReleaseError,
+  type ProductionReleaseResult,
+} from "./release.js";

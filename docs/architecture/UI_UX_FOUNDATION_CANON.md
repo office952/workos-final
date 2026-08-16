@@ -42,7 +42,7 @@ Small token set in `apps/web/src/index.css`. Shared pieces only where reused:
 
 ## Action hierarchy
 
-Primary: Pornește, Finalizează, Îngheață oferta, Acceptă oferta, Creează comanda, Acceptă pentru producție, Adaugă persoană.
+Primary: Pornește, Finalizează, Îngheață oferta, Acceptă oferta, Creează comanda, Eliberează pentru producție, Acceptă pentru producție, Adaugă persoană.
 Secondary: Alocă executant, Retrage persoana.
 Quiet: Editează nume, filters, Detalii.
 
@@ -86,7 +86,7 @@ While editing, the form leads. Construction facts are a compact summary of suppl
 
 Review is a concise operator summary. Confirm is primary. Modify is secondary.
 
-After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → production preview → accept for production → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. The workshop action Acceptă pentru producție remains a separate pilot path.
+After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → Eliberează pentru producție → production preview → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. On a commercial Order the next action is Eliberează pentru producție. Acceptă pentru producție remains only the Atelier / test tehnic path when no Order exists.
 
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
 

@@ -489,12 +489,23 @@ export function QuoteSnapshotSection({
   );
 }
 
-export function OrderSnapshotSection({ snapshot }: { snapshot: OrderSnapshot }) {
+export function OrderSnapshotSection({
+  snapshot,
+  release,
+  busy = false,
+  onRelease,
+}: {
+  snapshot: OrderSnapshot;
+  release?: AcceptedProductionSnapshot;
+  busy?: boolean;
+  onRelease?: () => void;
+}) {
+  const released = Boolean(release);
   return (
     <section className="result-section order-section">
       <div className="commercial-summary">
         <h3>Comandă creată</h3>
-        <StatusChip label="Creată" tone="ok" />
+        <StatusChip label={released ? "Eliberată" : "Creată"} tone="ok" />
       </div>
       <p className="commercial-gross">
         Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
@@ -531,7 +542,20 @@ export function OrderSnapshotSection({ snapshot }: { snapshot: OrderSnapshot }) 
         Creată {new Date(snapshot.createdAt).toLocaleString("ro-RO")} · Ofertă acceptată{" "}
         {new Date(snapshot.sourceAcceptedAt).toLocaleString("ro-RO")}
       </p>
-      <p className="page-lead">Comanda nu a fost încă eliberată pentru producție.</p>
+      {released ? (
+        <p className="page-lead">Eliberată pentru producție.</p>
+      ) : (
+        <>
+          <p className="page-lead">Comanda nu a fost încă eliberată pentru producție.</p>
+          {onRelease ? (
+            <div className="action-row">
+              <button type="button" onClick={onRelease} disabled={busy}>
+                Eliberează pentru producție
+              </button>
+            </div>
+          ) : null}
+        </>
+      )}
       <details className="snapshot-details">
         <summary>Detalii</summary>
         <ul>
@@ -633,9 +657,18 @@ export function AcceptedSnapshotSection({
   busy: boolean;
   hasExecutionPlan: boolean;
 }) {
+  const commercial = snapshot.releaseSource === "ORDER" || Boolean(snapshot.sourceOrderSnapshotId);
   return (
     <div className="production-snapshot">
-      <h3>{reused ? "Deja acceptat pentru producție" : "Acceptat pentru producție"}</h3>
+      <h3>
+        {commercial
+          ? reused
+            ? "Deja eliberată pentru producție"
+            : "Eliberată pentru producție"
+          : reused
+            ? "Deja acceptat pentru producție"
+            : "Acceptat pentru producție"}
+      </h3>
       <ul className="metric-row">
         <li>Operații: {snapshot.operations.length}</li>
         <li>

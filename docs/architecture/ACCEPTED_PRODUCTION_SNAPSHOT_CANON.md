@@ -6,18 +6,23 @@ Runtime wins if this document disagrees.
 ## Permanent separation
 
 ```text
+Pilot:
 Confirmed Product Truth
-  → ProductAggregate
-  → Process Composition
-  → Execution Plan Preview          live, read-only
-
-Accepted Production Snapshot        frozen, persisted
+  → Accepted Production Snapshot    PILOT
   → ExecutionPlan
-    → ExecutionTasks
+
+Commercial:
+Order Snapshot + FrozenProductionInput
+  → Production Release Snapshot     ORDER-sourced APS
+  → [later] ExecutionPlan
 ```
 
+Conceptually, Production Release Snapshot = Accepted Production Snapshot.
+Commercial release adds Order lineage. It does not create a second snapshot family.
+
 Confirmation validates truth.
-Acceptance freezes production truth.
+Pilot accept freezes workshop technical truth from live confirmed Product Truth.
+Commercial release freezes workshop authorization from the persisted Order.
 They are not the same action.
 
 ## What this is
@@ -37,8 +42,10 @@ Future persisted Execution must consume this snapshot. It must not reread mutabl
 
 Not a customer Order.
 Not Commercial or Quote.
-The commercial job root is Order Snapshot. This snapshot remains the pilot workshop freeze until Production Release from Order exists.
-Quote/Order now carry the same generic `FrozenProductionInput` arrays (`operations`, `requirements`, `usedTechnicalSettings`, `usedRecipes`) via a shared freeze helper. That does not redesign this snapshot and does not make Quote or Order a Production Snapshot.
+The commercial job root is Order Snapshot.
+Commercial production uses `freezeProductionReleaseFromOrder(order)` and copies frozen production input. It does not reread ProductTemplate, settings, recipes, EIC, or Commercial.
+Pilot workshop accept remains available only when no commercial Order exists, labeled Atelier / test tehnic.
+Quote/Order carry the same generic `FrozenProductionInput` arrays. That does not make Quote or Order a Production Snapshot.
 Not an ExecutionPlan or ExecutionTask by itself.
 Not machine / people assignment.
 Not a workflow engine.
@@ -49,7 +56,9 @@ Not a workflow engine.
 
 Content hash is SHA-256 of the canonical accepted content.
 It excludes `snapshotId`, `createdAt`, and `sourceConfirmedAt`.
-Same accepted configuration → same snapshot. A second accept returns the existing row.
+Pilot hash stays the existing production-content hash.
+Commercial release hash also includes `releaseSource`, `sourceOrderSnapshotId`, `sourceOrderContentHash`, and `sourceProductionInputHash`.
+One Order produces one Release. A retry returns the existing row and `created: false`.
 
 A correction creates a new snapshot. There is no update endpoint.
 
