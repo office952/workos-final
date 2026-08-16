@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
+  COMPLETION_NOTE_MAX_LENGTH,
   eicLineGroupLabel,
   type AcceptedProductionSnapshot,
   type DraftValues,
@@ -515,8 +516,8 @@ export function ProductConfigurationPage() {
                 void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
               }
               onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
-              onCompleteTask={(taskId) =>
-                void applyTaskMutation(() => completeExecutionTask(taskId))
+              onCompleteTask={(taskId, input) =>
+                void applyTaskMutation(() => completeExecutionTask(taskId, input))
               }
             />
           ) : null}
@@ -640,7 +641,7 @@ function PersistedExecutionPlanSection({
   busy: boolean;
   onAssignProvider: (taskId: string, providerId: string) => void;
   onStartTask: (taskId: string) => void;
-  onCompleteTask: (taskId: string) => void;
+  onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
 }) {
   return (
     <div className="execution-plan">
@@ -653,6 +654,9 @@ function PersistedExecutionPlanSection({
         <li>În lucru: {view.progress.inProgress}</li>
         <li>În așteptare: {view.progress.waitingDependencies}</li>
         <li>Fără furnizor: {view.progress.noProvider}</li>
+        {view.progress.varianceCount > 0 ? (
+          <li>Abateri: {view.progress.varianceCount}</li>
+        ) : null}
       </ul>
       <ul className="execution-plan-meta">
         <li>Produs: {view.plan.productLabel}</li>
@@ -690,11 +694,28 @@ function ExecutionTaskCard({
   busy: boolean;
   onAssignProvider: (taskId: string, providerId: string) => void;
   onStartTask: (taskId: string) => void;
-  onCompleteTask: (taskId: string) => void;
+  onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
 }) {
   const [providerId, setProviderId] = useState(
     task.assignedProvider?.id ?? task.eligibleProviders[0]?.id ?? "",
   );
+  const [completedQuantity, setCompletedQuantity] = useState(
+    task.measurableQuantity ? String(task.measurableQuantity.value) : "",
+  );
+  const [note, setNote] = useState("");
+
+  function submitComplete() {
+    const trimmedNote = note.trim();
+    if (!task.requiresCompletedQuantity) {
+      onCompleteTask(task.taskId, trimmedNote ? { note: trimmedNote } : {});
+      return;
+    }
+    const parsed = Number(completedQuantity.replace(",", "."));
+    onCompleteTask(task.taskId, {
+      ...(Number.isFinite(parsed) ? { completedQuantity: parsed } : {}),
+      ...(trimmedNote ? { note: trimmedNote } : {}),
+    });
+  }
 
   return (
     <li className="production-op">
@@ -706,11 +727,21 @@ function ExecutionTaskCard({
       {task.assignedProvider ? <p>Alocat: {task.assignedProvider.label}</p> : <p>Alocare: Nealocat</p>}
       {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join("; ")}</p> : null}
       {task.eligibleProviders.length === 0 ? <p>Fără furnizor disponibil</p> : null}
-      {task.quantities.slice(0, 1).map((quantity) => (
-        <p key={`${task.taskId}-${quantity.label}`}>
-          Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
+      {task.measurableQuantity ? (
+        <p>
+          Cantitate planificată: {formatQuantity(task.measurableQuantity.value)}{" "}
+          {formatUnit(task.measurableQuantity.unit)}
         </p>
-      ))}
+      ) : (
+        task.quantities.slice(0, 1).map((quantity) => (
+          <p key={`${task.taskId}-${quantity.label}`}>
+            Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
+          </p>
+        ))
+      )}
+      {task.completedQuantityLabel ? <p>{task.completedQuantityLabel}</p> : null}
+      {task.varianceLabel ? <p>{task.varianceLabel}</p> : null}
+      {task.completion?.note ? <p>Notă: {task.completion.note}</p> : null}
       {task.startedAt ? (
         <p>Pornit la: {new Date(task.startedAt).toLocaleString("ro-RO")}</p>
       ) : null}
@@ -749,9 +780,34 @@ function ExecutionTaskCard({
           </button>
         ) : null}
         {task.canComplete ? (
-          <button type="button" disabled={busy} onClick={() => onCompleteTask(task.taskId)}>
-            Finalizează
-          </button>
+          <>
+            {task.requiresCompletedQuantity ? (
+              <label>
+                Cantitate realizată
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={completedQuantity}
+                  onChange={(event) => setCompletedQuantity(event.target.value)}
+                  disabled={busy}
+                />
+              </label>
+            ) : null}
+            <label>
+              Notă
+              <input
+                type="text"
+                maxLength={COMPLETION_NOTE_MAX_LENGTH}
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                disabled={busy}
+              />
+            </label>
+            <button type="button" disabled={busy} onClick={submitComplete}>
+              Finalizează
+            </button>
+          </>
         ) : null}
       </div>
     </li>
@@ -772,6 +828,10 @@ function taskActionNotice(error: string): string {
       return "Taskul așteaptă alte operații.";
     case "invalid_transition":
       return "Tranziția nu este permisă.";
+    case "invalid_quantity":
+      return "Cantitatea realizată nu este validă.";
+    case "invalid_note":
+      return "Nota de finalizare este prea lungă.";
     default:
       return "Acțiunea nu a putut fi aplicată.";
   }

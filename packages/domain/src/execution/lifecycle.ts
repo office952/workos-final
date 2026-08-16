@@ -1,11 +1,14 @@
 import type { ProviderKind } from "../workcenters/catalog.js";
 import {
+  COMPLETION_NOTE_MAX_LENGTH,
   assignedProviderStillValid,
   dependenciesCompleted,
   liveEligibleProviders,
+  measurablePlannedQuantity,
   type AssignedExecutionProvider,
   type ExecutionPlanRecord,
   type ExecutionTask,
+  type TaskCompletionEvidence,
 } from "./plan.js";
 
 export const TASK_MUTATION_ERRORS = [
@@ -16,12 +19,19 @@ export const TASK_MUTATION_ERRORS = [
   "provider_unavailable",
   "dependencies_incomplete",
   "invalid_transition",
+  "invalid_quantity",
+  "invalid_note",
 ] as const;
 export type TaskMutationError = (typeof TASK_MUTATION_ERRORS)[number];
 
 export type TaskMutationResult =
   | { ok: true; record: ExecutionPlanRecord; alreadyApplied: boolean }
   | { ok: false; error: TaskMutationError };
+
+export type TaskCompletionInput = {
+  completedQuantity?: number;
+  note?: string;
+};
 
 export function assignProviderToTask(
   record: ExecutionPlanRecord,
@@ -103,6 +113,7 @@ export function completeExecutionTask(
   record: ExecutionPlanRecord,
   taskId: string,
   completedAt: string,
+  input: TaskCompletionInput = {},
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -114,6 +125,10 @@ export function completeExecutionTask(
   if (task.status !== "IN_PROGRESS") {
     return { ok: false, error: "invalid_transition" };
   }
+  const completion = buildCompletionEvidence(task, input);
+  if (!completion.ok) {
+    return completion;
+  }
   return {
     ok: true,
     alreadyApplied: false,
@@ -121,12 +136,105 @@ export function completeExecutionTask(
       ...task,
       status: "COMPLETED",
       completedAt,
+      completion: completion.evidence,
     }),
   };
 }
 
+export function plannedCompletionInput(task: ExecutionTask): TaskCompletionInput {
+  const measurable = measurablePlannedQuantity(task);
+  return measurable ? { completedQuantity: measurable.value } : {};
+}
+
+function buildCompletionEvidence(
+  task: ExecutionTask,
+  input: TaskCompletionInput,
+): { ok: true; evidence: TaskCompletionEvidence } | { ok: false; error: TaskMutationError } {
+  const note = readCompletionNote(input.note);
+  if (note === false) {
+    return { ok: false, error: "invalid_note" };
+  }
+  const measurable = measurablePlannedQuantity(task);
+  if (!measurable) {
+    if (input.completedQuantity !== undefined) {
+      return { ok: false, error: "invalid_quantity" };
+    }
+    return {
+      ok: true,
+      evidence: {
+        outcome: "COMPLETED_AS_PLANNED",
+        completedQuantity: null,
+        completedQuantityUnit: null,
+        note,
+      },
+    };
+  }
+  if (!isValidCompletedQuantity(input.completedQuantity)) {
+    return { ok: false, error: "invalid_quantity" };
+  }
+  return {
+    ok: true,
+    evidence: {
+      outcome: quantitiesMatch(measurable.value, input.completedQuantity)
+        ? "COMPLETED_AS_PLANNED"
+        : "COMPLETED_WITH_VARIANCE",
+      completedQuantity: input.completedQuantity,
+      completedQuantityUnit: measurable.unit,
+      note,
+    },
+  };
+}
+
+function isValidCompletedQuantity(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function quantitiesMatch(planned: number, actual: number): boolean {
+  return Math.abs(planned - actual) < 1e-9;
+}
+
+function readCompletionNote(note: string | undefined): string | null | false {
+  if (note === undefined) {
+    return null;
+  }
+  if (typeof note !== "string") {
+    return false;
+  }
+  const trimmed = note.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+  if (trimmed.length > COMPLETION_NOTE_MAX_LENGTH) {
+    return false;
+  }
+  return trimmed;
+}
+
 export function isProviderKind(value: string): value is ProviderKind {
   return value === "MACHINE" || value === "WORKCENTER";
+}
+
+export function isCompletionOutcome(
+  value: string,
+): value is TaskCompletionEvidence["outcome"] {
+  return value === "COMPLETED_AS_PLANNED" || value === "COMPLETED_WITH_VARIANCE";
+}
+
+export function completionFromRow(
+  outcome: string | null,
+  completedQuantity: number | null,
+  completedQuantityUnit: string | null,
+  note: string | null,
+): TaskCompletionEvidence | null {
+  if (!outcome || !isCompletionOutcome(outcome)) {
+    return null;
+  }
+  return {
+    outcome,
+    completedQuantity,
+    completedQuantityUnit,
+    note,
+  };
 }
 
 export function assignedProviderFromRow(

@@ -58,7 +58,28 @@ On Start: `PLANNED → IN_PROGRESS` and server `startedAt`.
 
 A task may Complete only if status is `IN_PROGRESS`.
 
-On Complete: `IN_PROGRESS → COMPLETED` and server `completedAt`.
+On Complete: `IN_PROGRESS → COMPLETED`, server `completedAt`, and minimal completion evidence.
+
+```text
+planned quantity  ≠  completed quantity
+```
+
+Frozen planned quantities stay on the task. Completed quantity is a separate execution fact.
+
+When the task has exactly one measurable planned quantity, Complete requires `completedQuantity`. The unit comes from that frozen quantity, never from the frontend. Outcome is derived by exact comparison:
+
+```text
+actual == planned  →  COMPLETED_AS_PLANNED
+actual != planned  →  COMPLETED_WITH_VARIANCE
+```
+
+When there is no single useful quantity, Complete records outcome + timestamp + optional note. Do not invent `1 buc`.
+
+Electrical-finish operations (`Cablare`, `Pregătire sursă`, `Probă aprindere`) carry a frozen PRODUCT_UNIT recipe quantity of 1 buc. That is cost-recipe identity, not a useful operator-confirmed production count. Inspection-like operations have no quantity. All of these complete without a numeric actual.
+
+Variance does not block Complete, reopen the snapshot, reprice EIC, or keep the task `IN_PROGRESS`. `COMPLETED_WITH_VARIANCE` is still `COMPLETED`.
+
+A completed task cannot be completed again. Completion evidence is immutable in V1.
 
 Completing a task does not reprice EIC, mutate the snapshot, consume inventory, or change frozen quantities.
 
@@ -70,6 +91,7 @@ The plan row stays `PLANNED`. UI progress is derived from tasks:
 total / completed / inProgress / planned
 waitingDependencies
 noProvider
+varianceCount
 ```
 
 Derived status:
@@ -106,8 +128,25 @@ Ambalare               PACKAGING        NO_PROVIDER
 
 Reachable end state: 9 completed, 3 planned, plan remains În lucru.
 
+## Completion evidence V1
+
+Persisted on the task row, not a separate actuals table:
+
+```text
+completion_outcome
+completed_quantity
+completed_quantity_unit
+completion_note
+completed_at
+```
+
+Optional note is free text, max 280 characters. It is not parsed.
+
+One measurable quantity is exposed only when `quantities.length === 1`. Multiple frozen resources do not get a generic actual-resource form in this V1.
+
 ## What this is not
 
 Not People / employee assignment.
-Not scheduling, capacity, pause/cancel, actual quantities, or actual cost.
-Not a generic workflow engine.
+Not scheduling, capacity, pause/cancel, inventory deduction, or actual cost.
+Not labor time, machine runtime, scrap, or rework.
+Not a generic actuals engine or workflow engine.

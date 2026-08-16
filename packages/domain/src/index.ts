@@ -195,6 +195,7 @@ export {
   type WorkcentersAdminProjection,
 } from "./workcenters/index.js";
 export {
+  COMPLETION_NOTE_MAX_LENGTH,
   compileExecutionPlanPreview,
   executionOperationReadinessLabel,
   executionPlanIdFromSnapshot,
@@ -206,7 +207,10 @@ export {
   assignProviderToTask,
   assignedProviderFromRow,
   completeExecutionTask,
+  completionFromRow,
+  plannedCompletionInput,
   startExecutionTask,
+  measurablePlannedQuantity,
   type ExecutionPlan,
   type ExecutionPlanPreview,
   type ExecutionPlanPreviewOperation,
@@ -215,6 +219,7 @@ export {
   type ExecutionPlanView,
   type ExecutionTask,
   type ExecutionTaskView,
+  type TaskCompletionInput,
   type TaskMutationError,
   type TaskMutationResult,
 } from "./execution/index.js";

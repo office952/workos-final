@@ -426,6 +426,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "execution-completion-evidence",
+        label: "Evidență de finalizare",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "workcenters",
         label: "Workcenters",
         state: "IMPLEMENTED",

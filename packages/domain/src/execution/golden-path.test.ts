@@ -37,6 +37,7 @@ import {
 import {
   assignProviderToTask,
   completeExecutionTask,
+  plannedCompletionInput,
   startExecutionTask,
   type TaskMutationResult,
 } from "./lifecycle.js";
@@ -97,7 +98,13 @@ function run(
 ): ExecutionPlanRecord {
   const assigned = unwrap(assignProviderToTask(record, taskId, providerId));
   const started = unwrap(startExecutionTask(assigned, taskId, startedAt));
-  return unwrap(completeExecutionTask(started, taskId, completedAt));
+  const task = started.tasks.find((item) => item.taskId === taskId);
+  if (!task) {
+    throw new Error(`missing ${taskId}`);
+  }
+  return unwrap(
+    completeExecutionTask(started, taskId, completedAt, plannedCompletionInput(task)),
+  );
 }
 
 function bySource(record: ExecutionPlanRecord, scope: "FACE" | "BACK" | "VOLUME", processId: string) {
@@ -157,8 +164,22 @@ describe("LETTERS execution golden path", () => {
     expect(parallel.progress.inProgress).toBe(2);
     expect(parallel.tasks.find((item) => item.taskId === placeLed.taskId)?.canStart).toBe(false);
 
-    record = unwrap(completeExecutionTask(record, faceCnc.taskId, "2026-08-16T10:12:00.000Z"));
-    record = unwrap(completeExecutionTask(record, backCnc.taskId, "2026-08-16T10:13:00.000Z"));
+    record = unwrap(
+      completeExecutionTask(
+        record,
+        faceCnc.taskId,
+        "2026-08-16T10:12:00.000Z",
+        plannedCompletionInput(faceCnc),
+      ),
+    );
+    record = unwrap(
+      completeExecutionTask(
+        record,
+        backCnc.taskId,
+        "2026-08-16T10:13:00.000Z",
+        plannedCompletionInput(backCnc),
+      ),
+    );
     expect(
       projectExecutionPlanView(record).tasks.find((item) => item.taskId === placeLed.taskId)
         ?.waitingFor,
@@ -183,6 +204,7 @@ describe("LETTERS execution golden path", () => {
       planned: 3,
       waitingDependencies: 2,
       noProvider: 3,
+      varianceCount: 0,
       status: "IN_PROGRESS",
     });
     expect(view.progress.status).not.toBe("COMPLETED");

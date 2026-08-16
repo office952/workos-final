@@ -2,10 +2,12 @@ import {
   assignProviderToTask,
   assignedProviderFromRow,
   completeExecutionTask,
+  completionFromRow,
   startExecutionTask,
   type ExecutionPlan,
   type ExecutionPlanRecord,
   type ExecutionTask,
+  type TaskCompletionInput,
   type TaskMutationResult,
 } from "@workos-final/domain";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
@@ -47,6 +49,10 @@ type TaskRow = {
   assigned_provider_label: string | null;
   started_at: string | null;
   completed_at: string | null;
+  completion_outcome: string | null;
+  completed_quantity: number | null;
+  completed_quantity_unit: string | null;
+  completion_note: string | null;
 };
 
 type DependencyRow = {
@@ -120,8 +126,12 @@ export function insertExecutionPlanRecord(
         assigned_provider_kind,
         assigned_provider_label,
         started_at,
-        completed_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        completed_at,
+        completion_outcome,
+        completed_quantity,
+        completed_quantity_unit,
+        completion_note
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     );
     const insertDependency = db.prepare(
@@ -156,6 +166,10 @@ export function insertExecutionPlanRecord(
         task.assignedProvider?.label ?? null,
         task.startedAt,
         task.completedAt,
+        task.completion?.outcome ?? null,
+        task.completion?.completedQuantity ?? null,
+        task.completion?.completedQuantityUnit ?? null,
+        task.completion?.note ?? null,
       );
       for (const dependencyId of task.dependsOnTaskIds) {
         insertDependency.run(record.plan.planId, task.taskId, dependencyId);
@@ -248,9 +262,10 @@ export function persistTaskComplete(
   db: SqliteDatabase,
   taskId: string,
   completedAt: string,
+  input: TaskCompletionInput = {},
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    completeExecutionTask(record, taskId, completedAt),
+    completeExecutionTask(record, taskId, completedAt, input),
   );
 }
 
@@ -304,7 +319,11 @@ function writeTaskOperationalState(
         assigned_provider_label = ?,
         status = ?,
         started_at = ?,
-        completed_at = ?
+        completed_at = ?,
+        completion_outcome = ?,
+        completed_quantity = ?,
+        completed_quantity_unit = ?,
+        completion_note = ?
       WHERE task_id = ?
         AND status = ?
         AND IFNULL(assigned_provider_id, '') = ?
@@ -319,6 +338,10 @@ function writeTaskOperationalState(
       next.status,
       next.startedAt,
       next.completedAt,
+      next.completion?.outcome ?? null,
+      next.completion?.completedQuantity ?? null,
+      next.completion?.completedQuantityUnit ?? null,
+      next.completion?.note ?? null,
       next.taskId,
       previous?.status ?? next.status,
       previous?.assignedProvider?.id ?? "",
@@ -394,6 +417,12 @@ function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecor
       ),
       startedAt: row.started_at,
       completedAt: row.completed_at,
+      completion: completionFromRow(
+        row.completion_outcome,
+        row.completed_quantity,
+        row.completed_quantity_unit,
+        row.completion_note,
+      ),
       createdAt: row.created_at,
     })),
   };

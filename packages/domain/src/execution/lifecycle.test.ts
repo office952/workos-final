@@ -30,6 +30,7 @@ import {
 import {
   assignProviderToTask,
   completeExecutionTask,
+  plannedCompletionInput,
   startExecutionTask,
 } from "./lifecycle.js";
 import {
@@ -228,6 +229,7 @@ describe("minimal execution task lifecycle", () => {
       startedCnc.record,
       backCnc.taskId,
       "2026-08-15T16:05:00.000Z",
+      plannedCompletionInput(backCnc),
     );
     if (!completedCnc.ok) {
       throw new Error("expected cnc complete");
@@ -268,6 +270,7 @@ describe("minimal execution task lifecycle", () => {
       started.record,
       backCnc.taskId,
       "2026-08-15T16:05:00.000Z",
+      plannedCompletionInput(backCnc),
     );
     expect(completed.ok).toBe(true);
     if (!completed.ok) {
@@ -367,6 +370,7 @@ describe("minimal execution task lifecycle", () => {
       started.record,
       backCnc.taskId,
       "2026-08-15T16:05:00.000Z",
+      plannedCompletionInput(backCnc),
     );
     if (!completed.ok) {
       throw new Error("expected complete");

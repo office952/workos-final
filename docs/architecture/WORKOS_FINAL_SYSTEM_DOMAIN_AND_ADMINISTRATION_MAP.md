@@ -94,8 +94,11 @@ WorkOS Final
 │   ├── ExecutionPlan                       IMPLEMENTED_CURRENT
 │   ├── ExecutionTasks                      IMPLEMENTED_CURRENT
 │   ├── Provider assignment                 IMPLEMENTED_CURRENT / BASIC
-│   ├── Task lifecycle                      IMPLEMENTED_CURRENT / PLANNED → IN_PROGRESS → COMPLETED
-│   └── Actuals / MachineRun                NOT_IMPLEMENTED
+│   ├── Task lifecycle                      IMPLEMENTED_CURRENT / BASIC
+│   ├── Completion evidence                 IMPLEMENTED_CURRENT / BASIC
+│   ├── Actual resource consumption         NOT_IMPLEMENTED
+│   ├── Actual cost                         NOT_IMPLEMENTED
+│   └── Inventory deduction / MachineRun    NOT_IMPLEMENTED
 ├── People / Angajați                       PLANNED
 │   ├── Employee master
 │   ├── Role / skill / availability
@@ -210,7 +213,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, and the minimal task lifecycle are IMPLEMENTED_CURRENT. People assignment, scheduling, capacity, and MachineRun remain NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, and minimal completion evidence are IMPLEMENTED_CURRENT. People assignment, scheduling, capacity, inventory deduction, actual costing, and MachineRun remain NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -383,6 +386,7 @@ Settings versions: keep previous active values as history after a new version is
 | Accepted Production Snapshot | IMPLEMENTED_CURRENT |
 | Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT |
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
+| Completion evidence | IMPLEMENTED_CURRENT / BASIC |
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
 | People, Pontaj, actual consumption / costing | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |

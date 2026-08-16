@@ -140,6 +140,7 @@ describe("persisted execution plan materialization", () => {
       planned: 12,
       waitingDependencies: view.tasks.filter((item) => item.waitingFor.length > 0).length,
       noProvider: 3,
+      varianceCount: 0,
       status: "PLANNED",
     });
     expect(view.progress.status).not.toBe("COMPLETED");

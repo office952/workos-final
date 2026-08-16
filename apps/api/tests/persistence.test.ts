@@ -64,7 +64,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(4);
+    expect(count.count).toBe(5);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -72,7 +72,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(4);
+    expect(again.count).toBe(5);
     second.close();
   });
 
@@ -248,7 +248,10 @@ describe("product system persistence", () => {
     expect(assigned.ok).toBe(true);
     const started = first.startExecutionTask(backCnc.taskId);
     expect(started.ok).toBe(true);
-    const completed = first.completeExecutionTask(backCnc.taskId);
+    const completed = first.completeExecutionTask(backCnc.taskId, {
+      completedQuantity: 12.5,
+      note: "Executat conform fișei",
+    });
     expect(completed.ok).toBe(true);
     first.close();
 
@@ -259,6 +262,13 @@ describe("product system persistence", () => {
     expect(task?.status).toBe("COMPLETED");
     expect(task?.startedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(task?.completedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(task?.completion).toEqual({
+      outcome: "COMPLETED_AS_PLANNED",
+      completedQuantity: 12.5,
+      completedQuantityUnit: "m",
+      note: "Executat conform fișei",
+    });
+    expect(task?.quantities[0]?.value).toBe(12.5);
     expect(stored?.plan.eicTotal).toBe(595);
     expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     second.close();

@@ -86,7 +86,14 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
       path: "docs/worklog/screenshots/letters-task-in-progress.png",
       fullPage: true,
     });
+    await expect(backCnc.getByLabel("Cantitate realizată")).toHaveValue("12.5");
+    await page.screenshot({
+      path: "docs/worklog/screenshots/letters-completion-form.png",
+      fullPage: true,
+    });
     await backCnc.getByRole("button", { name: "Finalizează" }).click();
+    await expect(backCnc.getByText("Realizat: 12,5 m")).toBeVisible();
+    await expect(backCnc.getByText("Conform planului")).toBeVisible();
   }
 
   await expect(backCnc.getByText("Stare: Finalizat")).toBeVisible();

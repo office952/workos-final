@@ -210,8 +210,15 @@ export function registerProductRoutes(
     return respondTaskMutation(c, runtime.startExecutionTask(c.req.param("taskId")));
   });
 
-  app.post("/api/execution-tasks/:taskId/complete", (c) => {
-    return respondTaskMutation(c, runtime.completeExecutionTask(c.req.param("taskId")));
+  app.post("/api/execution-tasks/:taskId/complete", async (c) => {
+    const input = readCompletionInput(await c.req.json().catch(() => ({})));
+    if (!input) {
+      return c.json({ error: "invalid_payload" }, 400);
+    }
+    return respondTaskMutation(
+      c,
+      runtime.completeExecutionTask(c.req.param("taskId"), input),
+    );
   });
 }
 
@@ -263,6 +270,32 @@ function compileAcceptedProduct(
   };
 }
 
+function readCompletionInput(body: unknown): { completedQuantity?: number; note?: string } | null {
+  if (body === undefined || body === null) {
+    return {};
+  }
+  if (typeof body !== "object" || Array.isArray(body)) {
+    return null;
+  }
+  const record = body as { completedQuantity?: unknown; note?: unknown };
+  if (
+    "completedQuantity" in record &&
+    record.completedQuantity !== undefined &&
+    typeof record.completedQuantity !== "number"
+  ) {
+    return null;
+  }
+  if ("note" in record && record.note !== undefined && typeof record.note !== "string") {
+    return null;
+  }
+  return {
+    ...(typeof record.completedQuantity === "number"
+      ? { completedQuantity: record.completedQuantity }
+      : {}),
+    ...(typeof record.note === "string" ? { note: record.note } : {}),
+  };
+}
+
 function readProviderId(body: unknown): string | null {
   if (typeof body !== "object" || body === null || !("providerId" in body)) {
     return null;
@@ -282,6 +315,8 @@ function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
     case "ineligible_provider":
     case "missing_assignment":
     case "provider_unavailable":
+    case "invalid_quantity":
+    case "invalid_note":
       return 422;
     case "reassignment_locked":
     case "dependencies_incomplete":

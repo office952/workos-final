@@ -446,6 +446,8 @@ describe("product configuration API", () => {
 
     const completed = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
       method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: 12.5, note: "Executat conform fișei" }),
     });
     const completedView = (await readBody(completed)).executionPlan as {
       tasks: Array<JsonObject>;
@@ -454,6 +456,15 @@ describe("product configuration API", () => {
     const released = completedView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
     expect(done.status).toBe("COMPLETED");
     expect(typeof done.completedAt).toBe("string");
+    expect(done.completion).toMatchObject({
+      outcome: "COMPLETED_AS_PLANNED",
+      completedQuantity: 12.5,
+      completedQuantityUnit: "m",
+      note: "Executat conform fișei",
+    });
+    expect(done.completedQuantityLabel).toBe("Realizat: 12,5 m");
+    expect(done.varianceLabel).toBe("Conform planului");
+    expect((done.quantities as Array<JsonObject>)[0]?.value).toBe(12.5);
     expect(released.canStart).toBe(true);
     expect(released.waitingFor).toEqual([]);
 
@@ -526,8 +537,15 @@ describe("product configuration API", () => {
       expect(assigned.status).toBe(200);
       const started = await app.request(`/api/execution-tasks/${taskId}/start`, { method: "POST" });
       expect(started.status).toBe(200);
+      const startedView = (await readBody(started)).executionPlan as { tasks: Array<JsonObject> };
+      const current = startedView.tasks.find((item) => item.taskId === taskId) as JsonObject;
+      const measurable = current.measurableQuantity as JsonObject | undefined;
       const completed = await app.request(`/api/execution-tasks/${taskId}/complete`, {
         method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(
+          measurable ? { completedQuantity: measurable.value } : {},
+        ),
       });
       expect(completed.status).toBe(200);
       return (await readBody(completed)).executionPlan as {
@@ -554,6 +572,7 @@ describe("product configuration API", () => {
       planned: 3,
       waitingDependencies: 2,
       noProvider: 3,
+      varianceCount: 0,
       status: "IN_PROGRESS",
     });
     expect(finalView.plan.eicTotal).toBe(595);
@@ -567,6 +586,156 @@ describe("product configuration API", () => {
             item.processLabel === "Ambalare"),
       ),
     ).toHaveLength(3);
-    expect(JSON.stringify(finalView)).not.toMatch(/employeeId|actualQty|scrap|schedule|capacity/);
+    expect(JSON.stringify(finalView)).not.toMatch(
+      /employeeId|actualCost|inventory|scrap|schedule|capacity|pontaj/,
+    );
+  });
+
+  it("records completion evidence separately from planned quantity", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const snapshot = (await readBody(accepted)).snapshot as JsonObject;
+    const created = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const view = (await readBody(created)).executionPlan as { tasks: Array<JsonObject> };
+    const backCnc = view.tasks.find(
+      (item) =>
+        item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
+    ) as JsonObject;
+    const lighting = view.tasks.find(
+      (item) => item.processId === PLACE_LED_MODULES_ID,
+    ) as JsonObject;
+    const wire = view.tasks.find((item) => item.processLabel === "Cablare electrică") as JsonObject;
+
+    await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+    });
+    await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, { method: "POST" });
+
+    const missing = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    expect(missing.status).toBe(422);
+    expect((await readBody(missing)).error).toBe("invalid_quantity");
+
+    const negative = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: -1 }),
+    });
+    expect(negative.status).toBe(422);
+
+    const notNumber = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: "12.5" }),
+    });
+    expect(notNumber.status).toBe(400);
+
+    const completedCnc = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: 12.5 }),
+    });
+    const cncView = (await readBody(completedCnc)).executionPlan as { tasks: Array<JsonObject> };
+    const cncDone = cncView.tasks.find((item) => item.taskId === backCnc.taskId) as JsonObject;
+    expect(cncDone.completion).toMatchObject({
+      outcome: "COMPLETED_AS_PLANNED",
+      completedQuantity: 12.5,
+      completedQuantityUnit: "m",
+    });
+
+    await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
+    });
+    await app.request(`/api/execution-tasks/${lighting.taskId}/start`, { method: "POST" });
+    const completedLed = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        completedQuantity: 123,
+        note: "2 module înlocuite în timpul montajului",
+      }),
+    });
+    const ledView = (await readBody(completedLed)).executionPlan as {
+      progress: JsonObject;
+      plan: JsonObject;
+      tasks: Array<JsonObject>;
+    };
+    const ledDone = ledView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
+    expect(ledDone.status).toBe("COMPLETED");
+    expect(ledDone.completion).toMatchObject({
+      outcome: "COMPLETED_WITH_VARIANCE",
+      completedQuantity: 123,
+      completedQuantityUnit: "buc",
+    });
+    expect(ledDone.completedQuantityLabel).toBe("Realizat: 123 buc");
+    expect(ledDone.varianceLabel).toBe("Diferență față de plan: -2 buc");
+    expect((ledDone.quantities as Array<JsonObject>)[0]?.value).toBe(125);
+    expect(ledView.progress.varianceCount).toBe(1);
+    expect(ledView.progress.status).toBe("IN_PROGRESS");
+    expect(ledView.plan.eicTotal).toBe(595);
+    expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+
+    const rewrite = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: 125, note: "rescrie" }),
+    });
+    const rewriteView = (await readBody(rewrite)).executionPlan as { tasks: Array<JsonObject> };
+    const stillLed = rewriteView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
+    expect(rewrite.status).toBe(200);
+    expect(stillLed.completion).toMatchObject({
+      outcome: "COMPLETED_WITH_VARIANCE",
+      completedQuantity: 123,
+      note: "2 module înlocuite în timpul montajului",
+    });
+
+    await app.request(`/api/execution-tasks/${wire.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
+    });
+    await app.request(`/api/execution-tasks/${wire.taskId}/start`, { method: "POST" });
+    const unexpected = await app.request(`/api/execution-tasks/${wire.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: 1 }),
+    });
+    expect(unexpected.status).toBe(422);
+    const completedWire = await app.request(`/api/execution-tasks/${wire.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ note: "Executat conform fișei" }),
+    });
+    const wireDone = (
+      (await readBody(completedWire)).executionPlan as { tasks: Array<JsonObject> }
+    ).tasks.find((item) => item.taskId === wire.taskId) as JsonObject;
+    expect(wireDone.completion).toMatchObject({
+      outcome: "COMPLETED_AS_PLANNED",
+      completedQuantity: null,
+      note: "Executat conform fișei",
+    });
+    expect(wireDone.completedQuantityLabel).toBeNull();
+    expect(JSON.stringify(ledView)).not.toMatch(/employeeId|actualCost|inventory|scrap|pontaj/);
   });
 });

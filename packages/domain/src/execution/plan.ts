@@ -1,4 +1,11 @@
-import { getProductionCapability } from "../processes/catalog.js";
+import {
+  getProductionCapability,
+  INSPECT_FINISHED_LETTER_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  WIRE_LIGHTING_ID,
+} from "../processes/catalog.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 import { productionWorkFromSnapshot } from "../production/snapshot.js";
 import type { ProviderKind } from "../workcenters/catalog.js";
@@ -21,6 +28,27 @@ export const EXECUTION_TASK_STATUSES = [
   "COMPLETED",
 ] as const;
 export type ExecutionTaskStatus = (typeof EXECUTION_TASK_STATUSES)[number];
+
+export const COMPLETION_OUTCOMES = [
+  "COMPLETED_AS_PLANNED",
+  "COMPLETED_WITH_VARIANCE",
+] as const;
+export type CompletionOutcome = (typeof COMPLETION_OUTCOMES)[number];
+
+export const COMPLETION_NOTE_MAX_LENGTH = 280;
+
+export type TaskCompletionEvidence = {
+  outcome: CompletionOutcome;
+  completedQuantity: number | null;
+  completedQuantityUnit: string | null;
+  note: string | null;
+};
+
+export type MeasurablePlannedQuantity = {
+  label: string;
+  value: number;
+  unit: string;
+};
 
 export type AssignedExecutionProvider = {
   id: string;
@@ -63,6 +91,7 @@ export type ExecutionTask = {
   assignedProvider: AssignedExecutionProvider | null;
   startedAt: string | null;
   completedAt: string | null;
+  completion: TaskCompletionEvidence | null;
   createdAt: string;
 };
 
@@ -83,6 +112,11 @@ export type ExecutionTaskView = ExecutionTask & {
   dependsOnLabels: readonly string[];
   waitingFor: readonly string[];
   eligibleProviders: readonly ExecutionEligibleProvider[];
+  measurableQuantity: MeasurablePlannedQuantity | null;
+  requiresCompletedQuantity: boolean;
+  completionOutcomeLabel: string | null;
+  completedQuantityLabel: string | null;
+  varianceLabel: string | null;
   canAssign: boolean;
   canStart: boolean;
   canComplete: boolean;
@@ -95,6 +129,7 @@ export type ExecutionPlanProgress = {
   planned: number;
   waitingDependencies: number;
   noProvider: number;
+  varianceCount: number;
   status: ExecutionProgressStatus;
 };
 
@@ -146,6 +181,7 @@ export function materializeExecutionPlanFromSnapshot(
       assignedProvider: null,
       startedAt: null,
       completedAt: null,
+      completion: null,
       createdAt,
     };
   });
@@ -181,6 +217,7 @@ export function projectExecutionPlanView(
       return dependency ? [taskDependencyLabel(dependency)] : [];
     });
     const waitingFor = incompleteDependencyLabels(task, byId);
+    const measurableQuantity = measurablePlannedQuantity(task);
     return {
       ...task,
       statusLabel: executionTaskStatusLabel(task.status),
@@ -188,6 +225,13 @@ export function projectExecutionPlanView(
       dependsOnLabels,
       waitingFor,
       eligibleProviders,
+      measurableQuantity,
+      requiresCompletedQuantity: measurableQuantity !== null,
+      completionOutcomeLabel: task.completion
+        ? completionOutcomeLabel(task.completion.outcome)
+        : null,
+      completedQuantityLabel: completedQuantityLabel(task.completion),
+      varianceLabel: varianceLabel(measurableQuantity, task.completion),
       canAssign: task.status === "PLANNED" && eligibleProviders.length > 0,
       canStart: canStartTask(task, byId),
       canComplete: task.status === "IN_PROGRESS",
@@ -206,7 +250,7 @@ export function projectExecutionPlanView(
 export function summarizeExecutionProgress(
   tasks: readonly Pick<
     ExecutionTaskView,
-    "status" | "waitingFor" | "eligibleProviders"
+    "status" | "waitingFor" | "eligibleProviders" | "completion"
   >[],
 ): ExecutionPlanProgress {
   return {
@@ -216,8 +260,93 @@ export function summarizeExecutionProgress(
     planned: tasks.filter((task) => task.status === "PLANNED").length,
     waitingDependencies: tasks.filter((task) => task.waitingFor.length > 0).length,
     noProvider: tasks.filter((task) => task.eligibleProviders.length === 0).length,
+    varianceCount: tasks.filter(
+      (task) => task.completion?.outcome === "COMPLETED_WITH_VARIANCE",
+    ).length,
     status: deriveExecutionProgress(tasks),
   };
+}
+
+const QUALITATIVE_COMPLETION_PROCESS_IDS = new Set([
+  WIRE_LIGHTING_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+  INSPECT_FINISHED_LETTER_ID,
+]);
+
+export function measurablePlannedQuantity(
+  task: Pick<ExecutionTask, "processId" | "quantities">,
+): MeasurablePlannedQuantity | null {
+  if (QUALITATIVE_COMPLETION_PROCESS_IDS.has(task.processId)) {
+    return null;
+  }
+  if (task.quantities.length !== 1) {
+    return null;
+  }
+  const quantity = task.quantities[0];
+  if (!quantity) {
+    return null;
+  }
+  return {
+    label: quantity.label,
+    value: quantity.value,
+    unit: quantity.unit,
+  };
+}
+
+export function completionOutcomeLabel(outcome: CompletionOutcome): string {
+  switch (outcome) {
+    case "COMPLETED_AS_PLANNED":
+      return "Conform planului";
+    case "COMPLETED_WITH_VARIANCE":
+      return "Cu diferență față de plan";
+    default: {
+      const _exhaustive: never = outcome;
+      return _exhaustive;
+    }
+  }
+}
+
+function completedQuantityLabel(
+  completion: TaskCompletionEvidence | null,
+): string | null {
+  if (!completion || completion.completedQuantity === null || !completion.completedQuantityUnit) {
+    return null;
+  }
+  return `Realizat: ${formatExecutionQuantity(completion.completedQuantity)} ${formatExecutionUnit(completion.completedQuantityUnit)}`;
+}
+
+function varianceLabel(
+  planned: MeasurablePlannedQuantity | null,
+  completion: TaskCompletionEvidence | null,
+): string | null {
+  if (!completion) {
+    return null;
+  }
+  if (completion.outcome === "COMPLETED_AS_PLANNED") {
+    return "Conform planului";
+  }
+  if (
+    !planned ||
+    completion.completedQuantity === null ||
+    !completion.completedQuantityUnit
+  ) {
+    return "Cu diferență față de plan";
+  }
+  const delta = completion.completedQuantity - planned.value;
+  const signed = `${delta > 0 ? "+" : ""}${formatExecutionQuantity(delta)}`;
+  return `Diferență față de plan: ${signed} ${formatExecutionUnit(completion.completedQuantityUnit)}`;
+}
+
+function formatExecutionQuantity(value: number): string {
+  return Number.isInteger(value)
+    ? String(value)
+    : value.toLocaleString("ro-RO", { maximumFractionDigits: 4 });
+}
+
+function formatExecutionUnit(unit: string): string {
+  return unit === "m2" ? "m²" : unit;
 }
 
 export function deriveExecutionProgress(

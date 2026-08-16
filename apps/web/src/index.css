@@ -473,6 +473,14 @@ details summary {
   min-width: 12rem;
 }
 
+.task-actions input[type="number"] {
+  width: 6.5rem;
+}
+
+.task-actions input[type="text"] {
+  width: 12rem;
+}
+
 @media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;

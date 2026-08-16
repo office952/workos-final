@@ -3,6 +3,7 @@ import {
   type AcceptedProductionSnapshot,
   type DisplayLabelCatalog,
   type ExecutionPlanRecord,
+  type TaskCompletionInput,
   type TaskMutationResult,
 } from "@workos-final/domain";
 import {
@@ -52,7 +53,7 @@ export type ProductSystemRuntime = {
   readExecutionPlanBySnapshot(snapshotId: string): ExecutionPlanRecord | null;
   assignExecutionTaskProvider(taskId: string, providerId: string): TaskMutationResult;
   startExecutionTask(taskId: string): TaskMutationResult;
-  completeExecutionTask(taskId: string): TaskMutationResult;
+  completeExecutionTask(taskId: string, input?: TaskCompletionInput): TaskMutationResult;
   close(): void;
 };
 
@@ -99,8 +100,8 @@ export function createProductSystemRuntime(
     startExecutionTask(taskId) {
       return persistTaskStart(db, taskId, new Date().toISOString());
     },
-    completeExecutionTask(taskId) {
-      return persistTaskComplete(db, taskId, new Date().toISOString());
+    completeExecutionTask(taskId, input) {
+      return persistTaskComplete(db, taskId, new Date().toISOString(), input);
     },
     close() {
       db.close();
