@@ -26,7 +26,7 @@ const GROUPS = [
         to: "/admin/processes",
         label: "Procese operaționale",
         description:
-          "Cum se lucrează: debitare, formare, finisare, asamblare. Cere o capabilitate, nu un utilaj. Fără execuție, fără write.",
+          "Cum se lucrează. Cere o capabilitate, nu un utilaj. Fără programare, fără write.",
       },
       {
         to: "/admin/workcenters",

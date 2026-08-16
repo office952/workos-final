@@ -155,7 +155,7 @@ Readiness is reported separately:
 
 Typed catalog and typed composition compiler are authority. No process write. No composition graph DB. No SQLite process table.
 
-`/admin` → Procese operaționale is inspection: Categorii, Procese, Compoziții produse, Capabilități necesare.
+`/admin` → Procese operaționale is inspection: Debitare, Formare, Sudură, Print / finisare, Finisare, Asamblare, Electric, Control calitate, Ambalare, then Compoziții produse. Capability and provider coverage are shown on each process. The page does not write.
 `GET /api/products/:productCode/process-composition` is read-only.
 `/components` shows the type process-requirement contract, not the full product graph.
 `/products` does not administer processes.

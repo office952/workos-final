@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import type { OperationalProcessesAdminProjection } from "@workos-final/domain";
 import { OwnerCatalogView } from "./OwnerCatalogView";
-import { buildProcessesCatalog } from "./processesCatalog";
+import {
+  buildProcessesCatalog,
+  formatProcessesAdminSummary,
+  processesAdminSummary,
+} from "./processesCatalog";
 import { fetchOperationalProcessesAdministration } from "./systemApi";
+import { Notice } from "./ui/Notice";
+import { PageHeader } from "./ui/PageHeader";
 
 type PageState =
   | { kind: "loading" }
@@ -31,17 +37,44 @@ export function ProcessesAdminPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă procesele operaționale…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Procese operaționale"
+          lead="Cum se lucrează în atelier. Nu spune ce utilaj se alocă, cine execută sau când se programează."
+        />
+        <p>Se încarcă procesele operaționale…</p>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca procesele operaționale.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Procese operaționale"
+          lead="Cum se lucrează în atelier. Nu spune ce utilaj se alocă, cine execută sau când se programează."
+        />
+        <p>Nu s-au putut încărca procesele operaționale.</p>
+      </section>
+    );
   }
+
+  const summary = processesAdminSummary(page.admin);
 
   return (
     <OwnerCatalogView
       catalog={buildProcessesCatalog(page.admin)}
       title="Procese operaționale"
-      lead="Inspecție a felului în care se lucrează și a traseului tehnologic Letters. Folie și vopsire RAL sunt trasee diferite. Compunerea nu este un plan de execuție. Nu se editează aici."
+      lead="Cum se lucrează în atelier. Nu spune ce utilaj se alocă, cine execută sau când se programează."
+      summary={<p className="page-summary">{formatProcessesAdminSummary(summary)}</p>}
+      notice={
+        <Notice compact>
+          <p>
+            Procesele descriu cum se lucrează. Editarea lor nu este disponibilă în
+            această etapă.
+          </p>
+        </Notice>
+      }
     />
   );
 }

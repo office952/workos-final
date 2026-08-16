@@ -72,6 +72,8 @@ Provenance uses the actual classification/source labels. Development defaults st
 
 Read-only admin pages say so once. Do not add disabled Edit controls.
 
+Operational process catalogs use category → process → detail. Process, capability and provider stay visually separate: the process is the operation, the capability is what a provider must be able to do, the provider is where it can be done now. Coverage is a live projection, not process truth. Raw process and capability IDs stay under Detalii.
+
 ## People admin pattern
 
 Compact rows. Create form uses `Field`. Retired list is secondary.
@@ -88,4 +90,4 @@ EIC total stays visible. Rates stay in Detalii. Preview is what production will 
 
 ## Future migration
 
-New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Operational Processes.
+New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Workcenters / Machines.

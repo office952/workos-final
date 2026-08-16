@@ -13,9 +13,8 @@ describe("ResourcesAdminPage", () => {
     const user = userEvent.setup();
     render(<ResourcesAdminPage />);
 
-    expect(
-      await screen.findByRole("heading", { name: "Resurse și cost intern" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Materiale" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Resurse și cost intern" })).toBeInTheDocument();
     expect(screen.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeInTheDocument();
     expect(
       screen.getByText(

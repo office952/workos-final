@@ -1,47 +1,52 @@
 import type { OperationalProcessesAdminProjection } from "@workos-final/domain";
-import type { CatalogDetailSection, CatalogGroup, OwnerCatalog } from "./ownerCatalog";
+import type {
+  CatalogChip,
+  CatalogDetailSection,
+  CatalogGroup,
+  OwnerCatalog,
+} from "./ownerCatalog";
+
+export type ProcessesAdminSummary = {
+  processes: number;
+  capabilities: number;
+  covered: number;
+  withoutProvider: number;
+};
+
+export function processesAdminSummary(
+  admin: OperationalProcessesAdminProjection,
+): ProcessesAdminSummary {
+  return {
+    processes: admin.processes.length,
+    capabilities: admin.capabilities.length,
+    covered: admin.processes.filter((item) => item.providerCoverage === "COVERED").length,
+    withoutProvider: admin.processes.filter((item) => item.providerCoverage === "NO_PROVIDER")
+      .length,
+  };
+}
+
+export function formatProcessesAdminSummary(summary: ProcessesAdminSummary): string {
+  return [
+    `Procese ${summary.processes}`,
+    `Capabilități ${summary.capabilities}`,
+    `Cu furnizor ${summary.covered}`,
+    `Fără furnizor ${summary.withoutProvider}`,
+  ].join(" · ");
+}
 
 export function buildProcessesCatalog(
   admin: OperationalProcessesAdminProjection,
 ): OwnerCatalog {
   return {
     categories: [
-      {
-        id: "categories",
-        label: "Categorii",
+      ...admin.categories.map((category) => ({
+        id: category.id,
+        label: category.label,
         kindLabel: "Categorie",
-        items: admin.categories.map((category) => ({
-          id: `category:${category.id}`,
-          label: category.label,
-          kindLabel: "Categorie de proces",
-          summary: `${category.processes.length} procese în această categorie.`,
-          groups: category.processes.map((process) => ({
-            id: process.id,
-            kindLabel: "Proces operațional",
-            title: process.label,
-            sections: processSections(process),
-          })),
-        })),
-      },
-      {
-        id: "processes",
-        label: "Procese",
-        kindLabel: "Categorie",
-        items: admin.processes.map((process) => ({
-          id: `process:${process.id}`,
-          label: process.label,
-          kindLabel: "Proces operațional",
-          summary: process.description,
-          groups: [
-            {
-              id: process.id,
-              kindLabel: "Proces operațional",
-              title: process.label,
-              sections: processSections(process),
-            },
-          ],
-        })),
-      },
+        items: category.processes.map((process) =>
+          processItem(process, conditionLinesFor(process.id, admin)),
+        ),
+      })),
       {
         id: "compositions",
         label: "Compoziții produse",
@@ -49,121 +54,82 @@ export function buildProcessesCatalog(
         items: admin.compositions.map((inspection) => ({
           id: `composition:${inspection.id}`,
           label: inspection.label,
-          kindLabel: "Compunere de procese",
+          kindLabel: "Traseu de produs",
           summary: `${inspection.composition.productLabel}. ${inspection.summary}`,
           groups: compositionGroups(inspection.composition),
-        })),
-      },
-      {
-        id: "capabilities",
-        label: "Capabilități necesare",
-        kindLabel: "Categorie",
-        items: admin.capabilities.map((capability) => ({
-          id: `capability:${capability.id}`,
-          label: capability.label,
-          kindLabel: "Clasă de capabilitate",
-          summary: capability.description,
-          groups: [
-            {
-              id: capability.id,
-              kindLabel: "Clasă de capabilitate",
-              title: capability.label,
-              sections: [
-                {
-                  id: "identity",
-                  title: "Identitate",
-                  facts: [
-                    { label: "Fel", value: capability.kindLabel },
-                    {
-                      label: "Procese care o cer",
-                      value:
-                        capability.processes.length === 0
-                          ? "niciun proces încă"
-                          : capability.processes.map((item) => item.label).join("; "),
-                    },
-                    { label: "Acoperire furnizor", value: capability.providerCoverageLabel },
-                    {
-                      label: "Furnizori actuali",
-                      value:
-                        capability.providers.length === 0
-                          ? "niciun furnizor confirmat"
-                          : capability.providers.map((item) => item.label).join("; "),
-                    },
-                  ],
-                  lines: [
-                    "Procesul cere o clasă de capabilitate, nu un utilaj concret. Furnizorii se inspectează în Utilaje și capacitate.",
-                  ],
-                },
-                {
-                  id: "technical",
-                  title: "Tehnic",
-                  technical: true,
-                  facts: [{ label: "Identitate capabilitate", value: capability.id }],
-                },
-              ],
-            },
-          ],
         })),
       },
     ].filter((category) => category.items.length > 0),
   };
 }
 
+function processItem(
+  process: OperationalProcessesAdminProjection["processes"][number],
+  conditionLines: readonly string[],
+): OwnerCatalog["categories"][number]["items"][number] {
+  return {
+    id: `process:${process.id}`,
+    label: process.label,
+    kindLabel: "Proces",
+    summary: process.description,
+    listHint: process.providerCoverageLabel,
+    chips: coverageChips(process),
+    groups: [
+      {
+        id: process.id,
+        kindLabel: "Proces",
+        title: process.label,
+        sections: processSections(process, conditionLines),
+      },
+    ],
+  };
+}
+
 function processSections(
   process: OperationalProcessesAdminProjection["processes"][number],
+  conditionLines: readonly string[],
 ): CatalogDetailSection[] {
+  const providers =
+    process.providers.length === 0
+      ? "Fără furnizor configurat"
+      : process.providers.map((item) => item.label).join("; ");
   return [
     {
-      id: "identity",
-      title: "Identitate",
-      facts: [
-        { label: "Categorie", value: process.categoryLabel },
-        { label: "Rezultat", value: process.outcome },
-        { label: "Stare", value: process.lifecycleLabel },
-        { label: "Pregătire", value: process.readinessLabel },
-      ],
-      lines: [process.description, process.readinessNote],
-    },
-    {
       id: "capability",
-      title: "Capabilitate necesară",
+      title: "Operație",
       facts: [
-        { label: "Clasă", value: process.requiredCapabilityLabel },
+        { label: "Necesită", value: process.requiredCapabilityLabel, emphasize: true },
         { label: "Fel", value: process.requiredCapabilityKindLabel },
         { label: "Acoperire furnizor", value: process.providerCoverageLabel },
-        {
-          label: "Furnizori actuali",
-          value:
-            process.providers.length === 0
-              ? "niciun furnizor confirmat"
-              : process.providers.map((item) => item.label).join("; "),
-        },
+        { label: "Furnizori actuali", value: providers },
+        { label: "Rezultat", value: process.outcome },
       ],
       lines: [
-        "Procesul cere o clasă de capabilitate, nu un utilaj sau un angajat. Detaliul de catalog este în Utilaje și capacitate.",
+        "Procesul spune ce operație trebuie făcută. Capabilitatea spune ce trebuie să poată furnizorul. Furnizorul arată unde se poate face acum.",
+        "Furnizorii se inspectează în Utilaje și capacitate.",
       ],
     },
+    ...(conditionLines.length > 0
+      ? [
+          {
+            id: "condition",
+            title: "Când apare",
+            lines: conditionLines,
+          },
+        ]
+      : []),
     {
       id: "recipe",
       title: "Rețetă de cost",
       facts: [
-        {
-          label: "Rețetă",
-          value: process.recipeLabel ?? "neconfigurată",
-        },
-        {
-          label: "Fel",
-          value: process.recipeKindLabel ?? "fără rețetă",
-        },
+        { label: "Rețetă", value: process.recipeLabel ?? "neconfigurată" },
+        { label: "Fel", value: process.recipeKindLabel ?? "fără rețetă" },
         { label: "Stare rețetă", value: process.recipeStateLabel },
-      ],
-      lines: [
-        "Procesul rămâne adevăr tehnologic. Rețeta spune CUM se formează costul intern.",
       ],
     },
     {
       id: "resources",
-      title: "Resurse / serviciu referit",
+      title: "Resurse",
       facts: [
         {
           label: "Referințe",
@@ -184,19 +150,18 @@ function processSections(
           : process.usedBy.map((item) => item.displayLine),
     },
     {
-      id: "gaps",
-      title: "Lipsă",
-      lines: [
-        "Write-ul de administrare nu este deschis.",
-        "Nu există graf de execuție, asignări sau plan de lucru.",
-        "Acoperirea de furnizor se inspectează în Utilaje și capacitate.",
-      ],
-    },
-    {
-      id: "technical",
-      title: "Tehnic",
+      id: "details",
+      title: "Detalii",
       technical: true,
-      facts: [{ label: "Identitate proces", value: process.id }],
+      facts: [
+        { label: "Identitate proces", value: process.id },
+        { label: "Identitate capabilitate", value: process.requiredCapabilityId },
+        { label: "Categorie", value: process.categoryLabel },
+        { label: "Stare", value: process.lifecycleLabel },
+        { label: "Pregătire", value: process.readinessLabel },
+        ...(process.recipeId ? [{ label: "Identitate rețetă", value: process.recipeId }] : []),
+      ],
+      lines: process.readinessNote ? [process.readinessNote] : undefined,
     },
   ];
 }
@@ -235,7 +200,7 @@ function compositionGroups(
       },
       {
         id: "order",
-        title: "Ordine derivată",
+        title: "Succesiune",
         lines: composition.derivedOrder.map((id) => {
           const node = composition.nodes.find((item) => item.id === id);
           if (!node) {
@@ -266,8 +231,8 @@ function compositionGroups(
           ]
         : []),
       {
-        id: "technical",
-        title: "Tehnic",
+        id: "details",
+        title: "Detalii",
         technical: true,
         facts: [{ label: "Produs", value: composition.productCode }],
       },
@@ -316,4 +281,36 @@ function compositionGroups(
       ];
     }),
   ];
+}
+
+function conditionLinesFor(
+  processId: string,
+  admin: OperationalProcessesAdminProjection,
+): readonly string[] {
+  const labels = new Set<string>();
+  for (const inspection of admin.compositions) {
+    for (const node of inspection.composition.nodes) {
+      if (node.processId === processId && node.conditionLabel) {
+        labels.add(node.conditionLabel);
+      }
+    }
+  }
+  return [...labels].map((label) => `Apare când ${label}.`);
+}
+
+function coverageChips(
+  process: OperationalProcessesAdminProjection["processes"][number],
+): CatalogChip[] {
+  switch (process.providerCoverage) {
+    case "COVERED":
+      return [{ label: process.providerCoverageLabel, tone: "ok" }];
+    case "NO_PROVIDER":
+      return [{ label: process.providerCoverageLabel, tone: "warn" }];
+    case "PROVIDER_PLANNED":
+      return [{ label: process.providerCoverageLabel, tone: "neutral" }];
+    default: {
+      const _exhaustive: never = process.providerCoverage;
+      return _exhaustive;
+    }
+  }
 }

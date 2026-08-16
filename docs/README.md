@@ -50,6 +50,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_UI_UX_FOUNDATION_AND_EXECUTION_SURFACE_V1.md` — UI/UX foundation proven on Execution and People
 - `docs/worklog/WORKOS_FINAL_PRODUCT_CONFIGURATION_RESULT_UX_MIGRATION_V1.md` — Product configuration / result uses the same grammar
 - `docs/worklog/WORKOS_FINAL_ADMIN_RESOURCES_UX_MIGRATION_V1.md` — Resources / Cost admin uses the same grammar
+- `docs/worklog/WORKOS_FINAL_ADMIN_OPERATIONAL_PROCESSES_UX_MIGRATION_V1.md` — Operational Processes admin uses the same grammar
 
 ## Historical evidence
 

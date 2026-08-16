@@ -224,8 +224,8 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
 
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/admin/processes");
-  await page.getByRole("button", { name: "Procese" }).click();
-  await page.getByRole("button", { name: "Lipire față-volum" }).click();
+  await page.getByRole("button", { name: "Asamblare", exact: true }).click();
+  await page.getByRole("button", { name: /Lipire față-volum/ }).click();
   await expect(page.getByRole("heading", { name: "Lipire față-volum" })).toBeVisible();
   await expect(page.getByText("Asamblare manuală").first()).toBeVisible();
   await expect(page.getByText("Acoperită").first()).toBeVisible();

@@ -127,8 +127,8 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/admin/processes");
   await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
-  await page.getByRole("button", { name: "Procese" }).click();
-  await page.getByRole("button", { name: "Vopsire RAL" }).click();
+  await page.getByRole("button", { name: "Finisare", exact: true }).click();
+  await page.getByRole("button", { name: /Vopsire RAL/ }).click();
   await expect(page.getByRole("heading", { name: "Vopsire RAL" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/process-completion-catalog.png",
