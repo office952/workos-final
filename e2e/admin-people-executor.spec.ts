@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { openPeopleAdmin } from "./helpers/people";
 
 const ACTIVE_NAME = "Executor PEOPLE E2E";
@@ -62,6 +63,10 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     path: "docs/worklog/screenshots/letters-people-active.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-people.png",
+    fullPage: true,
+  });
 
   const retiredRow = page.locator(".people-list li").filter({ hasText: RETIRED_NAME }).first();
   if (await retiredRow.getByRole("button", { name: "Retrage persoana" }).isVisible()) {
@@ -71,6 +76,10 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   await expect(page.getByText(RETIRED_NAME)).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-people-retired.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-people-retired.png",
     fullPage: true,
   });
 
@@ -127,6 +136,10 @@ test("assigns an owner-created executor and keeps attribution after complete", a
       path: "docs/worklog/screenshots/letters-people-in-progress.png",
       fullPage: true,
     });
+    await page.screenshot({
+      path: "docs/worklog/screenshots/ui-execution-in-progress.png",
+      fullPage: true,
+    });
     await backCnc.getByLabel("Cantitate realizată").fill("12.5");
     await backCnc.getByRole("button", { name: "Finalizează" }).click();
   }
@@ -154,6 +167,10 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   await expect(backCnc.getByText(`Executant: ${ACTIVE_NAME}`)).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-people-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-people-narrow.png",
     fullPage: true,
   });
 });

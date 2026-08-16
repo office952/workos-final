@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
-  COMPLETION_NOTE_MAX_LENGTH,
   eicLineGroupLabel,
   type AcceptedProductionSnapshot,
   type DraftValues,
@@ -10,11 +9,12 @@ import {
   type EicResult,
   type ExecutionPlanPreview,
   type ExecutionPlanView,
-  type ExecutionTaskView,
   type ProductAggregate,
   type ProductDefinition,
   type ProductTruth,
 } from "@workos-final/domain";
+import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
+import { formatMoney, formatQuantity, formatUnit } from "./formatDisplay";
 import { FormRenderer } from "./FormRenderer";
 import {
   acceptProductionSnapshot,
@@ -35,25 +35,6 @@ type PageState =
   | { kind: "error" }
   | { kind: "ready"; projection: TemplateProjection };
 
-function formatQuantity(value: number): string {
-  return value.toLocaleString("ro-RO", { maximumFractionDigits: 2 });
-}
-
-function formatUnit(unit: string): string {
-  switch (unit) {
-    case "m2":
-      return "m²";
-    case "mm2":
-      return "mm²";
-    case "W":
-      return "W";
-    case "buc":
-      return "buc";
-    default:
-      return unit;
-  }
-}
-
 function lightingUnavailableReason(aggregate: ProductAggregate): string {
   const lighting = aggregate.componentStatuses.find((item) => item.id === "LIGHTING");
   if (!lighting || lighting.status === "CALCULATED") {
@@ -70,13 +51,6 @@ function measurementCopy(value: number, unit: string): string {
     return `Suprafață confirmată: ${value} mm² (introdusă de operator)`;
   }
   return `Perimetru confirmat: ${value} mm (introdus de operator)`;
-}
-
-function formatMoney(value: number): string {
-  return value.toLocaleString("ro-RO", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 const EIC_GROUP_ORDER: readonly EicLineGroup[] = [
@@ -490,6 +464,7 @@ export function ProductConfigurationPage() {
             </button>
             <button
               type="button"
+              className="button-secondary"
               onClick={() => {
                 setConfirmed(null);
                 setDefinition(null);
@@ -509,7 +484,7 @@ export function ProductConfigurationPage() {
           ) : null}
 
           {confirmed.executionPlan ? (
-            <PersistedExecutionPlanSection
+            <ExecutionPlanPanel
               view={confirmed.executionPlan}
               reused={Boolean(confirmed.executionPlanReused)}
               busy={busy}
@@ -629,239 +604,6 @@ function AcceptedProductionSnapshotSection({
         </button>
       </div>
     </div>
-  );
-}
-
-function PersistedExecutionPlanSection({
-  view,
-  reused,
-  busy,
-  onAssignProvider,
-  onAssignExecutor,
-  onStartTask,
-  onCompleteTask,
-}: {
-  view: ExecutionPlanView;
-  reused: boolean;
-  busy: boolean;
-  onAssignProvider: (taskId: string, providerId: string) => void;
-  onAssignExecutor: (taskId: string, personId: string) => void;
-  onStartTask: (taskId: string) => void;
-  onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
-}) {
-  return (
-    <div className="execution-plan">
-      <h3>{reused ? "Plan de execuție deja creat" : "Plan de execuție"}</h3>
-      <ul className="execution-progress">
-        <li>Stare: {view.statusLabel}</li>
-        <li>
-          {view.progress.completed} / {view.progress.total} finalizate
-        </li>
-        <li>În lucru: {view.progress.inProgress}</li>
-        <li>În așteptare: {view.progress.waitingDependencies}</li>
-        <li>Fără furnizor: {view.progress.noProvider}</li>
-        <li>Fără executant: {view.progress.noExecutor}</li>
-        {view.progress.varianceCount > 0 ? (
-          <li>Abateri: {view.progress.varianceCount}</li>
-        ) : null}
-      </ul>
-      <ul className="execution-plan-meta">
-        <li>Produs: {view.plan.productLabel}</li>
-        <li>
-          Cost intern din snapshot: {formatMoney(view.plan.eicTotal)}{" "}
-          {view.plan.eicCurrency}
-          {view.plan.eicCompleteness === "PARTIAL" ? " (parțial)" : ""}
-        </li>
-        <li>Referință: {view.plan.planId}</li>
-      </ul>
-      <ol className="production-ops">
-        {view.tasks.map((task) => (
-          <ExecutionTaskCard
-            key={task.taskId}
-            task={task}
-            busy={busy}
-            onAssignProvider={onAssignProvider}
-            onAssignExecutor={onAssignExecutor}
-            onStartTask={onStartTask}
-            onCompleteTask={onCompleteTask}
-          />
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function ExecutionTaskCard({
-  task,
-  busy,
-  onAssignProvider,
-  onAssignExecutor,
-  onStartTask,
-  onCompleteTask,
-}: {
-  task: ExecutionTaskView;
-  busy: boolean;
-  onAssignProvider: (taskId: string, providerId: string) => void;
-  onAssignExecutor: (taskId: string, personId: string) => void;
-  onStartTask: (taskId: string) => void;
-  onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
-}) {
-  const [providerId, setProviderId] = useState(
-    task.assignedProvider?.id ?? task.eligibleProviders[0]?.id ?? "",
-  );
-  const [executorId, setExecutorId] = useState(
-    task.assignedExecutor?.id ?? task.eligibleExecutors[0]?.id ?? "",
-  );
-  const [completedQuantity, setCompletedQuantity] = useState(
-    task.measurableQuantity ? String(task.measurableQuantity.value) : "",
-  );
-  const [note, setNote] = useState("");
-
-  function submitComplete() {
-    const trimmedNote = note.trim();
-    if (!task.requiresCompletedQuantity) {
-      onCompleteTask(task.taskId, trimmedNote ? { note: trimmedNote } : {});
-      return;
-    }
-    const parsed = Number(completedQuantity.replace(",", "."));
-    onCompleteTask(task.taskId, {
-      ...(Number.isFinite(parsed) ? { completedQuantity: parsed } : {}),
-      ...(trimmedNote ? { note: trimmedNote } : {}),
-    });
-  }
-
-  return (
-    <li className="production-op">
-      <h4>
-        {task.seqLabel}. {task.processLabel}
-      </h4>
-      <p>Componentă: {task.scopeLabel}</p>
-      <p className="task-status">Stare: {task.statusLabel}</p>
-      {task.assignedProvider ? <p>Alocat: {task.assignedProvider.label}</p> : <p>Alocare: Nealocat</p>}
-      {task.assignedExecutor ? (
-        <p>Executant: {task.assignedExecutor.label}</p>
-      ) : (
-        <p>Executant: Nealocat</p>
-      )}
-      {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join("; ")}</p> : null}
-      {task.eligibleProviders.length === 0 ? <p>Fără furnizor disponibil</p> : null}
-      {task.measurableQuantity ? (
-        <p>
-          Cantitate planificată: {formatQuantity(task.measurableQuantity.value)}{" "}
-          {formatUnit(task.measurableQuantity.unit)}
-        </p>
-      ) : (
-        task.quantities.slice(0, 1).map((quantity) => (
-          <p key={`${task.taskId}-${quantity.label}`}>
-            Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
-          </p>
-        ))
-      )}
-      {task.completedQuantityLabel ? <p>{task.completedQuantityLabel}</p> : null}
-      {task.varianceLabel ? <p>{task.varianceLabel}</p> : null}
-      {task.completion?.note ? <p>Notă: {task.completion.note}</p> : null}
-      {task.startedAt ? (
-        <p>Pornit la: {new Date(task.startedAt).toLocaleString("ro-RO")}</p>
-      ) : null}
-      {task.completedAt ? (
-        <p>Finalizat la: {new Date(task.completedAt).toLocaleString("ro-RO")}</p>
-      ) : null}
-      <div className="task-actions">
-        {task.canAssign ? (
-          <>
-            <label>
-              Alocare
-              <select
-                value={providerId}
-                onChange={(event) => setProviderId(event.target.value)}
-                disabled={busy}
-              >
-                {task.eligibleProviders.map((provider) => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              disabled={busy || providerId.length === 0}
-              onClick={() => onAssignProvider(task.taskId, providerId)}
-            >
-              Alocă
-            </button>
-          </>
-        ) : null}
-        {task.canAssignExecutor ? (
-          <>
-            <label>
-              Executant
-              <select
-                value={executorId}
-                onChange={(event) => setExecutorId(event.target.value)}
-                disabled={busy}
-              >
-                {task.eligibleExecutors.map((person) => (
-                  <option key={person.id} value={person.id}>
-                    {person.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              disabled={busy || executorId.length === 0}
-              onClick={() => onAssignExecutor(task.taskId, executorId)}
-            >
-              Alocă executant
-            </button>
-          </>
-        ) : null}
-        {task.status === "PLANNED" &&
-        task.eligibleExecutors.length === 0 &&
-        !task.assignedExecutor ? (
-          <p>
-            Nu există persoane active configurate.{" "}
-            <Link to="/admin/people">Deschide administrarea persoanelor</Link>
-          </p>
-        ) : null}
-        {task.canStart ? (
-          <button type="button" disabled={busy} onClick={() => onStartTask(task.taskId)}>
-            Pornește
-          </button>
-        ) : null}
-        {task.canComplete ? (
-          <>
-            {task.requiresCompletedQuantity ? (
-              <label>
-                Cantitate realizată
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={completedQuantity}
-                  onChange={(event) => setCompletedQuantity(event.target.value)}
-                  disabled={busy}
-                />
-              </label>
-            ) : null}
-            <label>
-              Notă
-              <input
-                type="text"
-                maxLength={COMPLETION_NOTE_MAX_LENGTH}
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                disabled={busy}
-              />
-            </label>
-            <button type="button" disabled={busy} onClick={submitComplete}>
-              Finalizează
-            </button>
-          </>
-        ) : null}
-      </div>
-    </li>
   );
 }
 

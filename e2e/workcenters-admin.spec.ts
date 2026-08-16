@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("workcenters admin shows the real shop-floor map without inventing capacity", async ({
   page,

@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
@@ -112,6 +113,10 @@ test("records planned vs completed quantity on LETTERS tasks", async ({ page, re
   await expect(plan.getByText("Abateri: 1")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actuals-with-variance.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-execution-variance.png",
     fullPage: true,
   });
 

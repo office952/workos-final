@@ -13,10 +13,7 @@ import { SystemStatusPage } from "./SystemStatusPage";
 import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Stare sistem" },
   { to: "/products", label: "Produse" },
-  { to: "/components", label: "Module și componente" },
-  { to: "/governance", label: "Guvernanța sistemului" },
   { to: "/admin", label: "Administrare" },
 ];
 

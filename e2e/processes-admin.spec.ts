@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("processes admin inspects capability-bound operational processes", async ({
   page,

@@ -1,4 +1,5 @@
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const FAMILY_ID = "LIGHTED_VOLUMETRIC_SIGNS";
 const CATEGORY_ID = "HALO_LIT_VOLUMETRIC_LETTERS";
@@ -37,8 +38,15 @@ test("admin display-label write persists and propagates", async ({
       page.getByRole("link", { name: "Utilaje și capacitate" }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Persoane" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Operațiuni" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sistem", exact: true })).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-home.png",
+      fullPage: true,
+    });
+    await page.screenshot({
+      path: "docs/worklog/screenshots/ui-admin-home.png",
       fullPage: true,
     });
 
@@ -122,6 +130,7 @@ test("admin display-label write persists and propagates", async ({
       fullPage: true,
     });
 
+    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Administrare" }).click();
     await page.getByRole("link", { name: "Module și componente" }).click();
     await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
     await page.getByRole("button", { name: "Componente de produs" }).click();

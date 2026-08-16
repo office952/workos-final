@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   assignExecutorIfNeeded,
   assignProviderIfNeeded,
@@ -63,7 +63,7 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
       path: "docs/worklog/screenshots/letters-task-unassigned.png",
       fullPage: true,
     });
-    await expect(backCnc.getByRole("combobox", { name: "Alocare" })).toContainText("CNC 4020");
+    await expect(backCnc.getByRole("combobox", { name: "Echipament / zonă" })).toContainText("CNC 4020");
     await page.screenshot({
       path: "docs/worklog/screenshots/letters-task-provider-selector.png",
       fullPage: true,
@@ -83,6 +83,10 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
     path: "docs/worklog/screenshots/letters-task-assigned.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-execution-actionable.png",
+    fullPage: true,
+  });
 
   if (await lighting.getByText(/Așteaptă:/).isVisible()) {
     await expect(lighting.getByRole("button", { name: "Pornește" })).toHaveCount(0);
@@ -97,9 +101,16 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
   }
   if (await backCnc.getByRole("button", { name: "Finalizează" }).isVisible()) {
     await expect(backCnc.getByText("Stare: În lucru")).toBeVisible();
+    await backCnc.locator("details.task-details").evaluate((el) => {
+      (el as HTMLDetailsElement).open = true;
+    });
     await expect(backCnc.getByText(/Pornit la:/)).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/letters-task-in-progress.png",
+      fullPage: true,
+    });
+    await page.screenshot({
+      path: "docs/worklog/screenshots/ui-execution-in-progress.png",
       fullPage: true,
     });
     await expect(backCnc.getByLabel("Cantitate realizată")).toHaveValue("12.5");
@@ -113,16 +124,23 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
   }
 
   await expect(backCnc.getByText("Stare: Finalizat")).toBeVisible();
+  await backCnc.locator("details.task-details").evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
   await expect(backCnc.getByText(/Finalizat la:/)).toBeVisible();
   await expect(backCnc.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-task-completed.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-execution-completed.png",
+    fullPage: true,
+  });
 
   await expect(lighting.getByText("Așteaptă:")).toHaveCount(0);
   if (await lighting.getByRole("button", { name: "Alocă", exact: true }).isVisible()) {
-    await lighting.getByRole("combobox", { name: "Alocare" }).selectOption({
+    await lighting.getByRole("combobox", { name: "Echipament / zonă" }).selectOption({
       label: "Montaj LED / electric",
     });
     await lighting.getByRole("button", { name: "Alocă", exact: true }).click();
@@ -138,13 +156,13 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
   });
 
   if (await assembly.getByRole("button", { name: "Alocă", exact: true }).isVisible()) {
-    await expect(assembly.getByRole("combobox", { name: "Alocare" })).toContainText(
+    await expect(assembly.getByRole("combobox", { name: "Echipament / zonă" })).toContainText(
       "Masă asamblare 1",
     );
-    await expect(assembly.getByRole("combobox", { name: "Alocare" })).toContainText(
+    await expect(assembly.getByRole("combobox", { name: "Echipament / zonă" })).toContainText(
       "Masă asamblare 2",
     );
-    await assembly.getByRole("combobox", { name: "Alocare" }).selectOption({
+    await assembly.getByRole("combobox", { name: "Echipament / zonă" }).selectOption({
       label: "Masă asamblare 2",
     });
     await assembly.getByRole("button", { name: "Alocă", exact: true }).click();

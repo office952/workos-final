@@ -10,6 +10,7 @@ Related current canons:
 - `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity and cost evidence
 - `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md` — service / labor recipe layer
 - `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition and capability class
+- `docs/architecture/UI_UX_FOUNDATION_CANON.md` — operator/admin visual and interaction grammar
 - `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — construction order and finalization status
 - `packages/domain/src/capabilities.ts` — frozen capability IDs (kernel status remains PLANNED by design)
 - `packages/domain/src/governance/projection.ts` — honest implemented vs planned runtime projection
@@ -315,25 +316,31 @@ Ownership arrows: Product System owns composition and settings; component contra
 
 Do not add a top-nav link per domain.
 
-Current primary nav:
+Current primary nav stays small so later domains do not accumulate in the header:
 
-- Stare sistem
 - Produse
-- Module și componente
-- Guvernanța sistemului
 - Administrare
 
-Inside Administrare, use catalog navigation (category → item → detail), not fifteen header links:
+Brand `WorkOS Final` returns to Stare sistem (`/`). Inspection surfaces stay reachable from Administrare, not from the top bar.
+
+Inside Administrare, group only real current pages:
 
 ```text
 Administrare
-├── Sistem produs
-├── Resurse și cost intern
-├── Procese operaționale
-└── Utilaje și capacitate
+├── Operațiuni
+│   └── Persoane
+├── Atelier
+│   ├── Resurse și cost intern
+│   ├── Procese operaționale
+│   └── Utilaje și capacitate
+└── Sistem
+    ├── Sistem produs
+    ├── Module și componente
+    ├── Guvernanța sistemului
+    └── Stare sistem
 ```
 
-Persoane, Execuție, Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și capacitate is present because the capability-provider model exists; live asset rows remain empty on purpose. Do not invent machines to fill the catalog.
+Do not add an empty Producție page. Execution lives on the confirmed product path. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și capacitate is present because the capability-provider model exists. Do not invent machines to fill the catalog.
 
 ## Operator vs admin surfaces
 

@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Person } from "@workos-final/domain";
 import { createPerson, fetchPeople, renamePerson, retirePerson } from "./peopleApi";
+import { EmptyState } from "./ui/EmptyState";
+import { Field } from "./ui/Field";
+import { PageHeader } from "./ui/PageHeader";
+import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
   | { kind: "loading" }
@@ -58,11 +62,10 @@ export function PeopleAdminPage() {
 
   return (
     <section>
-      <h1>Persoane</h1>
-      <p className="page-lead">
-        Identitate operațională pentru executantul de task. Nu este HR, pontaj,
-        salariu sau programare.
-      </p>
+      <PageHeader
+        title="Persoane"
+        lead="Identitate operațională pentru executantul de task. Nu este HR, pontaj, salariu sau programare."
+      />
       <form
         className="people-create"
         onSubmit={(event) => {
@@ -78,83 +81,91 @@ export function PeopleAdminPage() {
           });
         }}
       >
-        <label>
-          Nume
+        <Field label="Nume">
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
             disabled={busy}
           />
-        </label>
+        </Field>
         <button type="submit" disabled={busy || name.trim().length === 0}>
           Adaugă persoană
         </button>
       </form>
       {notice ? <p className="status-bad">{notice}</p> : null}
       <h2>Active</h2>
-      {active.length === 0 ? <p>Nu există persoane active configurate.</p> : null}
-      <ul className="people-list">
-        {active.map((person) => (
-          <li key={person.personId}>
-            {editingId === person.personId ? (
-              <>
-                <label>
-                  Nume
-                  <input
-                    value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
+      {active.length === 0 ? (
+        <EmptyState title="Nu există persoane active configurate." action={<p>Adaugă prima persoană.</p>} />
+      ) : (
+        <ul className="people-list">
+          {active.map((person) => (
+            <li key={person.personId}>
+              {editingId === person.personId ? (
+                <>
+                  <Field label="Nume">
+                    <input
+                      value={draft}
+                      onChange={(event) => setDraft(event.target.value)}
+                      disabled={busy}
+                    />
+                  </Field>
+                  <button
+                    type="button"
+                    disabled={busy || draft.trim().length === 0}
+                    onClick={() =>
+                      void apply(async () => {
+                        const people = await renamePerson(person.personId, draft);
+                        setEditingId(null);
+                        return people;
+                      })
+                    }
+                  >
+                    Salvează
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p>{person.displayName}</p>
+                  <StatusChip label="Activ" tone="ok" />
+                  <button
+                    type="button"
+                    className="button-quiet"
                     disabled={busy}
-                  />
-                </label>
-                <button
-                  type="button"
-                  disabled={busy || draft.trim().length === 0}
-                  onClick={() =>
-                    void apply(async () => {
-                      const people = await renamePerson(person.personId, draft);
-                      setEditingId(null);
-                      return people;
-                    })
-                  }
-                >
-                  Salvează
-                </button>
-              </>
-            ) : (
-              <>
-                <p>{person.displayName}</p>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => {
-                    setEditingId(person.personId);
-                    setDraft(person.displayName);
-                  }}
-                >
-                  Editează nume
-                </button>
-                <button
-                  type="button"
-                  className="button-secondary"
-                  disabled={busy}
-                  onClick={() => void apply(() => retirePerson(person.personId))}
-                >
-                  Retrage persoana
-                </button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-      <h2>Retrase</h2>
-      {retired.length === 0 ? <p>Nicio persoană retrasă.</p> : null}
-      <ul className="people-list">
-        {retired.map((person) => (
-          <li key={person.personId}>
-            <p>{person.displayName}</p>
-          </li>
-        ))}
-      </ul>
+                    onClick={() => {
+                      setEditingId(person.personId);
+                      setDraft(person.displayName);
+                    }}
+                  >
+                    Editează nume
+                  </button>
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    disabled={busy}
+                    onClick={() => void apply(() => retirePerson(person.personId))}
+                  >
+                    Retrage persoana
+                  </button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <details className="people-retired" open={retired.length > 0}>
+        <summary>
+          <h2>Retrase</h2>
+        </summary>
+        {retired.length === 0 ? <p>Nicio persoană retrasă.</p> : null}
+        <ul className="people-list">
+          {retired.map((person) => (
+            <li key={person.personId}>
+              <p>{person.displayName}</p>
+              <StatusChip label="Retras" tone="neutral" />
+            </li>
+          ))}
+        </ul>
+      </details>
     </section>
   );
 }

@@ -46,7 +46,7 @@ Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClas
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan.
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none EIC is 595.00 EUR PARTIAL because Analyzer geometry is still missing. Values are calibratable development configuration, not final workshop rates.
-A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, and explicit task executor assignment are IMPLEMENTED_CURRENT. HR, Pontaj, scheduling, capacity, inventory deduction and actual costing remain NOT_IMPLEMENTED.
+A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, and explicit task executor assignment are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution and People. HR, Pontaj, scheduling, capacity, inventory deduction and actual costing remain NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text

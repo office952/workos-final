@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.goto("/");
@@ -11,6 +11,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
     fullPage: true,
   });
 
+  await page.getByRole("link", { name: "Administrare" }).click();
   await page.getByRole("link", { name: "Module și componente" }).click();
   await expect(page.getByRole("heading", { name: "Module și componente" })).toBeVisible();
   await expect(
@@ -246,6 +247,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.setViewportSize({ width: 1280, height: 900 });
 
+  await page.getByRole("link", { name: "Administrare" }).click();
   await page.getByRole("link", { name: "Guvernanța sistemului" }).click();
   await expect(page.getByRole("heading", { name: "Guvernanța sistemului" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Autoritate și adevăr" })).toHaveAttribute(

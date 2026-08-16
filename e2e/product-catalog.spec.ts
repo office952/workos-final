@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("catalog leads to canonical product confirm and partial EIC", async ({
   page,

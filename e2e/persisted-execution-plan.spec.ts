@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 async function confirmLetters(
   page: import("@playwright/test").Page,
@@ -51,10 +51,21 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await expect(plan.getByText("Montare module LED").first()).toBeVisible();
   await expect(plan.getByText("Cost intern din snapshot: 595,00 EUR (parțial)")).toBeVisible();
   await expect(plan.getByText(/Fără furnizor: 3/)).toBeVisible();
+  await expect(plan.getByRole("tab", { name: "Toate" })).toBeVisible();
+  await expect(plan.getByText("QUALITY_CONTROL")).toHaveCount(0);
+  await expect(plan.getByText("CUT_SHEET_CNC")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Completează" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-persisted.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-execution-overview.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-execution-no-provider.png",
     fullPage: true,
   });
   await page.screenshot({
@@ -78,9 +89,15 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
     fullPage: true,
   });
 
+  await plan.locator("details.execution-plan-meta-wrap").evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
   const reference = await plan.getByText("Referință: exp:").textContent();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await expect(page.getByRole("heading", { name: "Plan de execuție deja creat" })).toBeVisible();
+  await page.locator(".execution-plan details.execution-plan-meta-wrap").evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
   await expect(page.getByText(reference ?? "Referință: exp:")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-idempotent.png",
@@ -93,6 +110,10 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
     path: "docs/worklog/screenshots/letters-execution-persisted-narrow.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-execution-narrow.png",
+    fullPage: true,
+  });
 });
 
 test("vinyl snapshot persists the frozen vinyl task", async ({ page }) => {
@@ -102,7 +123,7 @@ test("vinyl snapshot persists the frozen vinyl task", async ({ page }) => {
   const plan = page.locator(".execution-plan");
   await expect(plan.getByText(/\/ 13 finalizate/)).toBeVisible();
   await expect(plan.getByText("Aplicare folie").first()).toBeVisible();
-  await expect(plan.getByRole("combobox", { name: "Alocare" }).first()).toBeVisible();
+  await expect(plan.getByRole("combobox", { name: "Echipament / zonă" }).first()).toBeVisible();
   await expect(plan.getByText("Vopsire RAL")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
 });

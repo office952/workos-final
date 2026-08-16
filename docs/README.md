@@ -17,6 +17,8 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/EXECUTION_PLAN_PREVIEW_CANON.md` — read-only production-plan preview law
 - `docs/architecture/ACCEPTED_PRODUCTION_SNAPSHOT_CANON.md` — frozen accepted production snapshot law
 - `docs/architecture/EXECUTION_PLAN_AND_TASKS_CANON.md` — persisted ExecutionPlan / ExecutionTasks and minimal lifecycle law
+- `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` — operational person identity and task executor
+- `docs/architecture/UI_UX_FOUNDATION_CANON.md` — operator/admin visual and interaction grammar
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
@@ -44,6 +46,8 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_LETTERS_PERSISTED_EXECUTION_PLAN_AND_TASKS_V1.md` — persisted ExecutionPlan and tasks
 - `docs/worklog/WORKOS_FINAL_LETTERS_MINIMAL_TASK_EXECUTION_V1.md` — provider assignment and minimal Start/Complete
 - `docs/worklog/WORKOS_FINAL_LETTERS_EXECUTION_GOLDEN_PATH_COMPLETION_V1.md` — reachable LETTERS execution DAG
+- `docs/worklog/WORKOS_FINAL_MINIMAL_PEOPLE_AND_TASK_EXECUTOR_V1.md` — People identity and task executor
+- `docs/worklog/WORKOS_FINAL_UI_UX_FOUNDATION_AND_EXECUTION_SURFACE_V1.md` — UI/UX foundation proven on Execution and People
 
 ## Historical evidence
 

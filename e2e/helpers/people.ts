@@ -45,7 +45,7 @@ export async function assignProviderIfNeeded(card: Locator, providerLabel?: stri
     return;
   }
   if (providerLabel) {
-    await card.getByRole("combobox", { name: "Alocare" }).selectOption({
+    await card.getByRole("combobox", { name: "Echipament / zonă" }).selectOption({
       label: providerLabel,
     });
   }

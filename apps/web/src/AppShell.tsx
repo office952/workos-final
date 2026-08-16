@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 export type AppNavItem = {
   to: string;
@@ -16,7 +16,9 @@ export function AppShell({ children, navItems }: AppShellProps) {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header-inner">
-          <p className="app-brand">WorkOS Final</p>
+          <p className="app-brand">
+            <Link to="/">WorkOS Final</Link>
+          </p>
           <nav className="app-nav" aria-label="Navigare principală">
             {navItems.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.to === "/"}>

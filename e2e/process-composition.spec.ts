@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("letters critical processes complete vinyl paint and electrical routes", async ({
   page,
