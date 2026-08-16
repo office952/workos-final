@@ -36,12 +36,29 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByLabel("Pas module LED")).toHaveCount(0);
   await expect(page.getByLabel("Rezervă sursă de alimentare")).toHaveCount(0);
   await expect(page.getByText("Setări tehnice")).toHaveCount(0);
+  await expect(page.getByText("PRD-LETTERS-FRONTLIT-PLEXI-AL06")).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-fresh.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("button", { name: "Verifică configurația" })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-config-narrow.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1280, height: 900 });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByText("Mai sunt informații de completat.")).toBeVisible();
+  await expect(page.getByText("Probleme de rezolvat:")).toBeVisible();
   await expect(
     page.getByRole("listitem").filter({ hasText: "Suprafață confirmată (mm²)" }),
   ).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-readiness.png",
+    fullPage: true,
+  });
 
   await page.getByLabel("Textul literelor").fill("WORKOS");
   await page.getByLabel("Finisaj față").selectOption("vinyl");
@@ -62,9 +79,13 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/config-product-configure.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-filled.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await expect(page.getByRole("heading", { name: "Verificare înainte de confirmare" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" })).toBeVisible();
   await expect(page.getByText("Revizuiți configurația.")).toBeVisible();
   await expect(page.getByText("Suprafață confirmată (mm²): 250000")).toBeVisible();
   await expect(page.getByLabel("Textul literelor")).toHaveCount(0);
@@ -83,6 +104,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/lighting-completion-review.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-review.png",
     fullPage: true,
   });
 
@@ -182,6 +207,14 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     path: "docs/worklog/screenshots/letters-eic-lighting.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-confirmed.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-eic-preview.png",
+    fullPage: true,
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
     path: "docs/worklog/screenshots/lighting-calc-narrow.png",
@@ -189,6 +222,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-eic-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-confirmed-narrow.png",
     fullPage: true,
   });
 });

@@ -27,7 +27,7 @@ test("confirmed LETTERS product can freeze an accepted production snapshot", asy
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   const snapshot = page.locator(".production-snapshot");
   await expect(
-    page.getByRole("heading", { name: /Snapshot (producție creat|deja acceptat)/ }),
+    page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await expect(snapshot.getByText("Stare: Acceptat / înghețat")).toBeVisible();
   await expect(snapshot.getByText("Operații: 12")).toBeVisible();
@@ -36,14 +36,24 @@ test("confirmed LETTERS product can freeze an accepted production snapshot", asy
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
   await expect(page.getByText("ExecutionTask")).toHaveCount(0);
   await expect(page.getByText("Comandă client")).toHaveCount(0);
+  await snapshot.locator("details.snapshot-details").evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
   const reference = await page.getByText("Referință: aps:").textContent();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-accepted-production-snapshot.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-accepted.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
-  await expect(page.getByRole("heading", { name: "Snapshot deja acceptat" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Deja acceptat pentru producție" })).toBeVisible();
+  await page.locator(".production-snapshot details.snapshot-details").evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
   await expect(page.getByText(reference ?? "Referință: aps:")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-accepted-production-snapshot-idempotent.png",

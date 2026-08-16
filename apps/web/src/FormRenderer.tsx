@@ -7,6 +7,7 @@ import {
   type FormSchema,
   type ProductTemplate,
 } from "@workos-final/domain";
+import { Field } from "./ui/Field";
 
 type FormRendererProps = {
   template: ProductTemplate;
@@ -105,22 +106,22 @@ export function FormRenderer({
         return (
           <fieldset key={section.id} className="form-section">
             <legend>{section.title}</legend>
-            {visibleFields.map((field) => (
-              <div
-                key={field.id}
-                className={
-                  field.type === "boolean" ? "form-row form-row-inline" : "form-row"
-                }
-              >
-                <label htmlFor={`field-${field.id}`}>{field.label}</label>
-                <FieldControl
-                  field={field}
-                  value={values[field.id]}
-                  onChange={(value) => onChange(field.id, value)}
-                />
-                {field.hint ? <p className="field-hint">{field.hint}</p> : null}
-              </div>
-            ))}
+            <div className="form-section-fields">
+              {visibleFields.map((field) => (
+                <div
+                  key={field.id}
+                  className={field.type === "boolean" ? "field-span field-inline" : undefined}
+                >
+                  <Field label={field.label} hint={field.hint}>
+                    <FieldControl
+                      field={field}
+                      value={values[field.id]}
+                      onChange={(value) => onChange(field.id, value)}
+                    />
+                  </Field>
+                </div>
+              ))}
+            </div>
           </fieldset>
         );
       })}

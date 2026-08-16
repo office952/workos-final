@@ -66,6 +66,16 @@ Completed rows recede. Simple local filter: Toate / De făcut / În lucru / Fina
 
 Compact rows. Create form uses `Field`. Retired list is secondary.
 
+## Product configuration / result pattern
+
+While editing, the form leads. Construction facts are a compact summary of supplied identity, not editable fields. Readiness is a short problem list from backend missing labels.
+
+Review is a concise operator summary. Confirm is primary. Modify is secondary.
+
+After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → production preview → accept → persisted execution.
+
+EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
+
 ## Future migration
 
-New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Product configuration / result.
+New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Admin resources.

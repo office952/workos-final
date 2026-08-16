@@ -1,21 +1,26 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  eicLineGroupLabel,
-  type AcceptedProductionSnapshot,
-  type DraftValues,
-  type EicLine,
-  type EicLineGroup,
-  type EicResult,
-  type ExecutionPlanPreview,
-  type ExecutionPlanView,
-  type ProductAggregate,
-  type ProductDefinition,
-  type ProductTruth,
+import type {
+  AcceptedProductionSnapshot,
+  DraftValues,
+  EicResult,
+  ExecutionPlanPreview,
+  ExecutionPlanView,
+  ProductAggregate,
+  ProductDefinition,
+  ProductTruth,
 } from "@workos-final/domain";
 import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
-import { formatMoney, formatQuantity, formatUnit } from "./formatDisplay";
 import { FormRenderer } from "./FormRenderer";
+import {
+  AcceptedSnapshotSection,
+  ConfirmedSummary,
+  ConstructionFacts,
+  EicSection,
+  ProductionPreviewSection,
+  ReadinessNotice,
+  ReviewPanel,
+} from "./ProductConfigurationViews";
 import {
   acceptProductionSnapshot,
   assignExecutionTaskExecutor,
@@ -28,44 +33,14 @@ import {
   startExecutionTask,
   type TemplateProjection,
 } from "./productApi";
+import { Notice } from "./ui/Notice";
+import { PageHeader } from "./ui/PageHeader";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "missing" }
   | { kind: "error" }
   | { kind: "ready"; projection: TemplateProjection };
-
-function lightingUnavailableReason(aggregate: ProductAggregate): string {
-  const lighting = aggregate.componentStatuses.find((item) => item.id === "LIGHTING");
-  if (!lighting || lighting.status === "CALCULATED") {
-    return "";
-  }
-  if (lighting.unavailable.length === 0) {
-    return " Iluminarea nu este calculată.";
-  }
-  return ` Iluminarea nu este calculată: ${lighting.unavailable.join("; ")}.`;
-}
-
-function measurementCopy(value: number, unit: string): string {
-  if (unit === "mm2") {
-    return `Suprafață confirmată: ${value} mm² (introdusă de operator)`;
-  }
-  return `Perimetru confirmat: ${value} mm (introdus de operator)`;
-}
-
-const EIC_GROUP_ORDER: readonly EicLineGroup[] = [
-  "materials",
-  "services",
-  "labor",
-  "lighting",
-];
-
-function eicGroups(eic: EicResult): Array<[EicLineGroup, EicLine[]]> {
-  return EIC_GROUP_ORDER.flatMap((group) => {
-    const lines = eic.lines.filter((line) => line.group === group);
-    return lines.length === 0 ? [] : [[group, lines]];
-  });
-}
 
 export function ProductConfigurationPage() {
   const { productCode = "" } = useParams();
@@ -122,6 +97,8 @@ export function ProductConfigurationPage() {
   }
 
   const { template, formSchema } = page.projection;
+  const reviewing = definition?.readiness === "ready" && !confirmed;
+  const editing = !confirmed && !reviewing;
 
   async function handleCompile() {
     setBusy(true);
@@ -156,9 +133,7 @@ export function ProductConfigurationPage() {
       } else if (result.reason === "review_mismatch") {
         setDefinition(null);
         setConfirmed(null);
-        setConfirmNotice(
-          "Configurația verificată nu mai corespunde. Verificați din nou.",
-        );
+        setConfirmNotice("Configurația verificată nu mai corespunde. Verificați din nou.");
       } else {
         setDefinition(result.definition);
         setConfirmed(null);
@@ -187,9 +162,7 @@ export function ProductConfigurationPage() {
       } else if (result.reason === "review_mismatch") {
         setConfirmed(null);
         setDefinition(null);
-        setConfirmNotice(
-          "Configurația verificată nu mai corespunde. Verificați din nou.",
-        );
+        setConfirmNotice("Configurația verificată nu mai corespunde. Verificați din nou.");
       } else {
         setConfirmed(null);
         setDefinition(result.definition);
@@ -245,24 +218,20 @@ export function ProductConfigurationPage() {
   }
 
   return (
-    <section>
-      <h1>{template.label}</h1>
-      <p className="page-lead">{template.description}</p>
+    <section className="product-page">
+      <PageHeader
+        title={template.label}
+        lead={
+          confirmed
+            ? `${confirmed.aggregate.inscription} — configurație confirmată.`
+            : reviewing
+              ? "Configurația este pregătită pentru confirmare."
+              : "Completează configurația, apoi verifică."
+        }
+        meta={<ConstructionFacts facts={template.identityFacts} />}
+      />
 
-      {template.identityFacts.length > 0 ? (
-        <div className="notice">
-          <h2>Caracteristici produs</h2>
-          <ul>
-            {template.identityFacts.map((fact) => (
-              <li key={fact.id}>
-                {fact.label}: {fact.value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {confirmed || definition?.readiness === "ready" ? null : (
+      {editing ? (
         <>
           <FormRenderer
             template={template}
@@ -275,335 +244,125 @@ export function ProductConfigurationPage() {
               setConfirmNotice(null);
             }}
           />
-
           <div className="action-row">
             <button type="button" onClick={() => void handleCompile()} disabled={busy}>
               Verifică configurația
             </button>
           </div>
         </>
-      )}
-
-      {confirmNotice ? <p className="notice notice-blocked">{confirmNotice}</p> : null}
-
-      {definition?.readiness === "blocked" ? (
-        <div className="notice notice-blocked">
-          <p>Mai sunt informații de completat.</p>
-          <ul>
-            {definition.missing.map((item) => (
-              <li key={item.fieldId}>{item.label}</li>
-            ))}
-          </ul>
-        </div>
       ) : null}
 
-      {definition?.readiness === "ready" && !confirmed ? (
-        <div className="notice">
-          <h2>Verificare înainte de confirmare</h2>
-          <p>Revizuiți configurația. Nu mai editați formularul în acest pas.</p>
-          <p>Produs: {template.label}</p>
-          <p>
-            Componente active:{" "}
-            {template.components
-              .filter((component) =>
-                definition.selectedComponentIds.includes(component.id),
-              )
-              .map((component) => component.label)
-              .join(", ")}
-          </p>
-          <ul>
-            {formSchema.sections
-              .flatMap((section) => section.fields)
-              .filter(
-                (field) =>
-                  definition.values[field.id] !== undefined &&
-                  field.type !== "boolean",
-              )
-              .map((field) => {
-                const raw = definition.values[field.id];
-                const label =
-                  field.options?.find((option) => option.value === raw)?.label ??
-                  String(raw);
-                return (
-                  <li key={field.id}>
-                    {field.label}: {label}
-                  </li>
-                );
-              })}
-          </ul>
-          {definition.measurements.length > 0 ? (
-            <p>
-              Măsurătorile de mai sus sunt introduse de operator. Nu sunt geometrie
-              calculată de WorkOS.
-            </p>
-          ) : null}
-          <div className="action-row">
-            <button type="button" onClick={() => void handleConfirm()} disabled={busy}>
-              Confirmă configurația
-            </button>
-            <button
-              type="button"
-              className="button-secondary"
-              onClick={() => {
-                setDefinition(null);
-                setConfirmNotice(null);
-              }}
-            >
-              Modifică configurația
-            </button>
-          </div>
-        </div>
+      {confirmNotice ? (
+        <Notice tone="warn" compact>
+          <p>{confirmNotice}</p>
+        </Notice>
+      ) : null}
+
+      {definition?.readiness === "blocked" ? <ReadinessNotice definition={definition} /> : null}
+
+      {reviewing && definition ? (
+        <ReviewPanel
+          template={template}
+          formSchema={formSchema}
+          definition={definition}
+          busy={busy}
+          onConfirm={() => void handleConfirm()}
+          onEdit={() => {
+            setDefinition(null);
+            setConfirmNotice(null);
+          }}
+        />
       ) : null}
 
       {confirmed ? (
-        <div className="notice notice-ok">
-          <h2>Configurație confirmată</h2>
-          <p>
-            {confirmed.aggregate.productLabel}: {confirmed.aggregate.inscription}
-          </p>
-          {confirmed.aggregate.components
-            .filter((component) => component.details.length > 0)
-            .map((component) => (
-              <div key={component.id}>
-                <h3>{component.label}</h3>
-                <ul>
-                  {component.details.map((detail) => (
-                    <li key={detail}>{detail}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-          {confirmed.truth.measurements.map((measurement) => (
-            <p key={measurement.fieldId}>
-              {measurementCopy(measurement.value, measurement.unit)}
-            </p>
-          ))}
-
-          <h3>Cantitate tehnică</h3>
-          {confirmed.aggregate.quantities.length === 0 ? (
-            <p>Cantitatea tehnică nu poate fi calculată fără măsurătoare confirmată.</p>
-          ) : (
-            <ul>
-              {confirmed.aggregate.quantities.map((quantity) => (
-                <li key={quantity.id}>
-                  {quantity.label}: {formatQuantity(quantity.value)}{" "}
-                  {formatUnit(quantity.unit)}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <h3>Resurse necesare</h3>
-          {confirmed.eic.lines.length === 0 ? (
-            <p>Nu există încă o cerere de resurse pentru acest produs.</p>
-          ) : (
-            eicGroups(confirmed.eic).map(([group, lines]) => (
-              <div key={`need-${group}`}>
-                <h4>{eicLineGroupLabel(group)}</h4>
-                <ul>
-                  {lines.map((line) => (
-                    <li key={`${line.resourceId}-need`}>
-                      {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          )}
-
-          <h3>Cost intern estimat</h3>
-          <p>
-            Costul intern al produsului este parțial. Include materialele, serviciile,
-            manopera și iluminarea calculate. Rămâne de calibrat pe costurile reale de
-            atelier.
-            {lightingUnavailableReason(confirmed.aggregate)}
-          </p>
-          {confirmed.eic.lines.length === 0 ? (
-            <p>Costul intern nu este disponibil pentru componentele necalculate.</p>
-          ) : (
-            eicGroups(confirmed.eic).map(([group, lines]) => (
-              <div key={`cost-${group}`}>
-                <h4>{eicLineGroupLabel(group)}</h4>
-                <ul>
-                  {lines.map((line) => (
-                    <li key={`${line.resourceId}-cost`}>
-                      {line.label}: {formatQuantity(line.quantity)} {formatUnit(line.unit)} ×{" "}
-                      {formatMoney(line.rate)} {line.currency}/{formatUnit(line.unit)} ={" "}
-                      {formatMoney(line.cost)} {line.currency}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          )}
-          {confirmed.eic.lines.length > 0 ? (
-            <p>
-              Total cost intern estimat: {formatMoney(confirmed.eic.total)}{" "}
-              {confirmed.eic.currency}
-            </p>
-          ) : null}
-          {confirmed.eic.excludedComponentLabels.length > 0 ? (
-            <p>
-              Neincluse încă în costul intern pilot:{" "}
-              {confirmed.eic.excludedComponentLabels.join(", ")}.
-            </p>
-          ) : null}
-          <p className="page-lead">
-            Indisponibil acum: {confirmed.aggregate.unavailable.join(", ")}.
-          </p>
-
-          <ExecutionPlanPreviewSection
+        <div className="confirmed-result">
+          <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
+          <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
+          <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}
             basedOnSnapshot={Boolean(confirmed.snapshot)}
           />
 
-          <div className="action-row">
-            <button type="button" onClick={() => void handleAcceptProduction()} disabled={busy}>
-              Acceptă pentru producție
-            </button>
-            <button
-              type="button"
-              className="button-secondary"
-              onClick={() => {
-                setConfirmed(null);
-                setDefinition(null);
-              }}
-            >
-              Modifică configurația
-            </button>
-          </div>
+          {confirmed.snapshot ? null : (
+            <div className="lifecycle-cta">
+              <p className="page-lead">Îngheață configurația tehnică pentru execuție.</p>
+              <div className="action-row">
+                <button type="button" onClick={() => void handleAcceptProduction()} disabled={busy}>
+                  Acceptă pentru producție
+                </button>
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => {
+                    setConfirmed(null);
+                    setDefinition(null);
+                  }}
+                >
+                  Modifică configurația
+                </button>
+              </div>
+            </div>
+          )}
 
           {confirmed.snapshot ? (
-            <AcceptedProductionSnapshotSection
-              snapshot={confirmed.snapshot}
-              reused={Boolean(confirmed.snapshotReused)}
-              onCreatePlan={() => void handleCreateExecutionPlan()}
-              busy={busy}
-            />
+            <>
+              {confirmed.executionPlan ? null : (
+                <div className="action-row">
+                  <button
+                    type="button"
+                    className="button-secondary"
+                    onClick={() => void handleAcceptProduction()}
+                    disabled={busy}
+                  >
+                    Acceptă pentru producție
+                  </button>
+                  <button
+                    type="button"
+                    className="button-quiet"
+                    onClick={() => {
+                      setConfirmed(null);
+                      setDefinition(null);
+                    }}
+                  >
+                    Modifică configurația
+                  </button>
+                </div>
+              )}
+              <AcceptedSnapshotSection
+                snapshot={confirmed.snapshot}
+                reused={Boolean(confirmed.snapshotReused)}
+                onCreatePlan={() => void handleCreateExecutionPlan()}
+                busy={busy}
+                hasExecutionPlan={Boolean(confirmed.executionPlan)}
+              />
+            </>
           ) : null}
 
           {confirmed.executionPlan ? (
-            <ExecutionPlanPanel
-              view={confirmed.executionPlan}
-              reused={Boolean(confirmed.executionPlanReused)}
-              busy={busy}
-              onAssignProvider={(taskId, providerId) =>
-                void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
-              }
-              onAssignExecutor={(taskId, personId) =>
-                void applyTaskMutation(() => assignExecutionTaskExecutor(taskId, personId))
-              }
-              onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
-              onCompleteTask={(taskId, input) =>
-                void applyTaskMutation(() => completeExecutionTask(taskId, input))
-              }
-            />
+            <div id="execution-plan" className="execution-handoff">
+              <Notice tone="ok" compact>
+                <p>Configurația este gata. Lucrul de producție este în planul de execuție.</p>
+              </Notice>
+              <ExecutionPlanPanel
+                view={confirmed.executionPlan}
+                reused={Boolean(confirmed.executionPlanReused)}
+                busy={busy}
+                onAssignProvider={(taskId, providerId) =>
+                  void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
+                }
+                onAssignExecutor={(taskId, personId) =>
+                  void applyTaskMutation(() => assignExecutionTaskExecutor(taskId, personId))
+                }
+                onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
+                onCompleteTask={(taskId, input) =>
+                  void applyTaskMutation(() => completeExecutionTask(taskId, input))
+                }
+              />
+            </div>
           ) : null}
         </div>
       ) : null}
     </section>
-  );
-}
-
-function ExecutionPlanPreviewSection({
-  preview,
-  basedOnSnapshot,
-}: {
-  preview: ExecutionPlanPreview;
-  basedOnSnapshot: boolean;
-}) {
-  return (
-    <div className="production-plan">
-      <h3>Plan de producție</h3>
-      {basedOnSnapshot ? <p>Plan bazat pe snapshot acceptat</p> : null}
-      <p>
-        {preview.summary.productLabel}: {preview.summary.inscription}
-      </p>
-      <ul>
-        <li>Operații: {preview.summary.operationCount}</li>
-        <li>Pregătite: {preview.summary.readyCount}</li>
-        <li>Incomplete: {preview.summary.incompleteCount}</li>
-        <li>Fără furnizor: {preview.summary.noProviderCount}</li>
-        <li>
-          Cost intern curent: {formatMoney(preview.summary.internalCostTotal)}{" "}
-          {preview.summary.internalCostCurrency}
-          {preview.summary.internalCostCompleteness === "PARTIAL" ? " (parțial)" : ""}
-        </li>
-      </ul>
-      <p className="page-lead">{preview.summary.analyzerNote}</p>
-      <ol className="production-ops">
-        {preview.operations.map((operation) => (
-          <li key={operation.id} className="production-op">
-            <h4>
-              {operation.seqLabel}. {operation.processLabel}
-            </h4>
-            <p>Componentă: {operation.scopeLabel}</p>
-            {operation.quantities.map((quantity) => (
-              <p key={`${operation.id}-${quantity.label}`}>
-                Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
-              </p>
-            ))}
-            {operation.resources.map((resource) => (
-              <p key={`${operation.id}-${resource.label}`}>
-                Resursă: {resource.label}: {formatQuantity(resource.quantity)}{" "}
-                {formatUnit(resource.unit)}
-              </p>
-            ))}
-            <p>Capabilitate: {operation.requiredCapabilityLabel}</p>
-            <p>
-              Furnizori disponibili:{" "}
-              {operation.eligibleProviders.length === 0
-                ? "Fără furnizor configurat"
-                : operation.eligibleProviders.map((item) => item.label).join("; ")}
-            </p>
-            <p>
-              {operation.canStart
-                ? "Poate începe"
-                : `Depinde de: ${operation.dependsOnLabels.join("; ")}`}
-            </p>
-            {operation.parallelEligible ? <p>Poate rula în paralel</p> : null}
-            <p>Stare: {operation.readinessLabel}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function AcceptedProductionSnapshotSection({
-  snapshot,
-  reused,
-  onCreatePlan,
-  busy,
-}: {
-  snapshot: AcceptedProductionSnapshot;
-  reused: boolean;
-  onCreatePlan: () => void;
-  busy: boolean;
-}) {
-  return (
-    <div className="production-snapshot">
-      <h3>{reused ? "Snapshot deja acceptat" : "Snapshot producție creat"}</h3>
-      <ul>
-        <li>Referință: {snapshot.snapshotId}</li>
-        <li>Produs: {snapshot.productLabel}</li>
-        <li>
-          Acceptat: {new Date(snapshot.createdAt).toLocaleString("ro-RO")}
-        </li>
-        <li>Operații: {snapshot.operations.length}</li>
-        <li>
-          Cost intern curent: {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
-          {snapshot.eic.completeness === "PARTIAL" ? " (parțial)" : ""}
-        </li>
-        <li>Stare: Acceptat / înghețat</li>
-      </ul>
-      <div className="action-row">
-        <button type="button" onClick={onCreatePlan} disabled={busy}>
-          Creează planul de execuție
-        </button>
-      </div>
-    </div>
   );
 }
 

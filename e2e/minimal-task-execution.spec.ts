@@ -44,7 +44,7 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
   await confirmLetters(page);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(
-    page.getByRole("heading", { name: /Snapshot (producție creat|deja acceptat)/ }),
+    page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   const plan = page.locator(".execution-plan");

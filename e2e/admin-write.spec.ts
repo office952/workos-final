@@ -165,7 +165,7 @@ test("admin display-label write persists and propagates", async ({
     fullPage: true,
   });
   await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await expect(page.getByRole("heading", { name: "Verificare înainte de confirmare" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-review.png",
     fullPage: true,

@@ -32,7 +32,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   const snapshot = page.locator(".production-snapshot");
   await expect(
-    page.getByRole("heading", { name: /Snapshot (producție creat|deja acceptat)/ }),
+    page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await expect(snapshot.getByText("Operații: 12")).toBeVisible();
   await page.screenshot({
@@ -58,6 +58,10 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await expect(page.getByRole("button", { name: "Completează" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-persisted.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-product-execution-handoff.png",
     fullPage: true,
   });
   await page.screenshot({
