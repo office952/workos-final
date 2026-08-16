@@ -143,7 +143,7 @@ describe("minimal execution completion evidence", () => {
     expect(ledView?.completedQuantityLabel).toBe("Realizat: 125 buc");
     expect(ledView?.varianceLabel).toBe("Conform planului");
     expect(view.progress.varianceCount).toBe(0);
-    expect(completedLed.plan.eicTotal).toBe(595);
+    expect(completedLed.plan.eicTotal).toBe(382.5);
     expect(completedLed.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(JSON.stringify(completedLed)).not.toMatch(
       /employeeId|"actualCost"|inventoryEngine|scrap|machineHours|laborMinutes/,
@@ -184,7 +184,7 @@ describe("minimal execution completion evidence", () => {
     expect(ledView?.quantities[0]?.value).toBe(125);
     expect(view.progress.varianceCount).toBe(1);
     expect(view.progress.status).toBe("IN_PROGRESS");
-    expect(completedLed.plan.eicTotal).toBe(595);
+    expect(completedLed.plan.eicTotal).toBe(382.5);
     expect(completedLed.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
   });
 

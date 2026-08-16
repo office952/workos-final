@@ -162,7 +162,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat: 645,00 EUR"),
+    page.getByText("Total cost intern estimat: 432,50 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Vopsire RAL: 12,5 m", { exact: true })).toBeVisible();
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);

@@ -49,6 +49,7 @@ describe("ALUMINIUM_VOLUME", () => {
         resourceId: ALUMINIUM_RETURN_PROFILE_ID,
         quantity: 12.5,
         unit: "m",
+        costQualifier: { volumeDepthMm: 60 },
       },
       {
         componentId: VOLUME_COMPONENT_ID,

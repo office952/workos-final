@@ -36,11 +36,12 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
   page,
 }) => {
   await confirmLetters(page, { faceFinish: "none", volumeFinish: "none" });
-  await expect(page.getByText("Total cost intern estimat: 595,00 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
-  await expect(page.getByText("Cost intern curent: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(page.getByText("Cost intern curent: 382,50 EUR (complet)")).toBeVisible();
   await expect(page.locator(".eic-section").getByText("Geometrie confirmată.")).toBeVisible();
-  await expect(page.getByText("Costuri încă în calibrare")).toBeVisible();
+  await expect(page.locator(".eic-section").getByText("Complet")).toBeVisible();
+  await expect(page.getByText("Costuri încă în calibrare")).toHaveCount(0);
   await expect(page.getByText("Geometrie din Analyzer")).toHaveCount(0);
   await expect(page.getByText("Analyzer")).toHaveCount(0);
   await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
@@ -100,7 +101,7 @@ test("vinyl face adds only the selected finish operation to the plan", async ({
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
   await expect(page.getByText("Resursă: Folie Oracal 651: 0,25 m²").first()).toBeVisible();
   await expect(page.getByText("Vopsire RAL")).toHaveCount(0);
-  await expect(page.getByText("Total cost intern estimat: 598,50 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 386,00 EUR")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-vinyl.png",
     fullPage: true,
@@ -117,7 +118,7 @@ test("painted volume adds RAL with an honest missing provider", async ({ page })
   await expect(page.getByText("Vopsire RAL").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie")).toHaveCount(0);
   await expect(page.getByText("Stare: Fără furnizor").first()).toBeVisible();
-  await expect(page.getByText("Total cost intern estimat: 645,00 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 432,50 EUR")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-ral.png",
     fullPage: true,

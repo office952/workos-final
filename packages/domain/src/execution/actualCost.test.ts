@@ -95,7 +95,7 @@ describe("actual internal cost projection", () => {
   it("stays unavailable until actual consumption exists and does not use planned quantity", () => {
     const { snapshot, record } = planned();
     const cost = projectActualInternalCost(record, snapshot);
-    expect(record.plan.eicTotal).toBe(595);
+    expect(record.plan.eicTotal).toBe(382.5);
     expect(cost.status).toBe("UNAVAILABLE");
     expect(cost.statusLabel).toBe("Indisponibil");
     expect(cost.calculableTotal).toBeNull();
@@ -161,7 +161,7 @@ describe("actual internal cost projection", () => {
     expect(cost.availableDifference).toBe(1);
     expect(labor?.status).toBe("UNAVAILABLE");
     expect(labor?.actualCost).toBeNull();
-    expect(next.plan.eicTotal).toBe(595);
+    expect(next.plan.eicTotal).toBe(382.5);
     expect(
       next.tasks.find((item) => item.taskId === lighting.taskId)?.resourceDemands[0]?.quantity,
     ).toBe(125);

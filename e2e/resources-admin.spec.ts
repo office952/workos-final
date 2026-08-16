@@ -130,7 +130,7 @@ test("resources admin inspects material family specification and cost", async ({
     page.getByRole("heading", { name: "Formare profil aluminiu" }).first(),
   ).toBeVisible();
   await expect(page.getByText("Rețetă serviciu").first()).toBeVisible();
-  await expect(page.getByText("15,00 EUR / m").first()).toBeVisible();
+  await expect(page.getByText("5,00 EUR / m").first()).toBeVisible();
   await expect(page.getByRole("button", { name: /Formare profil aluminiu/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Debitare CNC față/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Debitare CNC spate/ })).toBeVisible();
@@ -209,7 +209,7 @@ test("resources admin inspects material family specification and cost", async ({
 
   await page.getByRole("button", { name: "Dovezi de cost" }).click();
   await expect(page.getByText("Dovadă de cost intern").first()).toBeVisible();
-  await expect(page.getByText("10,00 EUR / m").first()).toBeVisible();
+  await expect(page.getByText("3,00 EUR / m · adâncime 60 mm").first()).toBeVisible();
   await page.getByRole("button", { name: /Plexiglas 3 mm opal/ }).click();
   await expect(page.getByText("16,00 EUR / m²").first()).toBeVisible();
   await expect(page.getByText("Achiziție confirmată de owner").first()).toBeVisible();
@@ -266,7 +266,7 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat: 595,00 EUR"),
+    page.getByText("Total cost intern estimat: 382,50 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Plexiglas 3 mm opal: 0,25 m²", { exact: true })).toBeVisible();
   await expect(page.getByText("Preț client")).toHaveCount(0);

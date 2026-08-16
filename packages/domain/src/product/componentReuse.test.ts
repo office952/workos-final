@@ -79,6 +79,7 @@ describe("component reuse", () => {
         "face.thicknessMm": 3,
         "face.opticalType": "opal",
         "face.confirmedAreaMm2": 250000,
+        "volume.depthMm": "60",
         "volume.confirmedPerimeterMm": 12500,
       },
       measurements: [
@@ -98,17 +99,18 @@ describe("component reuse", () => {
       frontlitPlexiAl06FormSchema,
       seededDisplayLabelCatalog(),
     );
-    expect(aggregate.quantities.map((item) => item.componentId)).toEqual([
-      "FACE",
-      "VOLUME",
+    expect(aggregate.quantities.map((item) => item.id)).toEqual([
+      "face_area",
+      "volume_linear",
+      "volume_lateral",
     ]);
     expect(aggregate.componentStatuses.map((item) => item.status)).toEqual([
       "CALCULATED",
       "CALCULATED",
     ]);
     const eic = compileEic(aggregate);
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.total).toBe(316.5);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.total).toBe(104);
     expect(eic.excludedComponentLabels).toEqual([]);
   });
 
@@ -126,6 +128,7 @@ describe("component reuse", () => {
           resourceId: "aluminium_return_profile",
           quantity: 12.5,
           unit: "m",
+          costQualifier: { volumeDepthMm: 60 },
         },
       ],
       componentStatuses: [
@@ -149,6 +152,6 @@ describe("component reuse", () => {
     const eic = compileEic(aggregate);
     expect(eic.completeness).toBe("PARTIAL");
     expect(eic.excludedComponentLabels).toEqual(["Altceva"]);
-    expect(eic.total).toBe(125);
+    expect(eic.total).toBe(37.5);
   });
 });

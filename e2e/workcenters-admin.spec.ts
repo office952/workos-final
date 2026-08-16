@@ -275,7 +275,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(
-    page.getByText("Total cost intern estimat: 595,00 EUR"),
+    page.getByText("Total cost intern estimat: 382,50 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Preț client")).toHaveCount(0);
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);

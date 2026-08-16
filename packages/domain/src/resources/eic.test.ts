@@ -84,29 +84,30 @@ describe("resource ownership", () => {
 });
 
 describe("EIC", () => {
-  it("multiplies confirmed quantity by catalog rates and stays partial without recipes", () => {
+  it("multiplies confirmed quantity by catalog rates and is complete without recipes at 60 mm", () => {
     const { aggregate } = confirmedSpine();
     const requirements = resourceRequirements(aggregate);
     expect(requirements).toHaveLength(6);
     const eic = compileEic(aggregate);
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.completenessReasons).toEqual([]);
     expect(eic.geometryLabel).toBe(EIC_GEOMETRY_CONFIRMED_LABEL);
     expect(eic.currency).toBe("EUR");
-    expect(eic.lines.map((line) => line.cost)).toEqual([4, 125, 187.5, 4, 62.5, 20]);
-    expect(eic.total).toBe(403);
+    expect(eic.lines.map((line) => line.cost)).toEqual([4, 37.5, 62.5, 4, 62.5, 20]);
+    expect(eic.total).toBe(190.5);
     expect(eic.excludedComponentLabels).toEqual([]);
     expect(JSON.stringify(eic)).not.toMatch(/Geometrie din Analyzer|customer|markup|quote/i);
   });
 
-  it("adds LETTERS recipes generically and stays partial for cost calibration", () => {
+  it("adds LETTERS recipes and becomes complete for owner-confirmed 60 mm none/none", () => {
     const { aggregate, composition } = confirmedSpine();
     const eic = compileEic(aggregate, composition);
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.completenessReasons).toEqual([]);
     expect(eic.geometryLabel).toBe(EIC_GEOMETRY_CONFIRMED_LABEL);
-    expect(eic.total).toBe(595);
+    expect(eic.total).toBe(382.5);
     expect(JSON.stringify(eic)).not.toMatch(/Geometrie din Analyzer/);
+    expect(lineCost(eic, "aluminium_return_profile")).toBe(37.5);
     expect(lineCost(eic, "SVC-CNC-FACE")).toBe(37.5);
     expect(lineCost(eic, "SVC-CNC-BACK")).toBe(56.25);
     expect(lineCost(eic, "LAB-BOND-LETTER-BODY")).toBe(62.5);
@@ -114,7 +115,7 @@ describe("EIC", () => {
     expect(lineCost(eic, "SVC-PLACE-LED-MODULES")).toBe(6.25);
     expect(lineCost(eic, "SVC-ELECTRICAL-FINISH")).toBe(2);
     expect(lineCost(eic, "SVC-PACK-PRODUCT")).toBe(2.5);
-    expect(lineCost(eic, RETURN_CANT_FORMING_ID)).toBe(187.5);
+    expect(lineCost(eic, RETURN_CANT_FORMING_ID)).toBe(62.5);
     expect(eic.lines.filter((line) => line.resourceId === RETURN_CANT_FORMING_ID)).toHaveLength(
       1,
     );
@@ -125,6 +126,28 @@ describe("EIC", () => {
     expect(eic.lines.some((line) => line.resourceId === "MAT-VINYL-ORACAL-651")).toBe(false);
     expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote|if process|LETTERS/i);
   });
+
+  it.each([30, 80, 100] as const)(
+    "does not inherit the 60 mm aluminium rate at %s mm",
+    (depthMm) => {
+      const { aggregate, composition } = confirmedSpine({
+        ...readyValues,
+        "volume.depthMm": String(depthMm),
+      });
+      const eic = compileEic(aggregate, composition);
+      expect(eic.completeness).toBe("PARTIAL");
+      expect(eic.completenessReasons).toEqual([
+        `Tarif profil aluminiu neconfirmat pentru adâncimea ${depthMm} mm`,
+      ]);
+      expect(eic.geometryLabel).toBe(EIC_GEOMETRY_CONFIRMED_LABEL);
+      expect(lineCost(eic, "aluminium_return_profile")).toBe(0);
+      expect(lineCost(eic, RETURN_CANT_FORMING_ID)).toBe(62.5);
+      expect(eic.total).toBe(345);
+      expect(eic.lines.some((line) => line.rate === 3 && line.resourceId === "aluminium_return_profile")).toBe(
+        false,
+      );
+    },
+  );
 
   it("keeps vinyl material and application labor separate when vinyl is selected", () => {
     const { aggregate, composition } = confirmedSpine({
@@ -138,7 +161,9 @@ describe("EIC", () => {
     expect(eic.lines.filter((line) => line.resourceId === "MAT-VINYL-ORACAL-651")).toHaveLength(
       1,
     );
-    expect(eic.total).toBe(598.5);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.total).toBe(386);
   });
 
   it("costs RAL only when the volume finish is painted", () => {
@@ -149,7 +174,9 @@ describe("EIC", () => {
     });
     const eic = compileEic(aggregate, composition);
     expect(lineCost(eic, "SVC-PAINT-RAL")).toBe(50);
-    expect(eic.total).toBe(645);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.total).toBe(432.5);
   });
 
   it("reports honest missing geometry without an Analyzer gap", () => {

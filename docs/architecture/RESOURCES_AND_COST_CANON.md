@@ -100,11 +100,17 @@ No compatibility aliases.
 ## Cost evidence
 
 One active typed row per live resource: amount, currency, unit, source, classification.
+A row may carry an optional configuration qualifier. Aluminium profile keeps one resource identity; the owner-confirmed 3 EUR/m purchase applies only at 60 mm depth. 30 / 80 / 100 mm have no confirmed profile rate.
+Unqualified lookup must not inherit a qualified rate.
+
+Owner-confirmed workshop rates use `OWNER_CONFIRMED_WORKSHOP`. Purchase rates use `OWNER_CONFIRMED_PURCHASE`.
+Used `PILOT_INTERNAL_EVIDENCE` or `LEGACY_EVIDENCE` keeps planned EIC PARTIAL.
 
 Not a procurement ledger. Future need: effective date, supplier/provenance, history.
 Do not overwrite destructively when that slice arrives.
 
 No customer price, markup, or VAT.
+No hourly or elapsed-time costing.
 
 ## Persistence
 

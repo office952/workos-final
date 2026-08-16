@@ -49,7 +49,7 @@ describe("ResourcesAdminPage", () => {
     await user.click(screen.getByRole("button", { name: "Servicii" }));
     expect(screen.getByRole("heading", { name: "Formare profil aluminiu" })).toBeInTheDocument();
     expect(screen.getByText("Rețetă serviciu")).toBeInTheDocument();
-    expect(screen.getAllByText("15,00 EUR / m").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("5,00 EUR / m").length).toBeGreaterThan(0);
     expect(screen.getByText("Perimetru volum (m)")).toBeInTheDocument();
     expect(screen.getByText("RCP_PROFILE_FORMING").closest("details")).toBeTruthy();
     expect(screen.getByText("return_cant_forming").closest("details")).toBeTruthy();
@@ -70,7 +70,7 @@ describe("ResourcesAdminPage", () => {
     await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
     const evidence = screen.getByRole("article");
     expect(within(evidence).getByText("Dovadă de cost intern")).toBeInTheDocument();
-    expect(within(evidence).getAllByText("10,00 EUR / m").length).toBeGreaterThan(0);
+    expect(within(evidence).getAllByText("3,00 EUR / m · adâncime 60 mm").length).toBeGreaterThan(0);
     expect(screen.queryByText("Preț client")).not.toBeInTheDocument();
     expect(screen.queryByText("ofertă")).not.toBeInTheDocument();
   });

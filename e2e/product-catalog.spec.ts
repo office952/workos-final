@@ -122,7 +122,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Sursă selectată 160 W: 1 buc")).toBeVisible();
   await expect(page.getByText("Modul LED 12V: 125 buc", { exact: true })).toBeVisible();
   await expect(page.getByText("Sursă LED 12V 160W: 1 buc", { exact: true })).toBeVisible();
-  await expect(page.getByText("Total cost intern estimat: 598,50 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 386,00 EUR")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Materiale" }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Servicii" }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Manoperă" }).first()).toBeVisible();

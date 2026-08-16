@@ -7,6 +7,7 @@ import {
   getCostEvidence,
   getMaterialFamily,
   getResource,
+  listCostEvidence,
   listLaborResources,
   listServiceResources,
   materialFamilies,
@@ -176,7 +177,7 @@ function toMissingRecipe(processId: string): MissingRecipeAdminRecord {
 function toAdminRecord(resource: ResourceDefinition): ResourceAdminRecord {
   const family = resource.familyId ? getMaterialFamily(resource.familyId) : undefined;
   const spec = resource.specification;
-  const evidence = getCostEvidence(resource.id);
+  const evidence = getCostEvidence(resource.id) ?? listCostEvidence(resource.id)[0];
   return {
     id: resource.id,
     label: resource.label,
@@ -205,6 +206,10 @@ function toAdminRecord(resource: ResourceDefinition): ResourceAdminRecord {
 
 function toCostProjection(evidence: CostEvidence): ResourceCostProjection {
   const unitLabel = resourceUnitLabel(evidence.perUnit);
+  const qualifier =
+    evidence.when?.volumeDepthMm !== undefined
+      ? `adâncime ${evidence.when.volumeDepthMm} mm`
+      : null;
   return {
     amount: evidence.amount,
     currency: evidence.currency,
@@ -212,7 +217,9 @@ function toCostProjection(evidence: CostEvidence): ResourceCostProjection {
     sourceLabel: costSourceLabel(evidence.source),
     classificationLabel: costClassificationLabel(evidence.classification),
     note: evidence.note,
-    amountDisplay: `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel}`,
+    amountDisplay: qualifier
+      ? `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel} · ${qualifier}`
+      : `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel}`,
   };
 }
 

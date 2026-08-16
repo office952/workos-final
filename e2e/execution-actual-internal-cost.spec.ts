@@ -57,7 +57,7 @@ test("projects partial actual internal cost from LED consumption and frozen rate
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Rezumat cost intern" })).toBeVisible();
-  await expect(page.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
   await expect(page.getByText("Cost intern real: indisponibil")).toBeVisible();
   await expect(page.getByText("Editează cost")).toHaveCount(0);
   await expect(page.getByText("ActualCostProjection")).toHaveCount(0);
@@ -75,7 +75,7 @@ test("projects partial actual internal cost from LED consumption and frozen rate
     await placeLed.getByRole("button", { name: "Finalizează" }).click();
   }
   await expect(placeLed.getByText("Modul LED 12V: 127 buc")).toBeVisible();
-  await expect(page.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
   await expect(page.getByText("Cost intern real: 63,50 EUR (parțial)")).toBeVisible();
   await expect(page.getByText("Diferență pe costurile disponibile: +1,00 EUR")).toBeVisible();
   await page.getByText("Detalii cost real").click();

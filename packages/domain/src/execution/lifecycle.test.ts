@@ -431,7 +431,7 @@ describe("minimal execution task lifecycle", () => {
     expect(done?.canAssign).toBe(false);
     expect(lighting?.waitingFor).toEqual([]);
     expect(lighting?.canStart).toBe(false);
-    expect(completed.record.plan.eicTotal).toBe(595);
+    expect(completed.record.plan.eicTotal).toBe(382.5);
     expect(completed.record.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(JSON.stringify(completed.record)).not.toMatch(
       /employeeId|workerId|operatorId|plannedStart|capacity|pontaj|"actualCost"|scrap/,

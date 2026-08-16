@@ -181,8 +181,15 @@ describe("resource catalog", () => {
       }),
     );
     expect(getCostEvidence(FOREX_10MM_ID)?.amount).toBe(16);
-    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID)?.amount).toBe(10);
-    expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.amount).toBe(15);
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID)).toBeUndefined();
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 60 })?.amount).toBe(
+      3,
+    );
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 30 })).toBeUndefined();
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 80 })).toBeUndefined();
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 100 })).toBeUndefined();
+    expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.amount).toBe(5);
+    expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.source).toBe("OWNER_CONFIRMED_WORKSHOP");
     expect(JSON.stringify(resourceCatalog)).not.toMatch(/"amount":/);
   });
 });

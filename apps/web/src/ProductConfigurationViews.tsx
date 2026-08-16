@@ -12,7 +12,12 @@ import {
   type ProductTemplate,
   type ProductTruth,
 } from "@workos-final/domain";
-import { formatMoney, formatQuantity, formatUnit } from "./formatDisplay";
+import {
+  formatCostCompleteness,
+  formatMoney,
+  formatQuantity,
+  formatUnit,
+} from "./formatDisplay";
 import { Notice } from "./ui/Notice";
 import { StatusChip } from "./ui/StatusChip";
 
@@ -202,7 +207,11 @@ export function EicSection({
     <section className="result-section eic-section">
       <div className="eic-summary">
         <h3>Cost intern estimat</h3>
-        {eic.completeness === "PARTIAL" ? <StatusChip label="Parțial" tone="warn" /> : null}
+        {eic.completeness === "PARTIAL" ? (
+          <StatusChip label="Parțial" tone="warn" />
+        ) : (
+          <StatusChip label="Complet" tone="ok" />
+        )}
       </div>
       {eic.lines.length > 0 ? (
         <p>
@@ -294,7 +303,7 @@ export function ProductionPreviewSection({
         <li>
           Cost intern curent: {formatMoney(preview.summary.internalCostTotal)}{" "}
           {preview.summary.internalCostCurrency}
-          {preview.summary.internalCostCompleteness === "PARTIAL" ? " (parțial)" : ""}
+          {formatCostCompleteness(preview.summary.internalCostCompleteness)}
         </li>
       </ul>
       {preview.summary.analyzerNote ? (
@@ -366,7 +375,7 @@ export function AcceptedSnapshotSection({
         <li>Operații: {snapshot.operations.length}</li>
         <li>
           Cost intern curent: {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
-          {snapshot.eic.completeness === "PARTIAL" ? " (parțial)" : ""}
+          {formatCostCompleteness(snapshot.eic.completeness)}
         </li>
         <li>Înghețat la: {new Date(snapshot.createdAt).toLocaleString("ro-RO")}</li>
         <li>Stare: Acceptat / înghețat</li>

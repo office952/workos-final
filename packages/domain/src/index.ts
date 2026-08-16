@@ -126,6 +126,7 @@ export {
   recipeForProcess,
   costEvidence,
   getCostEvidence,
+  listCostEvidence,
   getMaterialFamily,
   getResource,
   listMaterialSpecifications,

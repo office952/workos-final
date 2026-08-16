@@ -35,14 +35,23 @@ export type ResourceDefinition = {
   electrical?: ElectricalSpecification;
 };
 
+export type CostEvidenceWhen = {
+  volumeDepthMm?: number;
+};
+
 export type CostEvidence = {
   resourceId: string;
   amount: number;
   currency: "EUR";
   perUnit: ResourceUnit;
-  source: "PILOT_INTERNAL_EVIDENCE" | "OWNER_CONFIRMED_PURCHASE" | "LEGACY_EVIDENCE";
+  source:
+    | "PILOT_INTERNAL_EVIDENCE"
+    | "OWNER_CONFIRMED_PURCHASE"
+    | "OWNER_CONFIRMED_WORKSHOP"
+    | "LEGACY_EVIDENCE";
   classification: "AI_DECISION" | "OWNER_CONFIRMED" | "DEVELOPMENT_DEFAULT";
   note: string;
+  when?: CostEvidenceWhen;
 };
 
 export const PLEXIGLAS_3MM_OPAL_ID = "plexiglas_3mm_opal";
@@ -253,21 +262,22 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
 export const costEvidence: readonly CostEvidence[] = [
   {
     resourceId: ALUMINIUM_RETURN_PROFILE_ID,
-    amount: 10,
+    amount: 3,
     currency: "EUR",
     perUnit: "m",
-    source: "PILOT_INTERNAL_EVIDENCE",
-    classification: "AI_DECISION",
-    note: "Generic return profile is not the same identity as depth-specific MAT-PROFIL-LATERAL-LITERE-60MM. Keep temporarily.",
+    source: "OWNER_CONFIRMED_PURCHASE",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed workshop purchase for 60 mm depth only. Not a universal profile rate.",
+    when: { volumeDepthMm: 60 },
   },
   {
     resourceId: RETURN_CANT_FORMING_ID,
-    amount: 15,
+    amount: 5,
     currency: "EUR",
     perUnit: "m",
-    source: "PILOT_INTERNAL_EVIDENCE",
-    classification: "AI_DECISION",
-    note: "Service/process cost for forming aluminium profile. Not a physical material. Not an exact match to RETURN_PROFILE_MACHINE_FORMING 5 EUR/ml. Keep temporarily.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed internal forming rate. Same basis for all configured depths.",
   },
   {
     resourceId: PLEXIGLAS_3MM_OPAL_ID,
@@ -346,18 +356,18 @@ export const costEvidence: readonly CostEvidence[] = [
     amount: 3,
     currency: "EUR",
     perUnit: "m",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Legacy CostEngine 1,5 EUR/ml/trecere × 2 treceri (debit + tesire) pe perimetrul literei. Default de dezvoltare.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed internal CNC face rate. 1,5 EUR/m × 2 passes on letter perimeter.",
   },
   {
     resourceId: SVC_CNC_BACK_ID,
     amount: 4.5,
     currency: "EUR",
     perUnit: "m",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Legacy CostEngine 1,5 EUR/ml/trecere × 3 treceri pe perimetrul literei. Default de dezvoltare.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed internal CNC back rate. 1,5 EUR/m × 3 passes on letter perimeter.",
   },
   {
     resourceId: LAB_VINYL_FACE_ID,
@@ -382,36 +392,36 @@ export const costEvidence: readonly CostEvidence[] = [
     amount: 5,
     currency: "EUR",
     perUnit: "m",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Legacy RETURN_PROFILE_FACE_BONDING 5 EUR/ml.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed internal face–volume bonding rate.",
   },
   {
     resourceId: LAB_CLOSE_LETTER_BODY_ID,
     amount: 2,
     currency: "EUR",
     perUnit: "m",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Nu există tarif intern owner pentru închidere. Default de dezvoltare, distinct de lipire. De calibrat.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed internal body-closure rate. Distinct from bonding.",
   },
   {
     resourceId: SVC_PLACE_LED_MODULES_ID,
     amount: 0.05,
     currency: "EUR",
     perUnit: "buc",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Legacy LED_ASSEMBLY 0,05 EUR/modul. Nu este prețul modulului.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed LED installation service. Not the module material price.",
   },
   {
     resourceId: SVC_ELECTRICAL_FINISH_ID,
     amount: 2,
     currency: "EUR",
     perUnit: "buc",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Legacy ELECTRICAL_WIRING 2 EUR/produs. Acoperă cablare, sursă și probă de aprindere.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed electrical finish per product. Covers wiring, PSU and ignition test.",
   },
   {
     resourceId: SVC_PAINT_RAL_ID,
@@ -427,9 +437,9 @@ export const costEvidence: readonly CostEvidence[] = [
     amount: 10,
     currency: "EUR",
     perUnit: "m2",
-    source: "LEGACY_EVIDENCE",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: "Legacy PACKAGING 10 EUR/m² pe suprafața feței.",
+    source: "OWNER_CONFIRMED_WORKSHOP",
+    classification: "OWNER_CONFIRMED",
+    note: "Owner-confirmed packing rate on confirmed face area.",
   },
 ];
 
@@ -441,8 +451,24 @@ export function getResource(id: string): ResourceDefinition | undefined {
   return resourceCatalog.find((item) => item.id === id);
 }
 
-export function getCostEvidence(resourceId: string): CostEvidence | undefined {
-  return costEvidence.find((item) => item.resourceId === resourceId);
+export function listCostEvidence(resourceId: string): readonly CostEvidence[] {
+  return costEvidence.filter((item) => item.resourceId === resourceId);
+}
+
+export function getCostEvidence(
+  resourceId: string,
+  when?: CostEvidenceWhen,
+): CostEvidence | undefined {
+  const rows = listCostEvidence(resourceId);
+  const qualified = rows.filter((item) => item.when?.volumeDepthMm !== undefined);
+  const unqualified = rows.filter((item) => item.when?.volumeDepthMm === undefined);
+  if (when?.volumeDepthMm !== undefined) {
+    return (
+      qualified.find((item) => item.when?.volumeDepthMm === when.volumeDepthMm) ??
+      unqualified[0]
+    );
+  }
+  return unqualified[0];
 }
 
 export function listMaterialSpecifications(
@@ -562,6 +588,8 @@ export function costSourceLabel(source: CostEvidence["source"]): string {
       return "Evidență internă de pilot";
     case "OWNER_CONFIRMED_PURCHASE":
       return "Achiziție confirmată de owner";
+    case "OWNER_CONFIRMED_WORKSHOP":
+      return "Tarif intern confirmat de owner";
     case "LEGACY_EVIDENCE":
       return "Evidență legacy";
     default: {

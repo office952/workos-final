@@ -217,7 +217,7 @@ describe("execution plan preview", () => {
     );
   });
 
-  it("reuses Lighting quantities and keeps EIC 595 on the canonical fixture", () => {
+  it("reuses Lighting quantities and keeps EIC 382.50 on the canonical fixture", () => {
     const { truth, aggregate } = confirmedSpine();
     const preview = compileExecutionPlanPreview(
       truth,
@@ -233,9 +233,9 @@ describe("execution plan preview", () => {
     expect(placeLed?.quantities[0]?.value).toBe(125);
     expect(placeLed?.resources.some((item) => item.label === "Modul LED 12V")).toBe(true);
     expect(psu?.resources.some((item) => item.label === "Sursă LED 12V 160W")).toBe(true);
-    expect(preview.summary.internalCostTotal).toBe(595);
-    expect(preview.summary.internalCostCompleteness).toBe("PARTIAL");
-    expect(compileEic(aggregate).total).toBe(403);
+    expect(preview.summary.internalCostTotal).toBe(382.5);
+    expect(preview.summary.internalCostCompleteness).toBe("COMPLETE");
+    expect(compileEic(aggregate).total).toBe(190.5);
     expect(JSON.stringify(preview)).not.toMatch(/ledPitchMm|0\.75|117\.1875/);
   });
 

@@ -244,7 +244,7 @@ describe("letters process composition", () => {
       seededDisplayLabelCatalog(),
     );
     const fromTruth = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
-    expect(compileEic(aggregate).total).toBe(403);
+    expect(compileEic(aggregate).total).toBe(190.5);
     expect(JSON.stringify(aggregate)).not.toMatch(/CUT_SHEET_CNC|derivedOrder/);
     expect(fromTruth.productCode).toBe(CANONICAL_PRODUCT_CODE);
     expect(fromTruth.nodes.some((item) => item.processId === CUT_SHEET_CNC_ID)).toBe(

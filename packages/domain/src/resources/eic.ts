@@ -1,9 +1,11 @@
 import type { ProductProcessComposition } from "../processes/composition.js";
 import type { ProductAggregate } from "../product/types.js";
 import {
+  ALUMINIUM_RETURN_PROFILE_ID,
   getCostEvidence,
   getResource,
   type CostEvidence,
+  type CostEvidenceWhen,
   type ResourceKind,
   type ResourceUnit,
 } from "./catalog.js";
@@ -49,11 +51,26 @@ export function resourceRequirements(
   return [...aggregate.requirements, ...recipeRequirements];
 }
 
+export function missingCostEvidenceReason(
+  resourceId: string,
+  when?: CostEvidenceWhen,
+): string {
+  if (resourceId === ALUMINIUM_RETURN_PROFILE_ID) {
+    return when?.volumeDepthMm !== undefined
+      ? `Tarif profil aluminiu neconfirmat pentru adâncimea ${when.volumeDepthMm} mm`
+      : "Tarif profil aluminiu neconfirmat pentru această adâncime";
+  }
+  return "Evidență de cost indisponibilă";
+}
+
 export function applyRequirement(requirement: ResourceRequirement): EicLine {
   const resource = getResource(requirement.resourceId);
-  const evidence = getCostEvidence(requirement.resourceId);
-  if (!resource || !evidence) {
+  if (!resource) {
     throw new Error(`Unknown resource ${requirement.resourceId}`);
+  }
+  const evidence = getCostEvidence(requirement.resourceId, requirement.costQualifier);
+  if (!evidence) {
+    throw new Error(`Cost evidence unavailable for ${requirement.resourceId}`);
   }
   if (requirement.unit !== resource.unit || requirement.unit !== evidence.perUnit) {
     throw new Error(`Unit mismatch for ${requirement.resourceId}`);
@@ -76,21 +93,37 @@ export function compileEic(
   composition?: ProductProcessComposition,
 ): EicResult {
   const requirements = resourceRequirements(aggregate, composition);
-  const lines: EicLine[] = requirements.map(applyRequirement);
+  const missingEvidenceReasons: string[] = [];
+  const lines: EicLine[] = [];
+  for (const requirement of requirements) {
+    const resource = getResource(requirement.resourceId);
+    if (!resource) {
+      throw new Error(`Unknown resource ${requirement.resourceId}`);
+    }
+    const evidence = getCostEvidence(requirement.resourceId, requirement.costQualifier);
+    if (!evidence) {
+      missingEvidenceReasons.push(
+        missingCostEvidenceReason(requirement.resourceId, requirement.costQualifier),
+      );
+      continue;
+    }
+    lines.push(applyRequirement(requirement));
+  }
   const excludedComponentLabels = aggregate.componentStatuses
     .filter((item) => item.status !== "CALCULATED")
     .map((item) => item.label);
   const measurementGaps = uniqueReasons(
     aggregate.componentStatuses.flatMap((item) => item.unavailable),
   );
-  const hasProvisionalCost = lines.some((line) => {
-    const evidence = getCostEvidence(line.resourceId);
+  const hasProvisionalCost = requirements.some((requirement) => {
+    const evidence = getCostEvidence(requirement.resourceId, requirement.costQualifier);
     return evidence !== undefined && costEvidenceKeepsEicPartial(evidence);
   });
-  const completenessReasons = [
+  const completenessReasons = uniqueReasons([
     ...measurementGaps,
+    ...missingEvidenceReasons,
     ...(hasProvisionalCost ? [EIC_CALIBRATION_REASON] : []),
-  ];
+  ]);
   const geometryMissing = aggregate.componentStatuses.some(
     (item) => item.status === "MISSING_MEASUREMENT",
   );

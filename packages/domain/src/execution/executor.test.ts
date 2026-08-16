@@ -133,7 +133,7 @@ describe("task executor assignment", () => {
     const done = view.tasks.find((item) => item.taskId === backCnc.taskId);
     expect(done?.assignedExecutor).toEqual({ id: "per:maria", label: "Maria I." });
     expect(done?.completion?.outcome).toBe("COMPLETED_AS_PLANNED");
-    expect(completed.record.plan.eicTotal).toBe(595);
+    expect(completed.record.plan.eicTotal).toBe(382.5);
     expect(completed.record.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(JSON.stringify(snapshot)).not.toMatch(/personId|Maria|executor/);
   });

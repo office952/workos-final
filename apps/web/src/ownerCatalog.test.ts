@@ -326,7 +326,7 @@ describe("resources catalog presentation", () => {
     ]);
     expect(catalog.categories[1]?.items[0]?.label).toBe("Formare profil aluminiu");
     expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
-    expect(catalog.categories[1]?.items[0]?.listHint).toBe("15,00 EUR / m");
+    expect(catalog.categories[1]?.items[0]?.listHint).toBe("5,00 EUR / m");
     expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
       "Debitare CNC față",
     );

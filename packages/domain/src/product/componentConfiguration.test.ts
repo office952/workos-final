@@ -111,11 +111,24 @@ describe("component configuration model", () => {
     );
     expect(depth60.quantities.find((item) => item.id === "volume_lateral")?.value).toBe(0.75);
     expect(depth100.quantities.find((item) => item.id === "volume_lateral")?.value).toBe(1.25);
+    const withoutVinyl = (requirements: typeof depth60.requirements) =>
+      requirements
+        .filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651")
+        .map((item) => ({
+          componentId: item.componentId,
+          resourceId: item.resourceId,
+          quantity: item.quantity,
+          unit: item.unit,
+        }));
+    expect(withoutVinyl(depth60.requirements)).toEqual(withoutVinyl(depth100.requirements));
     expect(
-      depth60.requirements.filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651"),
-    ).toEqual(
-      depth100.requirements.filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651"),
-    );
+      depth60.requirements.find((item) => item.resourceId === "aluminium_return_profile")
+        ?.costQualifier,
+    ).toEqual({ volumeDepthMm: 60 });
+    expect(
+      depth100.requirements.find((item) => item.resourceId === "aluminium_return_profile")
+        ?.costQualifier,
+    ).toEqual({ volumeDepthMm: 100 });
     expect(depth100.requirements.some((item) => item.resourceId === "MAT-VINYL-ORACAL-651")).toBe(
       true,
     );

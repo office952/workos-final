@@ -49,7 +49,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await expect(plan.getByText(/Stare: (Planificat|În lucru)/).first()).toBeVisible();
   await expect(plan.getByText("Fără furnizor disponibil").first()).toBeVisible();
   await expect(plan.getByRole("heading", { name: /Montare module LED/ })).toBeVisible();
-  await expect(plan.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
   await expect(plan.getByText(/Fără furnizor: 3/)).toBeVisible();
   await expect(plan.getByRole("tab", { name: "Toate" })).toBeVisible();
   await expect(plan.getByText("QUALITY_CONTROL")).toHaveCount(0);

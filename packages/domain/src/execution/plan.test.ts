@@ -83,8 +83,8 @@ describe("persisted execution plan materialization", () => {
       second.tasks.map((item) => item.taskId),
     );
     expect(new Set(first.tasks.map((item) => item.taskId)).size).toBe(12);
-    expect(first.plan.eicTotal).toBe(595);
-    expect(first.plan.eicCompleteness).toBe("PARTIAL");
+    expect(first.plan.eicTotal).toBe(382.5);
+    expect(first.plan.eicCompleteness).toBe("COMPLETE");
   });
 
   it("maps frozen dependencies to persisted task IDs without inventing order", () => {
@@ -194,9 +194,9 @@ describe("persisted execution plan materialization", () => {
     });
     expect(record.tasks).toHaveLength(13);
     expect(record.tasks.some((item) => item.processLabel === "Aplicare folie")).toBe(true);
-    expect(record.plan.eicTotal).toBe(598.5);
+    expect(record.plan.eicTotal).toBe(386);
     expect(record.plan.sourceSnapshotHash).toBe(vinyl.contentHash);
     expect(later.contentHash).not.toBe(vinyl.contentHash);
-    expect(materializeExecutionPlanFromSnapshot(vinyl).plan.eicTotal).toBe(598.5);
+    expect(materializeExecutionPlanFromSnapshot(vinyl).plan.eicTotal).toBe(386);
   });
 });

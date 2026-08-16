@@ -72,9 +72,9 @@ describe("cost recipes", () => {
       resourceId: RETURN_CANT_FORMING_ID,
       quantity: 12.5,
       unit: "m",
-      rate: 15,
+      rate: 5,
       currency: "EUR",
-      cost: 187.5,
+      cost: 62.5,
     });
   });
 

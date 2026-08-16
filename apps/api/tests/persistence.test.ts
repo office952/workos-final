@@ -126,7 +126,7 @@ describe("product system persistence", () => {
 
     const second = createProductSystemRuntime(sqlitePath);
     const stored = second.readProductionSnapshot(snapshot.snapshotId);
-    expect(stored?.eic.total).toBe(595);
+    expect(stored?.eic.total).toBe(382.5);
     expect(stored?.usedTechnicalSettings.find((item) => item.id === "ledPitchMm")?.value).toBe(
       100,
     );
@@ -296,7 +296,7 @@ describe("product system persistence", () => {
         note: null,
       })),
     );
-    expect(stored?.plan.eicTotal).toBe(595);
+    expect(stored?.plan.eicTotal).toBe(382.5);
     expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     const afterService = second.readInventory().items.find(
       (item) => item.resourceId === "MAT-LED-MODULE",
@@ -399,7 +399,7 @@ describe("product system persistence", () => {
       ?.tasks.find((item) => item.taskId === lighting.taskId);
     expect(storedTask?.actualConsumption[0]?.actualQuantity).toBe(127);
     expect(storedTask?.quantities[0]?.value).toBe(125);
-    expect(second.readExecutionPlan(created.record.plan.planId)?.plan.eicTotal).toBe(595);
+    expect(second.readExecutionPlan(created.record.plan.planId)?.plan.eicTotal).toBe(382.5);
     second.close();
   });
 });

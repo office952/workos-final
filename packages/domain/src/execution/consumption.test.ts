@@ -164,7 +164,7 @@ describe("execution actual resource consumption", () => {
       125,
     );
     expect(ledDone?.quantities[0]?.value).toBe(125);
-    expect(completedLed.plan.eicTotal).toBe(595);
+    expect(completedLed.plan.eicTotal).toBe(382.5);
     expect(completedLed.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(JSON.stringify(completedLed)).not.toMatch(
       /"actualCost"|inventoryEngine|scrap|machineHours|laborMinutes/,

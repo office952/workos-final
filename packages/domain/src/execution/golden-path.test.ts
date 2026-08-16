@@ -237,7 +237,7 @@ describe("LETTERS execution golden path", () => {
     expect(view.tasks.find((item) => item.taskId === pack.taskId)?.waitingFor).toEqual([
       "Control calitate final — Produs",
     ]);
-    expect(record.plan.eicTotal).toBe(595);
+    expect(record.plan.eicTotal).toBe(382.5);
     expect(record.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(record.tasks.find((item) => item.taskId === placeLed.taskId)?.quantities[0]?.value).toBe(
       125,
@@ -262,6 +262,6 @@ describe("LETTERS execution golden path", () => {
     );
     expect(view.progress.noProvider).toBe(3);
     expect(view.progress.status).toBe("PLANNED");
-    expect(record.plan.eicTotal).toBe(598.5);
+    expect(record.plan.eicTotal).toBe(386);
   });
 });

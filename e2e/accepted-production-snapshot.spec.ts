@@ -23,7 +23,7 @@ test("confirmed LETTERS product can freeze an accepted production snapshot", asy
 }) => {
   await confirmCanonicalLetters(page);
   await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
-  await expect(page.getByText("Total cost intern estimat: 595,00 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   const snapshot = page.locator(".production-snapshot");
   await expect(
@@ -31,7 +31,7 @@ test("confirmed LETTERS product can freeze an accepted production snapshot", asy
   ).toBeVisible();
   await expect(snapshot.getByText("Stare: Acceptat / înghețat")).toBeVisible();
   await expect(snapshot.getByText("Operații: 12")).toBeVisible();
-  await expect(snapshot.getByText("Cost intern curent: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(snapshot.getByText("Cost intern curent: 382,50 EUR (complet)")).toBeVisible();
   await expect(page.getByText("Plan bazat pe snapshot acceptat")).toBeVisible();
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
   await expect(page.getByText("ExecutionTask")).toHaveCount(0);

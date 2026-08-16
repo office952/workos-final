@@ -3,7 +3,10 @@ import type {
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
-import { MAT_VINYL_ORACAL_651_ID } from "../resources/catalog.js";
+import {
+  ALUMINIUM_RETURN_PROFILE_ID,
+  MAT_VINYL_ORACAL_651_ID,
+} from "../resources/catalog.js";
 import { resolveTypeResources } from "./componentTypes.js";
 import type { DraftValues, TechnicalMeasurement } from "./types.js";
 import { linearMetersFromMm } from "./units.js";
@@ -78,6 +81,11 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
           resourceId: item.resourceId,
           quantity: meters,
           unit: "m" as const,
+          ...(item.resourceId === ALUMINIUM_RETURN_PROFILE_ID &&
+          Number.isFinite(depthMm) &&
+          depthMm > 0
+            ? { costQualifier: { volumeDepthMm: depthMm } }
+            : {}),
         })),
       ...(input.values["volume.finish"] === "vinyl" && lateralArea !== undefined
         ? [

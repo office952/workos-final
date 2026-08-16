@@ -23,3 +23,18 @@ export function formatMoney(value: number): string {
     maximumFractionDigits: 2,
   });
 }
+
+export function formatCostCompleteness(
+  completeness: "PARTIAL" | "COMPLETE",
+): string {
+  switch (completeness) {
+    case "PARTIAL":
+      return " (parțial)";
+    case "COMPLETE":
+      return " (complet)";
+    default: {
+      const _exhaustive: never = completeness;
+      return _exhaustive;
+    }
+  }
+}

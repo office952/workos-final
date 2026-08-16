@@ -92,8 +92,8 @@ describe("accepted production snapshot", () => {
     expect(first.schemaVersion).toBe(1);
     expect(first.sourceReviewId).toBe(second.sourceReviewId);
     expect(first.operations).toHaveLength(12);
-    expect(first.eic.total).toBe(595);
-    expect(first.eic.completeness).toBe("PARTIAL");
+    expect(first.eic.total).toBe(382.5);
+    expect(first.eic.completeness).toBe("COMPLETE");
     expect(first.truth.measurements.every((item) => item.source === "OPERATOR_MANUAL")).toBe(
       true,
     );
@@ -180,7 +180,7 @@ describe("accepted production snapshot", () => {
     expect(snapshot.usedTechnicalSettings.find((item) => item.id === LED_PITCH_SETTING_ID)?.value).toBe(
       100,
     );
-    expect(snapshot.eic.total).toBe(595);
+    expect(snapshot.eic.total).toBe(382.5);
     expect(later.usedTechnicalSettings.find((item) => item.id === LED_PITCH_SETTING_ID)?.value).toBe(
       80,
     );
@@ -196,7 +196,7 @@ describe("accepted production snapshot", () => {
     const work = productionWorkFromSnapshot(snapshot);
     const placeLed = work.operations.find((item) => item.processId === PLACE_LED_MODULES_ID);
     expect(work.snapshotId).toBe(snapshot.snapshotId);
-    expect(work.eic.total).toBe(595);
+    expect(work.eic.total).toBe(382.5);
     expect(placeLed?.quantities[0]?.value).toBe(125);
     expect(work.usedRecipes.some((item) => item.rate > 0)).toBe(true);
     expect(work).not.toHaveProperty("template");
@@ -213,6 +213,24 @@ describe("accepted production snapshot", () => {
     expect(vinyl.operations.some((item) => item.processLabel === "Aplicare folie")).toBe(true);
     expect(none.operations.some((item) => item.processLabel === "Aplicare folie")).toBe(false);
     expect(vinyl.snapshotId).not.toBe(none.snapshotId);
-    expect(vinyl.eic.total).toBe(598.5);
+    expect(vinyl.eic.total).toBe(386);
+  });
+
+  it("does not rewrite a historically frozen 595 EIC from live catalog rates", () => {
+    const live = freeze().snapshot;
+    const historical = {
+      ...live,
+      eic: {
+        ...live.eic,
+        total: 595,
+        completeness: "PARTIAL" as const,
+      },
+    };
+    expect(live.eic.total).toBe(382.5);
+    expect(live.eic.completeness).toBe("COMPLETE");
+    expect(productionWorkFromSnapshot(historical).eic.total).toBe(595);
+    expect(productionWorkFromSnapshot(historical).eic.completeness).toBe("PARTIAL");
+    const { aggregate, composition } = confirmedSpine();
+    expect(compileEic(aggregate, composition).total).toBe(382.5);
   });
 });

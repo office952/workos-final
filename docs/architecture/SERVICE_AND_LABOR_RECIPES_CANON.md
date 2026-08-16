@@ -75,8 +75,7 @@ EIC may consume a resolved recipe only when the process is required, quantity ex
 
 EIC is generic. When process composition is supplied, it merges recipe requirements with component resource requirements.
 The forming recipe reuses the same `return_cant_forming` evidence. It does not add a second line.
-Canonical none/none fixture: 595.00 EUR PARTIAL. Honest PARTIAL reason is cost-evidence calibration (`DEVELOPMENT_DEFAULT` / legacy / pilot rates), not missing Analyzer geometry. Operator-confirmed FACE area and VOLUME perimeter are valid Product Truth.
-Final workshop calibration is later. Development rates are replaceable cost evidence, not OWNER_CONFIRMED.
+Canonical none/none at 60 mm: 382.50 EUR COMPLETE on owner-confirmed workshop rates. Forming is 5 EUR/m. CNC face 3 EUR/m, CNC back 4.5 EUR/m, bonding 5 EUR/m, body closure 2 EUR/m, LED install 0.05 EUR/buc, electrical 2 EUR/product, packing 10 EUR/m². Vinyl / RAL remain development evidence and keep those configurations PARTIAL. Operator-confirmed FACE area and VOLUME perimeter are valid Product Truth.
 
 ## Boundaries
 

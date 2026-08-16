@@ -50,6 +50,7 @@ export type FrozenRequirement = {
   resourceId: string;
   quantity: number;
   unit: string;
+  costQualifier?: { volumeDepthMm?: number };
 };
 
 export type FrozenOperationQuantity = {
@@ -322,6 +323,7 @@ function freezeRequirements(
     resourceId: item.resourceId,
     quantity: item.quantity,
     unit: item.unit,
+    ...(item.costQualifier ? { costQualifier: item.costQualifier } : {}),
   }));
 }
 

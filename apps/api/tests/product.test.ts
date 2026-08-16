@@ -176,11 +176,11 @@ describe("product configuration API", () => {
     expect(quantities.find((item) => item.componentId === "VOLUME")?.value).toBe(12.5);
     expect(quantities.find((item) => item.componentId === "FACE")?.value).toBe(0.25);
     expect(quantities.find((item) => item.componentId === "BACK")?.value).toBe(0.25);
-    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completeness).toBe("COMPLETE");
     expect(eic.geometryLabel).toBe("Geometrie confirmată");
-    expect(eic.completenessReasons).toEqual(["Costuri încă în calibrare"]);
+    expect(eic.completenessReasons).toEqual([]);
     expect(JSON.stringify(eic)).not.toMatch(/Geometrie din Analyzer/);
-    expect(eic.total).toBe(595);
+    expect(eic.total).toBe(382.5);
     expect(eic.currency).toBe("EUR");
     expect((eic.excludedComponentLabels as string[])).toEqual([]);
     const preview = body.executionPlanPreview as JsonObject;
@@ -188,8 +188,8 @@ describe("product configuration API", () => {
     expect(preview.operationCount).toBeGreaterThan(0);
     expect(preview.summary).toEqual(
       expect.objectContaining({
-        internalCostTotal: 595,
-        internalCostCompleteness: "PARTIAL",
+        internalCostTotal: 382.5,
+        internalCostCompleteness: "COMPLETE",
       }),
     );
     expect(JSON.stringify(preview)).not.toMatch(/ExecutionTask|startTask|assignedTo/);
@@ -239,7 +239,7 @@ describe("product configuration API", () => {
     expect(firstBody.created).toBe(true);
     expect(snapshot.status).toBe("ACCEPTED");
     expect(snapshot.eic).toEqual(
-      expect.objectContaining({ total: 595, completeness: "PARTIAL" }),
+      expect.objectContaining({ total: 382.5, completeness: "COMPLETE" }),
     );
     expect((snapshot.operations as unknown[]).length).toBe(12);
     expect(JSON.stringify(snapshot)).not.toMatch(
@@ -303,7 +303,7 @@ describe("product configuration API", () => {
     expect(firstBody.created).toBe(true);
     expect(view.plan.status).toBe("PLANNED");
     expect(view.plan.sourceSnapshotId).toBe(snapshot.snapshotId);
-    expect(view.plan.eicTotal).toBe(595);
+    expect(view.plan.eicTotal).toBe(382.5);
     expect(view.tasks).toHaveLength(12);
     expect(view.tasks.every((item) => item.assignedProvider === null)).toBe(true);
     expect(view.tasks.every((item) => item.assignedExecutor === null)).toBe(true);
@@ -444,7 +444,7 @@ describe("product configuration API", () => {
     expect(typeof startedTask.startedAt).toBe("string");
     expect(Date.parse(startedTask.startedAt as string)).toBeGreaterThanOrEqual(beforeStart - 1000);
     expect(startedView.progressStatus).toBe("IN_PROGRESS");
-    expect(startedView.plan.eicTotal).toBe(595);
+    expect(startedView.plan.eicTotal).toBe(382.5);
     expect(startedView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
 
     const reassignAfterStart = await app.request(
@@ -609,7 +609,7 @@ describe("product configuration API", () => {
     expect(started.status).toBe(200);
     expect((startedTask.assignedExecutor as JsonObject).id).toBe(secondId);
     expect((startedTask.assignedExecutor as JsonObject).label).toBe("Executor doi");
-    expect(startedView.plan.eicTotal).toBe(595);
+    expect(startedView.plan.eicTotal).toBe(382.5);
 
     const locked = await assignExecutor(app, backCnc.taskId, firstId);
     expect(locked.status).toBe(409);
@@ -730,7 +730,7 @@ describe("product configuration API", () => {
       varianceCount: 0,
       status: "IN_PROGRESS",
     });
-    expect(finalView.plan.eicTotal).toBe(595);
+    expect(finalView.plan.eicTotal).toBe(382.5);
     expect(finalView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(
       finalView.tasks.filter(
@@ -851,7 +851,7 @@ describe("product configuration API", () => {
     expect((ledDone.quantities as Array<JsonObject>)[0]?.value).toBe(125);
     expect(ledView.progress.varianceCount).toBe(1);
     expect(ledView.progress.status).toBe("IN_PROGRESS");
-    expect(ledView.plan.eicTotal).toBe(595);
+    expect(ledView.plan.eicTotal).toBe(382.5);
     expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
 
     const rewrite = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
@@ -1000,7 +1000,7 @@ describe("product configuration API", () => {
         (item) => item.resourceId === "MAT-LED-MODULE",
       )?.quantity,
     ).toBe(125);
-    expect(ledView.plan.eicTotal).toBe(595);
+    expect(ledView.plan.eicTotal).toBe(382.5);
     expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(ledView.actualInternalCost.status).toBe("PARTIAL");
     expect(ledView.actualInternalCost.calculableTotal).toBe(63.5);

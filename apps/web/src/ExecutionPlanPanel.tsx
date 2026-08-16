@@ -7,7 +7,12 @@ import {
   type ExecutionPlanView,
   type ExecutionTaskView,
 } from "@workos-final/domain";
-import { formatMoney, formatQuantity, formatUnit } from "./formatDisplay";
+import {
+  formatCostCompleteness,
+  formatMoney,
+  formatQuantity,
+  formatUnit,
+} from "./formatDisplay";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
@@ -63,7 +68,7 @@ export function ExecutionPlanPanel({
           <p className="execution-plan-cost">
             Cost intern planificat: {formatMoney(view.plan.eicTotal)}{" "}
             {view.plan.eicCurrency}
-            {view.plan.eicCompleteness === "PARTIAL" ? " (parțial)" : ""}
+            {formatCostCompleteness(view.plan.eicCompleteness)}
           </p>
           <p className="execution-plan-cost">
             Cost intern real: {actualCostSummary(view.actualInternalCost)}
