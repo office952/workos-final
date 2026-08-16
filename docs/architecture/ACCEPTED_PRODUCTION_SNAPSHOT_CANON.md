@@ -14,7 +14,7 @@ Confirmed Product Truth
 Commercial:
 Order Snapshot + FrozenProductionInput
   → Production Release Snapshot     ORDER-sourced APS
-  → [later] ExecutionPlan
+  → ExecutionPlan
 ```
 
 Conceptually, Production Release Snapshot = Accepted Production Snapshot.

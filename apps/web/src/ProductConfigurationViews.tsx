@@ -572,15 +572,23 @@ export function OrderSnapshotSection({
 export function ProductionPreviewSection({
   preview,
   basedOnSnapshot,
+  commercial = false,
 }: {
   preview: ExecutionPlanPreview;
   basedOnSnapshot: boolean;
+  commercial?: boolean;
 }) {
   return (
     <div className="production-plan">
-      <h3>Plan de producție</h3>
-      <p className="page-lead">Ce va cere producția, înainte de planul de execuție.</p>
-      {basedOnSnapshot ? <p>Plan bazat pe snapshot acceptat</p> : null}
+      <h3>Previzualizare producție</h3>
+      <p className="page-lead">Estimare orientativă — nu este planul de execuție.</p>
+      {basedOnSnapshot ? (
+        <p>
+          {commercial
+            ? "Aliniată la eliberarea comenzii, nu la planul persistat."
+            : "Aliniată la acceptarea de atelier, nu la planul persistat."}
+        </p>
+      ) : null}
       <p>
         {preview.summary.productLabel}: {preview.summary.inscription}
       </p>
@@ -669,6 +677,15 @@ export function AcceptedSnapshotSection({
             ? "Deja acceptat pentru producție"
             : "Acceptat pentru producție"}
       </h3>
+      {hasExecutionPlan ? (
+        <p className="page-lead">Plan de execuție creat.</p>
+      ) : (
+        <p className="page-lead">
+          {commercial
+            ? "Următorul pas: creează planul de execuție pentru atelier."
+            : "Următorul pas: creează planul de execuție de atelier."}
+        </p>
+      )}
       <ul className="metric-row">
         <li>Operații: {snapshot.operations.length}</li>
         <li>
@@ -678,16 +695,13 @@ export function AcceptedSnapshotSection({
         <li>Înghețat la: {new Date(snapshot.createdAt).toLocaleString("ro-RO")}</li>
         <li>Stare: Acceptat / înghețat</li>
       </ul>
-      <div className="action-row">
-        <button
-          type="button"
-          className={hasExecutionPlan ? "button-secondary" : undefined}
-          onClick={onCreatePlan}
-          disabled={busy}
-        >
-          Creează planul de execuție
-        </button>
-      </div>
+      {hasExecutionPlan ? null : (
+        <div className="action-row">
+          <button type="button" onClick={onCreatePlan} disabled={busy}>
+            Creează planul de execuție
+          </button>
+        </div>
+      )}
       <details className="snapshot-details">
         <summary>Detalii</summary>
         <ul>

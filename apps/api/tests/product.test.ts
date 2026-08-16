@@ -587,6 +587,134 @@ describe("product configuration API", () => {
     expect(releasePath).not.toMatch(/freezeAcceptedProductionSnapshot|compileAcceptedProduct/);
   });
 
+  it("creates an execution plan from the order release without live compile or side effects", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quoteId = ((await readBody(createdQuote)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/acceptance`,
+      { method: "POST" },
+    );
+    const createdOrder = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/order`,
+      { method: "POST" },
+    );
+    const order = (await readBody(createdOrder)).orderSnapshot as JsonObject;
+    const released = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/${order.orderSnapshotId}/production-release`,
+      { method: "POST" },
+    );
+    const snapshot = (await readBody(released)).snapshot as JsonObject;
+    const snapshotId = snapshot.snapshotId as string;
+    const planPath = `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshotId}/execution-plan`;
+    const first = await app.request(planPath, { method: "POST" });
+    const second = await app.request(planPath, { method: "POST" });
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    const created = await readBody(first);
+    const reused = await readBody(second);
+    const view = created.executionPlan as { plan: JsonObject; tasks: Array<JsonObject> };
+    expect(created.created).toBe(true);
+    expect(reused.created).toBe(false);
+    expect(view.plan.sourceSnapshotId).toBe(snapshotId);
+    expect(view.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+    expect(view.tasks).toHaveLength(12);
+    expect(view.plan.eicTotal).toBe(382.5);
+    expect(view.tasks.every((task) => task.status === "PLANNED")).toBe(true);
+    expect(view.tasks.every((task) => task.startedAt == null)).toBe(true);
+    const readBack = await app.request(planPath);
+    expect(readBack.status).toBe(200);
+    expect(
+      ((await readBody(readBack)).executionPlan as { plan: JsonObject }).plan.sourceSnapshotId,
+    ).toBe(snapshotId);
+    const inventory = await app.request("/api/inventory");
+    const items = ((await readBody(inventory)).inventory as { items: Array<JsonObject> }).items;
+    expect(items.every((item) => item.movementCount === 0)).toBe(true);
+    const unknown = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/aps:missing/execution-plan`,
+      { method: "POST" },
+    );
+    expect(unknown.status).toBe(404);
+  });
+
+  it("keeps the execution plan on the frozen release after live product mutation", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const createdQuote = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const quoteId = ((await readBody(createdQuote)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/acceptance`,
+      { method: "POST" },
+    );
+    const createdOrder = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/order`,
+      { method: "POST" },
+    );
+    const order = (await readBody(createdOrder)).orderSnapshot as JsonObject;
+    const released = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/${order.orderSnapshotId}/production-release`,
+      { method: "POST" },
+    );
+    const snapshot = (await readBody(released)).snapshot as JsonObject;
+    const snapshotId = snapshot.snapshotId as string;
+    const live = await app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/compile`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        values: {
+          ...readyValues,
+          "face.finish": "vinyl",
+          "face.color": "alb",
+        },
+      }),
+    });
+    expect(live.status).toBe(200);
+    const planPath = `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshotId}/execution-plan`;
+    const created = await readBody(await app.request(planPath, { method: "POST" }));
+    const view = created.executionPlan as { plan: JsonObject; tasks: Array<JsonObject> };
+    expect(view.plan.sourceSnapshotId).toBe(snapshotId);
+    expect(view.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+    expect(view.tasks).toHaveLength(12);
+    expect(view.plan.eicTotal).toBe(382.5);
+    expect((snapshot.operations as unknown[]).length).toBe(12);
+  });
+
+  it("does not compile or reprice on the execution-plan path", () => {
+    const source = readFileSync(new URL("../src/product.ts", import.meta.url), "utf8");
+    const start = source.indexOf(
+      '"/api/products/:productCode/accepted-production-snapshots/:snapshotId/execution-plan"',
+    );
+    const end = source.indexOf('"/api/execution-plans/:planId"');
+    const planPath = source.slice(start, end);
+    expect(planPath).toContain("materializeExecutionPlanFromSnapshot");
+    expect(planPath).toContain("assertOrderReleaseReadyForExecution");
+    expect(planPath).not.toMatch(/compileDefinition|compileAggregate|compileEic/);
+    expect(planPath).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
+  });
+
   it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {
     const compiled = await createApp().request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,

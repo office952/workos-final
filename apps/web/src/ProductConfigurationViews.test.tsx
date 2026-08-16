@@ -496,9 +496,35 @@ describe("Product configuration views", () => {
     );
     expect(screen.getByText("Eliberată pentru producție.")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Eliberată pentru producție" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Următorul pas: creează planul de execuție pentru atelier."),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Eliberează pentru producție" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Acceptă pentru producție" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Creează planul de execuție" })).toBeInTheDocument();
+  });
+
+  it("hides the create-plan action after the persisted plan exists", () => {
+    const release = {
+      snapshotId: "aps:released",
+      releaseSource: "ORDER",
+      sourceOrderSnapshotId: "ord:qad:qts:hidden:hash",
+      productLabel: "Litere",
+      createdAt: "2026-08-17T03:00:00.000Z",
+      operations: Array.from({ length: 12 }),
+      eic: { total: 382.5, currency: "EUR", completeness: "COMPLETE" },
+    } as unknown as AcceptedProductionSnapshot;
+    render(
+      <AcceptedSnapshotSection
+        snapshot={release}
+        reused={true}
+        onCreatePlan={() => undefined}
+        busy={false}
+        hasExecutionPlan={true}
+      />,
+    );
+    expect(screen.getByText("Plan de execuție creat.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Creează planul de execuție" })).not.toBeInTheDocument();
   });
 
   it("does not duplicate the commercial formula in the UI module", () => {

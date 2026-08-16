@@ -37,7 +37,7 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
 }) => {
   await confirmLetters(page, { faceFinish: "none", volumeFinish: "none" });
   await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Cost intern curent: 382,50 EUR (complet)")).toBeVisible();
   await expect(page.locator(".eic-section").getByText("Geometrie confirmată.")).toBeVisible();
   await expect(page.locator(".eic-section").getByText("Complet")).toBeVisible();
@@ -82,7 +82,7 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
   });
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-narrow.png",
     fullPage: true,
@@ -97,7 +97,7 @@ test("vinyl face adds only the selected finish operation to the plan", async ({
     volumeFinish: "none",
     faceColor: "alb",
   });
-  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
   await expect(page.getByText("Resursă: Folie Oracal 651: 0,25 m²").first()).toBeVisible();
   await expect(page.getByText("Vopsire RAL")).toHaveCount(0);
@@ -114,7 +114,7 @@ test("painted volume adds RAL with an honest missing provider", async ({ page })
     volumeFinish: "painted",
     volumeColor: "RAL 9010",
   });
-  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Vopsire RAL").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie")).toHaveCount(0);
   await expect(page.getByText("Stare: Fără furnizor").first()).toBeVisible();

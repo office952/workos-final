@@ -13,7 +13,7 @@ Pilot workshop accept remains a separate PILOT path.
 Order Snapshot + FrozenProductionInput
   → freezeProductionReleaseFromOrder
   → AcceptedProductionSnapshot (releaseSource = ORDER)
-  → [later] Creează planul de execuție
+  → Creează planul de execuție
 ```
 
 Option A: Release authorizes production. ExecutionPlan stays a separate operator action.

@@ -95,6 +95,7 @@ WorkOS Final
 │   ├── Execution Plan Preview              IMPLEMENTED_CURRENT
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
 │   ├── Production Release from Order       IMPLEMENTED_CURRENT / BASIC
+│   ├── Execution from Order Release        IMPLEMENTED_CURRENT / BASIC
 │   ├── ExecutionPlan                       IMPLEMENTED_CURRENT
 │   ├── ExecutionTasks                      IMPLEMENTED_CURRENT
 │   ├── Provider assignment                 IMPLEMENTED_CURRENT / BASIC
@@ -280,7 +281,7 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, and Production Release from Order are implemented. Commercial ExecutionPlan materialization remains a separate operator action.
+Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and ExecutionPlan from that Release are implemented. Plan creation remains a separate operator action after Release.
 
 ```text
 confirmed Product Truth
@@ -292,7 +293,7 @@ confirmed Product Truth
 → Quote Acceptance Decision
 → Order Snapshot copies FrozenProductionInput
 → Production Release Snapshot
-→ [later] ExecutionPlan
+→ ExecutionPlan
 ```
 
 Quote Snapshot does not require Production Snapshot.
@@ -334,7 +335,7 @@ ProductTruth + planned EIC + Commercial rules
   → Quote Acceptance Decision
     → Order Snapshot copies FrozenProductionInput
       → Production Release Snapshot
-        → [later] ExecutionPlan
+        → ExecutionPlan
         → Tasks / Operations
           → Employee assignment
           → Machine / Workcenter allocation
@@ -452,6 +453,7 @@ Settings versions: keep previous active values as history after a new version is
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Frozen production input | IMPLEMENTED_CURRENT / BASIC |
 | Production Release from Order | IMPLEMENTED_CURRENT / BASIC |
+| Execution from Order Release | IMPLEMENTED_CURRENT / BASIC |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
 | Capability kernel promotion to ACTIVE | FOUNDATION_ONLY (IDs frozen) |

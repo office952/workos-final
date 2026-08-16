@@ -14,7 +14,7 @@ Confirmed Product Truth
   → Order Snapshot                 frozen commercial job root
     copies FrozenProductionInput
     → Production Release Snapshot  workshop authorization
-      → [later] ExecutionPlan
+      → ExecutionPlan
 ```
 
 Order Snapshot answers: this exact accepted offer is now the canonical commercial job.
@@ -93,7 +93,8 @@ Product Truth → Production Snapshot → Execution
 That path is workshop/technical. It is not customer-job release from Order.
 The explicit commercial action is **Eliberează pentru producție** from Order.
 That creates one immutable Production Release Snapshot from Order + frozen production input.
-It does not start tasks, assign people/machines, or create an ExecutionPlan.
+It does not start tasks, assign people/machines, or auto-create an ExecutionPlan.
+The next explicit action is **Creează planul de execuție**, which reuses the existing planner against the Release.
 
 ## Frozen production input
 
@@ -116,7 +117,8 @@ After **Ofertă acceptată**:
 
 - Before Order: **Creează comanda**
 - After Order: **Comandă creată** and **Eliberează pentru producție**
-- After Release: **Eliberată pentru producție**
+- After Release: **Eliberată pentru producție** and **Creează planul de execuție**
+- After plan: **Plan de execuție creat**
 
 **Ofertă acceptată** stays visible.
 **Acceptă pentru producție** remains only the Atelier / test tehnic path when no commercial Order exists.

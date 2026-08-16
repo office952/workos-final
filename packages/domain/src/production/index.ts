@@ -23,10 +23,13 @@ export {
   type ProductionReleaseSource,
 } from "./snapshot.js";
 export {
+  COMMERCIAL_EXECUTION_ERRORS,
   PRODUCTION_RELEASE_ERRORS,
+  assertOrderReleaseReadyForExecution,
   freezeProductionReleaseFromOrder,
   isOrderProductionRelease,
   productionReleaseErrorLabel,
+  type CommercialExecutionError,
   type ProductionReleaseError,
   type ProductionReleaseResult,
 } from "./release.js";

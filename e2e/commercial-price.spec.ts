@@ -36,7 +36,7 @@ test("shows complete customer price after confirmed 60 mm internal cost", async 
   await expect(commercial.getByText("516,38 EUR")).toBeVisible();
   await expect(commercial.getByText("21% · 108,44 EUR")).toBeVisible();
   await expect(commercial.getByLabel("Discount")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-commercial-60mm-relation.png",
     fullPage: true,

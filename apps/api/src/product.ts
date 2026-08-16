@@ -10,6 +10,7 @@ import {
   composeProductProcesses,
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
+  assertOrderReleaseReadyForExecution,
   freezeAcceptedProductionSnapshot,
   freezeProductionReleaseFromOrder,
   lettersProcessCompositionInspections,
@@ -368,12 +369,39 @@ export function registerProductRoutes(
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
       }
+      const order = snapshot.sourceOrderSnapshotId
+        ? runtime.readOrderSnapshot(snapshot.sourceOrderSnapshotId)
+        : null;
+      const gate = assertOrderReleaseReadyForExecution(snapshot, order);
+      if (!gate.ok) {
+        return c.json(
+          { error: gate.error, reasons: gate.reasons },
+          422,
+        );
+      }
       const stored = runtime.persistExecutionPlan(
         materializeExecutionPlanFromSnapshot(snapshot),
       );
       return c.json({
         created: stored.created,
         executionPlan: projectPlanView(runtime, stored.record),
+      });
+    },
+  );
+
+  app.get(
+    "/api/products/:productCode/accepted-production-snapshots/:snapshotId/execution-plan",
+    (c) => {
+      const snapshot = runtime.readProductionSnapshot(c.req.param("snapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const record = runtime.readExecutionPlanBySnapshot(snapshot.snapshotId);
+      if (!record) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      return c.json({
+        executionPlan: projectPlanView(runtime, record),
       });
     },
   );

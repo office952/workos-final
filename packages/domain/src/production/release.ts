@@ -104,6 +104,47 @@ export function isOrderProductionRelease(snapshot: AcceptedProductionSnapshot): 
   return snapshot.releaseSource === "ORDER" || Boolean(snapshot.sourceOrderSnapshotId);
 }
 
+export const COMMERCIAL_EXECUTION_ERRORS = [
+  "release_order_mismatch",
+  "empty_release_operations",
+] as const;
+export type CommercialExecutionError = (typeof COMMERCIAL_EXECUTION_ERRORS)[number];
+
+const EXECUTION_MISMATCH_REASON =
+  "Planul de execuție comercial poate fi creat doar din eliberarea comenzii.";
+const EMPTY_OPERATIONS_REASON = "Eliberarea nu conține operații înghețate.";
+
+export function assertOrderReleaseReadyForExecution(
+  snapshot: AcceptedProductionSnapshot,
+  order: OrderSnapshot | null,
+):
+  | { ok: true }
+  | { ok: false; error: CommercialExecutionError; reasons: readonly string[] } {
+  if (snapshot.operations.length === 0) {
+    return {
+      ok: false,
+      error: "empty_release_operations",
+      reasons: [EMPTY_OPERATIONS_REASON],
+    };
+  }
+  if (!isOrderProductionRelease(snapshot)) {
+    return { ok: true };
+  }
+  if (
+    !order ||
+    order.orderSnapshotId !== snapshot.sourceOrderSnapshotId ||
+    order.contentHash !== snapshot.sourceOrderContentHash ||
+    order.productCode !== snapshot.productCode
+  ) {
+    return {
+      ok: false,
+      error: "release_order_mismatch",
+      reasons: [EXECUTION_MISMATCH_REASON],
+    };
+  }
+  return { ok: true };
+}
+
 export function productionReleaseErrorLabel(error: ProductionReleaseError): string {
   switch (error) {
     case "incompatible_order_source":

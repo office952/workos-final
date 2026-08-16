@@ -6,13 +6,25 @@ Runtime wins if this document disagrees.
 ## Permanent separation
 
 ```text
+Pilot:
 AcceptedProductionSnapshot
+  → ExecutionPlan
+  → ExecutionTasks
+
+Commercial:
+Production Release Snapshot (ORDER-sourced APS)
   → ExecutionPlan
   → ExecutionTasks
 ```
 
+One ExecutionPlan / ExecutionTask model. Source differs. Downstream assignment, start, complete, actuals, and inventory do not.
+
+Commercial plans may be created only from a persisted Production Release whose `releaseSource = ORDER` and whose Order provenance is valid.
+`sourceSnapshotId` / `sourceSnapshotHash` point at that Release. Upstream Order → Acceptance → Quote is transitive through the Release.
+
 Persisted Execution consumes only the frozen snapshot.
-It does not reread ProductTemplate, current settings, current recipe rates, or regenerate process composition.
+It does not reread ProductTemplate, current settings, current recipe rates, Commercial policy, or regenerate process composition.
+Plan creation does not assign, start, complete, or move inventory.
 
 ## Frozen vs live vs assigned
 

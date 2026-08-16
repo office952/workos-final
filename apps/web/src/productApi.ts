@@ -415,6 +415,23 @@ export async function createOrderSnapshot(
   };
 }
 
+export async function readExecutionPlan(
+  productCode: string,
+  snapshotId: string,
+): Promise<ExecutionPlanView | null> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/accepted-production-snapshots/${snapshotId}/execution-plan`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ executionPlan?: ExecutionPlanView }>(response);
+  if (!response.ok || !body.executionPlan) {
+    throw new Error("execution_plan_unavailable");
+  }
+  return body.executionPlan;
+}
+
 export async function createExecutionPlan(
   productCode: string,
   snapshotId: string,

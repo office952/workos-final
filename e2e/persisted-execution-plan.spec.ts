@@ -28,7 +28,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   page,
 }) => {
   await confirmLetters(page, { faceFinish: "none" });
-  await expect(page.getByRole("heading", { name: "Plan de producție" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   const snapshot = page.locator(".production-snapshot");
   await expect(
@@ -97,11 +97,8 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
     (el as HTMLDetailsElement).open = true;
   });
   const reference = await plan.getByText("Referință: exp:").textContent();
-  await page.getByRole("button", { name: "Creează planul de execuție" }).click();
-  await expect(page.getByRole("heading", { name: "Plan de execuție deja creat" })).toBeVisible();
-  await page.locator(".execution-plan details.execution-plan-meta-wrap").evaluate((el) => {
-    (el as HTMLDetailsElement).open = true;
-  });
+  await expect(page.getByRole("button", { name: "Creează planul de execuție" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ })).toBeVisible();
   await expect(page.getByText(reference ?? "Referință: exp:")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-idempotent.png",
@@ -109,7 +106,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   });
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole("heading", { name: "Plan de execuție deja creat" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-persisted-narrow.png",
     fullPage: true,

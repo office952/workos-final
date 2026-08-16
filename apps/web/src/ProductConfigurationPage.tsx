@@ -41,6 +41,7 @@ import {
   createProductionRelease,
   createQuoteSnapshot,
   fetchTemplateProjection,
+  readExecutionPlan,
   readOrderSnapshot,
   readProductionRelease,
   readQuoteAcceptance,
@@ -181,17 +182,19 @@ export function ProductConfigurationPage() {
         const orderSnapshot = quoteAcceptance
           ? await readOrderSnapshot(productCode, result.quoteSnapshot.quoteSnapshotId)
           : null;
-        const productionRelease = orderSnapshot
-          ? await readProductionRelease(productCode, orderSnapshot.orderSnapshotId)
-          : null;
+        const commercial = orderSnapshot
+          ? await loadCommercialExecution(productCode, orderSnapshot.orderSnapshotId)
+          : {};
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteReused: !result.created,
           quoteAcceptance: quoteAcceptance ?? undefined,
           orderSnapshot: orderSnapshot ?? undefined,
-          snapshot: productionRelease ?? confirmed.snapshot,
-          snapshotReused: productionRelease ? true : confirmed.snapshotReused,
+          snapshot: commercial.snapshot ?? confirmed.snapshot,
+          snapshotReused: commercial.snapshot ? true : confirmed.snapshotReused,
+          executionPlan: commercial.executionPlan ?? confirmed.executionPlan,
+          executionPlanReused: commercial.executionPlan ? true : confirmed.executionPlanReused,
         });
       } else if (result.reason === "review_mismatch") {
         setConfirmed(null);
@@ -229,16 +232,18 @@ export function ProductConfigurationPage() {
           productCode,
           result.quoteSnapshot.quoteSnapshotId,
         );
-        const productionRelease = orderSnapshot
-          ? await readProductionRelease(productCode, orderSnapshot.orderSnapshotId)
-          : null;
+        const commercial = orderSnapshot
+          ? await loadCommercialExecution(productCode, orderSnapshot.orderSnapshotId)
+          : {};
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
           quoteAcceptance: result.acceptance,
           orderSnapshot: orderSnapshot ?? undefined,
-          snapshot: productionRelease ?? confirmed.snapshot,
-          snapshotReused: productionRelease ? true : confirmed.snapshotReused,
+          snapshot: commercial.snapshot ?? confirmed.snapshot,
+          snapshotReused: commercial.snapshot ? true : confirmed.snapshotReused,
+          executionPlan: commercial.executionPlan ?? confirmed.executionPlan,
+          executionPlanReused: commercial.executionPlan ? true : confirmed.executionPlanReused,
         });
       } else {
         setConfirmNotice(
@@ -264,7 +269,7 @@ export function ProductConfigurationPage() {
         confirmed.quoteSnapshot.quoteSnapshotId,
       );
       if (result.ok) {
-        const productionRelease = await readProductionRelease(
+        const commercial = await loadCommercialExecution(
           productCode,
           result.orderSnapshot.orderSnapshotId,
         );
@@ -273,8 +278,10 @@ export function ProductConfigurationPage() {
           quoteSnapshot: result.quoteSnapshot,
           quoteAcceptance: result.acceptance,
           orderSnapshot: result.orderSnapshot,
-          snapshot: productionRelease ?? confirmed.snapshot,
-          snapshotReused: productionRelease ? true : confirmed.snapshotReused,
+          snapshot: commercial.snapshot ?? confirmed.snapshot,
+          snapshotReused: commercial.snapshot ? true : confirmed.snapshotReused,
+          executionPlan: commercial.executionPlan ?? confirmed.executionPlan,
+          executionPlanReused: commercial.executionPlan ? true : confirmed.executionPlanReused,
         });
       } else {
         setConfirmNotice(
@@ -300,11 +307,14 @@ export function ProductConfigurationPage() {
         confirmed.orderSnapshot.orderSnapshotId,
       );
       if (result.ok) {
+        const executionPlan = await readExecutionPlan(productCode, result.snapshot.snapshotId);
         setConfirmed({
           ...confirmed,
           orderSnapshot: result.orderSnapshot,
           snapshot: result.snapshot,
           snapshotReused: !result.created,
+          executionPlan: executionPlan ?? undefined,
+          executionPlanReused: Boolean(executionPlan),
         });
       } else {
         setConfirmNotice(
@@ -484,6 +494,7 @@ export function ProductConfigurationPage() {
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}
             basedOnSnapshot={Boolean(confirmed.snapshot)}
+            commercial={Boolean(confirmed.orderSnapshot)}
           />
 
           {confirmed.snapshot || confirmed.orderSnapshot ? null : (
@@ -549,7 +560,11 @@ export function ProductConfigurationPage() {
           {confirmed.executionPlan ? (
             <div id="execution-plan" className="execution-handoff">
               <Notice tone="ok" compact>
-                <p>Configurația este gata. Lucrul de producție este în planul de execuție.</p>
+                <p>
+                  {confirmed.executionPlanReused
+                    ? "Planul de execuție era deja creat."
+                    : "Plan de execuție creat."}
+                </p>
               </Notice>
               <ExecutionPlanPanel
                 view={confirmed.executionPlan}
@@ -572,6 +587,24 @@ export function ProductConfigurationPage() {
       ) : null}
     </section>
   );
+}
+
+async function loadCommercialExecution(
+  productCode: string,
+  orderSnapshotId: string,
+): Promise<{
+  snapshot?: AcceptedProductionSnapshot;
+  executionPlan?: ExecutionPlanView;
+}> {
+  const snapshot = await readProductionRelease(productCode, orderSnapshotId);
+  if (!snapshot) {
+    return {};
+  }
+  const executionPlan = await readExecutionPlan(productCode, snapshot.snapshotId);
+  return {
+    snapshot,
+    executionPlan: executionPlan ?? undefined,
+  };
 }
 
 function taskActionNotice(error: string): string {

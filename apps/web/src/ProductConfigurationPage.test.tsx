@@ -48,6 +48,7 @@ vi.mock("./productApi", () => ({
   acceptProductionSnapshot: vi.fn(),
   createProductionRelease: vi.fn(),
   readProductionRelease: vi.fn(),
+  readExecutionPlan: vi.fn(),
   createExecutionPlan: vi.fn(),
   assignExecutionTaskProvider: vi.fn(),
   assignExecutionTaskExecutor: vi.fn(),

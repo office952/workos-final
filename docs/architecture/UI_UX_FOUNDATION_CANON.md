@@ -86,7 +86,7 @@ While editing, the form leads. Construction facts are a compact summary of suppl
 
 Review is a concise operator summary. Confirm is primary. Modify is secondary.
 
-After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → Eliberează pentru producție → production preview → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. On a commercial Order the next action is Eliberează pentru producție. Acceptă pentru producție remains only the Atelier / test tehnic path when no Order exists.
+After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → Eliberează pentru producție → Creează planul de execuție → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. Release is not plan creation. On a commercial Order the next action is Eliberează pentru producție, then Creează planul de execuție. Acceptă pentru producție remains only the Atelier / test tehnic path when no Order exists. Previzualizare producție is an estimate, not the persisted plan.
 
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
 

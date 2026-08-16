@@ -17,7 +17,9 @@ Accepted Production Snapshot
 ```
 
 The preview consumes current confirmed Product Truth because it is deterministic and non-persistent.
-Persisted Execution must consume an Accepted Production Snapshot, not live mutable configuration.
+Persisted Execution must consume an Accepted Production Snapshot or commercial Production Release, not live mutable configuration.
+After a persisted plan exists, the preview remains an estimate. It is not a second plan.
+Operator wording: **Previzualizare producție** — estimare orientativă, nu planul de execuție.
 See `docs/architecture/ACCEPTED_PRODUCTION_SNAPSHOT_CANON.md`.
 
 ## What this is

@@ -21,6 +21,7 @@ import { LED_PITCH_SETTING_ID } from "../product/technicalSettings.js";
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import {
+  assertOrderReleaseReadyForExecution,
   freezeProductionReleaseFromOrder,
   isOrderProductionRelease,
 } from "./release.js";
@@ -205,6 +206,30 @@ describe("production release from order", () => {
       },
     };
     expect(freezeProductionReleaseFromOrder(stripped).ok).toBe(false);
+  });
+
+  it("creates an ExecutionPlan only from the frozen order release", () => {
+    const { order } = goldenOrder();
+    const frozen = freezeProductionReleaseFromOrder(order, {
+      createdAt: "2026-08-17T03:00:00.000Z",
+    });
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    expect(assertOrderReleaseReadyForExecution(frozen.snapshot, order).ok).toBe(true);
+    expect(assertOrderReleaseReadyForExecution(frozen.snapshot, null).ok).toBe(false);
+    expect(
+      assertOrderReleaseReadyForExecution({ ...frozen.snapshot, operations: [] }, order).ok,
+    ).toBe(false);
+    const record = materializeExecutionPlanFromSnapshot(frozen.snapshot, {
+      createdAt: "2026-08-17T04:00:00.000Z",
+    });
+    expect(record.plan.sourceSnapshotId).toBe(frozen.snapshot.snapshotId);
+    expect(record.plan.sourceSnapshotHash).toBe(frozen.snapshot.contentHash);
+    expect(record.tasks).toHaveLength(12);
+    expect(record.plan.eicTotal).toBe(382.5);
+    expect(record.tasks.every((task) => task.status === "PLANNED")).toBe(true);
   });
 
   it("does not know LETTERS internals and does not import live compilers", () => {
