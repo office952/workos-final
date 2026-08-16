@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import type { WorkcentersAdminProjection } from "@workos-final/domain";
 import { OwnerCatalogView } from "./OwnerCatalogView";
 import { fetchWorkcentersAdministration } from "./systemApi";
-import { buildWorkcentersCatalog } from "./workcentersCatalog";
+import {
+  buildWorkcentersCatalog,
+  formatWorkcentersAdminSummary,
+  workcentersAdminSummary,
+} from "./workcentersCatalog";
+import { Notice } from "./ui/Notice";
+import { PageHeader } from "./ui/PageHeader";
 
 type PageState =
   | { kind: "loading" }
@@ -31,17 +37,44 @@ export function WorkcentersAdminPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă utilajele și zonele…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Utilaje și zone"
+          lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
+        />
+        <p>Se încarcă utilajele și zonele…</p>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca utilajele și zonele.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Utilaje și zone"
+          lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
+        />
+        <p>Nu s-au putut încărca utilajele și zonele.</p>
+      </section>
+    );
   }
+
+  const summary = workcentersAdminSummary(page.admin);
 
   return (
     <OwnerCatalogView
       catalog={buildWorkcentersCatalog(page.admin)}
-      title="Utilaje și capacitate"
-      lead="Inspecție a hărții reale de atelier: zone, utilaje, capabilități și goluri de rețetă. Planificarea de capacitate nu este implementată. Nu se editează aici."
+      title="Utilaje și zone"
+      lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
+      summary={<p className="page-summary">{formatWorkcentersAdminSummary(summary)}</p>}
+      notice={
+        <Notice compact>
+          <p>
+            Această pagină descrie zonele și utilajele disponibile. Programarea și
+            capacitatea nu sunt implementate aici.
+          </p>
+        </Notice>
+      }
     />
   );
 }

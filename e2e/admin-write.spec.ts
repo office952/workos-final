@@ -35,7 +35,7 @@ test("admin display-label write persists and propagates", async ({
       page.getByRole("link", { name: "Procese operaționale" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Utilaje și capacitate" }),
+      page.getByRole("link", { name: "Utilaje și zone" }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "Persoane" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Operațiuni" })).toBeVisible();

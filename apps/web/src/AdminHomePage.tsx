@@ -30,9 +30,9 @@ const GROUPS = [
       },
       {
         to: "/admin/workcenters",
-        label: "Utilaje și capacitate",
+        label: "Utilaje și zone",
         description:
-          "Cine / unde poate furniza o capabilitate. Hartă reală de atelier: zone, utilaje și acoperire. Fără programare, fără write.",
+          "Unde și cu ce se poate lucra. Zone, utilaje și acoperire de capabilitate. Fără programare, fără write.",
       },
     ],
   },

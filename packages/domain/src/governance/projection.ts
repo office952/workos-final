@@ -164,7 +164,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       },
       {
         id: "WORKCENTERS_MACHINES",
-        label: "Utilaje și capacitate",
+        label: "Utilaje și zone",
         owns: [
           "identitatea workcenter",
           "identitatea utilajului",

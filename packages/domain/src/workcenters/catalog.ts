@@ -329,7 +329,7 @@ export function providerLifecycleLabel(lifecycle: ProviderLifecycle): string {
 export function providerKindLabel(kind: ProviderKind): string {
   switch (kind) {
     case "WORKCENTER":
-      return "Zonă / workcenter";
+      return "Zonă / stație";
     case "MACHINE":
       return "Utilaj";
     default: {

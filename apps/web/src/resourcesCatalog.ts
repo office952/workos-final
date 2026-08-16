@@ -191,7 +191,7 @@ function missingRecipeItem(
             ],
             lines: [
               "Nu există rețetă canonică pentru acest proces. Nu inventăm tarif pe oră sau pe utilaj.",
-              "Acoperirea de furnizor se inspectează separat, în Utilaje și capacitate.",
+              "Acoperirea de furnizor se inspectează separat, în Utilaje și zone.",
             ],
           },
           {

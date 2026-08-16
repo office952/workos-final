@@ -332,7 +332,7 @@ Administrare
 ├── Atelier
 │   ├── Resurse și cost intern
 │   ├── Procese operaționale
-│   └── Utilaje și capacitate
+│   └── Utilaje și zone
 └── Sistem
     ├── Sistem produs
     ├── Module și componente
@@ -340,7 +340,7 @@ Administrare
     └── Stare sistem
 ```
 
-Do not add an empty Producție page. Execution lives on the confirmed product path. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și capacitate is present because the capability-provider model exists. Do not invent machines to fill the catalog.
+Do not add an empty Producție page. Execution lives on the confirmed product path. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
 
 ## Operator vs admin surfaces
 

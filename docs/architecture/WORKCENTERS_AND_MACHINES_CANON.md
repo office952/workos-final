@@ -144,8 +144,8 @@ Product configuration does not select a machine.
 
 ## Administration
 
-Owner inspection lives under Administrare → Utilaje și capacitate.
+Owner inspection lives under Administrare → Utilaje și zone.
 
-Categories: Prezentare, Zone / Workcenters, Utilaje, Capabilități, Acoperire procese, Hartă procese / rețete.
+Categories follow the real workshop map: CNC, Formare, Sudură, Debitare metal, Asamblare, Electric, Print, Laminare, Aplicare folie, Plotter, Laser, then Fără furnizor. Capability and recipe dumps are not top-level categories.
 
-The label names the domain destination. Capacity planning is not implemented.
+The label names zones and machines. Capacity planning is not implemented.

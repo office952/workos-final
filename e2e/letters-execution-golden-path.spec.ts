@@ -37,10 +37,12 @@ async function executeTask(card: Locator, providerLabel?: string) {
   if (await card.getByText("Stare: Finalizat").isVisible()) {
     return;
   }
-  const start = card.getByRole("button", { name: "Pornește" });
-  await expect(start).toBeVisible();
-  await start.click();
-  await expect(card.getByText("Stare: În lucru")).toBeVisible();
+  if (!(await card.getByText("Stare: În lucru").isVisible())) {
+    const start = card.getByRole("button", { name: "Pornește" });
+    await expect(start).toBeVisible();
+    await start.click();
+    await expect(card.getByText("Stare: În lucru")).toBeVisible();
+  }
   await card.getByRole("button", { name: "Finalizează" }).click();
   await expect(card.getByText("Stare: Finalizat")).toBeVisible();
 }

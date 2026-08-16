@@ -14,7 +14,7 @@ describe("ProcessesAdminPage", () => {
     const user = userEvent.setup();
     render(<ProcessesAdminPage />);
 
-    expect(await screen.findByRole("button", { name: "Debitare", exact: true })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /^Debitare$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Procese operaționale" })).toBeInTheDocument();
     expect(
       screen.getByText(/Procese \d+ · Capabilități \d+ · Cu furnizor \d+ · Fără furnizor \d+/),
@@ -24,7 +24,7 @@ describe("ProcessesAdminPage", () => {
         "Procesele descriu cum se lucrează. Editarea lor nu este disponibilă în această etapă.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Debitare", exact: true })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /^Debitare$/ })).toHaveAttribute(
       "aria-current",
       "true",
     );

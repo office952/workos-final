@@ -23,7 +23,7 @@ Routes stay stable. Inspection surfaces live under Administrare:
 
 ```text
 Operațiuni   Persoane
-Atelier      Resurse, Procese, Utilaje și capacitate
+Atelier      Resurse, Procese, Utilaje și zone
 Sistem       Sistem produs, Module și componente, Guvernanță, Stare sistem
 ```
 
@@ -74,6 +74,8 @@ Read-only admin pages say so once. Do not add disabled Edit controls.
 
 Operational process catalogs use category → process → detail. Process, capability and provider stay visually separate: the process is the operation, the capability is what a provider must be able to do, the provider is where it can be done now. Coverage is a live projection, not process truth. Raw process and capability IDs stay under Detalii.
 
+Workcenter catalogs use zone → equipment → detail. A workcenter-only provider is a zone / workstation, not a fake machine. A machine sits in a parent zone and supplies its own capabilities. Coverage is catalog presence, not busy/idle. Missing providers stay honest. Raw workcenter, machine and capability IDs stay under Detalii.
+
 ## People admin pattern
 
 Compact rows. Create form uses `Field`. Retired list is secondary.
@@ -90,4 +92,4 @@ EIC total stays visible. Rates stay in Detalii. Preview is what production will 
 
 ## Future migration
 
-New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Workcenters / Machines.
+New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Product System admin.

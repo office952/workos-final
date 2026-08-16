@@ -106,7 +106,7 @@ function processSections(
       ],
       lines: [
         "Procesul spune ce operație trebuie făcută. Capabilitatea spune ce trebuie să poată furnizorul. Furnizorul arată unde se poate face acum.",
-        "Furnizorii se inspectează în Utilaje și capacitate.",
+        "Furnizorii se inspectează în Utilaje și zone.",
       ],
     },
     ...(conditionLines.length > 0

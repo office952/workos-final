@@ -24,7 +24,11 @@ import {
   formatResourcesAdminSummary,
   resourcesAdminSummary,
 } from "./resourcesCatalog";
-import { buildWorkcentersCatalog } from "./workcentersCatalog";
+import {
+  buildWorkcentersCatalog,
+  formatWorkcentersAdminSummary,
+  workcentersAdminSummary,
+} from "./workcentersCatalog";
 
 describe("component catalog presentation", () => {
   it("places FACE VOLUME BACK LIGHTING under product components", () => {
@@ -453,70 +457,81 @@ describe("processes catalog presentation", () => {
 });
 
 describe("workcenters catalog presentation", () => {
-  it("groups overview workcenters machines capabilities and coverage without write targets", () => {
-    const catalog = buildWorkcentersCatalog(projectWorkcentersAdministration());
+  it("groups workshop zones and machines without capability or recipe registries", () => {
+    const admin = projectWorkcentersAdministration();
+    const catalog = buildWorkcentersCatalog(admin);
     expect(catalog.categories.map((item) => item.id)).toEqual([
-      "overview",
-      "workcenters",
-      "machines",
-      "capabilities",
-      "coverage",
-      "service-map",
+      "cnc",
+      "forming",
+      "welding",
+      "metal-cutting",
+      "assembly",
+      "electrical",
+      "print",
+      "laminate",
+      "vinyl",
+      "plotter",
+      "laser",
+      "gaps",
     ]);
-    expect(catalog.categories[1]?.items.map((item) => item.label)).toEqual(
+    expect(catalog.categories.map((item) => item.label)).not.toEqual(
       expect.arrayContaining([
-        "Masă asamblare 1",
-        "Masă asamblare 2",
-        "Stație sudură",
-        "Stație debitare metale",
+        "Prezentare",
+        "Zone / Workcenters",
+        "Capabilități",
+        "Acoperire procese",
+        "Hartă procese / rețete",
       ]),
     );
-    expect(catalog.categories[1]?.items[0]?.label).toBe("Masă asamblare 1");
-    expect(catalog.categories[2]?.items.map((item) => item.label)).toEqual(
-      expect.arrayContaining(["CNC 4020", "Aparat sudură oțel", "Aparat sudură aluminiu"]),
-    );
+    const cnc = catalog.categories.find((item) => item.id === "cnc");
+    expect(cnc?.items.map((item) => item.label)).toEqual([
+      "Zonă CNC",
+      "CNC 4020",
+      "Debitator polistiren",
+    ]);
+    expect(cnc?.items[1]?.kindLabel).toBe("Utilaj");
     expect(
-      catalog.categories[3]?.items
-        .find((item) => item.id === "capability:MANUAL_ASSEMBLY")
-        ?.groups[0]?.sections.find((item) => item.id === "identity")?.facts,
+      cnc?.items[1]?.groups[0]?.sections.find((item) => item.id === "provider")?.facts,
     ).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Acoperire catalog", value: "Acoperită" }),
+        expect.objectContaining({ label: "Poate face", value: "Debitare CNC" }),
         expect.objectContaining({
-          label: "Furnizori",
-          value: "Zonă / workcenter: Masă asamblare 1; Zonă / workcenter: Masă asamblare 2",
+          label: "Procese susținute",
+          value: expect.stringContaining("Debitare foaie CNC"),
         }),
+        expect.objectContaining({ label: "Zonă", value: "Zonă CNC" }),
       ]),
     );
-    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain("Debitare CNC");
-    expect(catalog.categories[4]?.items[0]?.label).toBe("Letters — acoperire capabilități");
+    const assembly = catalog.categories.find((item) => item.id === "assembly");
+    expect(assembly?.items.map((item) => item.label)).toEqual([
+      "Masă asamblare 1",
+      "Masă asamblare 2",
+    ]);
+    expect(assembly?.items[0]?.kindLabel).toBe("Zonă / post de lucru");
     expect(
-      catalog.categories[4]?.items[0]?.groups[0]?.sections.find((item) => item.id === "status")
-        ?.facts,
+      assembly?.items[0]?.groups[0]?.sections.find((item) => item.id === "provider")?.facts,
     ).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          label: "Acoperite",
-          value: expect.stringContaining("Asamblare manuală"),
-        }),
-        expect.objectContaining({
-          label: "Fără furnizor",
-          value: expect.stringContaining("Vopsire"),
-        }),
+        expect.objectContaining({ label: "Tip", value: "Zonă / post de lucru" }),
+        expect.objectContaining({ label: "Poate face", value: "Asamblare manuală" }),
+        expect.objectContaining({ label: "Utilaje în zonă", value: "niciun utilaj" }),
       ]),
     );
-    expect(
-      catalog.categories[3]?.items
-        .find((item) => item.id === "capability:CNC_ROUTING")
-        ?.groups[0]?.sections.find((item) => item.id === "identity")?.facts,
-    ).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ label: "Acoperire catalog", value: "Acoperită" }),
-      ]),
+    const electrical = catalog.categories.find((item) => item.id === "electrical");
+    expect(electrical?.items[0]?.kindLabel).toBe("Zonă / post de lucru");
+    expect(electrical?.items.map((item) => item.kindLabel)).not.toContain("Utilaj");
+    const gaps = catalog.categories.find((item) => item.id === "gaps");
+    expect(gaps?.items.map((item) => item.label)).toEqual(
+      expect.arrayContaining(["Vopsire", "Control calitate", "Ambalare"]),
     );
+    expect(gaps?.items.every((item) => item.listHint === "Fără furnizor")).toBe(true);
+    expect(JSON.stringify(catalog)).not.toMatch(/Letters —|Hartă procese|Prezentare/);
     expect(catalog.categories.flatMap((item) => item.items).every((item) => !item.editTarget)).toBe(
       true,
     );
     expect(JSON.stringify(catalog)).not.toMatch(/CNC-01|ExecutionPlan|Preț client|machineHour/);
+    expect(formatWorkcentersAdminSummary(workcentersAdminSummary(admin))).toMatch(
+      /^Zone \d+ · Utilaje \d+ · Capabilități acoperite \d+ · Fără furnizor \d+$/,
+    );
   });
 });

@@ -5,131 +5,67 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
 }) => {
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Utilaje și capacitate" })).toBeVisible();
-  await page.getByRole("link", { name: "Utilaje și capacitate" }).click();
+  await expect(page.getByRole("link", { name: "Utilaje și zone" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Utilaje și capacitate" })).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-admin-home.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-admin-nav.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("link", { name: "Utilaje și zone" }).click();
+  await expect(page.getByRole("heading", { name: "Utilaje și zone", level: 1 })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Utilaje și capacitate", level: 1 }),
+    page.getByText(/Zone \d+ · Utilaje \d+ · Capabilități acoperite \d+ · Fără furnizor \d+/),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Prezentare" })).toHaveAttribute(
+  await expect(
+    page.getByText(
+      "Această pagină descrie zonele și utilajele disponibile. Programarea și capacitatea nu sunt implementate aici.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "CNC", exact: true })).toHaveAttribute(
     "aria-current",
     "true",
   );
-  await expect(page.getByText("Zone confirmate")).toBeVisible();
-  await expect(page.getByText("12", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Utilaje confirmate")).toBeVisible();
-  await expect(page.getByText("11", { exact: true }).first()).toBeVisible();
-  await expect(
-    page.getByText("Nu există ore-mașină, calendar de disponibilitate, limită de sarcini sau limită de angajați."),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Asamblare", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Fără furnizor", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Zonă CNC" })).toBeVisible();
+  await expect(page.getByText("Utilaje în zonă")).toBeVisible();
+  await expect(page.getByText("CNC 4020").first()).toBeVisible();
+  await expect(page.getByText("Debitator polistiren").first()).toBeVisible();
+  await expect(page.getByText("MCH-CNC-4020")).not.toBeVisible();
   await expect(page.getByRole("button", { name: "Editează" })).toHaveCount(0);
+  await expect(page.getByText("Rulează")).toHaveCount(0);
+  await expect(page.getByText("Mentenanță")).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-overview.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-overview.png",
     fullPage: true,
   });
   await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-admin-home.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Zone / Workcenters" }).click();
-  await expect(page.getByRole("button", { name: "Masă asamblare 1" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Masă asamblare 2" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Stație sudură" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Stație debitare metale" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Masă asamblare 1" })).toBeVisible();
-  await expect(page.getByText("Activ").first()).toBeVisible();
-  await expect(page.getByText("Asamblare manuală").first()).toBeVisible();
-  await expect(page.getByText("nu singurul loc din hală").first()).toBeVisible();
-  await expect(page.getByText("Lipire față-volum").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-zones.png",
-    fullPage: true,
-  });
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-assembly-1.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Masă asamblare 2" }).click();
-  await expect(page.getByRole("heading", { name: "Masă asamblare 2" })).toBeVisible();
-  await expect(page.getByText("Activ").first()).toBeVisible();
-  await expect(page.getByText("Asamblare manuală").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-assembly-2.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Stație sudură" }).click();
-  await expect(page.getByRole("heading", { name: "Stație sudură" })).toBeVisible();
-  await expect(page.getByText("Aparat sudură oțel").first()).toBeVisible();
-  await expect(page.getByText("Aparat sudură aluminiu").first()).toBeVisible();
-  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
-  await expect(page.getByText("Îmbinare sudură aluminiu").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-welding.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Stație debitare metale" }).click();
-  await expect(page.getByRole("heading", { name: "Stație debitare metale" })).toBeVisible();
-  await expect(page.getByText("Debitator metale").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-metal-cutting.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Zonă CNC" }).click();
-  await expect(page.getByRole("heading", { name: "Zonă CNC" })).toBeVisible();
-  await expect(page.getByText("CNC 4020").first()).toBeVisible();
-  await expect(page.getByText("Debitator polistiren").first()).toBeVisible();
-  await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-cnc.png",
     fullPage: true,
   });
-
-  await page.getByRole("button", { name: "Zonă formare cant" }).click();
-  await expect(page.getByRole("heading", { name: "Zonă formare cant" })).toBeVisible();
-  await expect(page.getByText("CNC Cant Litere").first()).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-forming.png",
+    path: "docs/worklog/screenshots/ui-workcenters-cnc.png",
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "Utilaje", exact: true }).click();
-  await page.getByRole("button", { name: "CNC Cant Litere" }).click();
-  await expect(page.getByRole("heading", { name: "CNC Cant Litere" })).toBeVisible();
-  await expect(page.getByText("Rețetă: Configurată").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-forming-recipe.png",
-    fullPage: true,
-  });
-  await page.getByRole("button", { name: "Zone / Workcenters" }).click();
-
-  await page.getByRole("button", { name: "Montaj LED / electric" }).click();
-  await expect(page.getByRole("heading", { name: "Montaj LED / electric" })).toBeVisible();
-  await expect(page.getByText("Asamblare electrică").first()).toBeVisible();
-  await expect(page.getByText("niciun utilaj").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-led.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Zonă print" }).click();
-  await expect(page.getByRole("heading", { name: "Zonă print" })).toBeVisible();
-  await expect(page.getByText("Imprimantă Epson").first()).toBeVisible();
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-print.png",
-    fullPage: true,
-  });
-
-  await page.getByRole("button", { name: "Utilaje", exact: true }).click();
-  await expect(page.getByRole("button", { name: "CNC 4020" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Aparat sudură oțel" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Aparat sudură aluminiu" })).toBeVisible();
+  await page.getByRole("button", { name: /CNC 4020/ }).click();
   await expect(page.getByRole("heading", { name: "CNC 4020" })).toBeVisible();
   await expect(page.getByText("Debitare CNC").first()).toBeVisible();
   await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
-  await expect(page.getByText("Rețetă: Configurată").first()).toBeVisible();
+  await expect(page.getByText("Zonă CNC").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-provider-detail.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-machines.png",
     fullPage: true,
@@ -142,50 +78,123 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
     path: "docs/worklog/screenshots/workcenters-machine-processes.png",
     fullPage: true,
   });
+  await page.getByText("Detalii").click();
+  await expect(page.getByText("MCH-CNC-4020")).toBeVisible();
+  await expect(page.getByText("CNC_ROUTING")).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-details.png",
+    fullPage: true,
+  });
+  await page.getByText("Detalii").click();
 
-  await page.getByRole("button", { name: "Aparat sudură oțel" }).click();
+  await page.getByRole("button", { name: "Asamblare", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Masă asamblare 1" })).toBeVisible();
+  await expect(page.getByText("Zonă / post de lucru").first()).toBeVisible();
+  await expect(page.getByText("Asamblare manuală").first()).toBeVisible();
+  await expect(page.getByText("niciun utilaj").first()).toBeVisible();
+  await expect(page.getByText("Lipire față-volum").first()).toBeVisible();
+  await expect(page.getByText("nu singurul loc din hală").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-assembly.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-assembly-1.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-zones.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-manual-assembly.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: /Masă asamblare 2/ }).click();
+  await expect(page.getByRole("heading", { name: "Masă asamblare 2" })).toBeVisible();
+  await expect(page.getByText("Asamblare manuală").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-assembly-2.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Electric", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Montaj LED / electric" })).toBeVisible();
+  await expect(page.getByText("Zonă / post de lucru").first()).toBeVisible();
+  await expect(page.getByText("Asamblare electrică").first()).toBeVisible();
+  await expect(page.getByText("niciun utilaj").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-led.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Formare", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Zonă formare cant" })).toBeVisible();
+  await expect(page.getByText("CNC Cant Litere").first()).toBeVisible();
+  await page.getByRole("button", { name: /CNC Cant Litere/ }).click();
+  await expect(page.getByRole("heading", { name: "CNC Cant Litere" })).toBeVisible();
+  await expect(page.getByText("Formare profil").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-forming.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-forming.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-forming-recipe.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Sudură", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Stație sudură" })).toBeVisible();
+  await expect(page.getByText("Aparat sudură oțel").first()).toBeVisible();
+  await expect(page.getByText("Aparat sudură aluminiu").first()).toBeVisible();
+  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-welding.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-welding.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: /Aparat sudură oțel/ }).click();
   await expect(page.getByRole("heading", { name: "Aparat sudură oțel" })).toBeVisible();
   await expect(page.getByText("Sudură oțel").first()).toBeVisible();
   await expect(page.getByText("Stație sudură").first()).toBeVisible();
-  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
-  await expect(page.getByText("Rețetă serviciu: Lipsă").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-welding-machines.png",
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "Capabilități" }).click();
-  await page.getByRole("button", { name: "Asamblare manuală" }).click();
-  await expect(page.getByRole("heading", { name: "Asamblare manuală" })).toBeVisible();
-  await expect(page.getByText("Acoperită").first()).toBeVisible();
-  await expect(page.getByText("Masă asamblare 1").first()).toBeVisible();
-  await expect(page.getByText("Masă asamblare 2").first()).toBeVisible();
+  await page.getByRole("button", { name: "Debitare metal", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Stație debitare metale" })).toBeVisible();
+  await expect(page.getByText("Debitator metale").first()).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-manual-assembly.png",
-    fullPage: true,
-  });
-  await page.screenshot({
-    path: "docs/worklog/screenshots/workcenters-capability-providers.png",
+    path: "docs/worklog/screenshots/workcenters-metal-cutting.png",
     fullPage: true,
   });
 
-  await page.getByRole("button", { name: "Debitare CNC" }).click();
-  await expect(page.getByText("Acoperită").first()).toBeVisible();
-  await expect(page.getByText("CNC 4020").first()).toBeVisible();
+  await page.getByRole("button", { name: "Print", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Zonă print" })).toBeVisible();
+  await expect(page.getByText("Imprimantă Epson").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-print.png",
+    fullPage: true,
+  });
 
-  await page.getByRole("button", { name: "Sudură oțel" }).click();
-  await expect(page.getByRole("heading", { name: "Sudură oțel" })).toBeVisible();
-  await expect(page.getByText("Aparat sudură oțel").first()).toBeVisible();
-  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
-
-  await page.getByRole("button", { name: "Acoperire procese" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Letters — acoperire capabilități" }),
-  ).toBeVisible();
-  await expect(page.getByText("Asamblare manuală").first()).toBeVisible();
-  await expect(page.getByText("Debitare CNC").first()).toBeVisible();
-  await expect(page.getByText("Vopsire").first()).toBeVisible();
-  await expect(page.getByText("Aceasta este acoperire de catalog, nu pregătire de execuție.")).toBeVisible();
+  await page.getByRole("button", { name: "Fără furnizor", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Vopsire" })).toBeVisible();
+  await expect(page.getByText("Fără furnizor configurat")).toBeVisible();
+  await expect(page.getByText("Control calitate").first()).toBeVisible();
+  await expect(page.getByText("Ambalare").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-gap.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-process-coverage.png",
     fullPage: true,
@@ -194,15 +203,10 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
     path: "docs/worklog/screenshots/workcenters-letters-coverage.png",
     fullPage: true,
   });
-
-  await page.getByRole("button", { name: "Hartă procese / rețete" }).click();
-  await expect(page.getByRole("heading", { name: "Hartă procese / rețete" })).toBeVisible();
-  await expect(page.getByText("Aceasta nu este o interfață de preț.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "CNC 4020" })).toBeVisible();
-  await page.getByRole("button", { name: "Aparat sudură oțel" }).click();
-  await expect(page.getByText("Îmbinare sudură oțel").first()).toBeVisible();
-  await page.getByRole("button", { name: "Imprimantă Epson" }).click();
-  await expect(page.getByText("Printare format mare").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/workcenters-capability-providers.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-recipe-gaps.png",
     fullPage: true,
@@ -214,9 +218,11 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/workcenters");
-  await expect(
-    page.getByRole("heading", { name: "Utilaje și capacitate", level: 1 }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Utilaje și zone", level: 1 })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/ui-workcenters-narrow.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-narrow.png",
     fullPage: true,
