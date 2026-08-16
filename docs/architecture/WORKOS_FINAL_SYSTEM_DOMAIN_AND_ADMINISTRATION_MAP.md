@@ -98,7 +98,7 @@ WorkOS Final
 │   ├── Task lifecycle                      IMPLEMENTED_CURRENT / BASIC
 │   ├── Completion evidence                 IMPLEMENTED_CURRENT / BASIC
 │   ├── Task executor assignment            IMPLEMENTED_CURRENT / BASIC
-│   ├── Actual resource consumption         NOT_IMPLEMENTED
+│   ├── Actual resource consumption         IMPLEMENTED_CURRENT / BASIC
 │   ├── Actual cost                         NOT_IMPLEMENTED
 │   └── Inventory deduction / MachineRun    NOT_IMPLEMENTED
 ├── People / identitate operațională        IMPLEMENTED_CURRENT / BASIC
@@ -226,7 +226,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, and explicit task executor assignment are IMPLEMENTED_CURRENT. Scheduling, capacity, inventory deduction, actual costing, and MachineRun remain NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, explicit task executor assignment, and actual resource consumption are IMPLEMENTED_CURRENT. Scheduling, capacity, inventory deduction, actual costing, and MachineRun remain NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -408,7 +408,8 @@ Settings versions: keep previous active values as history after a new version is
 | Completion evidence | IMPLEMENTED_CURRENT / BASIC |
 | People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
-| HR, Pontaj, actual consumption / costing | PLANNED |
+| Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
+| HR, Pontaj, inventory deduction / actual costing | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |

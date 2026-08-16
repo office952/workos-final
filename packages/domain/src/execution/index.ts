@@ -49,6 +49,12 @@ export {
   type ExecutionTaskView,
 } from "./plan.js";
 export {
+  actualConsumptionEntryId,
+  buildActualConsumption,
+  type ActualConsumptionEntry,
+  type ActualConsumptionLineInput,
+} from "./consumption.js";
+export {
   TASK_MUTATION_ERRORS,
   assignExecutorToTask,
   assignProviderToTask,

@@ -838,6 +838,30 @@ details summary {
   margin-top: 0.35rem;
 }
 
+.task-consumption {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.task-consumption-list {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.task-consumption-row {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.task-consumption-row p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
 .task-status-col {
   display: grid;
   gap: 0.25rem;

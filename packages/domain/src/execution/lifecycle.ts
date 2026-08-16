@@ -1,6 +1,10 @@
 import { findPerson, type Person } from "../people/identity.js";
 import type { ProviderKind } from "../workcenters/catalog.js";
 import {
+  buildActualConsumption,
+  type ActualConsumptionLineInput,
+} from "./consumption.js";
+import {
   COMPLETION_NOTE_MAX_LENGTH,
   assignedExecutorStillActive,
   assignedProviderStillValid,
@@ -27,6 +31,8 @@ export const TASK_MUTATION_ERRORS = [
   "dependencies_incomplete",
   "invalid_transition",
   "invalid_quantity",
+  "invalid_unit",
+  "invalid_resource",
   "invalid_note",
 ] as const;
 export type TaskMutationError = (typeof TASK_MUTATION_ERRORS)[number];
@@ -38,6 +44,7 @@ export type TaskMutationResult =
 export type TaskCompletionInput = {
   completedQuantity?: number;
   note?: string;
+  actualConsumption?: readonly ActualConsumptionLineInput[];
 };
 
 export function assignProviderToTask(
@@ -184,6 +191,10 @@ export function completeExecutionTask(
   if (!completion.ok) {
     return completion;
   }
+  const actuals = buildActualConsumption(task, input.actualConsumption, completedAt);
+  if (!actuals.ok) {
+    return actuals;
+  }
   return {
     ok: true,
     alreadyApplied: false,
@@ -192,6 +203,7 @@ export function completeExecutionTask(
       status: "COMPLETED",
       completedAt,
       completion: completion.evidence,
+      actualConsumption: actuals.entries,
     }),
   };
 }

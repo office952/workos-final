@@ -55,6 +55,7 @@ const view: ExecutionPlanView = {
       startedAt: null,
       completedAt: null,
       completion: null,
+      actualConsumption: [],
       createdAt: "2026-08-16T10:00:00.000Z",
       statusLabel: "Planificat",
       assignmentLabel: "Nealocat",
@@ -71,6 +72,8 @@ const view: ExecutionPlanView = {
       canAssignExecutor: true,
       canStart: false,
       canComplete: false,
+      hasPlannedResources: false,
+      canRecordActualConsumption: false,
     },
     {
       taskId: "task:2",
@@ -93,6 +96,7 @@ const view: ExecutionPlanView = {
       startedAt: null,
       completedAt: null,
       completion: null,
+      actualConsumption: [],
       createdAt: "2026-08-16T10:00:00.000Z",
       statusLabel: "Planificat",
       assignmentLabel: "Nealocat",
@@ -109,6 +113,8 @@ const view: ExecutionPlanView = {
       canAssignExecutor: true,
       canStart: false,
       canComplete: false,
+      hasPlannedResources: false,
+      canRecordActualConsumption: false,
     },
   ],
 };
@@ -197,5 +203,120 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getByText("Realizat: 12 m")).toBeInTheDocument();
     expect(screen.getByText("Cu abatere")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Pornește" })).not.toBeInTheDocument();
+  });
+
+  it("shows optional actual consumption inputs only while the task can complete", () => {
+    const inProgress: ExecutionPlanView = {
+      ...view,
+      progress: { ...view.progress, inProgress: 1, planned: 1, status: "IN_PROGRESS" },
+      statusLabel: "În lucru",
+      tasks: [
+        {
+          ...view.tasks[0],
+          status: "IN_PROGRESS",
+          statusLabel: "În lucru",
+          assignedProvider: { id: "MCH_CNC_4020", kind: "MACHINE", label: "CNC 4020" },
+          assignedExecutor: { id: "per:1", label: "Maria" },
+          assignmentLabel: "CNC 4020",
+          resourceDemands: [
+            { resourceId: "MAT-LED-MODULE", label: "Modul LED 12V", quantity: 125, unit: "buc" },
+          ],
+          canAssign: false,
+          canAssignExecutor: false,
+          canStart: false,
+          canComplete: true,
+          hasPlannedResources: true,
+          canRecordActualConsumption: true,
+        },
+        view.tasks[1],
+      ],
+    };
+
+    render(
+      <MemoryRouter>
+        <ExecutionPlanPanel
+          view={inProgress}
+          reused={false}
+          busy={false}
+          onAssignProvider={() => undefined}
+          onAssignExecutor={() => undefined}
+          onStartTask={() => undefined}
+          onCompleteTask={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Consum real")).toBeInTheDocument();
+    expect(screen.getByText("Planificat: Modul LED 12V — 125 buc")).toBeInTheDocument();
+    expect(screen.getByLabelText("Cantitate folosită (Modul LED 12V)")).toHaveValue(null);
+    expect(screen.queryByText("Fără consum înregistrat")).not.toBeInTheDocument();
+    expect(screen.queryByText("ActualConsumptionEntry")).not.toBeInTheDocument();
+  });
+
+  it("renders frozen actual consumption and keeps tasks without materials clean", () => {
+    const completed: ExecutionPlanView = {
+      ...view,
+      progress: { ...view.progress, completed: 1, planned: 1, status: "IN_PROGRESS" },
+      statusLabel: "În lucru",
+      tasks: [
+        {
+          ...view.tasks[0],
+          status: "COMPLETED",
+          statusLabel: "Finalizat",
+          assignedProvider: { id: "MCH_CNC_4020", kind: "MACHINE", label: "CNC 4020" },
+          assignedExecutor: { id: "per:1", label: "Maria" },
+          assignmentLabel: "CNC 4020",
+          resourceDemands: [
+            { resourceId: "MAT-LED-MODULE", label: "Modul LED 12V", quantity: 125, unit: "buc" },
+          ],
+          actualConsumption: [
+            {
+              entryId: "act:task:1:MAT-LED-MODULE",
+              taskId: "task:1",
+              resourceId: "MAT-LED-MODULE",
+              resourceLabel: "Modul LED 12V",
+              actualQuantity: 127,
+              unit: "buc",
+              recordedAt: "2026-08-16T12:12:00.000Z",
+              note: null,
+            },
+          ],
+          completedQuantityLabel: "Realizat: 125 buc",
+          canAssign: false,
+          canAssignExecutor: false,
+          canStart: false,
+          canComplete: false,
+          hasPlannedResources: true,
+          canRecordActualConsumption: false,
+        },
+        {
+          ...view.tasks[1],
+          status: "COMPLETED",
+          statusLabel: "Finalizat",
+          canAssign: false,
+          canAssignExecutor: false,
+          canStart: false,
+          canComplete: false,
+        },
+      ],
+    };
+
+    render(
+      <MemoryRouter>
+        <ExecutionPlanPanel
+          view={completed}
+          reused={false}
+          busy={false}
+          onAssignProvider={() => undefined}
+          onAssignExecutor={() => undefined}
+          onStartTask={() => undefined}
+          onCompleteTask={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Modul LED 12V: 127 buc")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Cantitate folosită (Modul LED 12V)")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fără consum înregistrat")).not.toBeInTheDocument();
   });
 });

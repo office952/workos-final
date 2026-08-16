@@ -204,14 +204,24 @@ export async function startExecutionTask(
 
 export async function completeExecutionTask(
   taskId: string,
-  input: { completedQuantity?: number; note?: string } = {},
+  input: {
+    completedQuantity?: number;
+    note?: string;
+    actualConsumption?: readonly { resourceId: string; actualQuantity: number; note?: string }[];
+  } = {},
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
   return postTaskMutation(`/api/execution-tasks/${taskId}/complete`, input);
 }
 
 async function postTaskMutation(
   path: string,
-  body?: { providerId?: string; personId?: string; completedQuantity?: number; note?: string },
+  body?: {
+    providerId?: string;
+    personId?: string;
+    completedQuantity?: number;
+    note?: string;
+    actualConsumption?: readonly { resourceId: string; actualQuantity: number; note?: string }[];
+  },
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
   const response = await fetch(`${baseUrl}${path}`, {
     method: "POST",

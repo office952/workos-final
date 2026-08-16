@@ -46,7 +46,7 @@ Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClas
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan.
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none EIC is 595.00 EUR PARTIAL because Analyzer geometry is still missing. Values are calibratable development configuration, not final workshop rates.
-A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, and explicit task executor assignment are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, and Operational Processes. HR, Pontaj, scheduling, capacity, inventory deduction and actual costing remain NOT_IMPLEMENTED.
+A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, explicit task executor assignment, and actual resource consumption are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, and Operational Processes. HR, Pontaj, scheduling, capacity, inventory deduction and actual costing remain NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text
@@ -91,9 +91,10 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
 | Completion evidence | IMPLEMENTED_CURRENT / BASIC |
 | People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
+| Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
-| HR, Pontaj, inventory deduction, actual consumption / costing | LATER |
+| HR, Pontaj, inventory deduction, actual costing | LATER |
 | Commercial, Quote Snapshot, Order Snapshot | LATER |
 | Reporting, Documents, ACM, Logo | LATER |
 

@@ -26,7 +26,14 @@ type ExecutionPlanPanelProps = {
   onAssignProvider: (taskId: string, providerId: string) => void;
   onAssignExecutor: (taskId: string, personId: string) => void;
   onStartTask: (taskId: string) => void;
-  onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
+  onCompleteTask: (
+    taskId: string,
+    input?: {
+      completedQuantity?: number;
+      note?: string;
+      actualConsumption?: readonly { resourceId: string; actualQuantity: number }[];
+    },
+  ) => void;
 };
 
 export function ExecutionPlanPanel({
@@ -123,7 +130,14 @@ function ExecutionTaskCard({
   onAssignProvider: (taskId: string, providerId: string) => void;
   onAssignExecutor: (taskId: string, personId: string) => void;
   onStartTask: (taskId: string) => void;
-  onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
+  onCompleteTask: (
+    taskId: string,
+    input?: {
+      completedQuantity?: number;
+      note?: string;
+      actualConsumption?: readonly { resourceId: string; actualQuantity: number }[];
+    },
+  ) => void;
 }) {
   const [providerId, setProviderId] = useState(
     task.assignedProvider?.id ?? task.eligibleProviders[0]?.id ?? "",
@@ -135,17 +149,32 @@ function ExecutionTaskCard({
     task.measurableQuantity ? String(task.measurableQuantity.value) : "",
   );
   const [note, setNote] = useState("");
+  const [actualQuantities, setActualQuantities] = useState<Record<string, string>>({});
 
   function submitComplete() {
     const trimmedNote = note.trim();
+    const actualConsumption = task.resourceDemands.flatMap((demand) => {
+      const raw = actualQuantities[demand.resourceId]?.trim() ?? "";
+      if (raw.length === 0) {
+        return [];
+      }
+      const parsed = Number(raw.replace(",", "."));
+      return Number.isFinite(parsed)
+        ? [{ resourceId: demand.resourceId, actualQuantity: parsed }]
+        : [];
+    });
+    const payload = {
+      ...(trimmedNote ? { note: trimmedNote } : {}),
+      ...(actualConsumption.length > 0 ? { actualConsumption } : {}),
+    };
     if (!task.requiresCompletedQuantity) {
-      onCompleteTask(task.taskId, trimmedNote ? { note: trimmedNote } : {});
+      onCompleteTask(task.taskId, payload);
       return;
     }
     const parsed = Number(completedQuantity.replace(",", "."));
     onCompleteTask(task.taskId, {
       ...(Number.isFinite(parsed) ? { completedQuantity: parsed } : {}),
-      ...(trimmedNote ? { note: trimmedNote } : {}),
+      ...payload,
     });
   }
 
@@ -202,6 +231,21 @@ function ExecutionTaskCard({
             <div>
               <dt>Realizat</dt>
               <dd>{task.completedQuantityLabel}</dd>
+            </div>
+          ) : null}
+          {task.status === "COMPLETED" && task.hasPlannedResources ? (
+            <div>
+              <dt>Consum real</dt>
+              <dd>
+                {task.actualConsumption.length === 0
+                  ? "Fără consum înregistrat"
+                  : task.actualConsumption
+                      .map(
+                        (entry) =>
+                          `${entry.resourceLabel}: ${formatQuantity(entry.actualQuantity)} ${formatUnit(entry.unit)}`,
+                      )
+                      .join("; ")}
+              </dd>
             </div>
           ) : null}
         </dl>
@@ -283,6 +327,37 @@ function ExecutionTaskCard({
                 disabled={busy}
               />
             </Field>
+            {task.canRecordActualConsumption ? (
+              <details className="task-consumption">
+                <summary>Consum real</summary>
+                <ul className="task-consumption-list">
+                  {task.resourceDemands.map((demand) => (
+                    <li key={demand.resourceId} className="task-consumption-row">
+                      <p>
+                        Planificat: {demand.label} — {formatQuantity(demand.quantity)}{" "}
+                        {formatUnit(demand.unit)}
+                      </p>
+                      <p>Unitate: {formatUnit(demand.unit)}</p>
+                      <Field label={`Cantitate folosită (${demand.label})`}>
+                        <input
+                          type="number"
+                          min="0"
+                          step="any"
+                          value={actualQuantities[demand.resourceId] ?? ""}
+                          onChange={(event) =>
+                            setActualQuantities((current) => ({
+                              ...current,
+                              [demand.resourceId]: event.target.value,
+                            }))
+                          }
+                          disabled={busy}
+                        />
+                      </Field>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
             <button type="button" disabled={busy} onClick={submitComplete}>
               Finalizează
             </button>

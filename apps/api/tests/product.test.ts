@@ -3,6 +3,7 @@ import {
   BOND_LETTER_BODY_ID,
   CANONICAL_PRODUCT_CODE,
   MCH_CNC_4020_ID,
+  PLEXIGLAS_3MM_OPAL_ID,
   MCH_CNC_CANT_LITERE_ID,
   PLACE_LED_MODULES_ID,
   WC_ASSEMBLY_01_ID,
@@ -892,5 +893,125 @@ describe("product configuration API", () => {
     });
     expect(wireDone.completedQuantityLabel).toBeNull();
     expect(JSON.stringify(ledView)).not.toMatch(/employeeId|actualCost|inventory|scrap|pontaj/);
+  });
+
+  it("records actual consumption on complete and keeps it immutable", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const snapshot = (await readBody(accepted)).snapshot as JsonObject;
+    const created = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const view = (await readBody(created)).executionPlan as { tasks: Array<JsonObject> };
+    const backCnc = view.tasks.find(
+      (item) =>
+        item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
+    ) as JsonObject;
+    const lighting = view.tasks.find(
+      (item) => item.processId === PLACE_LED_MODULES_ID,
+    ) as JsonObject;
+    const personId = await createExecutor(app);
+
+    await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+    });
+    await assignExecutor(app, backCnc.taskId, personId);
+    await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, { method: "POST" });
+
+    const unknownResource = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        completedQuantity: 12.5,
+        actualConsumption: [{ resourceId: PLEXIGLAS_3MM_OPAL_ID, actualQuantity: 0.87 }],
+      }),
+    });
+    expect(unknownResource.status).toBe(422);
+    expect((await readBody(unknownResource)).error).toBe("invalid_resource");
+
+    const completedCnc = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: 12.5 }),
+    });
+    expect(completedCnc.status).toBe(200);
+
+    await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
+    });
+    await assignExecutor(app, lighting.taskId, personId);
+    await app.request(`/api/execution-tasks/${lighting.taskId}/start`, { method: "POST" });
+
+    const badUnit = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        completedQuantity: 125,
+        actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127, unit: "m2" }],
+      }),
+    });
+    expect(badUnit.status).toBe(422);
+    expect((await readBody(badUnit)).error).toBe("invalid_unit");
+
+    const completedLed = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        completedQuantity: 125,
+        actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127 }],
+      }),
+    });
+    const ledView = (await readBody(completedLed)).executionPlan as {
+      plan: JsonObject;
+      tasks: Array<JsonObject>;
+    };
+    const ledDone = ledView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
+    expect(ledDone.actualConsumption).toEqual([
+      expect.objectContaining({
+        resourceId: "MAT-LED-MODULE",
+        resourceLabel: "Modul LED 12V",
+        actualQuantity: 127,
+        unit: "buc",
+      }),
+    ]);
+    expect((ledDone.resourceDemands as Array<JsonObject>)[0]).toBeTruthy();
+    expect(
+      (ledDone.resourceDemands as Array<JsonObject>).find(
+        (item) => item.resourceId === "MAT-LED-MODULE",
+      )?.quantity,
+    ).toBe(125);
+    expect(ledView.plan.eicTotal).toBe(595);
+    expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+    expect(JSON.stringify(ledView)).not.toMatch(/actualCost|inventory|warehouse|stock/);
+
+    const rewrite = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        completedQuantity: 125,
+        actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 200 }],
+      }),
+    });
+    const stillLed = (
+      (await readBody(rewrite)).executionPlan as { tasks: Array<JsonObject> }
+    ).tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
+    expect(rewrite.status).toBe(200);
+    expect((stillLed.actualConsumption as Array<JsonObject>)[0]?.actualQuantity).toBe(127);
   });
 });

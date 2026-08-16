@@ -78,13 +78,14 @@ On Start: `PLANNED → IN_PROGRESS`, server `startedAt`, and freeze of the then-
 
 A task may Complete only if status is `IN_PROGRESS`.
 
-On Complete: `IN_PROGRESS → COMPLETED`, server `completedAt`, and minimal completion evidence.
+On Complete: `IN_PROGRESS → COMPLETED`, server `completedAt`, minimal completion evidence, and optional actual resource consumption.
 
 ```text
 planned quantity  ≠  completed quantity
+planned resource  ≠  actual consumption
 ```
 
-Frozen planned quantities stay on the task. Completed quantity is a separate execution fact.
+Frozen planned quantities and frozen `resourceDemands` stay on the task. Completed quantity and actual consumption are separate execution facts.
 
 When the task has exactly one measurable planned quantity, Complete requires `completedQuantity`. The unit comes from that frozen quantity, never from the frontend. Outcome is derived by exact comparison:
 
@@ -99,9 +100,9 @@ Electrical-finish operations (`Cablare`, `Pregătire sursă`, `Probă aprindere`
 
 Variance does not block Complete, reopen the snapshot, reprice EIC, or keep the task `IN_PROGRESS`. `COMPLETED_WITH_VARIANCE` is still `COMPLETED`.
 
-A completed task cannot be completed again. Completion evidence is immutable in V1.
+A completed task cannot be completed again. Completion evidence and actual consumption are immutable in V1. The first Complete wins, including an empty actuals set.
 
-Completing a task does not reprice EIC, mutate the snapshot, consume inventory, or change frozen quantities.
+Completing a task does not reprice EIC, mutate the snapshot, deduct inventory, or change frozen quantities.
 
 ## Plan progress
 
@@ -151,7 +152,7 @@ Reachable end state: 9 completed, 3 planned, plan remains În lucru.
 
 ## Completion evidence V1
 
-Persisted on the task row, not a separate actuals table:
+Process output stays on the task row:
 
 ```text
 completion_outcome
@@ -163,7 +164,44 @@ completed_at
 
 Optional note is free text, max 280 characters. It is not parsed.
 
-One measurable quantity is exposed only when `quantities.length === 1`. Multiple frozen resources do not get a generic actual-resource form in this V1.
+One measurable quantity is exposed only when `quantities.length === 1`. That is process output (CNC metres, LED count), not material consumption.
+
+## Actual resource consumption V1
+
+Actual consumption belongs to the executed `ExecutionTask`. It is recorded only as part of Complete, only from `IN_PROGRESS`.
+
+```text
+ExecutionTask
+  → execution_task_actual_consumption
+```
+
+Each row is one canonical planned resource actually used:
+
+```text
+entry_id = act:{taskId}:{resourceId}
+task_id
+plan_id
+resource_id          frozen planned identity
+resource_label       frozen display
+actual_quantity
+unit                 frozen planned unit
+recorded_at
+note                 optional
+```
+
+V1 rules:
+
+- Only identities already present on the task's frozen `resourceDemands` may be recorded.
+- Unit comes from that frozen demand. The client does not own the unit. No conversion.
+- Quantity must be a finite number `>= 0`.
+- Actual lines are optional. Empty Complete is honest `Fără consum înregistrat`.
+- Planned quantity is never copied into actual without an explicit operator value.
+- Tasks with no planned resources reject any actuals payload and show no material form.
+- Plexiglas / other aggregate materials are not invented onto a task that does not already carry them.
+
+This is quantity reality for later Inventory. It is not a stock ledger, reservation, actual cost, or commercial reprice.
+
+Read path: the existing plan/task view. Write path: `POST /api/execution-tasks/:taskId/complete`. No generic actuals CRUD.
 
 ## Historical attribution
 
@@ -174,6 +212,6 @@ Completed tasks show `Executant: <frozen label>`. That is the assigned executor,
 Not HR, Pontaj, payroll, skills, availability, or scheduling.
 Not automatic executor assignment.
 Not a substitute for missing QC / pack providers.
-Not inventory deduction or actual cost.
+Not inventory deduction, stock balance, reservation, or actual cost.
 Not labor time, machine runtime, scrap, or rework.
-Not a generic actuals engine or workflow engine.
+Not a generic actuals engine, correction workflow, or second material catalog.

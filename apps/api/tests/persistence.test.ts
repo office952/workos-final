@@ -64,7 +64,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(6);
+    expect(count.count).toBe(7);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -72,7 +72,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(6);
+    expect(again.count).toBe(7);
     second.close();
   });
 
@@ -258,6 +258,10 @@ describe("product system persistence", () => {
     const completed = first.completeExecutionTask(backCnc.taskId, {
       completedQuantity: 12.5,
       note: "Executat conform fișei",
+      actualConsumption: backCnc.resourceDemands.map((demand) => ({
+        resourceId: demand.resourceId,
+        actualQuantity: demand.quantity + 0.2,
+      })),
     });
     expect(completed.ok).toBe(true);
     first.close();
@@ -277,6 +281,19 @@ describe("product system persistence", () => {
       note: "Executat conform fișei",
     });
     expect(task?.quantities[0]?.value).toBe(12.5);
+    expect(task?.resourceDemands[0]?.quantity).toBe(backCnc.resourceDemands[0]?.quantity);
+    expect(task?.actualConsumption).toEqual(
+      backCnc.resourceDemands.map((demand) => ({
+        entryId: `act:${backCnc.taskId}:${demand.resourceId}`,
+        taskId: backCnc.taskId,
+        resourceId: demand.resourceId,
+        resourceLabel: demand.label,
+        actualQuantity: demand.quantity + 0.2,
+        unit: demand.unit,
+        recordedAt: task?.completedAt,
+        note: null,
+      })),
+    );
     expect(stored?.plan.eicTotal).toBe(595);
     expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     second.close();

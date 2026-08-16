@@ -6,6 +6,7 @@ import {
   completeExecutionTask,
   completionFromRow,
   startExecutionTask,
+  type ActualConsumptionEntry,
   type ExecutionPlan,
   type ExecutionPlanRecord,
   type ExecutionTask,
@@ -63,6 +64,18 @@ type TaskRow = {
 type DependencyRow = {
   task_id: string;
   depends_on_task_id: string;
+};
+
+type ActualConsumptionRow = {
+  entry_id: string;
+  task_id: string;
+  plan_id: string;
+  resource_id: string;
+  resource_label: string;
+  actual_quantity: number;
+  unit: string;
+  recorded_at: string;
+  note: string | null;
 };
 
 export function insertExecutionPlanRecord(
@@ -308,7 +321,11 @@ function applyMutation(
     if (!next) {
       return { ok: false, error: "not_found" };
     }
-    const written = writeTaskOperationalState(db, next, record.tasks.find((task) => task.taskId === taskId));
+    const written = writeTaskOperationalState(
+      db,
+      next,
+      record.tasks.find((task) => task.taskId === taskId),
+    );
     if (!written) {
       const current = getExecutionPlanByTaskId(db, taskId);
       if (!current) {
@@ -375,7 +392,42 @@ function writeTaskOperationalState(
       previous?.startedAt ?? "",
       previous?.completedAt ?? "",
     );
-  return result.changes === 1;
+  if (result.changes !== 1) {
+    return false;
+  }
+  writeActualConsumption(db, next);
+  return true;
+}
+
+function writeActualConsumption(db: SqliteDatabase, task: ExecutionTask): void {
+  const insert = db.prepare(
+    `
+      INSERT INTO execution_task_actual_consumption (
+        entry_id,
+        task_id,
+        plan_id,
+        resource_id,
+        resource_label,
+        actual_quantity,
+        unit,
+        recorded_at,
+        note
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+  );
+  for (const entry of task.actualConsumption) {
+    insert.run(
+      entry.entryId,
+      entry.taskId,
+      task.executionPlanId,
+      entry.resourceId,
+      entry.resourceLabel,
+      entry.actualQuantity,
+      entry.unit,
+      entry.recordedAt,
+      entry.note,
+    );
+  }
 }
 
 function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecord {
@@ -398,6 +450,31 @@ function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecor
     `,
     )
     .all(planRow.plan_id) as DependencyRow[];
+  const actualRows = db
+    .prepare(
+      `
+      SELECT *
+      FROM execution_task_actual_consumption
+      WHERE plan_id = ?
+      ORDER BY resource_id
+    `,
+    )
+    .all(planRow.plan_id) as ActualConsumptionRow[];
+  const actuals = new Map<string, ActualConsumptionEntry[]>();
+  for (const row of actualRows) {
+    const current = actuals.get(row.task_id) ?? [];
+    current.push({
+      entryId: row.entry_id,
+      taskId: row.task_id,
+      resourceId: row.resource_id,
+      resourceLabel: row.resource_label,
+      actualQuantity: row.actual_quantity,
+      unit: row.unit,
+      recordedAt: row.recorded_at,
+      note: row.note,
+    });
+    actuals.set(row.task_id, current);
+  }
   const dependencies = new Map<string, string[]>();
   for (const row of dependencyRows) {
     const current = dependencies.get(row.task_id) ?? [];
@@ -454,6 +531,7 @@ function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecor
         row.completed_quantity_unit,
         row.completion_note,
       ),
+      actualConsumption: actuals.get(row.task_id) ?? [],
       createdAt: row.created_at,
     })),
   };

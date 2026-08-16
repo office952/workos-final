@@ -390,6 +390,10 @@ function taskActionNotice(error: string): string {
       return "Tranziția nu este permisă.";
     case "invalid_quantity":
       return "Cantitatea realizată nu este validă.";
+    case "invalid_unit":
+      return "Unitatea nu corespunde resursei planificate.";
+    case "invalid_resource":
+      return "Resursa aleasă nu face parte din planul taskului.";
     case "invalid_note":
       return "Nota de finalizare este prea lungă.";
     default:

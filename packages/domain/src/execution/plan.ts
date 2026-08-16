@@ -11,6 +11,7 @@ import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 import { productionWorkFromSnapshot } from "../production/snapshot.js";
 import type { ProviderKind } from "../workcenters/catalog.js";
 import { providersForCapability } from "../workcenters/providers.js";
+import type { ActualConsumptionEntry } from "./consumption.js";
 
 export const EXECUTION_PLAN_SCHEMA_VERSION = 1 as const;
 export const EXECUTION_PLAN_STATUSES = ["PLANNED"] as const;
@@ -99,6 +100,7 @@ export type ExecutionTask = {
   startedAt: string | null;
   completedAt: string | null;
   completion: TaskCompletionEvidence | null;
+  actualConsumption: readonly ActualConsumptionEntry[];
   createdAt: string;
 };
 
@@ -129,6 +131,8 @@ export type ExecutionTaskView = ExecutionTask & {
   canAssignExecutor: boolean;
   canStart: boolean;
   canComplete: boolean;
+  hasPlannedResources: boolean;
+  canRecordActualConsumption: boolean;
 };
 
 export type ExecutionPlanProgress = {
@@ -193,6 +197,7 @@ export function materializeExecutionPlanFromSnapshot(
       startedAt: null,
       completedAt: null,
       completion: null,
+      actualConsumption: [],
       createdAt,
     };
   });
@@ -255,6 +260,9 @@ export function projectExecutionPlanView(
       canAssignExecutor: task.status === "PLANNED" && eligibleExecutors.length > 0,
       canStart: canStartTask(task, byId, people),
       canComplete: task.status === "IN_PROGRESS",
+      hasPlannedResources: task.resourceDemands.length > 0,
+      canRecordActualConsumption:
+        task.status === "IN_PROGRESS" && task.resourceDemands.length > 0,
     };
   });
   const progress = summarizeExecutionProgress(tasks);

@@ -10,6 +10,8 @@ import {
   lettersProcessCompositionInspections,
   materializeExecutionPlanFromSnapshot,
   projectExecutionPlanView,
+  type ActualConsumptionLineInput,
+  type TaskCompletionInput,
   type TaskMutationError,
   type TaskMutationResult,
   type DraftConfiguration,
@@ -285,14 +287,18 @@ function compileAcceptedProduct(
   };
 }
 
-function readCompletionInput(body: unknown): { completedQuantity?: number; note?: string } | null {
+function readCompletionInput(body: unknown): TaskCompletionInput | null {
   if (body === undefined || body === null) {
     return {};
   }
   if (typeof body !== "object" || Array.isArray(body)) {
     return null;
   }
-  const record = body as { completedQuantity?: unknown; note?: unknown };
+  const record = body as {
+    completedQuantity?: unknown;
+    note?: unknown;
+    actualConsumption?: unknown;
+  };
   if (
     "completedQuantity" in record &&
     record.completedQuantity !== undefined &&
@@ -303,12 +309,57 @@ function readCompletionInput(body: unknown): { completedQuantity?: number; note?
   if ("note" in record && record.note !== undefined && typeof record.note !== "string") {
     return null;
   }
+  const actualConsumption =
+    "actualConsumption" in record && record.actualConsumption !== undefined
+      ? readActualConsumption(record.actualConsumption)
+      : undefined;
+  if (actualConsumption === null) {
+    return null;
+  }
   return {
     ...(typeof record.completedQuantity === "number"
       ? { completedQuantity: record.completedQuantity }
       : {}),
     ...(typeof record.note === "string" ? { note: record.note } : {}),
+    ...(actualConsumption ? { actualConsumption } : {}),
   };
+}
+
+function readActualConsumption(value: unknown): ActualConsumptionLineInput[] | null {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+  const lines: ActualConsumptionLineInput[] = [];
+  for (const item of value) {
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      return null;
+    }
+    const row = item as {
+      resourceId?: unknown;
+      actualQuantity?: unknown;
+      unit?: unknown;
+      note?: unknown;
+    };
+    if (typeof row.resourceId !== "string" || row.resourceId.trim().length === 0) {
+      return null;
+    }
+    if (typeof row.actualQuantity !== "number") {
+      return null;
+    }
+    if (row.unit !== undefined && typeof row.unit !== "string") {
+      return null;
+    }
+    if (row.note !== undefined && typeof row.note !== "string") {
+      return null;
+    }
+    lines.push({
+      resourceId: row.resourceId,
+      actualQuantity: row.actualQuantity,
+      ...(typeof row.unit === "string" ? { unit: row.unit } : {}),
+      ...(typeof row.note === "string" ? { note: row.note } : {}),
+    });
+  }
+  return lines;
 }
 
 function readProviderId(body: unknown): string | null {
@@ -335,6 +386,8 @@ function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
     case "unknown_person":
     case "retired_person":
     case "invalid_quantity":
+    case "invalid_unit":
+    case "invalid_resource":
     case "invalid_note":
       return 422;
     case "reassignment_locked":
