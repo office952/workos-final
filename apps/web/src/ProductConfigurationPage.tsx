@@ -10,6 +10,7 @@ import type {
   ProductAggregate,
   ProductDefinition,
   ProductTruth,
+  QuoteSnapshot,
 } from "@workos-final/domain";
 import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
 import { FormRenderer } from "./FormRenderer";
@@ -20,6 +21,7 @@ import {
   ConstructionFacts,
   EicSection,
   ProductionPreviewSection,
+  QuoteSnapshotSection,
   ReadinessNotice,
   ReviewPanel,
 } from "./ProductConfigurationViews";
@@ -31,6 +33,7 @@ import {
   completeExecutionTask,
   confirmReviewedConfiguration,
   createExecutionPlan,
+  createQuoteSnapshot,
   fetchTemplateProjection,
   startExecutionTask,
   type TemplateProjection,
@@ -56,6 +59,8 @@ export function ProductConfigurationPage() {
     commercialPrice: CommercialPriceProjection;
     executionPlanPreview: ExecutionPlanPreview;
     definition: ProductDefinition;
+    quoteSnapshot?: QuoteSnapshot;
+    quoteReused?: boolean;
     snapshot?: AcceptedProductionSnapshot;
     snapshotReused?: boolean;
     executionPlan?: ExecutionPlanView;
@@ -141,6 +146,40 @@ export function ProductConfigurationPage() {
       } else {
         setDefinition(result.definition);
         setConfirmed(null);
+      }
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleFreezeQuote() {
+    if (!confirmed) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createQuoteSnapshot(productCode, confirmed.definition);
+      if (result.ok) {
+        setConfirmed({
+          ...confirmed,
+          quoteSnapshot: result.quoteSnapshot,
+          quoteReused: !result.created,
+        });
+      } else if (result.reason === "review_mismatch") {
+        setConfirmed(null);
+        setDefinition(null);
+        setConfirmNotice("Configurația verificată nu mai corespunde. Verificați din nou.");
+      } else if (result.reason === "not_ready") {
+        setConfirmed(null);
+        setDefinition(result.definition ?? null);
+      } else {
+        setConfirmNotice(
+          result.message ??
+            "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.",
+        );
       }
     } catch {
       setPage({ kind: "error" });
@@ -283,6 +322,13 @@ export function ProductConfigurationPage() {
           <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
           <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
           <CommercialPriceSection price={confirmed.commercialPrice} />
+          <QuoteSnapshotSection
+            price={confirmed.commercialPrice}
+            snapshot={confirmed.quoteSnapshot}
+            reused={Boolean(confirmed.quoteReused)}
+            busy={busy}
+            onFreeze={() => void handleFreezeQuote()}
+          />
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}
             basedOnSnapshot={Boolean(confirmed.snapshot)}

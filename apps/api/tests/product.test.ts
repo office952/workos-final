@@ -240,6 +240,96 @@ describe("product configuration API", () => {
     ]);
   });
 
+  it("freezes a quote snapshot from server-confirmed truth without production side effects", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const payload = {
+      definition: reviewed.definition,
+      reviewId: reviewed.reviewId,
+    };
+    const first = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    const second = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(200);
+    const created = await readBody(first);
+    const reused = await readBody(second);
+    const snapshot = created.quoteSnapshot as JsonObject;
+    const commercial = snapshot.commercial as JsonObject;
+    const eic = snapshot.eic as JsonObject;
+    expect(created.created).toBe(true);
+    expect(reused.created).toBe(false);
+    expect((reused.quoteSnapshot as JsonObject).quoteSnapshotId).toBe(
+      snapshot.quoteSnapshotId,
+    );
+    expect(snapshot.status).toBe("FROZEN");
+    expect(eic.total).toBe(382.5);
+    expect(commercial.policyId).toBe("DEFAULT_COMMERCIAL_POLICY");
+    expect(commercial.policyVersion).toBe(1);
+    expect(commercial.markupPercent).toBe(35);
+    expect(commercial.vatPercent).toBe(21);
+    expect(commercial.grossPrice).toBe(624.82);
+    expect(commercial.discountAmount).toBe(0);
+    expect(commercial.adjustmentAmount).toBe(0);
+    expect(JSON.stringify(snapshot)).not.toMatch(/ExecutionPlan|ExecutionTask|inventory/);
+
+    const read = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${snapshot.quoteSnapshotId}`,
+    );
+    expect(read.status).toBe(200);
+    const stored = ((await readBody(read)).quoteSnapshot as JsonObject).commercial as JsonObject;
+    expect(stored.grossPrice).toBe(624.82);
+
+    const plans = await app.request(`/api/execution-plans/missing`);
+    expect(plans.status).toBe(404);
+    const inventory = await app.request("/api/inventory");
+    const items = ((await readBody(inventory)).inventory as { items: Array<JsonObject> })
+      .items;
+    expect(items.every((item) => item.movementCount === 0)).toBe(true);
+  });
+
+  it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {
+    const compiled = await createApp().request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          values: { ...readyValues, "volume.depthMm": "30" },
+        }),
+      },
+    );
+    const reviewed = await readBody(compiled);
+    const response = await createApp().request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    expect(response.status).toBe(422);
+    const body = await readBody(response);
+    expect(body.error).toBe("incomplete_offer");
+    expect(body.quoteSnapshot).toBeUndefined();
+  });
+
   it("does not let a draft override product-fixed identity", async () => {
     const response = await createApp().request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,

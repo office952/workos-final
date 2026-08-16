@@ -24,8 +24,8 @@ Commercial owns the company policy and the customer-price projection.
 
 Commercial does not own internal cost, resource rates, technical quantities, inventory, or actual consumption.
 
-Future Quote consumes this projection and freezes an offer.
-Future Order consumes a frozen quote. Neither exists in this foundation.
+Quote Snapshot freezes this projection as historical offer evidence.
+Future Order consumes an accepted quote. Customer acceptance is not implemented.
 
 ## Policy
 
@@ -84,8 +84,9 @@ Actual Internal Cost is retrospective. It does not reprice the customer.
 
 ## Persistence and freeze
 
-The V1 projection is current-policy output, not historical quote evidence.
-A later Quote Snapshot must freeze policy id/version, inputs, and calculated outputs.
+The live projection is current-policy output.
+Quote Snapshot freezes policy id/version, inputs, and calculated outputs.
+Later policy or rate changes do not rewrite an old quote.
 Production Snapshot remains technical/production truth and does not store Commercial.
 
 ## Currency

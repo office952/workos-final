@@ -247,7 +247,8 @@ h1 {
   margin: 0;
 }
 
-.commercial-section {
+.commercial-section,
+.quote-section {
   padding: 0.85rem 0 0.15rem;
 }
 

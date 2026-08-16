@@ -7,6 +7,7 @@ import {
   type InventoryStockProjection,
   type Person,
   type PersonMutationResult,
+  type QuoteSnapshot,
   type TaskCompletionInput,
   type TaskMutationResult,
 } from "@workos-final/domain";
@@ -37,6 +38,10 @@ import {
   persistRetiredPerson,
 } from "../people/store.js";
 import {
+  getQuoteSnapshot,
+  insertQuoteSnapshot,
+} from "../commercial/store.js";
+import {
   getAcceptedProductionSnapshot,
   insertAcceptedProductionSnapshot,
 } from "../production/store.js";
@@ -62,6 +67,11 @@ export type ProductSystemRuntime = {
     snapshot: AcceptedProductionSnapshot;
   };
   readProductionSnapshot(snapshotId: string): AcceptedProductionSnapshot | null;
+  persistQuoteSnapshot(snapshot: QuoteSnapshot): {
+    created: boolean;
+    snapshot: QuoteSnapshot;
+  };
+  readQuoteSnapshot(quoteSnapshotId: string): QuoteSnapshot | null;
   persistExecutionPlan(record: ExecutionPlanRecord): {
     created: boolean;
     record: ExecutionPlanRecord;
@@ -113,6 +123,12 @@ export function createProductSystemRuntime(
     },
     readProductionSnapshot(snapshotId) {
       return getAcceptedProductionSnapshot(db, snapshotId);
+    },
+    persistQuoteSnapshot(snapshot) {
+      return insertQuoteSnapshot(db, snapshot);
+    },
+    readQuoteSnapshot(quoteSnapshotId) {
+      return getQuoteSnapshot(db, quoteSnapshotId);
     },
     persistExecutionPlan(record) {
       return insertExecutionPlanRecord(db, record);

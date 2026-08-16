@@ -10,6 +10,8 @@ import {
   composeProductProcessesFromTruth,
   confirmReviewedDefinition,
   freezeAcceptedProductionSnapshot,
+  freezeQuoteSnapshot,
+  projectCommercialPrice,
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
   materializeExecutionPlanFromSnapshot,
@@ -66,7 +68,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(8);
+    expect(count.count).toBe(9);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -74,7 +76,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(8);
+    expect(again.count).toBe(9);
     second.close();
   });
 
@@ -132,6 +134,70 @@ describe("product system persistence", () => {
     );
     expect(stored?.createdAt).toBe("2026-08-15T14:00:00.000Z");
     expect(second).not.toHaveProperty("updateProductionSnapshot");
+    second.close();
+  });
+
+  it("persists a quote snapshot without rewriting historical commercial values", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const eic = compileEic(
+      aggregate,
+      composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template),
+    );
+    const frozen = freezeQuoteSnapshot(
+      truth,
+      aggregate,
+      eic,
+      projectCommercialPrice(eic),
+      { createdAt: "2026-08-17T00:00:00.000Z" },
+    );
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    const created = first.persistQuoteSnapshot(frozen.snapshot);
+    const again = first.persistQuoteSnapshot({
+      ...frozen.snapshot,
+      createdAt: "2026-08-17T12:00:00.000Z",
+    });
+    expect(created.created).toBe(true);
+    expect(again.created).toBe(false);
+    expect(again.snapshot.createdAt).toBe("2026-08-17T00:00:00.000Z");
+    expect(first.readExecutionPlanBySnapshot("missing")).toBeNull();
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readQuoteSnapshot(frozen.snapshot.quoteSnapshotId);
+    expect(stored?.eic.total).toBe(382.5);
+    expect(stored?.commercial.grossPrice).toBe(624.82);
+    expect(stored?.commercial.policyVersion).toBe(1);
+    expect(stored?.createdAt).toBe("2026-08-17T00:00:00.000Z");
+    expect(second).not.toHaveProperty("updateQuoteSnapshot");
     second.close();
   });
 

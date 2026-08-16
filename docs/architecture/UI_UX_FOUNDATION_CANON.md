@@ -42,7 +42,7 @@ Small token set in `apps/web/src/index.css`. Shared pieces only where reused:
 
 ## Action hierarchy
 
-Primary: Pornește, Finalizează, Acceptă pentru producție, Adaugă persoană.
+Primary: Pornește, Finalizează, Îngheață oferta, Acceptă pentru producție, Adaugă persoană.
 Secondary: Alocă executant, Retrage persoana.
 Quiet: Editează nume, filters, Detalii.
 
@@ -86,7 +86,7 @@ While editing, the form leads. Construction facts are a compact summary of suppl
 
 Review is a concise operator summary. Confirm is primary. Modify is secondary.
 
-After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → production preview → accept → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer.
+After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → production preview → accept → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze.
 
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
 

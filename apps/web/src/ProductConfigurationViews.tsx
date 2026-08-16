@@ -13,6 +13,7 @@ import {
   type ProductIdentityFact,
   type ProductTemplate,
   type ProductTruth,
+  type QuoteSnapshot,
 } from "@workos-final/domain";
 import {
   formatCostCompleteness,
@@ -336,6 +337,99 @@ export function CommercialPriceSection({
           ) : null}
         </>
       )}
+    </section>
+  );
+}
+
+export function QuoteSnapshotSection({
+  price,
+  snapshot,
+  reused,
+  busy,
+  onFreeze,
+}: {
+  price: CommercialPriceProjection;
+  snapshot?: QuoteSnapshot;
+  reused: boolean;
+  busy: boolean;
+  onFreeze: () => void;
+}) {
+  if (snapshot) {
+    return (
+      <section className="result-section quote-section">
+        <div className="commercial-summary">
+          <h3>Ofertă salvată</h3>
+          <StatusChip label="Înghețată" tone="ok" />
+        </div>
+        {reused ? <p className="page-lead">Oferta era deja salvată pentru această configurație.</p> : null}
+        <p className="commercial-gross">
+          Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
+        </p>
+        <dl className="commercial-breakdown">
+          <div>
+            <dt>Cost intern</dt>
+            <dd>
+              {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
+            </dd>
+          </div>
+          <div>
+            <dt>Adaos comercial</dt>
+            <dd>
+              {snapshot.commercial.markupPercent}% ·{" "}
+              {formatMoney(snapshot.commercial.markupAmount)} {snapshot.commercial.currency}
+            </dd>
+          </div>
+          <div>
+            <dt>Preț net</dt>
+            <dd>
+              {formatMoney(snapshot.commercial.netPrice)} {snapshot.commercial.currency}
+            </dd>
+          </div>
+          <div>
+            <dt>TVA</dt>
+            <dd>
+              {snapshot.commercial.vatPercent}% ·{" "}
+              {formatMoney(snapshot.commercial.vatAmount)} {snapshot.commercial.currency}
+            </dd>
+          </div>
+        </dl>
+        <p>
+          Politică comercială v{snapshot.commercial.policyVersion} ·{" "}
+          {new Date(snapshot.createdAt).toLocaleString("ro-RO")}
+        </p>
+        <details className="snapshot-details">
+          <summary>Detalii</summary>
+          <ul>
+            <li>Referință: {snapshot.quoteSnapshotId}</li>
+            <li>Produs: {snapshot.productLabel}</li>
+            <li>Stare: Înghețată</li>
+          </ul>
+        </details>
+      </section>
+    );
+  }
+
+  if (price.completeness !== "COMPLETE") {
+    return (
+      <section className="result-section quote-section">
+        <h3>Ofertă</h3>
+        <p>Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="result-section quote-section">
+      <h3>Ofertă</h3>
+      <p className="page-lead">
+        Îngheață prețul și configurația confirmate. Nu înseamnă acceptare de client și nu pornește
+        producția.
+      </p>
+      <div className="action-row">
+        <button type="button" onClick={onFreeze} disabled={busy}>
+          Îngheață oferta
+        </button>
+      </div>
     </section>
   );
 }

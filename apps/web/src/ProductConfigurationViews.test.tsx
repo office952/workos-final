@@ -9,11 +9,13 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  QuoteSnapshot,
 } from "@workos-final/domain";
 import {
   AcceptedSnapshotSection,
   CommercialPriceSection,
   ConfirmedSummary,
+  QuoteSnapshotSection,
   ConstructionFacts,
   EicSection,
   ReadinessNotice,
@@ -249,6 +251,83 @@ describe("Product configuration views", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("Preț final client: 563,56 EUR")).not.toBeInTheDocument();
     expect(screen.queryByText("624,82 EUR")).not.toBeInTheDocument();
+  });
+
+  it("offers quote freeze only when commercial is complete", () => {
+    const complete: CommercialPriceProjection = {
+      internalCost: 382.5,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    const { rerender } = render(
+      <QuoteSnapshotSection
+        price={complete}
+        reused={false}
+        busy={false}
+        onFreeze={() => undefined}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Îngheață oferta" })).toBeInTheDocument();
+    rerender(
+      <QuoteSnapshotSection
+        price={{ ...complete, completeness: "PARTIAL", unavailableReasons: ["gap"] }}
+        reused={false}
+        busy={false}
+        onFreeze={() => undefined}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("renders frozen quote values from the snapshot only", () => {
+    const snapshot = {
+      quoteSnapshotId: "qts:hidden",
+      productLabel: "Litere",
+      createdAt: "2026-08-17T00:00:00.000Z",
+      commercial: {
+        policyVersion: 1,
+        markupPercent: 35,
+        markupAmount: 133.88,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+      },
+      eic: { total: 382.5, currency: "EUR" },
+    } as unknown as QuoteSnapshot;
+    render(
+      <QuoteSnapshotSection
+        price={{ completeness: "COMPLETE" } as CommercialPriceProjection}
+        snapshot={snapshot}
+        reused={false}
+        busy={false}
+        onFreeze={() => undefined}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "Ofertă salvată" })).toBeInTheDocument();
+    expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Politică comercială v1", { exact: false })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
   });
 
   it("does not duplicate the commercial formula in the UI module", () => {

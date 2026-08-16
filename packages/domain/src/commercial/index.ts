@@ -16,3 +16,15 @@ export {
   type CommercialPriceCompleteness,
   type CommercialPriceProjection,
 } from "./price.js";
+export {
+  QUOTE_SNAPSHOT_ERRORS,
+  QUOTE_SNAPSHOT_SCHEMA_VERSION,
+  QUOTE_SNAPSHOT_STATUSES,
+  freezeQuoteSnapshot,
+  quoteSnapshotErrorLabel,
+  type FrozenCommercialOffer,
+  type QuoteSnapshot,
+  type QuoteSnapshotError,
+  type QuoteSnapshotResult,
+  type QuoteSnapshotStatus,
+} from "./quoteSnapshot.js";

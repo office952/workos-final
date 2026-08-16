@@ -11,6 +11,7 @@ import type {
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
+  QuoteSnapshot,
 } from "@workos-final/domain";
 
 export type TemplateProjection = {
@@ -158,6 +159,57 @@ export async function acceptProductionSnapshot(
     ok: true,
     created: Boolean(body.created),
     snapshot: body.snapshot,
+  };
+}
+
+export async function createQuoteSnapshot(
+  productCode: string,
+  definition: ProductDefinition,
+): Promise<
+  | { ok: true; created: boolean; quoteSnapshot: QuoteSnapshot }
+  | {
+      ok: false;
+      reason: "not_ready" | "review_mismatch" | "incomplete_offer" | "unavailable_offer";
+      definition?: ProductDefinition;
+      message?: string;
+    }
+> {
+  const response = await fetch(`${baseUrl}/api/products/${productCode}/quote-snapshots`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      definition,
+      reviewId: definition.reviewId,
+    }),
+  });
+  const body = await readJson<{
+    created?: boolean;
+    quoteSnapshot?: QuoteSnapshot;
+    definition?: ProductDefinition;
+    error?: string;
+    reasons?: string[];
+  }>(response);
+
+  if (response.status === 409 && body.definition) {
+    return { ok: false, reason: "review_mismatch", definition: body.definition };
+  }
+  if (response.status === 422 && body.definition) {
+    return { ok: false, reason: "not_ready", definition: body.definition };
+  }
+  if (response.status === 422 && (body.error === "incomplete_offer" || body.error === "unavailable_offer")) {
+    return {
+      ok: false,
+      reason: body.error,
+      message: body.reasons?.[0],
+    };
+  }
+  if (!response.ok || !body.quoteSnapshot) {
+    throw new Error("quote_unavailable");
+  }
+  return {
+    ok: true,
+    created: Boolean(body.created),
+    quoteSnapshot: body.quoteSnapshot,
   };
 }
 

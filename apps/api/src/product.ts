@@ -3,6 +3,7 @@ import {
   compileDefinition,
   compileEic,
   compileExecutionPlanPreview,
+  freezeQuoteSnapshot,
   projectCommercialPrice,
   composeProductProcesses,
   composeProductProcessesFromTruth,
@@ -163,6 +164,43 @@ export function registerProductRoutes(
       created: stored.created,
       snapshot: stored.snapshot,
     });
+  });
+
+  app.post("/api/products/:productCode/quote-snapshots", async (c) => {
+    const compiled = compileAcceptedProduct(
+      runtime,
+      c.req.param("productCode"),
+      await c.req.json(),
+    );
+    if (!compiled.ok) {
+      return c.json(compiled.body, compiled.status);
+    }
+    const commercialPrice = projectCommercialPrice(compiled.eic);
+    const frozen = freezeQuoteSnapshot(
+      compiled.truth,
+      compiled.aggregate,
+      compiled.eic,
+      commercialPrice,
+    );
+    if (!frozen.ok) {
+      return c.json(
+        { error: frozen.error, reasons: frozen.reasons },
+        422,
+      );
+    }
+    const stored = runtime.persistQuoteSnapshot(frozen.snapshot);
+    return c.json({
+      created: stored.created,
+      quoteSnapshot: stored.snapshot,
+    });
+  });
+
+  app.get("/api/products/:productCode/quote-snapshots/:quoteSnapshotId", (c) => {
+    const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
+    if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    return c.json({ quoteSnapshot: snapshot });
   });
 
   app.get(

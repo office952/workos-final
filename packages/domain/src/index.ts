@@ -284,8 +284,11 @@ export {
   COMMERCIAL_ROUNDING,
   DEFAULT_COMMERCIAL_POLICY,
   DEFAULT_COMMERCIAL_POLICY_ID,
+  QUOTE_SNAPSHOT_SCHEMA_VERSION,
   commercialCompletenessLabel,
+  freezeQuoteSnapshot,
   projectCommercialPrice,
+  quoteSnapshotErrorLabel,
   roundMoney,
   validateCommercialPolicy,
   type CommercialCostInput,
@@ -293,6 +296,10 @@ export {
   type CommercialPolicyIssue,
   type CommercialPriceCompleteness,
   type CommercialPriceProjection,
+  type FrozenCommercialOffer,
+  type QuoteSnapshot,
+  type QuoteSnapshotError,
+  type QuoteSnapshotResult,
 } from "./commercial/index.js";
 export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
