@@ -3,6 +3,8 @@ import {
   type AcceptedProductionSnapshot,
   type DisplayLabelCatalog,
   type ExecutionPlanRecord,
+  type InventoryItemDetail,
+  type InventoryStockProjection,
   type Person,
   type PersonMutationResult,
   type TaskCompletionInput,
@@ -22,6 +24,12 @@ import {
   persistTaskComplete,
   persistTaskStart,
 } from "../execution/store.js";
+import {
+  persistInventoryAdjustment,
+  readInventoryItem,
+  readInventoryProjection,
+  type InventoryAdjustmentResult,
+} from "../inventory/store.js";
 import {
   listPeople,
   persistCreatedPerson,
@@ -64,6 +72,13 @@ export type ProductSystemRuntime = {
   assignExecutionTaskExecutor(taskId: string, personId: string): TaskMutationResult;
   startExecutionTask(taskId: string): TaskMutationResult;
   completeExecutionTask(taskId: string, input?: TaskCompletionInput): TaskMutationResult;
+  readInventory(): InventoryStockProjection;
+  readInventoryItem(resourceId: string): InventoryItemDetail | null;
+  recordInventoryAdjustment(
+    resourceId: string,
+    quantityDelta: number,
+    note?: string,
+  ): InventoryAdjustmentResult;
   listPeople(): Person[];
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
@@ -131,6 +146,21 @@ export function createProductSystemRuntime(
     },
     completeExecutionTask(taskId, input) {
       return persistTaskComplete(db, taskId, new Date().toISOString(), input);
+    },
+    readInventory() {
+      return readInventoryProjection(db);
+    },
+    readInventoryItem(resourceId) {
+      return readInventoryItem(db, resourceId);
+    },
+    recordInventoryAdjustment(resourceId, quantityDelta, note) {
+      return persistInventoryAdjustment(
+        db,
+        resourceId,
+        quantityDelta,
+        new Date().toISOString(),
+        note,
+      );
     },
     close() {
       db.close();

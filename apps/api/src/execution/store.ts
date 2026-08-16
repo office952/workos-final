@@ -14,6 +14,7 @@ import {
   type TaskCompletionInput,
   type TaskMutationResult,
 } from "@workos-final/domain";
+import { writeInventoryOutFromTask } from "../inventory/store.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 
 type PlanRow = {
@@ -396,6 +397,7 @@ function writeTaskOperationalState(
     return false;
   }
   writeActualConsumption(db, next);
+  writeInventoryOutFromTask(db, next);
   return true;
 }
 

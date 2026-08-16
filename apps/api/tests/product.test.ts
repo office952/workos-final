@@ -1013,5 +1013,56 @@ describe("product configuration API", () => {
     ).tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
     expect(rewrite.status).toBe(200);
     expect((stillLed.actualConsumption as Array<JsonObject>)[0]?.actualQuantity).toBe(127);
+
+    const inventory = await app.request("/api/inventory");
+    const inventoryBody = await readBody(inventory);
+    const ledStock = (
+      (inventoryBody.inventory as { items: Array<JsonObject> }).items
+    ).find((item) => item.resourceId === "MAT-LED-MODULE") as JsonObject;
+    expect(ledStock.balance).toBe(-127);
+    expect(ledStock.statusLabel).toBe("Sold negativ");
+    const ledDetail = await app.request("/api/inventory/MAT-LED-MODULE");
+    const ledDetailBody = await readBody(ledDetail);
+    expect((ledDetailBody.movements as Array<JsonObject>)).toHaveLength(1);
+    expect((ledDetailBody.movements as Array<JsonObject>)[0]).toMatchObject({
+      quantityDelta: -127,
+      movementTypeLabel: "Consum producție",
+    });
+    const replayInventory = await app.request("/api/inventory/MAT-LED-MODULE");
+    expect(((await readBody(replayInventory)).movements as Array<JsonObject>)).toHaveLength(1);
+  });
+});
+
+describe("inventory API", () => {
+  it("projects stockable materials and records an owner adjustment as a movement", async () => {
+    const app = createApp();
+    const listed = await app.request("/api/inventory");
+    expect(listed.status).toBe(200);
+    const body = await readBody(listed);
+    const items = (body.inventory as { items: Array<JsonObject> }).items;
+    expect(items.some((item) => item.resourceId === "MAT-LED-MODULE")).toBe(true);
+    expect(items.some((item) => item.resourceId === "SVC-CNC-FACE")).toBe(false);
+    expect(items.every((item) => item.status === "NO_MOVEMENTS")).toBe(true);
+
+    const service = await app.request("/api/inventory/SVC-CNC-FACE/adjustments", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quantityDelta: 10 }),
+    });
+    expect(service.status).toBe(404);
+
+    const adjusted = await app.request("/api/inventory/MAT-LED-MODULE/adjustments", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quantityDelta: 200, note: "Stoc inițial" }),
+    });
+    expect(adjusted.status).toBe(200);
+    const adjustedBody = await readBody(adjusted);
+    const led = (
+      (adjustedBody.inventory as { items: Array<JsonObject> }).items
+    ).find((item) => item.resourceId === "MAT-LED-MODULE") as JsonObject;
+    expect(led.balance).toBe(200);
+    expect(led.statusLabel).toBe("În stoc");
+    expect(JSON.stringify(adjustedBody)).not.toMatch(/purchaseOrder|reservation|warehouse|FIFO/);
   });
 });

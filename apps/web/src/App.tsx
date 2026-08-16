@@ -9,6 +9,7 @@ import { ProductConfigurationPage } from "./ProductConfigurationPage";
 import { ProcessesAdminPage } from "./ProcessesAdminPage";
 import { ProductSystemAdminPage } from "./ProductSystemAdminPage";
 import { ResourcesAdminPage } from "./ResourcesAdminPage";
+import { StockAdminPage } from "./StockAdminPage";
 import { SystemStatusPage } from "./SystemStatusPage";
 import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
 
@@ -29,6 +30,8 @@ export function App() {
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
         <Route path="/admin/resources" element={<ResourcesAdminPage />} />
+        <Route path="/admin/stock" element={<StockAdminPage />} />
+        <Route path="/admin/stock/:resourceId" element={<StockAdminPage />} />
         <Route path="/admin/processes" element={<ProcessesAdminPage />} />
         <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
         <Route path="/admin/people" element={<PeopleAdminPage />} />

@@ -119,7 +119,17 @@ describe("system governance projection", () => {
     ).toBe("IMPLEMENTED");
     expect(
       governance.boundaries.find((item) => item.id === "inventory")?.state,
-    ).toBe("NOT_IMPLEMENTED");
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.authorities.find((item) => item.id === "INVENTORY")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "inventory-stock-movements")
+        ?.state,
+    ).toBe("IMPLEMENTED");
+    expect(governance.roadmap.find((item) => item.id === "inventory")?.state).toBe(
+      "NOT_IMPLEMENTED",
+    );
     expect(
       governance.roadmap.find((item) => item.id === "technical-settings-write")
         ?.state,

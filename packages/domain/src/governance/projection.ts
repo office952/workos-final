@@ -146,6 +146,15 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "INVENTORY",
+        label: "Stoc",
+        owns: [
+          "mișcările de stoc",
+          "soldul derivat din mișcări",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
         id: "EIC",
         label: "EIC",
         owns: ["proiecția de cost intern din cereri de resurse"],
@@ -229,8 +238,8 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "inventory",
         label: "Stoc",
         statement:
-          "Nu există stoc, lot, rezervare sau mișcare. Catalogul de resurse este consumabil ulterior de Inventory.",
-        state: "NOT_IMPLEMENTED",
+          "Stocul este sold derivat din mișcări. Consumul real de execuție generează ieșire. Fără rezervare, achiziție, lot sau evaluare.",
+        state: "IMPLEMENTED",
       },
       {
         id: "machines",
@@ -376,8 +385,13 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "NOT_IMPLEMENTED",
       },
       {
+        id: "inventory-stock-movements",
+        label: "Stoc și mișcări",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "inventory",
-        label: "Stoc / disponibilitate",
+        label: "Rezervări / disponibilitate",
         state: "NOT_IMPLEMENTED",
       },
       {

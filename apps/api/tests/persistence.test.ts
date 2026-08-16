@@ -14,7 +14,9 @@ import {
   frontlitPlexiAl06Template,
   materializeExecutionPlanFromSnapshot,
   MCH_CNC_4020_ID,
+  PLACE_LED_MODULES_ID,
   seedDisplayLabelRecords,
+  WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
@@ -64,7 +66,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(7);
+    expect(count.count).toBe(8);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -72,7 +74,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(7);
+    expect(again.count).toBe(8);
     second.close();
   });
 
@@ -296,6 +298,108 @@ describe("product system persistence", () => {
     );
     expect(stored?.plan.eicTotal).toBe(595);
     expect(stored?.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+    const afterService = second.readInventory().items.find(
+      (item) => item.resourceId === "MAT-LED-MODULE",
+    );
+    expect(afterService?.movementCount).toBe(0);
+    expect(afterService?.status).toBe("NO_MOVEMENTS");
+    second.close();
+  });
+
+  it("writes one inventory OUT from LED actual consumption and keeps it after reopen and retry", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const snapshot = freezeAcceptedProductionSnapshot(
+      truth,
+      aggregate,
+      composition,
+      compileEic(aggregate, composition),
+      { createdAt: "2026-08-15T14:00:00.000Z" },
+    );
+    first.acceptProductionSnapshot(snapshot);
+    const created = first.persistExecutionPlan(
+      materializeExecutionPlanFromSnapshot(snapshot, {
+        createdAt: "2026-08-15T15:00:00.000Z",
+      }),
+    );
+    const backCnc = created.record.tasks.find(
+      (item) => item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
+    );
+    const lighting = created.record.tasks.find((item) => item.processId === PLACE_LED_MODULES_ID);
+    if (!backCnc || !lighting) {
+      throw new Error("missing tasks");
+    }
+    const person = first.createPerson("Executor test");
+    if (!person.ok) {
+      throw new Error("expected person");
+    }
+    first.assignExecutionTaskProvider(backCnc.taskId, MCH_CNC_4020_ID);
+    first.assignExecutionTaskExecutor(backCnc.taskId, person.person.personId);
+    first.startExecutionTask(backCnc.taskId);
+    first.completeExecutionTask(backCnc.taskId, { completedQuantity: 12.5 });
+    first.assignExecutionTaskProvider(lighting.taskId, WC_LED_ASSEMBLY_ID);
+    first.assignExecutionTaskExecutor(lighting.taskId, person.person.personId);
+    first.startExecutionTask(lighting.taskId);
+    const completed = first.completeExecutionTask(lighting.taskId, {
+      completedQuantity: 125,
+      actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127 }],
+    });
+    expect(completed.ok).toBe(true);
+    const retry = first.completeExecutionTask(lighting.taskId, {
+      completedQuantity: 125,
+      actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 200 }],
+    });
+    expect(retry.ok).toBe(true);
+    if (retry.ok) {
+      expect(retry.alreadyApplied).toBe(true);
+    }
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const led = second.readInventoryItem("MAT-LED-MODULE");
+    expect(led?.item.balance).toBe(-127);
+    expect(led?.item.status).toBe("NEGATIVE");
+    expect(led?.movements).toHaveLength(1);
+    expect(led?.movements[0]).toMatchObject({
+      resourceId: "MAT-LED-MODULE",
+      quantityDelta: -127,
+      unit: "buc",
+      movementType: "OUT",
+      sourceType: "EXECUTION_ACTUAL_CONSUMPTION",
+      movementTypeLabel: "Consum producție",
+    });
+    const storedTask = second
+      .readExecutionPlan(created.record.plan.planId)
+      ?.tasks.find((item) => item.taskId === lighting.taskId);
+    expect(storedTask?.actualConsumption[0]?.actualQuantity).toBe(127);
+    expect(storedTask?.quantities[0]?.value).toBe(125);
+    expect(second.readExecutionPlan(created.record.plan.planId)?.plan.eicTotal).toBe(595);
     second.close();
   });
 });

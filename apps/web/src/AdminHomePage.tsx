@@ -20,7 +20,13 @@ const GROUPS = [
         to: "/admin/resources",
         label: "Resurse și cost intern",
         description:
-          "Materiale, servicii, manoperă și dovezi de cost intern. Fără stoc, fără preț client, fără write.",
+          "Materiale, servicii, manoperă și dovezi de cost intern. Fără preț client. Soldul este la Stoc.",
+      },
+      {
+        to: "/admin/stock",
+        label: "Stoc",
+        description:
+          "Sold curent și mișcări din consum real. Fără rezervări, achiziții sau evaluare.",
       },
       {
         to: "/admin/processes",

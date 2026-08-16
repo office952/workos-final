@@ -22,7 +22,7 @@ Product / component owns whether a resource applies and the required quantity.
 
 Commercial later owns customer price.
 
-Inventory later owns stock, lot, availability, and movement.
+Inventory owns stock movement and derived balance. It does not own resource identity, lot, reservation, or valuation.
 
 ## Resource kind
 

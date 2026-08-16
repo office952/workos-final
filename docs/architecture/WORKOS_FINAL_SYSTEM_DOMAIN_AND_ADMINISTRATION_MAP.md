@@ -100,7 +100,12 @@ WorkOS Final
 │   ├── Task executor assignment            IMPLEMENTED_CURRENT / BASIC
 │   ├── Actual resource consumption         IMPLEMENTED_CURRENT / BASIC
 │   ├── Actual cost                         NOT_IMPLEMENTED
-│   └── Inventory deduction / MachineRun    NOT_IMPLEMENTED
+│   └── MachineRun                          NOT_IMPLEMENTED
+├── Inventory                               IMPLEMENTED_CURRENT / BASIC
+│   ├── Stock identity (Resources MATERIAL) IMPLEMENTED_CURRENT / BASIC
+│   ├── Movements + derived balance         IMPLEMENTED_CURRENT / BASIC
+│   ├── Reservations                        NOT_IMPLEMENTED
+│   └── Purchasing / valuation              NOT_IMPLEMENTED
 ├── People / identitate operațională        IMPLEMENTED_CURRENT / BASIC
 │   ├── Person registry                     IMPLEMENTED_CURRENT / BASIC
 │   ├── Employee master / HR                NOT_IMPLEMENTED
@@ -126,7 +131,8 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
 | Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
-| Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice |
+| Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
+| Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
 | Machines / Workcenters | Machine identity, workcenter identity, capability-provider mapping | Process definition, commercial hourly price, capacity calendar, Execution selection |
 | Reporting | Read-only projections | Underlying business truth |
@@ -164,6 +170,16 @@ Do not merge internal cost with Commercial. Do not put stock here.
 Admin inspection lives under `/admin` → Resurse și cost intern. No resource write yet.
 
 Current live catalog: Plexiglas 3 mm opal, Forex 10 mm, aluminium return profile 0.6 mm, forming service. Labor recipes remain planned. Operational processes are a separate foundation.
+
+## Inventory
+
+Canonical law: `docs/architecture/INVENTORY_STOCK_AND_MOVEMENTS_CANON.md`.
+
+Stock identity is the canonical Resources MATERIAL. Movements are append-only. Balance is derived. Actual consumption of a stockable material creates one OUT. Owner adjustment is a bounded write. Negative balances are honest. Inventory does not block execution.
+
+Admin: `/admin` → Stoc → `/admin/stock`.
+
+Reservations, purchasing, warehouses, FIFO, and valuation remain NOT_IMPLEMENTED.
 
 ## People / identitate operațională
 
@@ -226,7 +242,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, explicit task executor assignment, and actual resource consumption are IMPLEMENTED_CURRENT. Scheduling, capacity, inventory deduction, actual costing, and MachineRun remain NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, explicit task executor assignment, and actual resource consumption are IMPLEMENTED_CURRENT. Inventory stock identity and movements are IMPLEMENTED_CURRENT / BASIC. Scheduling, capacity, reservations, purchasing, actual costing, and MachineRun remain NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -331,6 +347,7 @@ Administrare
 │   └── Persoane
 ├── Atelier
 │   ├── Resurse și cost intern
+│   ├── Stoc
 │   ├── Procese operaționale
 │   └── Utilaje și zone
 └── Sistem
@@ -348,7 +365,7 @@ Do not add an empty Producție page. Execution lives on the confirmed product pa
 |---|---|---|
 | Operator | Daily workflow | `/products` configure → review → confirm |
 | Owner projection | System honesty / inspection | `/components`, `/governance` |
-| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources, Processes and Workcenters inspection |
+| Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources, Stoc, Processes and Workcenters inspection |
 
 Do not mix system configuration into daily workflow.
 
@@ -409,7 +426,8 @@ Settings versions: keep previous active values as history after a new version is
 | People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
-| HR, Pontaj, inventory deduction / actual costing | PLANNED |
+| Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
+| HR, Pontaj, reservations, purchasing, actual costing | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |

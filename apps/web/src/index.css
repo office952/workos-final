@@ -909,6 +909,26 @@ details summary {
   color: var(--text-muted);
 }
 
+.stock-list,
+.stock-movements {
+  margin: 0.4rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.stock-list li,
+.stock-movements li {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.stock-list p,
+.stock-movements p {
+  margin: 0;
+}
+
 .people-create {
   display: flex;
   flex-wrap: wrap;

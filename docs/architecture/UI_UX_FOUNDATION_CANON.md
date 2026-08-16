@@ -23,7 +23,7 @@ Routes stay stable. Inspection surfaces live under Administrare:
 
 ```text
 Operațiuni   Persoane
-Atelier      Resurse, Procese, Utilaje și zone
+Atelier      Resurse, Stoc, Procese, Utilaje și zone
 Sistem       Sistem produs, Module și componente, Guvernanță, Stare sistem
 ```
 

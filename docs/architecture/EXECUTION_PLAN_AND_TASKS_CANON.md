@@ -102,7 +102,7 @@ Variance does not block Complete, reopen the snapshot, reprice EIC, or keep the 
 
 A completed task cannot be completed again. Completion evidence and actual consumption are immutable in V1. The first Complete wins, including an empty actuals set.
 
-Completing a task does not reprice EIC, mutate the snapshot, deduct inventory, or change frozen quantities.
+Completing a task does not reprice EIC, mutate the snapshot, or change frozen planned quantities. If actual consumption includes a stockable material, Inventory appends exactly one OUT movement in the same transaction.
 
 ## Plan progress
 
@@ -199,7 +199,7 @@ V1 rules:
 - Tasks with no planned resources reject any actuals payload and show no material form.
 - Plexiglas / other aggregate materials are not invented onto a task that does not already carry them.
 
-This is quantity reality for later Inventory. It is not a stock ledger, reservation, actual cost, or commercial reprice.
+This is quantity reality for Inventory. Inventory consumes the immutable actual entry and may append one OUT movement. Execution does not own stock balance, reservation, actual cost, or commercial reprice.
 
 Read path: the existing plan/task view. Write path: `POST /api/execution-tasks/:taskId/complete`. No generic actuals CRUD.
 
@@ -212,6 +212,6 @@ Completed tasks show `Executant: <frozen label>`. That is the assigned executor,
 Not HR, Pontaj, payroll, skills, availability, or scheduling.
 Not automatic executor assignment.
 Not a substitute for missing QC / pack providers.
-Not inventory deduction, stock balance, reservation, or actual cost.
+Not reservation, purchasing, valuation, or actual cost. Stock movements are owned by Inventory.
 Not labor time, machine runtime, scrap, or rework.
 Not a generic actuals engine, correction workflow, or second material catalog.
