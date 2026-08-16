@@ -108,6 +108,12 @@ h1 {
   margin-bottom: var(--space-4);
 }
 
+.page-summary {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 .page-lead {
   margin: 0;
   color: var(--text-muted);
@@ -535,12 +541,28 @@ button:disabled {
 .owner-catalog-category,
 .owner-catalog-item {
   width: 100%;
+  display: grid;
+  gap: 0.1rem;
   text-align: left;
   background: transparent;
   color: var(--ink);
   border: 1px solid transparent;
   border-left: 2px solid transparent;
   padding: 0.4rem 0.55rem;
+  overflow-wrap: anywhere;
+}
+
+.owner-catalog-item-hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.owner-catalog-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0;
 }
 
 .owner-catalog-category.is-current,
@@ -554,6 +576,11 @@ button:disabled {
   padding: 1rem 1.1rem 1.15rem;
   border: 1px solid var(--line);
   background: var(--surface);
+}
+
+.owner-catalog-detail h2,
+.owner-catalog-group h3 {
+  overflow-wrap: anywhere;
 }
 
 .owner-catalog-group {
@@ -589,6 +616,12 @@ button:disabled {
 
 .owner-catalog-facts dd {
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.owner-catalog-facts dd.is-emphasis {
+  font-weight: 650;
+  font-size: 1.05rem;
 }
 
 .owner-catalog-setting-value {

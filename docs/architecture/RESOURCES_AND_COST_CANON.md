@@ -117,11 +117,11 @@ Resource admin write is `NOT_IMPLEMENTED`.
 `/admin` → Resurse și cost intern is inspection:
 
 - Materiale
-- Servicii / cost operațional
-- Manoperă / cost intern
-- Rețete servicii
-- Rețete manoperă
+- Servicii
+- Manoperă
 - Dovezi de cost
+
+Servicii and Manoperă present reusable recipes. Resource identity and rates remain the same catalog facts. The page does not write.
 
 Where-used is derived from live type resolution and product composition.
 `/products` does not administer the catalog.

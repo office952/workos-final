@@ -9,7 +9,7 @@ Hierarchical product catalog plus first canonical LETTERS product.
 FACE / VOLUME / BACK / LIGHTING are stable component roles. Constructive types and product configuration are separate. See `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md`.
 Owner-facing projections: Module și componente, Guvernanța sistemului, Administrare.
 Primary nav is Produse + Administrare. Inspection surfaces live under Administrare. See `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
-`/components` is the Product System inspection surface. `/admin` is the owner surface: Product System display-label write, Resources / Cost inspection including Service / Labor Recipes, Operational Processes inspection including Letters process composition and the reusable shop-floor process catalog, Workcenters / Machines capability-provider inspection, and People operational identity. Live shop-floor map includes the accepted assembly tables plus real welding, metal-cutting, CNC, forming, electrical, print and related stations, each with a canonical Operational Process where evidence supports one. The first persisted write is display-label only.
+`/components` is the Product System inspection surface. `/admin` is the owner surface: Product System display-label write, Resources / Cost owner inspection including Service / Labor Recipes, Operational Processes inspection including Letters process composition and the reusable shop-floor process catalog, Workcenters / Machines capability-provider inspection, and People operational identity. Live shop-floor map includes the accepted assembly tables plus real welding, metal-cutting, CNC, forming, electrical, print and related stations, each with a canonical Operational Process where evidence supports one. The first persisted write is display-label only.
 Cross-system domain and administration map is canonical; do not invent a second admin model per domain.
 ProductTemplate composes roles/types and owns allowed/fixed configuration. ProductAggregate orchestrates. EIC is generic.
 LIGHTING calculation is IMPLEMENTED_CURRENT / functional V1: confirmed volume perimeter → module quantity → load → multi-PSU selection → generic EIC. `ledPitchMm`, `ledModulePowerW` and `psuReservePercent` are configurable technical settings. LETTERS Service/Labor recipes are functional V1. Canonical none/none EIC is 595.00 EUR PARTIAL because Analyzer geometry is still missing. Values are development configuration, not final workshop calibration.
@@ -30,6 +30,7 @@ PEOPLE REGISTRY = IMPLEMENTED_CURRENT / BASIC OPERATIONAL IDENTITY
 TASK EXECUTOR ASSIGNMENT = IMPLEMENTED_CURRENT / BASIC
 UI UX FOUNDATION = IMPLEMENTED_CURRENT / BASIC
 PRODUCT CONFIGURATION UX = IMPLEMENTED_CURRENT / BASIC
+ADMIN RESOURCES UX = IMPLEMENTED_CURRENT / BASIC
 ACTUAL RESOURCE CONSUMPTION = NOT_IMPLEMENTED
 ACTUAL COST = NOT_IMPLEMENTED
 INVENTORY DEDUCTION = NOT_IMPLEMENTED

@@ -15,7 +15,11 @@ import {
   buildProductSystemAdministrationCatalog,
 } from "./ownerCatalog";
 import { buildProcessesCatalog } from "./processesCatalog";
-import { buildResourcesCatalog } from "./resourcesCatalog";
+import {
+  buildResourcesCatalog,
+  formatResourcesAdminSummary,
+  resourcesAdminSummary,
+} from "./resourcesCatalog";
 import { buildWorkcentersCatalog } from "./workcentersCatalog";
 
 describe("component catalog presentation", () => {
@@ -272,9 +276,13 @@ describe("resources catalog presentation", () => {
       "materials",
       "services",
       "labor",
-      "service-recipes",
-      "labor-recipes",
       "cost-evidence",
+    ]);
+    expect(catalog.categories.map((item) => item.label)).toEqual([
+      "Materiale",
+      "Servicii",
+      "Manoperă",
+      "Dovezi de cost",
     ]);
     expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
       "Plexiglas",
@@ -296,27 +304,41 @@ describe("resources catalog presentation", () => {
         expect.objectContaining({ label: "Proprietate optică", value: "Opal" }),
       ]),
     );
+    expect(
+      catalog.categories[0]?.items[0]?.groups[0]?.sections.find(
+        (item) => item.id === "cost",
+      )?.facts,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Tarif", value: "16,00 EUR / m²" }),
+      ]),
+    );
+    expect(catalog.categories[0]?.items[0]?.groups[0]?.chips).toEqual([
+      { label: "Confirmat de owner", tone: "ok" },
+    ]);
     expect(catalog.categories[1]?.items[0]?.label).toBe("Formare profil aluminiu");
-    expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Serviciu");
+    expect(catalog.categories[1]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
+    expect(catalog.categories[1]?.items[0]?.listHint).toBe("15,00 EUR / m");
     expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
       "Debitare CNC față",
+    );
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Îmbinare sudură oțel",
+    );
+    expect(catalog.categories[1]?.items.map((item) => item.label)).toContain(
+      "Printare format mare",
     );
     expect(catalog.categories[2]?.items.map((item) => item.label)).toContain(
       "Lipire față-volum",
     );
-    expect(catalog.categories[3]?.items[0]?.label).toBe("Formare profil aluminiu");
-    expect(catalog.categories[3]?.items[0]?.kindLabel).toBe("Rețetă serviciu");
+    expect(catalog.categories[2]?.items[0]?.kindLabel).toBe("Rețetă manoperă");
+    expect(catalog.categories[2]?.items[0]?.listHint).toBe("5,00 EUR / m²");
+    expect(catalog.categories[3]?.items[0]?.kindLabel).toBe("Dovadă de cost intern");
     expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
-      "Îmbinare sudură oțel",
+      "Plexiglas 3 mm opal",
     );
-    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
-      "Printare format mare",
-    );
-    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
-      "Debitare CNC față",
-    );
-    expect(catalog.categories[4]?.items.map((item) => item.label)).toContain(
-      "Lipire față-volum",
+    expect(formatResourcesAdminSummary(resourcesAdminSummary(projectResourcesAdministration()))).toMatch(
+      /^Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+$/,
     );
     expect(
       catalog.categories[0]?.items[0]?.groups[0]?.sections.find(

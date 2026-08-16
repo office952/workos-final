@@ -20,7 +20,7 @@ const GROUPS = [
         to: "/admin/resources",
         label: "Resurse și cost intern",
         description:
-          "Familii de material, specificații, rețete de serviciu / manoperă și dovezi de cost intern. Fără stoc, fără preț client, fără write.",
+          "Materiale, servicii, manoperă și dovezi de cost intern. Fără stoc, fără preț client, fără write.",
       },
       {
         to: "/admin/processes",

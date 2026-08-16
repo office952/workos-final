@@ -62,6 +62,16 @@ Wait reasons stay compact. Plan ID and capability stay in Detalii.
 
 Completed rows recede. Simple local filter: Toate / De făcut / În lucru / Finalizate.
 
+## Admin catalog pattern
+
+Owner inspection catalogs use category → item → detail. Do not flatten every resource, recipe or evidence row into one list.
+
+Rates show value, currency and unit together, from backend evidence. UI does not convert or calculate.
+
+Provenance uses the actual classification/source labels. Development defaults stay visually distinct from owner-confirmed truth. Raw IDs stay under Detalii.
+
+Read-only admin pages say so once. Do not add disabled Edit controls.
+
 ## People admin pattern
 
 Compact rows. Create form uses `Field`. Retired list is secondary.
@@ -78,4 +88,4 @@ EIC total stays visible. Rates stay in Detalii. Preview is what production will 
 
 ## Future migration
 
-New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Admin resources.
+New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Operational Processes.

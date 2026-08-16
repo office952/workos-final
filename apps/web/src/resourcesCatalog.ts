@@ -1,5 +1,37 @@
 import type { ResourcesAdminProjection } from "@workos-final/domain";
-import type { CatalogDetailSection, OwnerCatalog } from "./ownerCatalog";
+import type {
+  CatalogChip,
+  CatalogDetailSection,
+  CatalogFact,
+  OwnerCatalog,
+} from "./ownerCatalog";
+
+export type ResourcesAdminSummary = {
+  materials: number;
+  services: number;
+  labor: number;
+  costEvidence: number;
+};
+
+export function resourcesAdminSummary(
+  admin: ResourcesAdminProjection,
+): ResourcesAdminSummary {
+  return {
+    materials: admin.materials.length,
+    services: admin.serviceRecipes.length + admin.missingServiceRecipes.length,
+    labor: admin.laborRecipes.length + admin.missingLaborRecipes.length,
+    costEvidence: admin.costEvidence.length,
+  };
+}
+
+export function formatResourcesAdminSummary(summary: ResourcesAdminSummary): string {
+  return [
+    `Materiale ${summary.materials}`,
+    `Servicii ${summary.services}`,
+    `Manoperă ${summary.labor}`,
+    `Dovezi de cost ${summary.costEvidence}`,
+  ].join(" · ");
+}
 
 export function buildResourcesCatalog(
   admin: ResourcesAdminProjection,
@@ -13,57 +45,20 @@ export function buildResourcesCatalog(
         items: admin.families.map((family) => ({
           id: `family:${family.id}`,
           label: family.label,
-          kindLabel: "Familie material",
+          kindLabel: "Familie",
           summary: family.description,
           groups: family.specifications.map((spec) => ({
             id: spec.id,
-            kindLabel: "Specificație resursă",
+            kindLabel: "Specificație",
             title: spec.label,
+            chips: costChips(spec.cost),
             sections: specificationSections(spec),
           })),
         })),
       },
       {
         id: "services",
-        label: "Servicii / cost operațional",
-        kindLabel: "Categorie",
-        items: admin.services.map((service) => ({
-          id: `service:${service.id}`,
-          label: service.label,
-          kindLabel: service.kindLabel,
-          summary: "Cost operațional consumat, nu material fizic.",
-          groups: [
-            {
-              id: service.id,
-              kindLabel: service.kindLabel,
-              title: service.label,
-              sections: specificationSections(service),
-            },
-          ],
-        })),
-      },
-      {
-        id: "labor",
-        label: "Manoperă / cost intern",
-        kindLabel: "Categorie",
-        items: admin.labor.map((item) => ({
-          id: `labor:${item.id}`,
-          label: item.label,
-          kindLabel: item.kindLabel,
-          summary: "Cost de manoperă consumat, nu material fizic.",
-          groups: [
-            {
-              id: item.id,
-              kindLabel: item.kindLabel,
-              title: item.label,
-              sections: specificationSections(item),
-            },
-          ],
-        })),
-      },
-      {
-        id: "service-recipes",
-        label: "Rețete servicii",
+        label: "Servicii",
         kindLabel: "Categorie",
         items: [
           ...admin.serviceRecipes.map(recipeItem),
@@ -71,16 +66,13 @@ export function buildResourcesCatalog(
         ],
       },
       {
-        id: "labor-recipes",
-        label: "Rețete manoperă",
+        id: "labor",
+        label: "Manoperă",
         kindLabel: "Categorie",
-        items:
-          admin.laborRecipes.length === 0 && admin.missingLaborRecipes.length === 0
-            ? []
-            : [
-                ...admin.laborRecipes.map(recipeItem),
-                ...admin.missingLaborRecipes.map(missingRecipeItem),
-              ],
+        items: [
+          ...admin.laborRecipes.map(recipeItem),
+          ...admin.missingLaborRecipes.map(missingRecipeItem),
+        ],
       },
       {
         id: "cost-evidence",
@@ -91,6 +83,8 @@ export function buildResourcesCatalog(
           label: item.resourceLabel,
           kindLabel: "Dovadă de cost intern",
           summary: item.amountDisplay,
+          listHint: item.amountDisplay,
+          chips: costChips(item),
           groups: [
             {
               id: item.resourceId,
@@ -108,11 +102,19 @@ export function buildResourcesCatalog(
 function recipeItem(
   recipe: ResourcesAdminProjection["serviceRecipes"][number],
 ): OwnerCatalog["categories"][number]["items"][number] {
+  const chips = [
+    ...completenessChips(recipe.completenessLabel),
+    ...costChips(recipe.cost),
+  ];
   return {
     id: `recipe:${recipe.id}`,
     label: recipe.label,
     kindLabel: recipe.kindLabel,
-    summary: recipe.description,
+    summary: recipe.cost
+      ? `${recipe.cost.amountDisplay} · ${recipe.quantityBasisLabel}`
+      : recipe.completenessLabel,
+    listHint: recipe.cost?.amountDisplay ?? recipe.completenessLabel,
+    chips,
     groups: [
       {
         id: recipe.id,
@@ -120,39 +122,42 @@ function recipeItem(
         title: recipe.label,
         sections: [
           {
-            id: "identity",
-            title: "Identitate",
+            id: "cost",
+            title: "Cost intern",
             facts: [
-              { label: "Fel", value: recipe.kindLabel },
-              { label: "Stare", value: recipe.lifecycleLabel },
-              { label: "Completitudine", value: recipe.completenessLabel },
+              {
+                label: "Tarif",
+                value: recipe.cost?.amountDisplay ?? "fără dovadă activă",
+                emphasize: Boolean(recipe.cost),
+              },
               { label: "Bază cantitate", value: recipe.quantityBasisLabel },
               { label: "Unitate", value: recipe.unitLabel },
               {
-                label: "Procese",
+                label: "Se aplică la",
                 value:
                   recipe.processLabels.length === 0
                     ? "niciun proces"
                     : recipe.processLabels.join("; "),
               },
-              { label: "Evidență de cost", value: recipe.costEvidenceLabel },
-              {
-                label: "Valoare internă",
-                value: recipe.cost?.amountDisplay ?? "fără dovadă activă",
-              },
+              { label: "Evidență", value: recipe.costEvidenceLabel },
+              { label: "Completitudine", value: recipe.completenessLabel },
+              ...(recipe.cost
+                ? [{ label: "Sursă", value: recipe.cost.sourceLabel }]
+                : []),
             ],
             lines: [
-              recipe.description,
-              "Rețeta spune CUM se formează costul intern. Nu inventează geometria.",
+              "Regulă reutilizabilă de cost intern. Nu inventează geometria.",
             ],
           },
           {
-            id: "technical",
-            title: "Tehnic",
+            id: "details",
+            title: "Detalii",
             technical: true,
             facts: [
               { label: "Identitate rețetă", value: recipe.id },
               { label: "Identitate evidență", value: recipe.costEvidenceId },
+              { label: "Stare", value: recipe.lifecycleLabel },
+              { label: "Completitudine", value: recipe.completenessLabel },
             ],
           },
         ],
@@ -169,6 +174,8 @@ function missingRecipeItem(
     label: item.processLabel,
     kindLabel: item.kindLabel,
     summary: "Rețetă neconfigurată. Furnizorul, dacă există, rămâne separat.",
+    listHint: item.completenessLabel,
+    chips: completenessChips(item.completenessLabel),
     groups: [
       {
         id: item.processId,
@@ -179,13 +186,19 @@ function missingRecipeItem(
             id: "gap",
             title: "Gol de rețetă",
             facts: [
-              { label: "Fel așteptat", value: item.kindLabel },
+              { label: "Fel", value: item.kindLabel },
               { label: "Completitudine", value: item.completenessLabel },
             ],
             lines: [
               "Nu există rețetă canonică pentru acest proces. Nu inventăm tarif pe oră sau pe utilaj.",
               "Acoperirea de furnizor se inspectează separat, în Utilaje și capacitate.",
             ],
+          },
+          {
+            id: "details",
+            title: "Detalii",
+            technical: true,
+            facts: [{ label: "Identitate proces", value: item.processId }],
           },
         ],
       },
@@ -196,70 +209,68 @@ function missingRecipeItem(
 function specificationSections(
   resource: ResourcesAdminProjection["materials"][number],
 ): CatalogDetailSection[] {
+  const specificationFacts = specificationFactsFor(resource);
   return [
     {
-      id: "identity",
-      title: "Identitate",
-      facts: [
-        { label: "Fel", value: resource.kindLabel },
-        ...(resource.familyLabel
-          ? [{ label: "Familie material", value: resource.familyLabel }]
-          : []),
-        { label: "Unitate", value: resource.unitLabel },
-      ],
+      id: "cost",
+      title: "Cost intern",
+      facts: resource.cost
+        ? [
+            {
+              label: "Tarif",
+              value: resource.cost.amountDisplay,
+              emphasize: true,
+            },
+            { label: "Unitate", value: resource.unitLabel },
+            { label: "Sursă", value: resource.cost.sourceLabel },
+          ]
+        : [{ label: "Tarif", value: "fără dovadă activă" }],
     },
-    ...(resource.kind === "MATERIAL"
+    ...(specificationFacts.length > 0
       ? [
           {
             id: "specification",
             title: "Specificație",
-            facts: [
-              ...(resource.formLabel
-                ? [{ label: "Formă", value: resource.formLabel }]
-                : []),
-              ...(resource.thicknessLabel
-                ? [{ label: "Grosime", value: resource.thicknessLabel }]
-                : []),
-              ...(resource.opticalLabel
-                ? [{ label: "Proprietate optică", value: resource.opticalLabel }]
-                : []),
-              ...(resource.voltageLabel
-                ? [{ label: "Tensiune", value: resource.voltageLabel }]
-                : []),
-              ...(resource.capacityLabel
-                ? [{ label: "Capacitate", value: resource.capacityLabel }]
-                : []),
-            ],
+            facts: specificationFacts,
           },
         ]
       : []),
-    {
-      id: "cost",
-      title: "Dovadă de cost intern",
-      facts: resource.cost
-        ? [
-            { label: "Valoare", value: resource.cost.amountDisplay },
-            { label: "Sursă", value: resource.cost.sourceLabel },
-            { label: "Clasificare", value: resource.cost.classificationLabel },
-          ]
-        : [{ label: "Valoare", value: "fără dovadă activă" }],
-      lines: resource.cost ? [resource.cost.note] : undefined,
-    },
     usedBySection(resource.usedBy),
     {
-      id: "gaps",
-      title: "Lipsă",
-      lines: [
-        "Write-ul de administrare nu este deschis.",
-        "Stocul și disponibilitatea nu aparțin acestui catalog.",
+      id: "details",
+      title: "Detalii",
+      technical: true,
+      facts: [
+        { label: "Identitate", value: resource.id },
+        { label: "Fel", value: resource.kindLabel },
+        ...(resource.familyLabel
+          ? [{ label: "Familie", value: resource.familyLabel }]
+          : []),
       ],
     },
-    {
-      id: "technical",
-      title: "Tehnic",
-      technical: true,
-      facts: [{ label: "Identitate resursă", value: resource.id }],
-    },
+  ];
+}
+
+function specificationFactsFor(
+  resource: ResourcesAdminProjection["materials"][number],
+): CatalogFact[] {
+  if (resource.kind !== "MATERIAL") {
+    return [];
+  }
+  return [
+    ...(resource.formLabel ? [{ label: "Formă", value: resource.formLabel }] : []),
+    ...(resource.thicknessLabel
+      ? [{ label: "Grosime", value: resource.thicknessLabel }]
+      : []),
+    ...(resource.opticalLabel
+      ? [{ label: "Proprietate optică", value: resource.opticalLabel }]
+      : []),
+    ...(resource.voltageLabel
+      ? [{ label: "Tensiune", value: resource.voltageLabel }]
+      : []),
+    ...(resource.capacityLabel
+      ? [{ label: "Capacitate", value: resource.capacityLabel }]
+      : []),
   ];
 }
 
@@ -271,28 +282,26 @@ function costEvidenceSections(
       id: "evidence",
       title: "Dovadă activă",
       facts: [
+        {
+          label: "Tarif",
+          value: item.amountDisplay,
+          emphasize: true,
+        },
         { label: "Resursă", value: item.resourceLabel },
         { label: "Fel", value: item.kindLabel },
-        { label: "Valoare", value: item.amountDisplay },
         { label: "Sursă", value: item.sourceLabel },
-        { label: "Clasificare", value: item.classificationLabel },
       ],
-      lines: [item.note],
     },
     usedBySection(item.usedBy),
     {
-      id: "gaps",
-      title: "Lipsă",
-      lines: [
-        "Nu există istoric de cost, dată efectivă sau furnizor.",
-        "Write-ul de cost nu este deschis.",
-      ],
-    },
-    {
-      id: "technical",
-      title: "Tehnic",
+      id: "details",
+      title: "Detalii",
       technical: true,
-      facts: [{ label: "Identitate resursă", value: item.resourceId }],
+      facts: [
+        { label: "Identitate", value: item.resourceId },
+        { label: "Clasificare", value: item.classificationLabel },
+        ...(item.note ? [{ label: "Notă", value: item.note }] : []),
+      ],
     },
   ];
 }
@@ -310,3 +319,33 @@ function usedBySection(
   };
 }
 
+function costChips(
+  cost: ResourcesAdminProjection["materials"][number]["cost"],
+): CatalogChip[] {
+  if (!cost) {
+    return [];
+  }
+  if (cost.classificationLabel === "Confirmat de owner") {
+    return [{ label: cost.classificationLabel, tone: "ok" }];
+  }
+  if (cost.classificationLabel === "Default de dezvoltare") {
+    return [{ label: cost.classificationLabel, tone: "warn" }];
+  }
+  if (cost.sourceLabel === "Evidență legacy") {
+    return [{ label: cost.sourceLabel, tone: "neutral" }];
+  }
+  if (cost.classificationLabel === "Decizie AI / pilot") {
+    return [{ label: cost.classificationLabel, tone: "neutral" }];
+  }
+  return [];
+}
+
+function completenessChips(label: string): CatalogChip[] {
+  if (label === "Lipsă") {
+    return [{ label, tone: "warn" }];
+  }
+  if (label === "Parțială") {
+    return [{ label, tone: "warn" }];
+  }
+  return [];
+}

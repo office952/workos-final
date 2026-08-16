@@ -1,11 +1,21 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { CatalogCategory, CatalogItem, OwnerCatalog } from "./ownerCatalog";
+import type {
+  CatalogCategory,
+  CatalogChip,
+  CatalogItem,
+  OwnerCatalog,
+} from "./ownerCatalog";
+import { EmptyState } from "./ui/EmptyState";
+import { PageHeader } from "./ui/PageHeader";
+import { StatusChip } from "./ui/StatusChip";
 import { StatePill } from "./StatePill";
 
 type OwnerCatalogViewProps = {
   catalog: OwnerCatalog;
   title: string;
   lead: string;
+  notice?: ReactNode;
+  summary?: ReactNode;
   renderItemActions?: (item: CatalogItem) => ReactNode;
 };
 
@@ -13,6 +23,8 @@ export function OwnerCatalogView({
   catalog,
   title,
   lead,
+  notice,
+  summary,
   renderItemActions,
 }: OwnerCatalogViewProps) {
   const firstCategory = catalog.categories[0];
@@ -33,9 +45,8 @@ export function OwnerCatalogView({
   if (!selectedCategory) {
     return (
       <section>
-        <h1>{title}</h1>
-        <p className="page-lead">{lead}</p>
-        <p>Nu există încă categorii cu date reale.</p>
+        <PageHeader title={title} lead={lead} meta={headerMeta(summary, notice)} />
+        <EmptyState title="Nu există încă categorii cu date reale." />
       </section>
     );
   }
@@ -46,11 +57,10 @@ export function OwnerCatalogView({
 
   return (
     <section>
-      <h1>{title}</h1>
-      <p className="page-lead">{lead}</p>
+      <PageHeader title={title} lead={lead} meta={headerMeta(summary, notice)} />
       <div className="owner-catalog">
         <aside className="owner-catalog-nav">
-          <p className="catalog-kind">Catalog</p>
+          <p className="catalog-kind">Categorii</p>
           <nav aria-label="Categorii catalog">
             {catalog.categories.map((category) => (
               <CategoryButton
@@ -64,7 +74,7 @@ export function OwnerCatalogView({
               />
             ))}
           </nav>
-          <p className="catalog-kind owner-catalog-items-label">Elemente</p>
+          <p className="catalog-kind owner-catalog-items-label">{selectedCategory.label}</p>
           <nav aria-label="Elemente catalog">
             {selectedCategory.items.map((item) => (
               <button
@@ -78,7 +88,10 @@ export function OwnerCatalogView({
                 aria-current={item.id === selectedItem?.id ? "true" : undefined}
                 onClick={() => setItemId(item.id)}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.listHint ? (
+                  <span className="owner-catalog-item-hint">{item.listHint}</span>
+                ) : null}
               </button>
             ))}
           </nav>
@@ -88,9 +101,23 @@ export function OwnerCatalogView({
             item={selectedItem}
             actions={renderItemActions?.(selectedItem)}
           />
-        ) : null}
+        ) : (
+          <EmptyState title="Nu există elemente în această categorie." />
+        )}
       </div>
     </section>
+  );
+}
+
+function headerMeta(summary?: ReactNode, notice?: ReactNode): ReactNode {
+  if (!summary && !notice) {
+    return undefined;
+  }
+  return (
+    <>
+      {summary}
+      {notice}
+    </>
   );
 }
 
@@ -126,6 +153,7 @@ function CatalogDetail({
     <article className="owner-catalog-detail">
       <p className="catalog-kind">{item.kindLabel}</p>
       <h2>{item.label}</h2>
+      <ChipRow chips={item.chips} />
       {item.summary ? <p className="page-lead">{item.summary}</p> : null}
       {actions}
       {item.groups.map((group) => {
@@ -139,6 +167,7 @@ function CatalogDetail({
               <>
                 <p className="catalog-kind">{group.kindLabel}</p>
                 <h3>{group.title}</h3>
+                <ChipRow chips={group.chips} />
               </>
             )}
             {group.sections.map((section) =>
@@ -161,6 +190,19 @@ function CatalogDetail({
   );
 }
 
+function ChipRow({ chips }: { chips?: readonly CatalogChip[] }) {
+  if (!chips || chips.length === 0) {
+    return null;
+  }
+  return (
+    <p className="owner-catalog-chips">
+      {chips.map((chip) => (
+        <StatusChip key={chip.label} label={chip.label} tone={chip.tone} />
+      ))}
+    </p>
+  );
+}
+
 function SectionBody({
   section,
 }: {
@@ -173,7 +215,7 @@ function SectionBody({
           {section.facts.map((fact) => (
             <div key={fact.label}>
               <dt>{fact.label}</dt>
-              <dd>{fact.value}</dd>
+              <dd className={fact.emphasize ? "is-emphasis" : undefined}>{fact.value}</dd>
             </div>
           ))}
         </dl>

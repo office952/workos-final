@@ -18,9 +18,15 @@ export type CatalogEditTarget = {
   identityLabel: string;
 };
 
+export type CatalogChip = {
+  label: string;
+  tone?: "neutral" | "progress" | "done" | "warn" | "ok";
+};
+
 export type CatalogFact = {
   label: string;
   value: string;
+  emphasize?: boolean;
 };
 
 export type CatalogStatusLine = {
@@ -51,6 +57,7 @@ export type CatalogGroup = {
   id: string;
   kindLabel: string;
   title: string;
+  chips?: readonly CatalogChip[];
   sections: readonly CatalogDetailSection[];
 };
 
@@ -59,6 +66,8 @@ export type CatalogItem = {
   label: string;
   kindLabel: string;
   summary?: string;
+  listHint?: string;
+  chips?: readonly CatalogChip[];
   groups: readonly CatalogGroup[];
   editTarget?: CatalogEditTarget;
 };
