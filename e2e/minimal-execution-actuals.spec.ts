@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
   await page.goto("/products");
@@ -30,13 +31,8 @@ async function assignAndStart(card: Locator, providerLabel: string) {
   if (await card.getByText("Stare: Finalizat").isVisible()) {
     return false;
   }
-  if (await card.getByRole("button", { name: "Alocă" }).isVisible()) {
-    await card.getByRole("combobox", { name: "Alocare" }).selectOption({
-      label: providerLabel,
-    });
-    await card.getByRole("button", { name: "Alocă" }).click();
-    await expect(card.getByText(/Alocat:/)).toBeVisible();
-  }
+  await assignProviderIfNeeded(card, providerLabel);
+  await assignExecutorIfNeeded(card);
   if (await card.getByText("Stare: În lucru").isVisible()) {
     return true;
   }
@@ -47,7 +43,8 @@ async function assignAndStart(card: Locator, providerLabel: string) {
   return true;
 }
 
-test("records planned vs completed quantity on LETTERS tasks", async ({ page }) => {
+test("records planned vs completed quantity on LETTERS tasks", async ({ page, request }) => {
+  await ensureTestExecutor(request);
   await confirmLetters(page, "ACTUALS");
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(
@@ -141,7 +138,7 @@ test("records planned vs completed quantity on LETTERS tasks", async ({ page }) 
 
   await expect(inspect.getByText("Fără furnizor disponibil")).toBeVisible();
   await expect(pack.getByText("Fără furnizor disponibil")).toBeVisible();
-  await expect(inspect.getByRole("button", { name: "Alocă" })).toHaveCount(0);
+  await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actuals-no-provider.png",
     fullPage: true,

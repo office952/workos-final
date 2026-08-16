@@ -34,7 +34,9 @@ import {
   WC_ASSEMBLY_01_ID,
   WC_LED_ASSEMBLY_ID,
 } from "../workcenters/catalog.js";
+import { createPerson, type Person } from "../people/identity.js";
 import {
+  assignExecutorToTask,
   assignProviderToTask,
   completeExecutionTask,
   plannedCompletionInput,
@@ -82,6 +84,14 @@ function freeze(values: DraftValues = readyValues) {
   );
 }
 
+function testPeople(): Person[] {
+  const created = createPerson("Executor test", { personId: "per:test-executor" });
+  if (!created.ok) {
+    throw new Error("expected test person");
+  }
+  return [created.person];
+}
+
 function unwrap(result: TaskMutationResult): ExecutionPlanRecord {
   if (!result.ok) {
     throw new Error(result.error);
@@ -96,8 +106,12 @@ function run(
   startedAt: string,
   completedAt: string,
 ): ExecutionPlanRecord {
+  const people = testPeople();
   const assigned = unwrap(assignProviderToTask(record, taskId, providerId));
-  const started = unwrap(startExecutionTask(assigned, taskId, startedAt));
+  const withExecutor = unwrap(
+    assignExecutorToTask(assigned, taskId, people[0]!.personId, people),
+  );
+  const started = unwrap(startExecutionTask(withExecutor, taskId, startedAt, people));
   const task = started.tasks.find((item) => item.taskId === taskId);
   if (!task) {
     throw new Error(`missing ${taskId}`);
@@ -148,10 +162,13 @@ describe("LETTERS execution golden path", () => {
     expect(placeLed.quantities[0]?.value).toBe(125);
     expect(psu.resourceDemands.some((item) => item.label === "Sursă LED 12V 160W")).toBe(true);
 
+    const people = testPeople();
     record = unwrap(assignProviderToTask(record, faceCnc.taskId, MCH_CNC_4020_ID));
     record = unwrap(assignProviderToTask(record, backCnc.taskId, MCH_CNC_4020_ID));
-    record = unwrap(startExecutionTask(record, faceCnc.taskId, "2026-08-16T10:10:00.000Z"));
-    record = unwrap(startExecutionTask(record, backCnc.taskId, "2026-08-16T10:11:00.000Z"));
+    record = unwrap(assignExecutorToTask(record, faceCnc.taskId, people[0]!.personId, people));
+    record = unwrap(assignExecutorToTask(record, backCnc.taskId, people[0]!.personId, people));
+    record = unwrap(startExecutionTask(record, faceCnc.taskId, "2026-08-16T10:10:00.000Z", people));
+    record = unwrap(startExecutionTask(record, backCnc.taskId, "2026-08-16T10:11:00.000Z", people));
     const parallel = projectExecutionPlanView(record);
     expect(
       parallel.tasks.filter(
@@ -204,6 +221,7 @@ describe("LETTERS execution golden path", () => {
       planned: 3,
       waitingDependencies: 2,
       noProvider: 3,
+      noExecutor: 3,
       varianceCount: 0,
       status: "IN_PROGRESS",
     });

@@ -32,6 +32,7 @@ export {
   measurablePlannedQuantity,
   projectExecutionPlanView,
   summarizeExecutionProgress,
+  type AssignedExecutionExecutor,
   type AssignedExecutionProvider,
   type CompletionOutcome,
   type MeasurablePlannedQuantity,
@@ -49,7 +50,9 @@ export {
 } from "./plan.js";
 export {
   TASK_MUTATION_ERRORS,
+  assignExecutorToTask,
   assignProviderToTask,
+  assignedExecutorFromRow,
   assignedProviderFromRow,
   completeExecutionTask,
   completionFromRow,

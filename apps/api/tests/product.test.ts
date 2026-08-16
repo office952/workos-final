@@ -26,6 +26,28 @@ const readyValues = {
   "volume.confirmedPerimeterMm": 12500,
 };
 
+async function createExecutor(app: ReturnType<typeof createApp>, name = "Executor test") {
+  const created = await app.request("/api/people", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ displayName: name }),
+  });
+  const body = await readBody(created);
+  return (body.person as JsonObject).personId as string;
+}
+
+async function assignExecutor(
+  app: ReturnType<typeof createApp>,
+  taskId: unknown,
+  personId: string,
+) {
+  return app.request(`/api/execution-tasks/${taskId}/executor`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ personId }),
+  });
+}
+
 async function compileReady() {
   const response = await createApp().request(
     `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
@@ -280,7 +302,9 @@ describe("product configuration API", () => {
     expect(view.plan.eicTotal).toBe(595);
     expect(view.tasks).toHaveLength(12);
     expect(view.tasks.every((item) => item.assignedProvider === null)).toBe(true);
+    expect(view.tasks.every((item) => item.assignedExecutor === null)).toBe(true);
     expect(JSON.stringify(view)).not.toMatch(/startTask|employeeId|plannedStart|capacity/);
+    expect(JSON.stringify(snapshot)).not.toMatch(/personId|assignedExecutor|people/);
 
     const second = await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
@@ -373,6 +397,7 @@ describe("product configuration API", () => {
         .label,
     ).toBe("CNC 4020");
 
+    const personId = await createExecutor(app);
     const blockedLighting = await app.request(`/api/execution-tasks/${lighting.taskId}/start`, {
       method: "POST",
     });
@@ -384,6 +409,7 @@ describe("product configuration API", () => {
       body: JSON.stringify({ providerId: "WC_LED_ASSEMBLY" }),
     });
     expect(assignLighting.status).toBe(200);
+    expect((await assignExecutor(app, lighting.taskId, personId)).status).toBe(200);
     const lightingStartBefore = await app.request(
       `/api/execution-tasks/${lighting.taskId}/start`,
       { method: "POST" },
@@ -397,6 +423,7 @@ describe("product configuration API", () => {
     );
     expect(completeBeforeStart.status).toBe(409);
 
+    expect((await assignExecutor(app, backCnc.taskId, personId)).status).toBe(200);
     const beforeStart = Date.now();
     const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
       method: "POST",
@@ -432,6 +459,7 @@ describe("product configuration API", () => {
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
     expect(assignFace.status).toBe(200);
+    expect((await assignExecutor(app, faceCnc.taskId, personId)).status).toBe(200);
     const startFace = await app.request(`/api/execution-tasks/${faceCnc.taskId}/start`, {
       method: "POST",
     });
@@ -494,6 +522,125 @@ describe("product configuration API", () => {
     expect(JSON.stringify(assemblyView)).not.toMatch(/employeeId|plannedStart|capacity|pontaj/);
   });
 
+  it("assigns an active executor and rejects start without one", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const snapshot = (await readBody(accepted)).snapshot as JsonObject;
+    expect(JSON.stringify(snapshot)).not.toMatch(/personId|assignedExecutor/);
+    const created = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const view = (await readBody(created)).executionPlan as { tasks: Array<JsonObject> };
+    const backCnc = view.tasks.find(
+      (item) =>
+        item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
+    ) as JsonObject;
+    const inspect = view.tasks.find(
+      (item) => item.processLabel === "Control calitate final",
+    ) as JsonObject;
+
+    const missingProvider = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
+      method: "POST",
+    });
+    expect(missingProvider.status).toBe(422);
+    expect((await readBody(missingProvider)).error).toBe("missing_assignment");
+
+    await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+    });
+    const missingExecutor = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
+      method: "POST",
+    });
+    expect(missingExecutor.status).toBe(422);
+    expect((await readBody(missingExecutor)).error).toBe("missing_executor");
+
+    const unknown = await assignExecutor(app, backCnc.taskId, "per:unknown");
+    expect(unknown.status).toBe(422);
+    expect((await readBody(unknown)).error).toBe("unknown_person");
+
+    const retiredId = await createExecutor(app, "Executor retras");
+    await app.request(`/api/people/${retiredId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "RETIRED" }),
+    });
+    const retiredAssign = await assignExecutor(app, backCnc.taskId, retiredId);
+    expect(retiredAssign.status).toBe(422);
+    expect((await readBody(retiredAssign)).error).toBe("retired_person");
+
+    const firstId = await createExecutor(app, "Executor unu");
+    const secondId = await createExecutor(app, "Executor doi");
+    expect((await assignExecutor(app, backCnc.taskId, firstId)).status).toBe(200);
+    const reassigned = await assignExecutor(app, backCnc.taskId, secondId);
+    const reassignedView = (await readBody(reassigned)).executionPlan as {
+      tasks: Array<JsonObject>;
+    };
+    expect(
+      (reassignedView.tasks.find((item) => item.taskId === backCnc.taskId)
+        ?.assignedExecutor as JsonObject).label,
+    ).toBe("Executor doi");
+
+    const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
+      method: "POST",
+    });
+    const startedView = (await readBody(started)).executionPlan as {
+      plan: JsonObject;
+      tasks: Array<JsonObject>;
+    };
+    const startedTask = startedView.tasks.find((item) => item.taskId === backCnc.taskId) as JsonObject;
+    expect(started.status).toBe(200);
+    expect((startedTask.assignedExecutor as JsonObject).id).toBe(secondId);
+    expect((startedTask.assignedExecutor as JsonObject).label).toBe("Executor doi");
+    expect(startedView.plan.eicTotal).toBe(595);
+
+    const locked = await assignExecutor(app, backCnc.taskId, firstId);
+    expect(locked.status).toBe(409);
+    expect((await readBody(locked)).error).toBe("reassignment_locked");
+
+    await app.request(`/api/people/${secondId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ displayName: "Executor doi redenumit" }),
+    });
+    await app.request(`/api/people/${secondId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "RETIRED" }),
+    });
+    const completed = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completedQuantity: 12.5 }),
+    });
+    const done = ((await readBody(completed)).executionPlan as { tasks: Array<JsonObject> }).tasks.find(
+      (item) => item.taskId === backCnc.taskId,
+    ) as JsonObject;
+    expect(done.status).toBe("COMPLETED");
+    expect(done.assignedExecutor).toEqual({ id: secondId, label: "Executor doi" });
+    expect((done.quantities as Array<JsonObject>)[0]?.value).toBe(12.5);
+
+    expect((await assignExecutor(app, inspect.taskId, firstId)).status).toBe(200);
+    const inspectStart = await app.request(`/api/execution-tasks/${inspect.taskId}/start`, {
+      method: "POST",
+    });
+    expect(inspectStart.status).toBe(422);
+    expect((await readBody(inspectStart)).error).toBe("missing_assignment");
+  });
+
   it("executes the reachable LETTERS DAG and does not complete the plan with open tasks", async () => {
     const reviewed = await compileReady();
     const app = createApp();
@@ -528,6 +675,8 @@ describe("product configuration API", () => {
     const task = (label: string, scope: string) =>
       initial.tasks.find((item) => item.processLabel === label && item.scopeLabel === scope) as JsonObject;
 
+    const personId = await createExecutor(app);
+
     async function execute(taskId: unknown, providerId: string) {
       const assigned = await app.request(`/api/execution-tasks/${taskId}/provider`, {
         method: "POST",
@@ -535,6 +684,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({ providerId }),
       });
       expect(assigned.status).toBe(200);
+      expect((await assignExecutor(app, taskId, personId)).status).toBe(200);
       const started = await app.request(`/api/execution-tasks/${taskId}/start`, { method: "POST" });
       expect(started.status).toBe(200);
       const startedView = (await readBody(started)).executionPlan as { tasks: Array<JsonObject> };
@@ -572,6 +722,7 @@ describe("product configuration API", () => {
       planned: 3,
       waitingDependencies: 2,
       noProvider: 3,
+      noExecutor: 3,
       varianceCount: 0,
       status: "IN_PROGRESS",
     });
@@ -619,12 +770,14 @@ describe("product configuration API", () => {
       (item) => item.processId === PLACE_LED_MODULES_ID,
     ) as JsonObject;
     const wire = view.tasks.find((item) => item.processLabel === "Cablare electrică") as JsonObject;
+    const personId = await createExecutor(app);
 
     await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
+    await assignExecutor(app, backCnc.taskId, personId);
     await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, { method: "POST" });
 
     const missing = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
@@ -667,6 +820,7 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
     });
+    await assignExecutor(app, lighting.taskId, personId);
     await app.request(`/api/execution-tasks/${lighting.taskId}/start`, { method: "POST" });
     const completedLed = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
       method: "POST",
@@ -715,6 +869,7 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
     });
+    await assignExecutor(app, wire.taskId, personId);
     await app.request(`/api/execution-tasks/${wire.taskId}/start`, { method: "POST" });
     const unexpected = await app.request(`/api/execution-tasks/${wire.taskId}/complete`, {
       method: "POST",

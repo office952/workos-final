@@ -3,6 +3,8 @@ import {
   type AcceptedProductionSnapshot,
   type DisplayLabelCatalog,
   type ExecutionPlanRecord,
+  type Person,
+  type PersonMutationResult,
   type TaskCompletionInput,
   type TaskMutationResult,
 } from "@workos-final/domain";
@@ -15,10 +17,17 @@ import {
   getExecutionPlanBySnapshotId,
   getExecutionPlanRecord,
   insertExecutionPlanRecord,
+  persistAssignedExecutor,
   persistAssignedProvider,
   persistTaskComplete,
   persistTaskStart,
 } from "../execution/store.js";
+import {
+  listPeople,
+  persistCreatedPerson,
+  persistRenamedPerson,
+  persistRetiredPerson,
+} from "../people/store.js";
 import {
   getAcceptedProductionSnapshot,
   insertAcceptedProductionSnapshot,
@@ -52,8 +61,13 @@ export type ProductSystemRuntime = {
   readExecutionPlan(planId: string): ExecutionPlanRecord | null;
   readExecutionPlanBySnapshot(snapshotId: string): ExecutionPlanRecord | null;
   assignExecutionTaskProvider(taskId: string, providerId: string): TaskMutationResult;
+  assignExecutionTaskExecutor(taskId: string, personId: string): TaskMutationResult;
   startExecutionTask(taskId: string): TaskMutationResult;
   completeExecutionTask(taskId: string, input?: TaskCompletionInput): TaskMutationResult;
+  listPeople(): Person[];
+  createPerson(displayName: string): PersonMutationResult;
+  renamePerson(personId: string, displayName: string): PersonMutationResult;
+  retirePerson(personId: string): PersonMutationResult;
   close(): void;
 };
 
@@ -97,8 +111,23 @@ export function createProductSystemRuntime(
     assignExecutionTaskProvider(taskId, providerId) {
       return persistAssignedProvider(db, taskId, providerId);
     },
+    assignExecutionTaskExecutor(taskId, personId) {
+      return persistAssignedExecutor(db, taskId, personId, listPeople(db));
+    },
     startExecutionTask(taskId) {
-      return persistTaskStart(db, taskId, new Date().toISOString());
+      return persistTaskStart(db, taskId, new Date().toISOString(), listPeople(db));
+    },
+    listPeople() {
+      return listPeople(db);
+    },
+    createPerson(displayName) {
+      return persistCreatedPerson(db, displayName);
+    },
+    renamePerson(personId, displayName) {
+      return persistRenamedPerson(db, personId, displayName);
+    },
+    retirePerson(personId) {
+      return persistRetiredPerson(db, personId, new Date().toISOString());
     },
     completeExecutionTask(taskId, input) {
       return persistTaskComplete(db, taskId, new Date().toISOString(), input);

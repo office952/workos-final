@@ -19,7 +19,7 @@ It does not reread ProductTemplate, current settings, current recipe rates, or r
 ```text
 Frozen:     required capability, quantities, resources, dependencies
 Live:       eligible-provider projection
-Assigned:   persisted operator choice of one eligible provider
+Assigned:   persisted operator choice of one eligible provider and one ACTIVE person
 Lifecycle:  PLANNED → IN_PROGRESS → COMPLETED
 ```
 
@@ -44,6 +44,25 @@ Reassignment is allowed while the task is `PLANNED`. After `IN_PROGRESS`, reassi
 
 If no eligible provider exists, the task stays unassigned. The plan still exists.
 
+## Executor assignment
+
+A task may have `assignedProvider` and `assignedExecutor` independently.
+
+```text
+Provider  = Machine / Workcenter that can perform the required capability
+Person    = human executor / operator
+```
+
+Assignment persists `assignedExecutor` (`id`, `label`) only after an explicit operator action.
+
+Backend validates the person against the People registry. Only `ACTIVE` people may be newly assigned. Unknown and `RETIRED` people are rejected.
+
+Reassignment is allowed while the task is `PLANNED`. After `IN_PROGRESS`, executor reassignment is rejected.
+
+People cannot substitute a missing capability provider. A QC or Packaging task with an executor and no eligible provider still cannot Start.
+
+Preview, snapshot and plan materialization do not require People.
+
 ## Start and complete
 
 A task may Start only if:
@@ -51,10 +70,11 @@ A task may Start only if:
 - status is `PLANNED`
 - every persisted dependency task is `COMPLETED`
 - an assigned provider exists and is still eligible for the frozen capability
+- an assigned executor exists and is still `ACTIVE`
 
 Root tasks (no dependencies) may Start once assigned. SEQ is display order, not a start gate.
 
-On Start: `PLANNED → IN_PROGRESS` and server `startedAt`.
+On Start: `PLANNED → IN_PROGRESS`, server `startedAt`, and freeze of the then-current executor display label on the task. The persisted `personId` stays the identity. Later rename or retirement does not erase historical attribution. A retired person may still Complete a task already started.
 
 A task may Complete only if status is `IN_PROGRESS`.
 
@@ -91,6 +111,7 @@ The plan row stays `PLANNED`. UI progress is derived from tasks:
 total / completed / inProgress / planned
 waitingDependencies
 noProvider
+noExecutor
 varianceCount
 ```
 
@@ -144,9 +165,15 @@ Optional note is free text, max 280 characters. It is not parsed.
 
 One measurable quantity is exposed only when `quantities.length === 1`. Multiple frozen resources do not get a generic actual-resource form in this V1.
 
+## Historical attribution
+
+Completed tasks show `Executant: <frozen label>`. That is the assigned executor, not an authenticated user who clicked Complete. This build has no auth system.
+
 ## What this is not
 
-Not People / employee assignment.
-Not scheduling, capacity, pause/cancel, inventory deduction, or actual cost.
+Not HR, Pontaj, payroll, skills, availability, or scheduling.
+Not automatic executor assignment.
+Not a substitute for missing QC / pack providers.
+Not inventory deduction or actual cost.
 Not labor time, machine runtime, scrap, or rework.
 Not a generic actuals engine or workflow engine.

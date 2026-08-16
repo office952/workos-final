@@ -9,7 +9,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(
     page.getByRole("link", { name: "Resurse și cost intern" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Persoane" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Persoane" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-admin-home.png",
     fullPage: true,

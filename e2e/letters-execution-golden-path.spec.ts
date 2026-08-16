@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page) {
   await page.goto("/products");
@@ -30,15 +31,8 @@ async function executeTask(card: Locator, providerLabel?: string) {
   if (await card.getByText("Stare: Finalizat").isVisible()) {
     return;
   }
-  if (await card.getByRole("button", { name: "Alocă" }).isVisible()) {
-    if (providerLabel) {
-      await card.getByRole("combobox", { name: "Alocare" }).selectOption({
-        label: providerLabel,
-      });
-    }
-    await card.getByRole("button", { name: "Alocă" }).click();
-    await expect(card.getByText(/Alocat:/)).toBeVisible();
-  }
+  await assignProviderIfNeeded(card, providerLabel);
+  await assignExecutorIfNeeded(card);
   if (await card.getByText("Stare: Finalizat").isVisible()) {
     return;
   }
@@ -57,15 +51,8 @@ async function startIfReady(card: Locator, providerLabel?: string) {
   if (await card.getByText("Stare: În lucru").isVisible()) {
     return true;
   }
-  if (await card.getByRole("button", { name: "Alocă" }).isVisible()) {
-    if (providerLabel) {
-      await card.getByRole("combobox", { name: "Alocare" }).selectOption({
-        label: providerLabel,
-      });
-    }
-    await card.getByRole("button", { name: "Alocă" }).click();
-    await expect(card.getByText(/Alocat:/)).toBeVisible();
-  }
+  await assignProviderIfNeeded(card, providerLabel);
+  await assignExecutorIfNeeded(card);
   const start = card.getByRole("button", { name: "Pornește" });
   if (!(await start.isVisible())) {
     return false;
@@ -77,7 +64,9 @@ async function startIfReady(card: Locator, providerLabel?: string) {
 
 test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", async ({
   page,
+  request,
 }) => {
+  await ensureTestExecutor(request);
   await confirmLetters(page);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(
@@ -165,7 +154,7 @@ test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", a
   for (const card of [uniformity, inspect, pack]) {
     await expect(card.getByText("Stare: Planificat")).toBeVisible();
     await expect(card.getByText("Fără furnizor disponibil")).toBeVisible();
-    await expect(card.getByRole("button", { name: "Alocă" })).toHaveCount(0);
+    await expect(card.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
     await expect(card.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   }
   await page.screenshot({

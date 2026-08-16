@@ -1,5 +1,7 @@
 import {
+  assignExecutorToTask,
   assignProviderToTask,
+  assignedExecutorFromRow,
   assignedProviderFromRow,
   completeExecutionTask,
   completionFromRow,
@@ -7,6 +9,7 @@ import {
   type ExecutionPlan,
   type ExecutionPlanRecord,
   type ExecutionTask,
+  type Person,
   type TaskCompletionInput,
   type TaskMutationResult,
 } from "@workos-final/domain";
@@ -47,6 +50,8 @@ type TaskRow = {
   assigned_provider_id: string | null;
   assigned_provider_kind: string | null;
   assigned_provider_label: string | null;
+  assigned_executor_id: string | null;
+  assigned_executor_label: string | null;
   started_at: string | null;
   completed_at: string | null;
   completion_outcome: string | null;
@@ -125,13 +130,15 @@ export function insertExecutionPlanRecord(
         assigned_provider_id,
         assigned_provider_kind,
         assigned_provider_label,
+        assigned_executor_id,
+        assigned_executor_label,
         started_at,
         completed_at,
         completion_outcome,
         completed_quantity,
         completed_quantity_unit,
         completion_note
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     );
     const insertDependency = db.prepare(
@@ -164,6 +171,8 @@ export function insertExecutionPlanRecord(
         task.assignedProvider?.id ?? null,
         task.assignedProvider?.kind ?? null,
         task.assignedProvider?.label ?? null,
+        task.assignedExecutor?.id ?? null,
+        task.assignedExecutor?.label ?? null,
         task.startedAt,
         task.completedAt,
         task.completion?.outcome ?? null,
@@ -248,13 +257,25 @@ export function persistAssignedProvider(
   );
 }
 
+export function persistAssignedExecutor(
+  db: SqliteDatabase,
+  taskId: string,
+  personId: string,
+  people: readonly Person[],
+): TaskMutationResult {
+  return applyMutation(db, taskId, (record) =>
+    assignExecutorToTask(record, taskId, personId, people),
+  );
+}
+
 export function persistTaskStart(
   db: SqliteDatabase,
   taskId: string,
   startedAt: string,
+  people: readonly Person[],
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    startExecutionTask(record, taskId, startedAt),
+    startExecutionTask(record, taskId, startedAt, people),
   );
 }
 
@@ -317,6 +338,8 @@ function writeTaskOperationalState(
         assigned_provider_id = ?,
         assigned_provider_kind = ?,
         assigned_provider_label = ?,
+        assigned_executor_id = ?,
+        assigned_executor_label = ?,
         status = ?,
         started_at = ?,
         completed_at = ?,
@@ -327,6 +350,7 @@ function writeTaskOperationalState(
       WHERE task_id = ?
         AND status = ?
         AND IFNULL(assigned_provider_id, '') = ?
+        AND IFNULL(assigned_executor_id, '') = ?
         AND IFNULL(started_at, '') = ?
         AND IFNULL(completed_at, '') = ?
     `,
@@ -335,6 +359,8 @@ function writeTaskOperationalState(
       next.assignedProvider?.id ?? null,
       next.assignedProvider?.kind ?? null,
       next.assignedProvider?.label ?? null,
+      next.assignedExecutor?.id ?? null,
+      next.assignedExecutor?.label ?? null,
       next.status,
       next.startedAt,
       next.completedAt,
@@ -345,6 +371,7 @@ function writeTaskOperationalState(
       next.taskId,
       previous?.status ?? next.status,
       previous?.assignedProvider?.id ?? "",
+      previous?.assignedExecutor?.id ?? "",
       previous?.startedAt ?? "",
       previous?.completedAt ?? "",
     );
@@ -414,6 +441,10 @@ function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecor
         row.assigned_provider_id,
         row.assigned_provider_kind,
         row.assigned_provider_label,
+      ),
+      assignedExecutor: assignedExecutorFromRow(
+        row.assigned_executor_id,
+        row.assigned_executor_label,
       ),
       startedAt: row.started_at,
       completedAt: row.completed_at,

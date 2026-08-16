@@ -20,6 +20,7 @@ import {
 import type { Hono } from "hono";
 import type { ProductSystemRuntime } from "./productSystem/runtime.js";
 
+
 function asDraftValues(value: unknown): DraftValues {
   if (typeof value !== "object" || value === null) {
     return {};
@@ -182,7 +183,7 @@ export function registerProductRoutes(
       );
       return c.json({
         created: stored.created,
-        executionPlan: projectExecutionPlanView(stored.record),
+        executionPlan: projectExecutionPlanView(stored.record, runtime.listPeople()),
       });
     },
   );
@@ -192,7 +193,7 @@ export function registerProductRoutes(
     if (!record) {
       return c.json({ error: "not_found" }, 404);
     }
-    return c.json({ executionPlan: projectExecutionPlanView(record) });
+    return c.json({ executionPlan: projectExecutionPlanView(record, runtime.listPeople()) });
   });
 
   app.post("/api/execution-tasks/:taskId/provider", async (c) => {
@@ -202,12 +203,25 @@ export function registerProductRoutes(
     }
     return respondTaskMutation(
       c,
+      runtime,
       runtime.assignExecutionTaskProvider(c.req.param("taskId"), providerId),
     );
   });
 
+  app.post("/api/execution-tasks/:taskId/executor", async (c) => {
+    const personId = readPersonId(await c.req.json().catch(() => null));
+    if (!personId) {
+      return c.json({ error: "invalid_payload" }, 400);
+    }
+    return respondTaskMutation(
+      c,
+      runtime,
+      runtime.assignExecutionTaskExecutor(c.req.param("taskId"), personId),
+    );
+  });
+
   app.post("/api/execution-tasks/:taskId/start", (c) => {
-    return respondTaskMutation(c, runtime.startExecutionTask(c.req.param("taskId")));
+    return respondTaskMutation(c, runtime, runtime.startExecutionTask(c.req.param("taskId")));
   });
 
   app.post("/api/execution-tasks/:taskId/complete", async (c) => {
@@ -217,6 +231,7 @@ export function registerProductRoutes(
     }
     return respondTaskMutation(
       c,
+      runtime,
       runtime.completeExecutionTask(c.req.param("taskId"), input),
     );
   });
@@ -314,7 +329,11 @@ function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
       return 404;
     case "ineligible_provider":
     case "missing_assignment":
+    case "missing_executor":
     case "provider_unavailable":
+    case "executor_unavailable":
+    case "unknown_person":
+    case "retired_person":
     case "invalid_quantity":
     case "invalid_note":
       return 422;
@@ -329,8 +348,21 @@ function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
   }
 }
 
+function readPersonId(body: unknown): string | null {
+  if (typeof body !== "object" || body === null || !("personId" in body)) {
+    return null;
+  }
+  const value = (body as { personId: unknown }).personId;
+  if (typeof value !== "string") {
+    return null;
+  }
+  const personId = value.trim();
+  return personId.length > 0 ? personId : null;
+}
+
 function respondTaskMutation(
   c: { json: (body: unknown, status?: 200 | 404 | 409 | 422) => Response },
+  runtime: ProductSystemRuntime,
   result: TaskMutationResult,
 ) {
   if (!result.ok) {
@@ -338,6 +370,6 @@ function respondTaskMutation(
   }
   return c.json({
     alreadyApplied: result.alreadyApplied,
-    executionPlan: projectExecutionPlanView(result.record),
+    executionPlan: projectExecutionPlanView(result.record, runtime.listPeople()),
   });
 }

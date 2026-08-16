@@ -250,7 +250,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "scheduling",
         label: "Programare",
         statement:
-          "Nu există programare, calendar sau capacitate. Alocarea de furnizor pe task există, fără People.",
+          "Nu există programare, calendar sau capacitate. Alocarea de furnizor și executant pe task există, fără programare.",
         state: "NOT_IMPLEMENTED",
       },
       {
@@ -263,7 +263,7 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "people-skills",
         label: "Persoane / calificări",
         statement:
-          "Un workcenter poate declara că stația susține o capabilitate umană. Calificarea angajatului rămâne adevăr viitor People.",
+          "Identitatea operațională a persoanei există. Calificarea pe capabilitate, pontaj și HR rămân în afara acestui registru.",
         state: "NOT_IMPLEMENTED",
       },
       {
@@ -428,6 +428,16 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "execution-completion-evidence",
         label: "Evidență de finalizare",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "people-registry",
+        label: "Registru persoane",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "execution-task-executor",
+        label: "Executant pe task",
         state: "IMPLEMENTED",
       },
       {

@@ -96,13 +96,15 @@ WorkOS Final
 │   ├── Provider assignment                 IMPLEMENTED_CURRENT / BASIC
 │   ├── Task lifecycle                      IMPLEMENTED_CURRENT / BASIC
 │   ├── Completion evidence                 IMPLEMENTED_CURRENT / BASIC
+│   ├── Task executor assignment            IMPLEMENTED_CURRENT / BASIC
 │   ├── Actual resource consumption         NOT_IMPLEMENTED
 │   ├── Actual cost                         NOT_IMPLEMENTED
 │   └── Inventory deduction / MachineRun    NOT_IMPLEMENTED
-├── People / Angajați                       PLANNED
-│   ├── Employee master
-│   ├── Role / skill / availability
-│   └── Attendance / Pontaj
+├── People / identitate operațională        IMPLEMENTED_CURRENT / BASIC
+│   ├── Person registry                     IMPLEMENTED_CURRENT / BASIC
+│   ├── Employee master / HR                NOT_IMPLEMENTED
+│   ├── Role / skill / availability         NOT_IMPLEMENTED
+│   └── Attendance / Pontaj                 NOT_IMPLEMENTED
 ├── Machines / Utilaje                      FOUNDATION
 │   ├── Machine / machine type              FOUNDATION (live catalog empty)
 │   ├── Workcenter                          FOUNDATION (2 assembly tables live)
@@ -124,7 +126,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
 | Commercial | Customer price rules, Quote Snapshot, Order commercial freeze | EIC authority, ProductTemplate, execution actuals |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice |
-| People | Employee master, attendance / Pontaj, payments, advances | Execution session, labor recipe / cost basis, Product Truth |
+| People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
 | Machines / Workcenters | Machine identity, workcenter identity, capability-provider mapping | Process definition, commercial hourly price, capacity calendar, Execution selection |
 | Reporting | Read-only projections | Underlying business truth |
 | Documentation | Explanation, history, architecture | Active configurable values |
@@ -162,11 +164,21 @@ Admin inspection lives under `/admin` → Resurse și cost intern. No resource w
 
 Current live catalog: Plexiglas 3 mm opal, Forex 10 mm, aluminium return profile 0.6 mm, forming service. Labor recipes remain planned. Operational processes are a separate foundation.
 
-## People / Angajați
+## People / identitate operațională
 
-Not implemented. Capability kernel already splits People from Execution and from labor cost basis.
+Minimal Person registry is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md`.
 
-Likely entities: Employee, HR role, skill/capability, employment/cost profile, availability, status.
+Admin: `/admin` → Persoane → `/admin/people`.
+
+Person supplies operational executor identity only.
+
+```text
+Person  ≠  Provider  ≠  authenticated user
+```
+
+HR, Pontaj, payroll, skills, availability and scheduling remain NOT_IMPLEMENTED.
+
+Likely later entities: Employee, HR role, skill/capability, employment/cost profile, availability, status.
 
 Clarify later:
 
@@ -213,7 +225,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, and minimal completion evidence are IMPLEMENTED_CURRENT. People assignment, scheduling, capacity, inventory deduction, actual costing, and MachineRun remain NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, and explicit task executor assignment are IMPLEMENTED_CURRENT. Scheduling, capacity, inventory deduction, actual costing, and MachineRun remain NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -387,8 +399,9 @@ Settings versions: keep previous active values as history after a new version is
 | Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT |
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
 | Completion evidence | IMPLEMENTED_CURRENT / BASIC |
+| People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
-| People, Pontaj, actual consumption / costing | PLANNED |
+| HR, Pontaj, actual consumption / costing | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
@@ -432,7 +445,7 @@ Recommended rank:
 
 3. **Lifecycle retire** later, when more live entities exist.
 
-Do not start People, Pontaj, or Commercial from mutable truth. Persisted Execution now assigns a provider and runs a minimal task lifecycle. Capacity planning and employee assignment do not.
+Do not start HR, Pontaj, or Commercial from this operational identity. Persisted Execution now assigns a provider and an executor, then runs a minimal task lifecycle. Capacity planning does not.
 
 ## Owner decisions
 
@@ -444,7 +457,7 @@ Do not start People, Pontaj, or Commercial from mutable truth. Persisted Executi
 ### Can defer
 
 - LED module wattage, geometric basis for module quantity, and PSU catalog policy
-- People before or after Execution (current roadmap keeps Execution first)
+- HR / Pontaj after operational identity exists
 - Attendance model (exception calendar vs daily grid)
 - Confirmed live workcenter / machine identities, if any
 - Capacity model after provider identities exist

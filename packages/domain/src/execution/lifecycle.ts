@@ -1,10 +1,13 @@
+import { findPerson, type Person } from "../people/identity.js";
 import type { ProviderKind } from "../workcenters/catalog.js";
 import {
   COMPLETION_NOTE_MAX_LENGTH,
+  assignedExecutorStillActive,
   assignedProviderStillValid,
   dependenciesCompleted,
   liveEligibleProviders,
   measurablePlannedQuantity,
+  type AssignedExecutionExecutor,
   type AssignedExecutionProvider,
   type ExecutionPlanRecord,
   type ExecutionTask,
@@ -16,7 +19,11 @@ export const TASK_MUTATION_ERRORS = [
   "ineligible_provider",
   "reassignment_locked",
   "missing_assignment",
+  "missing_executor",
   "provider_unavailable",
+  "executor_unavailable",
+  "unknown_person",
+  "retired_person",
   "dependencies_incomplete",
   "invalid_transition",
   "invalid_quantity",
@@ -71,10 +78,47 @@ export function assignProviderToTask(
   };
 }
 
+export function assignExecutorToTask(
+  record: ExecutionPlanRecord,
+  taskId: string,
+  personId: string,
+  people: readonly Person[],
+): TaskMutationResult {
+  const task = findTask(record, taskId);
+  if (!task) {
+    return { ok: false, error: "not_found" };
+  }
+  if (task.status !== "PLANNED") {
+    return { ok: false, error: "reassignment_locked" };
+  }
+  const person = findPerson(people, personId);
+  if (!person) {
+    return { ok: false, error: "unknown_person" };
+  }
+  if (person.status !== "ACTIVE") {
+    return { ok: false, error: "retired_person" };
+  }
+  if (task.assignedExecutor?.id === person.personId) {
+    return { ok: true, record, alreadyApplied: true };
+  }
+  return {
+    ok: true,
+    alreadyApplied: false,
+    record: replaceTask(record, {
+      ...task,
+      assignedExecutor: {
+        id: person.personId,
+        label: person.displayName,
+      },
+    }),
+  };
+}
+
 export function startExecutionTask(
   record: ExecutionPlanRecord,
   taskId: string,
   startedAt: string,
+  people: readonly Person[] = [],
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -94,6 +138,13 @@ export function startExecutionTask(
   ) {
     return { ok: false, error: "provider_unavailable" };
   }
+  if (!task.assignedExecutor) {
+    return { ok: false, error: "missing_executor" };
+  }
+  if (!assignedExecutorStillActive(task.assignedExecutor, people)) {
+    return { ok: false, error: "executor_unavailable" };
+  }
+  const live = findPerson(people, task.assignedExecutor.id);
   const byId = taskIndex(record);
   if (!dependenciesCompleted(task, byId)) {
     return { ok: false, error: "dependencies_incomplete" };
@@ -105,6 +156,10 @@ export function startExecutionTask(
       ...task,
       status: "IN_PROGRESS",
       startedAt,
+      assignedExecutor: {
+        id: task.assignedExecutor.id,
+        label: live?.displayName ?? task.assignedExecutor.label,
+      },
     }),
   };
 }
@@ -235,6 +290,16 @@ export function completionFromRow(
     completedQuantityUnit,
     note,
   };
+}
+
+export function assignedExecutorFromRow(
+  id: string | null,
+  label: string | null,
+): AssignedExecutionExecutor | null {
+  if (!id || !label) {
+    return null;
+  }
+  return { id, label };
 }
 
 export function assignedProviderFromRow(

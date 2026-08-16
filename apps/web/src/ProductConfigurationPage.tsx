@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   COMPLETION_NOTE_MAX_LENGTH,
   eicLineGroupLabel,
@@ -18,6 +18,7 @@ import {
 import { FormRenderer } from "./FormRenderer";
 import {
   acceptProductionSnapshot,
+  assignExecutionTaskExecutor,
   assignExecutionTaskProvider,
   compileConfiguration,
   completeExecutionTask,
@@ -515,6 +516,9 @@ export function ProductConfigurationPage() {
               onAssignProvider={(taskId, providerId) =>
                 void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
               }
+              onAssignExecutor={(taskId, personId) =>
+                void applyTaskMutation(() => assignExecutionTaskExecutor(taskId, personId))
+              }
               onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
               onCompleteTask={(taskId, input) =>
                 void applyTaskMutation(() => completeExecutionTask(taskId, input))
@@ -633,6 +637,7 @@ function PersistedExecutionPlanSection({
   reused,
   busy,
   onAssignProvider,
+  onAssignExecutor,
   onStartTask,
   onCompleteTask,
 }: {
@@ -640,6 +645,7 @@ function PersistedExecutionPlanSection({
   reused: boolean;
   busy: boolean;
   onAssignProvider: (taskId: string, providerId: string) => void;
+  onAssignExecutor: (taskId: string, personId: string) => void;
   onStartTask: (taskId: string) => void;
   onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
 }) {
@@ -654,6 +660,7 @@ function PersistedExecutionPlanSection({
         <li>În lucru: {view.progress.inProgress}</li>
         <li>În așteptare: {view.progress.waitingDependencies}</li>
         <li>Fără furnizor: {view.progress.noProvider}</li>
+        <li>Fără executant: {view.progress.noExecutor}</li>
         {view.progress.varianceCount > 0 ? (
           <li>Abateri: {view.progress.varianceCount}</li>
         ) : null}
@@ -674,6 +681,7 @@ function PersistedExecutionPlanSection({
             task={task}
             busy={busy}
             onAssignProvider={onAssignProvider}
+            onAssignExecutor={onAssignExecutor}
             onStartTask={onStartTask}
             onCompleteTask={onCompleteTask}
           />
@@ -687,17 +695,22 @@ function ExecutionTaskCard({
   task,
   busy,
   onAssignProvider,
+  onAssignExecutor,
   onStartTask,
   onCompleteTask,
 }: {
   task: ExecutionTaskView;
   busy: boolean;
   onAssignProvider: (taskId: string, providerId: string) => void;
+  onAssignExecutor: (taskId: string, personId: string) => void;
   onStartTask: (taskId: string) => void;
   onCompleteTask: (taskId: string, input?: { completedQuantity?: number; note?: string }) => void;
 }) {
   const [providerId, setProviderId] = useState(
     task.assignedProvider?.id ?? task.eligibleProviders[0]?.id ?? "",
+  );
+  const [executorId, setExecutorId] = useState(
+    task.assignedExecutor?.id ?? task.eligibleExecutors[0]?.id ?? "",
   );
   const [completedQuantity, setCompletedQuantity] = useState(
     task.measurableQuantity ? String(task.measurableQuantity.value) : "",
@@ -725,6 +738,11 @@ function ExecutionTaskCard({
       <p>Componentă: {task.scopeLabel}</p>
       <p className="task-status">Stare: {task.statusLabel}</p>
       {task.assignedProvider ? <p>Alocat: {task.assignedProvider.label}</p> : <p>Alocare: Nealocat</p>}
+      {task.assignedExecutor ? (
+        <p>Executant: {task.assignedExecutor.label}</p>
+      ) : (
+        <p>Executant: Nealocat</p>
+      )}
       {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join("; ")}</p> : null}
       {task.eligibleProviders.length === 0 ? <p>Fără furnizor disponibil</p> : null}
       {task.measurableQuantity ? (
@@ -774,6 +792,39 @@ function ExecutionTaskCard({
             </button>
           </>
         ) : null}
+        {task.canAssignExecutor ? (
+          <>
+            <label>
+              Executant
+              <select
+                value={executorId}
+                onChange={(event) => setExecutorId(event.target.value)}
+                disabled={busy}
+              >
+                {task.eligibleExecutors.map((person) => (
+                  <option key={person.id} value={person.id}>
+                    {person.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={busy || executorId.length === 0}
+              onClick={() => onAssignExecutor(task.taskId, executorId)}
+            >
+              Alocă executant
+            </button>
+          </>
+        ) : null}
+        {task.status === "PLANNED" &&
+        task.eligibleExecutors.length === 0 &&
+        !task.assignedExecutor ? (
+          <p>
+            Nu există persoane active configurate.{" "}
+            <Link to="/admin/people">Deschide administrarea persoanelor</Link>
+          </p>
+        ) : null}
         {task.canStart ? (
           <button type="button" disabled={busy} onClick={() => onStartTask(task.taskId)}>
             Pornește
@@ -822,8 +873,16 @@ function taskActionNotice(error: string): string {
       return "Alocarea nu mai poate fi schimbată după pornire.";
     case "missing_assignment":
       return "Taskul nu are furnizor alocat.";
+    case "missing_executor":
+      return "Taskul nu are executant alocat.";
     case "provider_unavailable":
       return "Furnizorul alocat nu mai este disponibil.";
+    case "executor_unavailable":
+      return "Executantul alocat nu mai este activ.";
+    case "unknown_person":
+      return "Persoana aleasă nu există.";
+    case "retired_person":
+      return "Persoana aleasă nu mai este activă.";
     case "dependencies_incomplete":
       return "Taskul așteaptă alte operații.";
     case "invalid_transition":

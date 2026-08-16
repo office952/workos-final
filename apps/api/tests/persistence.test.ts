@@ -64,7 +64,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(5);
+    expect(count.count).toBe(6);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -72,7 +72,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(5);
+    expect(again.count).toBe(6);
     second.close();
   });
 
@@ -244,8 +244,15 @@ describe("product system persistence", () => {
     if (!backCnc) {
       throw new Error("missing back cnc task");
     }
+    const person = first.createPerson("Executor test");
+    expect(person.ok).toBe(true);
+    if (!person.ok) {
+      throw new Error("expected person");
+    }
     const assigned = first.assignExecutionTaskProvider(backCnc.taskId, MCH_CNC_4020_ID);
     expect(assigned.ok).toBe(true);
+    const executor = first.assignExecutionTaskExecutor(backCnc.taskId, person.person.personId);
+    expect(executor.ok).toBe(true);
     const started = first.startExecutionTask(backCnc.taskId);
     expect(started.ok).toBe(true);
     const completed = first.completeExecutionTask(backCnc.taskId, {
@@ -259,6 +266,7 @@ describe("product system persistence", () => {
     const stored = second.readExecutionPlan(created.record.plan.planId);
     const task = stored?.tasks.find((item) => item.taskId === backCnc.taskId);
     expect(task?.assignedProvider?.label).toBe("CNC 4020");
+    expect(task?.assignedExecutor?.label).toBe("Executor test");
     expect(task?.status).toBe("COMPLETED");
     expect(task?.startedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(task?.completedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);

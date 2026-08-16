@@ -1,3 +1,4 @@
+import { activePeople, type Person } from "../people/identity.js";
 import {
   getProductionCapability,
   INSPECT_FINISHED_LETTER_ID,
@@ -56,6 +57,11 @@ export type AssignedExecutionProvider = {
   label: string;
 };
 
+export type AssignedExecutionExecutor = {
+  id: string;
+  label: string;
+};
+
 export type ExecutionPlan = {
   planId: string;
   sourceSnapshotId: string;
@@ -89,6 +95,7 @@ export type ExecutionTask = {
   quantities: AcceptedProductionSnapshot["operations"][number]["quantities"];
   resourceDemands: AcceptedProductionSnapshot["operations"][number]["resourceDemands"];
   assignedProvider: AssignedExecutionProvider | null;
+  assignedExecutor: AssignedExecutionExecutor | null;
   startedAt: string | null;
   completedAt: string | null;
   completion: TaskCompletionEvidence | null;
@@ -112,12 +119,14 @@ export type ExecutionTaskView = ExecutionTask & {
   dependsOnLabels: readonly string[];
   waitingFor: readonly string[];
   eligibleProviders: readonly ExecutionEligibleProvider[];
+  eligibleExecutors: readonly AssignedExecutionExecutor[];
   measurableQuantity: MeasurablePlannedQuantity | null;
   requiresCompletedQuantity: boolean;
   completionOutcomeLabel: string | null;
   completedQuantityLabel: string | null;
   varianceLabel: string | null;
   canAssign: boolean;
+  canAssignExecutor: boolean;
   canStart: boolean;
   canComplete: boolean;
 };
@@ -129,6 +138,7 @@ export type ExecutionPlanProgress = {
   planned: number;
   waitingDependencies: number;
   noProvider: number;
+  noExecutor: number;
   varianceCount: number;
   status: ExecutionProgressStatus;
 };
@@ -179,6 +189,7 @@ export function materializeExecutionPlanFromSnapshot(
       quantities: operation.quantities,
       resourceDemands: operation.resourceDemands,
       assignedProvider: null,
+      assignedExecutor: null,
       startedAt: null,
       completedAt: null,
       completion: null,
@@ -208,8 +219,13 @@ export function materializeExecutionPlanFromSnapshot(
 
 export function projectExecutionPlanView(
   record: ExecutionPlanRecord,
+  people: readonly Person[] = [],
 ): ExecutionPlanView {
   const byId = new Map(record.tasks.map((task) => [task.taskId, task]));
+  const eligibleExecutors = activePeople(people).map((person) => ({
+    id: person.personId,
+    label: person.displayName,
+  }));
   const tasks = record.tasks.map((task) => {
     const eligibleProviders = liveEligibleProviders(task.requiredCapabilityId);
     const dependsOnLabels = task.dependsOnTaskIds.flatMap((id) => {
@@ -218,13 +234,16 @@ export function projectExecutionPlanView(
     });
     const waitingFor = incompleteDependencyLabels(task, byId);
     const measurableQuantity = measurablePlannedQuantity(task);
+    const assignedExecutor = projectAssignedExecutor(task, people);
     return {
       ...task,
+      assignedExecutor,
       statusLabel: executionTaskStatusLabel(task.status),
       assignmentLabel: task.assignedProvider?.label ?? "Nealocat",
       dependsOnLabels,
       waitingFor,
       eligibleProviders,
+      eligibleExecutors,
       measurableQuantity,
       requiresCompletedQuantity: measurableQuantity !== null,
       completionOutcomeLabel: task.completion
@@ -233,7 +252,8 @@ export function projectExecutionPlanView(
       completedQuantityLabel: completedQuantityLabel(task.completion),
       varianceLabel: varianceLabel(measurableQuantity, task.completion),
       canAssign: task.status === "PLANNED" && eligibleProviders.length > 0,
-      canStart: canStartTask(task, byId),
+      canAssignExecutor: task.status === "PLANNED" && eligibleExecutors.length > 0,
+      canStart: canStartTask(task, byId, people),
       canComplete: task.status === "IN_PROGRESS",
     };
   });
@@ -250,7 +270,7 @@ export function projectExecutionPlanView(
 export function summarizeExecutionProgress(
   tasks: readonly Pick<
     ExecutionTaskView,
-    "status" | "waitingFor" | "eligibleProviders" | "completion"
+    "status" | "waitingFor" | "eligibleProviders" | "completion" | "assignedExecutor"
   >[],
 ): ExecutionPlanProgress {
   return {
@@ -260,6 +280,7 @@ export function summarizeExecutionProgress(
     planned: tasks.filter((task) => task.status === "PLANNED").length,
     waitingDependencies: tasks.filter((task) => task.waitingFor.length > 0).length,
     noProvider: tasks.filter((task) => task.eligibleProviders.length === 0).length,
+    noExecutor: tasks.filter((task) => task.assignedExecutor === null).length,
     varianceCount: tasks.filter(
       (task) => task.completion?.outcome === "COMPLETED_WITH_VARIANCE",
     ).length,
@@ -453,13 +474,41 @@ export function dependenciesCompleted(
 function canStartTask(
   task: ExecutionTask,
   byId: ReadonlyMap<string, ExecutionTask>,
+  people: readonly Person[],
 ): boolean {
   return (
     task.status === "PLANNED" &&
     task.assignedProvider !== null &&
     assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider) &&
+    task.assignedExecutor !== null &&
+    assignedExecutorStillActive(task.assignedExecutor, people) &&
     dependenciesCompleted(task, byId)
   );
+}
+
+export function assignedExecutorStillActive(
+  assigned: AssignedExecutionExecutor,
+  people: readonly Person[],
+): boolean {
+  return people.some(
+    (person) => person.personId === assigned.id && person.status === "ACTIVE",
+  );
+}
+
+function projectAssignedExecutor(
+  task: ExecutionTask,
+  people: readonly Person[],
+): AssignedExecutionExecutor | null {
+  if (!task.assignedExecutor) {
+    return null;
+  }
+  if (task.status === "PLANNED") {
+    const live = people.find((person) => person.personId === task.assignedExecutor?.id);
+    if (live) {
+      return { id: live.personId, label: live.displayName };
+    }
+  }
+  return task.assignedExecutor;
 }
 
 function taskDependencyLabel(task: ExecutionTask): string {

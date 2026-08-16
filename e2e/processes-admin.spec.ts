@@ -8,7 +8,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await expect(page.getByRole("link", { name: "Sistem produs" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Procese operaționale" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Persoane" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Persoane" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Utilaje și capacitate" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-admin-home.png",

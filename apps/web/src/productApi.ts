@@ -189,6 +189,13 @@ export async function assignExecutionTaskProvider(
   return postTaskMutation(`/api/execution-tasks/${taskId}/provider`, { providerId });
 }
 
+export async function assignExecutionTaskExecutor(
+  taskId: string,
+  personId: string,
+): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
+  return postTaskMutation(`/api/execution-tasks/${taskId}/executor`, { personId });
+}
+
 export async function startExecutionTask(
   taskId: string,
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
@@ -204,7 +211,7 @@ export async function completeExecutionTask(
 
 async function postTaskMutation(
   path: string,
-  body?: { providerId?: string; completedQuantity?: number; note?: string },
+  body?: { providerId?: string; personId?: string; completedQuantity?: number; note?: string },
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
   const response = await fetch(`${baseUrl}${path}`, {
     method: "POST",

@@ -195,6 +195,22 @@ export {
   type WorkcentersAdminProjection,
 } from "./workcenters/index.js";
 export {
+  PERSON_DISPLAY_NAME_MAX_LENGTH,
+  PERSON_STATUSES,
+  activePeople,
+  createPerson,
+  findPerson,
+  generatePersonId,
+  personFromRow,
+  personStatusLabel,
+  renamePerson,
+  retirePerson,
+  type Person,
+  type PersonMutationError,
+  type PersonMutationResult,
+  type PersonStatus,
+} from "./people/index.js";
+export {
   COMPLETION_NOTE_MAX_LENGTH,
   compileExecutionPlanPreview,
   executionOperationReadinessLabel,
@@ -204,7 +220,9 @@ export {
   projectExecutionPlanPreview,
   projectExecutionPlanView,
   summarizeExecutionProgress,
+  assignExecutorToTask,
   assignProviderToTask,
+  assignedExecutorFromRow,
   assignedProviderFromRow,
   completeExecutionTask,
   completionFromRow,

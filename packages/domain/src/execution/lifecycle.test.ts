@@ -27,7 +27,9 @@ import {
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
 } from "../workcenters/catalog.js";
+import { createPerson, type Person } from "../people/identity.js";
 import {
+  assignExecutorToTask,
   assignProviderToTask,
   completeExecutionTask,
   plannedCompletionInput,
@@ -77,6 +79,26 @@ function planned() {
   return materializeExecutionPlanFromSnapshot(freeze(), {
     createdAt: "2026-08-15T15:00:00.000Z",
   });
+}
+
+function testPeople(): Person[] {
+  const created = createPerson("Executor test", { personId: "per:test-executor" });
+  if (!created.ok) {
+    throw new Error("expected test person");
+  }
+  return [created.person];
+}
+
+function withExecutor(
+  record: ReturnType<typeof planned>,
+  taskId: string,
+  people = testPeople(),
+) {
+  const assigned = assignExecutorToTask(record, taskId, people[0]!.personId, people);
+  if (!assigned.ok) {
+    throw new Error(assigned.error);
+  }
+  return { record: assigned.record, people };
 }
 
 function taskBySource(record: ReturnType<typeof planned>, scope: "FACE" | "BACK", processId: string) {
@@ -143,10 +165,12 @@ describe("minimal execution task lifecycle", () => {
     if (!assigned.ok) {
       throw new Error("expected assignment");
     }
+    const ready = withExecutor(assigned.record, backCnc.taskId);
     const started = startExecutionTask(
-      assigned.record,
+      ready.record,
       backCnc.taskId,
       "2026-08-15T16:00:00.000Z",
+      ready.people,
     );
     expect(started.ok).toBe(true);
     if (!started.ok) {
@@ -168,10 +192,15 @@ describe("minimal execution task lifecycle", () => {
     if (!assigned.ok) {
       throw new Error("expected assignment");
     }
+    expect(
+      startExecutionTask(assigned.record, backCnc.taskId, "2026-08-15T16:00:00.000Z"),
+    ).toEqual({ ok: false, error: "missing_executor" });
+    const ready = withExecutor(assigned.record, backCnc.taskId);
     const started = startExecutionTask(
-      assigned.record,
+      ready.record,
       backCnc.taskId,
       "2026-08-15T16:00:00.000Z",
+      ready.people,
     );
     expect(started.ok).toBe(true);
     if (!started.ok) {
@@ -202,28 +231,37 @@ describe("minimal execution task lifecycle", () => {
     if (!assignedLighting.ok) {
       return;
     }
+    const people = testPeople();
+    const lightingReady = withExecutor(assignedLighting.record, lighting.taskId, people);
     expect(
-      startExecutionTask(assignedLighting.record, lighting.taskId, "2026-08-15T16:10:00.000Z"),
+      startExecutionTask(
+        lightingReady.record,
+        lighting.taskId,
+        "2026-08-15T16:10:00.000Z",
+        people,
+      ),
     ).toEqual({ ok: false, error: "dependencies_incomplete" });
 
     const assignedCnc = assignProviderToTask(
-      assignedLighting.record,
+      lightingReady.record,
       backCnc.taskId,
       MCH_CNC_4020_ID,
     );
     if (!assignedCnc.ok) {
       throw new Error("expected cnc assignment");
     }
+    const cncReady = withExecutor(assignedCnc.record, backCnc.taskId, people);
     const startedCnc = startExecutionTask(
-      assignedCnc.record,
+      cncReady.record,
       backCnc.taskId,
       "2026-08-15T16:00:00.000Z",
+      people,
     );
     if (!startedCnc.ok) {
       throw new Error("expected cnc start");
     }
     expect(
-      startExecutionTask(startedCnc.record, lighting.taskId, "2026-08-15T16:10:00.000Z"),
+      startExecutionTask(startedCnc.record, lighting.taskId, "2026-08-15T16:10:00.000Z", people),
     ).toEqual({ ok: false, error: "dependencies_incomplete" });
     const completedCnc = completeExecutionTask(
       startedCnc.record,
@@ -238,6 +276,7 @@ describe("minimal execution task lifecycle", () => {
       completedCnc.record,
       lighting.taskId,
       "2026-08-15T16:10:00.000Z",
+      people,
     );
     expect(startedLighting.ok).toBe(true);
     if (!startedLighting.ok) {
@@ -258,10 +297,12 @@ describe("minimal execution task lifecycle", () => {
     if (!assigned.ok) {
       throw new Error("expected assignment");
     }
+    const ready = withExecutor(assigned.record, backCnc.taskId);
     const started = startExecutionTask(
-      assigned.record,
+      ready.record,
       backCnc.taskId,
       "2026-08-15T16:00:00.000Z",
+      ready.people,
     );
     if (!started.ok) {
       throw new Error("expected start");
@@ -307,10 +348,14 @@ describe("minimal execution task lifecycle", () => {
     if (!assignedBoth.ok) {
       throw new Error("expected back assignment");
     }
+    const people = testPeople();
+    const faceReady = withExecutor(assignedBoth.record, faceCnc.taskId, people);
+    const bothReady = withExecutor(faceReady.record, backCnc.taskId, people);
     const startedFace = startExecutionTask(
-      assignedBoth.record,
+      bothReady.record,
       faceCnc.taskId,
       "2026-08-15T16:00:00.000Z",
+      people,
     );
     if (!startedFace.ok) {
       throw new Error("expected face start");
@@ -319,6 +364,7 @@ describe("minimal execution task lifecycle", () => {
       startedFace.record,
       backCnc.taskId,
       "2026-08-15T16:01:00.000Z",
+      people,
     );
     expect(startedBack.ok).toBe(true);
     if (!startedBack.ok) {
@@ -358,10 +404,12 @@ describe("minimal execution task lifecycle", () => {
     if (!assigned.ok) {
       throw new Error("expected assignment");
     }
+    const ready = withExecutor(assigned.record, backCnc.taskId);
     const started = startExecutionTask(
-      assigned.record,
+      ready.record,
       backCnc.taskId,
       "2026-08-15T16:00:00.000Z",
+      ready.people,
     );
     if (!started.ok) {
       throw new Error("expected start");

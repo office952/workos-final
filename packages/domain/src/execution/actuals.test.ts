@@ -16,7 +16,9 @@ import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { freezeAcceptedProductionSnapshot } from "../production/snapshot.js";
 import { MCH_CNC_4020_ID, WC_LED_ASSEMBLY_ID } from "../workcenters/catalog.js";
+import { createPerson, type Person } from "../people/identity.js";
 import {
+  assignExecutorToTask,
   assignProviderToTask,
   completeExecutionTask,
   plannedCompletionInput,
@@ -77,13 +79,25 @@ function unwrap(result: TaskMutationResult): ExecutionPlanRecord {
   return result.record;
 }
 
+function testPeople(): Person[] {
+  const created = createPerson("Executor test", { personId: "per:test-executor" });
+  if (!created.ok) {
+    throw new Error("expected test person");
+  }
+  return [created.person];
+}
+
 function startAssigned(
   record: ExecutionPlanRecord,
   taskId: string,
   providerId: string,
 ): ExecutionPlanRecord {
+  const people = testPeople();
   const assigned = unwrap(assignProviderToTask(record, taskId, providerId));
-  return unwrap(startExecutionTask(assigned, taskId, "2026-08-16T12:10:00.000Z"));
+  const withExecutor = unwrap(
+    assignExecutorToTask(assigned, taskId, people[0]!.personId, people),
+  );
+  return unwrap(startExecutionTask(withExecutor, taskId, "2026-08-16T12:10:00.000Z", people));
 }
 
 describe("minimal execution completion evidence", () => {
