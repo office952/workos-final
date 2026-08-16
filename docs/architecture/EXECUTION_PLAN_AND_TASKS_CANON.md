@@ -62,15 +62,49 @@ On Complete: `IN_PROGRESS → COMPLETED` and server `completedAt`.
 
 Completing a task does not reprice EIC, mutate the snapshot, consume inventory, or change frozen quantities.
 
-## Plan status
+## Plan progress
 
 The plan row stays `PLANNED`. UI progress is derived from tasks:
+
+```text
+total / completed / inProgress / planned
+waitingDependencies
+noProvider
+```
+
+Derived status:
 
 ```text
 all PLANNED → Planificat
 any started or mixed → În lucru
 all COMPLETED → Finalizat
 ```
+
+A plan is Finalizat only when every task is COMPLETED.
+Executable work finishing while QC / pack remain without provider keeps the plan În lucru.
+
+## LETTERS none/none coverage
+
+Canonical WORKOS none/none has 12 tasks.
+
+Currently executable with the live registry:
+
+```text
+FACE CNC, BACK CNC          → CNC 4020
+VOLUME forming              → CNC Cant Litere
+PLACE LED, WIRE, PSU, IGNITION → Montaj LED / electric
+BOND, CLOSE                 → Masă asamblare 1 or 2
+```
+
+Honest current gaps, no fabricated stations:
+
+```text
+Probă uniformitate     QUALITY_CONTROL  NO_PROVIDER
+Control calitate final QUALITY_CONTROL  NO_PROVIDER
+Ambalare               PACKAGING        NO_PROVIDER
+```
+
+Reachable end state: 9 completed, 3 planned, plan remains În lucru.
 
 ## What this is not
 

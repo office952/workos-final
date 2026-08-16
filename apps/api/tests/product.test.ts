@@ -3,9 +3,11 @@ import {
   BOND_LETTER_BODY_ID,
   CANONICAL_PRODUCT_CODE,
   MCH_CNC_4020_ID,
+  MCH_CNC_CANT_LITERE_ID,
   PLACE_LED_MODULES_ID,
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
+  WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 
@@ -479,5 +481,92 @@ describe("product configuration API", () => {
         .label,
     ).toBe("Masă asamblare 2");
     expect(JSON.stringify(assemblyView)).not.toMatch(/employeeId|plannedStart|capacity|pontaj/);
+  });
+
+  it("executes the reachable LETTERS DAG and does not complete the plan with open tasks", async () => {
+    const reviewed = await compileReady();
+    const app = createApp();
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshot`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          definition: reviewed.definition,
+          reviewId: reviewed.reviewId,
+        }),
+      },
+    );
+    const snapshot = (await readBody(accepted)).snapshot as JsonObject;
+    const created = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/accepted-production-snapshots/${snapshot.snapshotId}/execution-plan`,
+      { method: "POST" },
+    );
+    const initial = (await readBody(created)).executionPlan as {
+      progress: JsonObject;
+      tasks: Array<JsonObject>;
+    };
+    expect(initial.progress).toMatchObject({
+      total: 12,
+      completed: 0,
+      planned: 12,
+      noProvider: 3,
+      status: "PLANNED",
+    });
+
+    const task = (label: string, scope: string) =>
+      initial.tasks.find((item) => item.processLabel === label && item.scopeLabel === scope) as JsonObject;
+
+    async function execute(taskId: unknown, providerId: string) {
+      const assigned = await app.request(`/api/execution-tasks/${taskId}/provider`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ providerId }),
+      });
+      expect(assigned.status).toBe(200);
+      const started = await app.request(`/api/execution-tasks/${taskId}/start`, { method: "POST" });
+      expect(started.status).toBe(200);
+      const completed = await app.request(`/api/execution-tasks/${taskId}/complete`, {
+        method: "POST",
+      });
+      expect(completed.status).toBe(200);
+      return (await readBody(completed)).executionPlan as {
+        progress: JsonObject;
+        plan: JsonObject;
+        tasks: Array<JsonObject>;
+      };
+    }
+
+    await execute(task("Debitare foaie CNC", "Față").taskId, MCH_CNC_4020_ID);
+    await execute(task("Debitare foaie CNC", "Spate").taskId, MCH_CNC_4020_ID);
+    await execute(task("Formare profil aluminiu", "Volum").taskId, MCH_CNC_CANT_LITERE_ID);
+    await execute(task("Montare module LED", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
+    await execute(task("Cablare electrică", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
+    await execute(task("Pregătire sursă de alimentare", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
+    await execute(task("Probă aprindere", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
+    await execute(task("Lipire față-volum", "Corp").taskId, WC_ASSEMBLY_01_ID);
+    const finalView = await execute(task("Închidere corp", "Corp").taskId, WC_ASSEMBLY_01_ID);
+
+    expect(finalView.progress).toEqual({
+      total: 12,
+      completed: 9,
+      inProgress: 0,
+      planned: 3,
+      waitingDependencies: 2,
+      noProvider: 3,
+      status: "IN_PROGRESS",
+    });
+    expect(finalView.plan.eicTotal).toBe(595);
+    expect(finalView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
+    expect(
+      finalView.tasks.filter(
+        (item) =>
+          item.status === "PLANNED" &&
+          (item.processLabel === "Probă uniformitate" ||
+            item.processLabel === "Control calitate final" ||
+            item.processLabel === "Ambalare"),
+      ),
+    ).toHaveLength(3);
+    expect(JSON.stringify(finalView)).not.toMatch(/employeeId|actualQty|scrap|schedule|capacity/);
   });
 });

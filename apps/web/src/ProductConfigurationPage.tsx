@@ -645,20 +645,23 @@ function PersistedExecutionPlanSection({
   return (
     <div className="execution-plan">
       <h3>{reused ? "Plan de execuție deja creat" : "Plan de execuție"}</h3>
-      <ul>
-        <li>Referință: {view.plan.planId}</li>
-        <li>Produs: {view.plan.productLabel}</li>
-        <li>Snapshot: {view.plan.sourceSnapshotId}</li>
-        <li>Taskuri: {view.plan.taskCount}</li>
+      <ul className="execution-progress">
         <li>Stare: {view.statusLabel}</li>
         <li>
-          Creat: {new Date(view.plan.createdAt).toLocaleString("ro-RO")}
+          {view.progress.completed} / {view.progress.total} finalizate
         </li>
+        <li>În lucru: {view.progress.inProgress}</li>
+        <li>În așteptare: {view.progress.waitingDependencies}</li>
+        <li>Fără furnizor: {view.progress.noProvider}</li>
+      </ul>
+      <ul className="execution-plan-meta">
+        <li>Produs: {view.plan.productLabel}</li>
         <li>
           Cost intern din snapshot: {formatMoney(view.plan.eicTotal)}{" "}
           {view.plan.eicCurrency}
           {view.plan.eicCompleteness === "PARTIAL" ? " (parțial)" : ""}
         </li>
+        <li>Referință: {view.plan.planId}</li>
       </ul>
       <ol className="production-ops">
         {view.tasks.map((task) => (
@@ -699,32 +702,15 @@ function ExecutionTaskCard({
         {task.seqLabel}. {task.processLabel}
       </h4>
       <p>Componentă: {task.scopeLabel}</p>
-      {task.quantities.map((quantity) => (
+      <p className="task-status">Stare: {task.statusLabel}</p>
+      {task.assignedProvider ? <p>Alocat: {task.assignedProvider.label}</p> : <p>Alocare: Nealocat</p>}
+      {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join("; ")}</p> : null}
+      {task.eligibleProviders.length === 0 ? <p>Fără furnizor disponibil</p> : null}
+      {task.quantities.slice(0, 1).map((quantity) => (
         <p key={`${task.taskId}-${quantity.label}`}>
           Cantitate: {formatQuantity(quantity.value)} {formatUnit(quantity.unit)}
         </p>
       ))}
-      {task.resourceDemands.map((resource) => (
-        <p key={`${task.taskId}-${resource.label}`}>
-          Resursă: {resource.label}: {formatQuantity(resource.quantity)}{" "}
-          {formatUnit(resource.unit)}
-        </p>
-      ))}
-      <p>Capabilitate: {task.requiredCapabilityLabel}</p>
-      <p>
-        Furnizori disponibili:{" "}
-        {task.eligibleProviders.length === 0
-          ? "Fără furnizor disponibil"
-          : task.eligibleProviders.map((item) => item.label).join("; ")}
-      </p>
-      <p>
-        {task.dependsOnLabels.length === 0
-          ? "Fără dependențe"
-          : `Depinde de: ${task.dependsOnLabels.join("; ")}`}
-      </p>
-      {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join("; ")}</p> : null}
-      {task.assignedProvider ? <p>Alocat: {task.assignedProvider.label}</p> : <p>Alocare: Nealocat</p>}
-      <p>Stare: {task.statusLabel}</p>
       {task.startedAt ? (
         <p>Pornit la: {new Date(task.startedAt).toLocaleString("ro-RO")}</p>
       ) : null}

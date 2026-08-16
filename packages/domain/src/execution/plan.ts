@@ -88,8 +88,19 @@ export type ExecutionTaskView = ExecutionTask & {
   canComplete: boolean;
 };
 
+export type ExecutionPlanProgress = {
+  total: number;
+  completed: number;
+  inProgress: number;
+  planned: number;
+  waitingDependencies: number;
+  noProvider: number;
+  status: ExecutionProgressStatus;
+};
+
 export type ExecutionPlanView = {
   plan: ExecutionPlan;
+  progress: ExecutionPlanProgress;
   progressStatus: ExecutionProgressStatus;
   statusLabel: string;
   tasks: readonly ExecutionTaskView[];
@@ -163,35 +174,54 @@ export function projectExecutionPlanView(
   record: ExecutionPlanRecord,
 ): ExecutionPlanView {
   const byId = new Map(record.tasks.map((task) => [task.taskId, task]));
-  const progressStatus = deriveExecutionProgress(record.tasks);
+  const tasks = record.tasks.map((task) => {
+    const eligibleProviders = liveEligibleProviders(task.requiredCapabilityId);
+    const dependsOnLabels = task.dependsOnTaskIds.flatMap((id) => {
+      const dependency = byId.get(id);
+      return dependency ? [taskDependencyLabel(dependency)] : [];
+    });
+    const waitingFor = incompleteDependencyLabels(task, byId);
+    return {
+      ...task,
+      statusLabel: executionTaskStatusLabel(task.status),
+      assignmentLabel: task.assignedProvider?.label ?? "Nealocat",
+      dependsOnLabels,
+      waitingFor,
+      eligibleProviders,
+      canAssign: task.status === "PLANNED" && eligibleProviders.length > 0,
+      canStart: canStartTask(task, byId),
+      canComplete: task.status === "IN_PROGRESS",
+    };
+  });
+  const progress = summarizeExecutionProgress(tasks);
   return {
     plan: record.plan,
-    progressStatus,
-    statusLabel: executionProgressStatusLabel(progressStatus),
-    tasks: record.tasks.map((task) => {
-      const eligibleProviders = liveEligibleProviders(task.requiredCapabilityId);
-      const dependsOnLabels = task.dependsOnTaskIds.flatMap((id) => {
-        const dependency = byId.get(id);
-        return dependency ? [taskDependencyLabel(dependency)] : [];
-      });
-      const waitingFor = incompleteDependencyLabels(task, byId);
-      return {
-        ...task,
-        statusLabel: executionTaskStatusLabel(task.status),
-        assignmentLabel: task.assignedProvider?.label ?? "Nealocat",
-        dependsOnLabels,
-        waitingFor,
-        eligibleProviders,
-        canAssign: task.status === "PLANNED" && eligibleProviders.length > 0,
-        canStart: canStartTask(task, byId),
-        canComplete: task.status === "IN_PROGRESS",
-      };
-    }),
+    progress,
+    progressStatus: progress.status,
+    statusLabel: executionProgressStatusLabel(progress.status),
+    tasks,
+  };
+}
+
+export function summarizeExecutionProgress(
+  tasks: readonly Pick<
+    ExecutionTaskView,
+    "status" | "waitingFor" | "eligibleProviders"
+  >[],
+): ExecutionPlanProgress {
+  return {
+    total: tasks.length,
+    completed: tasks.filter((task) => task.status === "COMPLETED").length,
+    inProgress: tasks.filter((task) => task.status === "IN_PROGRESS").length,
+    planned: tasks.filter((task) => task.status === "PLANNED").length,
+    waitingDependencies: tasks.filter((task) => task.waitingFor.length > 0).length,
+    noProvider: tasks.filter((task) => task.eligibleProviders.length === 0).length,
+    status: deriveExecutionProgress(tasks),
   };
 }
 
 export function deriveExecutionProgress(
-  tasks: readonly ExecutionTask[],
+  tasks: readonly { status: ExecutionTaskStatus }[],
 ): ExecutionProgressStatus {
   if (tasks.length === 0 || tasks.every((task) => task.status === "PLANNED")) {
     return "PLANNED";

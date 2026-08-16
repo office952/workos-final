@@ -43,6 +43,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/worklog/WORKOS_FINAL_ACCEPTED_PRODUCTION_SNAPSHOT_V1.md` — accepted production snapshot
 - `docs/worklog/WORKOS_FINAL_LETTERS_PERSISTED_EXECUTION_PLAN_AND_TASKS_V1.md` — persisted ExecutionPlan and tasks
 - `docs/worklog/WORKOS_FINAL_LETTERS_MINIMAL_TASK_EXECUTION_V1.md` — provider assignment and minimal Start/Complete
+- `docs/worklog/WORKOS_FINAL_LETTERS_EXECUTION_GOLDEN_PATH_COMPLETION_V1.md` — reachable LETTERS execution DAG
 
 ## Historical evidence
 

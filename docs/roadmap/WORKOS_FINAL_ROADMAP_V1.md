@@ -89,6 +89,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Accepted Production Snapshot | IMPLEMENTED_CURRENT |
 | Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT |
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
+| LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | People, Pontaj, actual consumption / costing | LATER |
 | Commercial, Quote Snapshot, Order Snapshot | LATER |
