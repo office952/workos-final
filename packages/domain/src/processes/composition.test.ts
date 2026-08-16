@@ -58,7 +58,47 @@ const vinylFinish = {
   "volume.finish": "vinyl",
 } as const;
 
+const canonicalGeometry = {
+  "face.confirmedAreaMm2": 250000,
+  "volume.depthMm": "60",
+  "volume.confirmedPerimeterMm": 12500,
+} as const;
+
 describe("letters process composition", () => {
+  it("derives cost completeness from selected cost evidence", () => {
+    const none = composeProductProcesses(frontlitPlexiAl06Template, {
+      ...noneFinish,
+      ...canonicalGeometry,
+    });
+    expect(none.costCompleteness).toBe("COMPLETE");
+    expect(none.costCompletenessLabel).toBe("Complete pentru configurația curentă");
+
+    for (const depthMm of ["30", "80", "100"] as const) {
+      const composition = composeProductProcesses(frontlitPlexiAl06Template, {
+        ...noneFinish,
+        ...canonicalGeometry,
+        "volume.depthMm": depthMm,
+      });
+      expect(composition.costCompleteness).toBe("PARTIAL");
+      expect(composition.costCompletenessLabel).toBe("Necesită calibrare");
+    }
+
+    const vinyl = composeProductProcesses(frontlitPlexiAl06Template, {
+      ...vinylFinish,
+      ...canonicalGeometry,
+    });
+    expect(vinyl.costCompleteness).toBe("PARTIAL");
+    expect(vinyl.costCompletenessLabel).toBe("Necesită calibrare");
+
+    const painted = composeProductProcesses(frontlitPlexiAl06Template, {
+      "face.finish": "none",
+      "volume.finish": "painted",
+      ...canonicalGeometry,
+    });
+    expect(painted.costCompleteness).toBe("PARTIAL");
+    expect(painted.costCompletenessLabel).toBe("Necesită calibrare");
+  });
+
   it("gives FACE a CNC requirement and BACK a distinct node of the same process", () => {
     const composition = composeProductProcesses(frontlitPlexiAl06Template, noneFinish);
     const faceCut = composition.nodes.find(
@@ -245,6 +285,11 @@ describe("letters process composition", () => {
     );
     const fromTruth = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
     expect(compileEic(aggregate).total).toBe(190.5);
+    const eic = compileEic(aggregate, fromTruth);
+    expect(eic.total).toBe(382.5);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(fromTruth.costCompleteness).toBe(eic.completeness);
+    expect(fromTruth.costCompletenessLabel).toBe("Complete pentru configurația curentă");
     expect(JSON.stringify(aggregate)).not.toMatch(/CUT_SHEET_CNC|derivedOrder/);
     expect(fromTruth.productCode).toBe(CANONICAL_PRODUCT_CODE);
     expect(fromTruth.nodes.some((item) => item.processId === CUT_SHEET_CNC_ID)).toBe(

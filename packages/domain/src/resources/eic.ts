@@ -142,6 +142,21 @@ export function compileEic(
   };
 }
 
+export function costCompletenessLabel(
+  completeness: EicResult["completeness"],
+): string {
+  switch (completeness) {
+    case "COMPLETE":
+      return "Complete pentru configurația curentă";
+    case "PARTIAL":
+      return "Necesită calibrare";
+    default: {
+      const _exhaustive: never = completeness;
+      return _exhaustive;
+    }
+  }
+}
+
 export function costEvidenceKeepsEicPartial(evidence: CostEvidence): boolean {
   return (
     evidence.classification !== "OWNER_CONFIRMED" ||

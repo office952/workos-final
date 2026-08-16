@@ -17,10 +17,12 @@ import type {
   ComponentRole,
   ComponentTypeId,
   DraftValues,
+  ProductAggregate,
   ProductTemplate,
   ProductTruth,
   TechnicalMeasurement,
 } from "../product/types.js";
+import { compileEic, costCompletenessLabel } from "../resources/eic.js";
 import {
   APPLY_SURFACE_FINISH_ID,
   BOND_LETTER_BODY_ID,
@@ -117,7 +119,7 @@ export type ProductProcessComposition = {
   technologicalProcessCompletenessLabel: string;
   lightingCalculationReadiness: LightingCalculationReadiness;
   lightingCalculationReadinessLabel: string;
-  costCompleteness: "PARTIAL";
+  costCompleteness: "PARTIAL" | "COMPLETE";
   costCompletenessLabel: string;
   executionReadiness: "NOT_IMPLEMENTED";
   executionReadinessLabel: string;
@@ -202,7 +204,7 @@ export function composeProductProcesses(
   const missingProcesses = missingProcessesFor();
   const { completeness, completenessReasons, technological } =
     compositionCompleteness(connected, missingProcesses);
-  return {
+  const composition: ProductProcessComposition = {
     productCode: template.code,
     productLabel: template.label,
     completeness,
@@ -215,12 +217,21 @@ export function composeProductProcesses(
       lightingReadinessFrom(lightingResult),
     ),
     costCompleteness: "PARTIAL",
-    costCompletenessLabel: "Parțială",
+    costCompletenessLabel: costCompletenessLabel("PARTIAL"),
     executionReadiness: "NOT_IMPLEMENTED",
     executionReadinessLabel: "Neimplementat",
     nodes: sortNodes(connected),
     derivedOrder,
     missingProcesses,
+  };
+  const eic = compileEic(
+    costAggregateFromEvaluations(template, merged, evaluations),
+    composition,
+  );
+  return {
+    ...composition,
+    costCompleteness: eic.completeness,
+    costCompletenessLabel: costCompletenessLabel(eic.completeness),
   };
 }
 
@@ -241,6 +252,30 @@ export function composeProductProcessesFromTruth(
     measurements: truth.measurements,
     evaluations,
   });
+}
+
+function costAggregateFromEvaluations(
+  template: ProductTemplate,
+  values: DraftValues,
+  evaluations: readonly ComponentEvaluation[],
+): ProductAggregate {
+  return {
+    derivedFrom: "ProductTruth",
+    productLabel: template.label,
+    familyLabel: "",
+    inscription: typeof values["root.inscription"] === "string" ? values["root.inscription"] : "",
+    components: [],
+    quantities: evaluations.flatMap((item) => item.result.quantities),
+    requirements: evaluations.flatMap((item) => item.result.requirements),
+    componentStatuses: evaluations.map(({ component, result }) => ({
+      id: component.id,
+      label: component.label,
+      typeId: result.typeId,
+      status: result.status,
+      unavailable: result.unavailable,
+    })),
+    unavailable: [...new Set(evaluations.flatMap((item) => item.result.unavailable))],
+  };
 }
 
 export function lettersProcessCompositionInspections(

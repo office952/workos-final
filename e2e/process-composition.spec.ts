@@ -16,6 +16,8 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await expect(page.getByText("Traseu tehnologic").first()).toBeVisible();
   await expect(page.getByText("Calcul iluminare").first()).toBeVisible();
   await expect(page.getByText("Parțială").first()).toBeVisible();
+  await expect(page.getByText("Costuri interne").first()).toBeVisible();
+  await expect(page.getByText("Complete pentru configurația curentă").first()).toBeVisible();
   await expect(page.getByText("Calculată").first()).toBeVisible();
   await expect(page.getByText("Regula de rezervă PSU")).toHaveCount(0);
   await expect(
@@ -94,8 +96,13 @@ test("letters critical processes complete vinyl paint and electrical routes", as
     path: "docs/worklog/screenshots/process-completion-readiness.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-process-cost-completeness-60mm.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Colantat față și volum" }).click();
+  await expect(page.getByText("Necesită calibrare").first()).toBeVisible();
   await expect(page.getByText("Finisaj față: Colantat").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Colantat").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
@@ -104,8 +111,13 @@ test("letters critical processes complete vinyl paint and electrical routes", as
     path: "docs/worklog/screenshots/process-completion-vinyl.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-process-cost-completeness-vinyl.png",
+    fullPage: true,
+  });
 
   await page.getByRole("button", { name: "Volum vopsit" }).click();
+  await expect(page.getByText("Necesită calibrare").first()).toBeVisible();
   await expect(page.getByText("Vopsire RAL").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Vopsit").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Colantat")).toHaveCount(0);

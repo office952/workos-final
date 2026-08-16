@@ -146,10 +146,10 @@ Recipe completeness is owned by `docs/architecture/SERVICE_AND_LABOR_RECIPES_CAN
 
 Readiness is reported separately:
 
-- TECHNOLOGICAL_PROCESS_COMPLETENESS
-- LIGHTING_CALCULATION_READINESS
-- COST_COMPLETENESS
-- EXECUTION_READINESS
+- TECHNOLOGICAL_PROCESS_COMPLETENESS — process-graph readiness. Independent of cost.
+- LIGHTING_CALCULATION_READINESS — Lighting calculation status.
+- COST_COMPLETENESS — projection of EIC / cost-evidence completeness for the selected configuration. Not a second cost authority. Canonical 60 mm none/none is COMPLETE. 30 / 80 / 100 mm, vinyl and RAL stay PARTIAL while their evidence is unconfirmed.
+- EXECUTION_READINESS — reserved inspection slot. Still labeled unimplemented on this surface. Execution itself is implemented elsewhere and is not owned by process composition.
 
 ## Persistence and administration
 

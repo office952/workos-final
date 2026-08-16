@@ -193,7 +193,7 @@ function compositionGroups(
             label: "Calcul iluminare",
             value: composition.lightingCalculationReadinessLabel,
           },
-          { label: "Cost intern", value: composition.costCompletenessLabel },
+          { label: "Costuri interne", value: composition.costCompletenessLabel },
           { label: "Execuție", value: composition.executionReadinessLabel },
         ],
         lines: [...composition.completenessReasons],

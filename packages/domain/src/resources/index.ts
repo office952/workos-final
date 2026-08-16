@@ -40,6 +40,7 @@ export {
   EIC_CALIBRATION_REASON,
   EIC_GEOMETRY_CONFIRMED_LABEL,
   compileEic,
+  costCompletenessLabel,
   costEvidenceKeepsEicPartial,
   missingCostEvidenceReason,
   eicLineGroupLabel,
