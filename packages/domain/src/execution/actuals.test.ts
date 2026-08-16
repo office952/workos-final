@@ -146,7 +146,7 @@ describe("minimal execution completion evidence", () => {
     expect(completedLed.plan.eicTotal).toBe(595);
     expect(completedLed.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(JSON.stringify(completedLed)).not.toMatch(
-      /employeeId|actualCost|inventory|scrap|machineHours|laborMinutes/,
+      /employeeId|"actualCost"|inventoryEngine|scrap|machineHours|laborMinutes/,
     );
   });
 

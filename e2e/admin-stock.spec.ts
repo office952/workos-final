@@ -144,7 +144,7 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
     await placeLed.getByRole("button", { name: "Finalizează" }).click();
   }
   await expect(placeLed.getByText("Modul LED 12V: 127 buc")).toBeVisible();
-  await expect(page.getByText("Cost intern din snapshot: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(page.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
   const expectedLedBalance = startedLed
     ? ledBeforeBody.item.balance - 127
     : ledBeforeBody.item.balance;

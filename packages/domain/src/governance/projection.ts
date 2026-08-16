@@ -242,6 +242,13 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "actual-internal-cost",
+        label: "Cost intern real",
+        statement:
+          "Proiecție din consum real × tarif înghețat din snapshot. Nu este EIC, Commercial, pontaj sau evaluare de stoc.",
+        state: "IMPLEMENTED",
+      },
+      {
         id: "machines",
         label: "Utilaje / workcenter",
         statement:
@@ -442,6 +449,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "execution-completion-evidence",
         label: "Evidență de finalizare",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "execution-actual-internal-cost",
+        label: "Cost intern real din execuție",
         state: "IMPLEMENTED",
       },
       {

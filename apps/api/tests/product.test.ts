@@ -739,7 +739,7 @@ describe("product configuration API", () => {
       ),
     ).toHaveLength(3);
     expect(JSON.stringify(finalView)).not.toMatch(
-      /employeeId|actualCost|inventory|scrap|schedule|capacity|pontaj/,
+      /employeeId|inventoryEngine|scrap|schedule|capacity|pontaj|costEngine/,
     );
   });
 
@@ -892,7 +892,7 @@ describe("product configuration API", () => {
       note: "Executat conform fișei",
     });
     expect(wireDone.completedQuantityLabel).toBeNull();
-    expect(JSON.stringify(ledView)).not.toMatch(/employeeId|actualCost|inventory|scrap|pontaj/);
+    expect(JSON.stringify(ledView)).not.toMatch(/employeeId|inventoryEngine|scrap|pontaj|costEngine/);
   });
 
   it("records actual consumption on complete and keeps it immutable", async () => {
@@ -980,6 +980,7 @@ describe("product configuration API", () => {
     const ledView = (await readBody(completedLed)).executionPlan as {
       plan: JsonObject;
       tasks: Array<JsonObject>;
+      actualInternalCost: JsonObject;
     };
     const ledDone = ledView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
     expect(ledDone.actualConsumption).toEqual([
@@ -998,7 +999,26 @@ describe("product configuration API", () => {
     ).toBe(125);
     expect(ledView.plan.eicTotal).toBe(595);
     expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
-    expect(JSON.stringify(ledView)).not.toMatch(/actualCost|inventory|warehouse|stock/);
+    expect(ledView.actualInternalCost.status).toBe("PARTIAL");
+    expect(ledView.actualInternalCost.calculableTotal).toBe(63.5);
+    expect(
+      (ledView.actualInternalCost.lines as Array<JsonObject>).find(
+        (item) => item.resourceId === "MAT-LED-MODULE",
+      ),
+    ).toMatchObject({
+      actualQuantity: 127,
+      rate: 0.5,
+      actualCost: 63.5,
+      status: "CALCULABLE",
+    });
+    expect(
+      (ledView.actualInternalCost.lines as Array<JsonObject>).some(
+        (item) => item.kind === "LABOR" && item.status === "UNAVAILABLE" && item.actualCost === null,
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(ledView)).not.toMatch(
+      /costEngine|quoteOrchestrator|inventoryEngine|warehouse|FIFO|margin|VAT/,
+    );
 
     const rewrite = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
       method: "POST",

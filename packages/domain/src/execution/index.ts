@@ -55,6 +55,16 @@ export {
   type ActualConsumptionLineInput,
 } from "./consumption.js";
 export {
+  ACTUAL_INTERNAL_COST_LINE_STATUSES,
+  ACTUAL_INTERNAL_COST_STATUSES,
+  actualInternalCostStatusLabel,
+  projectActualInternalCost,
+  type ActualInternalCostLine,
+  type ActualInternalCostLineStatus,
+  type ActualInternalCostProjection,
+  type ActualInternalCostStatus,
+} from "./actualCost.js";
+export {
   TASK_MUTATION_ERRORS,
   assignExecutorToTask,
   assignProviderToTask,

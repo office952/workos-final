@@ -434,7 +434,7 @@ describe("minimal execution task lifecycle", () => {
     expect(completed.record.plan.eicTotal).toBe(595);
     expect(completed.record.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(JSON.stringify(completed.record)).not.toMatch(
-      /employeeId|workerId|operatorId|plannedStart|capacity|pontaj|actualCost|scrap/,
+      /employeeId|workerId|operatorId|plannedStart|capacity|pontaj|"actualCost"|scrap/,
     );
     expect(JSON.stringify(view)).not.toMatch(/employeeId|schedule|gantt|timesheet/);
   });

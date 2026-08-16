@@ -33,6 +33,17 @@ const view: ExecutionPlanView = {
   },
   progressStatus: "PLANNED",
   statusLabel: "Planificat",
+  actualInternalCost: {
+    status: "UNAVAILABLE",
+    statusLabel: "Indisponibil",
+    currency: "EUR",
+    calculableTotal: null,
+    plannedComparableTotal: null,
+    availableDifference: null,
+    lines: [],
+    calculableCount: 0,
+    unavailableCount: 0,
+  },
   tasks: [
     {
       taskId: "task:1",
@@ -136,6 +147,9 @@ describe("ExecutionPlanPanel", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Plan de execuție" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Rezumat cost intern" })).toBeInTheDocument();
+    expect(screen.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeInTheDocument();
+    expect(screen.getByText("Cost intern real: indisponibil")).toBeInTheDocument();
     expect(screen.getByText("WORKOS")).toBeInTheDocument();
     expect(screen.getByText("0 / 2 finalizate")).toBeInTheDocument();
     expect(screen.getByText("Fără furnizor: 1")).toBeInTheDocument();
@@ -318,5 +332,85 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getByText("Modul LED 12V: 127 buc")).toBeInTheDocument();
     expect(screen.queryByLabelText("Cantitate folosită (Modul LED 12V)")).not.toBeInTheDocument();
     expect(screen.queryByText("Fără consum înregistrat")).not.toBeInTheDocument();
+  });
+
+  it("renders projected actual internal cost without computing rates in the UI", () => {
+    const priced: ExecutionPlanView = {
+      ...view,
+      actualInternalCost: {
+        status: "PARTIAL",
+        statusLabel: "Parțial",
+        currency: "EUR",
+        calculableTotal: 63.5,
+        plannedComparableTotal: 62.5,
+        availableDifference: 1,
+        calculableCount: 1,
+        unavailableCount: 1,
+        lines: [
+          {
+            resourceId: "MAT-LED-MODULE",
+            label: "Modul LED 12V",
+            kind: "MATERIAL",
+            group: "lighting",
+            groupLabel: "Iluminare",
+            plannedQuantity: 125,
+            actualQuantity: 127,
+            unit: "buc",
+            rate: 0.5,
+            currency: "EUR",
+            plannedCost: 62.5,
+            actualCost: 63.5,
+            difference: 1,
+            status: "CALCULABLE",
+            statusLabel: "Cost calculabil",
+            unavailableReason: null,
+            quantitySourceLabel: "Consum real înregistrat",
+            costSourceLabel: "Tarif înghețat din snapshot",
+            sourceTaskLabels: ["Montare module LED — Iluminare"],
+          },
+          {
+            resourceId: "LAB-BOND-LETTER-BODY",
+            label: "Lipire corp literă",
+            kind: "LABOR",
+            group: "labor",
+            groupLabel: "Manoperă",
+            plannedQuantity: 12.5,
+            actualQuantity: null,
+            unit: "m",
+            rate: 5,
+            currency: "EUR",
+            plannedCost: 62.5,
+            actualCost: null,
+            difference: null,
+            status: "UNAVAILABLE",
+            statusLabel: "Cost indisponibil",
+            unavailableReason: "Fără consum înregistrat",
+            quantitySourceLabel: "Fără consum înregistrat",
+            costSourceLabel: "Tarif înghețat din snapshot",
+            sourceTaskLabels: [],
+          },
+        ],
+      },
+    };
+
+    render(
+      <MemoryRouter>
+        <ExecutionPlanPanel
+          view={priced}
+          reused={false}
+          busy={false}
+          onAssignProvider={() => undefined}
+          onAssignExecutor={() => undefined}
+          onStartTask={() => undefined}
+          onCompleteTask={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Cost intern real: 63,50 EUR (parțial)")).toBeInTheDocument();
+    expect(screen.getByText("Diferență pe costurile disponibile: +1,00 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Modul LED 12V: Cost calculabil")).toBeInTheDocument();
+    expect(screen.getByText("Lipire corp literă: Cost indisponibil")).toBeInTheDocument();
+    expect(screen.queryByText("ActualCostProjection")).not.toBeInTheDocument();
   });
 });

@@ -135,7 +135,7 @@ test("records planned vs completed quantity on LETTERS tasks", async ({ page, re
   await expect(wire.getByText("Realizat:")).toHaveCount(0);
 
   await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
-  await expect(plan.getByText("Cost intern din snapshot: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(plan.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actuals-progress.png",
     fullPage: true,

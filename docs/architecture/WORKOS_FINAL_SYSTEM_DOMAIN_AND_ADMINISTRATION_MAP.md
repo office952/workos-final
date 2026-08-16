@@ -99,7 +99,7 @@ WorkOS Final
 │   ├── Completion evidence                 IMPLEMENTED_CURRENT / BASIC
 │   ├── Task executor assignment            IMPLEMENTED_CURRENT / BASIC
 │   ├── Actual resource consumption         IMPLEMENTED_CURRENT / BASIC
-│   ├── Actual cost                         NOT_IMPLEMENTED
+│   ├── Actual internal cost projection     IMPLEMENTED_CURRENT / BASIC
 │   └── MachineRun                          NOT_IMPLEMENTED
 ├── Inventory                               IMPLEMENTED_CURRENT / BASIC
 │   ├── Stock identity (Resources MATERIAL) IMPLEMENTED_CURRENT / BASIC
@@ -242,7 +242,7 @@ Time is not the default technical or commercial pricing authority. Labor recipes
 
 ## Execution
 
-Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, explicit task executor assignment, and actual resource consumption are IMPLEMENTED_CURRENT. Inventory stock identity and movements are IMPLEMENTED_CURRENT / BASIC. Scheduling, capacity, reservations, purchasing, actual costing, and MachineRun remain NOT_IMPLEMENTED.
+Read-only preview, Accepted Production Snapshot, persisted ExecutionPlan / ExecutionTasks, provider assignment, the minimal task lifecycle, minimal completion evidence, explicit task executor assignment, actual resource consumption, and actual internal cost projection are IMPLEMENTED_CURRENT. Inventory stock identity and movements are IMPLEMENTED_CURRENT / BASIC. Scheduling, capacity, reservations, purchasing, and MachineRun remain NOT_IMPLEMENTED.
 
 Preview feed:
 
@@ -427,7 +427,8 @@ Settings versions: keep previous active values as history after a new version is
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
-| HR, Pontaj, reservations, purchasing, actual costing | PLANNED |
+| Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |
+| HR, Pontaj, reservations, purchasing | PLANNED |
 | Commercial, Quote Snapshot, Order Snapshot | PLANNED |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |

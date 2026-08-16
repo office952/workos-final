@@ -11,6 +11,10 @@ import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 import { productionWorkFromSnapshot } from "../production/snapshot.js";
 import type { ProviderKind } from "../workcenters/catalog.js";
 import { providersForCapability } from "../workcenters/providers.js";
+import {
+  projectActualInternalCost,
+  type ActualInternalCostProjection,
+} from "./actualCost.js";
 import type { ActualConsumptionEntry } from "./consumption.js";
 
 export const EXECUTION_PLAN_SCHEMA_VERSION = 1 as const;
@@ -153,6 +157,7 @@ export type ExecutionPlanView = {
   progressStatus: ExecutionProgressStatus;
   statusLabel: string;
   tasks: readonly ExecutionTaskView[];
+  actualInternalCost: ActualInternalCostProjection;
 };
 
 export function executionPlanIdFromSnapshot(
@@ -225,6 +230,7 @@ export function materializeExecutionPlanFromSnapshot(
 export function projectExecutionPlanView(
   record: ExecutionPlanRecord,
   people: readonly Person[] = [],
+  snapshot: AcceptedProductionSnapshot | null = null,
 ): ExecutionPlanView {
   const byId = new Map(record.tasks.map((task) => [task.taskId, task]));
   const eligibleExecutors = activePeople(people).map((person) => ({
@@ -272,6 +278,7 @@ export function projectExecutionPlanView(
     progressStatus: progress.status,
     statusLabel: executionProgressStatusLabel(progress.status),
     tasks,
+    actualInternalCost: projectActualInternalCost(record, snapshot),
   };
 }
 

@@ -24,6 +24,8 @@ Commercial later owns customer price.
 
 Inventory owns stock movement and derived balance. It does not own resource identity, lot, reservation, or valuation.
 
+Actual Internal Cost consumes the same cost evidence identity, using rates frozen on the accepted production snapshot. It does not create a second rate table.
+
 ## Resource kind
 
 Live kinds:

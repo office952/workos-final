@@ -11,6 +11,7 @@ import {
   materializeExecutionPlanFromSnapshot,
   projectExecutionPlanView,
   type ActualConsumptionLineInput,
+  type ExecutionPlanRecord,
   type TaskCompletionInput,
   type TaskMutationError,
   type TaskMutationResult,
@@ -185,7 +186,7 @@ export function registerProductRoutes(
       );
       return c.json({
         created: stored.created,
-        executionPlan: projectExecutionPlanView(stored.record, runtime.listPeople()),
+        executionPlan: projectPlanView(runtime, stored.record),
       });
     },
   );
@@ -195,7 +196,7 @@ export function registerProductRoutes(
     if (!record) {
       return c.json({ error: "not_found" }, 404);
     }
-    return c.json({ executionPlan: projectExecutionPlanView(record, runtime.listPeople()) });
+    return c.json({ executionPlan: projectPlanView(runtime, record) });
   });
 
   app.post("/api/execution-tasks/:taskId/provider", async (c) => {
@@ -413,6 +414,14 @@ function readPersonId(body: unknown): string | null {
   return personId.length > 0 ? personId : null;
 }
 
+function projectPlanView(runtime: ProductSystemRuntime, record: ExecutionPlanRecord) {
+  return projectExecutionPlanView(
+    record,
+    runtime.listPeople(),
+    runtime.readProductionSnapshot(record.plan.sourceSnapshotId),
+  );
+}
+
 function respondTaskMutation(
   c: { json: (body: unknown, status?: 200 | 404 | 409 | 422) => Response },
   runtime: ProductSystemRuntime,
@@ -423,6 +432,6 @@ function respondTaskMutation(
   }
   return c.json({
     alreadyApplied: result.alreadyApplied,
-    executionPlan: projectExecutionPlanView(result.record, runtime.listPeople()),
+    executionPlan: projectPlanView(runtime, result.record),
   });
 }

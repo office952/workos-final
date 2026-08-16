@@ -131,6 +131,13 @@ describe("system governance projection", () => {
       "NOT_IMPLEMENTED",
     );
     expect(
+      governance.roadmap.find((item) => item.id === "execution-actual-internal-cost")
+        ?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.boundaries.find((item) => item.id === "actual-internal-cost")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
       governance.roadmap.find((item) => item.id === "technical-settings-write")
         ?.state,
     ).toBe("NOT_IMPLEMENTED");

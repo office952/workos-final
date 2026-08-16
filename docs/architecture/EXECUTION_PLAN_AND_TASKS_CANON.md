@@ -199,7 +199,19 @@ V1 rules:
 - Tasks with no planned resources reject any actuals payload and show no material form.
 - Plexiglas / other aggregate materials are not invented onto a task that does not already carry them.
 
-This is quantity reality for Inventory. Inventory consumes the immutable actual entry and may append one OUT movement. Execution does not own stock balance, reservation, actual cost, or commercial reprice.
+This is quantity reality for Inventory and for Actual Internal Cost. Inventory consumes the immutable actual entry and may append one OUT movement. Actual Internal Cost multiplies that quantity by the frozen snapshot rate. Execution does not own stock balance, reservation, or commercial reprice.
+
+## Actual internal cost
+
+Planned EIC and actual internal cost stay separate.
+
+```text
+actual consumption quantity
+× frozen snapshot EIC rate
+= actual internal cost line
+```
+
+No completedQuantity proxy. No Start→Complete duration. No live catalog rate after accept. Missing contributors stay UNAVAILABLE, never 0. Job status is usually PARTIAL.
 
 Read path: the existing plan/task view. Write path: `POST /api/execution-tasks/:taskId/complete`. No generic actuals CRUD.
 
@@ -212,6 +224,6 @@ Completed tasks show `Executant: <frozen label>`. That is the assigned executor,
 Not HR, Pontaj, payroll, skills, availability, or scheduling.
 Not automatic executor assignment.
 Not a substitute for missing QC / pack providers.
-Not reservation, purchasing, valuation, or actual cost. Stock movements are owned by Inventory.
+Not reservation, purchasing, valuation, payroll, or Commercial. Stock movements are owned by Inventory. Actual internal cost is a read projection, not a second cost engine.
 Not labor time, machine runtime, scrap, or rework.
 Not a generic actuals engine, correction workflow, or second material catalog.

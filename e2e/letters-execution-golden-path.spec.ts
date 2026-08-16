@@ -152,7 +152,7 @@ test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", a
   await expect(plan.getByText("În lucru: 0")).toBeVisible();
   await expect(plan.getByText("Fără furnizor: 3")).toBeVisible();
   await expect(plan.getByText("Stare: În lucru").first()).toBeVisible();
-  await expect(plan.getByText("Cost intern din snapshot: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(plan.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
 
   for (const card of [uniformity, inspect, pack]) {
     await expect(card.getByText("Stare: Planificat")).toBeVisible();

@@ -48,8 +48,8 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
   await expect(plan.getByText(/Stare: (Planificat|În lucru)/).first()).toBeVisible();
   await expect(plan.getByText("Fără furnizor disponibil").first()).toBeVisible();
-  await expect(plan.getByText("Montare module LED").first()).toBeVisible();
-  await expect(plan.getByText("Cost intern din snapshot: 595,00 EUR (parțial)")).toBeVisible();
+  await expect(plan.getByRole("heading", { name: /Montare module LED/ })).toBeVisible();
+  await expect(plan.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeVisible();
   await expect(plan.getByText(/Fără furnizor: 3/)).toBeVisible();
   await expect(plan.getByRole("tab", { name: "Toate" })).toBeVisible();
   await expect(plan.getByText("QUALITY_CONTROL")).toHaveCount(0);
@@ -93,7 +93,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
     fullPage: true,
   });
 
-  await plan.locator("details.execution-plan-meta-wrap").evaluate((el) => {
+  await plan.locator("details.execution-plan-meta-wrap", { hasText: "Detalii plan" }).evaluate((el) => {
     (el as HTMLDetailsElement).open = true;
   });
   const reference = await plan.getByText("Referință: exp:").textContent();
@@ -126,7 +126,7 @@ test("vinyl snapshot persists the frozen vinyl task", async ({ page }) => {
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   const plan = page.locator(".execution-plan");
   await expect(plan.getByText(/\/ 13 finalizate/)).toBeVisible();
-  await expect(plan.getByText("Aplicare folie").first()).toBeVisible();
+  await expect(plan.getByRole("heading", { name: /Aplicare folie/ })).toBeVisible();
   await expect(plan.getByRole("combobox", { name: "Echipament / zonă" }).first()).toBeVisible();
   await expect(plan.getByText("Vopsire RAL")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);

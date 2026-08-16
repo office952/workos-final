@@ -750,6 +750,30 @@ details summary {
   font-weight: 500;
 }
 
+.execution-actual-cost-wrap summary {
+  cursor: pointer;
+}
+
+.execution-internal-cost {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.execution-internal-cost h4,
+.actual-internal-cost-details h5 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.actual-internal-cost-details ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.actual-internal-cost-details p {
+  margin: 0.15rem 0;
+}
+
 .people-retired summary {
   cursor: pointer;
 }
