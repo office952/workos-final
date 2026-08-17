@@ -88,6 +88,7 @@ WorkOS Final
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
+│   ├── Quote Document PDF                  IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote acceptance                    IMPLEMENTED_CURRENT / BASIC
 │   ├── Order Snapshot                      IMPLEMENTED_CURRENT / BASIC
 │   └── Frozen production input             IMPLEMENTED_CURRENT / BASIC
@@ -121,7 +122,9 @@ WorkOS Final
 │   ├── Workcenter                          FOUNDATION (2 assembly tables live)
 │   └── Capacity / availability             NOT_IMPLEMENTED
 ├── Reporting                               PLANNED (projection only)
-└── Documents                               PLANNED (output, not truth)
+└── Documents
+    ├── Quote Document PDF                  IMPLEMENTED_CURRENT / BASIC
+    └── Order / invoice / production docs   PLANNED
 ```
 
 Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first product is missing. Governance projection is the honest operational status for what the pilot actually does.
@@ -135,7 +138,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, Customer/CRM |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -452,13 +455,15 @@ Settings versions: keep previous active values as history after a new version is
 | HR, Pontaj, reservations, purchasing | PLANNED |
 | Commercial price rules | IMPLEMENTED_CURRENT / BASIC |
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
+| Quote Document PDF | IMPLEMENTED_CURRENT / BASIC |
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Frozen production input | IMPLEMENTED_CURRENT / BASIC |
 | Production Release from Order | IMPLEMENTED_CURRENT / BASIC |
 | Execution from Order Release | IMPLEMENTED_CURRENT / BASIC |
 | Execution workspace | IMPLEMENTED_CURRENT / BASIC |
-| Reporting, Documents | PLANNED |
+| Quote Document PDF (Ofertă) | IMPLEMENTED_CURRENT / BASIC |
+| Reporting, Order/invoice/production documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
 | Capability kernel promotion to ACTIVE | FOUNDATION_ONLY (IDs frozen) |
 | CostEngine / QuoteOrchestrator / unified Pricing UI | REJECTED_LEGACY_PATTERN |

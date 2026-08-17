@@ -17,6 +17,19 @@ export {
   type CommercialPriceProjection,
 } from "./price.js";
 export {
+  QUOTE_DOCUMENT_ISSUER,
+  QUOTE_DOCUMENT_STATUS,
+  QUOTE_DOCUMENT_TITLE,
+  formatCustomerMoney,
+  formatFrozenOfferDate,
+  projectQuoteDocument,
+  quoteDocumentReference,
+  sanitizeDocumentText,
+  type QuoteDocumentCommercial,
+  type QuoteDocumentLine,
+  type QuoteDocumentModel,
+} from "./quoteDocument.js";
+export {
   QUOTE_SNAPSHOT_ERRORS,
   QUOTE_SNAPSHOT_SCHEMA_VERSION,
   QUOTE_SNAPSHOT_STATUSES,

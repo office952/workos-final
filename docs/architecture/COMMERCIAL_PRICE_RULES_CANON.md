@@ -9,6 +9,7 @@ Runtime wins if this document disagrees.
 EIC / INTERNAL COST
 ≠ COMMERCIAL PRICE
 ≠ QUOTE SNAPSHOT
+≠ QUOTE DOCUMENT / PDF
 ≠ ORDER
 ```
 

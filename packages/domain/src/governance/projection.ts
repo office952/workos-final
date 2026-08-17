@@ -184,7 +184,14 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "COMMERCIAL",
         label: "Commercial",
-        owns: ["preț client", "reguli comerciale", "snapshot ofertă", "acceptare ofertă", "snapshot comandă"],
+        owns: [
+          "preț client",
+          "reguli comerciale",
+          "snapshot ofertă",
+          "document ofertă PDF (proiecție)",
+          "acceptare ofertă",
+          "snapshot comandă",
+        ],
         state: "IMPLEMENTED",
       },
       {
@@ -308,6 +315,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Compilatorul de definiție / adevăr / agregat",
       "EIC generic din cereri de resurse",
       "Politica comercială canonică a companiei",
+      "Canonul documentului de ofertă",
       "Harta canonică de domenii și administrare",
       "Metadatele de afișare persistate ale Product System",
       "Proiecția de administrare Product System",
@@ -563,6 +571,11 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "quote-snapshot",
         label: "Snapshot ofertă",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "quote-document-pdf",
+        label: "Document ofertă PDF",
         state: "IMPLEMENTED",
       },
       {

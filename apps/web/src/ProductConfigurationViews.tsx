@@ -23,6 +23,7 @@ import {
   formatQuantity,
   formatUnit,
 } from "./formatDisplay";
+import { quoteDocumentUrl } from "./productApi";
 import { Notice } from "./ui/Notice";
 import { StatusChip } from "./ui/StatusChip";
 
@@ -352,6 +353,17 @@ export function CommercialPriceSection({
   );
 }
 
+function QuoteDocumentDownloadLink({ snapshot }: { snapshot: QuoteSnapshot }) {
+  return (
+    <a
+      className="button-link"
+      href={quoteDocumentUrl(snapshot.productCode, snapshot.quoteSnapshotId)}
+    >
+      Descarcă oferta PDF
+    </a>
+  );
+}
+
 export function QuoteSnapshotSection({
   price,
   snapshot,
@@ -388,15 +400,16 @@ export function QuoteSnapshotSection({
           {snapshot.commercial.policyVersion}
         </p>
         {order ? null : (
-          <>
-            <p className="page-lead">Oferta acceptată nu a fost încă transformată în comandă.</p>
-            <div className="action-row">
-              <button type="button" onClick={onCreateOrder} disabled={busy}>
-                Creează comanda
-              </button>
-            </div>
-          </>
+          <p className="page-lead">Oferta acceptată nu a fost încă transformată în comandă.</p>
         )}
+        <div className="action-row">
+          {order ? null : (
+            <button type="button" onClick={onCreateOrder} disabled={busy}>
+              Creează comanda
+            </button>
+          )}
+          <QuoteDocumentDownloadLink snapshot={snapshot} />
+        </div>
         <details className="snapshot-details">
           <summary>Detalii</summary>
           <ul>
@@ -460,6 +473,7 @@ export function QuoteSnapshotSection({
           <button type="button" onClick={onAccept} disabled={busy}>
             Acceptă oferta
           </button>
+          <QuoteDocumentDownloadLink snapshot={snapshot} />
         </div>
         <details className="snapshot-details">
           <summary>Detalii</summary>

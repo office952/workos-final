@@ -100,6 +100,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | HR, Pontaj, reservations, purchasing | LATER |
 | Commercial price rules foundation | IMPLEMENTED_CURRENT / BASIC |
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
+| Quote Document PDF | IMPLEMENTED_CURRENT / BASIC |
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Frozen production input alignment | IMPLEMENTED_CURRENT / BASIC |
@@ -108,6 +109,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Commercial Execution workspace | IMPLEMENTED_CURRENT / BASIC |
 | Operational job overview | IMPLEMENTED_CURRENT / BASIC |
 | ACM cassette second-product vertical slice | IMPLEMENTED_CURRENT / BASIC / EIC COMPLETE / QUOTE READY |
-| Reporting, Documents, full ACM, Logo | LATER |
+| Quote Document PDF (Ofertă) | IMPLEMENTED_CURRENT / BASIC |
+| Reporting, Order/invoice/production documents, full ACM, Logo | LATER |
 
 Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

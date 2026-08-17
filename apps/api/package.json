@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.0",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@workos-final/domain": "workspace:*",
     "better-sqlite3": "^12.4.1",
-    "hono": "^4.9.0"
+    "hono": "^4.9.0",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",

@@ -40,7 +40,7 @@ See `docs/architecture/ORDER_SNAPSHOT_CANON.md`.
 ## What this is not
 
 Not an Order.
-Not a PDF.
+Not a PDF authority. The customer Ofertă PDF is a derived projection of this snapshot. See `docs/architecture/QUOTE_DOCUMENT_CANON.md`.
 Not a Production Snapshot.
 Not an ExecutionPlan.
 Not a second Product Truth compiler.

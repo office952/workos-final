@@ -308,6 +308,7 @@ describe("Product configuration views", () => {
   it("renders frozen quote values from the snapshot only", () => {
     const snapshot = {
       quoteSnapshotId: "qts:hidden",
+      productCode: "PRD-TEST",
       productLabel: "Litere",
       createdAt: "2026-08-17T00:00:00.000Z",
       commercial: {
@@ -334,6 +335,10 @@ describe("Product configuration views", () => {
       />,
     );
     expect(screen.getByRole("heading", { name: "Ofertă salvată" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Descarcă oferta PDF" })).toHaveAttribute(
+      "href",
+      "/api/products/PRD-TEST/quote-snapshots/qts%3Ahidden/document",
+    );
     expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
     expect(screen.getByText("Politică comercială v1", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Acceptă oferta" })).toBeInTheDocument();
@@ -344,6 +349,7 @@ describe("Product configuration views", () => {
   it("renders accepted quote from the frozen snapshot only", () => {
     const snapshot = {
       quoteSnapshotId: "qts:hidden",
+      productCode: "PRD-TEST",
       productLabel: "Litere",
       createdAt: "2026-08-17T00:00:00.000Z",
       commercial: {
@@ -387,6 +393,7 @@ describe("Product configuration views", () => {
   it("renders frozen order values from the order snapshot only", () => {
     const snapshot = {
       quoteSnapshotId: "qts:hidden",
+      productCode: "PRD-TEST",
       productLabel: "Litere",
       createdAt: "2026-08-17T00:00:00.000Z",
       commercial: {

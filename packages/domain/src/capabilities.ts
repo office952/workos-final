@@ -122,13 +122,14 @@ export const capabilities: readonly CapabilityDefinition[] = [
   {
     id: "COMMERCIAL",
     responsibility:
-      "Owns customer commercial price, company commercial rules, Quote Snapshot freeze, Quote Acceptance, and Order Snapshot. Quote freeze carries generic frozen production-input evidence that Order copies. That evidence is not a second Product Truth, EIC, or Commercial authority. Production Release is workshop authorization, not a Commercial fact.",
+      "Owns customer commercial price, company commercial rules, Quote Snapshot freeze, Quote Acceptance, Order Snapshot, and the customer Quote Document PDF projection of a frozen Quote. Quote freeze carries generic frozen production-input evidence that Order copies. That evidence is not a second Product Truth, EIC, or Commercial authority. The PDF does not reprice. Production Release is workshop authorization, not a Commercial fact.",
     owns: [
       "customer commercial price",
       "commercial rules",
       "Quote Snapshot",
       "Quote Acceptance",
       "Order Snapshot",
+      "Quote Document projection",
     ],
     doesNotOwn: [
       "EIC authority",
@@ -145,6 +146,7 @@ export const capabilities: readonly CapabilityDefinition[] = [
       "Quote Snapshot",
       "Quote Acceptance",
       "Order Snapshot",
+      "Quote Document projection",
       "frozen production-input copy",
     ],
     currentPhase: "FOUNDATION — Commercial price rules",

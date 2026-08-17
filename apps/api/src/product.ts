@@ -5,6 +5,7 @@ import {
   compileExecutionPlanPreview,
   freezeOrderSnapshot,
   freezeQuoteSnapshot,
+  projectQuoteDocument,
   projectCommercialPrice,
   recordQuoteAcceptance,
   composeProductProcesses,
@@ -28,6 +29,7 @@ import {
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import type { ProductSystemRuntime } from "./productSystem/runtime.js";
+import { renderQuoteDocumentPdf } from "./quoteDocument/renderQuoteDocumentPdf.js";
 
 
 function asDraftValues(value: unknown): DraftValues {
@@ -207,6 +209,22 @@ export function registerProductRoutes(
     }
     return c.json({ quoteSnapshot: snapshot });
   });
+
+  app.get(
+    "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/document",
+    async (c) => {
+      const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
+      if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
+        return c.json({ error: "not_found" }, 404);
+      }
+      const model = projectQuoteDocument(snapshot);
+      const bytes = await renderQuoteDocumentPdf(model);
+      return c.body(Buffer.from(bytes), 200, {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${model.filename}"`,
+      });
+    },
+  );
 
   app.post(
     "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/acceptance",

@@ -23,6 +23,10 @@ export type TemplateProjection = {
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
+export function quoteDocumentUrl(productCode: string, quoteSnapshotId: string): string {
+  return `${baseUrl}/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}/document`;
+}
+
 async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
