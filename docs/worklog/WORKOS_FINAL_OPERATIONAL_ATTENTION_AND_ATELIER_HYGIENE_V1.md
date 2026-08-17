@@ -41,3 +41,26 @@ Screenshots:
 
 ## Out of scope (honored)
 Documents, Pontaj, RBAC, ACM, provider picker in Atelier, stuck detection, eligibility-zero attention.
+
+## Closure
+
+### Impact Harta sistemelor
+**NO OWNERSHIP CHANGE.**  
+Lucrări and Atelier remain projections over existing Order / ExecutionTask / People / Provider truth. Attention owns no business state; Atelier owns no task authority.
+
+### Impact Guvernanța sistemului
+**NO OWNERSHIP CHANGE.**  
+Attention is a derived signal only. Atelier does not invent scheduling, priority, or a second execution engine.
+
+### Roadmap
+Operational Attention + Atelier Hygiene = **DONE** after merge to `main`.
+
+### Independent code review
+**PASS** on implementation (`ec68a84`).
+
+### Explicit non-goals kept
+- No DB migration  
+- No new mutation endpoint  
+- No scheduling / priority / dispatch  
+- No Provider workflow added in Atelier  
+- Claim-on-Start and Execution lifecycle unchanged
