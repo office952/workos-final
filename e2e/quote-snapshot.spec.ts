@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { selectOrCreateCustomer } from "./helpers/customers";
 
 const productName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -33,12 +34,14 @@ test("freezes a quote from complete commercial price without production acceptan
   });
   const quote = page.locator(".quote-section");
   await expect(quote.getByRole("button", { name: "Îngheață oferta" })).toBeVisible();
+  await selectOrCreateCustomer(page, "Client Demo LETTERS");
   await quote.screenshot({
     path: "docs/worklog/screenshots/letters-quote-action.png",
   });
   await quote.getByRole("button", { name: "Îngheață oferta" }).click();
   await expect(quote.getByRole("heading", { name: "Ofertă salvată" })).toBeVisible();
   await expect(quote.getByText("Preț final: 624,82 EUR")).toBeVisible();
+  await expect(quote.getByText("Client: Client Demo LETTERS")).toBeVisible();
   await expect(quote.getByText("382,50 EUR")).toBeVisible();
   await expect(quote.getByText("35% · 133,88 EUR")).toBeVisible();
   await expect(quote.getByText("516,38 EUR")).toBeVisible();
@@ -71,6 +74,7 @@ test("blocks quote freeze when 30 mm commercial is partial", async ({ page }) =>
 test("keeps frozen quote readable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await confirmLetters(page, { inscription: "QTSN", depth: "60" });
+  await selectOrCreateCustomer(page, "Client Demo LETTERS");
   await page.locator(".quote-section").getByRole("button", { name: "Îngheață oferta" }).click();
   await expect(page.getByText("Preț final: 624,82 EUR")).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > 390);

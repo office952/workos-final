@@ -5,6 +5,8 @@ import {
   type ExecutionPlanRecord,
   type InventoryItemDetail,
   type InventoryStockProjection,
+  type Customer,
+  type CustomerMutationResult,
   type Person,
   type PersonMutationResult,
   projectExecutionPlanView,
@@ -37,6 +39,13 @@ import {
   readInventoryProjection,
   type InventoryAdjustmentResult,
 } from "../inventory/store.js";
+import {
+  getCustomer,
+  listCustomers,
+  persistCreatedCustomer,
+  persistRenamedCustomer,
+  persistRetiredCustomer,
+} from "../customers/store.js";
 import {
   listPeople,
   persistCreatedPerson,
@@ -115,10 +124,15 @@ export type ProductSystemRuntime = {
     note?: string,
   ): InventoryAdjustmentResult;
   listPeople(): Person[];
+  listCustomers(): Customer[];
+  getCustomer(customerId: string): Customer | null;
   listJobOverview(): JobOverviewProjection;
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
   retirePerson(personId: string): PersonMutationResult;
+  createCustomer(displayName: string): CustomerMutationResult;
+  renameCustomer(customerId: string, displayName: string): CustomerMutationResult;
+  retireCustomer(customerId: string): CustomerMutationResult;
   close(): void;
 };
 
@@ -195,6 +209,12 @@ export function createProductSystemRuntime(
     listPeople() {
       return listPeople(db);
     },
+    listCustomers() {
+      return listCustomers(db);
+    },
+    getCustomer(customerId) {
+      return getCustomer(db, customerId);
+    },
     listJobOverview() {
       const people = listPeople(db);
       const jobs = listOrderSnapshots(db).map((order) => {
@@ -218,6 +238,15 @@ export function createProductSystemRuntime(
     },
     retirePerson(personId) {
       return persistRetiredPerson(db, personId, new Date().toISOString());
+    },
+    createCustomer(displayName) {
+      return persistCreatedCustomer(db, displayName);
+    },
+    renameCustomer(customerId, displayName) {
+      return persistRenamedCustomer(db, customerId, displayName);
+    },
+    retireCustomer(customerId) {
+      return persistRetiredCustomer(db, customerId, new Date().toISOString());
     },
     completeExecutionTask(taskId, input) {
       return persistTaskComplete(db, taskId, new Date().toISOString(), input);

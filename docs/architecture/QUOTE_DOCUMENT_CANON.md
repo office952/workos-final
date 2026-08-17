@@ -11,7 +11,7 @@ QUOTE SNAPSHOT          immutable commercial + technical freeze
     → PDF bytes         render of that presentation
 ```
 
-Never inverse. The PDF does not own price, Product Truth, customer identity, or Order state.
+Never inverse. The PDF does not own price, Product Truth, live Customer, or Order state.
 
 ## What this is
 
@@ -19,6 +19,7 @@ A Romanian **Ofertă** derived only from a persisted Quote Snapshot:
 
 - offer reference and frozen date
 - product name and inscription when present
+- frozen Client display name when the Quote has one
 - customer-safe configuration and measurements
 - frozen net / VAT / gross
 
@@ -27,7 +28,7 @@ A Romanian **Ofertă** derived only from a persisted Quote Snapshot:
 Not a pricing engine.
 Not a second Quote model.
 Not a mutable document authority.
-Not Customer / CRM.
+Not a live Customer reread or CRM.
 Not an Order PDF, production sheet, invoice, or proforma.
 
 ## Read law
@@ -48,7 +49,9 @@ Date is the UTC calendar date of frozen `createdAt`. Regeneration does not stamp
 
 ## Customer and company
 
-There is no Customer / CRM domain. The document stays neutral when client identity is absent.
+Client comes from `quoteSnapshot.customer.displayName` when present.
+The document does not reread the live Customer catalog.
+Historical Quotes without customer omit the Client line.
 
 Issuer text is the accepted brand `WorkOS Final`. Legal CUI, address, VAT number, and logo are not invented here.
 

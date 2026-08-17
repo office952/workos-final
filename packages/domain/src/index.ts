@@ -222,6 +222,25 @@ export {
   type PersonStatus,
 } from "./people/index.js";
 export {
+  CUSTOMER_DISPLAY_NAME_MAX_LENGTH,
+  CUSTOMER_STATUSES,
+  activeCustomers,
+  copyFrozenCustomerIdentity,
+  createCustomer,
+  customerFromRow,
+  customerStatusLabel,
+  findCustomer,
+  freezeCustomerIdentity,
+  generateCustomerId,
+  renameCustomer,
+  retireCustomer,
+  type Customer,
+  type CustomerMutationError,
+  type CustomerMutationResult,
+  type CustomerStatus,
+  type FrozenCustomerIdentity,
+} from "./customers/index.js";
+export {
   COMPLETION_NOTE_MAX_LENGTH,
   compileExecutionPlanPreview,
   executionOperationReadinessLabel,

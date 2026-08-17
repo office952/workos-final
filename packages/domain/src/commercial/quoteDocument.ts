@@ -32,6 +32,7 @@ export type QuoteDocumentModel = {
   status: typeof QUOTE_DOCUMENT_STATUS;
   productName: string;
   inscription?: string;
+  customerDisplayName?: string;
   configuration: readonly QuoteDocumentLine[];
   technicalSummary: readonly QuoteDocumentLine[];
   commercial: QuoteDocumentCommercial;
@@ -70,6 +71,9 @@ export function projectQuoteDocument(snapshot: QuoteSnapshot): QuoteDocumentMode
   const configuration = projectConfigurationLines(snapshot.truth.values, measurementFieldIds);
   const technicalSummary = projectTechnicalLines(snapshot.truth.measurements);
   const inscription = sanitizeDocumentText(snapshot.inscription);
+  const customerDisplayName = snapshot.customer
+    ? sanitizeDocumentText(snapshot.customer.displayName)
+    : "";
   return {
     title: QUOTE_DOCUMENT_TITLE,
     issuerName: QUOTE_DOCUMENT_ISSUER,
@@ -78,6 +82,7 @@ export function projectQuoteDocument(snapshot: QuoteSnapshot): QuoteDocumentMode
     status: QUOTE_DOCUMENT_STATUS,
     productName: sanitizeDocumentText(snapshot.productLabel),
     ...(inscription ? { inscription } : {}),
+    ...(customerDisplayName ? { customerDisplayName } : {}),
     configuration,
     technicalSummary,
     commercial: projectCommercialLines(snapshot),

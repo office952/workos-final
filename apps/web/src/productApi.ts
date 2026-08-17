@@ -171,11 +171,19 @@ export async function acceptProductionSnapshot(
 export async function createQuoteSnapshot(
   productCode: string,
   definition: ProductDefinition,
+  customerId: string,
 ): Promise<
   | { ok: true; created: boolean; quoteSnapshot: QuoteSnapshot }
   | {
       ok: false;
-      reason: "not_ready" | "review_mismatch" | "incomplete_offer" | "unavailable_offer";
+      reason:
+        | "not_ready"
+        | "review_mismatch"
+        | "incomplete_offer"
+        | "unavailable_offer"
+        | "missing_customer"
+        | "customer_unavailable"
+        | "invalid_customer";
       definition?: ProductDefinition;
       message?: string;
     }
@@ -186,6 +194,7 @@ export async function createQuoteSnapshot(
     body: JSON.stringify({
       definition,
       reviewId: definition.reviewId,
+      customerId,
     }),
   });
   const body = await readJson<{
@@ -202,7 +211,14 @@ export async function createQuoteSnapshot(
   if (response.status === 422 && body.definition) {
     return { ok: false, reason: "not_ready", definition: body.definition };
   }
-  if (response.status === 422 && (body.error === "incomplete_offer" || body.error === "unavailable_offer")) {
+  if (
+    response.status === 422 &&
+    (body.error === "incomplete_offer" ||
+      body.error === "unavailable_offer" ||
+      body.error === "missing_customer" ||
+      body.error === "customer_unavailable" ||
+      body.error === "invalid_customer")
+  ) {
     return {
       ok: false,
       reason: body.error,

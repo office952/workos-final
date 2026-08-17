@@ -38,6 +38,15 @@ const acmValues = {
   "face.foldCount": "2",
 };
 
+async function createCustomer(app: ReturnType<typeof createApp>, displayName: string) {
+  const created = await app.request("/api/customers", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ displayName }),
+  });
+  return ((await readBody(created)).customer as JsonObject).customerId as string;
+}
+
 async function freezeQuote(productCode: string, values: Record<string, unknown>) {
   const app = createApp();
   const compiled = await app.request(`/api/products/${productCode}/compile`, {
@@ -52,6 +61,7 @@ async function freezeQuote(productCode: string, values: Record<string, unknown>)
     body: JSON.stringify({
       definition: compiledBody.definition,
       reviewId: compiledBody.reviewId,
+      customerId: await createCustomer(app, productCode.includes("ACM") ? "Client Demo ACM" : "Client Demo LETTERS"),
     }),
   });
   const body = await readBody(created);
@@ -82,6 +92,8 @@ describe("quote document PDF", () => {
     expect(text).toContain("Litere volumetrice luminoase");
     expect(text).toContain("WORKOS ăâîșț");
     expect(text).toContain("60 mm");
+    expect(text).toContain("Client");
+    expect(text).toContain("Client Demo LETTERS");
     expect(text).not.toMatch(/382,50|EIC|AI_DECISION|markup|qts:/);
     expect(response.headers.get("content-disposition")).toContain(model.filename);
   });
@@ -97,8 +109,29 @@ describe("quote document PDF", () => {
     expect(text).toContain("40 mm");
     expect(text).toContain("Cornier oțel");
     expect(text).toContain("118,66 EUR");
+    expect(text).toContain("Client Demo ACM");
     expect(text).not.toMatch(/72,644|AI_DECISION|PRD-ACM|resourceId/);
     expect(String.fromCharCode(...bytes.slice(0, 4))).toBe("%PDF");
+  });
+
+  it("keeps the frozen customer name after the live customer is renamed", async () => {
+    const { app, snapshot } = await freezeQuote(CANONICAL_PRODUCT_CODE, lettersValues);
+    const customer = snapshot.customer as JsonObject;
+    expect(customer.displayName).toBe("Client Demo LETTERS");
+    await app.request(`/api/customers/${customer.customerId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ displayName: "Client Demo NOU" }),
+    });
+    const reread = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${snapshot.quoteSnapshotId}`,
+    );
+    const stored = (await readBody(reread)).quoteSnapshot as JsonObject;
+    expect((stored.customer as JsonObject).displayName).toBe("Client Demo LETTERS");
+    const model = projectQuoteDocument(stored as never);
+    expect(model.customerDisplayName).toBe("Client Demo LETTERS");
+    expect(quoteDocumentDrawLines(model).join("\n")).toContain("Client Demo LETTERS");
+    expect(quoteDocumentDrawLines(model).join("\n")).not.toContain("Client Demo NOU");
   });
 
   it("returns 404 for a missing snapshot and does not accept client prices", async () => {

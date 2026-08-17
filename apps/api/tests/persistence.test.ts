@@ -71,7 +71,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(13);
+    expect(count.count).toBe(14);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -79,7 +79,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(13);
+    expect(again.count).toBe(14);
     second.close();
   });
 
@@ -202,6 +202,76 @@ describe("product system persistence", () => {
     expect(stored?.productionInput.contentHash).toBe(frozen.snapshot.productionInput.contentHash);
     expect(stored?.createdAt).toBe("2026-08-17T00:00:00.000Z");
     expect(second).not.toHaveProperty("updateQuoteSnapshot");
+    expect(stored?.customer).toBeUndefined();
+    second.close();
+  });
+
+  it("keeps frozen quote customer after the live customer is renamed", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const createdCustomer = first.createCustomer("SC Exemplu SRL");
+    expect(createdCustomer.ok).toBe(true);
+    if (!createdCustomer.ok) {
+      return;
+    }
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const eic = compileEic(aggregate, composition);
+    const frozen = freezeQuoteSnapshot(
+      truth,
+      aggregate,
+      composition,
+      eic,
+      projectCommercialPrice(eic),
+      {
+        createdAt: "2026-08-17T00:00:00.000Z",
+        customer: {
+          customerId: createdCustomer.customer.customerId,
+          displayName: createdCustomer.customer.displayName,
+        },
+      },
+    );
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    first.persistQuoteSnapshot(frozen.snapshot);
+    first.renameCustomer(createdCustomer.customer.customerId, "SC Exemplu Nou SRL");
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readQuoteSnapshot(frozen.snapshot.quoteSnapshotId);
+    expect(stored?.customer).toEqual({
+      customerId: createdCustomer.customer.customerId,
+      displayName: "SC Exemplu SRL",
+    });
+    expect(second.getCustomer(createdCustomer.customer.customerId)?.displayName).toBe(
+      "SC Exemplu Nou SRL",
+    );
     second.close();
   });
 

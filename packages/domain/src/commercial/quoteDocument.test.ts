@@ -153,6 +153,22 @@ describe("quote document projection", () => {
       grossPrice: 624.82,
     });
     expect(document.filename).toBe(`Oferta-${document.reference}.pdf`);
+    expect(document.customerDisplayName).toBeUndefined();
+  });
+
+  it("projects the frozen customer display name and ignores a later rename", () => {
+    const snapshot = freezeLetters();
+    const withCustomer: QuoteSnapshot = {
+      ...snapshot,
+      customer: { customerId: "cus:letters", displayName: "Client Demo LETTERS" },
+    };
+    const renamedLive: QuoteSnapshot = {
+      ...withCustomer,
+      customer: { customerId: "cus:letters", displayName: "Client Demo NOU" },
+    };
+    expect(projectQuoteDocument(withCustomer).customerDisplayName).toBe("Client Demo LETTERS");
+    expect(projectQuoteDocument(snapshot).customerDisplayName).toBeUndefined();
+    expect(projectQuoteDocument(renamedLive).customerDisplayName).toBe("Client Demo NOU");
   });
 
   it("projects ACM customer facts without a product-code branch", () => {

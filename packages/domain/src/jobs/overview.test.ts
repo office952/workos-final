@@ -224,4 +224,23 @@ describe("job overview projection", () => {
     expect(filterJobOverview(overview, "COMPLETED")[0]?.inscription).toBe("B");
     expect(JSON.stringify(overview)).not.toMatch(/PILOT|contentHash|schemaVersion/);
   });
+
+  it("projects frozen customer display name from the order snapshot", () => {
+    const withCustomer = projectJobOverviewItem({
+      order: {
+        ...order("WORKOS"),
+        customer: { customerId: "cus:letters", displayName: "Client Demo LETTERS" },
+      },
+      release: null,
+      planView: null,
+    });
+    const legacy = projectJobOverviewItem({
+      order: order("WORKOS"),
+      release: null,
+      planView: null,
+    });
+    expect(withCustomer.customerDisplayName).toBe("Client Demo LETTERS");
+    expect(legacy.customerDisplayName).toBeNull();
+    expect(withCustomer.inscription).toBe("WORKOS");
+  });
 });

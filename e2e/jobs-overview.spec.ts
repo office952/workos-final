@@ -50,7 +50,10 @@ test("operator can scan commercial jobs and open the correct workspace", async (
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Lucrări" })).toBeVisible();
-  await expect(page.getByText(orderOnly.inscription)).toBeVisible();
+  await expect(jobRow(page, orderOnly.inscription)).toBeVisible();
+  await expect(jobRow(page, orderOnly.inscription)).toContainText(
+    `Client: Client ${orderOnly.inscription}`,
+  );
   await expect(jobRow(page, orderOnly.inscription)).toContainText("Comandă creată");
   await expect(jobRow(page, orderOnly.inscription)).toContainText("Eliberează pentru producție");
   await expect(jobRow(page, released.inscription)).toContainText("Eliberată pentru producție");
@@ -67,16 +70,16 @@ test("operator can scan commercial jobs and open the correct workspace", async (
     path: "docs/worklog/screenshots/letters-jobs-needs-action.png",
     fullPage: true,
   });
-  await jobRow(page, released.inscription).screenshot({
+  await page.locator(".jobs-list li", { hasText: released.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-released.png",
   });
-  await jobRow(page, active.inscription).screenshot({
+  await page.locator(".jobs-list li", { hasText: active.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-in-progress.png",
   });
-  await jobRow(page, completed.inscription).screenshot({
+  await page.locator(".jobs-list li", { hasText: completed.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-completed.png",
   });
-  await jobRow(page, orderOnly.inscription).screenshot({
+  await page.locator(".jobs-list li", { hasText: orderOnly.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-attention.png",
   });
 
@@ -100,8 +103,8 @@ test("operator can scan commercial jobs and open the correct workspace", async (
   await expect(jobRow(page, planned.inscription)).toContainText("0 / 12 finalizate");
 
   await page.getByRole("button", { name: "Finalizate" }).click();
-  await expect(page.getByText(completed.inscription)).toBeVisible();
-  await expect(page.getByText(active.inscription)).toHaveCount(0);
+  await expect(jobRow(page, completed.inscription)).toBeVisible();
+  await expect(jobRow(page, active.inscription)).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Toate" }).click();

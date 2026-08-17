@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { selectOrCreateCustomer } from "./helpers/customers";
 
 test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({ page }) => {
   await page.goto("/");
@@ -103,9 +104,11 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
 
   const quote = page.locator(".quote-section");
   await expect(quote.getByRole("button", { name: "Îngheață oferta" })).toBeVisible();
+  await selectOrCreateCustomer(page, "Client Demo ACM");
   await quote.getByRole("button", { name: "Îngheață oferta" }).click();
-  await expect(quote.getByRole("heading", { name: "Ofertă salvată" })).toBeVisible();
+  await expect(quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ })).toBeVisible();
   await expect(quote.getByText("Preț final: 118,66 EUR")).toBeVisible();
+  await expect(quote.getByText("Client: Client Demo ACM")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-quote-frozen.png",
     fullPage: true,

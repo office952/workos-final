@@ -37,7 +37,20 @@ async function compileReady(app: ReturnType<typeof createApp>, inscription: stri
   };
 }
 
-async function createOrder(app: ReturnType<typeof createApp>, inscription: string) {
+async function createCustomer(app: ReturnType<typeof createApp>, displayName: string) {
+  const created = await app.request("/api/customers", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ displayName }),
+  });
+  return ((await readBody(created)).customer as JsonObject).customerId as string;
+}
+
+async function createOrder(
+  app: ReturnType<typeof createApp>,
+  inscription: string,
+  customerName = `Client ${inscription}`,
+) {
   const reviewed = await compileReady(app, inscription);
   const createdQuote = await app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`, {
     method: "POST",
@@ -45,6 +58,7 @@ async function createOrder(app: ReturnType<typeof createApp>, inscription: strin
     body: JSON.stringify({
       definition: reviewed.definition,
       reviewId: reviewed.reviewId,
+      customerId: await createCustomer(app, customerName),
     }),
   });
   const quoteId = ((await readBody(createdQuote)).quoteSnapshot as JsonObject)
@@ -209,6 +223,7 @@ describe("job overview API", () => {
       stageLabel: "Comandă creată",
       nextActionLabel: "Eliberează pentru producție",
       needsAttention: true,
+      customerDisplayName: "Client JOBA",
     });
     expect(String(byInscription.JOBA.href)).toContain("?order=");
     expect(byInscription.JOBB).toMatchObject({

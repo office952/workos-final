@@ -1,8 +1,10 @@
+import { useState } from "react";
 import {
   commercialCompletenessLabel,
   eicLineGroupLabel,
   type AcceptedProductionSnapshot,
   type CommercialPriceProjection,
+  type Customer,
   type EicLine,
   type EicLineGroup,
   type EicResult,
@@ -24,6 +26,7 @@ import {
   formatUnit,
 } from "./formatDisplay";
 import { quoteDocumentUrl } from "./productApi";
+import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 import { StatusChip } from "./ui/StatusChip";
 
@@ -364,6 +367,79 @@ function QuoteDocumentDownloadLink({ snapshot }: { snapshot: QuoteSnapshot }) {
   );
 }
 
+function FrozenCustomerLine({
+  customer,
+}: {
+  customer?: { displayName: string };
+}) {
+  if (!customer?.displayName) {
+    return null;
+  }
+  return <p>Client: {customer.displayName}</p>;
+}
+
+function CustomerSelectionFields({
+  customers,
+  selectedCustomerId,
+  busy,
+  onSelectCustomer,
+  onCreateCustomer,
+}: {
+  customers: readonly Customer[];
+  selectedCustomerId: string;
+  busy: boolean;
+  onSelectCustomer: (customerId: string) => void;
+  onCreateCustomer: (displayName: string) => Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const active = customers.filter((customer) => customer.status === "ACTIVE");
+
+  async function submitNewCustomer(displayName: string) {
+    await onCreateCustomer(displayName);
+    setName("");
+  }
+  return (
+    <div className="customer-select">
+      <Field label="Client">
+        <select
+          value={selectedCustomerId}
+          disabled={busy}
+          onChange={(event) => onSelectCustomer(event.target.value)}
+        >
+          <option value="">Alege clientul</option>
+          {active.map((customer) => (
+            <option key={customer.customerId} value={customer.customerId}>
+              {customer.displayName}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <form
+        className="people-create"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const trimmed = name.trim();
+          if (trimmed.length === 0) {
+            return;
+          }
+          void submitNewCustomer(trimmed);
+        }}
+      >
+        <Field label="Nume client">
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={busy}
+          />
+        </Field>
+        <button type="submit" disabled={busy || name.trim().length === 0}>
+          Adaugă client
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export function QuoteSnapshotSection({
   price,
   snapshot,
@@ -371,6 +447,10 @@ export function QuoteSnapshotSection({
   order,
   reused,
   busy,
+  customers = [],
+  selectedCustomerId = "",
+  onSelectCustomer,
+  onCreateCustomer,
   onFreeze,
   onAccept,
   onCreateOrder,
@@ -381,6 +461,10 @@ export function QuoteSnapshotSection({
   order?: OrderSnapshot;
   reused: boolean;
   busy: boolean;
+  customers?: readonly Customer[];
+  selectedCustomerId?: string;
+  onSelectCustomer?: (customerId: string) => void;
+  onCreateCustomer?: (displayName: string) => Promise<void>;
   onFreeze: () => void;
   onAccept: () => void;
   onCreateOrder: () => void;
@@ -395,6 +479,7 @@ export function QuoteSnapshotSection({
         <p className="commercial-gross">
           Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
         </p>
+        <FrozenCustomerLine customer={snapshot.customer} />
         <p>
           Acceptată {new Date(acceptance.acceptedAt).toLocaleString("ro-RO")} · Politică comercială v
           {snapshot.commercial.policyVersion}
@@ -433,6 +518,7 @@ export function QuoteSnapshotSection({
         <p className="commercial-gross">
           Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
         </p>
+        <FrozenCustomerLine customer={snapshot.customer} />
         <dl className="commercial-breakdown">
           <div>
             <dt>Cost intern</dt>
@@ -503,8 +589,17 @@ export function QuoteSnapshotSection({
         Îngheață prețul și configurația confirmate. Nu înseamnă acceptare de client și nu pornește
         producția.
       </p>
+      {onSelectCustomer && onCreateCustomer ? (
+        <CustomerSelectionFields
+          customers={customers}
+          selectedCustomerId={selectedCustomerId}
+          busy={busy}
+          onSelectCustomer={onSelectCustomer}
+          onCreateCustomer={onCreateCustomer}
+        />
+      ) : null}
       <div className="action-row">
-        <button type="button" onClick={onFreeze} disabled={busy}>
+        <button type="button" onClick={onFreeze} disabled={busy || !selectedCustomerId}>
           Îngheață oferta
         </button>
       </div>
@@ -533,6 +628,7 @@ export function OrderSnapshotSection({
       <p className="commercial-gross">
         Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
       </p>
+      <FrozenCustomerLine customer={snapshot.customer} />
       <dl className="commercial-breakdown">
         <div>
           <dt>Cost intern</dt>

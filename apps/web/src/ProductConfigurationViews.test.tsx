@@ -322,6 +322,7 @@ describe("Product configuration views", () => {
         currency: "EUR",
       },
       eic: { total: 382.5, currency: "EUR" },
+      customer: { customerId: "cus:hidden", displayName: "Client Demo LETTERS" },
     } as unknown as QuoteSnapshot;
     render(
       <QuoteSnapshotSection
@@ -335,6 +336,8 @@ describe("Product configuration views", () => {
       />,
     );
     expect(screen.getByRole("heading", { name: "Ofertă salvată" })).toBeInTheDocument();
+    expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
+    expect(screen.queryByText("cus:hidden")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Descarcă oferta PDF" })).toHaveAttribute(
       "href",
       "/api/products/PRD-TEST/quote-snapshots/qts%3Ahidden/document",

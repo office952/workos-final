@@ -85,9 +85,13 @@ WorkOS Final
 │   └── Product process composition         FOUNDATION_ONLY (deterministic, not ExecutionPlan)
 ├── Governance / owner projections          IMPLEMENTED_CURRENT (read-only)
 ├── Analyzer                                NOT_IMPLEMENTED (separate app; proposal only)
+├── Customer / identitate comercială        IMPLEMENTED_CURRENT / BASIC
+│   ├── Customer registry                   IMPLEMENTED_CURRENT / BASIC
+│   └── CRM / contacts / billing            NOT_IMPLEMENTED
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
+│   ├── Frozen customer identity            IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Document PDF                  IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote acceptance                    IMPLEMENTED_CURRENT / BASIC
 │   ├── Order Snapshot                      IMPLEMENTED_CURRENT / BASIC
@@ -138,7 +142,8 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, Customer/CRM |
+| Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer identity, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, CRM |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -196,6 +201,18 @@ Minimal Person registry is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/arc
 Admin: `/admin` → Persoane → `/admin/people`.
 
 Person supplies operational executor identity only.
+
+## Customer / identitate comercială
+
+Minimal Customer registry is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/CUSTOMER_IDENTITY_CANON.md`.
+
+Admin: `/admin` → Comercial → Clienți → `/admin/customers`.
+
+Customer supplies reusable commercial identity only. Quote/Order freeze the name used by that job.
+
+```text
+Customer catalog  ≠  Quote customer snapshot  ≠  CRM
+```
 
 ```text
 Person  ≠  Provider  ≠  authenticated user
@@ -366,6 +383,8 @@ Inside Administrare, group only real current pages:
 
 ```text
 Administrare
+├── Comercial
+│   └── Clienți
 ├── Operațiuni
 │   └── Persoane
 ├── Atelier

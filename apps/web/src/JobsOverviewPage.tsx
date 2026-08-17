@@ -111,6 +111,9 @@ export function JobsOverviewPage() {
                   <div className="jobs-identity">
                     <Link to={job.href}>{job.inscription}</Link>
                     <span>{job.productLabel}</span>
+                    {job.customerDisplayName ? (
+                      <span className="jobs-customer">Client: {job.customerDisplayName}</span>
+                    ) : null}
                   </div>
                   <div className="jobs-status">
                     <StatusChip label={job.stageLabel} tone={stageTone(job.stage)} />

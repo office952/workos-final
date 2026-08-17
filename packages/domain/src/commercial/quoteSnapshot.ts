@@ -6,6 +6,12 @@ import {
   type FrozenProductionInput,
   type FrozenQuantity,
 } from "../production/snapshot.js";
+import {
+  freezeCustomerIdentity,
+  type FrozenCustomerIdentity,
+} from "../customers/identity.js";
+
+export type { FrozenCustomerIdentity };
 import type { ProductAggregate, ProductTruth } from "../product/types.js";
 import type { EicResult } from "../resources/eic.js";
 import type { CommercialPriceProjection } from "./price.js";
@@ -17,6 +23,7 @@ export type QuoteSnapshotStatus = (typeof QUOTE_SNAPSHOT_STATUSES)[number];
 export const QUOTE_SNAPSHOT_ERRORS = [
   "incomplete_offer",
   "unavailable_offer",
+  "invalid_customer",
 ] as const;
 export type QuoteSnapshotError = (typeof QUOTE_SNAPSHOT_ERRORS)[number];
 
@@ -59,6 +66,7 @@ export type QuoteSnapshot = {
   eic: FrozenEicReference;
   commercial: FrozenCommercialOffer;
   productionInput: FrozenProductionInput;
+  customer?: FrozenCustomerIdentity;
 };
 
 export type QuoteSnapshotResult =
@@ -68,6 +76,7 @@ export type QuoteSnapshotResult =
 const INCOMPLETE_REASON =
   "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.";
 const UNAVAILABLE_REASON = "Prețul client nu este disponibil pentru înghețare.";
+const INVALID_CUSTOMER_REASON = "Identitatea clientului nu este validă pentru înghețare.";
 
 export function freezeQuoteSnapshot(
   truth: ProductTruth,
@@ -75,7 +84,7 @@ export function freezeQuoteSnapshot(
   composition: ProductProcessComposition,
   eic: EicResult,
   commercial: CommercialPriceProjection,
-  options?: { createdAt?: string },
+  options?: { createdAt?: string; customer?: FrozenCustomerIdentity },
 ): QuoteSnapshotResult {
   if (eic.completeness !== "COMPLETE" || commercial.completeness !== "COMPLETE") {
     return {
@@ -98,6 +107,17 @@ export function freezeQuoteSnapshot(
       ok: false,
       error: "unavailable_offer",
       reasons: [UNAVAILABLE_REASON],
+    };
+  }
+
+  const customer = options?.customer
+    ? freezeCustomerIdentity(options.customer)
+    : undefined;
+  if (customer === null) {
+    return {
+      ok: false,
+      error: "invalid_customer",
+      reasons: [INVALID_CUSTOMER_REASON],
     };
   }
 
@@ -134,6 +154,7 @@ export function freezeQuoteSnapshot(
       currency: "EUR" as const,
       completeness: "COMPLETE" as const,
     },
+    ...(customer ? { customer } : {}),
   };
   const contentHash = sha256Hex(stableStringify(hashedContent));
   return {
@@ -154,6 +175,8 @@ export function quoteSnapshotErrorLabel(error: QuoteSnapshotError): string {
       return INCOMPLETE_REASON;
     case "unavailable_offer":
       return UNAVAILABLE_REASON;
+    case "invalid_customer":
+      return INVALID_CUSTOMER_REASON;
     default: {
       const _exhaustive: never = error;
       return _exhaustive;

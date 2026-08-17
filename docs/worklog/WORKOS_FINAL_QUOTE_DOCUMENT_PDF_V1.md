@@ -24,7 +24,8 @@ Internal EIC, AI_DECISION, rates, and snapshot hashes stay out of the PDF.
 ## Company / customer
 
 Issuer is the accepted brand `WorkOS Final`.
-No CUI, address, VAT number, or customer entity.
+No CUI, address, or VAT number.
+Client display name comes from the frozen Quote customer snapshot when present.
 No invented validity or contract terms.
 
 ## Engine

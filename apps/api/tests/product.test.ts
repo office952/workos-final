@@ -28,6 +28,19 @@ const readyValues = {
   "volume.confirmedPerimeterMm": 12500,
 };
 
+async function createCustomer(
+  app: ReturnType<typeof createApp>,
+  displayName = "Client Demo",
+) {
+  const created = await app.request("/api/customers", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ displayName }),
+  });
+  const body = await readBody(created);
+  return (body.customer as JsonObject).customerId as string;
+}
+
 async function createExecutor(app: ReturnType<typeof createApp>, name = "Executor test") {
   const created = await app.request("/api/people", {
     method: "POST",
@@ -247,6 +260,7 @@ describe("product configuration API", () => {
     const payload = {
       definition: reviewed.definition,
       reviewId: reviewed.reviewId,
+      customerId: await createCustomer(app),
     };
     const first = await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
@@ -277,6 +291,7 @@ describe("product configuration API", () => {
       snapshot.quoteSnapshotId,
     );
     expect(snapshot.status).toBe("FROZEN");
+    expect((snapshot.customer as JsonObject).displayName).toBe("Client Demo");
     expect(eic.total).toBe(382.5);
     expect(commercial.policyId).toBe("DEFAULT_COMMERCIAL_POLICY");
     expect(commercial.policyVersion).toBe(1);
@@ -313,6 +328,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -370,6 +386,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -398,6 +415,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -472,6 +490,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -516,6 +535,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -598,6 +618,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -660,6 +681,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );
@@ -716,7 +738,8 @@ describe("product configuration API", () => {
   });
 
   it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {
-    const compiled = await createApp().request(
+    const app = createApp();
+    const compiled = await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
       {
         method: "POST",
@@ -727,7 +750,7 @@ describe("product configuration API", () => {
       },
     );
     const reviewed = await readBody(compiled);
-    const response = await createApp().request(
+    const response = await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
       {
         method: "POST",
@@ -735,6 +758,7 @@ describe("product configuration API", () => {
         body: JSON.stringify({
           definition: reviewed.definition,
           reviewId: reviewed.reviewId,
+          customerId: await createCustomer(app),
         }),
       },
     );

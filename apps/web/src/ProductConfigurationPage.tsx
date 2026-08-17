@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import type {
   AcceptedProductionSnapshot,
   CommercialPriceProjection,
+  Customer,
   DraftValues,
   EicResult,
   ExecutionPlanPreview,
@@ -14,6 +15,7 @@ import type {
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
+import { createCustomer, fetchCustomers } from "./customerApi";
 import { FormRenderer } from "./FormRenderer";
 import {
   AcceptedSnapshotSection,
@@ -92,6 +94,8 @@ export function ProductConfigurationPage() {
   } | null>(null);
   const [confirmNotice, setConfirmNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -117,6 +121,24 @@ export function ProductConfigurationPage() {
       cancelled = true;
     };
   }, [productCode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchCustomers()
+      .then((listed) => {
+        if (!cancelled) {
+          setCustomers(listed);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCustomers([]);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (page.kind !== "ready" || !orderId) {
@@ -224,7 +246,11 @@ export function ProductConfigurationPage() {
     setBusy(true);
     setConfirmNotice(null);
     try {
-      const result = await createQuoteSnapshot(productCode, confirmed.definition);
+      const result = await createQuoteSnapshot(
+        productCode,
+        confirmed.definition,
+        selectedCustomerId,
+      );
       if (result.ok) {
         const quoteAcceptance = await readQuoteAcceptance(
           productCode,
@@ -491,7 +517,11 @@ export function ProductConfigurationPage() {
       <section className="product-page">
         <PageHeader
           title={template.label}
-          lead={`${restoredJob.job.order.inscription} — continuare lucrare comercială.`}
+          lead={`${restoredJob.job.order.inscription}${
+            restoredJob.job.order.customer
+              ? ` · ${restoredJob.job.order.customer.displayName}`
+              : ""
+          } — continuare lucrare comercială.`}
           meta={<ConstructionFacts facts={template.identityFacts} />}
         />
         {confirmNotice ? (
@@ -603,6 +633,14 @@ export function ProductConfigurationPage() {
             order={confirmed.orderSnapshot}
             reused={Boolean(confirmed.quoteReused)}
             busy={busy}
+            customers={customers}
+            selectedCustomerId={selectedCustomerId}
+            onSelectCustomer={setSelectedCustomerId}
+            onCreateCustomer={async (displayName) => {
+              const created = await createCustomer(displayName);
+              setCustomers(created.customers);
+              setSelectedCustomerId(created.customer.customerId);
+            }}
             onFreeze={() => void handleFreezeQuote()}
             onAccept={() => void handleAcceptQuote()}
             onCreateOrder={() => void handleCreateOrder()}

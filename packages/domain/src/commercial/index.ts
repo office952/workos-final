@@ -36,6 +36,7 @@ export {
   freezeQuoteSnapshot,
   quoteSnapshotErrorLabel,
   type FrozenCommercialOffer,
+  type FrozenCustomerIdentity,
   type QuoteSnapshot,
   type QuoteSnapshotError,
   type QuoteSnapshotResult,

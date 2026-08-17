@@ -4,6 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
 import { readExecutionPlan, readOrderSnapshotById, readProductionRelease } from "./productApi";
 
+vi.mock("./customerApi", () => ({
+  fetchCustomers: () => Promise.resolve([]),
+  createCustomer: vi.fn(),
+}));
+
 vi.mock("./productApi", () => ({
   fetchTemplateProjection: () =>
     Promise.resolve({
@@ -95,6 +100,7 @@ describe("ProductConfigurationPage", () => {
       productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
       productLabel: "Litere",
       inscription: "JOB01",
+      customer: { customerId: "cus:hidden", displayName: "Client Demo LETTERS" },
       sourceReviewId: "rev:test",
       contentHash: "hash",
       truth: {
@@ -144,7 +150,10 @@ describe("ProductConfigurationPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("JOB01 — continuare lucrare comercială.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("JOB01 · Client Demo LETTERS — continuare lucrare comercială."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comandă creată" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Eliberează pentru producție" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Textul literelor")).not.toBeInTheDocument();

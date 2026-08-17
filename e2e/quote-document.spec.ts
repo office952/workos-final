@@ -1,6 +1,7 @@
 import { copyFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { selectOrCreateCustomer } from "./helpers/customers";
 
 const lettersName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -33,10 +34,11 @@ async function confirmAcm(page: Page) {
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
 }
 
-async function freezeAndDownload(page: Page, evidenceName: string) {
+async function freezeAndDownload(page: Page, evidenceName: string, customerName: string) {
+  await selectOrCreateCustomer(page, customerName);
   const quote = page.locator(".quote-section");
   await quote.getByRole("button", { name: "Îngheață oferta" }).click();
-  await expect(quote.getByRole("heading", { name: "Ofertă salvată" })).toBeVisible();
+  await expect(quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ })).toBeVisible();
   const downloadLink = quote.getByRole("link", { name: "Descarcă oferta PDF" });
   await expect(downloadLink).toBeVisible();
   await quote.screenshot({
@@ -55,18 +57,19 @@ async function freezeAndDownload(page: Page, evidenceName: string) {
 test("downloads LETTERS offer PDF from the frozen quote", async ({ page }) => {
   await confirmLetters(page);
   await expect(page.getByText("Preț final client: 624,82 EUR")).toBeVisible();
-  await freezeAndDownload(page, "letters");
+  await freezeAndDownload(page, "letters", "Client Demo LETTERS");
 });
 
 test("downloads ACM offer PDF from the frozen quote", async ({ page }) => {
   await confirmAcm(page);
   await expect(page.getByText("Preț final client: 118,66 EUR")).toBeVisible();
-  await freezeAndDownload(page, "acm");
+  await freezeAndDownload(page, "acm", "Client Demo ACM");
 });
 
 test("keeps the PDF download action usable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await confirmLetters(page);
+  await selectOrCreateCustomer(page, "Client Demo LETTERS");
   const quote = page.locator(".quote-section");
   await quote.getByRole("button", { name: "Îngheață oferta" }).click();
   await expect(quote.getByRole("link", { name: "Descarcă oferta PDF" })).toBeVisible();

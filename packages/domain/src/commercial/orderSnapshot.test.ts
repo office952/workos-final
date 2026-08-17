@@ -125,6 +125,29 @@ describe("order snapshot freeze", () => {
     expect(frozen.snapshot.eic.total).toBe(382.5);
   });
 
+  it("copies frozen customer identity from the quote and does not reread a later name", () => {
+    const { quote, acceptance } = frozenAcceptedQuote();
+    const quoted: QuoteSnapshot = {
+      ...quote,
+      customer: { customerId: "cus:letters", displayName: "Client Demo LETTERS" },
+    };
+    const frozen = freezeOrderSnapshot(quoted, acceptance);
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    expect(frozen.snapshot.customer).toEqual({
+      customerId: "cus:letters",
+      displayName: "Client Demo LETTERS",
+    });
+    const laterQuote: QuoteSnapshot = {
+      ...quoted,
+      customer: { customerId: "cus:letters", displayName: "Client Demo NOU" },
+    };
+    expect(frozen.snapshot.customer?.displayName).toBe("Client Demo LETTERS");
+    expect(laterQuote.customer?.displayName).toBe("Client Demo NOU");
+  });
+
   it("does not reread a later product configuration", () => {
     const { quote, acceptance } = frozenAcceptedQuote();
     const frozen = freezeOrderSnapshot(quote, acceptance);

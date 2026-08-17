@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { selectOrCreateCustomer } from "./helpers/customers";
 import { openExecutionWorkspace } from "./helpers/execution";
 import {
   assignExecutorIfNeeded,
@@ -28,6 +29,7 @@ async function createReleasedPlan(page: Page, inscription: string) {
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   const quote = page.locator(".quote-section");
+  await selectOrCreateCustomer(page, "Client Demo LETTERS");
   await quote.getByRole("button", { name: "Îngheață oferta" }).click();
   await expect(
     quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ }),

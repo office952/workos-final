@@ -59,6 +59,18 @@ function readDraft(templateCode: string, body: unknown): DraftConfiguration {
   return { templateCode, values };
 }
 
+function readCustomerId(body: unknown): string | null {
+  if (typeof body !== "object" || body === null || !("customerId" in body)) {
+    return null;
+  }
+  const value = (body as { customerId: unknown }).customerId;
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 function readReviewedDefinition(body: unknown): {
   definition: ProductDefinition | null;
   reviewId: string;
@@ -173,13 +185,34 @@ export function registerProductRoutes(
   });
 
   app.post("/api/products/:productCode/quote-snapshots", async (c) => {
+    const body = await c.req.json().catch(() => null);
     const compiled = compileAcceptedProduct(
       runtime,
       c.req.param("productCode"),
-      await c.req.json(),
+      body,
     );
     if (!compiled.ok) {
       return c.json(compiled.body, compiled.status);
+    }
+    const customerId = readCustomerId(body);
+    if (!customerId) {
+      return c.json(
+        {
+          error: "missing_customer",
+          reasons: ["Oferta comercială necesită un client înainte de înghețare."],
+        },
+        422,
+      );
+    }
+    const customer = runtime.getCustomer(customerId);
+    if (!customer || customer.status !== "ACTIVE") {
+      return c.json(
+        {
+          error: "customer_unavailable",
+          reasons: ["Clientul selectat nu poate fi folosit pentru o ofertă nouă."],
+        },
+        422,
+      );
     }
     const commercialPrice = projectCommercialPrice(compiled.eic);
     const frozen = freezeQuoteSnapshot(
@@ -188,6 +221,12 @@ export function registerProductRoutes(
       compiled.composition,
       compiled.eic,
       commercialPrice,
+      {
+        customer: {
+          customerId: customer.customerId,
+          displayName: customer.displayName,
+        },
+      },
     );
     if (!frozen.ok) {
       return c.json(

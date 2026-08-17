@@ -203,4 +203,58 @@ describe("quote snapshot freeze", () => {
     expect(later.snapshot.contentHash).not.toBe(frozen.snapshot.contentHash);
     expect(later.snapshot.eic.total).toBe(999);
   });
+
+  it("keeps the legacy hash when no customer is frozen", () => {
+    const { truth, aggregate, composition, eic } = confirmedSpine();
+    const result = freezeQuoteSnapshot(
+      truth,
+      aggregate,
+      composition,
+      eic,
+      projectCommercialPrice(eic),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+    expect(result.snapshot.customer).toBeUndefined();
+    expect(result.snapshot.eic.total).toBe(382.5);
+    expect(result.snapshot.commercial.grossPrice).toBe(624.82);
+  });
+
+  it("includes frozen customer identity in the content hash", () => {
+    const { truth, aggregate, composition, eic } = confirmedSpine();
+    const commercial = projectCommercialPrice(eic);
+    const withoutCustomer = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial);
+    const withCustomer = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      customer: { customerId: "cus:letters", displayName: "Client Demo LETTERS" },
+    });
+    const renamedLive = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      customer: { customerId: "cus:letters", displayName: "Client Demo NOU" },
+    });
+    expect(withoutCustomer.ok && withCustomer.ok && renamedLive.ok).toBe(true);
+    if (!withoutCustomer.ok || !withCustomer.ok || !renamedLive.ok) {
+      return;
+    }
+    expect(withCustomer.snapshot.customer).toEqual({
+      customerId: "cus:letters",
+      displayName: "Client Demo LETTERS",
+    });
+    expect(withCustomer.snapshot.contentHash).not.toBe(withoutCustomer.snapshot.contentHash);
+    expect(renamedLive.snapshot.contentHash).not.toBe(withCustomer.snapshot.contentHash);
+    expect(withCustomer.snapshot.commercial.grossPrice).toBe(624.82);
+  });
+
+  it("rejects an empty customer identity when one is supplied", () => {
+    const { truth, aggregate, composition, eic } = confirmedSpine();
+    expect(
+      freezeQuoteSnapshot(truth, aggregate, composition, eic, projectCommercialPrice(eic), {
+        customer: { customerId: "cus:x", displayName: "   " },
+      }),
+    ).toEqual({
+      ok: false,
+      error: "invalid_customer",
+      reasons: ["Identitatea clientului nu este validă pentru înghețare."],
+    });
+  });
 });

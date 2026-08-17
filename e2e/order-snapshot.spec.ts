@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { selectOrCreateCustomer } from "./helpers/customers";
 
 const productName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -17,6 +18,7 @@ async function acceptGoldenQuote(page: Page, inscription: string) {
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   const quote = page.locator(".quote-section");
+  await selectOrCreateCustomer(page, "Client Demo LETTERS");
   await quote.getByRole("button", { name: "Îngheață oferta" }).click();
   await expect(
     quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ }),

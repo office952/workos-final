@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { registerInventoryRoutes } from "./inventory/routes.js";
 import { registerJobRoutes } from "./jobs/routes.js";
+import { registerCustomerRoutes } from "./customers/routes.js";
 import { registerPeopleRoutes } from "./people/routes.js";
 import { registerProductRoutes } from "./product.js";
 import { registerProductSystemAdminRoutes } from "./productSystem/routes.js";
@@ -49,6 +50,7 @@ export function createApp(options: CreateAppOptions = {}): Hono {
   registerProductRoutes(app, productSystem);
   registerJobRoutes(app, productSystem);
   registerPeopleRoutes(app, productSystem);
+  registerCustomerRoutes(app, productSystem);
   registerInventoryRoutes(app, productSystem);
   registerSystemProjectionRoutes(app, productSystem);
   registerProductSystemAdminRoutes(app, productSystem);

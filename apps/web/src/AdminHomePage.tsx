@@ -3,6 +3,17 @@ import { PageHeader } from "./ui/PageHeader";
 
 const GROUPS = [
   {
+    title: "Comercial",
+    items: [
+      {
+        to: "/admin/customers",
+        label: "Clienți",
+        description:
+          "Identitate comercială minimă pentru ofertă, comandă și Lucrări. Fără CRM, facturi sau portal.",
+      },
+    ],
+  },
+  {
     title: "Operațiuni",
     items: [
       {

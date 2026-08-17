@@ -10,6 +10,7 @@ import {
   QUOTE_ACCEPTANCE_SCHEMA_VERSION,
   type QuoteAcceptanceDecision,
 } from "./quoteAcceptance.js";
+import { copyFrozenCustomerIdentity } from "../customers/identity.js";
 import {
   QUOTE_SNAPSHOT_SCHEMA_VERSION,
   type FrozenCommercialOffer,
@@ -46,6 +47,7 @@ export type OrderSnapshot = {
   eic: FrozenEicReference;
   commercial: FrozenCommercialOffer;
   productionInput: FrozenProductionInput;
+  customer?: QuoteSnapshot["customer"];
 };
 
 export type OrderSnapshotResult =
@@ -125,6 +127,9 @@ export function freezeOrderSnapshot(
     },
     commercial: { ...quote.commercial },
     productionInput: copyFrozenProductionInput(quote.productionInput),
+    ...(quote.customer
+      ? { customer: copyFrozenCustomerIdentity(quote.customer) }
+      : {}),
   };
   const contentHash = sha256Hex(stableStringify(hashedContent));
   return {

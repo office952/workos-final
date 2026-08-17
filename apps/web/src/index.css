@@ -1100,12 +1100,27 @@ details summary {
   text-decoration: underline;
 }
 
+.customer-select {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0 0 0.75rem;
+}
+
+.customer-select .people-create {
+  margin: 0;
+}
+
 .jobs-identity span,
+.jobs-customer,
 .jobs-status p,
 .jobs-date {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.jobs-customer {
+  display: block;
 }
 
 .jobs-status {

@@ -37,10 +37,15 @@ export async function createCommercialOrder(
     data: { values: { ...readyValues, "root.inscription": inscription } },
   });
   const compiledBody = await readJson(compiled);
+  const customer = await request.post("/api/customers", {
+    data: { displayName: `Client ${inscription}` },
+  });
+  const customerId = ((await readJson(customer)).customer as JsonObject).customerId as string;
   const quote = await request.post(`/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`, {
     data: {
       definition: compiledBody.definition,
       reviewId: compiledBody.reviewId,
+      customerId,
     },
   });
   const quoteId = ((await readJson(quote)).quoteSnapshot as JsonObject).quoteSnapshotId as string;

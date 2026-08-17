@@ -28,6 +28,7 @@ An immutable historical copy of one accepted frozen Quote:
 - source Quote identity and content hash
 - source Acceptance identity and acceptedAt
 - copied technical truth, planned quantities, planned EIC, and commercial totals
+- copied frozen customer identity when the Quote has one
 
 Order is the canonical root of the accepted commercial job.
 After Order exists, future customer production must derive from this snapshot.
@@ -35,7 +36,7 @@ After Order exists, future customer production must derive from this snapshot.
 ## What this is not
 
 Not a draft cart.
-Not a customer/CRM record.
+Not a live Customer record or CRM. It copies frozen Quote customer identity.
 Not a Production Release.
 Not an ExecutionPlan.
 Not an invoice or payment.
