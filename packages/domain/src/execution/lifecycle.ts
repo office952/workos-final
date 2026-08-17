@@ -8,8 +8,8 @@ import {
 } from "./consumption.js";
 import {
   COMPLETION_NOTE_MAX_LENGTH,
-  assignedExecutorStillActive,
   assignedProviderStillValid,
+  plannedExecutorStartError,
   dependenciesCompleted,
   liveEligibleProviders,
   measurablePlannedQuantity,
@@ -150,6 +150,7 @@ export function startExecutionTask(
   taskId: string,
   startedAt: string,
   people: readonly Person[] = [],
+  eligibility: PeopleEligibilityContext | null = null,
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -174,10 +175,16 @@ export function startExecutionTask(
   if (!task.assignedExecutor) {
     return { ok: false, error: "missing_executor" };
   }
-  if (!assignedExecutorStillActive(task.assignedExecutor, people)) {
-    return { ok: false, error: "executor_unavailable" };
-  }
   const live = findPerson(people, task.assignedExecutor.id);
+  const startBlock = plannedExecutorStartError(
+    task.assignedExecutor.id,
+    task.requiredCapabilityId as ProductionCapabilityClassId,
+    people,
+    eligibility,
+  );
+  if (startBlock) {
+    return { ok: false, error: startBlock };
+  }
   const byId = taskIndex(record);
   if (!dependenciesCompleted(task, byId)) {
     return { ok: false, error: "dependencies_incomplete" };

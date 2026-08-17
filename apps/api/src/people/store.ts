@@ -173,6 +173,13 @@ export function readPeopleEligibilityContext(db: SqliteDatabase): PeopleEligibil
   };
 }
 
+export function runtimePeopleEligibilityContext(
+  db: SqliteDatabase,
+): PeopleEligibilityContext | null {
+  const context = readPeopleEligibilityContext(db);
+  return context.requirements.length === 0 ? null : context;
+}
+
 export function readPeopleRegistry(db: SqliteDatabase): PeopleRegistryProjection {
   return projectPeopleRegistry(
     listPeople(db),
@@ -387,7 +394,51 @@ export function personHasInProgressTask(db: SqliteDatabase, personId: string): b
   return Boolean(row);
 }
 
+export const PEOPLE_TRUSTED_WORKFORCE_MARKER = "PEOPLE_TRUSTED_WORKFORCE_V1_APPLIED";
+
+export function isTrustedWorkforceApplied(db: SqliteDatabase): boolean {
+  const row = db
+    .prepare("SELECT marker_id FROM runtime_bootstrap_markers WHERE marker_id = ?")
+    .get(PEOPLE_TRUSTED_WORKFORCE_MARKER) as { marker_id: string } | undefined;
+  return Boolean(row);
+}
+
 export function ensureTrustedWorkforce(db: SqliteDatabase): void {
+  if (isTrustedWorkforceApplied(db)) {
+    return;
+  }
+  const apply = db.transaction(() => {
+    if (isTrustedWorkforceApplied(db)) {
+      return;
+    }
+    if (!allTrustedPeoplePresent(db)) {
+      materializeTrustedWorkforceOnce(db);
+    }
+    db.prepare(
+      `
+      INSERT INTO runtime_bootstrap_markers (marker_id, applied_at)
+      VALUES (?, ?)
+    `,
+    ).run(PEOPLE_TRUSTED_WORKFORCE_MARKER, new Date().toISOString());
+  });
+  apply();
+}
+
+function trustedPersonPresent(
+  db: SqliteDatabase,
+  seed: (typeof TRUSTED_PEOPLE)[number],
+): boolean {
+  return Boolean(
+    getPerson(db, seed.personId) ||
+      listPeople(db).some((item) => item.displayName === seed.displayName),
+  );
+}
+
+function allTrustedPeoplePresent(db: SqliteDatabase): boolean {
+  return TRUSTED_PEOPLE.every((seed) => trustedPersonPresent(db, seed));
+}
+
+function materializeTrustedWorkforceOnce(db: SqliteDatabase): void {
   const createdAt = "2026-08-17T12:00:00.000Z";
   for (const seed of TRUSTED_SKILLS) {
     const existing = db
@@ -424,26 +475,25 @@ export function ensureTrustedWorkforce(db: SqliteDatabase): void {
   for (const seed of TRUSTED_PEOPLE) {
     const byId = getPerson(db, seed.personId);
     const byName = listPeople(db).find((item) => item.displayName === seed.displayName);
-    let person = byId ?? byName ?? null;
-    if (!person) {
-      const created = createPerson(seed.displayName, {
-        personId: seed.personId,
-        createdAt,
-        roleLabel: seed.roleLabel,
-        provenance: "OWNER_CONFIRMED_LEGACY",
-      });
-      if (!created.ok) {
-        continue;
-      }
-      insertPerson(db, created.person);
-      person = created.person;
+    if (byId || byName) {
+      continue;
     }
+    const created = createPerson(seed.displayName, {
+      personId: seed.personId,
+      createdAt,
+      roleLabel: seed.roleLabel,
+      provenance: "OWNER_CONFIRMED_LEGACY",
+    });
+    if (!created.ok) {
+      continue;
+    }
+    insertPerson(db, created.person);
     for (const code of seed.skillCodes) {
       const skillId = skillIdByCode.get(code);
       if (!skillId) {
         continue;
       }
-      persistAssignedPersonSkill(db, person.personId, skillId);
+      persistAssignedPersonSkill(db, created.person.personId, skillId);
     }
   }
 }

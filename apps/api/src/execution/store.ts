@@ -292,9 +292,10 @@ export function persistTaskStart(
   taskId: string,
   startedAt: string,
   people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null = null,
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    startExecutionTask(record, taskId, startedAt, people),
+    startExecutionTask(record, taskId, startedAt, people, eligibility),
   );
 }
 

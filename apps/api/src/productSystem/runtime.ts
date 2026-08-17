@@ -95,6 +95,7 @@ import {
   persistRetiredSkill,
   persistUpdatedPerson,
   readPeopleEligibilityContext,
+  runtimePeopleEligibilityContext,
   readPeopleRegistry,
   listSkills,
 } from "../people/store.js";
@@ -182,7 +183,7 @@ export type ProductSystemRuntime = {
   getPerson(personId: string): Person | null;
   listPeopleRegistry(): PeopleRegistryProjection;
   listSkills(): Skill[];
-  peopleEligibilityContext(): PeopleEligibilityContext;
+  peopleEligibilityContext(): PeopleEligibilityContext | null;
   readEligibility(capabilityId: string): {
     eligiblePeople: Array<{ personId: string; displayName: string }>;
     diagnoses: readonly PersonEligibilityDiagnosis[];
@@ -319,11 +320,17 @@ export function createProductSystemRuntime(
         taskId,
         personId,
         listPeople(db),
-        readPeopleEligibilityContext(db),
+        runtimePeopleEligibilityContext(db),
       );
     },
     startExecutionTask(taskId) {
-      return persistTaskStart(db, taskId, new Date().toISOString(), listPeople(db));
+      return persistTaskStart(
+        db,
+        taskId,
+        new Date().toISOString(),
+        listPeople(db),
+        runtimePeopleEligibilityContext(db),
+      );
     },
     listPeople() {
       return listPeople(db);
@@ -338,7 +345,7 @@ export function createProductSystemRuntime(
       return listSkills(db);
     },
     peopleEligibilityContext() {
-      return readPeopleEligibilityContext(db);
+      return runtimePeopleEligibilityContext(db);
     },
     readEligibility(capabilityId) {
       const context = readPeopleEligibilityContext(db);
@@ -546,7 +553,7 @@ function jobOverviewItems(db: SqliteDatabase) {
             record,
             people,
             release,
-            readPeopleEligibilityContext(db),
+            runtimePeopleEligibilityContext(db),
           )
         : null,
     });

@@ -36,7 +36,7 @@ retiredAt                nullable
 Lifecycle: create → `ACTIVE`. Retire → `RETIRED`. No delete. No DRAFT.
 Retire is blocked while the person owns an IN_PROGRESS task.
 
-The trusted starting roster may be materialized on live boot. It is starting state, not an immutable product list. The owner can add or retire people on `/admin/people` without a code change.
+The trusted starting roster is materialized once (`PEOPLE_TRUSTED_WORKFORCE_V1_APPLIED`). After that, database truth wins. Restart does not restore retired skills or reactivate retired people. The owner can add or retire people on `/admin/people` without a code change.
 
 ## Task executor
 
@@ -50,9 +50,9 @@ assigned_executor_label
 Assignment is an explicit operator action. It is not inferred from provider, browser user, machine, or snapshot.
 
 Only currently eligible people may be newly assigned when a capability mapping exists.
-After Start, assignment is locked.
+A PLANNED Start revalidates the same current eligibility. After Start, assignment is locked.
 
-Start requires completed dependencies, an ACTIVE executor, and a valid provider only when the frozen operation requires one.
+Start requires completed dependencies, a currently eligible executor, and a valid provider only when the frozen operation requires one.
 
 People cannot bypass a missing provider on a provider-required task.
 A manual task still needs an ACTIVE executor. It does not need a Machine or Workcenter.

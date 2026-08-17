@@ -1,6 +1,9 @@
 import { eligibleExecutorsForCapability } from "../people/projection.js";
 import { activePeople, type Person } from "../people/identity.js";
-import type { PeopleEligibilityContext } from "../people/eligibility.js";
+import {
+  diagnoseAssignedPerson,
+  type PeopleEligibilityContext,
+} from "../people/eligibility.js";
 import {
   frozenProviderRequirement,
   getProductionCapability,
@@ -120,6 +123,13 @@ export type ExecutionPlanRecord = {
   tasks: readonly ExecutionTask[];
 };
 
+export const PLANNED_START_BLOCK_REASONS = [
+  "executor_unavailable",
+  "unavailable_person",
+  "ineligible_executor",
+] as const;
+export type PlannedStartBlockReason = (typeof PLANNED_START_BLOCK_REASONS)[number];
+
 export type ExecutionEligibleProvider = {
   id: string;
   kind: ProviderKind;
@@ -143,6 +153,7 @@ export type ExecutionTaskView = ExecutionTask & {
   canAssign: boolean;
   canAssignExecutor: boolean;
   canStart: boolean;
+  startBlockReason: PlannedStartBlockReason | null;
   canComplete: boolean;
   hasPlannedResources: boolean;
   canRecordActualConsumption: boolean;
@@ -298,7 +309,8 @@ export function projectExecutionPlanView(
         taskRequiresProvider(task) &&
         eligibleProviders.length > 0,
       canAssignExecutor: task.status === "PLANNED" && eligibleExecutors.length > 0,
-      canStart: canStartTask(task, byId, people),
+      canStart: canStartTask(task, byId, people, eligibility),
+      startBlockReason: plannedStartBlockReason(task, byId, people, eligibility),
       canComplete: task.status === "IN_PROGRESS",
       hasPlannedResources: task.resourceDemands.length > 0,
       canRecordActualConsumption:
@@ -572,14 +584,78 @@ function canStartTask(
   task: ExecutionTask,
   byId: ReadonlyMap<string, ExecutionTask>,
   people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null,
 ): boolean {
   return (
     task.status === "PLANNED" &&
     providerReadyForStart(task) &&
     task.assignedExecutor !== null &&
-    assignedExecutorStillActive(task.assignedExecutor, people) &&
+    plannedExecutorStartError(
+      task.assignedExecutor.id,
+      task.requiredCapabilityId as ProductionCapabilityClassId,
+      people,
+      eligibility,
+    ) === null &&
     dependenciesCompleted(task, byId)
   );
+}
+
+function plannedStartBlockReason(
+  task: ExecutionTask,
+  byId: ReadonlyMap<string, ExecutionTask>,
+  people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null,
+): PlannedStartBlockReason | null {
+  if (
+    task.status !== "PLANNED" ||
+    !task.assignedExecutor ||
+    !providerReadyForStart(task) ||
+    !dependenciesCompleted(task, byId)
+  ) {
+    return null;
+  }
+  return plannedExecutorStartError(
+    task.assignedExecutor.id,
+    task.requiredCapabilityId as ProductionCapabilityClassId,
+    people,
+    eligibility,
+  );
+}
+
+export function plannedExecutorStartError(
+  personId: string,
+  capabilityId: ProductionCapabilityClassId,
+  people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null,
+): PlannedStartBlockReason | null {
+  const diagnosis = diagnoseAssignedPerson({
+    personId,
+    capabilityId,
+    people,
+    eligibility,
+  });
+  if (!diagnosis) {
+    return "executor_unavailable";
+  }
+  if (diagnosis.eligible) {
+    return null;
+  }
+  switch (diagnosis.reason) {
+    case "RETIRED":
+      return "executor_unavailable";
+    case "TEMPORARILY_UNAVAILABLE":
+      return "unavailable_person";
+    case "MISSING_SKILL":
+    case "RETIRED_SKILL":
+    case "CAPABILITY_UNMAPPED":
+      return "ineligible_executor";
+    case null:
+      return "ineligible_executor";
+    default: {
+      const _exhaustive: never = diagnosis.reason;
+      return _exhaustive;
+    }
+  }
 }
 
 export function assignedExecutorStillActive(

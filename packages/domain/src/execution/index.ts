@@ -20,6 +20,7 @@ export {
   COMPLETION_NOTE_MAX_LENGTH,
   COMPLETION_OUTCOMES,
   EXECUTION_TASK_STATUSES,
+  PLANNED_START_BLOCK_REASONS,
   assignedProviderStillValid,
   deriveExecutionProgress,
   executionPlanIdFromSnapshot,
@@ -48,6 +49,7 @@ export {
   type ExecutionTask,
   type ExecutionTaskStatus,
   type ExecutionTaskView,
+  type PlannedStartBlockReason,
 } from "./plan.js";
 export {
   actualConsumptionEntryId,

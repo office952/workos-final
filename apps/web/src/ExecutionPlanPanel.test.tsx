@@ -87,6 +87,7 @@ const view: ExecutionPlanView = {
       canAssign: true,
       canAssignExecutor: true,
       canStart: false,
+      startBlockReason: null,
       canComplete: false,
       hasPlannedResources: false,
       canRecordActualConsumption: false,
@@ -131,6 +132,7 @@ const view: ExecutionPlanView = {
       canAssign: false,
       canAssignExecutor: true,
       canStart: false,
+      startBlockReason: null,
       canComplete: false,
       hasPlannedResources: false,
       canRecordActualConsumption: false,
@@ -204,6 +206,7 @@ describe("ExecutionPlanPanel", () => {
           canAssign: false,
           canAssignExecutor: false,
           canStart: false,
+          startBlockReason: null,
           canComplete: false,
         },
       ],
@@ -251,6 +254,7 @@ describe("ExecutionPlanPanel", () => {
           canAssign: false,
           canAssignExecutor: false,
           canStart: false,
+          startBlockReason: null,
           canComplete: true,
           hasPlannedResources: true,
           canRecordActualConsumption: true,
@@ -312,6 +316,7 @@ describe("ExecutionPlanPanel", () => {
           canAssign: false,
           canAssignExecutor: false,
           canStart: false,
+          startBlockReason: null,
           canComplete: false,
           hasPlannedResources: true,
           canRecordActualConsumption: false,
@@ -323,6 +328,7 @@ describe("ExecutionPlanPanel", () => {
           canAssign: false,
           canAssignExecutor: false,
           canStart: false,
+          startBlockReason: null,
           canComplete: false,
         },
       ],
@@ -442,6 +448,7 @@ describe("ExecutionPlanPanel", () => {
           canAssign: false,
           canAssignExecutor: true,
           canStart: false,
+          startBlockReason: null,
         },
       ],
     };
@@ -465,5 +472,43 @@ describe("ExecutionPlanPanel", () => {
     expect(
       screen.getByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
     ).toBeInTheDocument();
+  });
+
+  it("shows an honest planned start block without offering Start", () => {
+    const blocked: ExecutionPlanView = {
+      ...view,
+      tasks: [
+        {
+          ...view.tasks[0],
+          assignedProvider: { id: "MCH_CNC_4020", kind: "MACHINE", label: "CNC 4020" },
+          assignedExecutor: { id: "per:florin", label: "Florin CNC" },
+          assignmentLabel: "Alocat: CNC 4020",
+          canAssign: false,
+          canAssignExecutor: false,
+          canStart: false,
+          startBlockReason: "unavailable_person",
+        },
+      ],
+    };
+
+    render(
+      <MemoryRouter>
+        <ExecutionPlanPanel
+          view={blocked}
+          reused={false}
+          busy={false}
+          onAssignProvider={() => undefined}
+          onAssignExecutor={() => undefined}
+          onStartTask={() => undefined}
+          onCompleteTask={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Executant: Florin CNC")).toBeInTheDocument();
+    expect(
+      screen.getByText("Persoana alocată este indisponibilă temporar. Startul este blocat."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Pornește" })).not.toBeInTheDocument();
   });
 });

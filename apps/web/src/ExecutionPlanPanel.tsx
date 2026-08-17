@@ -6,6 +6,7 @@ import {
   type ActualInternalCostProjection,
   type ExecutionPlanView,
   type ExecutionTaskView,
+  type PlannedStartBlockReason,
 } from "@workos-final/domain";
 import {
   formatCostCompleteness,
@@ -329,6 +330,11 @@ function ExecutionTaskCard({
             Pornește
           </button>
         ) : null}
+        {task.status === "PLANNED" && task.assignedExecutor && task.startBlockReason ? (
+          <Notice compact>
+            <p>{plannedStartBlockLabel(task.startBlockReason)}</p>
+          </Notice>
+        ) : null}
         {task.canComplete ? (
           <>
             {task.requiresCompletedQuantity ? (
@@ -404,9 +410,9 @@ function ExecutionTaskCard({
       !task.assignedExecutor &&
       task.eligibleExecutors.length === 0 ? (
         <Notice compact>
-          <p>Nu există persoane active configurate.</p>
+          <p>Nicio persoană eligibilă acum pentru această operație.</p>
           <p>
-            <Link to="/admin/people">Adaugă prima persoană</Link>
+            <Link to="/admin/people">Deschide oamenii</Link>
           </p>
         </Notice>
       ) : null}
@@ -517,6 +523,21 @@ function taskLane(task: ExecutionTaskView): TaskLane {
     return "upcoming";
   }
   return "blocked";
+}
+
+function plannedStartBlockLabel(reason: PlannedStartBlockReason): string {
+  switch (reason) {
+    case "unavailable_person":
+      return "Persoana alocată este indisponibilă temporar. Startul este blocat.";
+    case "ineligible_executor":
+      return "Persoana alocată nu mai este eligibilă pentru această operație. Startul este blocat.";
+    case "executor_unavailable":
+      return "Persoana alocată nu mai este activă. Startul este blocat.";
+    default: {
+      const _exhaustive: never = reason;
+      return _exhaustive;
+    }
+  }
 }
 
 function statusTone(label: string): string {

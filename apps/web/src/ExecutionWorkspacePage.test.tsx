@@ -88,6 +88,7 @@ vi.mock("./productApi", () => ({
           canAssign: true,
           canAssignExecutor: true,
           canStart: false,
+          startBlockReason: null,
           canComplete: false,
           hasPlannedResources: false,
           canRecordActualConsumption: false,

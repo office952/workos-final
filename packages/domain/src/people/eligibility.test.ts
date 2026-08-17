@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { assignPersonSkill, retirePersonSkill } from "./assignment.js";
-import { resolveEligiblePeople } from "./eligibility.js";
+import { diagnoseEligibility, resolveEligiblePeople } from "./eligibility.js";
 import { createPerson, retirePerson, setPersonAvailability } from "./identity.js";
 import { createSkill, retireSkill } from "./skills.js";
 
@@ -220,7 +220,7 @@ describe("current operational eligibility", () => {
     expect(florin.status).toBe("ACTIVE");
   });
 
-  it("treats an unmapped capability as ACTIVE + AVAILABLE only", () => {
+  it("does not treat an unmapped capability as everyone-eligible", () => {
     const florin = person("Florin CNC", "per:florin");
     const away = setPersonAvailability(person("Andrei Goghi", "per:andrei"), {
       availability: "TEMPORARILY_UNAVAILABLE",
@@ -237,7 +237,23 @@ describe("current operational eligibility", () => {
         skills: [],
         assignments: [],
         requirements: [],
-      }).map((item) => item.personId),
-    ).toEqual(["per:florin"]);
+      }),
+    ).toEqual([]);
+    expect(
+      diagnoseEligibility({
+        capabilityId: "LASER_CUTTING",
+        people: [florin],
+        skills: [],
+        assignments: [],
+        requirements: [],
+      }),
+    ).toEqual([
+      {
+        personId: "per:florin",
+        displayName: "Florin CNC",
+        eligible: false,
+        reason: "CAPABILITY_UNMAPPED",
+      },
+    ]);
   });
 });

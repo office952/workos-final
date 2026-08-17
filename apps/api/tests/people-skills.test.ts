@@ -135,5 +135,18 @@ describe("people skills API", () => {
         (item) => item.displayName === "Chirila Cristian",
       ),
     ).toBe(false);
+
+    const laser = await readBody(
+      await app.request("/api/people/eligibility?capabilityId=LASER_CUTTING"),
+    );
+    expect(laser.eligiblePeople).toEqual([]);
+    expect(
+      (laser.diagnoses as Array<JsonObject>).some(
+        (item) =>
+          item.displayName === "Florin CNC" &&
+          item.eligible === false &&
+          item.reason === "CAPABILITY_UNMAPPED",
+      ),
+    ).toBe(true);
   });
 });

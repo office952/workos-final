@@ -63,7 +63,9 @@ export {
 } from "./assignment.js";
 export {
   ELIGIBILITY_EXCLUSION_REASONS,
+  diagnoseAssignedPerson,
   diagnoseEligibility,
+  personIsCurrentlyEligible,
   resolveEligiblePeople,
   skillIdsForCapability,
   type CapabilitySkillRequirement,

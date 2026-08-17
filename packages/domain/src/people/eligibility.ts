@@ -8,6 +8,7 @@ export const ELIGIBILITY_EXCLUSION_REASONS = [
   "TEMPORARILY_UNAVAILABLE",
   "MISSING_SKILL",
   "RETIRED_SKILL",
+  "CAPABILITY_UNMAPPED",
 ] as const;
 export type EligibilityExclusionReason =
   (typeof ELIGIBILITY_EXCLUSION_REASONS)[number];
@@ -88,7 +89,7 @@ function diagnosePerson(
     return excluded(person, "TEMPORARILY_UNAVAILABLE");
   }
   if (requiredSkillIds.length === 0) {
-    return { personId: person.personId, displayName: person.displayName, eligible: true, reason: null };
+    return excluded(person, "CAPABILITY_UNMAPPED");
   }
   const qualified = assignments.some((assignment) => {
     if (
@@ -120,6 +121,63 @@ function diagnosePerson(
     eligible: true,
     reason: null,
   };
+}
+
+export function personIsCurrentlyEligible(input: {
+  personId: string;
+  capabilityId: ProductionCapabilityClassId;
+  people: readonly Person[];
+  eligibility: PeopleEligibilityContext | null;
+}): boolean {
+  const person = input.people.find((item) => item.personId === input.personId);
+  if (!person || person.status !== "ACTIVE" || person.availability !== "AVAILABLE") {
+    return false;
+  }
+  if (!input.eligibility) {
+    return true;
+  }
+  return resolveEligiblePeople({
+    capabilityId: input.capabilityId,
+    people: input.people,
+    skills: input.eligibility.skills,
+    assignments: input.eligibility.assignments,
+    requirements: input.eligibility.requirements,
+  }).some((item) => item.personId === input.personId);
+}
+
+export function diagnoseAssignedPerson(input: {
+  personId: string;
+  capabilityId: ProductionCapabilityClassId;
+  people: readonly Person[];
+  eligibility: PeopleEligibilityContext | null;
+}): PersonEligibilityDiagnosis | null {
+  const person = input.people.find((item) => item.personId === input.personId);
+  if (!person) {
+    return null;
+  }
+  if (!input.eligibility) {
+    if (person.status === "RETIRED") {
+      return excluded(person, "RETIRED");
+    }
+    if (person.availability === "TEMPORARILY_UNAVAILABLE") {
+      return excluded(person, "TEMPORARILY_UNAVAILABLE");
+    }
+    return {
+      personId: person.personId,
+      displayName: person.displayName,
+      eligible: true,
+      reason: null,
+    };
+  }
+  return (
+    diagnoseEligibility({
+      capabilityId: input.capabilityId,
+      people: [person],
+      skills: input.eligibility.skills,
+      assignments: input.eligibility.assignments,
+      requirements: input.eligibility.requirements,
+    })[0] ?? null
+  );
 }
 
 function excluded(

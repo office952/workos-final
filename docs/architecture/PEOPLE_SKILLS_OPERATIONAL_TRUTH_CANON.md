@@ -14,6 +14,18 @@ The trusted starting roster is initial state, not eternal product truth.
 Add, retire, assign skills and change availability without a code change.
 Do not keep `const PEOPLE = [...]` or `ELIGIBLE_CNC = ["Florin", "Andrei"]` in product logic.
 
+## One-time trusted bootstrap
+
+```text
+TRUSTED_PEOPLE / TRUSTED_SKILLS  =  one-time bootstrap evidence
+FINAL DATABASE                   =  current authority after bootstrap
+```
+
+Materialization runs once, then persists `PEOPLE_TRUSTED_WORKFORCE_V1_APPLIED`.
+Restarting the API is observational. It must not restore a retired skill, reactivate a retired person, or overwrite availability.
+
+An already-materialized database receives the marker without reasserting skills.
+
 ## Three truths
 
 ```text
@@ -40,10 +52,18 @@ Current eligibility is derived in domain/backend:
 ```text
 ACTIVE
 + AVAILABLE
-+ (if the capability is mapped) any mapped ACTIVE skill that is itself ACTIVE
++ any mapped ACTIVE skill that is itself ACTIVE
 ```
 
-Unmapped capabilities (METAL_CUTTING, LASER_CUTTING, STYRO_CUTTING) stay ACTIVE + AVAILABLE.
+```text
+UNMAPPED CAPABILITY  ≠  ANY PERSON
+```
+
+A capability with no human-skill mapping is unresolved. Eligible people = none.
+Absence of mapping is not “no qualification required”. That would need explicit future truth.
+
+METAL_CUTTING, LASER_CUTTING and STYRO_CUTTING stay unmapped until owner-confirmed evidence exists.
+
 Frontend does not invent eligibility rules.
 
 Vacation / temporary unavailability removes the person from current eligibility.
@@ -53,11 +73,15 @@ Leaving the company retires the person. History remains. No delete.
 ## Execution
 
 ExecutionPlan freezes required work and required capability. It does not freeze the employee roster.
-The executor selector uses the current resolver.
-Assign rejects an unavailable or currently ineligible person.
-Start still requires the already-assigned ACTIVE executor.
-Availability or skill changes do not rewrite IN_PROGRESS or COMPLETED tasks.
-Retire is blocked while the person owns an IN_PROGRESS task.
+
+```text
+PLANNED      eligibility is current truth at Assign and at Start
+IN_PROGRESS  executor is historical execution fact
+```
+
+Assign and Start both reuse the same resolver.
+If the assigned person is no longer eligible, Start is blocked. The assignment is not silently deleted.
+After Start, later unavailability or skill removal does not cancel, unassign, or rewrite the task. Completion remains possible.
 
 Claim-on-Start is next. It will consume this resolver. It is not implemented here.
 
