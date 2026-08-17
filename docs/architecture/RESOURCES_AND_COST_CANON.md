@@ -61,8 +61,8 @@ Current live specifications:
 - Modul LED 12V — buc
 - Sursă LED 12V 60 / 100 / 160 / 200 W — buc
 - Folie Oracal 651 — sheet, m² — only when vinyl is selected
-- ACM 3 mm — sheet, m² — identity only; no owner-confirmed rate yet
-- Profil oțel cadru intern — profile, m — identity only; no owner-confirmed rate yet
+- ACM 3 mm — sheet, m² — AI_DECISION 32 EUR/m² on developed blank area; not owner-confirmed
+- Profil oțel cadru intern — profile, m — AI_DECISION 3.50 EUR/m on frame perimeter; not owner-confirmed
 
 Typed units currently used: `m`, `m²`, `buc`.
 `buc` is the piece-count unit for LED modules and PSU units. It is not a generic arbitrary-unit engine.
@@ -106,7 +106,8 @@ A row may carry an optional configuration qualifier. Aluminium profile keeps one
 Unqualified lookup must not inherit a qualified rate.
 
 Owner-confirmed workshop rates use `OWNER_CONFIRMED_WORKSHOP`. Purchase rates use `OWNER_CONFIRMED_PURCHASE`.
-Used `PILOT_INTERNAL_EVIDENCE` or `LEGACY_EVIDENCE` keeps planned EIC PARTIAL.
+`AI_DECISION` source/classification may complete planned EIC when every required line has a rate. It is not owner-confirmed truth.
+Used `PILOT_INTERNAL_EVIDENCE` or `LEGACY_EVIDENCE` keeps planned EIC PARTIAL. Vinyl / RAL stay PARTIAL on that rule.
 
 Not a procurement ledger. Future need: effective date, supplier/provenance, history.
 Do not overwrite destructively when that slice arrives.

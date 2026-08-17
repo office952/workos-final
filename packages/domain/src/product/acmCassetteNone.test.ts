@@ -4,14 +4,24 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { projectCommercialPrice } from "../commercial/price.js";
 import { DEFAULT_COMMERCIAL_POLICY } from "../commercial/policy.js";
+import { freezeQuoteSnapshot } from "../commercial/quoteSnapshot.js";
 import {
   ATTACH_INTERNAL_FRAME_ID,
   BOND_LETTER_BODY_ID,
+  FORM_SHEET_CASSETTE_ID,
   INSPECT_FINISHED_LETTER_ID,
   PACK_PRODUCT_ID,
 } from "../processes/catalog.js";
 import { composeProductProcessesFromTruth } from "../processes/composition.js";
-import { ACM_3MM_ID, STEEL_FRAME_PROFILE_ID } from "../resources/catalog.js";
+import {
+  ACM_3MM_ID,
+  LAB_ATTACH_INTERNAL_FRAME_ID,
+  LAB_FORM_SHEET_CASSETTE_ID,
+  STEEL_FRAME_PROFILE_ID,
+  SVC_CNC_SHEET_PANEL_ID,
+  SVC_CUT_METAL_STOCK_ID,
+  SVC_PACK_PRODUCT_ID,
+} from "../resources/catalog.js";
 import { compileEic } from "../resources/eic.js";
 import {
   ACM_CASSETTE_NONE_PRODUCT_CODE,
@@ -144,7 +154,11 @@ describe("ACM cassette second product", () => {
     const { composition } = confirmedAcm();
     expect(composition.lightingCalculationReadiness).toBe("NOT_APPLICABLE");
     expect(composition.nodes.map((item) => item.processId)).toEqual(
-      expect.arrayContaining([ATTACH_INTERNAL_FRAME_ID, PACK_PRODUCT_ID]),
+      expect.arrayContaining([
+        ATTACH_INTERNAL_FRAME_ID,
+        FORM_SHEET_CASSETTE_ID,
+        PACK_PRODUCT_ID,
+      ]),
     );
     expect(composition.nodes.map((item) => item.processId)).not.toContain(BOND_LETTER_BODY_ID);
     expect(composition.nodes.map((item) => item.processId)).not.toContain(
@@ -165,13 +179,48 @@ describe("ACM cassette second product", () => {
     expect(composition).toContain("NOT_APPLICABLE");
   });
 
-  it("uses generic EIC and stays honestly PARTIAL without invented ACM rates", () => {
+  it("uses generic EIC and becomes COMPLETE on classified ACM cost evidence", () => {
     const { aggregate, composition } = confirmedAcm();
     const eic = compileEic(aggregate, composition);
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.completenessReasons.some((item) => item.includes("Evidență de cost"))).toBe(true);
-    expect(JSON.stringify(eic)).not.toMatch(/ACM CostEngine|frontend/i);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.completenessReasons).toEqual([]);
+    expect(eic.total).toBeCloseTo(72.644, 6);
+    expect(lineCost(eic, ACM_3MM_ID)).toBeCloseTo(20.0448, 6);
+    expect(lineCost(eic, STEEL_FRAME_PROFILE_ID)).toBeCloseTo(10.388, 6);
+    expect(lineCost(eic, SVC_CNC_SHEET_PANEL_ID)).toBeCloseTo(11.2752, 6);
+    expect(lineCost(eic, LAB_FORM_SHEET_CASSETTE_ID)).toBe(8);
+    expect(lineCost(eic, SVC_CUT_METAL_STOCK_ID)).toBeCloseTo(5.936, 6);
+    expect(lineCost(eic, LAB_ATTACH_INTERNAL_FRAME_ID)).toBe(12);
+    expect(lineCost(eic, SVC_PACK_PRODUCT_ID)).toBe(5);
+    expect(eic.lines.some((line) => line.resourceId === "SVC-CNC-FACE")).toBe(false);
+    expect(JSON.stringify(eic)).not.toMatch(/ACM CostEngine|frontend|PRD-ACM/i);
     const commercial = projectCommercialPrice(eic, DEFAULT_COMMERCIAL_POLICY);
-    expect(commercial.completeness).toBe("PARTIAL");
+    expect(commercial.completeness).toBe("COMPLETE");
+    expect(commercial.netPrice).toBe(98.07);
+    expect(commercial.vatAmount).toBe(20.59);
+    expect(commercial.grossPrice).toBe(118.66);
+  });
+
+  it("freezes a generic ACM Quote Snapshot with production input", () => {
+    const { truth, aggregate, composition } = confirmedAcm();
+    const eic = compileEic(aggregate, composition);
+    const commercial = projectCommercialPrice(eic, DEFAULT_COMMERCIAL_POLICY);
+    const frozen = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial);
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      throw new Error("expected ACM quote freeze");
+    }
+    expect(frozen.snapshot.productCode).toBe(ACM_CASSETTE_NONE_PRODUCT_CODE);
+    expect(frozen.snapshot.eic.completeness).toBe("COMPLETE");
+    expect(frozen.snapshot.eic.total).toBeCloseTo(72.644, 6);
+    expect(frozen.snapshot.commercial.grossPrice).toBe(118.66);
+    expect(frozen.snapshot.productionInput.operations.length).toBeGreaterThan(0);
+    expect(JSON.stringify(frozen.snapshot)).not.toMatch(/ACM Quote|ACM CostEngine/i);
   });
 });
+
+function lineCost(eic: ReturnType<typeof compileEic>, resourceId: string): number {
+  return eic.lines
+    .filter((line) => line.resourceId === resourceId)
+    .reduce((sum, line) => sum + line.cost, 0);
+}

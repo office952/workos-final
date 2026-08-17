@@ -85,10 +85,11 @@ describe("resource ownership", () => {
     expect(resourceCatalog.map((item) => item.id)).toEqual(
       expect.arrayContaining(["acm_3mm", "steel_frame_profile"]),
     );
-    expect(costEvidence.map((item) => item.resourceId)).not.toContain("acm_3mm");
-    expect(costEvidence.map((item) => item.resourceId)).not.toContain(
-      "steel_frame_profile",
+    expect(costEvidence.map((item) => item.resourceId)).toEqual(
+      expect.arrayContaining(["acm_3mm", "steel_frame_profile"]),
     );
+    expect(getCostEvidence("acm_3mm")?.classification).toBe("AI_DECISION");
+    expect(getCostEvidence("steel_frame_profile")?.classification).toBe("AI_DECISION");
   });
 });
 

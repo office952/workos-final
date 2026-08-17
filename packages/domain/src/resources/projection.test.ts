@@ -69,6 +69,8 @@ describe("resources administration projection", () => {
       "LAB-VINYL-VOLUME",
       "LAB-BOND-LETTER-BODY",
       "LAB-CLOSE-LETTER-BODY",
+      "LAB-FORM-SHEET-CASSETTE",
+      "LAB-ATTACH-INTERNAL-FRAME",
     ]);
     expect(admin.serviceRecipes.map((item) => item.id)).toEqual(
       expect.arrayContaining([
@@ -79,6 +81,8 @@ describe("resources administration projection", () => {
         "RCP_ELECTRICAL_FINISH",
         "RCP_PAINT_RAL",
         "RCP_PACK_PRODUCT",
+        "RCP_CNC_SHEET_PANEL",
+        "RCP_CUT_METAL_STOCK",
       ]),
     );
     expect(admin.laborRecipes.map((item) => item.id)).toEqual([
@@ -86,6 +90,8 @@ describe("resources administration projection", () => {
       "RCP_VINYL_VOLUME_LABOR",
       "RCP_BOND_LETTER_BODY",
       "RCP_CLOSE_LETTER_BODY",
+      "RCP_FORM_SHEET_CASSETTE",
+      "RCP_ATTACH_INTERNAL_FRAME",
     ]);
     expect(admin.missingServiceRecipes.map((item) => item.processId)).not.toContain(
       "CUT_SHEET_CNC",
@@ -99,7 +105,7 @@ describe("resources administration projection", () => {
     expect(admin.missingLaborRecipes.map((item) => item.processId)).toContain(
       "INSPECT_FINISHED_LETTER",
     );
-    expect(admin.costEvidence).toHaveLength(20);
+    expect(admin.costEvidence).toHaveLength(26);
     const catalogIds = admin.materials
       .concat(admin.services)
       .concat(admin.labor)
@@ -108,9 +114,8 @@ describe("resources administration projection", () => {
       true,
     );
     expect(catalogIds).toEqual(expect.arrayContaining(["acm_3mm", "steel_frame_profile"]));
-    expect(admin.costEvidence.map((item) => item.resourceId)).not.toContain("acm_3mm");
-    expect(admin.costEvidence.map((item) => item.resourceId)).not.toContain(
-      "steel_frame_profile",
+    expect(admin.costEvidence.map((item) => item.resourceId)).toEqual(
+      expect.arrayContaining(["acm_3mm", "steel_frame_profile"]),
     );
   });
 });

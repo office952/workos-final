@@ -93,6 +93,7 @@ export const TEST_ILLUMINATION_UNIFORMITY_ID = "TEST_ILLUMINATION_UNIFORMITY";
 export const INSPECT_FINISHED_LETTER_ID = "INSPECT_FINISHED_LETTER";
 export const PACK_PRODUCT_ID = "PACK_PRODUCT";
 export const ATTACH_INTERNAL_FRAME_ID = "ATTACH_INTERNAL_FRAME";
+export const FORM_SHEET_CASSETTE_ID = "FORM_SHEET_CASSETTE";
 export const WELD_STEEL_JOIN_ID = "WELD_STEEL_JOIN";
 export const WELD_ALUMINIUM_JOIN_ID = "WELD_ALUMINIUM_JOIN";
 export const CUT_METAL_STOCK_ID = "CUT_METAL_STOCK";
@@ -417,6 +418,21 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     readiness: "KNOWN_PROCESS",
     readinessNote:
       "Proces de atelier cunoscut. Fără rețetă de labor și fără tarif de prindere.",
+  },
+  {
+    id: FORM_SHEET_CASSETTE_ID,
+    label: "Formare casetă din foaie",
+    description:
+      "Îndoire/debavurare manuală a casetei după V-groove CNC. Nu este formare de profil aluminiu și nu este un utilaj de îndoit.",
+    category: "FORMING",
+    requiredCapabilityId: "MANUAL_ASSEMBLY",
+    applicableTypeIds: ["ACM_CASSETTE_BODY"],
+    outcome: "Casetă formată din foaia debitată",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "KNOWN_PROCESS",
+    readinessNote:
+      "Lucru manual după CNC. V-groove rămâne în debitarea CNC. Fără mașină de îndoit.",
   },
   {
     id: WELD_STEEL_JOIN_ID,

@@ -157,6 +157,7 @@ export {
   BOND_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  FORM_SHEET_CASSETTE_ID,
   PLACE_LED_MODULES_ID,
   composeProductProcesses,
   composeProductProcessesFromTruth,

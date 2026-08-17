@@ -1,6 +1,6 @@
 import { expect, test } from "./fixtures";
 
-test("catalog shows ACM cassette and confirms honest partial EIC", async ({ page }) => {
+test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Produse" }).click();
   await expect(page.getByRole("heading", { name: "Produse" })).toBeVisible();
@@ -64,6 +64,7 @@ test("catalog shows ACM cassette and confirms honest partial EIC", async ({ page
   });
 
   await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
+  await expect(page.getByText("Formare casetă din foaie").first()).toBeVisible();
   await expect(page.getByText("Prindere cadru intern").first()).toBeVisible();
   await expect(page.getByText("Ambalare").first()).toBeVisible();
   await page.screenshot({
@@ -71,11 +72,42 @@ test("catalog shows ACM cassette and confirms honest partial EIC", async ({ page
     fullPage: true,
   });
 
-  await expect(page.locator(".eic-section").getByText("Parțial", { exact: true })).toBeVisible();
-  await expect(page.getByText("Evidență de cost indisponibilă")).toBeVisible();
-  await expect(page.getByText("Preț final client")).toHaveCount(0);
+  const eic = page.locator(".eic-section");
+  await expect(eic.getByText("Complet", { exact: true })).toBeVisible();
+  await expect(eic.getByText("Total cost intern estimat: 72,64 EUR")).toBeVisible();
+  await expect(eic.getByText("ACM 3 mm: 0,63 m²", { exact: true })).toBeVisible();
+  await expect(eic.getByText("Profil oțel cadru intern: 2,97 m", { exact: true })).toBeVisible();
   await page.screenshot({
-    path: "docs/worklog/screenshots/acm-eic-partial.png",
+    path: "docs/worklog/screenshots/acm-eic-complete.png",
+    fullPage: true,
+  });
+  await eic.getByText("Detalii cost intern").click();
+  await expect(eic.getByText("ACM 3 mm: 0,63 m² × 32,00 EUR/m² = 20,04 EUR")).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/acm-material-breakdown.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/acm-process-breakdown.png",
+    fullPage: true,
+  });
+
+  const commercial = page.locator(".commercial-section");
+  await expect(commercial.getByText("Complet", { exact: true })).toBeVisible();
+  await expect(commercial.getByText("Preț final client: 118,66 EUR")).toBeVisible();
+  await expect(commercial.getByText("98,07 EUR")).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/acm-commercial-complete.png",
+    fullPage: true,
+  });
+
+  const quote = page.locator(".quote-section");
+  await expect(quote.getByRole("button", { name: "Îngheață oferta" })).toBeVisible();
+  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await expect(quote.getByRole("heading", { name: "Ofertă salvată" })).toBeVisible();
+  await expect(quote.getByText("Preț final: 118,66 EUR")).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/acm-quote-frozen.png",
     fullPage: true,
   });
 
@@ -83,6 +115,18 @@ test("catalog shows ACM cassette and confirms honest partial EIC", async ({ page
   await expect(page.getByRole("heading", { name: "Panou ACM casetat" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-narrow.png",
+    fullPage: true,
+  });
+
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/admin/resources");
+  await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
+  await page.getByRole("button", { name: "ACM" }).click();
+  await expect(page.getByRole("heading", { name: "ACM 3 mm" })).toBeVisible();
+  await expect(page.getByText("32,00 EUR / m²")).toBeVisible();
+  await expect(page.getByText("Decizie AI / pilot").first()).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/acm-admin-cost-evidence.png",
     fullPage: true,
   });
 });

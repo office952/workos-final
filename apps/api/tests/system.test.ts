@@ -101,7 +101,7 @@ describe("system projection API", () => {
     expect(body.services[0]).toEqual(
       expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
     );
-    expect(body.costEvidence).toHaveLength(20);
+    expect(body.costEvidence).toHaveLength(26);
     expect(JSON.stringify(body)).not.toMatch(/plexiglas_face_3mm|forex_back_10mm/);
   });
 
@@ -133,6 +133,7 @@ describe("system projection API", () => {
       "INSPECT_FINISHED_LETTER",
       "PACK_PRODUCT",
       "ATTACH_INTERNAL_FRAME",
+      "FORM_SHEET_CASSETTE",
       "WELD_STEEL_JOIN",
       "WELD_ALUMINIUM_JOIN",
       "CUT_METAL_STOCK",

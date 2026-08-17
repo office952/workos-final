@@ -36,7 +36,7 @@ Sheet quantity is one bounding-box unfold, not nesting.
 
 ## EIC
 
-Generic engine. ACM sheet and steel profile have identities and no rates.
+Generic engine. ACM sheet and steel profile started as identities without rates. Cost completeness is now in `WORKOS_FINAL_ACM_COST_COMPLETENESS_AND_QUOTE_READINESS_V1`.
 EIC is honestly PARTIAL. Commercial stays PARTIAL. No Quote freeze.
 
 ## Process

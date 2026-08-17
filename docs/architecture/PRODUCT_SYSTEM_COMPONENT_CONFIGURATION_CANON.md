@@ -52,7 +52,7 @@ Applied vinyl/paint color is not the same fact as inherent material color or opt
 | BACK | `STEEL_INTERNAL_FRAME` | steel profile; size from cassette formula |
 | LIGHTING | `LIGHTING_FRONT_LED` | technology fixed; LED pitch / module power / PSU reserve are settings |
 
-Product codes: `PRD-LETTERS-FRONTLIT-PLEXI-AL06` and `PRD-ACM-CASSETTE-NONE`. ACM V1 has no VOLUME and no LIGHTING. Unselected roles stay silent.
+Product codes: `PRD-LETTERS-FRONTLIT-PLEXI-AL06` and `PRD-ACM-CASSETTE-NONE`. ACM V1 has no VOLUME and no LIGHTING. Unselected roles stay silent. Canonical ACM none is commercially COMPLETE through generic EIC / Commercial / Quote. ACM material and process rates are AI_DECISION unless marked otherwise.
 
 Display labels for families, categories, templates, and constructive types are persisted metadata. They are not constructive configuration and do not change calculation lookup.
 

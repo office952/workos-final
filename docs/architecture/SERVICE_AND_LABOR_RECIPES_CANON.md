@@ -50,16 +50,20 @@ Service recipes:
 - `RCP_ELECTRICAL_FINISH` — `WIRE_LIGHTING` + `INSTALL_OR_CONNECT_PSU` + `TEST_LIGHTING_IGNITION` — 1 product
 - `RCP_PAINT_RAL` — `PAINT_RAL` when painted — volume perimeter (m)
 - `RCP_PACK_PRODUCT` — `PACK_PRODUCT` — face area (m²)
+- `RCP_CNC_SHEET_PANEL` — `CUT_SHEET_CNC` scoped FACE + `ACM_CASSETTE_BODY` — developed blank area (m²)
+- `RCP_CUT_METAL_STOCK` — `CUT_METAL_STOCK` — frame perimeter (m)
 
 Labor recipes:
 
 - `RCP_VINYL_FACE_LABOR` / `RCP_VINYL_VOLUME_LABOR` — `APPLY_SURFACE_FINISH` scoped FACE / VOLUME
 - `RCP_BOND_LETTER_BODY` — `BOND_LETTER_BODY` — volume perimeter (m)
 - `RCP_CLOSE_LETTER_BODY` — `CLOSE_LETTER_BODY` — volume perimeter (m)
+- `RCP_FORM_SHEET_CASSETTE` — `FORM_SHEET_CASSETTE` — 1 product
+- `RCP_ATTACH_INTERNAL_FRAME` — `ATTACH_INTERNAL_FRAME` — 1 product
 
-Quantity is consumed, not invented. Volume / FACE / Lighting calculation remain the geometry authority.
+Quantity is consumed, not invented. Volume / FACE / Lighting / ACM blank / frame calculation remain the geometry authority.
 
-Unrelated shop-floor operations stay without recipes: welding, print, lamination, plotter, laser, styro, metal cutting.
+Unrelated shop-floor operations stay without recipes: welding, print, lamination, plotter, laser, styro.
 QC inspection has no cost recipe. Legacy treated it as internal-only / 0 EUR.
 
 ## Completeness vs providers

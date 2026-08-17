@@ -4,6 +4,7 @@ import {
   CUT_METAL_STOCK_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  FORM_SHEET_CASSETTE_ID,
   INSTALL_OR_CONNECT_PSU_ID,
   PAINT_RAL_ID,
   PLACE_LED_MODULES_ID,
@@ -67,6 +68,11 @@ const ACM_CASSETTE_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
     processId: CUT_SHEET_CNC_ID,
     condition: { kind: "always" },
     reason: "Foaia ACM trebuie debitată.",
+  },
+  {
+    processId: FORM_SHEET_CASSETTE_ID,
+    condition: { kind: "always" },
+    reason: "Caseta se formează manual după V-groove.",
   },
 ];
 

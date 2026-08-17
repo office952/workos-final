@@ -76,6 +76,10 @@ describe("resource catalog", () => {
       "SVC-PACK-PRODUCT",
       "acm_3mm",
       "steel_frame_profile",
+      "SVC-CNC-SHEET-PANEL",
+      "SVC-CUT-METAL-STOCK",
+      "LAB-FORM-SHEET-CASSETTE",
+      "LAB-ATTACH-INTERNAL-FRAME",
     ]);
   });
 
@@ -93,6 +97,8 @@ describe("resource catalog", () => {
       "SVC-ELECTRICAL-FINISH",
       "SVC-PAINT-RAL",
       "SVC-PACK-PRODUCT",
+      "SVC-CNC-SHEET-PANEL",
+      "SVC-CUT-METAL-STOCK",
     ]);
     expect(getResource("LAB-BOND-LETTER-BODY")?.kind).toBe("LABOR");
     expect(resourceKindLabel("LABOR")).toBe("Manoperă");
@@ -178,8 +184,20 @@ describe("resource catalog", () => {
         resourceCatalog.some((resource) => resource.id === item.resourceId),
       ),
     ).toBe(true);
-    expect(getCostEvidence("acm_3mm")).toBeUndefined();
-    expect(getCostEvidence("steel_frame_profile")).toBeUndefined();
+    expect(getCostEvidence("acm_3mm")).toEqual(
+      expect.objectContaining({
+        amount: 32,
+        classification: "AI_DECISION",
+        source: "AI_DECISION",
+      }),
+    );
+    expect(getCostEvidence("steel_frame_profile")).toEqual(
+      expect.objectContaining({
+        amount: 3.5,
+        classification: "AI_DECISION",
+        source: "AI_DECISION",
+      }),
+    );
     expect(getCostEvidence(PLEXIGLAS_3MM_OPAL_ID)).toEqual(
       expect.objectContaining({
         amount: 16,

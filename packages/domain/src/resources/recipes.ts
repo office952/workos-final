@@ -1,10 +1,13 @@
 import type { ProductProcessComposition } from "../processes/composition.js";
 import {
   APPLY_SURFACE_FINISH_ID,
+  ATTACH_INTERNAL_FRAME_ID,
   BOND_LETTER_BODY_ID,
   CLOSE_LETTER_BODY_ID,
+  CUT_METAL_STOCK_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  FORM_SHEET_CASSETTE_ID,
   INSTALL_OR_CONNECT_PSU_ID,
   PACK_PRODUCT_ID,
   PAINT_RAL_ID,
@@ -15,17 +18,21 @@ import {
   getProductionCapability,
   operationalProcesses,
 } from "../processes/catalog.js";
-import type { ProductAggregate } from "../product/types.js";
+import type { ComponentTypeId, ProductAggregate } from "../product/types.js";
 import {
   getCostEvidence,
   getResource,
+  LAB_ATTACH_INTERNAL_FRAME_ID,
   LAB_BOND_LETTER_BODY_ID,
   LAB_CLOSE_LETTER_BODY_ID,
+  LAB_FORM_SHEET_CASSETTE_ID,
   LAB_VINYL_FACE_ID,
   LAB_VINYL_VOLUME_ID,
   RETURN_CANT_FORMING_ID,
   SVC_CNC_BACK_ID,
   SVC_CNC_FACE_ID,
+  SVC_CNC_SHEET_PANEL_ID,
+  SVC_CUT_METAL_STOCK_ID,
   SVC_ELECTRICAL_FINISH_ID,
   SVC_PACK_PRODUCT_ID,
   SVC_PAINT_RAL_ID,
@@ -45,6 +52,8 @@ export const RECIPE_QUANTITY_BASES = [
   "FACE_AREA_M2",
   "BACK_AREA_M2",
   "VOLUME_LATERAL_AREA_M2",
+  "CASSETTE_BLANK_AREA_M2",
+  "FRAME_PERIMETER_M",
   "LED_MODULE_QTY",
   "PRODUCT_UNIT",
 ] as const;
@@ -71,6 +80,10 @@ export const RCP_PLACE_LED_MODULES_ID = "RCP_PLACE_LED_MODULES";
 export const RCP_ELECTRICAL_FINISH_ID = "RCP_ELECTRICAL_FINISH";
 export const RCP_PAINT_RAL_ID = "RCP_PAINT_RAL";
 export const RCP_PACK_PRODUCT_ID = "RCP_PACK_PRODUCT";
+export const RCP_CNC_SHEET_PANEL_ID = "RCP_CNC_SHEET_PANEL";
+export const RCP_CUT_METAL_STOCK_ID = "RCP_CUT_METAL_STOCK";
+export const RCP_FORM_SHEET_CASSETTE_ID = "RCP_FORM_SHEET_CASSETTE";
+export const RCP_ATTACH_INTERNAL_FRAME_ID = "RCP_ATTACH_INTERNAL_FRAME";
 
 export type CostRecipe = {
   readonly id: string;
@@ -80,6 +93,7 @@ export type CostRecipe = {
   readonly lifecycle: RecipeLifecycle;
   readonly processIds: readonly string[];
   readonly scopes?: readonly RecipeScope[];
+  readonly applicableTypeIds?: readonly ComponentTypeId[];
   readonly quantityBasis: RecipeQuantityBasis;
   readonly unit: ResourceUnit;
   readonly costEvidenceId: string;
@@ -124,6 +138,7 @@ export const costRecipes: readonly CostRecipe[] = [
     lifecycle: "ACTIVE",
     processIds: [CUT_SHEET_CNC_ID],
     scopes: ["FACE"],
+    applicableTypeIds: ["PLEXIGLAS_FACE"],
     quantityBasis: "VOLUME_PERIMETER_M",
     unit: "m",
     costEvidenceId: SVC_CNC_FACE_ID,
@@ -137,6 +152,7 @@ export const costRecipes: readonly CostRecipe[] = [
     lifecycle: "ACTIVE",
     processIds: [CUT_SHEET_CNC_ID],
     scopes: ["BACK"],
+    applicableTypeIds: ["FOREX_BACK"],
     quantityBasis: "VOLUME_PERIMETER_M",
     unit: "m",
     costEvidenceId: SVC_CNC_BACK_ID,
@@ -233,6 +249,54 @@ export const costRecipes: readonly CostRecipe[] = [
     unit: "m2",
     costEvidenceId: SVC_PACK_PRODUCT_ID,
   },
+  {
+    id: RCP_CNC_SHEET_PANEL_ID,
+    kind: "SERVICE",
+    label: "Debitare CNC foaie panou",
+    description:
+      "Debitare CNC de foaie de panou pe suprafața dezvoltată. Include contur și V-groove. Nu este tariful pe perimetru de literă.",
+    lifecycle: "ACTIVE",
+    processIds: [CUT_SHEET_CNC_ID],
+    scopes: ["FACE"],
+    applicableTypeIds: ["ACM_CASSETTE_BODY"],
+    quantityBasis: "CASSETTE_BLANK_AREA_M2",
+    unit: "m2",
+    costEvidenceId: SVC_CNC_SHEET_PANEL_ID,
+  },
+  {
+    id: RCP_CUT_METAL_STOCK_ID,
+    kind: "SERVICE",
+    label: "Debitare semifabricat metalic",
+    description: "Debitare profil de cadru intern pe perimetrul cadrului.",
+    lifecycle: "ACTIVE",
+    processIds: [CUT_METAL_STOCK_ID],
+    quantityBasis: "FRAME_PERIMETER_M",
+    unit: "m",
+    costEvidenceId: SVC_CUT_METAL_STOCK_ID,
+  },
+  {
+    id: RCP_FORM_SHEET_CASSETTE_ID,
+    kind: "LABOR",
+    label: "Formare casetă din foaie",
+    description:
+      "Îndoire manuală după V-groove. Un cost pe produs în V1; foldCount rămâne adevăr de atelier.",
+    lifecycle: "ACTIVE",
+    processIds: [FORM_SHEET_CASSETTE_ID],
+    quantityBasis: "PRODUCT_UNIT",
+    unit: "buc",
+    costEvidenceId: LAB_FORM_SHEET_CASSETTE_ID,
+  },
+  {
+    id: RCP_ATTACH_INTERNAL_FRAME_ID,
+    kind: "LABOR",
+    label: "Prindere cadru intern",
+    description: "Manoperă de prindere a cadrului intern de corpul casetat.",
+    lifecycle: "ACTIVE",
+    processIds: [ATTACH_INTERNAL_FRAME_ID],
+    quantityBasis: "PRODUCT_UNIT",
+    unit: "buc",
+    costEvidenceId: LAB_ATTACH_INTERNAL_FRAME_ID,
+  },
 ];
 
 export function getCostRecipe(id: string): CostRecipe | undefined {
@@ -246,11 +310,16 @@ export function recipeForProcess(processId: string): CostRecipe | undefined {
 export function recipeForProcessScope(
   processId: string,
   scope: string,
+  typeId?: string | null,
 ): CostRecipe | undefined {
   const matches = costRecipes.filter((item) => item.processIds.includes(processId));
+  const typed = typeId
+    ? matches.filter((item) => item.applicableTypeIds?.includes(typeId as ComponentTypeId))
+    : [];
+  const pool = typed.length > 0 ? typed : matches;
   return (
-    matches.find((item) => item.scopes?.includes(scope as RecipeScope)) ??
-    matches.find((item) => item.scopes === undefined)
+    pool.find((item) => item.scopes?.includes(scope as RecipeScope)) ??
+    pool.find((item) => item.scopes === undefined)
   );
 }
 
@@ -297,6 +366,10 @@ export function recipeQuantityBasisLabel(basis: RecipeQuantityBasis): string {
       return "Suprafață spate (m²)";
     case "VOLUME_LATERAL_AREA_M2":
       return "Suprafață laterală volum (m²)";
+    case "CASSETTE_BLANK_AREA_M2":
+      return "Foaie dezvoltată (m²)";
+    case "FRAME_PERIMETER_M":
+      return "Perimetru cadru intern (m)";
     case "LED_MODULE_QTY":
       return "Cantitate module LED (buc)";
     case "PRODUCT_UNIT":
@@ -383,6 +456,10 @@ export function quantityForRecipe(
       return quantityById(aggregate, "back_area");
     case "VOLUME_LATERAL_AREA_M2":
       return quantityById(aggregate, "volume_lateral");
+    case "CASSETTE_BLANK_AREA_M2":
+      return quantityById(aggregate, "cassette_blank_area");
+    case "FRAME_PERIMETER_M":
+      return quantityById(aggregate, "frame_perimeter");
     case "LED_MODULE_QTY":
       return quantityById(aggregate, "ledModuleQuantity");
     case "PRODUCT_UNIT":
@@ -402,7 +479,7 @@ export function collectRecipeRequirements(
   const existing = new Set(aggregate.requirements.map((item) => item.resourceId));
   const requirements: ResourceRequirement[] = [];
   for (const node of composition.nodes) {
-    const recipe = recipeForProcessScope(node.processId, node.scope);
+    const recipe = recipeForProcessScope(node.processId, node.scope, node.typeId);
     if (!recipe || seen.has(recipe.id) || existing.has(recipe.costEvidenceId)) {
       continue;
     }
@@ -456,6 +533,7 @@ export function assertCostRecipeRegistry(): void {
       throw new Error(`Unit mismatch on ${recipe.id}`);
     }
     const scopes = recipe.scopes ?? ["*"];
+    const typeKeys = recipe.applicableTypeIds ?? ["*"];
     for (const processId of recipe.processIds) {
       if (!getOperationalProcess(processId)) {
         throw new Error(`Unknown process ${processId} on ${recipe.id}`);
@@ -464,15 +542,17 @@ export function assertCostRecipeRegistry(): void {
       if (expectedKind && expectedKind !== recipe.kind) {
         throw new Error(`Recipe kind mismatch for ${processId}`);
       }
-      for (const scope of scopes) {
-        const key = `${processId}:${scope}`;
-        if (owned.has(key) || owned.has(`${processId}:*`)) {
-          throw new Error(`Duplicate recipe ownership for ${key}`);
+      for (const typeKey of typeKeys) {
+        for (const scope of scopes) {
+          const key = `${processId}:${scope}:${typeKey}`;
+          if (owned.has(key) || owned.has(`${processId}:${scope}:*`) || owned.has(`${processId}:*:*`)) {
+            throw new Error(`Duplicate recipe ownership for ${key}`);
+          }
+          if (typeKey === "*" && [...owned].some((item) => item.startsWith(`${processId}:${scope}:`))) {
+            throw new Error(`Duplicate recipe ownership for ${processId}:${scope}`);
+          }
+          owned.add(key);
         }
-        if (scope === "*" && [...owned].some((item) => item.startsWith(`${processId}:`))) {
-          throw new Error(`Duplicate recipe ownership for ${processId}`);
-        }
-        owned.add(key);
       }
     }
   }

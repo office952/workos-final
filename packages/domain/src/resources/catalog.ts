@@ -56,7 +56,8 @@ export type CostEvidence = {
     | "PILOT_INTERNAL_EVIDENCE"
     | "OWNER_CONFIRMED_PURCHASE"
     | "OWNER_CONFIRMED_WORKSHOP"
-    | "LEGACY_EVIDENCE";
+    | "LEGACY_EVIDENCE"
+    | "AI_DECISION";
   classification: "AI_DECISION" | "OWNER_CONFIRMED" | "DEVELOPMENT_DEFAULT";
   note: string;
   when?: CostEvidenceWhen;
@@ -84,6 +85,10 @@ export const SVC_PAINT_RAL_ID = "SVC-PAINT-RAL";
 export const SVC_PACK_PRODUCT_ID = "SVC-PACK-PRODUCT";
 export const ACM_3MM_ID = "acm_3mm";
 export const STEEL_FRAME_PROFILE_ID = "steel_frame_profile";
+export const SVC_CNC_SHEET_PANEL_ID = "SVC-CNC-SHEET-PANEL";
+export const SVC_CUT_METAL_STOCK_ID = "SVC-CUT-METAL-STOCK";
+export const LAB_FORM_SHEET_CASSETTE_ID = "LAB-FORM-SHEET-CASSETTE";
+export const LAB_ATTACH_INTERNAL_FRAME_ID = "LAB-ATTACH-INTERNAL-FRAME";
 
 export const materialFamilies: readonly MaterialFamily[] = [
   {
@@ -300,6 +305,30 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
       form: "profile",
     },
   },
+  {
+    id: SVC_CNC_SHEET_PANEL_ID,
+    label: "Debitare CNC foaie panou",
+    kind: "SERVICE",
+    unit: "m2",
+  },
+  {
+    id: SVC_CUT_METAL_STOCK_ID,
+    label: "Debitare semifabricat metalic",
+    kind: "SERVICE",
+    unit: "m",
+  },
+  {
+    id: LAB_FORM_SHEET_CASSETTE_ID,
+    label: "Formare casetă din foaie",
+    kind: "LABOR",
+    unit: "buc",
+  },
+  {
+    id: LAB_ATTACH_INTERNAL_FRAME_ID,
+    label: "Prindere cadru intern",
+    kind: "LABOR",
+    unit: "buc",
+  },
 ];
 
 export const costEvidence: readonly CostEvidence[] = [
@@ -484,6 +513,60 @@ export const costEvidence: readonly CostEvidence[] = [
     classification: "OWNER_CONFIRMED",
     note: "Owner-confirmed packing rate on confirmed face area.",
   },
+  {
+    resourceId: ACM_3MM_ID,
+    amount: 32,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "AI_DECISION",
+    classification: "AI_DECISION",
+    note: "AI development purchase rate for ACM 3 mm PE-core sheet. Bounded between typical 28–40 EUR/m² workshop quotes. Replace with the current supplier invoice. Not nesting and not owner-confirmed.",
+  },
+  {
+    resourceId: STEEL_FRAME_PROFILE_ID,
+    amount: 3.5,
+    currency: "EUR",
+    perUnit: "m",
+    source: "AI_DECISION",
+    classification: "AI_DECISION",
+    note: "AI development purchase rate for internal steel frame profile, priced on frame perimeter. Replace with the current steel-profile purchase. Not an area rate and not owner-confirmed.",
+  },
+  {
+    resourceId: SVC_CNC_SHEET_PANEL_ID,
+    amount: 18,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "AI_DECISION",
+    classification: "AI_DECISION",
+    note: "AI development CNC rate on developed blank area. Covers outer contour plus V-groove on the existing CNC 4020. Not the LETTERS perimeter 2-pass/3-pass rate. Replace with workshop calibration. Not owner-confirmed.",
+  },
+  {
+    resourceId: SVC_CUT_METAL_STOCK_ID,
+    amount: 2,
+    currency: "EUR",
+    perUnit: "m",
+    source: "AI_DECISION",
+    classification: "AI_DECISION",
+    note: "AI development metal-stock cutting rate on frame perimeter. Replace with the workshop metal-cutting rate. Not owner-confirmed.",
+  },
+  {
+    resourceId: LAB_FORM_SHEET_CASSETTE_ID,
+    amount: 8,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "AI_DECISION",
+    classification: "AI_DECISION",
+    note: "AI development per-product labor for manual fold/deburr after CNC V-groove. foldCount is workshop truth, not a V1 quantity driver. No bending machine. Replace with labor calibration. Not owner-confirmed.",
+  },
+  {
+    resourceId: LAB_ATTACH_INTERNAL_FRAME_ID,
+    amount: 12,
+    currency: "EUR",
+    perUnit: "buc",
+    source: "AI_DECISION",
+    classification: "AI_DECISION",
+    note: "AI development per-product labor for attaching the internal steel frame. Replace with labor calibration. Not owner-confirmed.",
+  },
 ];
 
 export function getMaterialFamily(id: string): MaterialFamily | undefined {
@@ -635,6 +718,8 @@ export function costSourceLabel(source: CostEvidence["source"]): string {
       return "Tarif intern confirmat de owner";
     case "LEGACY_EVIDENCE":
       return "Evidență legacy";
+    case "AI_DECISION":
+      return "Decizie AI / default de dezvoltare";
     default: {
       const _exhaustive: never = source;
       return _exhaustive;

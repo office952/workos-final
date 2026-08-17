@@ -48,6 +48,10 @@ describe("cost recipes", () => {
       RCP_ELECTRICAL_FINISH_ID,
       "RCP_PAINT_RAL",
       "RCP_PACK_PRODUCT",
+      "RCP_CNC_SHEET_PANEL",
+      "RCP_CUT_METAL_STOCK",
+      "RCP_FORM_SHEET_CASSETTE",
+      "RCP_ATTACH_INTERNAL_FRAME",
     ]);
     const forming = getCostRecipe(RCP_PROFILE_FORMING_ID);
     expect(forming).toEqual(
@@ -81,6 +85,12 @@ describe("cost recipes", () => {
   it("scopes CNC face and back on the same process with distinct development rates", () => {
     expect(recipeForProcessScope(CUT_SHEET_CNC_ID, "FACE")?.id).toBe(RCP_CNC_FACE_ID);
     expect(recipeForProcessScope(CUT_SHEET_CNC_ID, "BACK")?.id).toBe(RCP_CNC_BACK_ID);
+    expect(recipeForProcessScope(CUT_SHEET_CNC_ID, "FACE", "PLEXIGLAS_FACE")?.id).toBe(
+      RCP_CNC_FACE_ID,
+    );
+    expect(recipeForProcessScope(CUT_SHEET_CNC_ID, "FACE", "ACM_CASSETTE_BODY")?.id).toBe(
+      "RCP_CNC_SHEET_PANEL",
+    );
     expect(expectedRecipeKindForProcess(CUT_SHEET_CNC_ID)).toBe("SERVICE");
     expect(recipeGapForProcess(CUT_SHEET_CNC_ID)).toBe("CANONICAL_COST_EXISTS");
     expect(coverageForCapability("CNC_ROUTING")).toBe("COVERED");

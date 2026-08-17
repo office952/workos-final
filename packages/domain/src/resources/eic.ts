@@ -158,10 +158,11 @@ export function costCompletenessLabel(
 }
 
 export function costEvidenceKeepsEicPartial(evidence: CostEvidence): boolean {
+  if (evidence.source === "PILOT_INTERNAL_EVIDENCE" || evidence.source === "LEGACY_EVIDENCE") {
+    return true;
+  }
   return (
-    evidence.classification !== "OWNER_CONFIRMED" ||
-    evidence.source === "PILOT_INTERNAL_EVIDENCE" ||
-    evidence.source === "LEGACY_EVIDENCE"
+    evidence.classification !== "OWNER_CONFIRMED" && evidence.classification !== "AI_DECISION"
   );
 }
 

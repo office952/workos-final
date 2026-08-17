@@ -27,6 +27,7 @@ import { compileEic, costCompletenessLabel } from "../resources/eic.js";
 import {
   APPLY_SURFACE_FINISH_ID,
   ATTACH_INTERNAL_FRAME_ID,
+  FORM_SHEET_CASSETTE_ID,
   BOND_LETTER_BODY_ID,
   CLOSE_LETTER_BODY_ID,
   CUT_METAL_STOCK_ID,
@@ -430,6 +431,7 @@ function explicitDependencies(
     TEST_ILLUMINATION_UNIFORMITY_ID,
   );
   const metalCut = compositionNodeId("BACK", CUT_METAL_STOCK_ID);
+  const formCassette = compositionNodeId("FACE", FORM_SHEET_CASSETTE_ID);
   const attach = compositionNodeId("BODY", ATTACH_INTERNAL_FRAME_ID);
   const inspect = compositionNodeId("PRODUCT", INSPECT_FINISHED_LETTER_ID);
   const pack = compositionNodeId("PRODUCT", PACK_PRODUCT_ID);
@@ -464,8 +466,11 @@ function explicitDependencies(
   if (node.id === testUniformity) {
     pushIfPresent(deps, ids, close, volumePaint);
   }
+  if (node.id === formCassette && ids.has(faceCut)) {
+    deps.push(faceCut);
+  }
   if (node.id === attach) {
-    pushIfPresent(deps, ids, faceCut, metalCut);
+    pushIfPresent(deps, ids, faceCut, formCassette, metalCut);
   }
   if (node.id === inspect) {
     pushIfPresent(deps, ids, testUniformity, volumePaint, close);

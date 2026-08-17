@@ -132,6 +132,7 @@ ACM cassette extras, type-driven, not LETTERS role forks:
 | Process | Category | Capability | Types | Readiness |
 |---|---|---|---|---|
 | `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | steel internal frame | KNOWN_PROCESS |
+| `FORM_SHEET_CASSETTE` | FORMING | MANUAL_ASSEMBLY | ACM cassette body | KNOWN_PROCESS |
 | `ATTACH_INTERNAL_FRAME` | ASSEMBLY | MANUAL_ASSEMBLY | ACM cassette + steel frame | KNOWN_PROCESS |
 
 Product extras are selected by constructive type ids. FACE+VOLUME roles alone do not create letter bond/close/inspect. Lighting readiness may be `NOT_APPLICABLE` when no LIGHTING component is selected.
@@ -142,7 +143,7 @@ Reusable shop-floor processes. They exist because real equipment and operations 
 |---|---|---|---|---|
 | `WELD_STEEL_JOIN` | WELDING | WELD_STEEL | `MCH-WELD-STEEL` | SERVICE missing |
 | `WELD_ALUMINIUM_JOIN` | WELDING | WELD_ALUMINIUM | `MCH-WELD-ALU` | SERVICE missing |
-| `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | `MCH-METAL-CUTTER-AUTO` | SERVICE missing; now also used by ACM frame |
+| `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | `MCH-METAL-CUTTER-AUTO` | `RCP_CUT_METAL_STOCK` |
 | `PRINT_WIDE_FORMAT` | PRINTING | PRINTING | `MCH-EPSON-60800` | SERVICE missing |
 | `LAMINATE_WIDE_FORMAT` | PRINTING | LAMINATION | `MCH-LAMINATOR-XPRO` | SERVICE missing |
 | `LAMINATE_RIGID_PLATE` | FINISHING | RIGID_FILM_LAMINATION | `MCH-RIGID-FILM-LAMINATOR` | SERVICE missing |
@@ -155,7 +156,7 @@ CATALOG OF POSSIBLE OPERATIONS
   ≠ PRODUCT PROCESS COMPOSITION
 ```
 
-Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process; contour / V-groove / engraving were not added.
+Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process. ACM uses the same process with a panel-blank recipe that covers contour plus V-groove on CNC 4020. Manual fold after CNC is `FORM_SHEET_CASSETTE`, not a bending machine.
 
 Letters Lighting calculation is CALCULATED on the confirmed-perimeter path. LETTERS CNC, assembly, vinyl, electrical, paint and packing now have functional recipes. Unrelated shop-floor processes still have no recipes.
 Confirmed manual FACE area and VOLUME perimeter are valid Product Truth. Canonical 60 mm none/none planned EIC is COMPLETE on owner-confirmed workshop rates. Other aluminium depths stay PARTIAL until those rates are confirmed. Analyzer is not the planned-EIC blocker.

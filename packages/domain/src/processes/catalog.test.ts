@@ -8,6 +8,7 @@ import {
   CLOSE_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
+  FORM_SHEET_CASSETTE_ID,
   INSPECT_FINISHED_LETTER_ID,
   INSTALL_OR_CONNECT_PSU_ID,
   PACK_PRODUCT_ID,
@@ -56,6 +57,7 @@ describe("operational process catalog", () => {
       INSPECT_FINISHED_LETTER_ID,
       PACK_PRODUCT_ID,
       ATTACH_INTERNAL_FRAME_ID,
+      FORM_SHEET_CASSETTE_ID,
       WELD_STEEL_JOIN_ID,
       WELD_ALUMINIUM_JOIN_ID,
       CUT_METAL_STOCK_ID,
@@ -123,6 +125,7 @@ describe("operational process catalog", () => {
     expect(processesForType("ACM_CASSETTE_BODY").map((item) => item.id)).toEqual([
       CUT_SHEET_CNC_ID,
       ATTACH_INTERNAL_FRAME_ID,
+      FORM_SHEET_CASSETTE_ID,
     ]);
     expect(processesForType("STEEL_INTERNAL_FRAME").map((item) => item.id)).toEqual([
       ATTACH_INTERNAL_FRAME_ID,
