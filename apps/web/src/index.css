@@ -1009,6 +1009,52 @@ details summary {
   margin: 0.7rem 0 0.35rem;
 }
 
+.registry-search {
+  margin: 0.55rem 0 0.85rem;
+  max-width: 28rem;
+}
+
+.registry-search-controls {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.registry-search-controls input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.registry-search-clear {
+  flex: 0 0 auto;
+}
+
+.registry-search-summary {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.registry-provenance-link {
+  display: inline-block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.request-return-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.request-return-context p {
+  margin: 0;
+}
+
 .task-row.is-complete {
   background: var(--surface);
   color: var(--ink);

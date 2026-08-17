@@ -28,6 +28,8 @@ const overview: QuoteOverviewProjection = {
       attentionLabel: "Urmează acceptarea",
       acceptanceId: null,
       orderSnapshotId: null,
+      requestId: null,
+      requestReference: null,
     },
   ],
 };

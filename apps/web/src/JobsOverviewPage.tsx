@@ -11,9 +11,14 @@ import {
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { fetchJobOverview } from "./jobsApi";
+import {
+  RegistrySearchField,
+  registrySearchResultSummary,
+} from "./RegistrySearchField";
 import { EmptyState } from "./ui/EmptyState";
 import { PageHeader } from "./ui/PageHeader";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
+import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
@@ -23,6 +28,7 @@ type PageState =
 export function JobsOverviewPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [filter, setFilter] = useState<JobFilter>("ALL");
+  const [query, setQuery] = useRegistrySearchQuery();
 
   useEffect(() => {
     let cancelled = false;
@@ -42,12 +48,19 @@ export function JobsOverviewPage() {
     };
   }, []);
 
+  const filteredPool = useMemo(() => {
+    if (page.kind !== "ready") {
+      return [];
+    }
+    return [...filterJobOverview(page.overview, filter, "")];
+  }, [filter, page]);
+
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
       return [];
     }
-    return [...filterJobOverview(page.overview, filter)].sort(compareJobRows);
-  }, [filter, page]);
+    return [...filterJobOverview(page.overview, filter, query)].sort(compareJobRows);
+  }, [filter, page, query]);
 
   if (page.kind === "loading") {
     return <p>Se încarcă lucrările…</p>;
@@ -58,6 +71,7 @@ export function JobsOverviewPage() {
 
   const { overview } = page;
   const empty = overview.jobs.length === 0;
+  const searching = query.trim().length > 0;
 
   return (
     <section className="jobs-overview">
@@ -103,8 +117,27 @@ export function JobsOverviewPage() {
               </button>
             ))}
           </div>
+          <RegistrySearchField
+            label="Caută lucrare"
+            placeholder="Caută lucrare..."
+            value={query}
+            onChange={setQuery}
+            resultSummary={registrySearchResultSummary({
+              visibleCount: visible.length,
+              poolCount: filteredPool.length,
+              totalCount: overview.summary.total,
+              query,
+              nounPlural: "lucrări",
+            })}
+          />
           {visible.length === 0 ? (
-            <EmptyState title="Nicio lucrare în acest filtru." />
+            <EmptyState
+              title={
+                searching
+                  ? "Nicio lucrare nu corespunde căutării."
+                  : "Nicio lucrare în acest filtru."
+              }
+            />
           ) : (
             <ul className="jobs-list">
               {visible.map((job) => (

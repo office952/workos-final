@@ -4,16 +4,22 @@ import {
   QUOTE_OVERVIEW_FILTERS,
   filterQuoteOverview,
   quoteOverviewFilterLabel,
+  requestOverviewHref,
   type QuoteOverviewFilter,
   type QuoteOverviewItem,
   type QuoteOverviewProjection,
   type QuoteOverviewStage,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
+import {
+  RegistrySearchField,
+  registrySearchResultSummary,
+} from "./RegistrySearchField";
 import { fetchQuoteOverview } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
 import { PageHeader } from "./ui/PageHeader";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
+import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
@@ -23,6 +29,7 @@ type PageState =
 export function QuotesOverviewPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [filter, setFilter] = useState<QuoteOverviewFilter>("ALL");
+  const [query, setQuery] = useRegistrySearchQuery();
 
   useEffect(() => {
     let cancelled = false;
@@ -42,12 +49,19 @@ export function QuotesOverviewPage() {
     };
   }, []);
 
+  const filteredPool = useMemo(() => {
+    if (page.kind !== "ready") {
+      return [];
+    }
+    return [...filterQuoteOverview(page.overview, filter, "")];
+  }, [filter, page]);
+
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
       return [];
     }
-    return [...filterQuoteOverview(page.overview, filter)].sort(compareQuoteRows);
-  }, [filter, page]);
+    return [...filterQuoteOverview(page.overview, filter, query)].sort(compareQuoteRows);
+  }, [filter, page, query]);
 
   if (page.kind === "loading") {
     return <p>Se încarcă ofertele…</p>;
@@ -58,6 +72,7 @@ export function QuotesOverviewPage() {
 
   const { overview } = page;
   const empty = overview.quotes.length === 0;
+  const searching = query.trim().length > 0;
 
   return (
     <section className="jobs-overview">
@@ -103,8 +118,25 @@ export function QuotesOverviewPage() {
               </button>
             ))}
           </div>
+          <RegistrySearchField
+            label="Caută ofertă"
+            placeholder="Caută ofertă..."
+            value={query}
+            onChange={setQuery}
+            resultSummary={registrySearchResultSummary({
+              visibleCount: visible.length,
+              poolCount: filteredPool.length,
+              totalCount: overview.summary.total,
+              query,
+              nounPlural: "oferte",
+            })}
+          />
           {visible.length === 0 ? (
-            <EmptyState title="Nicio ofertă în acest filtru." />
+            <EmptyState
+              title={
+                searching ? "Nicio ofertă găsită." : "Nicio ofertă în acest filtru."
+              }
+            />
           ) : (
             <ul className="jobs-list">
               {visible.map((quote) => (
@@ -119,6 +151,14 @@ export function QuotesOverviewPage() {
                     <span>
                       {quote.reference} · {quote.grossDisplay} {quote.currency}
                     </span>
+                    {quote.requestId && quote.requestReference ? (
+                      <Link
+                        className="registry-provenance-link"
+                        to={requestOverviewHref(quote.requestId)}
+                      >
+                        Din cererea {quote.requestReference}
+                      </Link>
+                    ) : null}
                   </div>
                   <div className="jobs-status">
                     <StatusChip label={quote.stageLabel} tone={stageTone(quote.stage)} />

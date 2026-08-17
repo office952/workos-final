@@ -1,6 +1,7 @@
 import type { JobOverviewItem } from "../jobs/overview.js";
 import type { QuoteOverviewItem } from "../quotes/overview.js";
 import type { RequestOverviewItem } from "../requests/overview.js";
+import { matchesSearchFields } from "../searchNormalize.js";
 import {
   customerStatusLabel,
   type Customer,
@@ -23,6 +24,9 @@ export type CustomerRegistryItem = {
   displayName: string;
   cui: string | null;
   contactName: string | null;
+  phone: string | null;
+  email: string | null;
+  city: string | null;
   status: CustomerStatus;
   statusLabel: string;
   openRequestCount: number;
@@ -114,13 +118,10 @@ export function matchesCustomerSearch(
   item: CustomerRegistryItem,
   query: string,
 ): boolean {
-  const needle = query.trim().toLocaleLowerCase("ro");
-  if (!needle) {
-    return true;
-  }
-  return [item.displayName, item.cui, item.contactName]
-    .filter((value): value is string => Boolean(value))
-    .some((value) => value.toLocaleLowerCase("ro").includes(needle));
+  return matchesSearchFields(
+    [item.displayName, item.cui, item.contactName, item.phone, item.email, item.city],
+    query,
+  );
 }
 
 export function filterCustomerRegistry(
@@ -167,6 +168,9 @@ export function projectCustomerRegistryItem(input: {
     displayName: input.customer.displayName,
     cui: input.customer.cui,
     contactName: input.customer.contactName,
+    phone: input.customer.phone,
+    email: input.customer.email,
+    city: input.customer.city,
     status: input.customer.status,
     statusLabel: customerStatusLabel(input.customer.status),
     openRequestCount,

@@ -326,6 +326,11 @@ export {
   type FrozenCustomerIdentity,
 } from "./customers/index.js";
 export {
+  matchesSearchFields,
+  normalizeSearchText,
+  searchTextIncludes,
+} from "./searchNormalize.js";
+export {
   OWNER_CONFIRMED_SELLER,
   SELLER_IBAN_MAX_LENGTH,
   SELLER_MUTATION_ERRORS,
@@ -468,6 +473,7 @@ export {
   deriveJobNextAction,
   deriveJobStage,
   filterJobOverview,
+  matchesJobSearch,
   jobFilterLabel,
   jobHref,
   jobNextActionLabel,
@@ -489,6 +495,7 @@ export {
   deriveQuoteOverviewNextAction,
   deriveQuoteOverviewStage,
   filterQuoteOverview,
+  matchesQuoteSearch,
   projectQuoteOverview,
   projectQuoteOverviewItem,
   quoteOverviewFilterLabel,
@@ -519,6 +526,7 @@ export {
   deriveRequestOverviewAttention,
   deriveRequestOverviewNextAction,
   filterRequestOverview,
+  matchesRequestSearch,
   furthestLinkedQuote,
   generateCommercialRequestId,
   isCommercialRequestStatus,

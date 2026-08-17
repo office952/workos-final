@@ -6,6 +6,7 @@ export {
   deriveQuoteOverviewNextAction,
   deriveQuoteOverviewStage,
   filterQuoteOverview,
+  matchesQuoteSearch,
   projectQuoteOverview,
   projectQuoteOverviewItem,
   quoteOverviewFilterLabel,

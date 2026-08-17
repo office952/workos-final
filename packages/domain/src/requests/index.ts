@@ -28,6 +28,7 @@ export {
   deriveRequestOverviewAttention,
   deriveRequestOverviewNextAction,
   filterRequestOverview,
+  matchesRequestSearch,
   furthestLinkedQuote,
   projectRequestDetail,
   projectRequestOverview,

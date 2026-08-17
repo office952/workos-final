@@ -6,6 +6,7 @@ import {
   type ExecutionTaskView,
 } from "../execution/plan.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
+import { matchesSearchFields } from "../searchNormalize.js";
 
 export const JOB_STAGES = [
   "ORDER_CREATED",
@@ -282,26 +283,37 @@ export function projectJobOverview(
   };
 }
 
+export function matchesJobSearch(item: JobOverviewItem, query: string): boolean {
+  return matchesSearchFields(
+    [item.customerDisplayName, item.productLabel, item.productCode, item.inscription],
+    query,
+  );
+}
+
 export function filterJobOverview(
   overview: JobOverviewProjection,
   filter: JobFilter,
+  query = "",
 ): readonly JobOverviewItem[] {
-  switch (filter) {
-    case "ALL":
-      return overview.jobs;
-    case "NEEDS_ACTION":
-      return overview.jobs.filter(
-        (job) => job.needsAttention && job.stage !== "EXECUTION_COMPLETED",
-      );
-    case "IN_EXECUTION":
-      return overview.jobs.filter((job) => job.stage === "EXECUTION_IN_PROGRESS");
-    case "COMPLETED":
-      return overview.jobs.filter((job) => job.stage === "EXECUTION_COMPLETED");
-    default: {
-      const _exhaustive: never = filter;
-      return _exhaustive;
+  const byStage = ((): readonly JobOverviewItem[] => {
+    switch (filter) {
+      case "ALL":
+        return overview.jobs;
+      case "NEEDS_ACTION":
+        return overview.jobs.filter(
+          (job) => job.needsAttention && job.stage !== "EXECUTION_COMPLETED",
+        );
+      case "IN_EXECUTION":
+        return overview.jobs.filter((job) => job.stage === "EXECUTION_IN_PROGRESS");
+      case "COMPLETED":
+        return overview.jobs.filter((job) => job.stage === "EXECUTION_COMPLETED");
+      default: {
+        const _exhaustive: never = filter;
+        return _exhaustive;
+      }
     }
-  }
+  })();
+  return byStage.filter((item) => matchesJobSearch(item, query));
 }
 
 function progressLabel(progress: ExecutionPlanProgress | null): string | null {

@@ -11,11 +11,16 @@ import {
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { createCustomer, fetchCustomers } from "./customerApi";
+import {
+  RegistrySearchField,
+  registrySearchResultSummary,
+} from "./RegistrySearchField";
 import { createCommercialRequest, fetchRequestOverview } from "./requestsApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
+import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
@@ -28,6 +33,7 @@ export function RequestsOverviewPage() {
   const presetCustomerId = searchParams.get("customer") ?? "";
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [filter, setFilter] = useState<RequestOverviewFilter>("ALL");
+  const [query, setQuery] = useRegistrySearchQuery();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -50,12 +56,19 @@ export function RequestsOverviewPage() {
     };
   }, []);
 
+  const filteredPool = useMemo(() => {
+    if (page.kind !== "ready") {
+      return [];
+    }
+    return [...filterRequestOverview(page.overview, filter, "")];
+  }, [filter, page]);
+
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
       return [];
     }
-    return [...filterRequestOverview(page.overview, filter)];
-  }, [filter, page]);
+    return [...filterRequestOverview(page.overview, filter, query)];
+  }, [filter, page, query]);
 
   async function handleCreate(input: {
     customerId: string;
@@ -86,6 +99,7 @@ export function RequestsOverviewPage() {
 
   const { overview } = page;
   const empty = overview.requests.length === 0;
+  const searching = query.trim().length > 0;
 
   return (
     <section className="jobs-overview">
@@ -133,8 +147,27 @@ export function RequestsOverviewPage() {
               </button>
             ))}
           </div>
+          <RegistrySearchField
+            label="Caută cerere"
+            placeholder="Caută cerere..."
+            value={query}
+            onChange={setQuery}
+            resultSummary={registrySearchResultSummary({
+              visibleCount: visible.length,
+              poolCount: filteredPool.length,
+              totalCount: overview.summary.total,
+              query,
+              nounPlural: "cereri",
+            })}
+          />
           {visible.length === 0 ? (
-            <EmptyState title="Nicio cerere în acest filtru." />
+            <EmptyState
+              title={
+                searching
+                  ? "Nicio cerere nu corespunde căutării."
+                  : "Nicio cerere în acest filtru."
+              }
+            />
           ) : (
             <ul className="jobs-list">
               {visible.map((request) => (

@@ -14,6 +14,9 @@ const registry: CustomerRegistryProjection = {
       displayName: "Client Alpha",
       cui: "RO111",
       contactName: "Ana",
+      phone: null,
+      email: null,
+      city: null,
       status: "ACTIVE",
       statusLabel: "Activ",
       openRequestCount: 1,
@@ -28,6 +31,9 @@ const registry: CustomerRegistryProjection = {
       displayName: "Client Retras",
       cui: null,
       contactName: null,
+      phone: null,
+      email: null,
+      city: null,
       status: "RETIRED",
       statusLabel: "Retras",
       openRequestCount: 0,
@@ -77,7 +83,7 @@ describe("ClientsOverviewPage", () => {
     expect(screen.getByText("Client Retras")).toBeInTheDocument();
     expect(screen.queryByText("Client Alpha")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Toți" }));
-    await userEvent.type(screen.getByLabelText("Caută"), "RO111");
+    await userEvent.type(screen.getByLabelText("Caută client"), "RO111");
     expect(screen.getByText("Client Alpha")).toBeInTheDocument();
     expect(screen.queryByText("Client Retras")).not.toBeInTheDocument();
   });

@@ -42,6 +42,7 @@ import {
   projectRequestDetail,
   projectRequestOverview,
   projectRequestOverviewItem,
+  commercialRequestReference,
   type CommercialRequest,
   type CommercialRequestLinkResult,
   type CommercialRequestMutationResult,
@@ -133,6 +134,7 @@ import {
 } from "../production/store.js";
 import {
   getCommercialRequest,
+  getCommercialRequestQuoteLinkByQuote,
   listCommercialRequestQuoteLinks,
   listCommercialRequests,
   persistCommercialRequestQuoteLink,
@@ -652,13 +654,18 @@ function requestOverviewItems(db: SqliteDatabase) {
 }
 
 function quoteOverviewItems(db: SqliteDatabase) {
-  return listQuoteSnapshots(db).map((quote) =>
-    projectQuoteOverviewItem({
+  return listQuoteSnapshots(db).map((quote) => {
+    const requestLink = getCommercialRequestQuoteLinkByQuote(db, quote.quoteSnapshotId);
+    return projectQuoteOverviewItem({
       quote,
       acceptance: getQuoteAcceptanceBySnapshotId(db, quote.quoteSnapshotId),
       order: getOrderSnapshotByQuoteSnapshotId(db, quote.quoteSnapshotId),
-    }),
-  );
+      requestId: requestLink?.requestId ?? null,
+      requestReference: requestLink
+        ? commercialRequestReference(requestLink.requestId)
+        : null,
+    });
+  });
 }
 
 function jobOverviewItems(db: SqliteDatabase) {
@@ -694,6 +701,8 @@ function linkedQuoteOverviewItems(db: SqliteDatabase, requestId: string) {
         quote,
         acceptance: getQuoteAcceptanceBySnapshotId(db, quote.quoteSnapshotId),
         order: getOrderSnapshotByQuoteSnapshotId(db, quote.quoteSnapshotId),
+        requestId,
+        requestReference: commercialRequestReference(requestId),
       }),
     ];
   });

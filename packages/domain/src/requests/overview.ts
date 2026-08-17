@@ -1,5 +1,6 @@
 import type { QuoteOverviewItem, QuoteOverviewStage } from "../quotes/overview.js";
 import { quoteOverviewHref } from "../quotes/overview.js";
+import { matchesSearchFields } from "../searchNormalize.js";
 import {
   commercialRequestStatusLabel,
   type CommercialRequest,
@@ -294,25 +295,39 @@ export function projectRequestOverview(
   };
 }
 
+export function matchesRequestSearch(
+  item: RequestOverviewItem,
+  query: string,
+): boolean {
+  return matchesSearchFields(
+    [item.reference, item.customerDisplayName, item.title],
+    query,
+  );
+}
+
 export function filterRequestOverview(
   overview: RequestOverviewProjection,
   filter: RequestOverviewFilter,
+  query = "",
 ): readonly RequestOverviewItem[] {
-  switch (filter) {
-    case "ALL":
-      return overview.requests;
-    case "NEW":
-    case "IN_REVIEW":
-    case "WAITING_CUSTOMER":
-    case "READY_FOR_QUOTE":
-    case "BLOCKED":
-    case "CANCELLED":
-      return overview.requests.filter((request) => request.status === filter);
-    default: {
-      const _exhaustive: never = filter;
-      return _exhaustive;
+  const byStatus = ((): readonly RequestOverviewItem[] => {
+    switch (filter) {
+      case "ALL":
+        return overview.requests;
+      case "NEW":
+      case "IN_REVIEW":
+      case "WAITING_CUSTOMER":
+      case "READY_FOR_QUOTE":
+      case "BLOCKED":
+      case "CANCELLED":
+        return overview.requests.filter((request) => request.status === filter);
+      default: {
+        const _exhaustive: never = filter;
+        return _exhaustive;
+      }
     }
-  }
+  })();
+  return byStatus.filter((item) => matchesRequestSearch(item, query));
 }
 
 export function projectRequestDetail(input: {

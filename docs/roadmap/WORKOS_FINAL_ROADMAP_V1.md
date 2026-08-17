@@ -17,9 +17,10 @@ Do not treat the old phase list as the active plan.
 6. Operator Identity + Claim-on-Start — DONE / IMPLEMENTED_CURRENT / BASIC
 7. Operator Task Inbox / Atelier — DONE / IMPLEMENTED_CURRENT / BASIC
 8. Operational Attention + Atelier Hygiene — DONE / IMPLEMENTED_CURRENT
-9. Later, as re-prioritized: Documents, Pontaj, salary/internal HR, ACM expansion, LETTERS polish
+9. Commercial Findability + Return Flow V1 — DONE / IMPLEMENTED_CURRENT
+10. Later, as re-prioritized: Documents, Pontaj, salary/internal HR, ACM expansion, LETTERS polish
 
-Documents remains a strong office candidate after hygiene, but is not started and not DONE.
+Documents remains the strong next office candidate after findability, but is not started and not DONE.
 The previous “LETTERS closure then ACM” sequence after Oferte is stale relative to the accepted Legacy Commercial / Client / People audit. Historical product milestones stay below. Do not treat that old product-polish list as the active office sequence.
 
 ## Later, not now
@@ -97,6 +98,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Operator Identity (PIN + session) + Claim-on-Start | IMPLEMENTED_CURRENT / BASIC (primary operator flow) |
 | Operator Task Inbox / Atelier | IMPLEMENTED_CURRENT / BASIC |
 | Operational Attention + Atelier Hygiene | IMPLEMENTED_CURRENT |
+| Commercial Findability + Return Flow | IMPLEMENTED_CURRENT |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
 | Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |

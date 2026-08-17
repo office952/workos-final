@@ -5,6 +5,7 @@ import {
   quoteDocumentReference,
 } from "../commercial/quoteDocument.js";
 import type { QuoteSnapshot } from "../commercial/quoteSnapshot.js";
+import { matchesSearchFields } from "../searchNormalize.js";
 
 export const QUOTE_OVERVIEW_STAGES = [
   "QUOTE_CREATED",
@@ -48,6 +49,9 @@ export type QuoteOverviewItem = {
   attentionLabel: string | null;
   acceptanceId: string | null;
   orderSnapshotId: string | null;
+  /** Existing commercial_request_quote_links only — optional provenance, not required. */
+  requestId: string | null;
+  requestReference: string | null;
 };
 
 export type QuoteOverviewSummary = {
@@ -182,6 +186,8 @@ export function projectQuoteOverviewItem(input: {
   quote: QuoteSnapshot;
   acceptance: QuoteAcceptanceDecision | null;
   order: OrderSnapshot | null;
+  requestId?: string | null;
+  requestReference?: string | null;
 }): QuoteOverviewItem {
   const stage = deriveQuoteOverviewStage({
     acceptance: input.acceptance,
@@ -215,6 +221,8 @@ export function projectQuoteOverviewItem(input: {
     attentionLabel: attention.attentionLabel,
     acceptanceId: input.acceptance?.acceptanceId ?? null,
     orderSnapshotId,
+    requestId: input.requestId ?? null,
+    requestReference: input.requestReference ?? null,
   };
 }
 
@@ -235,22 +243,43 @@ export function projectQuoteOverview(
   };
 }
 
+export function matchesQuoteSearch(
+  item: QuoteOverviewItem,
+  query: string,
+): boolean {
+  return matchesSearchFields(
+    [
+      item.customerDisplayName,
+      item.productLabel,
+      item.productCode,
+      item.inscription,
+      item.reference,
+      item.requestReference,
+    ],
+    query,
+  );
+}
+
 export function filterQuoteOverview(
   overview: QuoteOverviewProjection,
   filter: QuoteOverviewFilter,
+  query = "",
 ): readonly QuoteOverviewItem[] {
-  switch (filter) {
-    case "ALL":
-      return overview.quotes;
-    case "NEEDS_ACTION":
-      return overview.quotes.filter((quote) => quote.needsAttention);
-    case "ACCEPTED":
-      return overview.quotes.filter((quote) => quote.stage === "QUOTE_ACCEPTED");
-    case "ORDERED":
-      return overview.quotes.filter((quote) => quote.stage === "ORDER_CREATED");
-    default: {
-      const _exhaustive: never = filter;
-      return _exhaustive;
+  const byStage = ((): readonly QuoteOverviewItem[] => {
+    switch (filter) {
+      case "ALL":
+        return overview.quotes;
+      case "NEEDS_ACTION":
+        return overview.quotes.filter((quote) => quote.needsAttention);
+      case "ACCEPTED":
+        return overview.quotes.filter((quote) => quote.stage === "QUOTE_ACCEPTED");
+      case "ORDERED":
+        return overview.quotes.filter((quote) => quote.stage === "ORDER_CREATED");
+      default: {
+        const _exhaustive: never = filter;
+        return _exhaustive;
+      }
     }
-  }
+  })();
+  return byStage.filter((item) => matchesQuoteSearch(item, query));
 }

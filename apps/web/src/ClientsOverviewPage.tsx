@@ -14,10 +14,14 @@ import {
   type CustomerProfileFormValue,
 } from "./CustomerProfileFields";
 import { createCustomer, fetchCustomerRegistry } from "./customerApi";
+import {
+  RegistrySearchField,
+  registrySearchResultSummary,
+} from "./RegistrySearchField";
 import { EmptyState } from "./ui/EmptyState";
-import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
 import { StatusChip } from "./ui/StatusChip";
+import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
@@ -28,7 +32,7 @@ export function ClientsOverviewPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [filter, setFilter] = useState<CustomerRegistryFilter>("ALL");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useRegistrySearchQuery();
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +53,13 @@ export function ClientsOverviewPage() {
     };
   }, []);
 
+  const filteredPool = useMemo(() => {
+    if (page.kind !== "ready") {
+      return [];
+    }
+    return [...filterCustomerRegistry(page.registry, filter, "")];
+  }, [filter, page]);
+
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
       return [];
@@ -63,7 +74,11 @@ export function ClientsOverviewPage() {
         value.displayName,
         customerProfilePatchFromForm(value),
       );
-      navigate(created.customer.customerId ? `/clients/${encodeURIComponent(created.customer.customerId)}` : "/clients");
+      navigate(
+        created.customer.customerId
+          ? `/clients/${encodeURIComponent(created.customer.customerId)}`
+          : "/clients",
+      );
     } catch {
       setNotice("Clientul nu a putut fi creat.");
     }
@@ -78,6 +93,7 @@ export function ClientsOverviewPage() {
 
   const { registry } = page;
   const empty = registry.customers.length === 0;
+  const searching = query.trim().length > 0;
 
   return (
     <section className="jobs-overview">
@@ -118,15 +134,27 @@ export function ClientsOverviewPage() {
               </button>
             ))}
           </div>
-          <Field label="Caută">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Nume, CUI sau contact"
-            />
-          </Field>
+          <RegistrySearchField
+            label="Caută client"
+            placeholder="Caută client..."
+            value={query}
+            onChange={setQuery}
+            resultSummary={registrySearchResultSummary({
+              visibleCount: visible.length,
+              poolCount: filteredPool.length,
+              totalCount: registry.summary.total,
+              query,
+              nounPlural: "clienți",
+            })}
+          />
           {visible.length === 0 ? (
-            <EmptyState title="Niciun client în acest filtru." />
+            <EmptyState
+              title={
+                searching
+                  ? "Niciun client nu corespunde căutării."
+                  : "Niciun client în acest filtru."
+              }
+            />
           ) : (
             <ul className="clients-list">
               {visible.map((customer) => (
@@ -134,8 +162,9 @@ export function ClientsOverviewPage() {
                   <div className="jobs-identity">
                     <Link to={customer.href}>{customer.displayName}</Link>
                     <span>
-                      {[customer.cui, customer.contactName].filter(Boolean).join(" · ") ||
-                        "Fără CUI sau contact"}
+                      {[customer.cui, customer.contactName, customer.city]
+                        .filter(Boolean)
+                        .join(" · ") || "Fără CUI sau contact"}
                     </span>
                     {customer.attentionLabel ? (
                       <p className="jobs-attention">{customer.attentionLabel}</p>

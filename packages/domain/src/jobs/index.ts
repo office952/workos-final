@@ -6,6 +6,7 @@ export {
   deriveJobNextAction,
   deriveJobStage,
   filterJobOverview,
+  matchesJobSearch,
   jobFilterLabel,
   jobHref,
   jobNextActionLabel,

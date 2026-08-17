@@ -82,6 +82,8 @@ const workspace: CustomerWorkspaceProjection = {
       attentionLabel: "Urmează acceptarea",
       acceptanceId: null,
       orderSnapshotId: null,
+      requestId: null,
+      requestReference: null,
     },
   ],
   jobs: [

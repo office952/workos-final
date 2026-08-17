@@ -821,16 +821,24 @@ export function ProductConfigurationPage() {
       />
       {requestContext ? (
         <Notice tone="ok" compact>
-          <p>
-            Cerere {requestContext.request.reference}
-            {requestContext.customerDisplayName ? " · " : ""}
-            <ClientLink
-              customerId={requestContext.request.customerId}
-              displayName={requestContext.customerDisplayName}
-              prefix="Client "
-            />
-            .
-          </p>
+          <div className="request-return-context">
+            <p>
+              Cerere {requestContext.request.reference}
+              {requestContext.customerDisplayName ? " · " : ""}
+              <ClientLink
+                customerId={requestContext.request.customerId}
+                displayName={requestContext.customerDisplayName}
+                prefix="Client "
+              />
+              .
+            </p>
+            <Link
+              className="button-link"
+              to={`/requests/${encodeURIComponent(requestContext.request.requestId)}`}
+            >
+              Înapoi la cerere
+            </Link>
+          </div>
         </Notice>
       ) : null}
 

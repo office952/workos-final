@@ -281,6 +281,10 @@ describe("ProductConfigurationPage", () => {
     );
 
     expect(await screen.findByText(/Cerere CER-11111111/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Înapoi la cerere" })).toHaveAttribute(
+      "href",
+      "/requests/crq%3A11111111-2222-3333-4444-555555555555",
+    );
     expect(screen.getByText(/Client HUB MEDIA/)).toBeInTheDocument();
     expect(screen.getByLabelText("Textul literelor")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Verifică configurația" })).toBeInTheDocument();

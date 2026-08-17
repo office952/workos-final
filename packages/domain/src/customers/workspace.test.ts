@@ -64,6 +64,8 @@ function quoteItem(
     attentionLabel: "Urmează acceptarea",
     acceptanceId: null,
     orderSnapshotId: null,
+    requestId: null,
+    requestReference: null,
     ...overrides,
   };
 }
@@ -270,5 +272,33 @@ describe("customer workspace projection", () => {
     expect(filterCustomerRegistry(registry, "RETIRED")).toHaveLength(1);
     expect(filterCustomerRegistry(registry, "ALL", "RO111")[0]?.customerId).toBe("cus:alpha");
     expect(filterCustomerRegistry(registry, "ALL", "Ana")[0]?.customerId).toBe("cus:alpha");
+  });
+
+  it("searches secondary profile fields and folds Romanian diacritics", () => {
+    const created = createCustomer("Cîmpean SRL", {
+      customerId: "cus:cimpean",
+      profile: {
+        email: "office@cimpean.ro",
+        phone: "0722000111",
+        city: "Cluj",
+      },
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    const registry = projectCustomerRegistry([
+      projectCustomerRegistryItem({
+        customer: created.customer,
+        requests: [],
+        quotes: [],
+        jobs: [],
+      }),
+    ]);
+    expect(filterCustomerRegistry(registry, "ALL", "cimpean")).toHaveLength(1);
+    expect(filterCustomerRegistry(registry, "ALL", "office@cimpean")).toHaveLength(1);
+    expect(filterCustomerRegistry(registry, "ALL", "0722")).toHaveLength(1);
+    expect(filterCustomerRegistry(registry, "ALL", "Cluj")).toHaveLength(1);
+    expect(filterCustomerRegistry(registry, "ALL", "missing")).toHaveLength(0);
   });
 });

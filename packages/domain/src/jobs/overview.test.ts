@@ -328,7 +328,35 @@ describe("job overview projection", () => {
     });
     expect(filterJobOverview(overview, "NEEDS_ACTION")).toHaveLength(1);
     expect(filterJobOverview(overview, "COMPLETED")[0]?.inscription).toBe("B");
+    expect(filterJobOverview(overview, "COMPLETED", "zz-missing")).toHaveLength(0);
     expect(JSON.stringify(overview)).not.toMatch(/PILOT|contentHash|schemaVersion/);
+  });
+
+  it("intersects operational filters with frozen inscription search", () => {
+    const overview = projectJobOverview([
+      projectJobOverviewItem({
+        order: {
+          ...order("HUB-ALPHA"),
+          customer: { customerId: "cus:1", displayName: "Client Înghețat" },
+        },
+        release: null,
+        planView: null,
+      }),
+      projectJobOverviewItem({
+        order: {
+          ...order("HUB-BETA"),
+          createdAt: "2026-08-17T09:00:00.000Z",
+          customer: { customerId: "cus:1", displayName: "Client Înghețat" },
+        },
+        release: release(),
+        planView: planView("COMPLETED"),
+      }),
+    ]);
+    expect(filterJobOverview(overview, "ALL", "HUB-ALPHA")).toHaveLength(1);
+    expect(filterJobOverview(overview, "COMPLETED", "HUB-ALPHA")).toHaveLength(0);
+    expect(filterJobOverview(overview, "COMPLETED", "HUB-BETA")).toHaveLength(1);
+    expect(filterJobOverview(overview, "ALL", "inghetat")).toHaveLength(2);
+    expect(filterJobOverview(overview, "ALL", "Live Rename")).toHaveLength(0);
   });
 
   it("projects frozen customer display name from the order snapshot", () => {

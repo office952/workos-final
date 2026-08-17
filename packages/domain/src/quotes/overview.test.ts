@@ -170,6 +170,22 @@ describe("quote overview projection", () => {
     expect(filterQuoteOverview(overview, "NEEDS_ACTION")).toHaveLength(2);
     expect(filterQuoteOverview(overview, "ACCEPTED")[0]?.inscription).toBe("B");
     expect(filterQuoteOverview(overview, "ORDERED")[0]?.inscription).toBe("C");
+    expect(filterQuoteOverview(overview, "ORDERED", "zz-missing")).toHaveLength(0);
     expect(JSON.stringify(overview)).not.toMatch(/contentHash|schemaVersion|SENT|draft/);
+  });
+
+  it("searches frozen customer identity, not live rename convenience", () => {
+    const item = projectQuoteOverviewItem({
+      quote: {
+        ...quote("FROZEN-INSCRIPTION"),
+        customer: { customerId: "cus:1", displayName: "Nume Înghețat" },
+      },
+      acceptance: null,
+      order: null,
+    });
+    const overview = projectQuoteOverview([item]);
+    expect(filterQuoteOverview(overview, "ALL", "inghetat")).toHaveLength(1);
+    expect(filterQuoteOverview(overview, "ALL", "FROZEN-INSCRIPTION")).toHaveLength(1);
+    expect(filterQuoteOverview(overview, "ALL", "Live Rename")).toHaveLength(0);
   });
 });

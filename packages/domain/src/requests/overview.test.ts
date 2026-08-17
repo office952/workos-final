@@ -52,6 +52,8 @@ function quote(stage: QuoteOverviewItem["stage"], inscription = "HUB"): QuoteOve
     attentionLabel: null,
     acceptanceId: stage === "QUOTE_CREATED" ? null : "qad:1",
     orderSnapshotId: stage === "ORDER_CREATED" ? "ord:1" : null,
+    requestId: null,
+    requestReference: null,
   };
 }
 
@@ -110,6 +112,10 @@ describe("request overview projection", () => {
     expect(overview.summary.needsAttention).toBe(1);
     expect(filterRequestOverview(overview, "NEW")).toHaveLength(1);
     expect(filterRequestOverview(overview, "CANCELLED")[0]?.requestId).toBe("crq:old");
+    expect(filterRequestOverview(overview, "ALL", "CER-11111111")).toHaveLength(2);
+    expect(filterRequestOverview(overview, "CANCELLED", "A")[0]?.requestId).toBe("crq:old");
+    expect(filterRequestOverview(overview, "NEW", "B")).toHaveLength(1);
+    expect(filterRequestOverview(overview, "NEW", "zz-missing")).toHaveLength(0);
   });
 
   it("projects detail with linked offers and customer lock after a quote", () => {
