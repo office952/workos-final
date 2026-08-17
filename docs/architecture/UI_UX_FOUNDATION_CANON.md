@@ -16,6 +16,7 @@ Primary navigation stays small so later domains do not accumulate in the top bar
 ```text
 WorkOS Final  →  /
 Lucrări       →  /
+Atelier       →  /atelier   (Munca mea — current operator task projection)
 Comercial     →  /requests   (active on /requests, /quotes, /clients)
   Cereri      →  /requests
   Oferte      →  /quotes
@@ -25,6 +26,7 @@ Administrare  →  /admin
 ```
 
 `/` is the operational job overview. It is a read-only projection of commercial Orders and their Release / ExecutionPlan lineage. It does not own job status.
+`/atelier` is the operator task inbox (Munca mea). It projects open ExecutionTasks for the current OperatorSession across jobs. It does not own task state, schedule, or assignment.
 `/requests` is the incoming-request queue. It projects CommercialRequest office status plus derived linked-offer progress. It does not own Quote or Order status.
 `/quotes` is the offer registry. It is a read-only projection of Quote Snapshots and their Acceptance / Order lineage. It does not own quote status.
 `/clients` is the Client registry. `/clients/:customerId` is the Client Workspace. Both project existing Customer / Request / Quote / Order truth. They do not own a second commercial engine.
@@ -37,6 +39,8 @@ Operațiuni   Persoane
 Atelier      Resurse, Stoc, Procese, Utilaje și zone
 Sistem       Sistem produs, Module și componente, Guvernanță, Stare sistem
 ```
+
+Top-nav **Atelier** (`/atelier`) is shop-floor **Munca mea**. The Administrare group also named “Atelier” is workshop **configuration** only. See `docs/architecture/OPERATOR_TASK_INBOX_ATELIER_CANON.md`.
 
 After product confirmation the product page is a commercial workspace: compact progress, one primary next action, customer price first, internal cost / production preview / Atelier collapsed.
 

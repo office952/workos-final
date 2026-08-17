@@ -236,7 +236,8 @@ Skill  ≠  permission
 HR, Pontaj, payroll and scheduling remain NOT_IMPLEMENTED.
 Skills and operational availability are implemented as current operational truth, not as Pontaj or RBAC.
 Operator Identity (PIN + session) and Claim-on-Start are IMPLEMENTED_CURRENT / BASIC.
-See `docs/architecture/OPERATOR_IDENTITY_CLAIM_ON_START_CANON.md`.
+Operator Task Inbox / Atelier is IMPLEMENTED_CURRENT / BASIC: a read projection over ExecutionTask + OperatorSession + eligibility. It owns no TaskQueue.
+See `docs/architecture/OPERATOR_IDENTITY_CLAIM_ON_START_CANON.md` and `docs/architecture/OPERATOR_TASK_INBOX_ATELIER_CANON.md`.
 
 Likely later entities: Employee master, employment/cost profile, Pontaj, full auth platform.
 

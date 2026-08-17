@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminHomePage } from "./AdminHomePage";
 import { AppShell } from "./AppShell";
+import { AtelierPage } from "./AtelierPage";
 import { ComponentsPage } from "./ComponentsPage";
 import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
 import { GovernancePage } from "./GovernancePage";
@@ -27,6 +28,7 @@ import { OperatorSessionProvider } from "./OperatorSessionContext";
 
 const NAV_ITEMS = [
   { to: "/", label: "Lucrări" },
+  { to: "/atelier", label: "Atelier" },
   {
     to: "/requests",
     label: "Comercial",
@@ -42,6 +44,7 @@ export function App() {
       <AppShell navItems={NAV_ITEMS}>
         <Routes>
           <Route path="/" element={<JobsOverviewPage />} />
+          <Route path="/atelier" element={<AtelierPage />} />
           <Route path="/requests" element={<RequestsOverviewPage />} />
           <Route path="/requests/:requestId" element={<RequestDetailPage />} />
           <Route path="/quotes" element={<QuotesOverviewPage />} />

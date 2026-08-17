@@ -1532,3 +1532,91 @@ details summary {
     justify-self: start;
   }
 }
+
+.atelier-page {
+  overflow-wrap: anywhere;
+}
+
+.atelier-lane {
+  margin: 1.1rem 0 0;
+}
+
+.atelier-lane h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.05rem;
+}
+
+.atelier-lane-empty {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.atelier-task-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.atelier-task-row {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem 0.85rem;
+  align-items: start;
+}
+
+.atelier-task-title {
+  margin: 0;
+  font-weight: 650;
+}
+
+.atelier-task-seq {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.atelier-task-meta {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.atelier-task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.atelier-block-reason {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.atelier-order-note {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.task-row.is-focused {
+  outline: 2px solid #7a8f82;
+  outline-offset: 1px;
+}
+
+@media (max-width: 56rem) {
+  .atelier-task-row {
+    grid-template-columns: 1fr;
+  }
+
+  .atelier-task-actions {
+    justify-content: flex-start;
+  }
+}

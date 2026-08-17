@@ -29,10 +29,12 @@ import {
   type PersonSkillMutationResult,
   type OperatorCandidate,
   type OperatorSessionRecord,
+  type OperatorTaskInboxProjection,
   resolveEligiblePeople,
   type Skill,
   type SkillMutationResult,
   projectExecutionPlanView,
+  projectOperatorTaskInbox,
   projectJobOverview,
   projectJobOverviewItem,
   projectQuoteOverview,
@@ -64,6 +66,7 @@ import {
   getExecutionPlanBySnapshotId,
   getExecutionPlanRecord,
   insertExecutionPlanRecord,
+  listOpenExecutionPlanRecords,
   persistAssignedExecutor,
   persistAssignedProvider,
   persistClaimAndStart,
@@ -217,6 +220,7 @@ export type ProductSystemRuntime = {
     | { ok: false; error: string };
   logoutOperatorSession(rawToken: string | undefined | null): void;
   personHasOperatorPin(personId: string): boolean;
+  getOperatorTaskInbox(personId: string): OperatorTaskInboxProjection | null;
   readInventory(): InventoryStockProjection;
   readInventoryItem(resourceId: string): InventoryItemDetail | null;
   recordInventoryAdjustment(
@@ -407,6 +411,31 @@ export function createProductSystemRuntime(
     },
     personHasOperatorPin(personId) {
       return personHasOperatorPin(db, personId);
+    },
+    getOperatorTaskInbox(personId) {
+      const person = getPerson(db, personId);
+      if (!person || person.status !== "ACTIVE") {
+        return null;
+      }
+      const people = listPeople(db);
+      const eligibility = runtimePeopleEligibilityContext(db);
+      const openPlans = listOpenExecutionPlanRecords(db);
+      const plans = openPlans.map((record) => {
+        const snapshot = getAcceptedProductionSnapshot(db, record.plan.sourceSnapshotId);
+        const orderId = snapshot?.sourceOrderSnapshotId;
+        const order = orderId ? getOrderSnapshot(db, orderId) : null;
+        return {
+          record,
+          snapshot,
+          customerDisplayName: order?.customer?.displayName ?? null,
+        };
+      });
+      return projectOperatorTaskInbox({
+        currentOperator: person,
+        people,
+        eligibility,
+        plans,
+      });
     },
     listPeople() {
       return listPeople(db);

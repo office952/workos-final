@@ -1,21 +1,40 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
+import { OperatorSessionProvider } from "./OperatorSessionContext";
+
+vi.mock("./operatorSessionApi", () => ({
+  fetchOperatorSession: vi.fn(async () => ({ operator: null, session: null })),
+  fetchOperatorCandidates: vi.fn(async () => []),
+  identifyOperator: vi.fn(),
+  logoutOperator: vi.fn(async () => undefined),
+}));
+
+function renderShell(ui: ReactElement, initialEntries: string[] = ["/"]) {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <OperatorSessionProvider>{ui}</OperatorSessionProvider>
+    </MemoryRouter>,
+  );
+}
 
 describe("AppShell", () => {
-  it("shows the Romanian shell chrome without internal capability names", () => {
-    render(
-      <MemoryRouter>
-        <AppShell
-          navItems={[
-            { to: "/products", label: "Produse" },
-            { to: "/admin", label: "Administrare" },
-          ]}
-        >
-          <p>conținut</p>
-        </AppShell>
-      </MemoryRouter>,
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows the Romanian shell chrome without internal capability names", async () => {
+    renderShell(
+      <AppShell
+        navItems={[
+          { to: "/products", label: "Produse" },
+          { to: "/admin", label: "Administrare" },
+        ]}
+      >
+        <p>conținut</p>
+      </AppShell>,
     );
 
     expect(screen.getByText("WorkOS Final")).toBeInTheDocument();
@@ -23,23 +42,23 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "Produse" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
     expect(screen.getByText("conținut")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Identifică-te" })).toBeInTheDocument();
     expect(screen.queryByText("PRODUCT")).not.toBeInTheDocument();
     expect(screen.queryByText("TRUTH_COMPILER")).not.toBeInTheDocument();
     expect(screen.queryByText("RESOURCES_COST")).not.toBeInTheDocument();
   });
 
   it("marks the active section in primary navigation", () => {
-    render(
-      <MemoryRouter initialEntries={["/admin"]}>
-        <AppShell
-          navItems={[
-            { to: "/products", label: "Produse" },
-            { to: "/admin", label: "Administrare" },
-          ]}
-        >
-          <p>conținut</p>
-        </AppShell>
-      </MemoryRouter>,
+    renderShell(
+      <AppShell
+        navItems={[
+          { to: "/products", label: "Produse" },
+          { to: "/admin", label: "Administrare" },
+        ]}
+      >
+        <p>conținut</p>
+      </AppShell>,
+      ["/admin"],
     );
 
     expect(screen.getByRole("link", { name: "Administrare" })).toHaveAttribute(
@@ -53,28 +72,29 @@ describe("AppShell", () => {
   });
 
   it("keeps Comercial active across commercial routes and shows secondary links", () => {
-    render(
-      <MemoryRouter initialEntries={["/quotes"]}>
-        <AppShell
-          navItems={[
-            { to: "/", label: "Lucrări" },
-            {
-              to: "/requests",
-              label: "Comercial",
-              matchPrefixes: ["/requests", "/quotes", "/clients"],
-            },
-            { to: "/products", label: "Produse" },
-          ]}
-        >
-          <p>oferte</p>
-        </AppShell>
-      </MemoryRouter>,
+    renderShell(
+      <AppShell
+        navItems={[
+          { to: "/", label: "Lucrări" },
+          { to: "/atelier", label: "Atelier" },
+          {
+            to: "/requests",
+            label: "Comercial",
+            matchPrefixes: ["/requests", "/quotes", "/clients"],
+          },
+          { to: "/products", label: "Produse" },
+        ]}
+      >
+        <p>oferte</p>
+      </AppShell>,
+      ["/quotes"],
     );
 
     expect(screen.getByRole("link", { name: "Comercial" })).toHaveAttribute(
       "aria-current",
       "page",
     );
+    expect(screen.getByRole("link", { name: "Atelier" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Navigare comercială" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Oferte" })).toHaveAttribute(
       "aria-current",
@@ -84,21 +104,20 @@ describe("AppShell", () => {
   });
 
   it("keeps commercial secondary navigation on a product continuation", () => {
-    render(
-      <MemoryRouter initialEntries={["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1"]}>
-        <AppShell
-          navItems={[
-            { to: "/", label: "Lucrări" },
-            {
-              to: "/requests",
-              label: "Comercial",
-              matchPrefixes: ["/requests", "/quotes", "/clients"],
-            },
-          ]}
-        >
-          <p>produs</p>
-        </AppShell>
-      </MemoryRouter>,
+    renderShell(
+      <AppShell
+        navItems={[
+          { to: "/", label: "Lucrări" },
+          {
+            to: "/requests",
+            label: "Comercial",
+            matchPrefixes: ["/requests", "/quotes", "/clients"],
+          },
+        ]}
+      >
+        <p>produs</p>
+      </AppShell>,
+      ["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1"],
     );
 
     expect(screen.getByRole("navigation", { name: "Navigare comercială" })).toBeInTheDocument();

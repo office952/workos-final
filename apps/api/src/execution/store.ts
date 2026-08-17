@@ -209,6 +209,23 @@ export function insertExecutionPlanRecord(
   return { created: true, record };
 }
 
+export function listOpenExecutionPlanRecords(
+  db: SqliteDatabase,
+): ExecutionPlanRecord[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT DISTINCT p.*
+      FROM execution_plans p
+      INNER JOIN execution_tasks t ON t.plan_id = p.plan_id
+      WHERE t.status IN ('PLANNED', 'IN_PROGRESS')
+      ORDER BY p.created_at ASC, p.plan_id ASC
+    `,
+    )
+    .all() as PlanRow[];
+  return rows.map((row) => hydrateRecord(db, row));
+}
+
 export function getExecutionPlanRecord(
   db: SqliteDatabase,
   planId: string,

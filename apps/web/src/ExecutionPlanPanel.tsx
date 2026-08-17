@@ -32,6 +32,7 @@ type ExecutionPlanPanelProps = {
   view: ExecutionPlanView;
   reused: boolean;
   busy: boolean;
+  focusTaskId?: string | null;
   onAssignProvider: (taskId: string, providerId: string) => void;
   onAssignExecutor: (taskId: string, personId: string) => void;
   onStartTask: (taskId: string) => void;
@@ -49,6 +50,7 @@ export function ExecutionPlanPanel({
   view,
   reused,
   busy,
+  focusTaskId = null,
   onAssignProvider,
   onAssignExecutor,
   onStartTask,
@@ -127,6 +129,7 @@ export function ExecutionPlanPanel({
                   key={task.taskId}
                   task={task}
                   busy={busy}
+                  focused={focusTaskId === task.taskId}
                   onAssignProvider={onAssignProvider}
                   onAssignExecutor={onAssignExecutor}
                   onStartTask={onStartTask}
@@ -144,6 +147,7 @@ export function ExecutionPlanPanel({
 function ExecutionTaskCard({
   task,
   busy,
+  focused,
   onAssignProvider,
   onAssignExecutor,
   onStartTask,
@@ -151,6 +155,7 @@ function ExecutionTaskCard({
 }: {
   task: ExecutionTaskView;
   busy: boolean;
+  focused: boolean;
   onAssignProvider: (taskId: string, providerId: string) => void;
   onAssignExecutor: (taskId: string, personId: string) => void;
   onStartTask: (taskId: string) => void;
@@ -208,9 +213,10 @@ function ExecutionTaskCard({
 
   return (
     <li
+      id={`execution-task-${encodeURIComponent(task.taskId)}`}
       className={`production-op task-row${task.status === "COMPLETED" ? " is-complete" : ""}${
         task.canStart || task.canComplete ? " is-actionable" : ""
-      }`}
+      }${focused ? " is-focused" : ""}`}
     >
       <div className="task-row-main">
         <p className="task-seq">{task.seqLabel}</p>

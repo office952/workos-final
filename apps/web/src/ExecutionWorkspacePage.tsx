@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import type { ExecutionPlanView } from "@workos-final/domain";
 import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
 import { useOperatorSession } from "./OperatorSessionContext";
@@ -22,6 +22,8 @@ type PageState =
 
 export function ExecutionWorkspacePage() {
   const { planId } = useParams();
+  const [searchParams] = useSearchParams();
+  const focusTaskId = searchParams.get("task");
   const { operator } = useOperatorSession();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [busy, setBusy] = useState(false);
@@ -50,6 +52,26 @@ export function ExecutionWorkspacePage() {
       cancelled = true;
     };
   }, [planId, operator?.personId]);
+
+  useEffect(() => {
+    if (page.kind !== "ready" || !focusTaskId) {
+      return;
+    }
+    const exists = page.view.tasks.some((task) => task.taskId === focusTaskId);
+    if (!exists) {
+      setNotice("Taskul selectat din Atelier nu mai este în acest plan.");
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      const node = document.getElementById(taskFocusDomId(focusTaskId));
+      if (node) {
+        node.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [page, focusTaskId]);
 
   async function applyTaskMutation(
     action: () => Promise<
@@ -87,6 +109,8 @@ export function ExecutionWorkspacePage() {
         <PageHeader title="Execuție" lead="Planul de execuție nu este disponibil." />
         <p>
           <Link to="/products">Înapoi la produse</Link>
+          {" · "}
+          <Link to="/atelier">Înapoi la Atelier</Link>
         </p>
       </section>
     );
@@ -97,6 +121,8 @@ export function ExecutionWorkspacePage() {
         <PageHeader title="Execuție" lead="Execuția nu a putut fi încărcată." />
         <p>
           <Link to="/products">Înapoi la produse</Link>
+          {" · "}
+          <Link to="/atelier">Înapoi la Atelier</Link>
         </p>
       </section>
     );
@@ -122,6 +148,8 @@ export function ExecutionWorkspacePage() {
       />
       <p className="execution-workspace-nav">
         <Link to={`/products/${view.plan.productCode}`}>Înapoi la produs</Link>
+        {" · "}
+        <Link to="/atelier">Înapoi la Atelier</Link>
       </p>
       {notice ? (
         <Notice tone="warn" compact>
@@ -132,6 +160,7 @@ export function ExecutionWorkspacePage() {
         view={view}
         reused={false}
         busy={busy}
+        focusTaskId={focusTaskId}
         onAssignProvider={(taskId, providerId) =>
           void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
         }
@@ -145,6 +174,10 @@ export function ExecutionWorkspacePage() {
       />
     </section>
   );
+}
+
+function taskFocusDomId(taskId: string): string {
+  return `execution-task-${encodeURIComponent(taskId)}`;
 }
 
 function taskActionNotice(result: TaskMutationFailure): string {

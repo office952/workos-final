@@ -53,6 +53,14 @@ export {
   type PlannedStartBlockReason,
 } from "./plan.js";
 export {
+  OPERATOR_INBOX_DISPLAY_ORDER_NOTE,
+  projectOperatorTaskInbox,
+  type OperatorInboxLaneKind,
+  type OperatorInboxPlanSource,
+  type OperatorInboxTaskItem,
+  type OperatorTaskInboxProjection,
+} from "./inbox.js";
+export {
   actualConsumptionEntryId,
   buildActualConsumption,
   type ActualConsumptionEntry,

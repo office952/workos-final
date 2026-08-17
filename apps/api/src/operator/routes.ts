@@ -73,6 +73,25 @@ export function registerOperatorRoutes(app: Hono, runtime: ProductSystemRuntime)
     return c.json({ ok: true });
   });
 
+  app.get("/api/operator-task-inbox", (c) => {
+    const resolved = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
+    if (!resolved.ok) {
+      return c.json({ operator: null, inbox: null });
+    }
+    const inbox = runtime.getOperatorTaskInbox(resolved.person.personId);
+    if (!inbox) {
+      return c.json({ operator: null, inbox: null });
+    }
+    return c.json({
+      operator: {
+        personId: inbox.operator.personId,
+        displayName: inbox.operator.displayName,
+        availability: inbox.operator.availability,
+      },
+      inbox,
+    });
+  });
+
   app.put("/api/people/:personId/operator-pin", async (c) => {
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null) {
