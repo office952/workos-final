@@ -59,6 +59,18 @@ function readDraft(templateCode: string, body: unknown): DraftConfiguration {
   return { templateCode, values };
 }
 
+function readRequestId(body: unknown): string | null {
+  if (typeof body !== "object" || body === null || !("requestId" in body)) {
+    return null;
+  }
+  const value = (body as { requestId: unknown }).requestId;
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 function readCustomerId(body: unknown): string | null {
   if (typeof body !== "object" || body === null || !("customerId" in body)) {
     return null;
@@ -214,6 +226,37 @@ export function registerProductRoutes(
         422,
       );
     }
+    const requestId = readRequestId(body);
+    if (requestId) {
+      const request = runtime.readCommercialRequest(requestId);
+      if (!request) {
+        return c.json(
+          {
+            error: "request_unavailable",
+            reasons: ["Cererea de ofertă nu este disponibilă."],
+          },
+          422,
+        );
+      }
+      if (request.status === "CANCELLED") {
+        return c.json(
+          {
+            error: "request_cancelled",
+            reasons: ["Cererea anulată nu poate primi o ofertă nouă."],
+          },
+          422,
+        );
+      }
+      if (request.customerId !== customerId) {
+        return c.json(
+          {
+            error: "request_customer_mismatch",
+            reasons: ["Oferta trebuie să folosească același client ca cererea."],
+          },
+          422,
+        );
+      }
+    }
     const commercialPrice = projectCommercialPrice(compiled.eic);
     const seller = runtime.getSellerProfile();
     const frozen = freezeQuoteSnapshot(
@@ -237,9 +280,25 @@ export function registerProductRoutes(
       );
     }
     const stored = runtime.persistQuoteSnapshot(frozen.snapshot);
+    if (!requestId) {
+      return c.json({
+        created: stored.created,
+        quoteSnapshot: stored.snapshot,
+      });
+    }
+    const linked = runtime.linkRequestQuote(requestId, stored.snapshot.quoteSnapshotId);
+    if (!linked.ok) {
+      return c.json({
+        created: stored.created,
+        quoteSnapshot: stored.snapshot,
+        requestLinkError: linked.error,
+        reasons: ["Oferta a fost creată, dar nu s-a legat de cerere."],
+      });
+    }
     return c.json({
       created: stored.created,
       quoteSnapshot: stored.snapshot,
+      requestLink: linked.link,
     });
   });
 

@@ -91,6 +91,7 @@ WorkOS Final
 │   ├── Company profile (Date firmă)        IMPLEMENTED_CURRENT / BASIC
 │   └── CRM / contacts / billing            NOT_IMPLEMENTED
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
+│   ├── Commercial Request (Cerere)         IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote registry (Oferte projection)  IMPLEMENTED_CURRENT / BASIC
@@ -145,9 +146,10 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth, seller identity |
+| Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth, seller identity, Request office status |
+| Commercial Request | Mutable incoming request: customerId, title, description, office status, Request↔Quote link. | Product Truth, EIC, pricing, Quote/Acceptance/Order status, CRM, People, documents |
 | Seller | Current company / vânzător identity for new Quotes. Owner-confirmed HUB MEDIA PRODUCTION profile. | Customer catalog, CRM, invoices, global Settings, ProductTemplate |
-| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer and seller identities, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, live seller profile, CRM |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer and seller identities, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. CommercialRequest is the incoming office object and may link to Quotes without entering Quote content. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, live seller profile, CRM, Product Truth |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -307,15 +309,18 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and ExecutionPlan from that Release are implemented. Plan creation remains a separate operator action after Release.
+Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and ExecutionPlan from that Release are implemented. Plan creation remains a separate operator action after Release. CommercialRequest records the incoming ask before Product Truth exists and may link to frozen Quotes without changing them. See `docs/architecture/COMMERCIAL_REQUEST_CANON.md`.
 
 ```text
-confirmed Product Truth
+CommercialRequest
+→ choose Product
+→ confirmed Product Truth
 → Aggregate
 → planned EIC
 → Commercial Price Rules
 → customer price projection
 → Quote Snapshot + FrozenProductionInput
+→ Request↔Quote link
 → Quote Acceptance Decision
 → Order Snapshot copies FrozenProductionInput
 → Production Release Snapshot
@@ -379,11 +384,12 @@ Do not add a top-nav link per domain.
 Current primary nav stays small so later domains do not accumulate in the header:
 
 - Lucrări
+- Cereri
 - Oferte
 - Produse
 - Administrare
 
-Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). **Oferte** opens the quote registry (`/quotes`). Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. Lucrări is a read-only projection: Order Snapshot is the commercial job root. Oferte is a read-only projection of Quote Snapshots. Neither owns a second status table.
+Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). **Cereri** opens the incoming-request queue (`/requests`). **Oferte** opens the quote registry (`/quotes`). Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. Lucrări is a read-only projection: Order Snapshot is the commercial job root. Cereri is mutable office truth about what the client asked. Oferte is a read-only projection of Quote Snapshots. None of these owns a second Quote or Order status table. Do not add a placeholder Clienți top-nav item until Client Workspace exists.
 
 Inside Administrare, group only real current pages:
 
@@ -481,6 +487,8 @@ Settings versions: keep previous active values as history after a new version is
 | HR, Pontaj, reservations, purchasing | PLANNED |
 | Commercial price rules | IMPLEMENTED_CURRENT / BASIC |
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
+| Commercial Request (Cereri de ofertă) | IMPLEMENTED_CURRENT / BASIC |
+| Client Workspace | NOT_IMPLEMENTED |
 | Quote Document PDF | IMPLEMENTED_CURRENT / BASIC |
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |

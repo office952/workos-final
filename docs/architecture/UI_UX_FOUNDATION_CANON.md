@@ -16,12 +16,14 @@ Primary navigation stays small so later domains do not accumulate in the top bar
 ```text
 WorkOS Final  →  /
 Lucrări       →  /
+Cereri        →  /requests
 Oferte        →  /quotes
 Produse       →  /products
 Administrare  →  /admin
 ```
 
 `/` is the operational job overview. It is a read-only projection of commercial Orders and their Release / ExecutionPlan lineage. It does not own job status.
+`/requests` is the incoming-request queue. It projects CommercialRequest office status plus derived linked-offer progress. It does not own Quote or Order status.
 `/quotes` is the offer registry. It is a read-only projection of Quote Snapshots and their Acceptance / Order lineage. It does not own quote status.
 
 Routes stay stable. Inspection surfaces live under Administrare:
@@ -100,6 +102,7 @@ EIC total stays visible. Rates stay in Detalii. Preview is what production will 
 
 `?order=` on the product page continues an existing commercial job. It does not recompile or mint a new review.
 `?quote=` continues an existing frozen offer. It does not recompile or mint a new review.
+`?request=` opens the existing configuration with CommercialRequest context: CER- reference, current Client name, and a locked customerId. It does not parse the request description or mint Product Truth.
 
 ## Operational job overview
 
@@ -115,6 +118,15 @@ Pilot / atelier releases are not listed.
 Filters are Toate / Necesită acțiune / Acceptate / Cu comandă.
 Stage and next action come from `GET /api/quotes`.
 There is no Draft or Sent chip.
+
+## Request registry
+
+`/requests` lists incoming requests as compact rows: title, CER- reference, client, created date, office status, derived offer progress, next action.
+The title always opens `/requests/:requestId`. The next-action control may continue the furthest linked Quote.
+Filters are Toate / Noi / În lucru / Așteaptă clientul / Gata de ofertă / Blocate / Anulate.
+Office status and derived progress come from `GET /api/requests`.
+`/requests/:requestId` is the working detail: mutable title/description/status, linked OF-* rows from QuoteOverview, and choose/configure Product from the live catalog.
+Do not add empty Documents / Notes / Timeline tabs.
 
 ## Future migration
 

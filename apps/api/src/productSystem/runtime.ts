@@ -17,8 +17,17 @@ import {
   projectJobOverviewItem,
   projectQuoteOverview,
   projectQuoteOverviewItem,
+  projectRequestDetail,
+  projectRequestOverview,
+  projectRequestOverviewItem,
+  type CommercialRequest,
+  type CommercialRequestLinkResult,
+  type CommercialRequestMutationResult,
+  type CommercialRequestStatus,
   type JobOverviewProjection,
   type QuoteOverviewProjection,
+  type RequestDetailProjection,
+  type RequestOverviewProjection,
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
@@ -75,6 +84,14 @@ import {
   getAcceptedProductionSnapshotByOrder,
   insertAcceptedProductionSnapshot,
 } from "../production/store.js";
+import {
+  getCommercialRequest,
+  listCommercialRequestQuoteLinks,
+  listCommercialRequests,
+  persistCommercialRequestQuoteLink,
+  persistCreatedCommercialRequest,
+  persistUpdatedCommercialRequest,
+} from "../requests/store.js";
 import {
   bootstrapProductSystemDisplayStore,
   loadDisplayLabelCatalog,
@@ -138,6 +155,27 @@ export type ProductSystemRuntime = {
   updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
   listJobOverview(): JobOverviewProjection;
   listQuoteOverview(): QuoteOverviewProjection;
+  listRequestOverview(): RequestOverviewProjection;
+  readCommercialRequest(requestId: string): CommercialRequest | null;
+  readRequestDetail(requestId: string): RequestDetailProjection | null;
+  createCommercialRequest(
+    customerId: string,
+    title: string,
+    description: string,
+  ): CommercialRequestMutationResult;
+  updateCommercialRequest(
+    requestId: string,
+    patch: {
+      title?: string;
+      description?: string;
+      status?: CommercialRequestStatus;
+      customerId?: string;
+    },
+  ): CommercialRequestMutationResult;
+  linkRequestQuote(
+    requestId: string,
+    quoteSnapshotId: string,
+  ): CommercialRequestLinkResult;
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
   retirePerson(personId: string): PersonMutationResult;
@@ -259,6 +297,59 @@ export function createProductSystemRuntime(
       });
       return projectQuoteOverview(quotes);
     },
+    listRequestOverview() {
+      const requests = listCommercialRequests(db).map((request) =>
+        projectRequestOverviewItem({
+          request,
+          customerDisplayName: getCustomer(db, request.customerId)?.displayName ?? null,
+          quotes: linkedQuoteOverviewItems(db, request.requestId),
+        }),
+      );
+      return projectRequestOverview(requests);
+    },
+    readCommercialRequest(requestId) {
+      return getCommercialRequest(db, requestId);
+    },
+    readRequestDetail(requestId) {
+      const request = getCommercialRequest(db, requestId);
+      if (!request) {
+        return null;
+      }
+      return projectRequestDetail({
+        request,
+        customerDisplayName: getCustomer(db, request.customerId)?.displayName ?? null,
+        quotes: linkedQuoteOverviewItems(db, request.requestId),
+      });
+    },
+    createCommercialRequest(customerId, title, description) {
+      const customer = getCustomer(db, customerId);
+      if (!customer) {
+        return { ok: false, error: "customer_unavailable" };
+      }
+      return persistCreatedCommercialRequest(db, customer, title, description);
+    },
+    updateCommercialRequest(requestId, patch) {
+      return persistUpdatedCommercialRequest(db, requestId, patch, {
+        hasLinkedQuotes: listCommercialRequestQuoteLinks(db, requestId).length > 0,
+        nextCustomer: patch.customerId ? getCustomer(db, patch.customerId) : undefined,
+      });
+    },
+    linkRequestQuote(requestId, quoteSnapshotId) {
+      const request = getCommercialRequest(db, requestId);
+      if (!request) {
+        return { ok: false, error: "not_found" };
+      }
+      const quote = getQuoteSnapshot(db, quoteSnapshotId);
+      if (!quote) {
+        return { ok: false, error: "quote_unavailable" };
+      }
+      return persistCommercialRequestQuoteLink(
+        db,
+        request,
+        quoteSnapshotId,
+        quote.customer?.customerId,
+      );
+    },
     createPerson(displayName) {
       return persistCreatedPerson(db, displayName);
     },
@@ -299,4 +390,20 @@ export function createProductSystemRuntime(
       db.close();
     },
   };
+}
+
+function linkedQuoteOverviewItems(db: SqliteDatabase, requestId: string) {
+  return listCommercialRequestQuoteLinks(db, requestId).flatMap((link) => {
+    const quote = getQuoteSnapshot(db, link.quoteSnapshotId);
+    if (!quote) {
+      return [];
+    }
+    return [
+      projectQuoteOverviewItem({
+        quote,
+        acceptance: getQuoteAcceptanceBySnapshotId(db, quote.quoteSnapshotId),
+        order: getOrderSnapshotByQuoteSnapshotId(db, quote.quoteSnapshotId),
+      }),
+    ];
+  });
 }

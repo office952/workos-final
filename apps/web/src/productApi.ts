@@ -172,8 +172,14 @@ export async function createQuoteSnapshot(
   productCode: string,
   definition: ProductDefinition,
   customerId: string,
+  requestId?: string,
 ): Promise<
-  | { ok: true; created: boolean; quoteSnapshot: QuoteSnapshot }
+  | {
+      ok: true;
+      created: boolean;
+      quoteSnapshot: QuoteSnapshot;
+      requestLinkError?: string;
+    }
   | {
       ok: false;
       reason:
@@ -184,7 +190,10 @@ export async function createQuoteSnapshot(
         | "missing_customer"
         | "customer_unavailable"
         | "invalid_customer"
-        | "invalid_seller";
+        | "invalid_seller"
+        | "request_unavailable"
+        | "request_cancelled"
+        | "request_customer_mismatch";
       definition?: ProductDefinition;
       message?: string;
     }
@@ -196,6 +205,7 @@ export async function createQuoteSnapshot(
       definition,
       reviewId: definition.reviewId,
       customerId,
+      ...(requestId ? { requestId } : {}),
     }),
   });
   const body = await readJson<{
@@ -204,6 +214,7 @@ export async function createQuoteSnapshot(
     definition?: ProductDefinition;
     error?: string;
     reasons?: string[];
+    requestLinkError?: string;
   }>(response);
 
   if (response.status === 409 && body.definition) {
@@ -219,7 +230,10 @@ export async function createQuoteSnapshot(
       body.error === "missing_customer" ||
       body.error === "customer_unavailable" ||
       body.error === "invalid_customer" ||
-      body.error === "invalid_seller")
+      body.error === "invalid_seller" ||
+      body.error === "request_unavailable" ||
+      body.error === "request_cancelled" ||
+      body.error === "request_customer_mismatch")
   ) {
     return {
       ok: false,
@@ -234,6 +248,7 @@ export async function createQuoteSnapshot(
     ok: true,
     created: Boolean(body.created),
     quoteSnapshot: body.quoteSnapshot,
+    requestLinkError: body.requestLinkError,
   };
 }
 

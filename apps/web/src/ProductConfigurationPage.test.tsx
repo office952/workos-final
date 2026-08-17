@@ -10,10 +10,15 @@ import {
   readQuoteAcceptance,
   readQuoteSnapshot,
 } from "./productApi";
+import { readRequestDetail } from "./requestsApi";
 
 vi.mock("./customerApi", () => ({
   fetchCustomers: () => Promise.resolve([]),
   createCustomer: vi.fn(),
+}));
+
+vi.mock("./requestsApi", () => ({
+  readRequestDetail: vi.fn(),
 }));
 
 vi.mock("./productApi", () => ({
@@ -240,5 +245,45 @@ describe("ProductConfigurationPage", () => {
     expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Marchează acceptată" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Textul literelor")).not.toBeInTheDocument();
+  });
+
+  it("opens configuration from a request with the request customer locked", async () => {
+    vi.mocked(readRequestDetail).mockResolvedValue({
+      request: {
+        requestId: "crq:11111111-2222-3333-4444-555555555555",
+        reference: "CER-11111111",
+        customerId: "cus:1",
+        title: "Litere exterior",
+        description: "Pe fațadă.",
+        status: "READY_FOR_QUOTE",
+        createdAt: "2026-08-17T10:00:00.000Z",
+        updatedAt: "2026-08-17T10:00:00.000Z",
+      },
+      customerDisplayName: "HUB MEDIA",
+      statusLabel: "Gata de ofertă",
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      canChangeCustomer: true,
+      canUpdateStatus: true,
+      linkedOffers: [],
+    });
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=crq:11111111-2222-3333-4444-555555555555",
+        ]}
+      >
+        <Routes>
+          <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Cerere CER-11111111/)).toBeInTheDocument();
+    expect(screen.getByText(/Client HUB MEDIA/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Textul literelor")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Verifică configurația" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Client")).not.toBeInTheDocument();
   });
 });

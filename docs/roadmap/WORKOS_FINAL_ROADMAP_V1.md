@@ -11,14 +11,17 @@ Do not treat the old phase list as the active plan.
 
 1. Commercial Experience Closure — DONE / IMPLEMENTED_CURRENT (operator flow + seller identity)
 2. Quote registry / Oferte — DONE / IMPLEMENTED_CURRENT (projection + continue)
-3. V1 LETTERS closure / regression / polish
-4. ACM Execution proof only if the product remains an active target
-5. Cost / settings calibration
-6. Optional post-V1 capabilities (reservations, scheduling, HR, Analyzer)
+3. Cereri de ofertă — DONE / IMPLEMENTED_CURRENT / BASIC (CommercialRequest + Request↔Quote link)
+4. Client Workspace V1
+5. People + operational SK_* truth
+6. Auth ↔ Person + Claim-on-Start
+7. Later, as re-prioritized: Documents, Pontaj, salary/internal HR, ACM expansion, LETTERS polish
+
+The previous “LETTERS closure then ACM” sequence after Oferte is stale relative to the accepted Legacy Commercial / Client / People audit. Historical product milestones stay below. Do not treat that old product-polish list as the active office sequence.
 
 ## Later, not now
 
-Reports, invoice/proforma, integrations, full ACM, Analyzer runtime.
+Reports, invoice/proforma, integrations, full ACM, Analyzer runtime, Documents, Pontaj, internal HR.
 
 ## Generalization
 
@@ -42,7 +45,7 @@ Letters now has one deterministic technological process composition. That compos
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none at 60 mm is 382.50 EUR COMPLETE on owner-confirmed workshop evidence. Aluminium 3 EUR/m is confirmed only for 60 mm; 30 / 80 / 100 mm stay PARTIAL. Forming is 5 EUR/m. Vinyl / RAL remain development evidence. Historical 595 snapshots stay frozen. Analyzer handoff is deferred; it is not the current planned-EIC blocker.
 Confirmed COMPLETE planned EIC now projects a customer price from one company Commercial policy. Canonical 60 mm none/none is 382.50 EUR internal → 624.82 EUR gross. That COMPLETE offer can be frozen as an immutable Quote Snapshot with frozen Customer and seller identities, without Production Snapshot or execution. Quote freeze also freezes generic production-input evidence. The customer Ofertă PDF and Lucrări project those frozen identities; renaming the live Customer or Date firmă does not rewrite history. After confirm, the product page shows a commercial summary with one next action. An accepted Quote can freeze an Order Snapshot that copies those facts and that evidence. An Order can be released to production from that frozen input. That Release can materialize the existing ExecutionPlan / ExecutionTasks without a second planner.
-A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, explicit task executor assignment, actual resource consumption, inventory stock movements, and actual internal cost projection are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, Operational Processes, and Stoc. The operator landing is Lucrări (`/`), a read-only projection of commercial Orders. Oferte (`/quotes`) is a read-only projection of frozen Quote Snapshots. HR, Pontaj, scheduling, capacity, reservations and purchasing remain NOT_IMPLEMENTED.
+A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, explicit task executor assignment, actual resource consumption, inventory stock movements, and actual internal cost projection are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, Operational Processes, and Stoc. The operator landing is Lucrări (`/`), a read-only projection of commercial Orders. Cereri (`/requests`) is the mutable incoming-request queue. Oferte (`/quotes`) is a read-only projection of frozen Quote Snapshots. Client Workspace, HR, Pontaj, scheduling, capacity, reservations and purchasing remain NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
 ```text
@@ -107,6 +110,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Commercial Execution workspace | IMPLEMENTED_CURRENT / BASIC |
 | Operational job overview | IMPLEMENTED_CURRENT / BASIC |
 | Quote registry (Oferte) | IMPLEMENTED_CURRENT / BASIC |
+| Commercial Request (Cereri de ofertă) | IMPLEMENTED_CURRENT / BASIC |
+| Client Workspace | NOT_IMPLEMENTED |
 | ACM cassette second-product vertical slice | IMPLEMENTED_CURRENT / BASIC / EIC COMPLETE / QUOTE READY |
 | Quote Document PDF (Ofertă) | IMPLEMENTED_CURRENT / BASIC |
 | Reporting, Order/invoice/production documents, full ACM, Logo | LATER |

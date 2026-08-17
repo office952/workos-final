@@ -71,7 +71,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(15);
+    expect(count.count).toBe(16);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -79,7 +79,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(15);
+    expect(again.count).toBe(16);
     second.close();
   });
 

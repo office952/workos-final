@@ -15,6 +15,7 @@ import {
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
+  type RequestDetailProjection,
 } from "@workos-final/domain";
 import { createCustomer, fetchCustomers } from "./customerApi";
 import { FormRenderer } from "./FormRenderer";
@@ -48,6 +49,7 @@ import {
   readQuoteSnapshot,
   type TemplateProjection,
 } from "./productApi";
+import { readRequestDetail } from "./requestsApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
 
@@ -76,6 +78,13 @@ type RestoredQuote = {
   order?: OrderSnapshot;
 };
 
+type RestoredRequestState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "missing" }
+  | { kind: "error" }
+  | { kind: "ready"; detail: RequestDetailProjection };
+
 type RestoredQuoteState =
   | { kind: "idle" }
   | { kind: "loading" }
@@ -88,9 +97,13 @@ export function ProductConfigurationPage() {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("order");
   const quoteId = searchParams.get("quote");
+  const requestId = searchParams.get("request");
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [restoredJob, setRestoredJob] = useState<RestoredJobState>({ kind: "idle" });
   const [restoredQuote, setRestoredQuote] = useState<RestoredQuoteState>({ kind: "idle" });
+  const [restoredRequest, setRestoredRequest] = useState<RestoredRequestState>({
+    kind: "idle",
+  });
   const [values, setValues] = useState<DraftValues>({});
   const [definition, setDefinition] = useState<ProductDefinition | null>(null);
   const [confirmed, setConfirmed] = useState<{
@@ -238,6 +251,35 @@ export function ProductConfigurationPage() {
     };
   }, [orderId, page.kind, productCode, quoteId]);
 
+  useEffect(() => {
+    if (page.kind !== "ready" || orderId || quoteId || !requestId) {
+      setRestoredRequest({ kind: "idle" });
+      return;
+    }
+    let cancelled = false;
+    setRestoredRequest({ kind: "loading" });
+    void readRequestDetail(requestId)
+      .then((detail) => {
+        if (cancelled) {
+          return;
+        }
+        if (!detail) {
+          setRestoredRequest({ kind: "missing" });
+          return;
+        }
+        setSelectedCustomerId(detail.request.customerId);
+        setRestoredRequest({ kind: "ready", detail });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRestoredRequest({ kind: "error" });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId, page.kind, quoteId, requestId]);
+
   if (page.kind === "loading") {
     return <p>Se încarcă produsul…</p>;
   }
@@ -308,7 +350,12 @@ export function ProductConfigurationPage() {
       const result = await createQuoteSnapshot(
         productCode,
         confirmed.definition,
-        selectedCustomerId,
+        restoredRequest.kind === "ready"
+          ? restoredRequest.detail.request.customerId
+          : selectedCustomerId,
+        restoredRequest.kind === "ready"
+          ? restoredRequest.detail.request.requestId
+          : undefined,
       );
       if (result.ok) {
         const quoteAcceptance = await readQuoteAcceptance(
@@ -321,6 +368,9 @@ export function ProductConfigurationPage() {
         const commercial = orderSnapshot
           ? await loadCommercialExecution(productCode, orderSnapshot.orderSnapshotId)
           : {};
+        if (result.requestLinkError) {
+          setConfirmNotice("Oferta a fost creată, dar nu s-a legat de cerere.");
+        }
         setConfirmed({
           ...confirmed,
           quoteSnapshot: result.quoteSnapshot,
@@ -740,6 +790,21 @@ export function ProductConfigurationPage() {
     );
   }
 
+  if (requestId && !orderId && !quoteId) {
+    if (restoredRequest.kind === "loading" || restoredRequest.kind === "idle") {
+      return <p>Se încarcă cererea…</p>;
+    }
+    if (restoredRequest.kind === "missing") {
+      return <p>Cererea de ofertă nu este disponibilă.</p>;
+    }
+    if (restoredRequest.kind === "error") {
+      return <p>Cererea de ofertă nu a putut fi încărcată.</p>;
+    }
+  }
+
+  const requestContext =
+    restoredRequest.kind === "ready" ? restoredRequest.detail : null;
+
   return (
     <section className="product-page">
       <PageHeader
@@ -753,6 +818,17 @@ export function ProductConfigurationPage() {
         }
         meta={<ConstructionFacts facts={template.identityFacts} />}
       />
+      {requestContext ? (
+        <Notice tone="ok" compact>
+          <p>
+            Cerere {requestContext.request.reference}
+            {requestContext.customerDisplayName
+              ? ` · Client ${requestContext.customerDisplayName}`
+              : ""}
+            .
+          </p>
+        </Notice>
+      ) : null}
 
       {editing ? (
         <>
@@ -802,13 +878,19 @@ export function ProductConfigurationPage() {
           confirmed={confirmed}
           busy={busy}
           customers={customers}
-          selectedCustomerId={selectedCustomerId}
-          onSelectCustomer={setSelectedCustomerId}
-          onCreateCustomer={async (displayName) => {
-            const created = await createCustomer(displayName);
-            setCustomers(created.customers);
-            setSelectedCustomerId(created.customer.customerId);
-          }}
+          selectedCustomerId={
+            requestContext?.request.customerId ?? selectedCustomerId
+          }
+          onSelectCustomer={requestContext ? undefined : setSelectedCustomerId}
+          onCreateCustomer={
+            requestContext
+              ? undefined
+              : async (displayName) => {
+                  const created = await createCustomer(displayName);
+                  setCustomers(created.customers);
+                  setSelectedCustomerId(created.customer.customerId);
+                }
+          }
           onEditConfiguration={() => {
             setConfirmed(null);
             setDefinition(null);
@@ -860,8 +942,8 @@ function ConfirmedCommercialWorkspace({
   busy: boolean;
   customers: readonly Customer[];
   selectedCustomerId: string;
-  onSelectCustomer: (customerId: string) => void;
-  onCreateCustomer: (displayName: string) => Promise<void>;
+  onSelectCustomer?: (customerId: string) => void;
+  onCreateCustomer?: (displayName: string) => Promise<void>;
   onEditConfiguration: () => void;
   onFreeze: () => void;
   onAccept: () => void;

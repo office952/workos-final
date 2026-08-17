@@ -89,3 +89,10 @@ Cu comandă    → Deschide comanda     → /products/:code?order=
 
 `?quote=` continues the frozen offer without recompiling.
 There is no Draft or Sent quote status. Assisted delivery is not a quote state.
+
+## Optional Request link
+
+A Quote may be linked to a CommercialRequest after freeze.
+The link is a separate row. `requestId` is not part of Quote content.
+See `docs/architecture/COMMERCIAL_REQUEST_CANON.md`.
+Quote may exist without a Request. Linking does not reprice or rewrite the snapshot.
