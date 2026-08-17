@@ -122,8 +122,10 @@ WorkOS Final
 │   └── Purchasing / valuation              NOT_IMPLEMENTED
 ├── People / identitate operațională        IMPLEMENTED_CURRENT / BASIC
 │   ├── Person registry                     IMPLEMENTED_CURRENT / BASIC
+│   ├── Skills catalog + assignments        IMPLEMENTED_CURRENT / BASIC
+│   ├── Operational availability            IMPLEMENTED_CURRENT / BASIC
+│   ├── Current eligibility resolver        IMPLEMENTED_CURRENT / BASIC
 │   ├── Employee master / HR                NOT_IMPLEMENTED
-│   ├── Role / skill / availability         NOT_IMPLEMENTED
 │   └── Attendance / Pontaj                 NOT_IMPLEMENTED
 ├── Machines / Utilaje                      FOUNDATION
 │   ├── Machine / machine type              FOUNDATION (live catalog empty)
@@ -152,7 +154,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer and seller identities, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. CommercialRequest is the incoming office object and may link to Quotes without entering Quote content. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, live seller profile, CRM, Product Truth |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
-| People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
+| People | Operational person identity, skills, availability and current eligibility. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
 | Machines / Workcenters | Machine identity, workcenter identity, capability-provider mapping | Process definition, commercial hourly price, capacity calendar, Execution selection |
 | Reporting | Read-only projections | Underlying business truth |
 | Documentation | Explanation, history, architecture | Active configurable values |
@@ -202,11 +204,12 @@ Reservations, purchasing, warehouses, FIFO, and valuation remain NOT_IMPLEMENTED
 
 ## People / identitate operațională
 
-Minimal Person registry is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md`.
+Person registry, skills and operational availability are IMPLEMENTED_CURRENT / BASIC.
+Canonical law: `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` and `docs/architecture/PEOPLE_SKILLS_OPERATIONAL_TRUTH_CANON.md`.
 
-Admin: `/admin` → Persoane → `/admin/people`.
+Admin: `/admin` → Persoane → `/admin/people` and `/admin/people/skills`.
 
-Person supplies operational executor identity only.
+Person supplies operational identity. Skills supply human qualification. Availability supplies current considerability. Eligibility is derived.
 
 ## Customer / identitate comercială
 
@@ -227,17 +230,16 @@ Customer catalog  ≠  Quote customer snapshot  ≠  CRM
 Person  ≠  Provider  ≠  authenticated user
 ```
 
-HR, Pontaj, payroll, skills, availability and scheduling remain NOT_IMPLEMENTED.
+HR, Pontaj, payroll and scheduling remain NOT_IMPLEMENTED.
+Skills and operational availability are implemented as current operational truth, not as Pontaj or RBAC.
 
-Likely later entities: Employee, HR role, skill/capability, employment/cost profile, availability, status.
+Likely later entities: Employee master, employment/cost profile, Auth ↔ Person, Claim-on-Start.
 
 Clarify later:
 
-- employee identity
 - employee internal cost profile
-- availability / Pontaj
-- permissions (auth role ≠ HR role)
-- skills (assignment eligibility)
+- Pontaj / attendance
+- permissions (auth role ≠ skill)
 - actual work (Execution sessions)
 
 Do not put named employees on product templates. Templates may require a skill or station class.
@@ -481,6 +483,7 @@ Settings versions: keep previous active values as history after a new version is
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
 | Completion evidence | IMPLEMENTED_CURRENT / BASIC |
 | People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
+| People skills + operational availability + eligibility | IMPLEMENTED_CURRENT / BASIC |
 | LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 12 of 12 executable path |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |

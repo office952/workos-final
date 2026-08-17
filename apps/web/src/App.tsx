@@ -13,6 +13,8 @@ import { RequestsOverviewPage } from "./RequestsOverviewPage";
 import { CustomerAdminPage } from "./CustomerAdminPage";
 import { SellerAdminPage } from "./SellerAdminPage";
 import { PeopleAdminPage } from "./PeopleAdminPage";
+import { PersonAdminPage } from "./PersonAdminPage";
+import { SkillsAdminPage } from "./SkillsAdminPage";
 import { ProductCatalogPage } from "./ProductCatalogPage";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
 import { ProcessesAdminPage } from "./ProcessesAdminPage";
@@ -57,6 +59,8 @@ export function App() {
         <Route path="/admin/processes" element={<ProcessesAdminPage />} />
         <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
         <Route path="/admin/people" element={<PeopleAdminPage />} />
+        <Route path="/admin/people/skills" element={<SkillsAdminPage />} />
+        <Route path="/admin/people/:personId" element={<PersonAdminPage />} />
         <Route path="/admin/customers" element={<CustomerAdminPage />} />
         <Route path="/admin/seller" element={<SellerAdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -220,7 +220,7 @@ describe("customer workspace projection", () => {
     if (!created.ok) {
       return;
     }
-    const retired = retireCustomer(created.customer);
+    const retired = retireCustomer(created.customer, "2026-08-17T12:00:00.000Z");
     expect(retired.ok).toBe(true);
     if (!retired.ok) {
       return;
@@ -247,7 +247,7 @@ describe("customer workspace projection", () => {
     if (!alpha.ok || !beta.ok) {
       return;
     }
-    const retired = retireCustomer(beta.customer);
+    const retired = retireCustomer(beta.customer, "2026-08-17T12:00:00.000Z");
     expect(retired.ok).toBe(true);
     if (!retired.ok) {
       return;

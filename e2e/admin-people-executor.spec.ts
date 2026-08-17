@@ -2,7 +2,7 @@ import { type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { openPeopleAdmin } from "./helpers/people";
+import { assignLettersExecutionSkills, openPeopleAdmin } from "./helpers/people";
 
 const ACTIVE_NAME = "Executor PEOPLE E2E";
 const RETIRED_NAME = "Executor retras PEOPLE E2E";
@@ -46,6 +46,7 @@ async function ensureNamedPerson(page: Page, name: string) {
 
 test("assigns an owner-created executor and keeps attribution after complete", async ({
   page,
+  request,
 }) => {
   await openPeopleAdmin(page);
   if (await page.getByText("Nu există persoane active configurate.").isVisible()) {
@@ -61,6 +62,14 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   });
   await ensureNamedPerson(page, ACTIVE_NAME);
   await ensureNamedPerson(page, RETIRED_NAME);
+  const listed = await request.get("/api/people");
+  const people = ((await listed.json()) as { people?: Array<{ personId: string; displayName: string }> })
+    .people ?? [];
+  const activePerson = people.find((person) => person.displayName === ACTIVE_NAME);
+  expect(activePerson).toBeTruthy();
+  if (activePerson) {
+    await assignLettersExecutionSkills(request, activePerson.personId);
+  }
   await expect(page.getByText(ACTIVE_NAME).first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-people-active.png",
@@ -72,10 +81,17 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   });
 
   const retiredRow = page.locator(".people-list li").filter({ hasText: RETIRED_NAME }).first();
-  if (await retiredRow.getByRole("button", { name: "Retrage persoana" }).isVisible()) {
-    await retiredRow.getByRole("button", { name: "Retrage persoana" }).click();
+  if (!(await retiredRow.getByText("Retras", { exact: true }).isVisible())) {
+    await retiredRow.getByRole("link", { name: "Deschide" }).click();
+    const retire = page.getByRole("button", { name: "Retrage persoana" });
+    if (await retire.isVisible()) {
+      await retire.click();
+    }
+    await page.getByRole("link", { name: "← Oameni" }).click();
   }
-  await expect(page.getByRole("heading", { name: "Retrase" })).toBeVisible();
+  await expect(
+    page.locator(".people-list li").filter({ hasText: RETIRED_NAME }).getByText("Retras", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText(RETIRED_NAME)).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-people-retired.png",

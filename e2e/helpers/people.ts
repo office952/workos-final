@@ -2,10 +2,23 @@ import { expect, type APIRequestContext, type Locator, type Page } from "@playwr
 
 export const TEST_EXECUTOR_NAME = "Executor test E2E";
 
+const LETTERS_EXECUTION_SKILL_CODES = [
+  "SK_CNC_OPERATOR",
+  "SK_LETTER_CANT_OPERATOR",
+  "SK_ASSEMBLY",
+  "SK_VINYL_APPLICATOR",
+  "SK_ELECTRICIAN",
+] as const;
+
 type PersonRecord = {
   personId: string;
   displayName: string;
   status: string;
+};
+
+type SkillRecord = {
+  skillId: string;
+  code: string;
 };
 
 export async function ensureTestExecutor(
@@ -17,14 +30,36 @@ export async function ensureTestExecutor(
   const existing = (body.people ?? []).find(
     (person) => person.displayName === displayName && person.status === "ACTIVE",
   );
-  if (existing) {
-    return existing;
+  const person = existing
+    ? existing
+    : ((await (
+        await request.post("/api/people", {
+          data: { displayName },
+        })
+      ).json()) as { person: PersonRecord }).person;
+  await assignLettersExecutionSkills(request, person.personId);
+  return person;
+}
+
+export async function assignLettersExecutionSkills(
+  request: APIRequestContext,
+  personId: string,
+): Promise<void> {
+  const listed = await request.get("/api/people/skills");
+  expect(listed.ok()).toBeTruthy();
+  const body = (await listed.json()) as { skills?: SkillRecord[] };
+  const skills = body.skills ?? [];
+  expect(skills.length).toBeGreaterThan(0);
+  for (const code of LETTERS_EXECUTION_SKILL_CODES) {
+    const skill = skills.find((item) => item.code === code);
+    if (!skill) {
+      continue;
+    }
+    const assigned = await request.post(`/api/people/${personId}/skills`, {
+      data: { skillId: skill.skillId },
+    });
+    expect(assigned.ok() || assigned.status() === 409).toBeTruthy();
   }
-  const created = await request.post("/api/people", {
-    data: { displayName },
-  });
-  const createdBody = (await created.json()) as { person: PersonRecord };
-  return createdBody.person;
 }
 
 export async function assignExecutorIfNeeded(card: Locator, personName = TEST_EXECUTOR_NAME) {
@@ -56,5 +91,5 @@ export async function assignProviderIfNeeded(card: Locator, providerLabel?: stri
 export async function openPeopleAdmin(page: Page) {
   await page.goto("/admin");
   await page.getByRole("link", { name: "Persoane" }).click();
-  await expect(page.getByRole("heading", { name: "Persoane" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Oameni" })).toBeVisible();
 }

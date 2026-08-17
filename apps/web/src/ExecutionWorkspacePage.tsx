@@ -156,6 +156,10 @@ function taskActionNotice(error: string): string {
       return "Persoana aleasă nu există.";
     case "retired_person":
       return "Persoana aleasă nu mai este activă.";
+    case "unavailable_person":
+      return "Persoana este indisponibilă temporar.";
+    case "ineligible_executor":
+      return "Persoana nu este eligibilă pentru această operație.";
     case "dependencies_incomplete":
       return "Taskul așteaptă alte operații.";
     case "invalid_transition":

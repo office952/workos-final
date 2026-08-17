@@ -719,6 +719,8 @@ function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
     case "executor_unavailable":
     case "unknown_person":
     case "retired_person":
+    case "unavailable_person":
+    case "ineligible_executor":
     case "invalid_quantity":
     case "invalid_unit":
     case "invalid_resource":
@@ -752,6 +754,7 @@ function projectPlanView(runtime: ProductSystemRuntime, record: ExecutionPlanRec
     record,
     runtime.listPeople(),
     runtime.readProductionSnapshot(record.plan.sourceSnapshotId),
+    runtime.peopleEligibilityContext(),
   );
 }
 

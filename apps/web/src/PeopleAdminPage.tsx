@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import type { Person } from "@workos-final/domain";
-import { createPerson, fetchPeople, renamePerson, retirePerson } from "./peopleApi";
+import { Link } from "react-router-dom";
+import type { PeopleRegistryProjection } from "@workos-final/domain";
+import { PeopleAdminNav } from "./PeopleAdminNav";
+import { createPerson, fetchPeopleRegistry } from "./peopleApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
@@ -9,22 +11,20 @@ import { StatusChip } from "./ui/StatusChip";
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "ready"; people: Person[] };
+  | { kind: "ready"; registry: PeopleRegistryProjection };
 
 export function PeopleAdminPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [name, setName] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void fetchPeople()
-      .then((people) => {
+    void fetchPeopleRegistry()
+      .then((registry) => {
         if (!cancelled) {
-          setPage({ kind: "ready", people });
+          setPage({ kind: "ready", registry });
         }
       })
       .catch(() => {
@@ -37,19 +37,6 @@ export function PeopleAdminPage() {
     };
   }, []);
 
-  async function apply(action: () => Promise<Person[]>) {
-    setBusy(true);
-    setNotice(null);
-    try {
-      const people = await action();
-      setPage({ kind: "ready", people });
-    } catch {
-      setNotice("Acțiunea nu a putut fi aplicată.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   if (page.kind === "loading") {
     return <p>Se încarcă persoanele…</p>;
   }
@@ -57,15 +44,26 @@ export function PeopleAdminPage() {
     return <p>Nu s-au putut încărca persoanele.</p>;
   }
 
-  const active = page.people.filter((person) => person.status === "ACTIVE");
-  const retired = page.people.filter((person) => person.status === "RETIRED");
+  const { registry } = page;
 
   return (
-    <section>
+    <section className="people-admin">
       <PageHeader
-        title="Persoane"
-        lead="Identitate operațională pentru executantul de task. Nu este HR, pontaj, salariu sau programare."
+        title="Oameni"
+        lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
+        meta={
+          <p className="page-summary">
+            Activi {registry.summary.active}
+            {" · "}
+            Disponibili {registry.summary.available}
+            {" · "}
+            Indisponibili temporar {registry.summary.temporarilyUnavailable}
+            {" · "}
+            Retrasi {registry.summary.retired}
+          </p>
+        }
       />
+      <PeopleAdminNav />
       <form
         className="people-create"
         onSubmit={(event) => {
@@ -74,98 +72,60 @@ export function PeopleAdminPage() {
           if (trimmed.length === 0) {
             return;
           }
-          void apply(async () => {
-            const people = await createPerson(trimmed);
-            setName("");
-            return people;
-          });
+          setBusy(true);
+          setNotice(null);
+          void createPerson(trimmed)
+            .then((next) => {
+              setName("");
+              setPage({ kind: "ready", registry: next });
+            })
+            .catch(() => setNotice("Persoana nu a putut fi adăugată."))
+            .finally(() => setBusy(false));
         }}
       >
         <Field label="Nume">
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            disabled={busy}
-          />
+          <input value={name} onChange={(event) => setName(event.target.value)} disabled={busy} />
         </Field>
         <button type="submit" disabled={busy || name.trim().length === 0}>
           Adaugă persoană
         </button>
       </form>
       {notice ? <p className="status-bad">{notice}</p> : null}
-      <h2>Active</h2>
-      {active.length === 0 ? (
-        <EmptyState title="Nu există persoane active configurate." action={<p>Adaugă prima persoană.</p>} />
+      {registry.people.length === 0 ? (
+        <EmptyState
+          title="Nu există persoane active configurate."
+          action={<p>Adaugă prima persoană.</p>}
+        />
       ) : (
         <ul className="people-list">
-          {active.map((person) => (
+          {registry.people.map((person) => (
             <li key={person.personId}>
-              {editingId === person.personId ? (
-                <>
-                  <Field label="Nume">
-                    <input
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      disabled={busy}
-                    />
-                  </Field>
-                  <button
-                    type="button"
-                    disabled={busy || draft.trim().length === 0}
-                    onClick={() =>
-                      void apply(async () => {
-                        const people = await renamePerson(person.personId, draft);
-                        setEditingId(null);
-                        return people;
-                      })
-                    }
-                  >
-                    Salvează
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p>{person.displayName}</p>
-                  <StatusChip label="Activ" tone="ok" />
-                  <button
-                    type="button"
-                    className="button-quiet"
-                    disabled={busy}
-                    onClick={() => {
-                      setEditingId(person.personId);
-                      setDraft(person.displayName);
-                    }}
-                  >
-                    Editează nume
-                  </button>
-                  <button
-                    type="button"
-                    className="button-secondary"
-                    disabled={busy}
-                    onClick={() => void apply(() => retirePerson(person.personId))}
-                  >
-                    Retrage persoana
-                  </button>
-                </>
-              )}
+              <div className="jobs-identity">
+                <Link to={person.href}>{person.displayName}</Link>
+                <span>
+                  {person.roleLabel ?? "Fără rol descriptiv"}
+                  {person.skills.length > 0
+                    ? ` · ${person.skills.map((skill) => skill.displayLabel).join(", ")}`
+                    : " · Fără skill-uri"}
+                </span>
+              </div>
+              <div className="jobs-status">
+                <StatusChip
+                  label={person.statusLabel}
+                  tone={person.status === "ACTIVE" ? "ok" : "neutral"}
+                />
+                <StatusChip
+                  label={person.availabilityLabel}
+                  tone={person.availability === "AVAILABLE" ? "progress" : "neutral"}
+                />
+              </div>
+              <Link className="button-link" to={person.href}>
+                Deschide
+              </Link>
             </li>
           ))}
         </ul>
       )}
-      <details className="people-retired" open={retired.length > 0}>
-        <summary>
-          <h2>Retrase</h2>
-        </summary>
-        {retired.length === 0 ? <p>Nicio persoană retrasă.</p> : null}
-        <ul className="people-list">
-          {retired.map((person) => (
-            <li key={person.personId}>
-              <p>{person.displayName}</p>
-              <StatusChip label="Retras" tone="neutral" />
-            </li>
-          ))}
-        </ul>
-      </details>
     </section>
   );
 }

@@ -19,8 +19,17 @@ import {
   type SellerMutationResult,
   type SellerProfile,
   type SellerProfileInput,
+  diagnoseEligibility,
+  type PeopleEligibilityContext,
+  type PeopleRegistryProjection,
   type Person,
+  type PersonEligibilityDiagnosis,
   type PersonMutationResult,
+  type PersonProfilePatch,
+  type PersonSkillMutationResult,
+  resolveEligiblePeople,
+  type Skill,
+  type SkillMutationResult,
   projectExecutionPlanView,
   projectJobOverview,
   projectJobOverviewItem,
@@ -73,10 +82,21 @@ import {
 } from "../customers/store.js";
 import { getSellerProfile, persistUpdatedSeller } from "../seller/store.js";
 import {
+  ensureTrustedWorkforce,
+  getPerson,
   listPeople,
+  persistAssignedPersonSkill,
   persistCreatedPerson,
+  persistCreatedSkill,
   persistRenamedPerson,
+  persistRenamedSkill,
   persistRetiredPerson,
+  persistRetiredPersonSkill,
+  persistRetiredSkill,
+  persistUpdatedPerson,
+  readPeopleEligibilityContext,
+  readPeopleRegistry,
+  listSkills,
 } from "../people/store.js";
 import {
   getOrderSnapshot,
@@ -159,6 +179,25 @@ export type ProductSystemRuntime = {
     note?: string,
   ): InventoryAdjustmentResult;
   listPeople(): Person[];
+  getPerson(personId: string): Person | null;
+  listPeopleRegistry(): PeopleRegistryProjection;
+  listSkills(): Skill[];
+  peopleEligibilityContext(): PeopleEligibilityContext;
+  readEligibility(capabilityId: string): {
+    eligiblePeople: Array<{ personId: string; displayName: string }>;
+    diagnoses: readonly PersonEligibilityDiagnosis[];
+  };
+  createSkill(input: {
+    code: string;
+    displayLabel: string;
+    description?: string | null;
+  }): SkillMutationResult;
+  renameSkill(skillId: string, displayLabel: string): SkillMutationResult;
+  retireSkill(skillId: string): SkillMutationResult;
+  assignPersonSkill(personId: string, skillId: string): PersonSkillMutationResult;
+  retirePersonSkill(personId: string, skillId: string): PersonSkillMutationResult;
+  updatePerson(personId: string, patch: PersonProfilePatch): PersonMutationResult;
+  materializeTrustedWorkforce(): void;
   listCustomers(): Customer[];
   getCustomer(customerId: string): Customer | null;
   listCustomerRegistry(): CustomerRegistryProjection;
@@ -188,7 +227,10 @@ export type ProductSystemRuntime = {
     requestId: string,
     quoteSnapshotId: string,
   ): CommercialRequestLinkResult;
-  createPerson(displayName: string): PersonMutationResult;
+  createPerson(
+    displayName: string,
+    options?: { roleLabel?: string | null },
+  ): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
   retirePerson(personId: string): PersonMutationResult;
   createCustomer(
@@ -209,6 +251,9 @@ export function createProductSystemRuntime(
 ): ProductSystemRuntime {
   const db: SqliteDatabase = openSqliteDatabase(sqlitePath);
   bootstrapProductSystemDisplayStore(db);
+  if (!process.env.VITEST) {
+    ensureTrustedWorkforce(db);
+  }
   return {
     sqlitePath,
     labels() {
@@ -269,13 +314,66 @@ export function createProductSystemRuntime(
       return persistAssignedProvider(db, taskId, providerId);
     },
     assignExecutionTaskExecutor(taskId, personId) {
-      return persistAssignedExecutor(db, taskId, personId, listPeople(db));
+      return persistAssignedExecutor(
+        db,
+        taskId,
+        personId,
+        listPeople(db),
+        readPeopleEligibilityContext(db),
+      );
     },
     startExecutionTask(taskId) {
       return persistTaskStart(db, taskId, new Date().toISOString(), listPeople(db));
     },
     listPeople() {
       return listPeople(db);
+    },
+    getPerson(personId) {
+      return getPerson(db, personId);
+    },
+    listPeopleRegistry() {
+      return readPeopleRegistry(db);
+    },
+    listSkills() {
+      return listSkills(db);
+    },
+    peopleEligibilityContext() {
+      return readPeopleEligibilityContext(db);
+    },
+    readEligibility(capabilityId) {
+      const context = readPeopleEligibilityContext(db);
+      const input = {
+        capabilityId: capabilityId as Parameters<
+          typeof resolveEligiblePeople
+        >[0]["capabilityId"],
+        people: listPeople(db),
+        ...context,
+      };
+      return {
+        eligiblePeople: resolveEligiblePeople(input),
+        diagnoses: diagnoseEligibility(input),
+      };
+    },
+    createSkill(input) {
+      return persistCreatedSkill(db, input);
+    },
+    renameSkill(skillId, displayLabel) {
+      return persistRenamedSkill(db, skillId, displayLabel);
+    },
+    retireSkill(skillId) {
+      return persistRetiredSkill(db, skillId, new Date().toISOString());
+    },
+    assignPersonSkill(personId, skillId) {
+      return persistAssignedPersonSkill(db, personId, skillId);
+    },
+    retirePersonSkill(personId, skillId) {
+      return persistRetiredPersonSkill(db, personId, skillId, new Date().toISOString());
+    },
+    updatePerson(personId, patch) {
+      return persistUpdatedPerson(db, personId, patch);
+    },
+    materializeTrustedWorkforce() {
+      ensureTrustedWorkforce(db);
     },
     listCustomers() {
       return listCustomers(db);
@@ -368,8 +466,8 @@ export function createProductSystemRuntime(
         quote.customer?.customerId,
       );
     },
-    createPerson(displayName) {
-      return persistCreatedPerson(db, displayName);
+    createPerson(displayName, options) {
+      return persistCreatedPerson(db, displayName, options);
     },
     renamePerson(personId, displayName) {
       return persistRenamedPerson(db, personId, displayName);
@@ -443,7 +541,14 @@ function jobOverviewItems(db: SqliteDatabase) {
     return projectJobOverviewItem({
       order,
       release,
-      planView: record ? projectExecutionPlanView(record, people, release) : null,
+      planView: record
+        ? projectExecutionPlanView(
+            record,
+            people,
+            release,
+            readPeopleEligibilityContext(db),
+          )
+        : null,
     });
   });
 }

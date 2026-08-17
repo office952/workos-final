@@ -10,6 +10,7 @@ import {
   type ExecutionPlan,
   type ExecutionPlanRecord,
   type ExecutionTask,
+  type PeopleEligibilityContext,
   type Person,
   type TaskCompletionInput,
   type TaskMutationResult,
@@ -279,9 +280,10 @@ export function persistAssignedExecutor(
   taskId: string,
   personId: string,
   people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null = null,
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    assignExecutorToTask(record, taskId, personId, people),
+    assignExecutorToTask(record, taskId, personId, people, eligibility),
   );
 }
 

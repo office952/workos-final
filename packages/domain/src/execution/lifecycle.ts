@@ -1,5 +1,7 @@
+import { resolveEligiblePeople, type PeopleEligibilityContext } from "../people/eligibility.js";
 import { findPerson, type Person } from "../people/identity.js";
 import type { ProviderKind } from "../workcenters/catalog.js";
+import type { ProductionCapabilityClassId } from "../processes/catalog.js";
 import {
   buildActualConsumption,
   type ActualConsumptionLineInput,
@@ -29,6 +31,8 @@ export const TASK_MUTATION_ERRORS = [
   "executor_unavailable",
   "unknown_person",
   "retired_person",
+  "unavailable_person",
+  "ineligible_executor",
   "dependencies_incomplete",
   "invalid_transition",
   "invalid_quantity",
@@ -94,6 +98,7 @@ export function assignExecutorToTask(
   taskId: string,
   personId: string,
   people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null = null,
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -108,6 +113,21 @@ export function assignExecutorToTask(
   }
   if (person.status !== "ACTIVE") {
     return { ok: false, error: "retired_person" };
+  }
+  if (person.availability === "TEMPORARILY_UNAVAILABLE") {
+    return { ok: false, error: "unavailable_person" };
+  }
+  if (eligibility) {
+    const eligible = resolveEligiblePeople({
+      capabilityId: task.requiredCapabilityId as ProductionCapabilityClassId,
+      people,
+      skills: eligibility.skills,
+      assignments: eligibility.assignments,
+      requirements: eligibility.requirements,
+    });
+    if (!eligible.some((item) => item.personId === person.personId)) {
+      return { ok: false, error: "ineligible_executor" };
+    }
   }
   if (task.assignedExecutor?.id === person.personId) {
     return { ok: true, record, alreadyApplied: true };

@@ -92,7 +92,7 @@ describe("system governance projection", () => {
       governance.roadmap.find((item) => item.id === "execution-task-executor")?.state,
     ).toBe("IMPLEMENTED");
     expect(governance.roadmap.find((item) => item.id === "people-skills")?.state).toBe(
-      "NOT_IMPLEMENTED",
+      "IMPLEMENTED",
     );
     expect(
       governance.authorities.find((item) => item.id === "WORKCENTERS_MACHINES")?.state,

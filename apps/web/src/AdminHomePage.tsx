@@ -26,7 +26,7 @@ const GROUPS = [
         to: "/admin/people",
         label: "Persoane",
         description:
-          "Identitate operațională pentru executantul de task. Fără HR, pontaj, salariu sau programare.",
+          "Catalog operațional: oameni, skill-uri și disponibilitate. Fără HR, pontaj sau salariu.",
       },
     ],
   },

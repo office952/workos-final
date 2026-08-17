@@ -1,4 +1,6 @@
+import { eligibleExecutorsForCapability } from "../people/projection.js";
 import { activePeople, type Person } from "../people/identity.js";
+import type { PeopleEligibilityContext } from "../people/eligibility.js";
 import {
   frozenProviderRequirement,
   getProductionCapability,
@@ -8,6 +10,7 @@ import {
   TEST_ILLUMINATION_UNIFORMITY_ID,
   TEST_LIGHTING_IGNITION_ID,
   WIRE_LIGHTING_ID,
+  type ProductionCapabilityClassId,
   type ProviderRequirement,
 } from "../processes/catalog.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
@@ -243,13 +246,25 @@ export function projectExecutionPlanView(
   record: ExecutionPlanRecord,
   people: readonly Person[] = [],
   snapshot: AcceptedProductionSnapshot | null = null,
+  eligibility: PeopleEligibilityContext | null = null,
 ): ExecutionPlanView {
   const byId = new Map(record.tasks.map((task) => [task.taskId, task]));
-  const eligibleExecutors = activePeople(people).map((person) => ({
-    id: person.personId,
-    label: person.displayName,
-  }));
+  const availablePeople = activePeople(people).filter(
+    (person) => person.availability === "AVAILABLE",
+  );
   const tasks = record.tasks.map((task) => {
+    const eligibleExecutors = eligibility
+      ? eligibleExecutorsForCapability({
+          capabilityId: task.requiredCapabilityId as ProductionCapabilityClassId,
+          people,
+          skills: eligibility.skills,
+          assignments: eligibility.assignments,
+          requirements: eligibility.requirements,
+        })
+      : availablePeople.map((person) => ({
+          id: person.personId,
+          label: person.displayName,
+        }));
     const eligibleProviders = liveEligibleProviders(task.requiredCapabilityId);
     const dependsOnLabels = task.dependsOnTaskIds.flatMap((id) => {
       const dependency = byId.get(id);

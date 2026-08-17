@@ -318,8 +318,8 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "people-skills",
         label: "Persoane / calificări",
         statement:
-          "Identitatea operațională a persoanei există. Calificarea pe capabilitate, pontaj și HR rămân în afara acestui registru.",
-        state: "NOT_IMPLEMENTED",
+          "Catalogul de oameni, skill-uri și disponibilitate operațională există. Eligibilitatea curentă este derivată. Pontaj, HR și Claim-on-Start rămân în afara acestui registru.",
+        state: "IMPLEMENTED",
       },
       {
         id: "intake-settings",
@@ -562,7 +562,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "people-skills",
         label: "Persoane / calificări",
-        state: "NOT_IMPLEMENTED",
+        state: "IMPLEMENTED",
       },
       {
         id: "labor-recipes",
