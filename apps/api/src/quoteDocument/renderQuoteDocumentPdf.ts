@@ -31,18 +31,11 @@ type DrawCursor = {
 };
 
 export function quoteDocumentDrawLines(model: QuoteDocumentModel): string[] {
-  const lines = [
-    model.issuerName,
-    model.title,
-    `Referință: ${model.reference}`,
-    `Data: ${model.issuedOn}`,
-    model.status,
-    "Produs",
-    model.productName,
-  ];
+  const lines = [...sellerDrawLines(model), model.title, `Referință: ${model.reference}`, `Data: ${model.issuedOn}`];
   if (model.customerDisplayName) {
     lines.push("Client", model.customerDisplayName);
   }
+  lines.push("Produs", model.productName);
   if (model.inscription) {
     lines.push("Înscripție", model.inscription);
   }
@@ -63,8 +56,38 @@ export function quoteDocumentDrawLines(model: QuoteDocumentModel): string[] {
     `${model.commercial.netLabel}: ${model.commercial.netDisplay} ${model.commercial.currency}`,
     `${model.commercial.vatLabel}: ${model.commercial.vatDisplay} ${model.commercial.currency}`,
     `${model.commercial.grossLabel}: ${model.commercial.grossDisplay} ${model.commercial.currency}`,
-    "Document derivat din oferta înghețată.",
+    "Ofertă comercială.",
   );
+  return lines;
+}
+
+function sellerDrawLines(model: QuoteDocumentModel): string[] {
+  const seller = model.seller;
+  if (!seller) {
+    return [model.issuerName];
+  }
+  const lines = [seller.brand && seller.brand !== seller.legalName ? seller.brand : seller.legalName];
+  if (seller.brand && seller.brand !== seller.legalName) {
+    lines.push(seller.legalName);
+  }
+  if (seller.fiscalId) {
+    lines.push(`CIF ${seller.fiscalId}`);
+  }
+  if (seller.tradeRegister) {
+    lines.push(`Reg. com. ${seller.tradeRegister}`);
+  }
+  if (seller.address) {
+    lines.push(seller.address);
+  }
+  if (seller.locality) {
+    lines.push(seller.locality);
+  }
+  if (seller.bank) {
+    lines.push(seller.bank);
+  }
+  if (seller.iban) {
+    lines.push(seller.iban);
+  }
   return lines;
 }
 
@@ -81,7 +104,7 @@ export async function renderQuoteDocumentPdf(model: QuoteDocumentModel): Promise
     y: height - MARGIN,
   };
 
-  drawText(pdf, cursor, model.issuerName, SMALL_SIZE, MUTED);
+  drawSellerHeader(pdf, cursor, model);
   cursor.y -= 6;
   drawText(pdf, cursor, model.title, TITLE_SIZE, INK);
   cursor.y -= 8;
@@ -89,16 +112,15 @@ export async function renderQuoteDocumentPdf(model: QuoteDocumentModel): Promise
   cursor.y -= SECTION_GAP;
   drawText(pdf, cursor, `Referință: ${model.reference}`, BODY_SIZE, INK);
   drawText(pdf, cursor, `Data: ${model.issuedOn}`, BODY_SIZE, INK);
-  drawText(pdf, cursor, model.status, BODY_SIZE, MUTED);
   cursor.y -= SECTION_GAP;
 
-  drawHeading(pdf, cursor, "Produs");
-  drawText(pdf, cursor, model.productName, BODY_SIZE, INK);
   if (model.customerDisplayName) {
-    cursor.y -= 6;
     drawHeading(pdf, cursor, "Client");
     drawText(pdf, cursor, model.customerDisplayName, BODY_SIZE, INK);
+    cursor.y -= 6;
   }
+  drawHeading(pdf, cursor, "Produs");
+  drawText(pdf, cursor, model.productName, BODY_SIZE, INK);
   if (model.inscription) {
     cursor.y -= 6;
     drawHeading(pdf, cursor, "Înscripție");
@@ -148,9 +170,20 @@ export async function renderQuoteDocumentPdf(model: QuoteDocumentModel): Promise
   ensureSpace(pdf, cursor, 28);
   cursor.y -= 10;
   drawRule(cursor);
-  drawText(pdf, cursor, "Document derivat din oferta înghețată.", SMALL_SIZE, MUTED);
+  drawText(pdf, cursor, "Ofertă comercială.", SMALL_SIZE, MUTED);
 
   return pdf.save();
+}
+
+function drawSellerHeader(pdf: PDFDocument, cursor: DrawCursor, model: QuoteDocumentModel): void {
+  const lines = sellerDrawLines(model);
+  if (lines.length === 0) {
+    return;
+  }
+  drawText(pdf, cursor, lines[0] ?? model.issuerName, HEADING_SIZE, INK);
+  for (const line of lines.slice(1)) {
+    drawText(pdf, cursor, line, SMALL_SIZE, MUTED);
+  }
 }
 
 function drawHeading(pdf: PDFDocument, cursor: DrawCursor, text: string): void {

@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const productName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -17,14 +18,15 @@ async function acceptGoldenQuote(page: Page, inscription: string) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   const quote = page.locator(".quote-section");
   await selectOrCreateCustomer(page, "Client Demo LETTERS");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(
-    quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ }),
+    quote.getByRole("heading", { name: /Ofertă creată|Ofertă acceptată/ }),
   ).toBeVisible();
-  if ((await quote.getByRole("button", { name: "Acceptă oferta" }).count()) > 0) {
-    await quote.getByRole("button", { name: "Acceptă oferta" }).click();
+  if ((await quote.getByRole("button", { name: "Marchează acceptată" }).count()) > 0) {
+    await quote.getByRole("button", { name: "Marchează acceptată" }).click();
   }
   await expect(quote.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   return quote;
@@ -38,7 +40,7 @@ test("creates an order from an accepted quote without releasing production", asy
   const createOrder = quote.getByRole("button", { name: "Creează comanda" });
   if ((await createOrder.count()) > 0) {
     await expect(
-      quote.getByText("Oferta acceptată nu a fost încă transformată în comandă."),
+      quote.getByText("Următorul pas: creează comanda."),
     ).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/letters-order-before-create.png",
@@ -53,10 +55,8 @@ test("creates an order from an accepted quote without releasing production", asy
   await expect(order.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   await expect(order.getByText("Preț final: 624,82 EUR")).toBeVisible();
-  await expect(order.getByText("382,50 EUR")).toBeVisible();
-  await expect(order.getByText("35% · 133,88 EUR")).toBeVisible();
-  await expect(order.getByText("516,38 EUR")).toBeVisible();
-  await expect(order.getByText("21% · 108,44 EUR")).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
+  await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
   await expect(
     order.getByText("Comanda nu a fost încă eliberată pentru producție."),
   ).toBeVisible();

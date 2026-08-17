@@ -148,6 +148,32 @@ describe("order snapshot freeze", () => {
     expect(laterQuote.customer?.displayName).toBe("Client Demo NOU");
   });
 
+  it("copies frozen seller identity from the quote and does not reread a later name", () => {
+    const { quote, acceptance } = frozenAcceptedQuote();
+    const quoted: QuoteSnapshot = {
+      ...quote,
+      seller: {
+        legalName: "HUB MEDIA PRODUCTION S.R.L.",
+        fiscalId: "RO54481582",
+      },
+    };
+    const frozen = freezeOrderSnapshot(quoted, acceptance);
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    expect(frozen.snapshot.seller).toEqual({
+      legalName: "HUB MEDIA PRODUCTION S.R.L.",
+      fiscalId: "RO54481582",
+    });
+    const laterQuote: QuoteSnapshot = {
+      ...quoted,
+      seller: { legalName: "P-Media B", fiscalId: "RO54481582" },
+    };
+    expect(frozen.snapshot.seller?.legalName).toBe("HUB MEDIA PRODUCTION S.R.L.");
+    expect(laterQuote.seller?.legalName).toBe("P-Media B");
+  });
+
   it("does not reread a later product configuration", () => {
     const { quote, acceptance } = frozenAcceptedQuote();
     const frozen = freezeOrderSnapshot(quote, acceptance);

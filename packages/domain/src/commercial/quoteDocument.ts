@@ -1,9 +1,10 @@
 import type { DraftValue, TechnicalMeasurement } from "../product/types.js";
+import type { FrozenSellerIdentity } from "../seller/identity.js";
 import type { QuoteSnapshot } from "./quoteSnapshot.js";
 
 export const QUOTE_DOCUMENT_TITLE = "Ofertă" as const;
 export const QUOTE_DOCUMENT_ISSUER = "WorkOS Final" as const;
-export const QUOTE_DOCUMENT_STATUS = "Ofertă înghețată" as const;
+export const QUOTE_DOCUMENT_STATUS = "Ofertă" as const;
 
 export type QuoteDocumentLine = {
   label: string;
@@ -24,15 +25,27 @@ export type QuoteDocumentCommercial = {
   grossPrice: number;
 };
 
+export type QuoteDocumentSeller = {
+  legalName: string;
+  brand?: string;
+  fiscalId?: string;
+  tradeRegister?: string;
+  address?: string;
+  locality?: string;
+  iban?: string;
+  bank?: string;
+};
+
 export type QuoteDocumentModel = {
   title: typeof QUOTE_DOCUMENT_TITLE;
-  issuerName: typeof QUOTE_DOCUMENT_ISSUER;
+  issuerName: string;
   reference: string;
   issuedOn: string;
   status: typeof QUOTE_DOCUMENT_STATUS;
   productName: string;
   inscription?: string;
   customerDisplayName?: string;
+  seller?: QuoteDocumentSeller;
   configuration: readonly QuoteDocumentLine[];
   technicalSummary: readonly QuoteDocumentLine[];
   commercial: QuoteDocumentCommercial;
@@ -74,15 +87,17 @@ export function projectQuoteDocument(snapshot: QuoteSnapshot): QuoteDocumentMode
   const customerDisplayName = snapshot.customer
     ? sanitizeDocumentText(snapshot.customer.displayName)
     : "";
+  const seller = projectSeller(snapshot.seller);
   return {
     title: QUOTE_DOCUMENT_TITLE,
-    issuerName: QUOTE_DOCUMENT_ISSUER,
+    issuerName: seller?.legalName ?? QUOTE_DOCUMENT_ISSUER,
     reference,
     issuedOn: formatFrozenOfferDate(snapshot.createdAt),
     status: QUOTE_DOCUMENT_STATUS,
     productName: sanitizeDocumentText(snapshot.productLabel),
     ...(inscription ? { inscription } : {}),
     ...(customerDisplayName ? { customerDisplayName } : {}),
+    ...(seller ? { seller } : {}),
     configuration,
     technicalSummary,
     commercial: projectCommercialLines(snapshot),
@@ -116,6 +131,34 @@ export function sanitizeDocumentText(value: string): string {
     })
     .join("")
     .trim();
+}
+
+function projectSeller(seller: FrozenSellerIdentity | undefined): QuoteDocumentSeller | undefined {
+  if (!seller) {
+    return undefined;
+  }
+  const legalName = sanitizeDocumentText(seller.legalName);
+  if (!legalName) {
+    return undefined;
+  }
+  return {
+    legalName,
+    ...optionalDocumentField("brand", seller.brand),
+    ...optionalDocumentField("fiscalId", seller.fiscalId),
+    ...optionalDocumentField("tradeRegister", seller.tradeRegister),
+    ...optionalDocumentField("address", seller.address),
+    ...optionalDocumentField("locality", seller.locality),
+    ...optionalDocumentField("iban", seller.iban),
+    ...optionalDocumentField("bank", seller.bank),
+  };
+}
+
+function optionalDocumentField(
+  key: keyof QuoteDocumentSeller,
+  value: string | undefined,
+): Partial<QuoteDocumentSeller> {
+  const text = value ? sanitizeDocumentText(value) : "";
+  return text ? { [key]: text } : {};
 }
 
 function projectCommercialLines(snapshot: QuoteSnapshot): QuoteDocumentCommercial {

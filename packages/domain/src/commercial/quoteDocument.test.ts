@@ -120,7 +120,7 @@ describe("quote document projection", () => {
     const document = projectQuoteDocument(snapshot);
     expect(document.title).toBe("Ofertă");
     expect(document.issuerName).toBe("WorkOS Final");
-    expect(document.status).toBe("Ofertă înghețată");
+    expect(document.status).toBe("Ofertă");
     expect(document.reference).toMatch(/^OF-[0-9A-F]{8}$/);
     expect(document.reference).toBe(`OF-${snapshot.contentHash.slice(0, 8).toUpperCase()}`);
     expect(document.issuedOn).toBe("17.08.2026");
@@ -169,6 +169,28 @@ describe("quote document projection", () => {
     expect(projectQuoteDocument(withCustomer).customerDisplayName).toBe("Client Demo LETTERS");
     expect(projectQuoteDocument(snapshot).customerDisplayName).toBeUndefined();
     expect(projectQuoteDocument(renamedLive).customerDisplayName).toBe("Client Demo NOU");
+  });
+
+  it("projects frozen seller identity and ignores a later live rename", () => {
+    const snapshot = freezeLetters();
+    const withSeller: QuoteSnapshot = {
+      ...snapshot,
+      seller: {
+        legalName: "HUB MEDIA PRODUCTION S.R.L.",
+        brand: "HUB MEDIA PRODUCTION",
+        fiscalId: "RO54481582",
+        address: "Șos. Sălaj, Nr. 351-353, Bl. 5, Et. 2, Ap. 22, Sector 5",
+        locality: "București",
+        iban: "RO81RZBR0000060030657337",
+        bank: "RAIFFEISEN BANK",
+      },
+    };
+    const document = projectQuoteDocument(withSeller);
+    expect(document.issuerName).toBe("HUB MEDIA PRODUCTION S.R.L.");
+    expect(document.seller?.fiscalId).toBe("RO54481582");
+    expect(document.seller?.iban).toBe("RO81RZBR0000060030657337");
+    expect(projectQuoteDocument(snapshot).seller).toBeUndefined();
+    expect(projectQuoteDocument(snapshot).issuerName).toBe("WorkOS Final");
   });
 
   it("projects ACM customer facts without a product-code branch", () => {

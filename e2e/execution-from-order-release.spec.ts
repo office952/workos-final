@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const productName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -17,14 +18,15 @@ async function createGoldenOrder(page: Page, inscription: string) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   const quote = page.locator(".quote-section");
   await selectOrCreateCustomer(page, "Client Demo LETTERS");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(
-    quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ }),
+    quote.getByRole("heading", { name: /Ofertă creată|Ofertă acceptată/ }),
   ).toBeVisible();
-  if ((await quote.getByRole("button", { name: "Acceptă oferta" }).count()) > 0) {
-    await quote.getByRole("button", { name: "Acceptă oferta" }).click();
+  if ((await quote.getByRole("button", { name: "Marchează acceptată" }).count()) > 0) {
+    await quote.getByRole("button", { name: "Marchează acceptată" }).click();
   }
   await expect(quote.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   const createOrder = quote.getByRole("button", { name: "Creează comanda" });
@@ -55,6 +57,7 @@ test("creates a persisted execution plan from the commercial order release", asy
   await expect(page.getByText("Cost intern curent: 382,50 EUR").first()).toBeVisible();
   const createPlan = page.getByRole("button", { name: "Creează planul de execuție" });
   if ((await createPlan.count()) > 0) {
+    await revealSecondaryProductSurfaces(page);
     await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
     await expect(page.getByText("Estimare orientativă — nu este planul de execuție.")).toBeVisible();
   }

@@ -23,6 +23,7 @@ describe("system governance projection", () => {
       "preț client",
       "reguli comerciale",
       "snapshot ofertă",
+      "identitate vânzător curentă",
       "document ofertă PDF (proiecție)",
       "acceptare ofertă",
       "snapshot comandă",

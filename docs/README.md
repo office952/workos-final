@@ -19,6 +19,10 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/EXECUTION_PLAN_AND_TASKS_CANON.md` — persisted ExecutionPlan / ExecutionTasks and minimal lifecycle law
 - `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` — operational person identity and task executor
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — operator/admin visual and interaction grammar
+- `docs/architecture/CUSTOMER_IDENTITY_CANON.md` — reusable Client identity
+- `docs/architecture/SELLER_IDENTITY_CANON.md` — company / vânzător identity
+- `docs/architecture/QUOTE_SNAPSHOT_CANON.md` — immutable offer freeze
+- `docs/architecture/QUOTE_DOCUMENT_CANON.md` — customer Ofertă PDF projection
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
 - `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
 - `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections

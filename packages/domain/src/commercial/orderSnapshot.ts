@@ -11,6 +11,7 @@ import {
   type QuoteAcceptanceDecision,
 } from "./quoteAcceptance.js";
 import { copyFrozenCustomerIdentity } from "../customers/identity.js";
+import { copyFrozenSellerIdentity } from "../seller/identity.js";
 import {
   QUOTE_SNAPSHOT_SCHEMA_VERSION,
   type FrozenCommercialOffer,
@@ -48,6 +49,7 @@ export type OrderSnapshot = {
   commercial: FrozenCommercialOffer;
   productionInput: FrozenProductionInput;
   customer?: QuoteSnapshot["customer"];
+  seller?: QuoteSnapshot["seller"];
 };
 
 export type OrderSnapshotResult =
@@ -99,6 +101,7 @@ export function freezeOrderSnapshot(
     };
   }
 
+  const seller = copyFrozenSellerIdentity(quote.seller);
   const hashedContent = {
     schemaVersion: ORDER_SNAPSHOT_SCHEMA_VERSION,
     status: "FROZEN" as const,
@@ -130,6 +133,7 @@ export function freezeOrderSnapshot(
     ...(quote.customer
       ? { customer: copyFrozenCustomerIdentity(quote.customer) }
       : {}),
+    ...(seller ? { seller } : {}),
   };
   const contentHash = sha256Hex(stableStringify(hashedContent));
   return {

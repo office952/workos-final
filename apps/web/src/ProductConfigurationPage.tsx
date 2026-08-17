@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import type {
-  AcceptedProductionSnapshot,
-  CommercialPriceProjection,
-  Customer,
-  DraftValues,
-  EicResult,
-  ExecutionPlanPreview,
-  ExecutionPlanView,
-  ProductAggregate,
-  ProductDefinition,
-  ProductTruth,
-  OrderSnapshot,
-  QuoteAcceptanceDecision,
-  QuoteSnapshot,
+import {
+  projectCommercialExperience,
+  type AcceptedProductionSnapshot,
+  type CommercialPriceProjection,
+  type Customer,
+  type DraftValues,
+  type EicResult,
+  type ExecutionPlanPreview,
+  type ExecutionPlanView,
+  type ProductAggregate,
+  type ProductDefinition,
+  type ProductTruth,
+  type OrderSnapshot,
+  type QuoteAcceptanceDecision,
+  type QuoteSnapshot,
 } from "@workos-final/domain";
 import { createCustomer, fetchCustomers } from "./customerApi";
 import { FormRenderer } from "./FormRenderer";
 import {
   AcceptedSnapshotSection,
-  CommercialPriceSection,
+  CommercialProgress,
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
@@ -283,7 +284,9 @@ export function ProductConfigurationPage() {
       } else {
         setConfirmNotice(
           result.message ??
-            "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.",
+            (result.reason === "missing_customer"
+              ? "Selectează clientul."
+              : "Prețul clientului nu poate fi calculat."),
         );
       }
     } catch {
@@ -622,138 +625,205 @@ export function ProductConfigurationPage() {
       ) : null}
 
       {confirmed ? (
-        <div className="confirmed-result">
-          <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
-          <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
-          <CommercialPriceSection price={confirmed.commercialPrice} />
-          <QuoteSnapshotSection
-            price={confirmed.commercialPrice}
-            snapshot={confirmed.quoteSnapshot}
-            acceptance={confirmed.quoteAcceptance}
-            order={confirmed.orderSnapshot}
-            reused={Boolean(confirmed.quoteReused)}
-            busy={busy}
-            customers={customers}
-            selectedCustomerId={selectedCustomerId}
-            onSelectCustomer={setSelectedCustomerId}
-            onCreateCustomer={async (displayName) => {
-              const created = await createCustomer(displayName);
-              setCustomers(created.customers);
-              setSelectedCustomerId(created.customer.customerId);
-            }}
-            onFreeze={() => void handleFreezeQuote()}
-            onAccept={() => void handleAcceptQuote()}
-            onCreateOrder={() => void handleCreateOrder()}
-          />
-          {confirmed.orderSnapshot ? (
-            <OrderSnapshotSection
-              snapshot={confirmed.orderSnapshot}
-              release={
-                confirmed.snapshot?.sourceOrderSnapshotId ===
-                confirmed.orderSnapshot.orderSnapshotId
-                  ? confirmed.snapshot
-                  : undefined
-              }
-              busy={busy}
-              onRelease={
-                confirmed.snapshot?.sourceOrderSnapshotId ===
-                confirmed.orderSnapshot.orderSnapshotId
-                  ? undefined
-                  : () => void handleReleaseProduction()
-              }
-            />
-          ) : null}
-          {confirmed.executionPlan ? null : (
-            <ProductionPreviewSection
-              preview={confirmed.executionPlanPreview}
-              basedOnSnapshot={Boolean(confirmed.snapshot)}
-              commercial={Boolean(confirmed.orderSnapshot)}
-            />
-          )}
-
-          {confirmed.snapshot || confirmed.orderSnapshot ? null : (
-            <div className="lifecycle-cta">
-              <p className="page-lead">
-                Atelier / test tehnic. Îngheață configurația tehnică pentru execuție, fără comandă
-                comercială.
-              </p>
-              <div className="action-row">
-                <button type="button" onClick={() => void handleAcceptProduction()} disabled={busy}>
-                  Acceptă pentru producție
-                </button>
-                <button
-                  type="button"
-                  className="button-secondary"
-                  onClick={() => {
-                    setConfirmed(null);
-                    setDefinition(null);
-                  }}
-                >
-                  Modifică configurația
-                </button>
-              </div>
-            </div>
-          )}
-
-          {confirmed.snapshot &&
-          (!confirmed.orderSnapshot ||
-            confirmed.snapshot.sourceOrderSnapshotId === confirmed.orderSnapshot.orderSnapshotId) ? (
-            <>
-              {confirmed.executionPlan || confirmed.orderSnapshot ? null : (
-                <div className="action-row">
-                  <button
-                    type="button"
-                    className="button-secondary"
-                    onClick={() => void handleAcceptProduction()}
-                    disabled={busy}
-                  >
-                    Acceptă pentru producție
-                  </button>
-                  <button
-                    type="button"
-                    className="button-quiet"
-                    onClick={() => {
-                      setConfirmed(null);
-                      setDefinition(null);
-                    }}
-                  >
-                    Modifică configurația
-                  </button>
-                </div>
-              )}
-              <AcceptedSnapshotSection
-                snapshot={confirmed.snapshot}
-                reused={Boolean(confirmed.snapshotReused)}
-                onCreatePlan={() => void handleCreateExecutionPlan()}
-                busy={busy}
-                hasExecutionPlan={Boolean(confirmed.executionPlan)}
-              />
-            </>
-          ) : null}
-
-          {confirmed.executionPlan ? (
-            <div id="execution-plan" className="execution-handoff">
-              <Notice tone="ok" compact>
-                <p>
-                  {confirmed.executionPlanReused
-                    ? "Planul de execuție era deja creat."
-                    : "Plan de execuție creat."}
-                </p>
-              </Notice>
-              <p className="page-lead">Lucrul pe taskuri se face în execuție, nu aici.</p>
-              <div className="action-row">
-                <Link
-                  className="button-link"
-                  to={`/execution/${confirmed.executionPlan.plan.planId}`}
-                >
-                  Deschide execuția
-                </Link>
-              </div>
-            </div>
-          ) : null}
-        </div>
+        <ConfirmedCommercialWorkspace
+          confirmed={confirmed}
+          busy={busy}
+          customers={customers}
+          selectedCustomerId={selectedCustomerId}
+          onSelectCustomer={setSelectedCustomerId}
+          onCreateCustomer={async (displayName) => {
+            const created = await createCustomer(displayName);
+            setCustomers(created.customers);
+            setSelectedCustomerId(created.customer.customerId);
+          }}
+          onEditConfiguration={() => {
+            setConfirmed(null);
+            setDefinition(null);
+          }}
+          onFreeze={() => void handleFreezeQuote()}
+          onAccept={() => void handleAcceptQuote()}
+          onCreateOrder={() => void handleCreateOrder()}
+          onRelease={() => void handleReleaseProduction()}
+          onAcceptProduction={() => void handleAcceptProduction()}
+          onCreatePlan={() => void handleCreateExecutionPlan()}
+        />
       ) : null}
     </section>
+  );
+}
+
+type ConfirmedProduct = {
+  truth: ProductTruth;
+  aggregate: ProductAggregate;
+  eic: EicResult;
+  commercialPrice: CommercialPriceProjection;
+  executionPlanPreview: ExecutionPlanPreview;
+  quoteSnapshot?: QuoteSnapshot;
+  quoteReused?: boolean;
+  quoteAcceptance?: QuoteAcceptanceDecision;
+  orderSnapshot?: OrderSnapshot;
+  snapshot?: AcceptedProductionSnapshot;
+  snapshotReused?: boolean;
+  executionPlan?: ExecutionPlanView;
+  executionPlanReused?: boolean;
+};
+
+function ConfirmedCommercialWorkspace({
+  confirmed,
+  busy,
+  customers,
+  selectedCustomerId,
+  onSelectCustomer,
+  onCreateCustomer,
+  onEditConfiguration,
+  onFreeze,
+  onAccept,
+  onCreateOrder,
+  onRelease,
+  onAcceptProduction,
+  onCreatePlan,
+}: {
+  confirmed: ConfirmedProduct;
+  busy: boolean;
+  customers: readonly Customer[];
+  selectedCustomerId: string;
+  onSelectCustomer: (customerId: string) => void;
+  onCreateCustomer: (displayName: string) => Promise<void>;
+  onEditConfiguration: () => void;
+  onFreeze: () => void;
+  onAccept: () => void;
+  onCreateOrder: () => void;
+  onRelease: () => void;
+  onAcceptProduction: () => void;
+  onCreatePlan: () => void;
+}) {
+  const commercialRelease =
+    confirmed.snapshot &&
+    confirmed.orderSnapshot &&
+    confirmed.snapshot.sourceOrderSnapshotId === confirmed.orderSnapshot.orderSnapshotId
+      ? confirmed.snapshot
+      : undefined;
+  const experience = projectCommercialExperience({
+    commercialCompleteness: confirmed.commercialPrice.completeness,
+    internalCostCompleteness: confirmed.eic.completeness,
+    quote: confirmed.quoteSnapshot,
+    acceptance: confirmed.quoteAcceptance,
+    order: confirmed.orderSnapshot,
+    released: Boolean(commercialRelease),
+    executionPlanId: confirmed.executionPlan?.plan.planId,
+  });
+  const quoteFrozen = Boolean(confirmed.quoteSnapshot);
+
+  return (
+    <div className="confirmed-result">
+      <CommercialProgress experience={experience} />
+      {quoteFrozen ? (
+        <details className="phase-summary">
+          <summary>Configurație confirmată</summary>
+          <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
+        </details>
+      ) : (
+        <>
+          <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
+          <div className="action-row">
+            <button type="button" className="button-secondary" onClick={onEditConfiguration}>
+              Modifică configurația
+            </button>
+          </div>
+        </>
+      )}
+
+      <QuoteSnapshotSection
+        price={confirmed.commercialPrice}
+        snapshot={confirmed.quoteSnapshot}
+        acceptance={confirmed.quoteAcceptance}
+        order={confirmed.orderSnapshot}
+        reused={Boolean(confirmed.quoteReused)}
+        busy={busy}
+        customers={customers}
+        selectedCustomerId={selectedCustomerId}
+        onSelectCustomer={onSelectCustomer}
+        onCreateCustomer={onCreateCustomer}
+        onFreeze={onFreeze}
+        onAccept={onAccept}
+        onCreateOrder={onCreateOrder}
+      />
+
+      {confirmed.orderSnapshot ? (
+        <OrderSnapshotSection
+          snapshot={confirmed.orderSnapshot}
+          release={commercialRelease}
+          busy={busy}
+          onRelease={commercialRelease ? undefined : onRelease}
+        />
+      ) : null}
+
+      {commercialRelease ? (
+        <AcceptedSnapshotSection
+          snapshot={commercialRelease}
+          reused={Boolean(confirmed.snapshotReused)}
+          onCreatePlan={onCreatePlan}
+          busy={busy}
+          hasExecutionPlan={Boolean(confirmed.executionPlan)}
+        />
+      ) : null}
+
+      {confirmed.executionPlan ? (
+        <div id="execution-plan" className="execution-handoff">
+          <Notice tone="ok" compact>
+            <p>
+              {confirmed.executionPlanReused
+                ? "Planul de execuție era deja creat."
+                : "Plan de execuție creat."}
+            </p>
+          </Notice>
+          <p className="page-lead">Lucrul pe taskuri se face în execuție, nu aici.</p>
+          <div className="action-row">
+            <Link
+              className="button-link"
+              to={`/execution/${confirmed.executionPlan.plan.planId}`}
+            >
+              Deschide execuția
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      <details className="secondary-details">
+        <summary>Detalii interne</summary>
+        <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
+        {confirmed.executionPlan ? null : (
+          <ProductionPreviewSection
+            preview={confirmed.executionPlanPreview}
+            basedOnSnapshot={Boolean(confirmed.snapshot)}
+            commercial={Boolean(confirmed.orderSnapshot)}
+          />
+        )}
+      </details>
+
+      {confirmed.orderSnapshot ? null : (
+        <details className="atelier-details">
+          <summary>Atelier / test tehnic</summary>
+          <p className="page-lead">
+            Cale tehnică de atelier, fără comandă comercială.
+          </p>
+          {confirmed.snapshot && !commercialRelease ? (
+            <AcceptedSnapshotSection
+              snapshot={confirmed.snapshot}
+              reused={Boolean(confirmed.snapshotReused)}
+              onCreatePlan={onCreatePlan}
+              busy={busy}
+              hasExecutionPlan={Boolean(confirmed.executionPlan)}
+            />
+          ) : null}
+          <div className="action-row">
+            <button type="button" className="button-secondary" onClick={onAcceptProduction} disabled={busy}>
+              Acceptă pentru producție
+            </button>
+          </div>
+        </details>
+      )}
+    </div>
   );
 }
 

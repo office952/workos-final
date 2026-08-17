@@ -17,6 +17,19 @@ export {
   type CommercialPriceProjection,
 } from "./price.js";
 export {
+  COMMERCIAL_EXPERIENCE_STAGES,
+  COMMERCIAL_PRIMARY_ACTIONS,
+  commercialPrimaryActionLabel,
+  projectCommercialExperience,
+  type CommercialExperienceInput,
+  type CommercialExperienceProjection,
+  type CommercialExperienceStage,
+  type CommercialMilestone,
+  type CommercialMilestoneId,
+  type CommercialMilestoneState,
+  type CommercialPrimaryAction,
+} from "./experience.js";
+export {
   QUOTE_DOCUMENT_ISSUER,
   QUOTE_DOCUMENT_STATUS,
   QUOTE_DOCUMENT_TITLE,
@@ -28,6 +41,7 @@ export {
   type QuoteDocumentCommercial,
   type QuoteDocumentLine,
   type QuoteDocumentModel,
+  type QuoteDocumentSeller,
 } from "./quoteDocument.js";
 export {
   QUOTE_SNAPSHOT_ERRORS,
@@ -37,6 +51,7 @@ export {
   quoteSnapshotErrorLabel,
   type FrozenCommercialOffer,
   type FrozenCustomerIdentity,
+  type FrozenSellerIdentity,
   type QuoteSnapshot,
   type QuoteSnapshotError,
   type QuoteSnapshotResult,

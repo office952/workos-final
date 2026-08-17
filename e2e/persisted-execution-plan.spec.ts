@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
 
 async function confirmLetters(
@@ -23,6 +24,7 @@ async function confirmLetters(
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 test("accepted snapshot materializes a persisted planned execution plan", async ({

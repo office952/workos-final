@@ -215,6 +215,7 @@ export function registerProductRoutes(
       );
     }
     const commercialPrice = projectCommercialPrice(compiled.eic);
+    const seller = runtime.getSellerProfile();
     const frozen = freezeQuoteSnapshot(
       compiled.truth,
       compiled.aggregate,
@@ -226,6 +227,7 @@ export function registerProductRoutes(
           customerId: customer.customerId,
           displayName: customer.displayName,
         },
+        seller,
       },
     );
     if (!frozen.ok) {

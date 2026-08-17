@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("letters critical processes complete vinyl paint and electrical routes", async ({
   page,
@@ -173,6 +174,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(
     page.getByText("Total cost intern estimat: 432,50 EUR"),
   ).toBeVisible();

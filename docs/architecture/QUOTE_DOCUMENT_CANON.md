@@ -50,10 +50,11 @@ Date is the UTC calendar date of frozen `createdAt`. Regeneration does not stamp
 ## Customer and company
 
 Client comes from `quoteSnapshot.customer.displayName` when present.
-The document does not reread the live Customer catalog.
+Seller comes from `quoteSnapshot.seller` when present.
+The document does not reread the live Customer catalog or the live seller profile.
 Historical Quotes without customer omit the Client line.
-
-Issuer text is the accepted brand `WorkOS Final`. Legal CUI, address, VAT number, and logo are not invented here.
+Historical Quotes without seller keep issuer text `WorkOS Final` and omit the seller block.
+Owner-confirmed current seller facts may appear only when they were frozen into that Quote.
 
 ## Validity and terms
 

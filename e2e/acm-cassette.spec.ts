@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({ page }) => {
   await page.goto("/");
@@ -46,6 +47,7 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
 
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(page.getByText("Sistem de prindere: Cornier oțel")).toBeVisible();
   await expect(page.getByText("Lățime exterioară: 1000 mm (introdus de operator)")).toBeVisible();
   await expect(page.getByText("Suprafață față: 0,5 m²")).toBeVisible();
@@ -93,20 +95,18 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
     fullPage: true,
   });
 
-  const commercial = page.locator(".commercial-section");
-  await expect(commercial.getByText("Complet", { exact: true })).toBeVisible();
-  await expect(commercial.getByText("Preț final client: 118,66 EUR")).toBeVisible();
-  await expect(commercial.getByText("98,07 EUR")).toBeVisible();
+  const quoteReady = page.locator(".quote-section");
+  await expect(quoteReady.getByText("Preț final client: 118,66 EUR")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-commercial-complete.png",
     fullPage: true,
   });
 
   const quote = page.locator(".quote-section");
-  await expect(quote.getByRole("button", { name: "Îngheață oferta" })).toBeVisible();
+  await expect(quote.getByRole("button", { name: "Creează oferta" })).toBeVisible();
   await selectOrCreateCustomer(page, "Client Demo ACM");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
-  await expect(quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ })).toBeVisible();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
+  await expect(quote.getByRole("heading", { name: /Ofertă creată|Ofertă acceptată/ })).toBeVisible();
   await expect(quote.getByText("Preț final: 118,66 EUR")).toBeVisible();
   await expect(quote.getByText("Client: Client Demo ACM")).toBeVisible();
   await page.screenshot({

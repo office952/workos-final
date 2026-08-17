@@ -1,8 +1,11 @@
 import { useState } from "react";
 import {
   commercialCompletenessLabel,
+  commercialPrimaryActionLabel,
   eicLineGroupLabel,
+  quoteDocumentReference,
   type AcceptedProductionSnapshot,
+  type CommercialExperienceProjection,
   type CommercialPriceProjection,
   type Customer,
   type EicLine,
@@ -298,6 +301,23 @@ export function EicSection({
   );
 }
 
+export function CommercialProgress({
+  experience,
+}: {
+  experience: CommercialExperienceProjection;
+}) {
+  return (
+    <ol className="commercial-progress">
+      {experience.milestones.map((milestone) => (
+        <li key={milestone.id} data-state={milestone.state}>
+          <span>{milestone.state === "complete" ? "✓" : milestone.state === "current" ? "●" : "○"}</span>
+          {milestone.label}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function CommercialPriceSection({
   price,
 }: {
@@ -319,30 +339,23 @@ export function CommercialPriceSection({
           <p className="commercial-gross">
             Preț final client: {formatMoney(price.grossPrice)} {price.currency}
           </p>
-          <dl className="commercial-breakdown">
-            <div>
-              <dt>Cost intern</dt>
-              <dd>
-                {formatMoney(price.internalCost)} {price.internalCostCurrency}
-              </dd>
-            </div>
-            <div>
-              <dt>Adaos comercial</dt>
-              <dd>{price.markupPercent}%</dd>
-            </div>
-            <div>
-              <dt>Preț net</dt>
-              <dd>
-                {formatMoney(price.netPrice)} {price.currency}
-              </dd>
-            </div>
-            <div>
-              <dt>TVA</dt>
-              <dd>
-                {price.vatPercent}% · {formatMoney(price.vatAmount)} {price.currency}
-              </dd>
-            </div>
-          </dl>
+          <details className="calc-details">
+            <summary>Detalii preț</summary>
+            <dl className="commercial-breakdown">
+              <div>
+                <dt>Subtotal</dt>
+                <dd>
+                  {formatMoney(price.netPrice)} {price.currency}
+                </dd>
+              </div>
+              <div>
+                <dt>TVA</dt>
+                <dd>
+                  {price.vatPercent}% · {formatMoney(price.vatAmount)} {price.currency}
+                </dd>
+              </div>
+            </dl>
+          </details>
         </>
       ) : (
         <>
@@ -481,28 +494,20 @@ export function QuoteSnapshotSection({
         </p>
         <FrozenCustomerLine customer={snapshot.customer} />
         <p>
-          Acceptată {new Date(acceptance.acceptedAt).toLocaleString("ro-RO")} · Politică comercială v
-          {snapshot.commercial.policyVersion}
+          {snapshot.contentHash ? `${quoteDocumentReference(snapshot.contentHash)} · ` : null}
+          {new Date(acceptance.acceptedAt).toLocaleDateString("ro-RO")}
         </p>
         {order ? null : (
-          <p className="page-lead">Oferta acceptată nu a fost încă transformată în comandă.</p>
+          <p className="page-lead">Următorul pas: creează comanda.</p>
         )}
         <div className="action-row">
           {order ? null : (
             <button type="button" onClick={onCreateOrder} disabled={busy}>
-              Creează comanda
+              {commercialPrimaryActionLabel("CREATE_ORDER")}
             </button>
           )}
           <QuoteDocumentDownloadLink snapshot={snapshot} />
         </div>
-        <details className="snapshot-details">
-          <summary>Detalii</summary>
-          <ul>
-            <li>Referință ofertă: {snapshot.quoteSnapshotId}</li>
-            <li>Produs: {snapshot.productLabel}</li>
-            <li>Stare ofertă: Înghețată</li>
-          </ul>
-        </details>
       </section>
     );
   }
@@ -511,64 +516,25 @@ export function QuoteSnapshotSection({
     return (
       <section className="result-section quote-section">
         <div className="commercial-summary">
-          <h3>Ofertă salvată</h3>
-          <StatusChip label="Înghețată" tone="ok" />
+          <h3>Ofertă creată</h3>
+          <StatusChip label="Creată" tone="ok" />
         </div>
-        {reused ? <p className="page-lead">Oferta era deja salvată pentru această configurație.</p> : null}
+        {reused ? <p className="page-lead">Oferta era deja creată pentru această configurație.</p> : null}
         <p className="commercial-gross">
           Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
         </p>
         <FrozenCustomerLine customer={snapshot.customer} />
-        <dl className="commercial-breakdown">
-          <div>
-            <dt>Cost intern</dt>
-            <dd>
-              {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
-            </dd>
-          </div>
-          <div>
-            <dt>Adaos comercial</dt>
-            <dd>
-              {snapshot.commercial.markupPercent}% ·{" "}
-              {formatMoney(snapshot.commercial.markupAmount)} {snapshot.commercial.currency}
-            </dd>
-          </div>
-          <div>
-            <dt>Preț net</dt>
-            <dd>
-              {formatMoney(snapshot.commercial.netPrice)} {snapshot.commercial.currency}
-            </dd>
-          </div>
-          <div>
-            <dt>TVA</dt>
-            <dd>
-              {snapshot.commercial.vatPercent}% ·{" "}
-              {formatMoney(snapshot.commercial.vatAmount)} {snapshot.commercial.currency}
-            </dd>
-          </div>
-        </dl>
         <p>
-          Politică comercială v{snapshot.commercial.policyVersion} ·{" "}
-          {new Date(snapshot.createdAt).toLocaleString("ro-RO")}
+          {snapshot.contentHash ? `${quoteDocumentReference(snapshot.contentHash)} · ` : null}
+          {new Date(snapshot.createdAt).toLocaleDateString("ro-RO")}
         </p>
-        <p className="page-lead">
-          Înregistrează faptul că această ofertă a fost acceptată. Nu creează comanda și nu pornește
-          producția.
-        </p>
+        <p className="page-lead">Oferta a fost salvată. Modificările ulterioare nu schimbă această ofertă.</p>
         <div className="action-row">
-          <button type="button" onClick={onAccept} disabled={busy}>
-            Acceptă oferta
-          </button>
           <QuoteDocumentDownloadLink snapshot={snapshot} />
+          <button type="button" className="button-secondary" onClick={onAccept} disabled={busy}>
+            {commercialPrimaryActionLabel("ACCEPT_QUOTE")}
+          </button>
         </div>
-        <details className="snapshot-details">
-          <summary>Detalii</summary>
-          <ul>
-            <li>Referință: {snapshot.quoteSnapshotId}</li>
-            <li>Produs: {snapshot.productLabel}</li>
-            <li>Stare: Înghețată</li>
-          </ul>
-        </details>
       </section>
     );
   }
@@ -577,7 +543,11 @@ export function QuoteSnapshotSection({
     return (
       <section className="result-section quote-section">
         <h3>Ofertă</h3>
-        <p>Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.</p>
+        <p>
+          {price.internalCostCompleteness === "COMPLETE"
+            ? "Prețul clientului nu poate fi calculat."
+            : "Costul intern nu este complet."}
+        </p>
       </section>
     );
   }
@@ -585,9 +555,8 @@ export function QuoteSnapshotSection({
   return (
     <section className="result-section quote-section">
       <h3>Ofertă</h3>
-      <p className="page-lead">
-        Îngheață prețul și configurația confirmate. Nu înseamnă acceptare de client și nu pornește
-        producția.
+      <p className="commercial-gross">
+        Preț final client: {formatMoney(price.grossPrice ?? 0)} {price.currency}
       </p>
       {onSelectCustomer && onCreateCustomer ? (
         <CustomerSelectionFields
@@ -598,9 +567,10 @@ export function QuoteSnapshotSection({
           onCreateCustomer={onCreateCustomer}
         />
       ) : null}
+      {!selectedCustomerId ? <p className="page-lead">Selectează clientul.</p> : null}
       <div className="action-row">
         <button type="button" onClick={onFreeze} disabled={busy || !selectedCustomerId}>
-          Îngheață oferta
+          {commercialPrimaryActionLabel("CREATE_QUOTE")}
         </button>
       </div>
     </section>
@@ -629,38 +599,7 @@ export function OrderSnapshotSection({
         Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
       </p>
       <FrozenCustomerLine customer={snapshot.customer} />
-      <dl className="commercial-breakdown">
-        <div>
-          <dt>Cost intern</dt>
-          <dd>
-            {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
-          </dd>
-        </div>
-        <div>
-          <dt>Adaos comercial</dt>
-          <dd>
-            {snapshot.commercial.markupPercent}% ·{" "}
-            {formatMoney(snapshot.commercial.markupAmount)} {snapshot.commercial.currency}
-          </dd>
-        </div>
-        <div>
-          <dt>Preț net</dt>
-          <dd>
-            {formatMoney(snapshot.commercial.netPrice)} {snapshot.commercial.currency}
-          </dd>
-        </div>
-        <div>
-          <dt>TVA</dt>
-          <dd>
-            {snapshot.commercial.vatPercent}% ·{" "}
-            {formatMoney(snapshot.commercial.vatAmount)} {snapshot.commercial.currency}
-          </dd>
-        </div>
-      </dl>
-      <p>
-        Creată {new Date(snapshot.createdAt).toLocaleString("ro-RO")} · Ofertă acceptată{" "}
-        {new Date(snapshot.sourceAcceptedAt).toLocaleString("ro-RO")}
-      </p>
+      <p>{new Date(snapshot.createdAt).toLocaleDateString("ro-RO")}</p>
       {released ? (
         <p className="page-lead">Eliberată pentru producție.</p>
       ) : (

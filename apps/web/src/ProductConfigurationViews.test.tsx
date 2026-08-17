@@ -217,10 +217,10 @@ describe("Product configuration views", () => {
     expect(screen.getByRole("heading", { name: "Preț client" })).toBeInTheDocument();
     expect(screen.getByText("Complet")).toBeInTheDocument();
     expect(screen.getByText("Preț final client: 624,82 EUR")).toBeInTheDocument();
-    expect(screen.getByText("382,50 EUR")).toBeInTheDocument();
-    expect(screen.getByText("35%")).toBeInTheDocument();
     expect(screen.getByText("516,38 EUR")).toBeInTheDocument();
     expect(screen.getByText("21% · 108,44 EUR")).toBeInTheDocument();
+    expect(screen.queryByText("382,50 EUR")).not.toBeInTheDocument();
+    expect(screen.queryByText("35%")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Discount")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Ajustare comercială")).not.toBeInTheDocument();
   });
@@ -286,7 +286,7 @@ describe("Product configuration views", () => {
         onCreateOrder={() => undefined}
       />,
     );
-    expect(screen.getByRole("button", { name: "Îngheață oferta" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Creează oferta" })).toBeInTheDocument();
     rerender(
       <QuoteSnapshotSection
         price={{ ...complete, completeness: "PARTIAL", unavailableReasons: ["gap"] }}
@@ -297,12 +297,8 @@ describe("Product configuration views", () => {
         onCreateOrder={() => undefined}
       />,
     );
-    expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Creează oferta" })).not.toBeInTheDocument();
+    expect(screen.getByText("Prețul clientului nu poate fi calculat.")).toBeInTheDocument();
   });
 
   it("renders frozen quote values from the snapshot only", () => {
@@ -335,7 +331,7 @@ describe("Product configuration views", () => {
         onCreateOrder={() => undefined}
       />,
     );
-    expect(screen.getByRole("heading", { name: "Ofertă salvată" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ofertă creată" })).toBeInTheDocument();
     expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
     expect(screen.queryByText("cus:hidden")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Descarcă oferta PDF" })).toHaveAttribute(
@@ -343,10 +339,9 @@ describe("Product configuration views", () => {
       "/api/products/PRD-TEST/quote-snapshots/qts%3Ahidden/document",
     );
     expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
-    expect(screen.getByText("Politică comercială v1", { exact: false })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Acceptă oferta" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Îngheață oferta" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Acceptă" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Marchează acceptată" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Creează oferta" })).not.toBeInTheDocument();
+    expect(screen.queryByText("382,50 EUR")).not.toBeInTheDocument();
   });
 
   it("renders accepted quote from the frozen snapshot only", () => {
@@ -385,11 +380,9 @@ describe("Product configuration views", () => {
     );
     expect(screen.getByRole("heading", { name: "Ofertă acceptată" })).toBeInTheDocument();
     expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
-    expect(
-      screen.getByText("Oferta acceptată nu a fost încă transformată în comandă."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Următorul pas: creează comanda.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Creează comanda" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Acceptă oferta" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Marchează acceptată" })).not.toBeInTheDocument();
     expect(screen.queryByText("Comandă creată")).not.toBeInTheDocument();
   });
 
@@ -451,9 +444,8 @@ describe("Product configuration views", () => {
     expect(screen.getByRole("heading", { name: "Ofertă acceptată" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comandă creată" })).toBeInTheDocument();
     expect(screen.getAllByText("Preț final: 624,82 EUR")).toHaveLength(2);
-    expect(screen.getByText("382,50 EUR")).toBeInTheDocument();
-    expect(screen.getByText("35% · 133,88 EUR")).toBeInTheDocument();
-    expect(screen.getByText("21% · 108,44 EUR")).toBeInTheDocument();
+    expect(screen.queryByText("382,50 EUR")).not.toBeInTheDocument();
+    expect(screen.queryByText("35% · 133,88 EUR")).not.toBeInTheDocument();
     expect(
       screen.getByText("Comanda nu a fost încă eliberată pentru producție."),
     ).toBeInTheDocument();

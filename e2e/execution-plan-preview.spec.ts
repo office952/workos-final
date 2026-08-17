@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 async function confirmLetters(
   page: import("@playwright/test").Page,
@@ -30,6 +31,7 @@ async function confirmLetters(
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 test("confirmed LETTERS product shows a read-only production plan preview", async ({

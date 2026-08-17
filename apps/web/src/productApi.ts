@@ -183,7 +183,8 @@ export async function createQuoteSnapshot(
         | "unavailable_offer"
         | "missing_customer"
         | "customer_unavailable"
-        | "invalid_customer";
+        | "invalid_customer"
+        | "invalid_seller";
       definition?: ProductDefinition;
       message?: string;
     }
@@ -217,7 +218,8 @@ export async function createQuoteSnapshot(
       body.error === "unavailable_offer" ||
       body.error === "missing_customer" ||
       body.error === "customer_unavailable" ||
-      body.error === "invalid_customer")
+      body.error === "invalid_customer" ||
+      body.error === "invalid_seller")
   ) {
     return {
       ok: false,

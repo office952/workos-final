@@ -1,5 +1,6 @@
 import { type APIRequestContext, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const FAMILY_ID = "LIGHTED_VOLUMETRIC_SIGNS";
 const CATEGORY_ID = "HALO_LIT_VOLUMETRIC_LETTERS";
@@ -174,6 +175,7 @@ test("admin display-label write persists and propagates", async ({
   });
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
   await expect(page.getByText("Cost intern curent: 382,50 EUR (complet)")).toBeVisible();
   await page.screenshot({

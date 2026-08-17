@@ -25,10 +25,13 @@ Administrare  →  /admin
 Routes stay stable. Inspection surfaces live under Administrare:
 
 ```text
+Comercial    Date firmă, Clienți
 Operațiuni   Persoane
 Atelier      Resurse, Stoc, Procese, Utilaje și zone
 Sistem       Sistem produs, Module și componente, Guvernanță, Stare sistem
 ```
+
+After product confirmation the product page is a commercial workspace: compact progress, one primary next action, customer price first, internal cost / production preview / Atelier collapsed.
 
 Stare sistem lives at `/system`, reached from Administrare. There is no empty Producție page and no Execution top-nav item. After plan creation the overview and the product page hand off with **Deschide execuția** to the generic job workspace `/execution/:planId`.
 

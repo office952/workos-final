@@ -29,6 +29,7 @@ An immutable historical copy of one offered configuration and price:
 - Commercial policy id/version and calculated amounts
 - generic frozen production input (operations, requirements, used settings, used recipes) compiled at the same moment as EIC
 - optional frozen customer identity `{ customerId, displayName }` for new commercial Quotes
+- optional frozen seller identity for new commercial Quotes (`legalName` plus owner-confirmed fiscal/address/bank facts when present)
 
 ## Acceptance
 
@@ -53,6 +54,8 @@ PARTIAL configurations return `incomplete_offer`.
 New commercial Quotes also require an ACTIVE Customer. The API returns `missing_customer` or `customer_unavailable`.
 Domain freeze without customer remains valid for historical snapshots and golden hashes.
 When customer identity is present, it is part of `contentHash`.
+When seller identity is present, it is part of `contentHash`.
+Historical Quotes without seller remain readable. A later seller rename does not rewrite them.
 
 ## Identity
 

@@ -87,6 +87,8 @@ WorkOS Final
 ├── Analyzer                                NOT_IMPLEMENTED (separate app; proposal only)
 ├── Customer / identitate comercială        IMPLEMENTED_CURRENT / BASIC
 │   ├── Customer registry                   IMPLEMENTED_CURRENT / BASIC
+├── Seller / identitate vânzător            IMPLEMENTED_CURRENT / BASIC
+│   ├── Company profile (Date firmă)        IMPLEMENTED_CURRENT / BASIC
 │   └── CRM / contacts / billing            NOT_IMPLEMENTED
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
@@ -142,8 +144,9 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
-| Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth |
-| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer identity, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, CRM |
+| Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth, seller identity |
+| Seller | Current company / vânzător identity for new Quotes. Owner-confirmed HUB MEDIA PRODUCTION profile. | Customer catalog, CRM, invoices, global Settings, ProductTemplate |
+| Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer and seller identities, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, live seller profile, CRM |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
 | People | Operational person identity for task executor attribution. Future: employee master, attendance / Pontaj, payments | Provider capability, labor recipe / cost basis, Product Truth, authenticated user |
@@ -207,6 +210,7 @@ Person supplies operational executor identity only.
 Minimal Customer registry is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/CUSTOMER_IDENTITY_CANON.md`.
 
 Admin: `/admin` → Comercial → Clienți → `/admin/customers`.
+Seller admin: `/admin` → Comercial → Date firmă → `/admin/seller`.
 
 Customer supplies reusable commercial identity only. Quote/Order freeze the name used by that job.
 
@@ -384,6 +388,7 @@ Inside Administrare, group only real current pages:
 ```text
 Administrare
 ├── Comercial
+│   ├── Date firmă
 │   └── Clienți
 ├── Operațiuni
 │   └── Persoane

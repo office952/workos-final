@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
 import {
   assignExecutorIfNeeded,
@@ -28,14 +29,15 @@ async function createReleasedPlan(page: Page, inscription: string) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   const quote = page.locator(".quote-section");
   await selectOrCreateCustomer(page, "Client Demo LETTERS");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(
-    quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ }),
+    quote.getByRole("heading", { name: /Ofertă creată|Ofertă acceptată/ }),
   ).toBeVisible();
-  if ((await quote.getByRole("button", { name: "Acceptă oferta" }).count()) > 0) {
-    await quote.getByRole("button", { name: "Acceptă oferta" }).click();
+  if ((await quote.getByRole("button", { name: "Marchează acceptată" }).count()) > 0) {
+    await quote.getByRole("button", { name: "Marchează acceptată" }).click();
   }
   await expect(quote.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   const createOrder = quote.getByRole("button", { name: "Creează comanda" });

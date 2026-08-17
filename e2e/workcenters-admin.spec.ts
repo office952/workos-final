@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("workcenters admin shows the real shop-floor map without inventing capacity", async ({
   page,
@@ -274,10 +275,10 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(
     page.getByText("Total cost intern estimat: 382,50 EUR"),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Preț client" })).toBeVisible();
   await expect(page.getByText("Preț final client: 624,82 EUR")).toBeVisible();
   await expect(page.getByText("ExecutionPlan")).toHaveCount(0);
   await page.screenshot({

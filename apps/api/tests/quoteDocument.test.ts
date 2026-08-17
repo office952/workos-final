@@ -94,6 +94,8 @@ describe("quote document PDF", () => {
     expect(text).toContain("60 mm");
     expect(text).toContain("Client");
     expect(text).toContain("Client Demo LETTERS");
+    expect(text).toContain("HUB MEDIA PRODUCTION S.R.L.");
+    expect(text).toContain("RO54481582");
     expect(text).not.toMatch(/382,50|EIC|AI_DECISION|markup|qts:/);
     expect(response.headers.get("content-disposition")).toContain(model.filename);
   });

@@ -245,6 +245,48 @@ describe("quote snapshot freeze", () => {
     expect(withCustomer.snapshot.commercial.grossPrice).toBe(624.82);
   });
 
+  it("includes frozen seller identity in the content hash", () => {
+    const { truth, aggregate, composition, eic } = confirmedSpine();
+    const commercial = projectCommercialPrice(eic);
+    const withoutSeller = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial);
+    const withSeller = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      seller: {
+        legalName: "HUB MEDIA PRODUCTION S.R.L.",
+        brand: "HUB MEDIA PRODUCTION",
+        fiscalId: "RO54481582",
+      },
+    });
+    const renamedLive = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      seller: {
+        legalName: "P-Media B",
+        brand: "P-Media B",
+        fiscalId: "RO54481582",
+      },
+    });
+    expect(withoutSeller.ok && withSeller.ok && renamedLive.ok).toBe(true);
+    if (!withoutSeller.ok || !withSeller.ok || !renamedLive.ok) {
+      return;
+    }
+    expect(withoutSeller.snapshot.seller).toBeUndefined();
+    expect(withSeller.snapshot.seller?.legalName).toBe("HUB MEDIA PRODUCTION S.R.L.");
+    expect(withSeller.snapshot.contentHash).not.toBe(withoutSeller.snapshot.contentHash);
+    expect(renamedLive.snapshot.contentHash).not.toBe(withSeller.snapshot.contentHash);
+    expect(withSeller.snapshot.commercial.grossPrice).toBe(624.82);
+  });
+
+  it("rejects an empty seller identity when one is supplied", () => {
+    const { truth, aggregate, composition, eic } = confirmedSpine();
+    expect(
+      freezeQuoteSnapshot(truth, aggregate, composition, eic, projectCommercialPrice(eic), {
+        seller: { legalName: "   " },
+      }),
+    ).toEqual({
+      ok: false,
+      error: "invalid_seller",
+      reasons: ["Identitatea vânzătorului nu este validă pentru înghețare."],
+    });
+  });
+
   it("rejects an empty customer identity when one is supplied", () => {
     const { truth, aggregate, composition, eic } = confirmedSpine();
     expect(

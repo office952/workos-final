@@ -37,7 +37,7 @@ Not CRM.
 Not leads, pipeline, contacts, notes, tags, or segmentation.
 Not billing, CUI/VAT, invoices, payments, or a customer portal.
 Not Product Truth.
-Not seller / legal company identity.
+Not seller / legal company identity. Seller lives in Date firmă (`/admin/seller`) and freezes separately into Quote.
 
 ## Freeze law
 

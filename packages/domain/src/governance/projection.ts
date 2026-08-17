@@ -188,6 +188,7 @@ export function projectSystemGovernance(): GovernanceProjection {
           "preț client",
           "reguli comerciale",
           "snapshot ofertă",
+          "identitate vânzător curentă",
           "document ofertă PDF (proiecție)",
           "acceptare ofertă",
           "snapshot comandă",

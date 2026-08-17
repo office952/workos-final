@@ -2,28 +2,22 @@
 
 Direction, not dogma. If implementation proves a change is needed, propose an amendment. Do not deviate silently.
 
-## Construction order
+## Construction history
 
-- PHASE 0 — Repository Foundation
-- PHASE 1 — Platform Shell + capability boundaries
-- PHASE 2 — Product Template foundation
-- PHASE 3 — Schema-driven Form System
-- PHASE 4 — ProductDefinition
-- PHASE 5 — Product Truth
-- PHASE 6 — ProductAggregate
-- PHASE 7 — Resource Catalogs: Materials, Pricing evidence, Operational Processes, Labor recipes, Service recipes, Workcenters; machines only when needed
-- PHASE 8 — EIC
-- PHASE 9 — Letters Golden Path
-- PHASE 10 — ACM Generalization
-- PHASE 11 — Logo Completion
+Phases 0–8 built the product spine through EIC. That history stays in worklogs.
+Do not treat the old phase list as the active plan.
 
-## Later
+## Active finalization
 
-Commercial → Quote Snapshot → Order Snapshot → Execution → People → Reports → Documents → Integrations
+1. Commercial Experience Closure — DONE / IMPLEMENTED_CURRENT (operator flow + seller identity)
+2. V1 LETTERS closure / regression / polish
+3. ACM Execution proof only if the product remains an active target
+4. Cost / settings calibration
+5. Optional post-V1 capabilities (reservations, scheduling, HR, Analyzer)
 
-## Initial finish line
+## Later, not now
 
-Product configuration → Product Truth → Product Aggregate → Resources → EIC
+Reports, invoice/proforma, integrations, full ACM, Analyzer runtime.
 
 ## Generalization
 
@@ -46,7 +40,7 @@ Workcenters / Machines now say WHO / WHERE can provide a required CapabilityClas
 Letters now has one deterministic technological process composition. That composition is not an ExecutionPlan. Composition cost completeness is a projection of EIC / cost-evidence completeness, not a hardcoded PARTIAL.
 LIGHTING resource calculation is IMPLEMENTED_CURRENT / functional V1: confirmed perimeter → modules → load → multi-PSU → generic EIC.
 LETTERS Service/Labor recipes are functional V1. Canonical none/none at 60 mm is 382.50 EUR COMPLETE on owner-confirmed workshop evidence. Aluminium 3 EUR/m is confirmed only for 60 mm; 30 / 80 / 100 mm stay PARTIAL. Forming is 5 EUR/m. Vinyl / RAL remain development evidence. Historical 595 snapshots stay frozen. Analyzer handoff is deferred; it is not the current planned-EIC blocker.
-Confirmed COMPLETE planned EIC now projects a customer price from one company Commercial policy. Canonical 60 mm none/none is 382.50 EUR internal → 624.82 EUR gross. That COMPLETE offer can be frozen as an immutable Quote Snapshot with a frozen Customer identity, without Production Snapshot or execution. Quote freeze also freezes generic production-input evidence. The customer Ofertă PDF and Lucrări project that frozen identity; renaming the live Customer does not rewrite history. An accepted Quote can freeze an Order Snapshot that copies those facts and that evidence. An Order can be released to production from that frozen input. That Release can materialize the existing ExecutionPlan / ExecutionTasks without a second planner.
+Confirmed COMPLETE planned EIC now projects a customer price from one company Commercial policy. Canonical 60 mm none/none is 382.50 EUR internal → 624.82 EUR gross. That COMPLETE offer can be frozen as an immutable Quote Snapshot with frozen Customer and seller identities, without Production Snapshot or execution. Quote freeze also freezes generic production-input evidence. The customer Ofertă PDF and Lucrări project those frozen identities; renaming the live Customer or Date firmă does not rewrite history. After confirm, the product page shows a commercial summary with one next action. An accepted Quote can freeze an Order Snapshot that copies those facts and that evidence. An Order can be released to production from that frozen input. That Release can materialize the existing ExecutionPlan / ExecutionTasks without a second planner.
 A read-only Execution Plan Preview now projects confirmed LETTERS truth into production operations. An accepted production snapshot can freeze that technical truth. Persisted ExecutionPlan and ExecutionTasks can be materialized from that snapshot. Provider assignment, a minimal task lifecycle (`PLANNED → IN_PROGRESS → COMPLETED`), minimal completion evidence, explicit task executor assignment, actual resource consumption, inventory stock movements, and actual internal cost projection are IMPLEMENTED_CURRENT. The first UI/UX foundation is now proven on Execution, People, Product configuration / result, Admin Resources, Operational Processes, and Stoc. The operator landing is Lucrări (`/`), a read-only projection of commercial Orders. HR, Pontaj, scheduling, capacity, reservations and purchasing remain NOT_IMPLEMENTED.
 VOLUME EIC regression preserved (formerly RETURN_CANT).
 
@@ -102,6 +96,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Quote Document PDF | IMPLEMENTED_CURRENT / BASIC |
 | Customer identity (minimal, no CRM) | IMPLEMENTED_CURRENT / BASIC |
+| Seller identity (Date firmă) | IMPLEMENTED_CURRENT / BASIC |
+| Commercial operator experience | IMPLEMENTED_CURRENT / BASIC |
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Frozen production input alignment | IMPLEMENTED_CURRENT / BASIC |

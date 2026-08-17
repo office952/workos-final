@@ -6,6 +6,12 @@ const GROUPS = [
     title: "Comercial",
     items: [
       {
+        to: "/admin/seller",
+        label: "Date firmă",
+        description:
+          "Identitatea vânzătorului pe oferte noi. Nu este catalogul de clienți și nu este Settings general.",
+      },
+      {
         to: "/admin/customers",
         label: "Clienți",
         description:

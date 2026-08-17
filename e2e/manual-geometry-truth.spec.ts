@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("accepts confirmed manual geometry and shows owner-confirmed 60 mm EIC", async ({
   page,
@@ -24,6 +25,7 @@ test("accepts confirmed manual geometry and shows owner-confirmed 60 mm EIC", as
   });
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(page.getByText("Suprafață confirmată: 250000 mm² (introdusă de operator)")).toBeVisible();
   await expect(page.getByText("Perimetru confirmat: 12500 mm (introdus de operator)")).toBeVisible();
   await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
@@ -56,6 +58,8 @@ test("keeps 30 mm aluminium profile cost unconfirmed", async ({ page }) => {
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
+  await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(page.locator(".eic-section").getByText("Parțial", { exact: true })).toBeVisible();
   await expect(
     page.getByText(

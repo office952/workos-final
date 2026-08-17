@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("resources admin inspects material family specification and cost", async ({
   page,
@@ -265,11 +266,11 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(
     page.getByText("Total cost intern estimat: 382,50 EUR"),
   ).toBeVisible();
   await expect(page.getByText("Plexiglas 3 mm opal: 0,25 m²", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Preț client" })).toBeVisible();
   await expect(page.getByText("Preț final client: 624,82 EUR")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-product-regression.png",

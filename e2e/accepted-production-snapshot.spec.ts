@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 async function confirmCanonicalLetters(page: import("@playwright/test").Page) {
   await page.goto("/products");
@@ -16,6 +17,7 @@ async function confirmCanonicalLetters(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 test("confirmed LETTERS product can freeze an accepted production snapshot", async ({
@@ -49,6 +51,7 @@ test("confirmed LETTERS product can freeze an accepted production snapshot", asy
     fullPage: true,
   });
 
+  await revealSecondaryProductSurfaces(page);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(page.getByRole("heading", { name: "Deja acceptat pentru producție" })).toBeVisible();
   await page.locator(".production-snapshot details.snapshot-details").evaluate((el) => {

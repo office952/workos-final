@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
@@ -20,6 +21,7 @@ async function confirmLetters(page: Page) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 function taskCard(page: Page, processLabel: string, scopeLabel: string) {

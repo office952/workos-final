@@ -10,8 +10,12 @@ import {
   freezeCustomerIdentity,
   type FrozenCustomerIdentity,
 } from "../customers/identity.js";
+import {
+  freezeSellerIdentity,
+  type FrozenSellerIdentity,
+} from "../seller/identity.js";
 
-export type { FrozenCustomerIdentity };
+export type { FrozenCustomerIdentity, FrozenSellerIdentity };
 import type { ProductAggregate, ProductTruth } from "../product/types.js";
 import type { EicResult } from "../resources/eic.js";
 import type { CommercialPriceProjection } from "./price.js";
@@ -24,6 +28,7 @@ export const QUOTE_SNAPSHOT_ERRORS = [
   "incomplete_offer",
   "unavailable_offer",
   "invalid_customer",
+  "invalid_seller",
 ] as const;
 export type QuoteSnapshotError = (typeof QUOTE_SNAPSHOT_ERRORS)[number];
 
@@ -67,6 +72,7 @@ export type QuoteSnapshot = {
   commercial: FrozenCommercialOffer;
   productionInput: FrozenProductionInput;
   customer?: FrozenCustomerIdentity;
+  seller?: FrozenSellerIdentity;
 };
 
 export type QuoteSnapshotResult =
@@ -77,6 +83,7 @@ const INCOMPLETE_REASON =
   "Oferta nu poate fi înghețată până când costul intern și prețul client nu sunt complete.";
 const UNAVAILABLE_REASON = "Prețul client nu este disponibil pentru înghețare.";
 const INVALID_CUSTOMER_REASON = "Identitatea clientului nu este validă pentru înghețare.";
+const INVALID_SELLER_REASON = "Identitatea vânzătorului nu este validă pentru înghețare.";
 
 export function freezeQuoteSnapshot(
   truth: ProductTruth,
@@ -84,7 +91,11 @@ export function freezeQuoteSnapshot(
   composition: ProductProcessComposition,
   eic: EicResult,
   commercial: CommercialPriceProjection,
-  options?: { createdAt?: string; customer?: FrozenCustomerIdentity },
+  options?: {
+    createdAt?: string;
+    customer?: FrozenCustomerIdentity;
+    seller?: FrozenSellerIdentity;
+  },
 ): QuoteSnapshotResult {
   if (eic.completeness !== "COMPLETE" || commercial.completeness !== "COMPLETE") {
     return {
@@ -118,6 +129,14 @@ export function freezeQuoteSnapshot(
       ok: false,
       error: "invalid_customer",
       reasons: [INVALID_CUSTOMER_REASON],
+    };
+  }
+  const seller = options?.seller ? freezeSellerIdentity(options.seller) : undefined;
+  if (seller === null) {
+    return {
+      ok: false,
+      error: "invalid_seller",
+      reasons: [INVALID_SELLER_REASON],
     };
   }
 
@@ -155,6 +174,7 @@ export function freezeQuoteSnapshot(
       completeness: "COMPLETE" as const,
     },
     ...(customer ? { customer } : {}),
+    ...(seller ? { seller } : {}),
   };
   const contentHash = sha256Hex(stableStringify(hashedContent));
   return {
@@ -177,6 +197,8 @@ export function quoteSnapshotErrorLabel(error: QuoteSnapshotError): string {
       return UNAVAILABLE_REASON;
     case "invalid_customer":
       return INVALID_CUSTOMER_REASON;
+    case "invalid_seller":
+      return INVALID_SELLER_REASON;
     default: {
       const _exhaustive: never = error;
       return _exhaustive;

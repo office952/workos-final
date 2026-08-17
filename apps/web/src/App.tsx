@@ -6,6 +6,7 @@ import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
 import { GovernancePage } from "./GovernancePage";
 import { JobsOverviewPage } from "./JobsOverviewPage";
 import { CustomerAdminPage } from "./CustomerAdminPage";
+import { SellerAdminPage } from "./SellerAdminPage";
 import { PeopleAdminPage } from "./PeopleAdminPage";
 import { ProductCatalogPage } from "./ProductCatalogPage";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
@@ -42,6 +43,7 @@ export function App() {
         <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
         <Route path="/admin/people" element={<PeopleAdminPage />} />
         <Route path="/admin/customers" element={<CustomerAdminPage />} />
+        <Route path="/admin/seller" element={<SellerAdminPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>

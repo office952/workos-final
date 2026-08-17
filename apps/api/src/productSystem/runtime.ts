@@ -7,6 +7,9 @@ import {
   type InventoryStockProjection,
   type Customer,
   type CustomerMutationResult,
+  type SellerMutationResult,
+  type SellerProfile,
+  type SellerProfileInput,
   type Person,
   type PersonMutationResult,
   projectExecutionPlanView,
@@ -46,6 +49,7 @@ import {
   persistRenamedCustomer,
   persistRetiredCustomer,
 } from "../customers/store.js";
+import { getSellerProfile, persistUpdatedSeller } from "../seller/store.js";
 import {
   listPeople,
   persistCreatedPerson,
@@ -126,6 +130,8 @@ export type ProductSystemRuntime = {
   listPeople(): Person[];
   listCustomers(): Customer[];
   getCustomer(customerId: string): Customer | null;
+  getSellerProfile(): SellerProfile;
+  updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
   listJobOverview(): JobOverviewProjection;
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
@@ -214,6 +220,12 @@ export function createProductSystemRuntime(
     },
     getCustomer(customerId) {
       return getCustomer(db, customerId);
+    },
+    getSellerProfile() {
+      return getSellerProfile(db);
+    },
+    updateSellerProfile(input) {
+      return persistUpdatedSeller(db, input);
     },
     listJobOverview() {
       const people = listPeople(db);

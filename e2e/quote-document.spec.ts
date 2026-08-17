@@ -2,6 +2,7 @@ import { copyFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const lettersName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -18,6 +19,7 @@ async function confirmLetters(page: Page) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 async function confirmAcm(page: Page) {
@@ -32,13 +34,14 @@ async function confirmAcm(page: Page) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 async function freezeAndDownload(page: Page, evidenceName: string, customerName: string) {
   await selectOrCreateCustomer(page, customerName);
   const quote = page.locator(".quote-section");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
-  await expect(quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ })).toBeVisible();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
+  await expect(quote.getByRole("heading", { name: /Ofertă creată|Ofertă acceptată/ })).toBeVisible();
   const downloadLink = quote.getByRole("link", { name: "Descarcă oferta PDF" });
   await expect(downloadLink).toBeVisible();
   await quote.screenshot({
@@ -71,7 +74,7 @@ test("keeps the PDF download action usable at 390px", async ({ page }) => {
   await confirmLetters(page);
   await selectOrCreateCustomer(page, "Client Demo LETTERS");
   const quote = page.locator(".quote-section");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(quote.getByRole("link", { name: "Descarcă oferta PDF" })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > 390);
   expect(overflow).toBe(false);

@@ -2,6 +2,7 @@ import { copyFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { createCustomer, selectOrCreateCustomer } from "./helpers/customers";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { uniqueJobInscription } from "./helpers/jobs";
 
 const lettersName =
@@ -20,6 +21,7 @@ async function confirmLetters(page: Page, inscription: string) {
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
 }
 
 test("admin can create a customer without building CRM", async ({ page }) => {
@@ -48,10 +50,11 @@ test("LETTERS quote freezes customer into PDF, order and Lucrări", async ({ pag
     path: "docs/worklog/screenshots/letters-customer-selected.png",
   });
   const quote = page.locator(".quote-section");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
-  await expect(quote.getByRole("heading", { name: /Ofertă salvată|Ofertă acceptată/ })).toBeVisible();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
+  await expect(quote.getByRole("heading", { name: /Ofertă creată|Ofertă acceptată/ })).toBeVisible();
   await expect(quote.getByText("Client: Client Demo LETTERS")).toBeVisible();
   await expect(quote.getByText("Preț final: 624,82 EUR")).toBeVisible();
+  await revealSecondaryProductSurfaces(page);
   await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
   await quote.screenshot({
     path: "docs/worklog/screenshots/letters-quote-customer-frozen.png",
@@ -61,9 +64,10 @@ test("LETTERS quote freezes customer into PDF, order and Lucrări", async ({ pag
     quote.getByRole("link", { name: "Descarcă oferta PDF" }).click(),
   ]);
   copyFileSync(await download.path(), "docs/worklog/screenshots/letters-quote-customer.pdf");
-  if ((await quote.getByRole("button", { name: "Acceptă oferta" }).count()) > 0) {
-    await quote.getByRole("button", { name: "Acceptă oferta" }).click();
+  if ((await quote.getByRole("button", { name: "Marchează acceptată" }).count()) > 0) {
+    await quote.getByRole("button", { name: "Marchează acceptată" }).click();
   }
+  await expect(quote.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   if ((await quote.getByRole("button", { name: "Creează comanda" }).count()) > 0) {
     await quote.getByRole("button", { name: "Creează comanda" }).click();
   }
@@ -90,7 +94,7 @@ test("ACM quote freezes a different customer", async ({ page }) => {
   await expect(page.getByText("Preț final client: 118,66 EUR")).toBeVisible();
   await selectOrCreateCustomer(page, "Client Demo ACM");
   const quote = page.locator(".quote-section");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(quote.getByText("Client: Client Demo ACM")).toBeVisible();
   await expect(quote.getByText("Preț final: 118,66 EUR")).toBeVisible();
   const [download] = await Promise.all([
@@ -107,7 +111,7 @@ test("renaming a customer does not rewrite a frozen quote", async ({ page, reque
   await confirmLetters(page, "RENAME");
   await selectOrCreateCustomer(page, "SC Exemplu SRL");
   const quote = page.locator(".quote-section");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(quote.getByText("Client: SC Exemplu SRL")).toBeVisible();
   const listed = await request.get("/api/customers");
   const customers = ((await listed.json()) as { customers: Array<{ customerId: string; displayName: string }> })
@@ -185,7 +189,7 @@ test("customer selector stays usable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await selectOrCreateCustomer(page, "Client Demo LETTERS");
   const quote = page.locator(".quote-section");
-  await quote.getByRole("button", { name: "Îngheață oferta" }).click();
+  await quote.getByRole("button", { name: "Creează oferta" }).click();
   await expect(quote.getByText("Client: Client Demo LETTERS")).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > 390);
   expect(overflow).toBe(false);
