@@ -13,8 +13,8 @@ Do not treat the old phase list as the active plan.
 2. Quote registry / Oferte — DONE / IMPLEMENTED_CURRENT (projection + continue)
 3. Cereri de ofertă — DONE / IMPLEMENTED_CURRENT / BASIC (CommercialRequest + Request↔Quote link)
 4. Client Workspace V1 — DONE / IMPLEMENTED_CURRENT / BASIC
-5. People + operational SK_* truth
-6. Auth ↔ Person + Claim-on-Start
+5. People + operational SK_* truth — DONE / IMPLEMENTED_CURRENT / BASIC
+6. Operator Identity + Claim-on-Start — DONE / IMPLEMENTED_CURRENT / BASIC
 7. Later, as re-prioritized: Documents, Pontaj, salary/internal HR, ACM expansion, LETTERS polish
 
 The previous “LETTERS closure then ACM” sequence after Oferte is stale relative to the accepted Legacy Commercial / Client / People audit. Historical product milestones stay below. Do not treat that old product-polish list as the active office sequence.
@@ -89,7 +89,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Persisted ExecutionPlan / ExecutionTasks | IMPLEMENTED_CURRENT |
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
 | Completion evidence | IMPLEMENTED_CURRENT / BASIC |
-| People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
+| People operational identity + skills + eligibility hardening | IMPLEMENTED_CURRENT / BASIC |
+| Operator Identity (PIN + session) + Claim-on-Start | IMPLEMENTED_CURRENT / BASIC |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
 | Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |

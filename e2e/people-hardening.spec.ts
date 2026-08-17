@@ -93,6 +93,7 @@ test("removed skill stays removed and planned start revalidates availability", a
   if (!startPerson || !planId) {
     return;
   }
+  await identifyOperator(request, startPerson.personId);
 
   await page.goto(`/admin/people/${encodeURIComponent(startPerson.personId)}`);
   await expect(page.getByRole("heading", { name: startName })).toBeVisible();
@@ -153,4 +154,17 @@ async function readBackCnc(request: APIRequestContext, planId: string) {
       (item) => item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
     ) ?? null
   );
+}
+
+async function identifyOperator(request: APIRequestContext, personId: string) {
+  const pin = "246810";
+  const configured = await request.put(
+    `/api/people/${encodeURIComponent(personId)}/operator-pin`,
+    { data: { pin, confirmPin: pin } },
+  );
+  expect(configured.status()).toBe(200);
+  const identified = await request.post("/api/operator-session", {
+    data: { personId, pin },
+  });
+  expect(identified.status()).toBe(200);
 }

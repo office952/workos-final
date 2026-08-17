@@ -325,7 +325,40 @@ function ExecutionTaskCard({
             </button>
           </>
         ) : null}
-        {task.canStart ? (
+        {task.operatorRelation === "identify_required" ? (
+          <Notice compact>
+            <p>Identifică-te pentru a porni.</p>
+          </Notice>
+        ) : null}
+        {task.operatorRelation === "missing_provider" ? (
+          <Notice compact>
+            <p>Alocă mai întâi echipamentul sau zona. Fără furnizor taskul nu poate fi revendicat.</p>
+          </Notice>
+        ) : null}
+        {task.operatorRelation === "unavailable" ? (
+          <Notice compact>
+            <p>Ești marcat indisponibil temporar. Nu poți revendica taskuri noi.</p>
+          </Notice>
+        ) : null}
+        {task.operatorRelation === "not_eligible" ? (
+          <Notice compact>
+            <p>Nu ești eligibil acum pentru această operație.</p>
+            <p>
+              <Link to="/admin/people">Deschide oamenii</Link>
+            </p>
+          </Notice>
+        ) : null}
+        {task.operatorRelation === "reserved_other" && task.assignedExecutor ? (
+          <Notice compact>
+            <p>Taskul este rezervat pentru {task.assignedExecutor.label}.</p>
+          </Notice>
+        ) : null}
+        {task.operatorRelation === "owned_by_other" && task.startedByLabel ? (
+          <Notice compact>
+            <p>Taskul a fost pornit deja de {task.startedByLabel}.</p>
+          </Notice>
+        ) : null}
+        {task.canClaimStart || task.canStart ? (
           <button type="button" disabled={busy} onClick={() => onStartTask(task.taskId)}>
             Pornește
           </button>
@@ -408,7 +441,9 @@ function ExecutionTaskCard({
       ) : null}
       {task.status === "PLANNED" &&
       !task.assignedExecutor &&
-      task.eligibleExecutors.length === 0 ? (
+      task.eligibleExecutors.length === 0 &&
+      task.operatorRelation !== "identify_required" &&
+      task.operatorRelation !== "not_eligible" ? (
         <Notice compact>
           <p>Nicio persoană eligibilă acum pentru această operație.</p>
           <p>
@@ -418,8 +453,8 @@ function ExecutionTaskCard({
       ) : null}
       {task.status === "PLANNED" &&
       !task.assignedExecutor &&
-      task.eligibleExecutors.length > 0 ? (
-        <p className="task-block-reason">Executant nealocat</p>
+      task.operatorRelation === "can_claim" ? (
+        <p className="task-block-reason">Pornește pentru a deveni executant</p>
       ) : null}
       {task.completion?.note ? <p className="task-note">Notă: {task.completion.note}</p> : null}
       <details className="task-details">

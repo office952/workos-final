@@ -3,6 +3,7 @@ import {
   assignProviderToTask,
   assignedExecutorFromRow,
   assignedProviderFromRow,
+  claimAndStartExecutionTask,
   completeExecutionTask,
   completionFromRow,
   startExecutionTask,
@@ -299,14 +300,28 @@ export function persistTaskStart(
   );
 }
 
+export function persistClaimAndStart(
+  db: SqliteDatabase,
+  taskId: string,
+  personId: string,
+  startedAt: string,
+  people: readonly Person[],
+  eligibility: PeopleEligibilityContext | null = null,
+): TaskMutationResult {
+  return applyMutation(db, taskId, (record) =>
+    claimAndStartExecutionTask(record, taskId, personId, startedAt, people, eligibility),
+  );
+}
+
 export function persistTaskComplete(
   db: SqliteDatabase,
   taskId: string,
   completedAt: string,
   input: TaskCompletionInput = {},
+  actorPersonId: string | null = null,
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    completeExecutionTask(record, taskId, completedAt, input),
+    completeExecutionTask(record, taskId, completedAt, input, actorPersonId),
   );
 }
 

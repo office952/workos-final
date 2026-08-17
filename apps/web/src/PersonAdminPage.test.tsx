@@ -3,6 +3,10 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { PersonAdminPage } from "./PersonAdminPage";
 
+vi.mock("./operatorSessionApi", () => ({
+  setOperatorPin: vi.fn(),
+}));
+
 vi.mock("./peopleApi", () => ({
   fetchPerson: () =>
     Promise.resolve({
@@ -20,6 +24,7 @@ vi.mock("./peopleApi", () => ({
         availabilityUpdatedAt: "2026-08-17T12:00:00.000Z",
         retiredAt: null,
       },
+      operatorPinConfigured: false,
       item: {
         personId: "per:test",
         displayName: "Mihai Test",
@@ -75,6 +80,8 @@ describe("PersonAdminPage", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByRole("heading", { name: "Mihai Test" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "PIN operator" })).toBeInTheDocument();
+    expect(screen.getByText("Neconfigurat")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Disponibilitate operațională" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Skill-uri" })).toBeInTheDocument();
     expect(screen.getByText("CNC")).toBeInTheDocument();

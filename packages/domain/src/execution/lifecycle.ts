@@ -33,6 +33,8 @@ export const TASK_MUTATION_ERRORS = [
   "retired_person",
   "unavailable_person",
   "ineligible_executor",
+  "already_started_by_other",
+  "wrong_executor",
   "dependencies_incomplete",
   "invalid_transition",
   "invalid_quantity",
@@ -162,6 +164,43 @@ export function startExecutionTask(
   if (task.status !== "PLANNED") {
     return { ok: false, error: "invalid_transition" };
   }
+  if (!task.assignedExecutor) {
+    return { ok: false, error: "missing_executor" };
+  }
+  return claimAndStartExecutionTask(
+    record,
+    taskId,
+    task.assignedExecutor.id,
+    startedAt,
+    people,
+    eligibility,
+  );
+}
+
+export function claimAndStartExecutionTask(
+  record: ExecutionPlanRecord,
+  taskId: string,
+  personId: string,
+  startedAt: string,
+  people: readonly Person[] = [],
+  eligibility: PeopleEligibilityContext | null = null,
+): TaskMutationResult {
+  const task = findTask(record, taskId);
+  if (!task) {
+    return { ok: false, error: "not_found" };
+  }
+  if (task.status === "IN_PROGRESS") {
+    if (task.assignedExecutor?.id === personId) {
+      return { ok: true, record, alreadyApplied: true };
+    }
+    return { ok: false, error: "already_started_by_other" };
+  }
+  if (task.status !== "PLANNED") {
+    return { ok: false, error: "invalid_transition" };
+  }
+  if (task.assignedExecutor && task.assignedExecutor.id !== personId) {
+    return { ok: false, error: "already_started_by_other" };
+  }
   if (taskRequiresProvider(task)) {
     if (!task.assignedProvider) {
       return { ok: false, error: "missing_assignment" };
@@ -172,12 +211,18 @@ export function startExecutionTask(
       return { ok: false, error: "provider_unavailable" };
     }
   }
-  if (!task.assignedExecutor) {
-    return { ok: false, error: "missing_executor" };
+  const person = findPerson(people, personId);
+  if (!person) {
+    return { ok: false, error: "unknown_person" };
   }
-  const live = findPerson(people, task.assignedExecutor.id);
+  if (person.status !== "ACTIVE") {
+    return { ok: false, error: "retired_person" };
+  }
+  if (person.availability === "TEMPORARILY_UNAVAILABLE") {
+    return { ok: false, error: "unavailable_person" };
+  }
   const startBlock = plannedExecutorStartError(
-    task.assignedExecutor.id,
+    person.personId,
     task.requiredCapabilityId as ProductionCapabilityClassId,
     people,
     eligibility,
@@ -197,8 +242,8 @@ export function startExecutionTask(
       status: "IN_PROGRESS",
       startedAt,
       assignedExecutor: {
-        id: task.assignedExecutor.id,
-        label: live?.displayName ?? task.assignedExecutor.label,
+        id: person.personId,
+        label: person.displayName,
       },
     }),
   };
@@ -209,6 +254,7 @@ export function completeExecutionTask(
   taskId: string,
   completedAt: string,
   input: TaskCompletionInput = {},
+  actorPersonId: string | null = null,
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -219,6 +265,11 @@ export function completeExecutionTask(
   }
   if (task.status !== "IN_PROGRESS") {
     return { ok: false, error: "invalid_transition" };
+  }
+  if (actorPersonId !== null) {
+    if (!task.assignedExecutor || task.assignedExecutor.id !== actorPersonId) {
+      return { ok: false, error: "wrong_executor" };
+    }
   }
   const completion = buildCompletionEvidence(task, input);
   if (!completion.ok) {

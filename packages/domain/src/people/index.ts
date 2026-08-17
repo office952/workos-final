@@ -83,3 +83,20 @@ export {
   type PersonRegistryItem,
   type PersonSkillView,
 } from "./projection.js";
+export {
+  OPERATOR_PIN_MAX_LENGTH,
+  OPERATOR_PIN_MIN_LENGTH,
+  OPERATOR_PIN_MUTATION_ERRORS,
+  OPERATOR_PIN_RECOMMENDED_LENGTH,
+  OPERATOR_SESSION_ERRORS,
+  OPERATOR_SESSION_TTL_MS,
+  diagnoseOperatorSession,
+  generateOperatorSessionId,
+  isValidOperatorPin,
+  sessionExpiresAt,
+  type OperatorCandidate,
+  type OperatorCredentialRecord,
+  type OperatorPinMutationError,
+  type OperatorSessionError,
+  type OperatorSessionRecord,
+} from "./operatorIdentity.js";

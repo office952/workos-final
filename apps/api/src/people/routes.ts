@@ -81,7 +81,11 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     }
     const registry = runtime.listPeopleRegistry();
     const item = registry.people.find((entry) => entry.personId === person.personId);
-    return c.json({ person, item: item ?? null });
+    return c.json({
+      person,
+      item: item ?? null,
+      operatorPinConfigured: runtime.personHasOperatorPin(person.personId),
+    });
   });
 
   app.post("/api/people", async (c) => {

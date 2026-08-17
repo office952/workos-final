@@ -5,6 +5,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import { CANONICAL_PRODUCT_CODE, MCH_CNC_4020_ID } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
+import {
+  completeTaskAs,
+  sessionCookieViaHttp,
+  startTaskAs,
+  withCookie,
+} from "./operator-test-helpers.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -69,14 +75,21 @@ async function createBackCncPlan(app: ReturnType<typeof createApp>) {
   return { planId: view.plan.planId as string, backCnc };
 }
 
-async function readTask(app: ReturnType<typeof createApp>, planId: string, taskId: unknown) {
-  const body = await readBody(await app.request(`/api/execution-plans/${planId}`));
+async function readTask(
+  app: ReturnType<typeof createApp>,
+  planId: string,
+  taskId: unknown,
+  cookie?: string,
+) {
+  const body = await readBody(
+    await app.request(`/api/execution-plans/${planId}`, withCookie(undefined, cookie ?? "")),
+  );
   const view = body.executionPlan as { tasks: Array<JsonObject> };
   return view.tasks.find((item) => item.taskId === taskId) as JsonObject;
 }
 
 describe("planned start current eligibility API", () => {
-  it("blocks start when the assigned executor becomes unavailable, then restores", async () => {
+  it("blocks claim-and-start when the operator becomes unavailable, then restores", async () => {
     const { app, runtime } = createIsolatedApp();
     const { planId, backCnc } = await createBackCncPlan(app);
     const florin = runtime.listPeople().find((item) => item.displayName === "Florin CNC");
@@ -84,6 +97,7 @@ describe("planned start current eligibility API", () => {
     if (!florin) {
       return;
     }
+    const cookie = await sessionCookieViaHttp(app, florin.personId);
 
     expect(
       (
@@ -94,19 +108,9 @@ describe("planned start current eligibility API", () => {
         })
       ).status,
     ).toBe(200);
-    expect(
-      (
-        await app.request(`/api/execution-tasks/${backCnc.taskId}/executor`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ personId: florin.personId }),
-        })
-      ).status,
-    ).toBe(200);
-
-    const assigned = await readTask(app, planId, backCnc.taskId);
-    expect((assigned.assignedExecutor as JsonObject).label).toBe("Florin CNC");
-    expect(assigned.canStart).toBe(true);
+    const claimable = await readTask(app, planId, backCnc.taskId, cookie);
+    expect(claimable.assignedExecutor).toBeNull();
+    expect(claimable.canClaimStart).toBe(true);
 
     await app.request(`/api/people/${florin.personId}`, {
       method: "PATCH",
@@ -116,14 +120,12 @@ describe("planned start current eligibility API", () => {
         unavailableReason: "Concediu",
       }),
     });
-    const blocked = await readTask(app, planId, backCnc.taskId);
-    expect((blocked.assignedExecutor as JsonObject).label).toBe("Florin CNC");
+    const blocked = await readTask(app, planId, backCnc.taskId, cookie);
+    expect(blocked.assignedExecutor).toBeNull();
     expect(blocked.status).toBe("PLANNED");
     expect(blocked.canStart).toBe(false);
-    expect(blocked.startBlockReason).toBe("unavailable_person");
-    const startBlocked = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    expect(blocked.operatorRelation).toBe("unavailable");
+    const startBlocked = await startTaskAs(app, String(backCnc.taskId), cookie);
     expect(startBlocked.status).toBe(422);
     expect((await readBody(startBlocked)).error).toBe("unavailable_person");
 
@@ -132,16 +134,14 @@ describe("planned start current eligibility API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ availability: "AVAILABLE" }),
     });
-    const restored = await readTask(app, planId, backCnc.taskId);
-    expect(restored.canStart).toBe(true);
+    const restored = await readTask(app, planId, backCnc.taskId, cookie);
+    expect(restored.canClaimStart).toBe(true);
     expect(restored.startBlockReason).toBeNull();
-    expect((await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, { method: "POST" })).status).toBe(
-      200,
-    );
+    expect((await startTaskAs(app, String(backCnc.taskId), cookie)).status).toBe(200);
     runtime.close();
   });
 
-  it("blocks start when the assigned executor loses the required skill", async () => {
+  it("blocks claim-and-start when the operator loses the required skill", async () => {
     const { app, runtime } = createIsolatedApp();
     const { planId, backCnc } = await createBackCncPlan(app);
     const andrei = runtime.listPeople().find((item) => item.displayName === "Andrei Goghi");
@@ -150,6 +150,7 @@ describe("planned start current eligibility API", () => {
     if (!andrei || !cnc) {
       return;
     }
+    const cookie = await sessionCookieViaHttp(app, andrei.personId);
 
     expect(
       (
@@ -160,24 +161,12 @@ describe("planned start current eligibility API", () => {
         })
       ).status,
     ).toBe(200);
-    expect(
-      (
-        await app.request(`/api/execution-tasks/${backCnc.taskId}/executor`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ personId: andrei.personId }),
-        })
-      ).status,
-    ).toBe(200);
-
     expect(runtime.retirePersonSkill(andrei.personId, cnc.skillId).ok).toBe(true);
-    const blocked = await readTask(app, planId, backCnc.taskId);
-    expect((blocked.assignedExecutor as JsonObject).label).toBe("Andrei Goghi");
+    const blocked = await readTask(app, planId, backCnc.taskId, cookie);
+    expect(blocked.assignedExecutor).toBeNull();
     expect(blocked.canStart).toBe(false);
-    expect(blocked.startBlockReason).toBe("ineligible_executor");
-    const startBlocked = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    expect(blocked.operatorRelation).toBe("not_eligible");
+    const startBlocked = await startTaskAs(app, String(backCnc.taskId), cookie);
     expect(startBlocked.status).toBe(422);
     expect((await readBody(startBlocked)).error).toBe("ineligible_executor");
     runtime.close();
@@ -191,19 +180,13 @@ describe("planned start current eligibility API", () => {
     if (!florin) {
       return;
     }
+    const cookie = await sessionCookieViaHttp(app, florin.personId);
     await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
-    await app.request(`/api/execution-tasks/${backCnc.taskId}/executor`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ personId: florin.personId }),
-    });
-    const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    const started = await startTaskAs(app, String(backCnc.taskId), cookie);
     expect(started.status).toBe(200);
     const startedTask = await readTask(app, planId, backCnc.taskId);
     const startedAt = startedTask.startedAt;
@@ -216,16 +199,16 @@ describe("planned start current eligibility API", () => {
         unavailableReason: "Concediu",
       }),
     });
-    const after = await readTask(app, planId, backCnc.taskId);
+    const after = await readTask(app, planId, backCnc.taskId, cookie);
     expect(after.status).toBe("IN_PROGRESS");
     expect((after.assignedExecutor as JsonObject).id).toBe(florin.personId);
     expect(after.startedAt).toBe(startedAt);
     expect(after.canComplete).toBe(true);
 
-    const completed = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: after.measurableQuantity ? (after.measurableQuantity as JsonObject).value : undefined }),
+    const completed = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: after.measurableQuantity
+        ? (after.measurableQuantity as JsonObject).value
+        : undefined,
     });
     expect(completed.status).toBe(200);
     runtime.close();
@@ -239,23 +222,14 @@ describe("planned start current eligibility API", () => {
     if (!florin) {
       return;
     }
-    expect(
-      (
-        await app.request(`/api/execution-tasks/${backCnc.taskId}/executor`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ personId: florin.personId }),
-        })
-      ).status,
-    ).toBe(200);
-    const task = await readTask(app, planId, backCnc.taskId);
+    const cookie = await sessionCookieViaHttp(app, florin.personId);
+    const task = await readTask(app, planId, backCnc.taskId, cookie);
     expect(task.requiresProvider).toBe(true);
-    expect(task.canStart).toBe(false);
-    const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    expect(task.canClaimStart).toBe(false);
+    const started = await startTaskAs(app, String(backCnc.taskId), cookie);
     expect(started.status).toBe(422);
     expect((await readBody(started)).error).toBe("missing_assignment");
+    expect((await readTask(app, planId, backCnc.taskId, cookie)).assignedExecutor).toBeNull();
     runtime.close();
   });
 });

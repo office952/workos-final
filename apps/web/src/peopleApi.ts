@@ -36,7 +36,11 @@ export async function fetchPeopleRegistry(): Promise<PeopleRegistryProjection> {
 
 export async function fetchPerson(
   personId: string,
-): Promise<{ person: Person; item: PersonRegistryItem | null } | null> {
+): Promise<{
+  person: Person;
+  item: PersonRegistryItem | null;
+  operatorPinConfigured: boolean;
+} | null> {
   const response = await fetch(`${baseUrl}/api/people/${encodeURIComponent(personId)}`);
   if (response.status === 404) {
     return null;
@@ -44,7 +48,16 @@ export async function fetchPerson(
   if (!response.ok) {
     throw new Error("person_unavailable");
   }
-  return readJson(response);
+  const body = await readJson<{
+    person: Person;
+    item: PersonRegistryItem | null;
+    operatorPinConfigured?: boolean;
+  }>(response);
+  return {
+    person: body.person,
+    item: body.item,
+    operatorPinConfigured: Boolean(body.operatorPinConfigured),
+  };
 }
 
 export async function fetchSkills(): Promise<Skill[]> {

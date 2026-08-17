@@ -28,7 +28,9 @@ import {
   type ProductDefinition,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
+import { getCookie } from "hono/cookie";
 import type { ProductSystemRuntime } from "./productSystem/runtime.js";
+import { OPERATOR_SESSION_COOKIE } from "./operator/store.js";
 import { renderQuoteDocumentPdf } from "./quoteDocument/renderQuoteDocumentPdf.js";
 
 
@@ -529,7 +531,14 @@ export function registerProductRoutes(
     if (!record) {
       return c.json({ error: "not_found" }, 404);
     }
-    return c.json({ executionPlan: projectPlanView(runtime, record) });
+    const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
+    return c.json({
+      executionPlan: projectPlanView(
+        runtime,
+        record,
+        session.ok ? session.person.personId : null,
+      ),
+    });
   });
 
   app.post("/api/execution-tasks/:taskId/provider", async (c) => {
@@ -541,6 +550,7 @@ export function registerProductRoutes(
       c,
       runtime,
       runtime.assignExecutionTaskProvider(c.req.param("taskId"), providerId),
+      { taskId: c.req.param("taskId") },
     );
   });
 
@@ -553,22 +563,39 @@ export function registerProductRoutes(
       c,
       runtime,
       runtime.assignExecutionTaskExecutor(c.req.param("taskId"), personId),
+      { taskId: c.req.param("taskId") },
     );
   });
 
   app.post("/api/execution-tasks/:taskId/start", (c) => {
-    return respondTaskMutation(c, runtime, runtime.startExecutionTask(c.req.param("taskId")));
+    const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
+    if (!session.ok) {
+      return c.json({ error: "invalid_session" }, 401);
+    }
+    const taskId = c.req.param("taskId");
+    return respondTaskMutation(
+      c,
+      runtime,
+      runtime.claimAndStartExecutionTask(taskId, session.person.personId),
+      { taskId, operatorId: session.person.personId },
+    );
   });
 
   app.post("/api/execution-tasks/:taskId/complete", async (c) => {
+    const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
+    if (!session.ok) {
+      return c.json({ error: "invalid_session" }, 401);
+    }
     const input = readCompletionInput(await c.req.json().catch(() => ({})));
     if (!input) {
       return c.json({ error: "invalid_payload" }, 400);
     }
+    const taskId = c.req.param("taskId");
     return respondTaskMutation(
       c,
       runtime,
-      runtime.completeExecutionTask(c.req.param("taskId"), input),
+      runtime.completeExecutionTask(taskId, input, session.person.personId),
+      { taskId, operatorId: session.person.personId },
     );
   });
 }
@@ -721,12 +748,14 @@ function mutationHttpStatus(error: TaskMutationError): 404 | 409 | 422 {
     case "retired_person":
     case "unavailable_person":
     case "ineligible_executor":
+    case "wrong_executor":
     case "invalid_quantity":
     case "invalid_unit":
     case "invalid_resource":
     case "invalid_note":
       return 422;
     case "reassignment_locked":
+    case "already_started_by_other":
     case "dependencies_incomplete":
     case "invalid_transition":
       return 409;
@@ -749,12 +778,17 @@ function readPersonId(body: unknown): string | null {
   return personId.length > 0 ? personId : null;
 }
 
-function projectPlanView(runtime: ProductSystemRuntime, record: ExecutionPlanRecord) {
+function projectPlanView(
+  runtime: ProductSystemRuntime,
+  record: ExecutionPlanRecord,
+  currentOperatorId: string | null = null,
+) {
   return projectExecutionPlanView(
     record,
     runtime.listPeople(),
     runtime.readProductionSnapshot(record.plan.sourceSnapshotId),
     runtime.peopleEligibilityContext(),
+    currentOperatorId,
   );
 }
 
@@ -762,12 +796,32 @@ function respondTaskMutation(
   c: { json: (body: unknown, status?: 200 | 404 | 409 | 422) => Response },
   runtime: ProductSystemRuntime,
   result: TaskMutationResult,
+  options: { taskId?: string; operatorId?: string | null } = {},
 ) {
+  const operatorId = options.operatorId ?? null;
   if (!result.ok) {
-    return c.json({ error: result.error }, mutationHttpStatus(result.error));
+    const body: Record<string, unknown> = { error: result.error };
+    if (
+      (result.error === "already_started_by_other" || result.error === "wrong_executor") &&
+      options.taskId
+    ) {
+      const plan = getPlanForTask(runtime, options.taskId);
+      const task = plan?.tasks.find((item) => item.taskId === options.taskId);
+      if (task?.assignedExecutor) {
+        body.startedBy = {
+          personId: task.assignedExecutor.id,
+          displayName: task.assignedExecutor.label,
+        };
+      }
+    }
+    return c.json(body, mutationHttpStatus(result.error));
   }
   return c.json({
     alreadyApplied: result.alreadyApplied,
-    executionPlan: projectPlanView(runtime, result.record),
+    executionPlan: projectPlanView(runtime, result.record, operatorId),
   });
+}
+
+function getPlanForTask(runtime: ProductSystemRuntime, taskId: string): ExecutionPlanRecord | null {
+  return runtime.readExecutionPlanByTaskId(taskId);
 }

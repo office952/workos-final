@@ -489,7 +489,9 @@ export async function createOrderSnapshot(
 export async function readExecutionPlanById(
   planId: string,
 ): Promise<ExecutionPlanView | null> {
-  const response = await fetch(`${baseUrl}/api/execution-plans/${planId}`);
+  const response = await fetch(`${baseUrl}/api/execution-plans/${planId}`, {
+    credentials: "include",
+  });
   if (response.status === 404) {
     return null;
   }
@@ -541,6 +543,7 @@ export async function createExecutionPlan(
 export type TaskMutationFailure = {
   ok: false;
   error: string;
+  startedBy?: { personId: string; displayName: string };
 };
 
 export async function assignExecutionTaskProvider(
@@ -586,15 +589,21 @@ async function postTaskMutation(
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
   const response = await fetch(`${baseUrl}${path}`, {
     method: "POST",
+    credentials: "include",
     headers: body ? { "content-type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   });
   const payload = await readJson<{
     executionPlan?: ExecutionPlanView;
     error?: string;
+    startedBy?: { personId: string; displayName: string };
   }>(response);
   if (!response.ok || !payload.executionPlan) {
-    return { ok: false, error: payload.error ?? "action_unavailable" };
+    return {
+      ok: false,
+      error: payload.error ?? "action_unavailable",
+      ...(payload.startedBy ? { startedBy: payload.startedBy } : {}),
+    };
   }
   return { ok: true, executionPlan: payload.executionPlan };
 }

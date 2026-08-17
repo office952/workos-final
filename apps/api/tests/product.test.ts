@@ -12,6 +12,11 @@ import {
   WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
+import {
+  completeTaskAs,
+  sessionCookieViaHttp,
+  startTaskAs,
+} from "./operator-test-helpers.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -982,9 +987,8 @@ describe("product configuration API", () => {
     ).toBe("CNC 4020");
 
     const personId = await createExecutor(app);
-    const blockedLighting = await app.request(`/api/execution-tasks/${lighting.taskId}/start`, {
-      method: "POST",
-    });
+    const cookie = await sessionCookieViaHttp(app, personId);
+    const blockedLighting = await startTaskAs(app, String(lighting.taskId), cookie);
     expect(blockedLighting.status).toBe(422);
 
     const assignLighting = await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
@@ -993,25 +997,19 @@ describe("product configuration API", () => {
       body: JSON.stringify({ providerId: "WC_LED_ASSEMBLY" }),
     });
     expect(assignLighting.status).toBe(200);
-    expect((await assignExecutor(app, lighting.taskId, personId)).status).toBe(200);
-    const lightingStartBefore = await app.request(
-      `/api/execution-tasks/${lighting.taskId}/start`,
-      { method: "POST" },
-    );
+    const lightingStartBefore = await startTaskAs(app, String(lighting.taskId), cookie);
     expect(lightingStartBefore.status).toBe(409);
     expect((await readBody(lightingStartBefore)).error).toBe("dependencies_incomplete");
 
-    const completeBeforeStart = await app.request(
-      `/api/execution-tasks/${backCnc.taskId}/complete`,
-      { method: "POST" },
+    const completeBeforeStart = await completeTaskAs(
+      app,
+      String(backCnc.taskId),
+      cookie,
     );
     expect(completeBeforeStart.status).toBe(409);
 
-    expect((await assignExecutor(app, backCnc.taskId, personId)).status).toBe(200);
     const beforeStart = Date.now();
-    const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    const started = await startTaskAs(app, String(backCnc.taskId), cookie);
     const startedBody = await readBody(started);
     const startedView = startedBody.executionPlan as {
       progressStatus: string;
@@ -1043,10 +1041,7 @@ describe("product configuration API", () => {
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
     expect(assignFace.status).toBe(200);
-    expect((await assignExecutor(app, faceCnc.taskId, personId)).status).toBe(200);
-    const startFace = await app.request(`/api/execution-tasks/${faceCnc.taskId}/start`, {
-      method: "POST",
-    });
+    const startFace = await startTaskAs(app, String(faceCnc.taskId), cookie);
     const parallel = (await readBody(startFace)).executionPlan as { tasks: Array<JsonObject> };
     expect(
       parallel.tasks.filter(
@@ -1056,10 +1051,9 @@ describe("product configuration API", () => {
       ),
     ).toHaveLength(2);
 
-    const completed = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: 12.5, note: "Executat conform fișei" }),
+    const completed = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: 12.5,
+      note: "Executat conform fișei",
     });
     const completedView = (await readBody(completed)).executionPlan as {
       tasks: Array<JsonObject>;
@@ -1080,9 +1074,7 @@ describe("product configuration API", () => {
     expect(released.canStart).toBe(true);
     expect(released.waitingFor).toEqual([]);
 
-    const restart = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    const restart = await startTaskAs(app, String(backCnc.taskId), cookie);
     expect(restart.status).toBe(409);
 
     const firstAssembly = await app.request(`/api/execution-tasks/${bond.taskId}/provider`, {
@@ -1106,7 +1098,7 @@ describe("product configuration API", () => {
     expect(JSON.stringify(assemblyView)).not.toMatch(/employeeId|plannedStart|capacity|pontaj/);
   });
 
-  it("assigns an active executor and rejects start without one", async () => {
+  it("requires a session, claims an empty task, and respects preassignment", async () => {
     const reviewed = await compileReady();
     const app = createApp();
     const accepted = await app.request(
@@ -1135,9 +1127,15 @@ describe("product configuration API", () => {
       (item) => item.processLabel === "Control calitate final",
     ) as JsonObject;
 
-    const missingProvider = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
+    const invalidSession = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
       method: "POST",
     });
+    expect(invalidSession.status).toBe(401);
+    expect((await readBody(invalidSession)).error).toBe("invalid_session");
+
+    const firstId = await createExecutor(app, "Executor unu");
+    const firstCookie = await sessionCookieViaHttp(app, firstId);
+    const missingProvider = await startTaskAs(app, String(backCnc.taskId), firstCookie);
     expect(missingProvider.status).toBe(422);
     expect((await readBody(missingProvider)).error).toBe("missing_assignment");
 
@@ -1146,12 +1144,6 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
-    const missingExecutor = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
-    expect(missingExecutor.status).toBe(422);
-    expect((await readBody(missingExecutor)).error).toBe("missing_executor");
-
     const unknown = await assignExecutor(app, backCnc.taskId, "per:unknown");
     expect(unknown.status).toBe(422);
     expect((await readBody(unknown)).error).toBe("unknown_person");
@@ -1166,8 +1158,8 @@ describe("product configuration API", () => {
     expect(retiredAssign.status).toBe(422);
     expect((await readBody(retiredAssign)).error).toBe("retired_person");
 
-    const firstId = await createExecutor(app, "Executor unu");
     const secondId = await createExecutor(app, "Executor doi");
+    const secondCookie = await sessionCookieViaHttp(app, secondId);
     expect((await assignExecutor(app, backCnc.taskId, firstId)).status).toBe(200);
     const reassigned = await assignExecutor(app, backCnc.taskId, secondId);
     const reassignedView = (await readBody(reassigned)).executionPlan as {
@@ -1178,9 +1170,11 @@ describe("product configuration API", () => {
         ?.assignedExecutor as JsonObject).label,
     ).toBe("Executor doi");
 
-    const started = await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, {
-      method: "POST",
-    });
+    const reservedOther = await startTaskAs(app, String(backCnc.taskId), firstCookie);
+    expect(reservedOther.status).toBe(409);
+    expect((await readBody(reservedOther)).error).toBe("already_started_by_other");
+
+    const started = await startTaskAs(app, String(backCnc.taskId), secondCookie);
     const startedView = (await readBody(started)).executionPlan as {
       plan: JsonObject;
       tasks: Array<JsonObject>;
@@ -1200,15 +1194,8 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ displayName: "Executor doi redenumit" }),
     });
-    await app.request(`/api/people/${secondId}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ status: "RETIRED" }),
-    });
-    const completed = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: 12.5 }),
+    const completed = await completeTaskAs(app, String(backCnc.taskId), secondCookie, {
+      completedQuantity: 12.5,
     });
     const done = ((await readBody(completed)).executionPlan as { tasks: Array<JsonObject> }).tasks.find(
       (item) => item.taskId === backCnc.taskId,
@@ -1217,10 +1204,13 @@ describe("product configuration API", () => {
     expect(done.assignedExecutor).toEqual({ id: secondId, label: "Executor doi" });
     expect((done.quantities as Array<JsonObject>)[0]?.value).toBe(12.5);
 
-    expect((await assignExecutor(app, inspect.taskId, firstId)).status).toBe(200);
-    const inspectStart = await app.request(`/api/execution-tasks/${inspect.taskId}/start`, {
-      method: "POST",
+    await app.request(`/api/people/${secondId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "RETIRED" }),
     });
+    expect((await assignExecutor(app, inspect.taskId, firstId)).status).toBe(200);
+    const inspectStart = await startTaskAs(app, String(inspect.taskId), firstCookie);
     expect(inspectStart.status).toBe(409);
     expect((await readBody(inspectStart)).error).toBe("dependencies_incomplete");
   });
@@ -1260,6 +1250,7 @@ describe("product configuration API", () => {
       initial.tasks.find((item) => item.processLabel === label && item.scopeLabel === scope) as JsonObject;
 
     const personId = await createExecutor(app);
+    const cookie = await sessionCookieViaHttp(app, personId);
 
     async function execute(taskId: unknown, providerId: string) {
       const assigned = await app.request(`/api/execution-tasks/${taskId}/provider`, {
@@ -1268,19 +1259,17 @@ describe("product configuration API", () => {
         body: JSON.stringify({ providerId }),
       });
       expect(assigned.status).toBe(200);
-      expect((await assignExecutor(app, taskId, personId)).status).toBe(200);
-      const started = await app.request(`/api/execution-tasks/${taskId}/start`, { method: "POST" });
+      const started = await startTaskAs(app, String(taskId), cookie);
       expect(started.status).toBe(200);
       const startedView = (await readBody(started)).executionPlan as { tasks: Array<JsonObject> };
       const current = startedView.tasks.find((item) => item.taskId === taskId) as JsonObject;
       const measurable = current.measurableQuantity as JsonObject | undefined;
-      const completed = await app.request(`/api/execution-tasks/${taskId}/complete`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(
-          measurable ? { completedQuantity: measurable.value } : {},
-        ),
-      });
+      const completed = await completeTaskAs(
+        app,
+        String(taskId),
+        cookie,
+        measurable ? { completedQuantity: measurable.value } : {},
+      );
       expect(completed.status).toBe(200);
       return (await readBody(completed)).executionPlan as {
         progress: JsonObject;
@@ -1355,41 +1344,31 @@ describe("product configuration API", () => {
     ) as JsonObject;
     const wire = view.tasks.find((item) => item.processLabel === "Cablare electrică") as JsonObject;
     const personId = await createExecutor(app);
+    const cookie = await sessionCookieViaHttp(app, personId);
 
     await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
-    await assignExecutor(app, backCnc.taskId, personId);
-    await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, { method: "POST" });
+    await startTaskAs(app, String(backCnc.taskId), cookie);
 
-    const missing = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({}),
-    });
+    const missing = await completeTaskAs(app, String(backCnc.taskId), cookie);
     expect(missing.status).toBe(422);
     expect((await readBody(missing)).error).toBe("invalid_quantity");
 
-    const negative = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: -1 }),
+    const negative = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: -1,
     });
     expect(negative.status).toBe(422);
 
-    const notNumber = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: "12.5" }),
+    const notNumber = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: "12.5",
     });
     expect(notNumber.status).toBe(400);
 
-    const completedCnc = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: 12.5 }),
+    const completedCnc = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: 12.5,
     });
     const cncView = (await readBody(completedCnc)).executionPlan as { tasks: Array<JsonObject> };
     const cncDone = cncView.tasks.find((item) => item.taskId === backCnc.taskId) as JsonObject;
@@ -1404,15 +1383,10 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
     });
-    await assignExecutor(app, lighting.taskId, personId);
-    await app.request(`/api/execution-tasks/${lighting.taskId}/start`, { method: "POST" });
-    const completedLed = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        completedQuantity: 123,
-        note: "2 module înlocuite în timpul montajului",
-      }),
+    await startTaskAs(app, String(lighting.taskId), cookie);
+    const completedLed = await completeTaskAs(app, String(lighting.taskId), cookie, {
+      completedQuantity: 123,
+      note: "2 module înlocuite în timpul montajului",
     });
     const ledView = (await readBody(completedLed)).executionPlan as {
       progress: JsonObject;
@@ -1434,10 +1408,9 @@ describe("product configuration API", () => {
     expect(ledView.plan.eicTotal).toBe(382.5);
     expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
 
-    const rewrite = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: 125, note: "rescrie" }),
+    const rewrite = await completeTaskAs(app, String(lighting.taskId), cookie, {
+      completedQuantity: 125,
+      note: "rescrie",
     });
     const rewriteView = (await readBody(rewrite)).executionPlan as { tasks: Array<JsonObject> };
     const stillLed = rewriteView.tasks.find((item) => item.taskId === lighting.taskId) as JsonObject;
@@ -1453,18 +1426,13 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
     });
-    await assignExecutor(app, wire.taskId, personId);
-    await app.request(`/api/execution-tasks/${wire.taskId}/start`, { method: "POST" });
-    const unexpected = await app.request(`/api/execution-tasks/${wire.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: 1 }),
+    await startTaskAs(app, String(wire.taskId), cookie);
+    const unexpected = await completeTaskAs(app, String(wire.taskId), cookie, {
+      completedQuantity: 1,
     });
     expect(unexpected.status).toBe(422);
-    const completedWire = await app.request(`/api/execution-tasks/${wire.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ note: "Executat conform fișei" }),
+    const completedWire = await completeTaskAs(app, String(wire.taskId), cookie, {
+      note: "Executat conform fișei",
     });
     const wireDone = (
       (await readBody(completedWire)).executionPlan as { tasks: Array<JsonObject> }
@@ -1506,30 +1474,24 @@ describe("product configuration API", () => {
       (item) => item.processId === PLACE_LED_MODULES_ID,
     ) as JsonObject;
     const personId = await createExecutor(app);
+    const cookie = await sessionCookieViaHttp(app, personId);
 
     await app.request(`/api/execution-tasks/${backCnc.taskId}/provider`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
     });
-    await assignExecutor(app, backCnc.taskId, personId);
-    await app.request(`/api/execution-tasks/${backCnc.taskId}/start`, { method: "POST" });
+    await startTaskAs(app, String(backCnc.taskId), cookie);
 
-    const unknownResource = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        completedQuantity: 12.5,
-        actualConsumption: [{ resourceId: PLEXIGLAS_3MM_OPAL_ID, actualQuantity: 0.87 }],
-      }),
+    const unknownResource = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: 12.5,
+      actualConsumption: [{ resourceId: PLEXIGLAS_3MM_OPAL_ID, actualQuantity: 0.87 }],
     });
     expect(unknownResource.status).toBe(422);
     expect((await readBody(unknownResource)).error).toBe("invalid_resource");
 
-    const completedCnc = await app.request(`/api/execution-tasks/${backCnc.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ completedQuantity: 12.5 }),
+    const completedCnc = await completeTaskAs(app, String(backCnc.taskId), cookie, {
+      completedQuantity: 12.5,
     });
     expect(completedCnc.status).toBe(200);
 
@@ -1538,27 +1500,18 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
     });
-    await assignExecutor(app, lighting.taskId, personId);
-    await app.request(`/api/execution-tasks/${lighting.taskId}/start`, { method: "POST" });
+    await startTaskAs(app, String(lighting.taskId), cookie);
 
-    const badUnit = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        completedQuantity: 125,
-        actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127, unit: "m2" }],
-      }),
+    const badUnit = await completeTaskAs(app, String(lighting.taskId), cookie, {
+      completedQuantity: 125,
+      actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127, unit: "m2" }],
     });
     expect(badUnit.status).toBe(422);
     expect((await readBody(badUnit)).error).toBe("invalid_unit");
 
-    const completedLed = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        completedQuantity: 125,
-        actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127 }],
-      }),
+    const completedLed = await completeTaskAs(app, String(lighting.taskId), cookie, {
+      completedQuantity: 125,
+      actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 127 }],
     });
     const ledView = (await readBody(completedLed)).executionPlan as {
       plan: JsonObject;
@@ -1603,13 +1556,9 @@ describe("product configuration API", () => {
       /costEngine|quoteOrchestrator|inventoryEngine|warehouse|FIFO|margin|VAT/,
     );
 
-    const rewrite = await app.request(`/api/execution-tasks/${lighting.taskId}/complete`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        completedQuantity: 125,
-        actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 200 }],
-      }),
+    const rewrite = await completeTaskAs(app, String(lighting.taskId), cookie, {
+      completedQuantity: 125,
+      actualConsumption: [{ resourceId: "MAT-LED-MODULE", actualQuantity: 200 }],
     });
     const stillLed = (
       (await readBody(rewrite)).executionPlan as { tasks: Array<JsonObject> }

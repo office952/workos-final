@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { ExecutionPlanView } from "@workos-final/domain";
 import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
+import { useOperatorSession } from "./OperatorSessionContext";
 import {
   assignExecutionTaskExecutor,
   assignExecutionTaskProvider,
   completeExecutionTask,
   readExecutionPlanById,
   startExecutionTask,
+  type TaskMutationFailure,
 } from "./productApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
@@ -20,6 +22,7 @@ type PageState =
 
 export function ExecutionWorkspacePage() {
   const { planId } = useParams();
+  const { operator } = useOperatorSession();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -46,11 +49,11 @@ export function ExecutionWorkspacePage() {
     return () => {
       cancelled = true;
     };
-  }, [planId]);
+  }, [planId, operator?.personId]);
 
   async function applyTaskMutation(
     action: () => Promise<
-      { ok: true; executionPlan: ExecutionPlanView } | { ok: false; error: string }
+      { ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure
     >,
   ) {
     setBusy(true);
@@ -58,7 +61,13 @@ export function ExecutionWorkspacePage() {
     try {
       const result = await action();
       if (!result.ok) {
-        setNotice(taskActionNotice(result.error));
+        setNotice(taskActionNotice(result));
+        if (planId && result.error === "already_started_by_other") {
+          const view = await readExecutionPlanById(planId);
+          if (view) {
+            setPage({ kind: "ready", view });
+          }
+        }
         return;
       }
       setPage({ kind: "ready", view: result.executionPlan });
@@ -138,8 +147,8 @@ export function ExecutionWorkspacePage() {
   );
 }
 
-function taskActionNotice(error: string): string {
-  switch (error) {
+function taskActionNotice(result: TaskMutationFailure): string {
+  switch (result.error) {
     case "ineligible_provider":
       return "Furnizorul ales nu este eligibil pentru această operație.";
     case "reassignment_locked":
@@ -157,9 +166,9 @@ function taskActionNotice(error: string): string {
     case "retired_person":
       return "Persoana aleasă nu mai este activă.";
     case "unavailable_person":
-      return "Persoana este indisponibilă temporar.";
+      return "Ești indisponibil temporar. Nu poți revendica taskuri noi.";
     case "ineligible_executor":
-      return "Persoana nu este eligibilă pentru această operație.";
+      return "Nu ești eligibil pentru această operație.";
     case "dependencies_incomplete":
       return "Taskul așteaptă alte operații.";
     case "invalid_transition":
@@ -172,6 +181,18 @@ function taskActionNotice(error: string): string {
       return "Resursa aleasă nu face parte din planul taskului.";
     case "invalid_note":
       return "Nota de finalizare este prea lungă.";
+    case "already_started_by_other":
+      return result.startedBy
+        ? `Taskul a fost pornit deja de ${result.startedBy.displayName}.`
+        : "Taskul a fost pornit deja de alt operator.";
+    case "wrong_executor":
+      return result.startedBy
+        ? `Doar ${result.startedBy.displayName} poate finaliza acest task.`
+        : "Doar executantul care a pornit taskul îl poate finaliza.";
+    case "invalid_session":
+    case "expired_session":
+    case "revoked_session":
+      return "Identifică-te din nou pentru a continua.";
     default:
       return "Acțiunea nu a putut fi aplicată.";
   }

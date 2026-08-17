@@ -27,6 +27,8 @@ import {
   type PersonMutationResult,
   type PersonProfilePatch,
   type PersonSkillMutationResult,
+  type OperatorCandidate,
+  type OperatorSessionRecord,
   resolveEligiblePeople,
   type Skill,
   type SkillMutationResult,
@@ -58,11 +60,13 @@ import {
   type SqliteDatabase,
 } from "../persistence/sqlite.js";
 import {
+  getExecutionPlanByTaskId,
   getExecutionPlanBySnapshotId,
   getExecutionPlanRecord,
   insertExecutionPlanRecord,
   persistAssignedExecutor,
   persistAssignedProvider,
+  persistClaimAndStart,
   persistTaskComplete,
   persistTaskStart,
 } from "../execution/store.js";
@@ -99,6 +103,14 @@ import {
   readPeopleRegistry,
   listSkills,
 } from "../people/store.js";
+import {
+  identifyOperator,
+  listOperatorCandidates,
+  logoutOperatorSession,
+  personHasOperatorPin,
+  resolveOperatorSession,
+  setOperatorPin,
+} from "../operator/store.js";
 import {
   getOrderSnapshot,
   getOrderSnapshotByQuoteSnapshotId,
@@ -168,10 +180,43 @@ export type ProductSystemRuntime = {
   };
   readExecutionPlan(planId: string): ExecutionPlanRecord | null;
   readExecutionPlanBySnapshot(snapshotId: string): ExecutionPlanRecord | null;
+  readExecutionPlanByTaskId(taskId: string): ExecutionPlanRecord | null;
   assignExecutionTaskProvider(taskId: string, providerId: string): TaskMutationResult;
   assignExecutionTaskExecutor(taskId: string, personId: string): TaskMutationResult;
   startExecutionTask(taskId: string): TaskMutationResult;
-  completeExecutionTask(taskId: string, input?: TaskCompletionInput): TaskMutationResult;
+  claimAndStartExecutionTask(taskId: string, personId: string): TaskMutationResult;
+  completeExecutionTask(
+    taskId: string,
+    input?: TaskCompletionInput,
+    actorPersonId?: string | null,
+  ): TaskMutationResult;
+  listOperatorCandidates(): OperatorCandidate[];
+  setOperatorPin(
+    personId: string,
+    pin: string,
+    confirmPin: string,
+  ): Promise<{ ok: true } | { ok: false; error: string }>;
+  identifyOperator(
+    personId: string,
+    pin: string,
+  ): Promise<
+    | {
+        ok: true;
+        person: Person;
+        session: OperatorSessionRecord;
+        rawToken: string;
+      }
+    | { ok: false; error: string }
+  >;
+  resolveOperatorSession(rawToken: string | undefined | null):
+    | {
+        ok: true;
+        person: Person;
+        session: OperatorSessionRecord;
+      }
+    | { ok: false; error: string };
+  logoutOperatorSession(rawToken: string | undefined | null): void;
+  personHasOperatorPin(personId: string): boolean;
   readInventory(): InventoryStockProjection;
   readInventoryItem(resourceId: string): InventoryItemDetail | null;
   recordInventoryAdjustment(
@@ -311,6 +356,9 @@ export function createProductSystemRuntime(
     readExecutionPlanBySnapshot(snapshotId) {
       return getExecutionPlanBySnapshotId(db, snapshotId);
     },
+    readExecutionPlanByTaskId(taskId) {
+      return getExecutionPlanByTaskId(db, taskId);
+    },
     assignExecutionTaskProvider(taskId, providerId) {
       return persistAssignedProvider(db, taskId, providerId);
     },
@@ -331,6 +379,34 @@ export function createProductSystemRuntime(
         listPeople(db),
         runtimePeopleEligibilityContext(db),
       );
+    },
+    claimAndStartExecutionTask(taskId, personId) {
+      return persistClaimAndStart(
+        db,
+        taskId,
+        personId,
+        new Date().toISOString(),
+        listPeople(db),
+        runtimePeopleEligibilityContext(db),
+      );
+    },
+    listOperatorCandidates() {
+      return listOperatorCandidates(db);
+    },
+    setOperatorPin(personId, pin, confirmPin) {
+      return setOperatorPin(db, personId, pin, confirmPin);
+    },
+    identifyOperator(personId, pin) {
+      return identifyOperator(db, personId, pin);
+    },
+    resolveOperatorSession(rawToken) {
+      return resolveOperatorSession(db, rawToken);
+    },
+    logoutOperatorSession(rawToken) {
+      logoutOperatorSession(db, rawToken);
+    },
+    personHasOperatorPin(personId) {
+      return personHasOperatorPin(db, personId);
     },
     listPeople() {
       return listPeople(db);
@@ -494,8 +570,14 @@ export function createProductSystemRuntime(
     retireCustomer(customerId) {
       return persistRetiredCustomer(db, customerId, new Date().toISOString());
     },
-    completeExecutionTask(taskId, input) {
-      return persistTaskComplete(db, taskId, new Date().toISOString(), input);
+    completeExecutionTask(taskId, input, actorPersonId = null) {
+      return persistTaskComplete(
+        db,
+        taskId,
+        new Date().toISOString(),
+        input,
+        actorPersonId,
+      );
     },
     readInventory() {
       return readInventoryProjection(db);

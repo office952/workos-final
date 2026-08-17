@@ -49,6 +49,7 @@ export {
   type ExecutionTask,
   type ExecutionTaskStatus,
   type ExecutionTaskView,
+  type OperatorTaskRelation,
   type PlannedStartBlockReason,
 } from "./plan.js";
 export {
@@ -77,6 +78,7 @@ export {
   completionFromRow,
   plannedCompletionInput,
   startExecutionTask,
+  claimAndStartExecutionTask,
   type TaskCompletionInput,
   type TaskMutationError,
   type TaskMutationResult,

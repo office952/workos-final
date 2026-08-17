@@ -13,8 +13,9 @@ Person     =  operational identity
 ```
 
 Provider is the Machine / Workcenter that can perform a required capability.
-Person is the human who may be assigned to execute or confirm a task.
-This build has no login, so Complete does not mean “finalizat de utilizatorul autentificat”.
+Person is the human who may execute a task.
+Operator Identity (PIN + OperatorSession) answers only: who is operating WorkOS now?
+See `docs/architecture/OPERATOR_IDENTITY_CLAIM_ON_START_CANON.md`.
 
 ## Person
 
@@ -40,6 +41,12 @@ The trusted starting roster is materialized once (`PEOPLE_TRUSTED_WORKFORCE_V1_A
 
 ## Task executor
 
+Primary path is Claim-on-Start: the current OperatorSession Person becomes
+`assignedExecutor` in the same mutation that moves the task to `IN_PROGRESS`.
+
+Compatibility/manual assignment (`POST .../executor`) may still preassign a Person.
+Only that Person may then Start; others cannot steal the reservation.
+
 An ExecutionTask may persist:
 
 ```text
@@ -47,25 +54,21 @@ assigned_executor_id
 assigned_executor_label
 ```
 
-Assignment is an explicit operator action. It is not inferred from provider, browser user, machine, or snapshot.
+Provider remains independent. People cannot bypass a missing REQUIRED provider.
+A manual task still needs an eligible executor. It does not need a Machine or Workcenter.
 
-Only currently eligible people may be newly assigned when a capability mapping exists.
-A PLANNED Start revalidates the same current eligibility. After Start, assignment is locked.
-
-Start requires completed dependencies, a currently eligible executor, and a valid provider only when the frozen operation requires one.
-
-People cannot bypass a missing provider on a provider-required task.
-A manual task still needs an ACTIVE executor. It does not need a Machine or Workcenter.
+A PLANNED Start / claim revalidates current eligibility.
+After Start, the executor is historical execution fact.
 
 ## Historical attribution
 
 While `PLANNED`, the read projection may overlay the live display name.
-At Start, the then-current display name is frozen on the task.
-Retirement after Start does not erase the persisted identity or block Complete.
-Full historical freeze of executor identity belongs to Claim-on-Start.
+At Claim-on-Start, the then-current display name is frozen on the task.
+Retirement after Start does not erase the persisted identity.
+Only the same Person may Complete (V1).
 
 ## What this is not
 
 Not HR, Pontaj, payroll, contract, department, attendance, shifts, scheduling, or capacity.
-Not an authentication system.
-Skills and operational availability are owned by the People + Skills canon, not by Pontaj.
+Not RBAC / UserAccount. PIN session ≠ Pontaj.
+Skills and operational availability are owned by the People + Skills canon.

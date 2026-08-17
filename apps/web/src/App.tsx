@@ -23,6 +23,7 @@ import { ResourcesAdminPage } from "./ResourcesAdminPage";
 import { StockAdminPage } from "./StockAdminPage";
 import { SystemStatusPage } from "./SystemStatusPage";
 import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
+import { OperatorSessionProvider } from "./OperatorSessionContext";
 
 const NAV_ITEMS = [
   { to: "/", label: "Lucrări" },
@@ -37,34 +38,36 @@ const NAV_ITEMS = [
 
 export function App() {
   return (
-    <AppShell navItems={NAV_ITEMS}>
-      <Routes>
-        <Route path="/" element={<JobsOverviewPage />} />
-        <Route path="/requests" element={<RequestsOverviewPage />} />
-        <Route path="/requests/:requestId" element={<RequestDetailPage />} />
-        <Route path="/quotes" element={<QuotesOverviewPage />} />
-        <Route path="/clients" element={<ClientsOverviewPage />} />
-        <Route path="/clients/:customerId" element={<ClientWorkspacePage />} />
-        <Route path="/system" element={<SystemStatusPage />} />
-        <Route path="/products" element={<ProductCatalogPage />} />
-        <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
-        <Route path="/execution/:planId" element={<ExecutionWorkspacePage />} />
-        <Route path="/components" element={<ComponentsPage />} />
-        <Route path="/governance" element={<GovernancePage />} />
-        <Route path="/admin" element={<AdminHomePage />} />
-        <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
-        <Route path="/admin/resources" element={<ResourcesAdminPage />} />
-        <Route path="/admin/stock" element={<StockAdminPage />} />
-        <Route path="/admin/stock/:resourceId" element={<StockAdminPage />} />
-        <Route path="/admin/processes" element={<ProcessesAdminPage />} />
-        <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
-        <Route path="/admin/people" element={<PeopleAdminPage />} />
-        <Route path="/admin/people/skills" element={<SkillsAdminPage />} />
-        <Route path="/admin/people/:personId" element={<PersonAdminPage />} />
-        <Route path="/admin/customers" element={<CustomerAdminPage />} />
-        <Route path="/admin/seller" element={<SellerAdminPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AppShell>
+    <OperatorSessionProvider>
+      <AppShell navItems={NAV_ITEMS}>
+        <Routes>
+          <Route path="/" element={<JobsOverviewPage />} />
+          <Route path="/requests" element={<RequestsOverviewPage />} />
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+          <Route path="/quotes" element={<QuotesOverviewPage />} />
+          <Route path="/clients" element={<ClientsOverviewPage />} />
+          <Route path="/clients/:customerId" element={<ClientWorkspacePage />} />
+          <Route path="/system" element={<SystemStatusPage />} />
+          <Route path="/products" element={<ProductCatalogPage />} />
+          <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
+          <Route path="/execution/:planId" element={<ExecutionWorkspacePage />} />
+          <Route path="/components" element={<ComponentsPage />} />
+          <Route path="/governance" element={<GovernancePage />} />
+          <Route path="/admin" element={<AdminHomePage />} />
+          <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
+          <Route path="/admin/resources" element={<ResourcesAdminPage />} />
+          <Route path="/admin/stock" element={<StockAdminPage />} />
+          <Route path="/admin/stock/:resourceId" element={<StockAdminPage />} />
+          <Route path="/admin/processes" element={<ProcessesAdminPage />} />
+          <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
+          <Route path="/admin/people" element={<PeopleAdminPage />} />
+          <Route path="/admin/people/skills" element={<SkillsAdminPage />} />
+          <Route path="/admin/people/:personId" element={<PersonAdminPage />} />
+          <Route path="/admin/customers" element={<CustomerAdminPage />} />
+          <Route path="/admin/seller" element={<SellerAdminPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppShell>
+    </OperatorSessionProvider>
   );
 }

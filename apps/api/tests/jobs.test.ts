@@ -7,6 +7,11 @@ import {
   WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
+import {
+  completeTaskAs,
+  sessionCookieViaHttp,
+  startTaskAs,
+} from "./operator-test-helpers.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -106,7 +111,7 @@ async function createExecutor(app: ReturnType<typeof createApp>) {
 async function executeTask(
   app: ReturnType<typeof createApp>,
   task: JsonObject,
-  personId: string,
+  cookie: string,
   providerId?: string,
 ) {
   if (providerId) {
@@ -117,24 +122,17 @@ async function executeTask(
     });
     expect(assigned.status).toBe(200);
   }
-  const executor = await app.request(`/api/execution-tasks/${task.taskId}/executor`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ personId }),
-  });
-  expect(executor.status).toBe(200);
-  const started = await app.request(`/api/execution-tasks/${task.taskId}/start`, {
-    method: "POST",
-  });
+  const started = await startTaskAs(app, String(task.taskId), cookie);
   expect(started.status).toBe(200);
   const startedView = (await readBody(started)).executionPlan as { tasks: Array<JsonObject> };
   const current = startedView.tasks.find((item) => item.taskId === task.taskId) as JsonObject;
   const measurable = current.measurableQuantity as JsonObject | undefined;
-  const completed = await app.request(`/api/execution-tasks/${task.taskId}/complete`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(measurable ? { completedQuantity: measurable.value } : {}),
-  });
+  const completed = await completeTaskAs(
+    app,
+    String(task.taskId),
+    cookie,
+    measurable ? { completedQuantity: measurable.value } : {},
+  );
   expect(completed.status).toBe(200);
   return (await readBody(completed)).executionPlan as {
     progress: JsonObject;
@@ -160,10 +158,11 @@ describe("job overview API", () => {
     const activeRelease = await releaseOrder(app, activeOrder.orderSnapshotId as string);
     const activePlan = await createPlan(app, activeRelease.snapshotId as string);
     const personId = await createExecutor(app);
+    const cookie = await sessionCookieViaHttp(app, personId);
     await executeTask(
       app,
       taskOf(activePlan.tasks, "Debitare foaie CNC", "Față"),
-      personId,
+      cookie,
       MCH_CNC_4020_ID,
     );
 
@@ -183,7 +182,7 @@ describe("job overview API", () => {
       ["Închidere corp", "Corp", WC_ASSEMBLY_01_ID],
     ];
     for (const [label, scope, providerId] of machineSteps) {
-      const next = await executeTask(app, taskOf(tasks, label, scope), personId, providerId);
+      const next = await executeTask(app, taskOf(tasks, label, scope), cookie, providerId);
       tasks = next.tasks;
     }
     for (const [label, scope] of [
@@ -191,7 +190,7 @@ describe("job overview API", () => {
       ["Control calitate final", "Produs"],
       ["Ambalare", "Produs"],
     ] as const) {
-      const next = await executeTask(app, taskOf(tasks, label, scope), personId);
+      const next = await executeTask(app, taskOf(tasks, label, scope), cookie);
       tasks = next.tasks;
     }
 

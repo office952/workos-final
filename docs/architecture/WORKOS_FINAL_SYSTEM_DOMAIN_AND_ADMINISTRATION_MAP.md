@@ -227,13 +227,18 @@ Customer catalog  ≠  Quote customer snapshot  ≠  CRM
 ```
 
 ```text
-Person  ≠  Provider  ≠  authenticated user
+Person  ≠  Provider  ≠  OperatorSession actor
+OperatorSession  ≠  Pontaj
+PIN  ≠  RBAC
+Skill  ≠  permission
 ```
 
 HR, Pontaj, payroll and scheduling remain NOT_IMPLEMENTED.
 Skills and operational availability are implemented as current operational truth, not as Pontaj or RBAC.
+Operator Identity (PIN + session) and Claim-on-Start are IMPLEMENTED_CURRENT / BASIC.
+See `docs/architecture/OPERATOR_IDENTITY_CLAIM_ON_START_CANON.md`.
 
-Likely later entities: Employee master, employment/cost profile, Auth ↔ Person, Claim-on-Start.
+Likely later entities: Employee master, employment/cost profile, Pontaj, full auth platform.
 
 Clarify later:
 

@@ -2,6 +2,15 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
+import { OperatorSessionProvider } from "./OperatorSessionContext";
+
+vi.mock("./operatorSessionApi", () => ({
+  fetchOperatorSession: () => Promise.resolve({ operator: null, session: null }),
+  fetchOperatorCandidates: () => Promise.resolve([]),
+  identifyOperator: vi.fn(),
+  logoutOperator: vi.fn(),
+  setOperatorPin: vi.fn(),
+}));
 
 vi.mock("./productApi", () => ({
   readExecutionPlanById: () =>
@@ -88,6 +97,9 @@ vi.mock("./productApi", () => ({
           canAssign: true,
           canAssignExecutor: true,
           canStart: false,
+          canClaimStart: false,
+          operatorRelation: "idle",
+          startedByLabel: null,
           startBlockReason: null,
           canComplete: false,
           hasPlannedResources: false,
@@ -104,11 +116,13 @@ vi.mock("./productApi", () => ({
 describe("ExecutionWorkspacePage", () => {
   it("shows job identity and next work without commercial price", async () => {
     render(
-      <MemoryRouter initialEntries={["/execution/exp:aps:test"]}>
-        <Routes>
-          <Route path="/execution/:planId" element={<ExecutionWorkspacePage />} />
-        </Routes>
-      </MemoryRouter>,
+      <OperatorSessionProvider>
+        <MemoryRouter initialEntries={["/execution/exp:aps:test"]}>
+          <Routes>
+            <Route path="/execution/:planId" element={<ExecutionWorkspacePage />} />
+          </Routes>
+        </MemoryRouter>
+      </OperatorSessionProvider>,
     );
 
     expect(await screen.findByRole("heading", { name: "WORKOS" })).toBeInTheDocument();

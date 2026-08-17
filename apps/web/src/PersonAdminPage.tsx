@@ -10,6 +10,7 @@ import {
   retirePerson,
   updatePerson,
 } from "./peopleApi";
+import { setOperatorPin } from "./operatorSessionApi";
 import { Field } from "./ui/Field";
 import { StatusChip } from "./ui/StatusChip";
 
@@ -17,7 +18,12 @@ type PageState =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "missing" }
-  | { kind: "ready"; item: PersonRegistryItem; skills: Skill[] };
+  | {
+      kind: "ready";
+      item: PersonRegistryItem;
+      skills: Skill[];
+      operatorPinConfigured: boolean;
+    };
 
 export function PersonAdminPage() {
   const { personId = "" } = useParams();
@@ -26,6 +32,8 @@ export function PersonAdminPage() {
   const [reason, setReason] = useState("");
   const [until, setUntil] = useState("");
   const [skillId, setSkillId] = useState("");
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -38,7 +46,14 @@ export function PersonAdminPage() {
     setName(loaded.item.displayName);
     setReason(loaded.item.unavailableReason ?? "");
     setUntil(loaded.item.unavailableUntil ?? "");
-    setPage({ kind: "ready", item: loaded.item, skills });
+    setPin("");
+    setConfirmPin("");
+    setPage({
+      kind: "ready",
+      item: loaded.item,
+      skills,
+      operatorPinConfigured: loaded.operatorPinConfigured,
+    });
   }
 
   useEffect(() => {
@@ -64,7 +79,7 @@ export function PersonAdminPage() {
     return <p>Persoana nu a putut fi încărcată.</p>;
   }
 
-  const { item, skills } = page;
+  const { item, skills, operatorPinConfigured } = page;
   const assignable = skills.filter(
     (skill) =>
       skill.status === "ACTIVE" &&
@@ -78,9 +93,7 @@ export function PersonAdminPage() {
       await action();
       await reload();
     } catch (error) {
-      setNotice(error instanceof Error && error.message === "has_active_task"
-        ? "Persoana are un task în lucru. Nu o retrage până nu se încheie."
-        : fallback);
+      setNotice(pinOrPeopleError(error, fallback));
     } finally {
       setBusy(false);
     }
@@ -114,7 +127,10 @@ export function PersonAdminPage() {
           className="people-create"
           onSubmit={(event) => {
             event.preventDefault();
-            void run(() => updatePerson(item.personId, { displayName: name }).then(() => undefined), "Numele nu a putut fi salvat.");
+            void run(
+              () => updatePerson(item.personId, { displayName: name }).then(() => undefined),
+              "Numele nu a putut fi salvat.",
+            );
           }}
         >
           <Field label="Nume">
@@ -124,6 +140,57 @@ export function PersonAdminPage() {
             Salvează numele
           </button>
         </form>
+      </article>
+
+      <article className="client-current-card">
+        <h2>PIN operator</h2>
+        <p className="client-current-hint">
+          PIN-ul identifică cine lucrează acum pe terminal. Nu este rol, cont sau pontaj. Valoarea nu
+          este reafișată după salvare.
+        </p>
+        <p>
+          Stare PIN: <strong>{operatorPinConfigured ? "Configurat" : "Neconfigurat"}</strong>
+        </p>
+        {item.status === "ACTIVE" ? (
+          <form
+            className="people-create"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void run(async () => {
+                const result = await setOperatorPin(item.personId, pin, confirmPin);
+                if (!result.ok) {
+                  throw new Error(result.error);
+                }
+              }, "PIN-ul nu a putut fi salvat.");
+            }}
+          >
+            <Field label={operatorPinConfigured ? "PIN nou" : "PIN"}>
+              <input
+                type="password"
+                inputMode="numeric"
+                autoComplete="new-password"
+                value={pin}
+                onChange={(event) => setPin(event.target.value)}
+                disabled={busy}
+              />
+            </Field>
+            <Field label="Confirmă PIN">
+              <input
+                type="password"
+                inputMode="numeric"
+                autoComplete="new-password"
+                value={confirmPin}
+                onChange={(event) => setConfirmPin(event.target.value)}
+                disabled={busy}
+              />
+            </Field>
+            <button type="submit" disabled={busy || pin.length < 4 || confirmPin.length < 4}>
+              {operatorPinConfigured ? "Resetează PIN" : "Setează PIN"}
+            </button>
+          </form>
+        ) : (
+          <p>Persoana retrasă nu mai poate primi PIN operațional.</p>
+        )}
       </article>
 
       <article className="client-current-card">
@@ -186,7 +253,9 @@ export function PersonAdminPage() {
 
       <article className="client-current-card">
         <h2>Skill-uri</h2>
-        {item.skills.length === 0 ? <p>Niciun skill curent.</p> : (
+        {item.skills.length === 0 ? (
+          <p>Niciun skill curent.</p>
+        ) : (
           <ul className="people-skill-list">
             {item.skills.map((skill) => (
               <li key={skill.skillId}>
@@ -221,11 +290,18 @@ export function PersonAdminPage() {
               if (!skillId) {
                 return;
               }
-              void run(() => assignPersonSkill(item.personId, skillId), "Skill-ul nu a putut fi adăugat.");
+              void run(
+                () => assignPersonSkill(item.personId, skillId),
+                "Skill-ul nu a putut fi adăugat.",
+              );
             }}
           >
             <Field label="Adaugă skill">
-              <select value={skillId} onChange={(event) => setSkillId(event.target.value)} disabled={busy}>
+              <select
+                value={skillId}
+                onChange={(event) => setSkillId(event.target.value)}
+                disabled={busy}
+              >
                 <option value="">Alege skill</option>
                 {assignable.map((skill) => (
                   <option key={skill.skillId} value={skill.skillId}>
@@ -255,4 +331,22 @@ export function PersonAdminPage() {
       ) : null}
     </section>
   );
+}
+
+function pinOrPeopleError(error: unknown, fallback: string): string {
+  if (!(error instanceof Error)) {
+    return fallback;
+  }
+  switch (error.message) {
+    case "has_active_task":
+      return "Persoana are un task în lucru. Nu o retrage până nu se încheie.";
+    case "invalid_pin":
+      return "PIN-ul trebuie să aibă 4–8 cifre.";
+    case "pin_mismatch":
+      return "Confirmarea PIN nu coincidă.";
+    case "retired_person":
+      return "Persoana retrasă nu poate primi PIN.";
+    default:
+      return fallback;
+  }
 }

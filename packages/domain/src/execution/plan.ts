@@ -136,6 +136,18 @@ export type ExecutionEligibleProvider = {
   label: string;
 };
 
+export type OperatorTaskRelation =
+  | "identify_required"
+  | "can_claim"
+  | "not_eligible"
+  | "unavailable"
+  | "missing_provider"
+  | "waiting_dependencies"
+  | "reserved_other"
+  | "owned"
+  | "owned_by_other"
+  | "idle";
+
 export type ExecutionTaskView = ExecutionTask & {
   statusLabel: string;
   assignmentLabel: string;
@@ -153,7 +165,10 @@ export type ExecutionTaskView = ExecutionTask & {
   canAssign: boolean;
   canAssignExecutor: boolean;
   canStart: boolean;
+  canClaimStart: boolean;
   startBlockReason: PlannedStartBlockReason | null;
+  operatorRelation: OperatorTaskRelation;
+  startedByLabel: string | null;
   canComplete: boolean;
   hasPlannedResources: boolean;
   canRecordActualConsumption: boolean;
@@ -258,6 +273,7 @@ export function projectExecutionPlanView(
   people: readonly Person[] = [],
   snapshot: AcceptedProductionSnapshot | null = null,
   eligibility: PeopleEligibilityContext | null = null,
+  currentOperatorId: string | null = null,
 ): ExecutionPlanView {
   const byId = new Map(record.tasks.map((task) => [task.taskId, task]));
   const availablePeople = activePeople(people).filter(
@@ -284,6 +300,27 @@ export function projectExecutionPlanView(
     const waitingFor = incompleteDependencyLabels(task, byId);
     const measurableQuantity = measurablePlannedQuantity(task);
     const assignedExecutor = projectAssignedExecutor(task, people);
+    const canClaimStart = canClaimStartTask(
+      task,
+      byId,
+      people,
+      eligibility,
+      currentOperatorId,
+    );
+    const operatorRelation = projectOperatorRelation({
+      task,
+      assignedExecutor,
+      waitingFor,
+      people,
+      eligibility,
+      currentOperatorId,
+      canClaimStart,
+    });
+    const ownedByCurrent =
+      task.status === "IN_PROGRESS" &&
+      assignedExecutor !== null &&
+      currentOperatorId !== null &&
+      assignedExecutor.id === currentOperatorId;
     return {
       ...task,
       assignedExecutor,
@@ -307,14 +344,23 @@ export function projectExecutionPlanView(
       canAssign:
         task.status === "PLANNED" &&
         taskRequiresProvider(task) &&
+        !task.assignedProvider &&
         eligibleProviders.length > 0,
-      canAssignExecutor: task.status === "PLANNED" && eligibleExecutors.length > 0,
-      canStart: canStartTask(task, byId, people, eligibility),
+      canAssignExecutor: false,
+      canStart: canClaimStart,
+      canClaimStart,
       startBlockReason: plannedStartBlockReason(task, byId, people, eligibility),
-      canComplete: task.status === "IN_PROGRESS",
+      operatorRelation,
+      startedByLabel:
+        task.status === "IN_PROGRESS" || task.status === "COMPLETED"
+          ? assignedExecutor?.label ?? null
+          : null,
+      canComplete: ownedByCurrent,
       hasPlannedResources: task.resourceDemands.length > 0,
       canRecordActualConsumption:
-        task.status === "IN_PROGRESS" && task.resourceDemands.length > 0,
+        task.status === "IN_PROGRESS" &&
+        task.resourceDemands.length > 0 &&
+        (currentOperatorId === null || ownedByCurrent),
     };
   });
   const progress = summarizeExecutionProgress(tasks);
@@ -580,24 +626,78 @@ function providerReadyForStart(task: ExecutionTask): boolean {
   );
 }
 
-function canStartTask(
+function canClaimStartTask(
   task: ExecutionTask,
   byId: ReadonlyMap<string, ExecutionTask>,
   people: readonly Person[],
   eligibility: PeopleEligibilityContext | null,
+  currentOperatorId: string | null,
 ): boolean {
+  if (
+    task.status !== "PLANNED" ||
+    !currentOperatorId ||
+    !providerReadyForStart(task) ||
+    !dependenciesCompleted(task, byId)
+  ) {
+    return false;
+  }
+  if (task.assignedExecutor && task.assignedExecutor.id !== currentOperatorId) {
+    return false;
+  }
   return (
-    task.status === "PLANNED" &&
-    providerReadyForStart(task) &&
-    task.assignedExecutor !== null &&
     plannedExecutorStartError(
-      task.assignedExecutor.id,
+      currentOperatorId,
       task.requiredCapabilityId as ProductionCapabilityClassId,
       people,
       eligibility,
-    ) === null &&
-    dependenciesCompleted(task, byId)
+    ) === null
   );
+}
+
+function projectOperatorRelation(input: {
+  task: ExecutionTask;
+  assignedExecutor: AssignedExecutionExecutor | null;
+  waitingFor: readonly string[];
+  people: readonly Person[];
+  eligibility: PeopleEligibilityContext | null;
+  currentOperatorId: string | null;
+  canClaimStart: boolean;
+}): OperatorTaskRelation {
+  const { task, assignedExecutor, waitingFor, currentOperatorId, canClaimStart } = input;
+  if (task.status === "IN_PROGRESS" || task.status === "COMPLETED") {
+    if (!currentOperatorId || !assignedExecutor) {
+      return "owned_by_other";
+    }
+    return assignedExecutor.id === currentOperatorId ? "owned" : "owned_by_other";
+  }
+  if (task.status !== "PLANNED") {
+    return "idle";
+  }
+  if (!currentOperatorId) {
+    return "identify_required";
+  }
+  if (waitingFor.length > 0) {
+    return "waiting_dependencies";
+  }
+  if (!providerReadyForStart(task)) {
+    return "missing_provider";
+  }
+  if (task.assignedExecutor && task.assignedExecutor.id !== currentOperatorId) {
+    return "reserved_other";
+  }
+  if (canClaimStart) {
+    return "can_claim";
+  }
+  const diagnosis = diagnoseAssignedPerson({
+    personId: currentOperatorId,
+    capabilityId: task.requiredCapabilityId as ProductionCapabilityClassId,
+    people: input.people,
+    eligibility: input.eligibility,
+  });
+  if (diagnosis?.reason === "TEMPORARILY_UNAVAILABLE") {
+    return "unavailable";
+  }
+  return "not_eligible";
 }
 
 function plannedStartBlockReason(

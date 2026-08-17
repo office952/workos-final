@@ -83,7 +83,8 @@ Assign and Start both reuse the same resolver.
 If the assigned person is no longer eligible, Start is blocked. The assignment is not silently deleted.
 After Start, later unavailability or skill removal does not cancel, unassign, or rewrite the task. Completion remains possible.
 
-Claim-on-Start is next. It will consume this resolver. It is not implemented here.
+Claim-on-Start consumes this resolver at the same transactional boundary as Start.
+See `docs/architecture/OPERATOR_IDENTITY_CLAIM_ON_START_CANON.md`.
 
 ## What this is not
 

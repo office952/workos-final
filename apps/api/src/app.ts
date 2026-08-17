@@ -7,6 +7,7 @@ import { registerRequestRoutes } from "./requests/routes.js";
 import { registerCustomerRoutes } from "./customers/routes.js";
 import { registerSellerRoutes } from "./seller/routes.js";
 import { registerPeopleRoutes } from "./people/routes.js";
+import { registerOperatorRoutes } from "./operator/routes.js";
 import { registerProductRoutes } from "./product.js";
 import { registerProductSystemAdminRoutes } from "./productSystem/routes.js";
 import {
@@ -39,6 +40,7 @@ export function createApp(options: CreateAppOptions = {}): Hono {
     "/api/*",
     cors({
       origin: [...DEV_WEB_ORIGINS],
+      credentials: true,
     }),
   );
 
@@ -55,6 +57,7 @@ export function createApp(options: CreateAppOptions = {}): Hono {
   registerQuoteRoutes(app, productSystem);
   registerRequestRoutes(app, productSystem);
   registerPeopleRoutes(app, productSystem);
+  registerOperatorRoutes(app, productSystem);
   registerCustomerRoutes(app, productSystem);
   registerSellerRoutes(app, productSystem);
   registerInventoryRoutes(app, productSystem);
