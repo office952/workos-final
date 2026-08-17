@@ -196,6 +196,22 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       {
+        id: "CUSTOMER",
+        label: "Client",
+        owns: ["profilul curent", "starea ACTIVE / RETIRED"],
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "COMMERCIAL_REQUEST",
+        label: "Cerere de ofertă",
+        owns: [
+          "ce a cerut clientul",
+          "starea de birou",
+          "legătura Request↔Quote",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
         id: "EXECUTION",
         label: "Execuție",
         owns: ["plan operațional", "actuale de execuție"],
@@ -221,6 +237,20 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Commercial",
         statement:
           "Prețul client este derivat din EIC planificat. Snapshot-ul de ofertă îngheață acel preț. Acceptarea ofertei este o decizie separată. Snapshot-ul de comandă copiază oferta acceptată. Eliberarea în producție din comandă nu este implementată.",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "customer",
+        label: "Client",
+        statement:
+          "Customer deține profilul curent. Workspace-ul client doar proiectează Cereri, Oferte și Lucrări după customerId. Nu este CRM și nu rescrie snapshot-uri.",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "client-workspace",
+        label: "Workspace client",
+        statement:
+          "Proiecție de citire. Nu deține profil, cerere, ofertă sau lucrare. Relațiile rămân pe customerId, nu pe nume.",
         state: "IMPLEMENTED",
       },
       {
@@ -349,6 +379,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Setările tehnice, lifecycle-ul și resursele nu au write persistat.",
       "Identitatea resursei, specificația, dovada de cost, cererea de componentă și prețul client rămân separate.",
       "Commercial consumă EIC planificat. Nu recalculează cantități și nu repricează din costul real.",
+      "Customer deține profilul curent. Workspace-ul client nu deține adevăr de business. Quote și Order rămân imutabile.",
       "Procesul operațional este HOW. Resursa este WHAT. Workcenter / utilaj furnizează capabilitatea. Task-ul de execuție alege ulterior furnizorul.",
       "Se confirmă definiția verificată, nu un draft ulterior.",
       "Componenta neselectată este tăcută; cea selectată este calculabilă independent.",
@@ -608,6 +639,16 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "operational-job-overview",
         label: "Prezentare lucrări operaționale",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "commercial-request",
+        label: "Cereri de ofertă",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "client-workspace",
+        label: "Workspace client",
         state: "IMPLEMENTED",
       },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },

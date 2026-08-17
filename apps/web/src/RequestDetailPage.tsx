@@ -7,6 +7,7 @@ import {
   type CommercialRequestStatus,
   type RequestDetailProjection,
 } from "@workos-final/domain";
+import { ClientLink } from "./ClientLink";
 import { fetchProductCatalog } from "./productApi";
 import { readRequestDetail, updateCommercialRequest } from "./requestsApi";
 import { Field } from "./ui/Field";
@@ -113,7 +114,12 @@ export function RequestDetailPage() {
       <p>
         <StatusChip label={detail.statusLabel} tone="progress" />
       </p>
-      {detail.customerDisplayName ? <p>Client: {detail.customerDisplayName}</p> : null}
+      <p>
+        <ClientLink
+          customerId={request.customerId}
+          displayName={detail.customerDisplayName}
+        />
+      </p>
       {notice ? <p>{notice}</p> : null}
 
       <form

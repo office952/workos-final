@@ -4,6 +4,8 @@ import { AppShell } from "./AppShell";
 import { ComponentsPage } from "./ComponentsPage";
 import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
 import { GovernancePage } from "./GovernancePage";
+import { ClientsOverviewPage } from "./ClientsOverviewPage";
+import { ClientWorkspacePage } from "./ClientWorkspacePage";
 import { JobsOverviewPage } from "./JobsOverviewPage";
 import { QuotesOverviewPage } from "./QuotesOverviewPage";
 import { RequestDetailPage } from "./RequestDetailPage";
@@ -22,8 +24,11 @@ import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
 
 const NAV_ITEMS = [
   { to: "/", label: "Lucrări" },
-  { to: "/requests", label: "Cereri" },
-  { to: "/quotes", label: "Oferte" },
+  {
+    to: "/requests",
+    label: "Comercial",
+    matchPrefixes: ["/requests", "/quotes", "/clients"],
+  },
   { to: "/products", label: "Produse" },
   { to: "/admin", label: "Administrare" },
 ];
@@ -36,6 +41,8 @@ export function App() {
         <Route path="/requests" element={<RequestsOverviewPage />} />
         <Route path="/requests/:requestId" element={<RequestDetailPage />} />
         <Route path="/quotes" element={<QuotesOverviewPage />} />
+        <Route path="/clients" element={<ClientsOverviewPage />} />
+        <Route path="/clients/:customerId" element={<ClientWorkspacePage />} />
         <Route path="/system" element={<SystemStatusPage />} />
         <Route path="/products" element={<ProductCatalogPage />} />
         <Route path="/products/:productCode" element={<ProductConfigurationPage />} />

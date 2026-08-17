@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Customer } from "@workos-final/domain";
+import { Link } from "react-router-dom";
+import { customerHref, type Customer } from "@workos-final/domain";
 import {
   createCustomer,
   fetchCustomers,
@@ -69,7 +70,7 @@ export function CustomerAdminPage() {
     <section>
       <PageHeader
         title="Clienți"
-        lead="Identitate comercială reutilizabilă pentru ofertă, comandă și Lucrări. Nu este CRM, facturare sau portal client."
+        lead="Ciclu de viață: adăugare, redenumire și retragere. Datele de lucru se editează în workspace-ul clientului."
       />
       <form
         className="people-create"
@@ -132,6 +133,9 @@ export function CustomerAdminPage() {
                 <>
                   <p>{customer.displayName}</p>
                   <StatusChip label="Activ" tone="ok" />
+                  <Link className="button-link" to={customerHref(customer.customerId)}>
+                    Deschide workspace
+                  </Link>
                   <button
                     type="button"
                     className="button-quiet"
@@ -167,6 +171,9 @@ export function CustomerAdminPage() {
             <li key={customer.customerId}>
               <p>{customer.displayName}</p>
               <StatusChip label="Retras" tone="neutral" />
+              <Link className="button-link" to={customerHref(customer.customerId)}>
+                Deschide workspace
+              </Link>
             </li>
           ))}
         </ul>

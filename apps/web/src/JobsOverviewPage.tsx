@@ -9,6 +9,7 @@ import {
   type JobOverviewProjection,
   type JobStage,
 } from "@workos-final/domain";
+import { ClientLink } from "./ClientLink";
 import { fetchJobOverview } from "./jobsApi";
 import { EmptyState } from "./ui/EmptyState";
 import { PageHeader } from "./ui/PageHeader";
@@ -111,9 +112,10 @@ export function JobsOverviewPage() {
                   <div className="jobs-identity">
                     <Link to={job.href}>{job.inscription}</Link>
                     <span>{job.productLabel}</span>
-                    {job.customerDisplayName ? (
-                      <span className="jobs-customer">Client: {job.customerDisplayName}</span>
-                    ) : null}
+                    <ClientLink
+                      customerId={job.customerId}
+                      displayName={job.customerDisplayName}
+                    />
                   </div>
                   <div className="jobs-status">
                     <StatusChip label={job.stageLabel} tone={stageTone(job.stage)} />

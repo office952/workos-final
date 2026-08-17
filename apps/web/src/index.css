@@ -52,6 +52,13 @@ body {
   margin: 0 auto;
   padding: 0.75rem 1.5rem;
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+}
+
+.app-header-row {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
@@ -134,10 +141,28 @@ h1 {
   color: var(--bad);
 }
 
-.app-nav {
+.app-nav,
+.app-subnav {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.app-subnav {
+  gap: 0.85rem;
+}
+
+.app-subnav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding-bottom: 0.15rem;
+  border-bottom: 2px solid transparent;
+}
+
+.app-subnav a[aria-current="page"] {
+  border-bottom-color: var(--accent);
 }
 
 .form-stack {
@@ -1175,8 +1200,217 @@ details summary {
   white-space: nowrap;
 }
 
+.clients-list {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.clients-list li {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.6fr) minmax(10rem, 1.2fr) auto;
+  gap: 0.5rem 0.9rem;
+  align-items: center;
+}
+
+.client-workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.client-workspace-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.client-kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.client-workspace-header h1 {
+  margin: 0;
+}
+
+.client-header-meta,
+.client-retired-note,
+.client-current-hint {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.client-header-side {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: end;
+}
+
+.client-header-actions,
+.client-next-actions,
+.client-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  align-items: center;
+}
+
+.client-next {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+}
+
+.client-next p {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.client-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.client-sections a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  padding-bottom: 0.15rem;
+  border-bottom: 2px solid transparent;
+}
+
+.client-sections a[aria-current="page"] {
+  border-bottom-color: var(--accent);
+}
+
+.client-overview {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.client-current-card,
+.client-activity-card {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+}
+
+.client-current-card h2,
+.client-activity-card h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.client-profile-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1.2rem;
+  margin: 0.85rem 0 0;
+}
+
+.client-profile-list div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.client-profile-list dt {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.client-profile-list dd {
+  margin: 0;
+}
+
+.client-profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 1rem;
+}
+
+.client-edit-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.client-count-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.client-count-card {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.client-count-card strong {
+  font-size: 1.35rem;
+}
+
+.client-activity {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.client-activity li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.client-activity span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.client-create {
+  margin: 0 0 0.85rem;
+}
+
+.client-create summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.client-create .people-create {
+  margin-top: 0.75rem;
+}
+
 @media (max-width: 56rem) {
-  .app-header-inner {
+  .app-header-row {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -1198,11 +1432,24 @@ details summary {
     grid-template-columns: 1fr;
   }
 
-  .jobs-list li {
+  .jobs-list li,
+  .clients-list li,
+  .client-profile-list,
+  .client-profile-fields,
+  .client-count-grid {
     grid-template-columns: 1fr;
   }
 
-  .jobs-list .button-link {
+  .client-workspace-header {
+    flex-direction: column;
+  }
+
+  .client-header-side {
+    justify-items: start;
+  }
+
+  .jobs-list .button-link,
+  .clients-list .button-link {
     justify-self: start;
   }
 }

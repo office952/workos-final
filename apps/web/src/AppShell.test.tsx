@@ -51,4 +51,61 @@ describe("AppShell", () => {
       "page",
     );
   });
+
+  it("keeps Comercial active across commercial routes and shows secondary links", () => {
+    render(
+      <MemoryRouter initialEntries={["/quotes"]}>
+        <AppShell
+          navItems={[
+            { to: "/", label: "Lucrări" },
+            {
+              to: "/requests",
+              label: "Comercial",
+              matchPrefixes: ["/requests", "/quotes", "/clients"],
+            },
+            { to: "/products", label: "Produse" },
+          ]}
+        >
+          <p>oferte</p>
+        </AppShell>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("link", { name: "Comercial" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("navigation", { name: "Navigare comercială" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Oferte" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("link", { name: "Clienți" })).toBeInTheDocument();
+  });
+
+  it("keeps commercial secondary navigation on a product continuation", () => {
+    render(
+      <MemoryRouter initialEntries={["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1"]}>
+        <AppShell
+          navItems={[
+            { to: "/", label: "Lucrări" },
+            {
+              to: "/requests",
+              label: "Comercial",
+              matchPrefixes: ["/requests", "/quotes", "/clients"],
+            },
+          ]}
+        >
+          <p>produs</p>
+        </AppShell>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("navigation", { name: "Navigare comercială" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Oferte" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Comercial" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
 });

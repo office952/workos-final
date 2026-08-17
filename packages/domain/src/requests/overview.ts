@@ -34,6 +34,7 @@ export type RequestCommercialProgress = (typeof REQUEST_COMMERCIAL_PROGRESS)[num
 export type RequestOverviewItem = {
   requestId: string;
   reference: string;
+  customerId: string;
   customerDisplayName: string | null;
   title: string;
   createdAt: string;
@@ -244,6 +245,7 @@ export function projectRequestOverviewItem(input: {
   return {
     requestId: input.request.requestId,
     reference: input.request.reference,
+    customerId: input.request.customerId,
     customerDisplayName: input.customerDisplayName,
     title: input.request.title,
     createdAt: input.request.createdAt,

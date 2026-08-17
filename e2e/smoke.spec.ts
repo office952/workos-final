@@ -17,10 +17,12 @@ test("platform shell shows real health and no fake business menu", async ({
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Lucrări" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Cereri" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Oferte" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Comercial" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Produse" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Administrare" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Cereri" }),
+  ).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/ui-shell.png",
     fullPage: true,

@@ -31,6 +31,7 @@ const detail: RequestDetailProjection = {
       productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
       productLabel: "Litere volumetrice",
       inscription: "HUB",
+      customerId: "cus:1",
       customerDisplayName: "HUB MEDIA",
       createdAt: "2026-08-17T12:00:00.000Z",
       grossDisplay: "624,82",
@@ -92,7 +93,10 @@ describe("RequestDetailPage", () => {
 
     expect(await screen.findByRole("heading", { name: "Litere exterior" })).toBeInTheDocument();
     expect(screen.getByText(/CER-11111111/)).toBeInTheDocument();
-    expect(screen.getByText("Client: HUB MEDIA")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Client: HUB MEDIA" })).toHaveAttribute(
+      "href",
+      "/clients/cus%3A1",
+    );
     expect(screen.getByLabelText("Descriere")).toHaveValue("Pe fațadă, text HUB MEDIA.");
     expect(screen.getByRole("heading", { name: "Oferte legate" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "OF-ABCDEF01" })).toHaveAttribute(

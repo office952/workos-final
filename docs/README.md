@@ -20,6 +20,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 - `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` — operational person identity and task executor
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — operator/admin visual and interaction grammar
 - `docs/architecture/CUSTOMER_IDENTITY_CANON.md` — reusable Client identity
+- `docs/architecture/CLIENT_WORKSPACE_CANON.md` — Client Workspace projection
 - `docs/architecture/SELLER_IDENTITY_CANON.md` — company / vânzător identity
 - `docs/architecture/QUOTE_SNAPSHOT_CANON.md` — immutable offer freeze
 - `docs/architecture/QUOTE_DOCUMENT_CANON.md` — customer Ofertă PDF projection

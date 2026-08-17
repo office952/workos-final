@@ -115,9 +115,12 @@ Description is not parsed. No auto-selected components. No auto-created Product 
 
 Registry title always opens the Request. The next-action control may open the furthest linked Quote.
 
-Primary nav: Lucrări · Cereri · Oferte · Produse · Administrare.
+Primary nav: Lucrări · Comercial · Produse · Administrare.
+Inside Comercial: Cereri · Oferte · Clienți.
+Bookmarked `/requests` stays valid.
 
-Client Workspace is next and is not this surface.
+`commercial_requests.reference` is unique. Existing `CER-XXXXXXXX` values are preserved.
+Client Workspace projects requests by `customerId`. It does not own Request truth.
 
 ## Persistence
 

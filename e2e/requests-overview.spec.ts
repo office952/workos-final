@@ -142,7 +142,7 @@ test("office can record a request, configure a product, and find the linked quot
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(page.locator(".jobs-list li").filter({ hasText: inscription })).toBeVisible();
 
-  await page.getByRole("link", { name: "Cereri" }).click();
+  await page.getByRole("link", { name: "Comercial" }).click();
   await expect(requestRow(page, title).getByRole("link", { name: title })).toHaveAttribute(
     "href",
     /\/requests\//,

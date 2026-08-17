@@ -7,6 +7,15 @@ import {
   type InventoryStockProjection,
   type Customer,
   type CustomerMutationResult,
+  type CustomerProfilePatch,
+  type CustomerRegistryProjection,
+  type CustomerWorkspaceProjection,
+  jobsForCustomer,
+  projectCustomerRegistry,
+  projectCustomerRegistryItem,
+  projectCustomerWorkspace,
+  quotesForCustomer,
+  requestsForCustomer,
   type SellerMutationResult,
   type SellerProfile,
   type SellerProfileInput,
@@ -60,6 +69,7 @@ import {
   persistCreatedCustomer,
   persistRenamedCustomer,
   persistRetiredCustomer,
+  persistUpdatedCustomer,
 } from "../customers/store.js";
 import { getSellerProfile, persistUpdatedSeller } from "../seller/store.js";
 import {
@@ -151,6 +161,8 @@ export type ProductSystemRuntime = {
   listPeople(): Person[];
   listCustomers(): Customer[];
   getCustomer(customerId: string): Customer | null;
+  listCustomerRegistry(): CustomerRegistryProjection;
+  readCustomerWorkspace(customerId: string): CustomerWorkspaceProjection | null;
   getSellerProfile(): SellerProfile;
   updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
   listJobOverview(): JobOverviewProjection;
@@ -179,7 +191,14 @@ export type ProductSystemRuntime = {
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
   retirePerson(personId: string): PersonMutationResult;
-  createCustomer(displayName: string): CustomerMutationResult;
+  createCustomer(
+    displayName: string,
+    profile?: CustomerProfilePatch,
+  ): CustomerMutationResult;
+  updateCustomer(
+    customerId: string,
+    patch: CustomerProfilePatch,
+  ): CustomerMutationResult;
   renameCustomer(customerId: string, displayName: string): CustomerMutationResult;
   retireCustomer(customerId: string): CustomerMutationResult;
   close(): void;
@@ -271,41 +290,40 @@ export function createProductSystemRuntime(
       return persistUpdatedSeller(db, input);
     },
     listJobOverview() {
-      const people = listPeople(db);
-      const jobs = listOrderSnapshots(db).map((order) => {
-        const release = getAcceptedProductionSnapshotByOrder(db, order.orderSnapshotId);
-        const record = release
-          ? getExecutionPlanBySnapshotId(db, release.snapshotId)
-          : null;
-        return projectJobOverviewItem({
-          order,
-          release,
-          planView: record ? projectExecutionPlanView(record, people, release) : null,
-        });
-      });
-      return projectJobOverview(jobs);
+      return projectJobOverview(jobOverviewItems(db));
     },
     listQuoteOverview() {
-      const quotes = listQuoteSnapshots(db).map((quote) => {
-        const acceptance = getQuoteAcceptanceBySnapshotId(db, quote.quoteSnapshotId);
-        const order = getOrderSnapshotByQuoteSnapshotId(db, quote.quoteSnapshotId);
-        return projectQuoteOverviewItem({
-          quote,
-          acceptance,
-          order,
-        });
-      });
-      return projectQuoteOverview(quotes);
+      return projectQuoteOverview(quoteOverviewItems(db));
     },
     listRequestOverview() {
-      const requests = listCommercialRequests(db).map((request) =>
-        projectRequestOverviewItem({
-          request,
-          customerDisplayName: getCustomer(db, request.customerId)?.displayName ?? null,
-          quotes: linkedQuoteOverviewItems(db, request.requestId),
-        }),
+      return projectRequestOverview(requestOverviewItems(db));
+    },
+    listCustomerRegistry() {
+      const requests = requestOverviewItems(db);
+      const quotes = quoteOverviewItems(db);
+      const jobs = jobOverviewItems(db);
+      return projectCustomerRegistry(
+        listCustomers(db).map((customer) =>
+          projectCustomerRegistryItem({
+            customer,
+            requests: requestsForCustomer(requests, customer.customerId),
+            quotes: quotesForCustomer(quotes, customer.customerId),
+            jobs: jobsForCustomer(jobs, customer.customerId),
+          }),
+        ),
       );
-      return projectRequestOverview(requests);
+    },
+    readCustomerWorkspace(customerId) {
+      const customer = getCustomer(db, customerId);
+      if (!customer) {
+        return null;
+      }
+      return projectCustomerWorkspace({
+        customer,
+        requests: requestsForCustomer(requestOverviewItems(db), customerId),
+        quotes: quotesForCustomer(quoteOverviewItems(db), customerId),
+        jobs: jobsForCustomer(jobOverviewItems(db), customerId),
+      });
     },
     readCommercialRequest(requestId) {
       return getCommercialRequest(db, requestId);
@@ -359,8 +377,11 @@ export function createProductSystemRuntime(
     retirePerson(personId) {
       return persistRetiredPerson(db, personId, new Date().toISOString());
     },
-    createCustomer(displayName) {
-      return persistCreatedCustomer(db, displayName);
+    createCustomer(displayName, profile) {
+      return persistCreatedCustomer(db, displayName, profile);
+    },
+    updateCustomer(customerId, patch) {
+      return persistUpdatedCustomer(db, customerId, patch);
     },
     renameCustomer(customerId, displayName) {
       return persistRenamedCustomer(db, customerId, displayName);
@@ -390,6 +411,41 @@ export function createProductSystemRuntime(
       db.close();
     },
   };
+}
+
+function requestOverviewItems(db: SqliteDatabase) {
+  return listCommercialRequests(db).map((request) =>
+    projectRequestOverviewItem({
+      request,
+      customerDisplayName: getCustomer(db, request.customerId)?.displayName ?? null,
+      quotes: linkedQuoteOverviewItems(db, request.requestId),
+    }),
+  );
+}
+
+function quoteOverviewItems(db: SqliteDatabase) {
+  return listQuoteSnapshots(db).map((quote) =>
+    projectQuoteOverviewItem({
+      quote,
+      acceptance: getQuoteAcceptanceBySnapshotId(db, quote.quoteSnapshotId),
+      order: getOrderSnapshotByQuoteSnapshotId(db, quote.quoteSnapshotId),
+    }),
+  );
+}
+
+function jobOverviewItems(db: SqliteDatabase) {
+  const people = listPeople(db);
+  return listOrderSnapshots(db).map((order) => {
+    const release = getAcceptedProductionSnapshotByOrder(db, order.orderSnapshotId);
+    const record = release
+      ? getExecutionPlanBySnapshotId(db, release.snapshotId)
+      : null;
+    return projectJobOverviewItem({
+      order,
+      release,
+      planView: record ? projectExecutionPlanView(record, people, release) : null,
+    });
+  });
 }
 
 function linkedQuoteOverviewItems(db: SqliteDatabase, requestId: string) {

@@ -217,6 +217,19 @@ describe("system governance projection", () => {
     expect(governance.roadmap.find((item) => item.id === "catalog")?.state).toBe(
       "IMPLEMENTED",
     );
+    expect(governance.authorities.find((item) => item.id === "CUSTOMER")?.owns).toEqual([
+      "profilul curent",
+      "starea ACTIVE / RETIRED",
+    ]);
+    expect(
+      governance.authorities.find((item) => item.id === "COMMERCIAL_REQUEST")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(governance.boundaries.find((item) => item.id === "client-workspace")?.statement).toMatch(
+      /Nu deține profil/,
+    );
+    expect(governance.roadmap.find((item) => item.id === "client-workspace")?.state).toBe(
+      "IMPLEMENTED",
+    );
   });
 
   it("does not promote the capability kernel to ACTIVE", () => {

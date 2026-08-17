@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   REQUEST_OVERVIEW_FILTERS,
   filterRequestOverview,
@@ -9,6 +9,7 @@ import {
   type RequestOverviewFilter,
   type RequestOverviewProjection,
 } from "@workos-final/domain";
+import { ClientLink } from "./ClientLink";
 import { createCustomer, fetchCustomers } from "./customerApi";
 import { createCommercialRequest, fetchRequestOverview } from "./requestsApi";
 import { EmptyState } from "./ui/EmptyState";
@@ -23,6 +24,8 @@ type PageState =
 
 export function RequestsOverviewPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const presetCustomerId = searchParams.get("customer") ?? "";
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [filter, setFilter] = useState<RequestOverviewFilter>("ALL");
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -108,6 +111,7 @@ export function RequestsOverviewPage() {
 
       <RequestCreateForm
         customers={customers}
+        initialCustomerId={presetCustomerId}
         onCreate={handleCreate}
         onCreateCustomer={handleCreateCustomer}
       />
@@ -138,11 +142,10 @@ export function RequestsOverviewPage() {
                   <div className="jobs-identity">
                     <Link to={request.href}>{request.title}</Link>
                     <span>{request.reference}</span>
-                    {request.customerDisplayName ? (
-                      <span className="jobs-customer">
-                        Client: {request.customerDisplayName}
-                      </span>
-                    ) : null}
+                    <ClientLink
+                      customerId={request.customerId}
+                      displayName={request.customerDisplayName}
+                    />
                   </div>
                   <div className="jobs-status">
                     <StatusChip
@@ -172,10 +175,12 @@ export function RequestsOverviewPage() {
 
 function RequestCreateForm({
   customers,
+  initialCustomerId,
   onCreate,
   onCreateCustomer,
 }: {
   customers: readonly Customer[];
+  initialCustomerId: string;
   onCreate: (input: {
     customerId: string;
     title: string;
@@ -183,8 +188,13 @@ function RequestCreateForm({
   }) => Promise<void>;
   onCreateCustomer: (displayName: string) => Promise<string>;
 }) {
-  const [customerId, setCustomerId] = useState("");
+  const [customerId, setCustomerId] = useState(initialCustomerId);
   const [title, setTitle] = useState("");
+  useEffect(() => {
+    if (initialCustomerId) {
+      setCustomerId(initialCustomerId);
+    }
+  }, [initialCustomerId]);
   const [description, setDescription] = useState("");
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);

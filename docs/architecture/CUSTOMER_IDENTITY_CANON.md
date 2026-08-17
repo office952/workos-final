@@ -26,18 +26,21 @@ V1 fields:
 
 - `customerId`
 - `displayName`
+- optional current profile: `cui`, `contactName`, `phone`, `email`, `address`, `city`, `notes`
 - `ACTIVE` / `RETIRED`
 - `createdAt` / `updatedAt` / `retiredAt`
 
 `displayName` may be a firm, a person, or a project label. V1 does not distinguish PERSON / COMPANY.
+One contact lives on the Customer row. Multiple contacts remain a future extension.
 
 ## What this is not
 
 Not CRM.
-Not leads, pipeline, contacts, notes, tags, or segmentation.
-Not billing, CUI/VAT, invoices, payments, or a customer portal.
+Not leads, pipeline, a Contact entity, tags, or segmentation.
+Not billing, invoices, payments, or a customer portal.
 Not Product Truth.
 Not seller / legal company identity. Seller lives in Date firmă (`/admin/seller`) and freezes separately into Quote.
+CUI is an optional current-profile string. It is not fiscal validation and is not frozen into Quote.
 
 ## Freeze law
 
@@ -73,7 +76,9 @@ Names are not unique. Identity is `customerId`.
 
 ## Surfaces
 
-Admin catalog: Administrare → Comercial → Clienți (`/admin/customers`).
+Daily work: Comercial → Clienți (`/clients`) and Client Workspace (`/clients/:customerId`).
+See `docs/architecture/CLIENT_WORKSPACE_CANON.md`.
+Admin catalog: Administrare → Comercial → Clienți (`/admin/customers`) remains lifecycle only.
 Commercial selection: compact Client selector + Adaugă client before Quote freeze.
-Lucrări shows frozen `displayName`. Order remains the job root.
+Lucrări shows frozen `displayName` and can open the workspace by `customerId`.
 ExecutionPlan / ExecutionTask do not duplicate Customer truth.

@@ -15,7 +15,7 @@ const GROUPS = [
         to: "/admin/customers",
         label: "Clienți",
         description:
-          "Identitate comercială minimă pentru ofertă, comandă și Lucrări. Fără CRM, facturi sau portal.",
+          "Ciclu de viață: adăugare, redenumire, retragere. Lucrul zilnic este în Clienți, sub Comercial.",
       },
     ],
   },

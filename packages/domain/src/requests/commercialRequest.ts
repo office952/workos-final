@@ -37,6 +37,7 @@ export const COMMERCIAL_REQUEST_MUTATION_ERRORS = [
   "customer_locked",
   "invalid_status",
   "not_found",
+  "reference_unavailable",
 ] as const;
 export type CommercialRequestMutationError =
   (typeof COMMERCIAL_REQUEST_MUTATION_ERRORS)[number];

@@ -28,6 +28,7 @@ import {
   formatQuantity,
   formatUnit,
 } from "./formatDisplay";
+import { ClientLink } from "./ClientLink";
 import { quoteDocumentUrl } from "./productApi";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
@@ -383,12 +384,16 @@ function QuoteDocumentDownloadLink({ snapshot }: { snapshot: QuoteSnapshot }) {
 function FrozenCustomerLine({
   customer,
 }: {
-  customer?: { displayName: string };
+  customer?: { customerId: string; displayName: string };
 }) {
   if (!customer?.displayName) {
     return null;
   }
-  return <p>Client: {customer.displayName}</p>;
+  return (
+    <p>
+      <ClientLink customerId={customer.customerId} displayName={customer.displayName} />
+    </p>
+  );
 }
 
 function CustomerSelectionFields({

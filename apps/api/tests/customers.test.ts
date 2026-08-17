@@ -49,9 +49,50 @@ describe("customer API", () => {
       body: JSON.stringify({ status: "RETIRED" }),
     });
     expect(((await readBody(retired)).customer as JsonObject).status).toBe("RETIRED");
+    expect(created.cui).toBeNull();
+    expect(created.contactName).toBeNull();
     expect(JSON.stringify(await readBody(await app.request("/api/customers")))).not.toMatch(
-      /email|phone|CUI|CRM|lead/,
+      /CRM|lead|pipeline|oportunit/i,
     );
+  });
+
+  it("persists optional current profile fields and reads one customer", async () => {
+    const app = createApp();
+    const created = await app.request("/api/customers", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        displayName: "HUB MEDIA",
+        cui: "RO12345678",
+        contactName: "Ana Pop",
+        phone: "0722000000",
+        email: "ana@hub.ro",
+        address: "Str. Exemplu 1",
+        city: "București",
+        notes: "Client vechi",
+      }),
+    });
+    expect(created.status).toBe(201);
+    const customer = (await readBody(created)).customer as JsonObject;
+    expect(customer).toMatchObject({
+      displayName: "HUB MEDIA",
+      cui: "RO12345678",
+      contactName: "Ana Pop",
+      city: "București",
+    });
+
+    const read = await readBody(await app.request(`/api/customers/${customer.customerId}`));
+    expect((read.customer as JsonObject).email).toBe("ana@hub.ro");
+
+    const updated = await readBody(
+      await app.request(`/api/customers/${customer.customerId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ displayName: "HUB MEDIA SRL", cui: "RO12345678" }),
+      }),
+    );
+    expect((updated.customer as JsonObject).displayName).toBe("HUB MEDIA SRL");
+    expect((updated.customer as JsonObject).contactName).toBe("Ana Pop");
   });
 
   it("rejects an empty name", async () => {

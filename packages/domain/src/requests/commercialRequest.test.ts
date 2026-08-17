@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Customer } from "../customers/identity.js";
+import { emptyCustomerProfile, type Customer } from "../customers/identity.js";
 import {
   canChangeCommercialRequestStatus,
   commercialRequestReference,
@@ -18,6 +18,7 @@ function customer(status: Customer["status"] = "ACTIVE"): Customer {
     createdAt: "2026-08-17T08:00:00.000Z",
     updatedAt: "2026-08-17T08:00:00.000Z",
     retiredAt: status === "RETIRED" ? "2026-08-17T09:00:00.000Z" : null,
+    ...emptyCustomerProfile(),
   };
 }
 

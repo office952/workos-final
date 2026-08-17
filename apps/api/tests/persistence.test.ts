@@ -23,8 +23,10 @@ import {
   seedDisplayLabelRecords,
   WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
+import { persistCreatedCustomer } from "../src/customers/store.js";
 import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
+import { persistCreatedCommercialRequest } from "../src/requests/store.js";
 
 const temps: string[] = [];
 
@@ -71,7 +73,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(16);
+    expect(count.count).toBe(17);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -79,7 +81,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(16);
+    expect(again.count).toBe(17);
     second.close();
   });
 
@@ -859,5 +861,71 @@ describe("product system persistence", () => {
     expect(storedTask?.quantities[0]?.value).toBe(125);
     expect(second.readExecutionPlan(created.record.plan.planId)?.plan.eicTotal).toBe(382.5);
     second.close();
+  });
+
+  it("keeps existing CER references and retries when the human reference already exists", () => {
+    const sqlitePath = tempSqlitePath();
+    const db = openSqliteDatabase(sqlitePath);
+    const createdCustomer = persistCreatedCustomer(db, "Client CER");
+    expect(createdCustomer.ok).toBe(true);
+    if (!createdCustomer.ok) {
+      return;
+    }
+    const first = persistCreatedCommercialRequest(
+      db,
+      createdCustomer.customer,
+      "Prima cerere",
+      "Descriere existentă.",
+      { requestId: "crq:11111111-2222-3333-4444-555555555555" },
+    );
+    expect(first.ok).toBe(true);
+    if (!first.ok) {
+      return;
+    }
+    expect(first.request.reference).toBe("CER-11111111");
+    const colliding = persistCreatedCommercialRequest(
+      db,
+      createdCustomer.customer,
+      "A doua cerere",
+      "Aceeași referință umană.",
+      { requestId: "crq:11111111-aaaa-bbbb-cccc-dddddddddddd" },
+    );
+    expect(colliding.ok).toBe(true);
+    if (!colliding.ok) {
+      return;
+    }
+    expect(colliding.request.reference).toMatch(/^CER-[0-9A-F]{8}$/);
+    expect(colliding.request.reference).not.toBe("CER-11111111");
+    expect(colliding.request.requestId).not.toBe(first.request.requestId);
+    const stored = db
+      .prepare("SELECT request_id, reference FROM commercial_requests ORDER BY created_at")
+      .all() as Array<{ request_id: string; reference: string }>;
+    expect(stored[0]).toEqual({
+      request_id: "crq:11111111-2222-3333-4444-555555555555",
+      reference: "CER-11111111",
+    });
+    expect(new Set(stored.map((row) => row.reference)).size).toBe(2);
+    expect(() =>
+      db
+        .prepare(
+          `
+          INSERT INTO commercial_requests (
+            request_id, reference, customer_id, title, description, status, created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        )
+        .run(
+          "crq:99999999-0000-4000-8000-000000000001",
+          "CER-11111111",
+          createdCustomer.customer.customerId,
+          "Coliziune",
+          "Nu trebuie să treacă.",
+          "NEW",
+          "2026-08-17T12:00:00.000Z",
+          "2026-08-17T12:00:00.000Z",
+        ),
+    ).toThrow(/UNIQUE constraint failed/);
+    db.close();
   });
 });

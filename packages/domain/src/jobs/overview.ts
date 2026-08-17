@@ -32,6 +32,7 @@ export type JobOverviewItem = {
   productCode: string;
   productLabel: string;
   inscription: string;
+  customerId: string | null;
   customerDisplayName: string | null;
   createdAt: string;
   stage: JobStage;
@@ -232,6 +233,7 @@ export function projectJobOverviewItem(input: {
     productCode: input.order.productCode,
     productLabel: input.order.productLabel,
     inscription: input.order.inscription,
+    customerId: input.order.customer?.customerId ?? null,
     customerDisplayName: input.order.customer?.displayName ?? null,
     createdAt: input.order.createdAt,
     stage,

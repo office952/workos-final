@@ -34,6 +34,7 @@ export type QuoteOverviewItem = {
   productCode: string;
   productLabel: string;
   inscription: string;
+  customerId: string | null;
   customerDisplayName: string | null;
   createdAt: string;
   grossDisplay: string;
@@ -195,6 +196,7 @@ export function projectQuoteOverviewItem(input: {
     productCode: input.quote.productCode,
     productLabel: input.quote.productLabel,
     inscription: input.quote.inscription,
+    customerId: input.quote.customer?.customerId ?? null,
     customerDisplayName: input.quote.customer?.displayName ?? null,
     createdAt: input.quote.createdAt,
     grossDisplay: formatCustomerMoney(input.quote.commercial.grossPrice),

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import type { RequestOverviewProjection } from "@workos-final/domain";
+import { emptyCustomerProfile, type RequestOverviewProjection } from "@workos-final/domain";
 import { RequestsOverviewPage } from "./RequestsOverviewPage";
 import { fetchCustomers } from "./customerApi";
 import { fetchRequestOverview } from "./requestsApi";
@@ -34,6 +34,7 @@ const readyOverview: RequestOverviewProjection = {
     {
       requestId: "crq:11111111-2222-3333-4444-555555555555",
       reference: "CER-11111111",
+      customerId: "cus:1",
       customerDisplayName: "HUB MEDIA",
       title: "Litere exterior",
       createdAt: "2026-08-17T10:00:00.000Z",
@@ -73,6 +74,7 @@ describe("RequestsOverviewPage", () => {
         createdAt: "2026-08-17T08:00:00.000Z",
         updatedAt: "2026-08-17T08:00:00.000Z",
         retiredAt: null,
+        ...emptyCustomerProfile(),
       },
     ]);
     render(
@@ -83,7 +85,10 @@ describe("RequestsOverviewPage", () => {
     expect(await screen.findByRole("heading", { name: "Cereri de ofertă" })).toBeInTheDocument();
     expect(screen.getByText("Litere exterior")).toBeInTheDocument();
     expect(screen.getByText("CER-11111111")).toBeInTheDocument();
-    expect(screen.getByText("Client: HUB MEDIA")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Client: HUB MEDIA" })).toHaveAttribute(
+      "href",
+      "/clients/cus%3A1",
+    );
     expect(screen.getByText("Nouă")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Litere exterior" })).toHaveAttribute(
       "href",

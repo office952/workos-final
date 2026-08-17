@@ -30,6 +30,7 @@ function quote(stage: QuoteOverviewItem["stage"], inscription = "HUB"): QuoteOve
     productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
     productLabel: "Litere",
     inscription,
+    customerId: "cus:active",
     customerDisplayName: "HUB MEDIA",
     createdAt: "2026-08-17T12:00:00.000Z",
     grossDisplay: "624,82",

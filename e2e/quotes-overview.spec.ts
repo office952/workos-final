@@ -67,7 +67,7 @@ test("operator can find frozen quotes and continue the commercial path", async (
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Oferte" }).click();
+  await page.getByRole("navigation", { name: "Navigare comercială" }).getByRole("link", { name: "Oferte" }).click();
   await expect(quoteRow(page, created.inscription)).toContainText("Acceptată");
   await expect(quoteRow(page, created.inscription)).toContainText("Creează comanda");
 
@@ -77,7 +77,7 @@ test("operator can find frozen quotes and continue the commercial path", async (
   await expect(page).toHaveURL(new RegExp(`/products/${ordered.productCode}\\?order=`));
   await expect(page.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Oferte" }).click();
+  await page.getByRole("navigation", { name: "Navigare comercială" }).getByRole("link", { name: "Oferte" }).click();
   await page.getByRole("button", { name: "Cu comandă" }).click();
   await expect(quoteRow(page, ordered.inscription)).toBeVisible();
   await expect(quoteRow(page, created.inscription)).toHaveCount(0);

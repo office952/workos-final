@@ -210,12 +210,14 @@ Person supplies operational executor identity only.
 
 ## Customer / identitate comercială
 
-Minimal Customer registry is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/CUSTOMER_IDENTITY_CANON.md`.
+Customer current profile is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/CUSTOMER_IDENTITY_CANON.md`.
+Client Workspace is IMPLEMENTED_CURRENT / BASIC. Canonical law: `docs/architecture/CLIENT_WORKSPACE_CANON.md`.
 
-Admin: `/admin` → Comercial → Clienți → `/admin/customers`.
+Daily work: Comercial → Clienți → `/clients` and `/clients/:customerId`.
+Admin: `/admin` → Comercial → Clienți → `/admin/customers` remains lifecycle only.
 Seller admin: `/admin` → Comercial → Date firmă → `/admin/seller`.
 
-Customer supplies reusable commercial identity only. Quote/Order freeze the name used by that job.
+Customer supplies the current reusable profile. Client Workspace projects that profile plus existing Cereri, Oferte and Lucrări by `customerId`. Quote/Order freeze the name used by that job.
 
 ```text
 Customer catalog  ≠  Quote customer snapshot  ≠  CRM
@@ -384,12 +386,11 @@ Do not add a top-nav link per domain.
 Current primary nav stays small so later domains do not accumulate in the header:
 
 - Lucrări
-- Cereri
-- Oferte
+- Comercial
 - Produse
 - Administrare
 
-Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). **Cereri** opens the incoming-request queue (`/requests`). **Oferte** opens the quote registry (`/quotes`). Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. Lucrări is a read-only projection: Order Snapshot is the commercial job root. Cereri is mutable office truth about what the client asked. Oferte is a read-only projection of Quote Snapshots. None of these owns a second Quote or Order status table. Do not add a placeholder Clienți top-nav item until Client Workspace exists.
+Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). **Comercial** is active on `/requests`, `/quotes` and `/clients`, with secondary Cereri / Oferte / Clienți. Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. Lucrări is a read-only projection: Order Snapshot is the commercial job root. Cereri is mutable office truth about what the client asked. Oferte is a read-only projection of Quote Snapshots. Clienți / Client Workspace project current Customer plus those existing records by `customerId`. None of these owns a second Quote or Order status table.
 
 Inside Administrare, group only real current pages:
 
@@ -488,7 +489,7 @@ Settings versions: keep previous active values as history after a new version is
 | Commercial price rules | IMPLEMENTED_CURRENT / BASIC |
 | Quote Snapshot | IMPLEMENTED_CURRENT / BASIC |
 | Commercial Request (Cereri de ofertă) | IMPLEMENTED_CURRENT / BASIC |
-| Client Workspace | NOT_IMPLEMENTED |
+| Client Workspace | IMPLEMENTED_CURRENT / BASIC |
 | Quote Document PDF | IMPLEMENTED_CURRENT / BASIC |
 | Quote Acceptance | IMPLEMENTED_CURRENT / BASIC |
 | Order Snapshot | IMPLEMENTED_CURRENT / BASIC |

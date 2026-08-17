@@ -173,6 +173,7 @@ function requestMutationStatus(error: CommercialRequestMutationError): 400 | 404
     case "invalid_description":
     case "invalid_status":
     case "customer_unavailable":
+    case "reference_unavailable":
       return 400;
     case "not_found":
       return 404;

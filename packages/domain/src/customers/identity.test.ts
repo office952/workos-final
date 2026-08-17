@@ -4,6 +4,7 @@ import {
   generateCustomerId,
   renameCustomer,
   retireCustomer,
+  updateCustomer,
 } from "./identity.js";
 
 describe("commercial customer identity", () => {
@@ -21,6 +22,8 @@ describe("commercial customer identity", () => {
     expect(created.customer.createdAt).toBe("2026-08-17T08:00:00.000Z");
     expect(created.customer.updatedAt).toBe("2026-08-17T08:00:00.000Z");
     expect(created.customer.retiredAt).toBeNull();
+    expect(created.customer.cui).toBeNull();
+    expect(created.customer.contactName).toBeNull();
     expect(created.customer.customerId).not.toBe("SC Exemplu SRL");
   });
 
@@ -83,5 +86,63 @@ describe("commercial customer identity", () => {
   it("rejects an empty or oversized name", () => {
     expect(createCustomer("   ")).toEqual({ ok: false, error: "invalid_name" });
     expect(createCustomer("x".repeat(81))).toEqual({ ok: false, error: "invalid_name" });
+  });
+
+  it("creates a customer with optional profile fields", () => {
+    const created = createCustomer("HUB MEDIA", {
+      profile: {
+        cui: "RO12345678",
+        contactName: "Ana Pop",
+        phone: "0722000000",
+        email: "ana@hub.ro",
+        address: "Str. Exemplu 1",
+        city: "București",
+        notes: "Client vechi",
+      },
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    expect(created.customer.cui).toBe("RO12345678");
+    expect(created.customer.contactName).toBe("Ana Pop");
+    expect(created.customer.phone).toBe("0722000000");
+    expect(created.customer.email).toBe("ana@hub.ro");
+    expect(created.customer.address).toBe("Str. Exemplu 1");
+    expect(created.customer.city).toBe("București");
+    expect(created.customer.notes).toBe("Client vechi");
+  });
+
+  it("updates current profile without changing customerId", () => {
+    const created = createCustomer("Client Alpha");
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    const updated = updateCustomer(created.customer, {
+      displayName: "Client Alpha SRL",
+      cui: "RO999",
+      contactName: "Ion",
+    });
+    expect(updated.ok).toBe(true);
+    if (!updated.ok) {
+      return;
+    }
+    expect(updated.customer.customerId).toBe(created.customer.customerId);
+    expect(updated.customer.displayName).toBe("Client Alpha SRL");
+    expect(updated.customer.cui).toBe("RO999");
+    expect(updated.customer.contactName).toBe("Ion");
+  });
+
+  it("rejects oversized optional profile fields", () => {
+    const created = createCustomer("Client");
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    expect(updateCustomer(created.customer, { cui: "x".repeat(33) })).toEqual({
+      ok: false,
+      error: "invalid_profile",
+    });
   });
 });

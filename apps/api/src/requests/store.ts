@@ -78,34 +78,66 @@ export function getCommercialRequest(
   return row ? requestFromRow(row) : null;
 }
 
+const REQUEST_CREATE_ATTEMPTS = 8;
+
 export function persistCreatedCommercialRequest(
   db: SqliteDatabase,
   customer: Customer,
   title: string,
   description: string,
+  options?: { requestId?: string },
 ): CommercialRequestMutationResult {
-  const created = createCommercialRequest({ customer, title, description });
-  if (!created.ok) {
-    return created;
-  }
-  db.prepare(
+  const insert = db.prepare(
     `
     INSERT INTO commercial_requests (
       request_id, reference, customer_id, title, description, status, created_at, updated_at
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `,
-  ).run(
-    created.request.requestId,
-    created.request.reference,
-    created.request.customerId,
-    created.request.title,
-    created.request.description,
-    created.request.status,
-    created.request.createdAt,
-    created.request.updatedAt,
   );
-  return created;
+  for (let attempt = 0; attempt < REQUEST_CREATE_ATTEMPTS; attempt += 1) {
+    const created = createCommercialRequest({
+      customer,
+      title,
+      description,
+      requestId: attempt === 0 ? options?.requestId : undefined,
+    });
+    if (!created.ok) {
+      return created;
+    }
+    try {
+      insert.run(
+        created.request.requestId,
+        created.request.reference,
+        created.request.customerId,
+        created.request.title,
+        created.request.description,
+        created.request.status,
+        created.request.createdAt,
+        created.request.updatedAt,
+      );
+      return created;
+    } catch (error) {
+      if (!isRequestIdentityCollision(error)) {
+        throw error;
+      }
+    }
+  }
+  return { ok: false, error: "reference_unavailable" };
+}
+
+function isRequestIdentityCollision(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  const code = "code" in error ? String(error.code) : "";
+  const message = "message" in error ? String(error.message) : "";
+  return (
+    code.includes("CONSTRAINT") &&
+    (message.includes("commercial_requests.reference") ||
+      message.includes("commercial_requests.request_id") ||
+      message.includes("UNIQUE constraint failed"))
+  );
 }
 
 export function persistUpdatedCommercialRequest(

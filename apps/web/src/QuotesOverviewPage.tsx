@@ -9,6 +9,7 @@ import {
   type QuoteOverviewProjection,
   type QuoteOverviewStage,
 } from "@workos-final/domain";
+import { ClientLink } from "./ClientLink";
 import { fetchQuoteOverview } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
 import { PageHeader } from "./ui/PageHeader";
@@ -111,9 +112,10 @@ export function QuotesOverviewPage() {
                   <div className="jobs-identity">
                     <Link to={quote.href}>{quote.inscription}</Link>
                     <span>{quote.productLabel}</span>
-                    {quote.customerDisplayName ? (
-                      <span className="jobs-customer">Client: {quote.customerDisplayName}</span>
-                    ) : null}
+                    <ClientLink
+                      customerId={quote.customerId}
+                      displayName={quote.customerDisplayName}
+                    />
                     <span>
                       {quote.reference} · {quote.grossDisplay} {quote.currency}
                     </span>

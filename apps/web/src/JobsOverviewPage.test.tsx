@@ -19,6 +19,7 @@ const readyOverview: JobOverviewProjection = {
       productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
       productLabel: "Litere volumetrice",
       inscription: "ACTIV",
+      customerId: "cus:letters",
       customerDisplayName: "Client Demo LETTERS",
       createdAt: "2026-08-17T10:00:00.000Z",
       stage: "EXECUTION_IN_PROGRESS",
@@ -41,6 +42,7 @@ const readyOverview: JobOverviewProjection = {
       productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
       productLabel: "Litere volumetrice",
       inscription: "GATA",
+      customerId: "cus:acm",
       customerDisplayName: "Client Demo ACM",
       createdAt: "2026-08-16T10:00:00.000Z",
       stage: "EXECUTION_COMPLETED",
@@ -92,7 +94,10 @@ describe("JobsOverviewPage", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText("ACTIV")).toBeInTheDocument();
-    expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Client: Client Demo LETTERS" })).toHaveAttribute(
+      "href",
+      "/clients/cus%3Aletters",
+    );
     expect(screen.getByText("3 / 12 finalizate · 1 în lucru")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Continuă execuția" })).toHaveAttribute(
       "href",

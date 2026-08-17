@@ -17,6 +17,7 @@ import {
   type QuoteSnapshot,
   type RequestDetailProjection,
 } from "@workos-final/domain";
+import { ClientLink } from "./ClientLink";
 import { createCustomer, fetchCustomers } from "./customerApi";
 import { FormRenderer } from "./FormRenderer";
 import {
@@ -822,9 +823,12 @@ export function ProductConfigurationPage() {
         <Notice tone="ok" compact>
           <p>
             Cerere {requestContext.request.reference}
-            {requestContext.customerDisplayName
-              ? ` · Client ${requestContext.customerDisplayName}`
-              : ""}
+            {requestContext.customerDisplayName ? " · " : ""}
+            <ClientLink
+              customerId={requestContext.request.customerId}
+              displayName={requestContext.customerDisplayName}
+              prefix="Client "
+            />
             .
           </p>
         </Notice>

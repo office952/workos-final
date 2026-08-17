@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import type {
   AcceptedProductionSnapshot,
@@ -321,18 +322,23 @@ describe("Product configuration views", () => {
       customer: { customerId: "cus:hidden", displayName: "Client Demo LETTERS" },
     } as unknown as QuoteSnapshot;
     render(
-      <QuoteSnapshotSection
-        price={{ completeness: "COMPLETE" } as CommercialPriceProjection}
-        snapshot={snapshot}
-        reused={false}
-        busy={false}
-        onFreeze={() => undefined}
-        onAccept={() => undefined}
-        onCreateOrder={() => undefined}
-      />,
+      <MemoryRouter>
+        <QuoteSnapshotSection
+          price={{ completeness: "COMPLETE" } as CommercialPriceProjection}
+          snapshot={snapshot}
+          reused={false}
+          busy={false}
+          onFreeze={() => undefined}
+          onAccept={() => undefined}
+          onCreateOrder={() => undefined}
+        />
+      </MemoryRouter>,
     );
     expect(screen.getByRole("heading", { name: "Ofertă creată" })).toBeInTheDocument();
-    expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Client: Client Demo LETTERS" })).toHaveAttribute(
+      "href",
+      "/clients/cus%3Ahidden",
+    );
     expect(screen.queryByText("cus:hidden")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Descarcă oferta PDF" })).toHaveAttribute(
       "href",

@@ -137,6 +137,7 @@ describe("quote overview projection", () => {
       stage: "QUOTE_CREATED",
       stageLabel: "Creată",
       nextActionLabel: "Marchează acceptată",
+      customerId: "cus:letters",
       customerDisplayName: "Client Demo LETTERS",
       grossDisplay: "624,82",
       currency: "EUR",
