@@ -1,0 +1,174 @@
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import type { ExecutionPlanView } from "@workos-final/domain";
+import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
+import {
+  assignExecutionTaskExecutor,
+  assignExecutionTaskProvider,
+  completeExecutionTask,
+  readExecutionPlanById,
+  startExecutionTask,
+} from "./productApi";
+import { Notice } from "./ui/Notice";
+import { PageHeader } from "./ui/PageHeader";
+
+type PageState =
+  | { kind: "loading" }
+  | { kind: "missing" }
+  | { kind: "error" }
+  | { kind: "ready"; view: ExecutionPlanView };
+
+export function ExecutionWorkspacePage() {
+  const { planId } = useParams();
+  const [page, setPage] = useState<PageState>({ kind: "loading" });
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!planId) {
+      setPage({ kind: "missing" });
+      return;
+    }
+    setPage({ kind: "loading" });
+    void readExecutionPlanById(planId)
+      .then((view) => {
+        if (cancelled) {
+          return;
+        }
+        setPage(view ? { kind: "ready", view } : { kind: "missing" });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPage({ kind: "error" });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [planId]);
+
+  async function applyTaskMutation(
+    action: () => Promise<
+      { ok: true; executionPlan: ExecutionPlanView } | { ok: false; error: string }
+    >,
+  ) {
+    setBusy(true);
+    setNotice(null);
+    try {
+      const result = await action();
+      if (!result.ok) {
+        setNotice(taskActionNotice(result.error));
+        return;
+      }
+      setPage({ kind: "ready", view: result.executionPlan });
+    } catch {
+      setPage({ kind: "error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (page.kind === "loading") {
+    return <p>Se încarcă execuția…</p>;
+  }
+  if (page.kind === "missing") {
+    return (
+      <section className="execution-workspace">
+        <PageHeader title="Execuție" lead="Planul de execuție nu este disponibil." />
+        <p>
+          <Link to="/products">Înapoi la produse</Link>
+        </p>
+      </section>
+    );
+  }
+  if (page.kind === "error") {
+    return (
+      <section className="execution-workspace">
+        <PageHeader title="Execuție" lead="Execuția nu a putut fi încărcată." />
+        <p>
+          <Link to="/products">Înapoi la produse</Link>
+        </p>
+      </section>
+    );
+  }
+
+  const { view } = page;
+  const nextTask = view.tasks.find((task) => task.status === "IN_PROGRESS" || task.canStart);
+
+  return (
+    <section className="execution-workspace">
+      <PageHeader
+        title={view.plan.inscription}
+        lead={`${view.plan.productLabel}. ${view.sourceKindLabel}.`}
+        meta={
+          <ul className="metric-row">
+            <li>Stare: {view.statusLabel}</li>
+            <li>
+              {view.progress.completed} / {view.progress.total} finalizate
+            </li>
+            {nextTask ? <li>Următorul: {nextTask.processLabel}</li> : null}
+          </ul>
+        }
+      />
+      <p className="execution-workspace-nav">
+        <Link to={`/products/${view.plan.productCode}`}>Înapoi la produs</Link>
+      </p>
+      {notice ? (
+        <Notice tone="warn" compact>
+          <p>{notice}</p>
+        </Notice>
+      ) : null}
+      <ExecutionPlanPanel
+        view={view}
+        reused={false}
+        busy={busy}
+        onAssignProvider={(taskId, providerId) =>
+          void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
+        }
+        onAssignExecutor={(taskId, personId) =>
+          void applyTaskMutation(() => assignExecutionTaskExecutor(taskId, personId))
+        }
+        onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
+        onCompleteTask={(taskId, input) =>
+          void applyTaskMutation(() => completeExecutionTask(taskId, input))
+        }
+      />
+    </section>
+  );
+}
+
+function taskActionNotice(error: string): string {
+  switch (error) {
+    case "ineligible_provider":
+      return "Furnizorul ales nu este eligibil pentru această operație.";
+    case "reassignment_locked":
+      return "Alocarea nu mai poate fi schimbată după pornire.";
+    case "missing_assignment":
+      return "Taskul nu are furnizor alocat.";
+    case "missing_executor":
+      return "Taskul nu are executant alocat.";
+    case "provider_unavailable":
+      return "Furnizorul alocat nu mai este disponibil.";
+    case "executor_unavailable":
+      return "Executantul alocat nu mai este activ.";
+    case "unknown_person":
+      return "Persoana aleasă nu există.";
+    case "retired_person":
+      return "Persoana aleasă nu mai este activă.";
+    case "dependencies_incomplete":
+      return "Taskul așteaptă alte operații.";
+    case "invalid_transition":
+      return "Tranziția nu este permisă.";
+    case "invalid_quantity":
+      return "Cantitatea realizată nu este validă.";
+    case "invalid_unit":
+      return "Unitatea nu corespunde resursei planificate.";
+    case "invalid_resource":
+      return "Resursa aleasă nu face parte din planul taskului.";
+    case "invalid_note":
+      return "Nota de finalizare este prea lungă.";
+    default:
+      return "Acțiunea nu a putut fi aplicată.";
+  }
+}

@@ -415,6 +415,20 @@ export async function createOrderSnapshot(
   };
 }
 
+export async function readExecutionPlanById(
+  planId: string,
+): Promise<ExecutionPlanView | null> {
+  const response = await fetch(`${baseUrl}/api/execution-plans/${planId}`);
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ executionPlan?: ExecutionPlanView }>(response);
+  if (!response.ok || !body.executionPlan) {
+    throw new Error("execution_plan_unavailable");
+  }
+  return body.executionPlan;
+}
+
 export async function readExecutionPlan(
   productCode: string,
   snapshotId: string,

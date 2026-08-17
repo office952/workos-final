@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 
 async function confirmLetters(
   page: import("@playwright/test").Page,
@@ -41,17 +42,23 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   });
 
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await expect(page.getByRole("link", { name: "Deschide execuția" })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-execution-open-workspace.png",
+    fullPage: true,
+  });
+  await openExecutionWorkspace(page);
   const plan = page.locator(".execution-plan");
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
   await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
   await expect(plan.getByText(/Stare: (Planificat|În lucru)/).first()).toBeVisible();
-  await expect(plan.getByText("Fără furnizor disponibil").first()).toBeVisible();
+  await expect(plan.getByText("Necesită configurare atelier").first()).toBeVisible();
   await expect(plan.getByRole("heading", { name: /Montare module LED/ })).toBeVisible();
   await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
   await expect(plan.getByText(/Fără furnizor: 3/)).toBeVisible();
-  await expect(plan.getByRole("tab", { name: "Toate" })).toBeVisible();
+  await expect(plan.getByRole("heading", { name: "Necesită configurare atelier" })).toBeVisible();
   await expect(plan.getByText("QUALITY_CONTROL")).toHaveCount(0);
   await expect(plan.getByText("CUT_SHEET_CNC")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
@@ -121,6 +128,7 @@ test("vinyl snapshot persists the frozen vinyl task", async ({ page }) => {
   await confirmLetters(page, { faceFinish: "vinyl", faceColor: "alb" });
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   const plan = page.locator(".execution-plan");
   await expect(plan.getByText(/\/ 13 finalizate/)).toBeVisible();
   await expect(plan.getByRole("heading", { name: /Aplicare folie/ })).toBeVisible();

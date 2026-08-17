@@ -1,5 +1,6 @@
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
@@ -127,6 +128,7 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
   await confirmLetters(page, `ST${Date.now().toString().slice(-4)}`);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();

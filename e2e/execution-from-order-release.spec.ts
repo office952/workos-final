@@ -51,12 +51,14 @@ test("creates a persisted execution plan from the commercial order release", asy
   await expect(quote.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   await expect(order.getByText("Preț final: 624,82 EUR")).toBeVisible();
   await expect(page.getByText("Cost intern curent: 382,50 EUR").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
-  await expect(page.getByText("Estimare orientativă — nu este planul de execuție.")).toBeVisible();
+  const createPlan = page.getByRole("button", { name: "Creează planul de execuție" });
+  if ((await createPlan.count()) > 0) {
+    await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
+    await expect(page.getByText("Estimare orientativă — nu este planul de execuție.")).toBeVisible();
+  }
   await expect(page.getByRole("button", { name: "Acceptă pentru producție" })).toHaveCount(0);
   await expect(page.getByText("Atelier / test tehnic")).toHaveCount(0);
 
-  const createPlan = page.getByRole("button", { name: "Creează planul de execuție" });
   if ((await createPlan.count()) > 0) {
     await expect(page.getByRole("heading", { name: "Plan de execuție" })).toHaveCount(0);
     await page.screenshot({
@@ -69,18 +71,12 @@ test("creates a persisted execution plan from the commercial order release", asy
     await createPlan.click();
   }
 
-  const plan = page.locator(".execution-plan");
   await expect(page.getByText("Plan de execuție creat.").first()).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
-  ).toBeVisible();
-  await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
-  await expect(plan.getByText(/Stare: (Planificat|În lucru)/).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Deschide execuția" })).toBeVisible();
+  await expect(page.locator(".execution-plan")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Creează planul de execuție" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Acceptă pentru producție" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
-  await expect(page.getByText("Estimare orientativă — nu este planul de execuție.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Eliberată pentru producție" })).toBeVisible();
@@ -88,9 +84,6 @@ test("creates a persisted execution plan from the commercial order release", asy
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-order-release-plan-created.png",
     fullPage: true,
-  });
-  await plan.screenshot({
-    path: "docs/worklog/screenshots/letters-order-release-tasks.png",
   });
   await page.locator(".production-snapshot").screenshot({
     path: "docs/worklog/screenshots/letters-order-release-source.png",
@@ -111,9 +104,9 @@ test("retries commercial plan creation without a second plan", async ({ page }) 
   if ((await createPlan.count()) > 0) {
     await createPlan.click();
   }
-  await expect(page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Deschide execuția" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Creează planul de execuție" })).toHaveCount(0);
-  await expect(page.locator(".execution-plan").getByText(/\/ 12 finalizate/)).toBeVisible();
+  await expect(page.locator(".execution-plan")).toHaveCount(0);
 });
 
 test("keeps commercial execution readable at 390px", async ({ page }) => {

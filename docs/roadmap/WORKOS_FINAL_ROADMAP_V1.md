@@ -105,6 +105,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Frozen production input alignment | IMPLEMENTED_CURRENT / BASIC |
 | Production Release from Order | IMPLEMENTED_CURRENT / BASIC |
 | Execution from Order Release | IMPLEMENTED_CURRENT / BASIC |
+| Commercial Execution workspace | IMPLEMENTED_CURRENT / BASIC |
 | Reporting, Documents, ACM, Logo | LATER |
 
 Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

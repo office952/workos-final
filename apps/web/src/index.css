@@ -385,6 +385,38 @@ button:disabled {
   border-color: var(--border);
 }
 
+a.button-link {
+  display: inline-block;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-s);
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.execution-workspace-nav {
+  margin: 0 0 0.75rem;
+}
+
+.execution-lane {
+  margin: 1rem 0 0;
+}
+
+.execution-lane h4 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+}
+
+.execution-lane.is-quiet {
+  color: var(--text-muted);
+}
+
+.execution-lane.is-quiet .production-op {
+  background: var(--surface);
+}
+
 .button-quiet.is-selected {
   border-color: var(--accent);
   font-weight: 650;

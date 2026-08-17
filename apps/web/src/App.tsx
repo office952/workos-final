@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminHomePage } from "./AdminHomePage";
 import { AppShell } from "./AppShell";
 import { ComponentsPage } from "./ComponentsPage";
+import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
 import { GovernancePage } from "./GovernancePage";
 import { PeopleAdminPage } from "./PeopleAdminPage";
 import { ProductCatalogPage } from "./ProductCatalogPage";
@@ -25,6 +26,7 @@ export function App() {
         <Route path="/" element={<SystemStatusPage />} />
         <Route path="/products" element={<ProductCatalogPage />} />
         <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
+        <Route path="/execution/:planId" element={<ExecutionWorkspacePage />} />
         <Route path="/components" element={<ComponentsPage />} />
         <Route path="/governance" element={<GovernancePage />} />
         <Route path="/admin" element={<AdminHomePage />} />

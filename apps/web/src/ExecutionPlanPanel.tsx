@@ -17,13 +17,14 @@ import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 
-type TaskFilter = "all" | "todo" | "active" | "done";
+type TaskLane = "next" | "blocked" | "upcoming" | "completed" | "gap";
 
-const FILTERS: readonly { id: TaskFilter; label: string }[] = [
-  { id: "all", label: "Toate" },
-  { id: "todo", label: "De făcut" },
-  { id: "active", label: "În lucru" },
-  { id: "done", label: "Finalizate" },
+const LANES: readonly { id: TaskLane; label: string }[] = [
+  { id: "next", label: "Acum / următorul" },
+  { id: "blocked", label: "Blocate" },
+  { id: "upcoming", label: "Urmează" },
+  { id: "completed", label: "Finalizate" },
+  { id: "gap", label: "Necesită configurare atelier" },
 ];
 
 type ExecutionPlanPanelProps = {
@@ -52,8 +53,10 @@ export function ExecutionPlanPanel({
   onStartTask,
   onCompleteTask,
 }: ExecutionPlanPanelProps) {
-  const [filter, setFilter] = useState<TaskFilter>("all");
-  const visible = view.tasks.filter((task) => matchesFilter(task, filter));
+  const lanes = LANES.map((lane) => ({
+    ...lane,
+    tasks: view.tasks.filter((task) => taskLane(task) === lane.id),
+  })).filter((lane) => lane.tasks.length > 0);
 
   return (
     <div className="execution-plan">
@@ -63,13 +66,13 @@ export function ExecutionPlanPanel({
         <p className={`task-status status-chip ${statusTone(view.statusLabel)}`}>
           Stare: {view.statusLabel}
         </p>
-        <section className="execution-internal-cost" aria-labelledby="execution-internal-cost">
-          <h4 id="execution-internal-cost">Rezumat cost intern</h4>
-          <p className="execution-plan-cost">
-            Cost intern planificat: {formatMoney(view.plan.eicTotal)}{" "}
-            {view.plan.eicCurrency}
-            {formatCostCompleteness(view.plan.eicCompleteness)}
-          </p>
+      </header>
+      <p className="execution-plan-cost">
+        Cost intern planificat: {formatMoney(view.plan.eicTotal)} {view.plan.eicCurrency}
+        {formatCostCompleteness(view.plan.eicCompleteness)}
+      </p>
+      {view.actualInternalCost.status !== "UNAVAILABLE" ? (
+        <section className="execution-internal-cost" aria-label="Rezumat cost intern">
           <p className="execution-plan-cost">
             Cost intern real: {actualCostSummary(view.actualInternalCost)}
           </p>
@@ -85,7 +88,7 @@ export function ExecutionPlanPanel({
             <ActualInternalCostDetails cost={view.actualInternalCost} />
           </details>
         </section>
-      </header>
+      ) : null}
       <ul className="execution-progress metric-row">
         <li>
           {view.progress.completed} / {view.progress.total} finalizate
@@ -103,39 +106,35 @@ export function ExecutionPlanPanel({
         <summary>Detalii plan</summary>
         <ul className="execution-plan-meta">
           <li>Produs: {view.plan.productLabel}</li>
+          <li>Proveniență: {view.sourceKindLabel}</li>
           <li>Referință: {view.plan.planId}</li>
         </ul>
       </details>
-      <div className="filter-row" role="tablist" aria-label="Filtru taskuri">
-        {FILTERS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            role="tab"
-            aria-selected={filter === item.id}
-            className={filter === item.id ? "button-quiet is-selected" : "button-quiet"}
-            onClick={() => setFilter(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-      {visible.length === 0 ? (
-        <EmptyState title="Niciun task în acest filtru." />
+      {lanes.length === 0 ? (
+        <EmptyState title="Nu există taskuri în acest plan." />
       ) : (
-        <ol className="production-ops">
-          {visible.map((task) => (
-            <ExecutionTaskCard
-              key={task.taskId}
-              task={task}
-              busy={busy}
-              onAssignProvider={onAssignProvider}
-              onAssignExecutor={onAssignExecutor}
-              onStartTask={onStartTask}
-              onCompleteTask={onCompleteTask}
-            />
-          ))}
-        </ol>
+        lanes.map((lane) => (
+          <section
+            key={lane.id}
+            className={`execution-lane${lane.id === "gap" ? " is-quiet" : ""}`}
+            aria-labelledby={`execution-lane-${lane.id}`}
+          >
+            <h4 id={`execution-lane-${lane.id}`}>{lane.label}</h4>
+            <ol className="production-ops">
+              {lane.tasks.map((task) => (
+                <ExecutionTaskCard
+                  key={task.taskId}
+                  task={task}
+                  busy={busy}
+                  onAssignProvider={onAssignProvider}
+                  onAssignExecutor={onAssignExecutor}
+                  onStartTask={onStartTask}
+                  onCompleteTask={onCompleteTask}
+                />
+              ))}
+            </ol>
+          </section>
+        ))
       )}
     </div>
   );
@@ -395,8 +394,8 @@ function ExecutionTaskCard({
         </Notice>
       ) : null}
       {task.eligibleProviders.length === 0 ? (
-        <Notice tone="warn" compact>
-          <p>Fără furnizor disponibil</p>
+        <Notice compact>
+          <p>Necesită configurare atelier. Nu există echipament sau zonă eligibilă.</p>
         </Notice>
       ) : null}
       {task.status === "PLANNED" &&
@@ -502,21 +501,20 @@ function formatSignedMoney(value: number): string {
   return labeled;
 }
 
-function matchesFilter(task: ExecutionTaskView, filter: TaskFilter): boolean {
-  switch (filter) {
-    case "all":
-      return true;
-    case "todo":
-      return task.status === "PLANNED";
-    case "active":
-      return task.status === "IN_PROGRESS";
-    case "done":
-      return task.status === "COMPLETED";
-    default: {
-      const _exhaustive: never = filter;
-      return _exhaustive;
-    }
+function taskLane(task: ExecutionTaskView): TaskLane {
+  if (task.status === "COMPLETED") {
+    return "completed";
   }
+  if (task.eligibleProviders.length === 0) {
+    return "gap";
+  }
+  if (task.status === "IN_PROGRESS" || task.canStart) {
+    return "next";
+  }
+  if (task.waitingFor.length > 0) {
+    return "upcoming";
+  }
+  return "blocked";
 }
 
 function statusTone(label: string): string {

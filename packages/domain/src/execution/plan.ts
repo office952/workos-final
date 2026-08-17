@@ -151,11 +151,16 @@ export type ExecutionPlanProgress = {
   status: ExecutionProgressStatus;
 };
 
+export const EXECUTION_SOURCE_KINDS = ["ORDER", "PILOT"] as const;
+export type ExecutionSourceKind = (typeof EXECUTION_SOURCE_KINDS)[number];
+
 export type ExecutionPlanView = {
   plan: ExecutionPlan;
   progress: ExecutionPlanProgress;
   progressStatus: ExecutionProgressStatus;
   statusLabel: string;
+  sourceKind: ExecutionSourceKind;
+  sourceKindLabel: string;
   tasks: readonly ExecutionTaskView[];
   actualInternalCost: ActualInternalCostProjection;
 };
@@ -272,14 +277,39 @@ export function projectExecutionPlanView(
     };
   });
   const progress = summarizeExecutionProgress(tasks);
+  const sourceKind = executionSourceKind(snapshot);
   return {
     plan: record.plan,
     progress,
     progressStatus: progress.status,
     statusLabel: executionProgressStatusLabel(progress.status),
+    sourceKind,
+    sourceKindLabel: executionSourceKindLabel(sourceKind),
     tasks,
     actualInternalCost: projectActualInternalCost(record, snapshot),
   };
+}
+
+function executionSourceKind(
+  snapshot: AcceptedProductionSnapshot | null,
+): ExecutionSourceKind {
+  if (snapshot?.releaseSource === "ORDER" || Boolean(snapshot?.sourceOrderSnapshotId)) {
+    return "ORDER";
+  }
+  return "PILOT";
+}
+
+function executionSourceKindLabel(kind: ExecutionSourceKind): string {
+  switch (kind) {
+    case "ORDER":
+      return "Eliberată din comandă";
+    case "PILOT":
+      return "Atelier / test tehnic";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
 }
 
 export function summarizeExecutionProgress(

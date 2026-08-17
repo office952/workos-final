@@ -586,6 +586,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Execuție din eliberarea comenzii",
         state: "IMPLEMENTED",
       },
+      {
+        id: "execution-workspace",
+        label: "Workspace execuție",
+        state: "IMPLEMENTED",
+      },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],
     uiRules: [

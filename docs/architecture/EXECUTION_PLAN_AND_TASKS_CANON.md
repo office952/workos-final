@@ -19,6 +19,9 @@ Production Release Snapshot (ORDER-sourced APS)
 
 One ExecutionPlan / ExecutionTask model. Source differs. Downstream assignment, start, complete, actuals, and inventory do not.
 
+The operator surface is the generic job workspace `/execution/:planId`.
+It is a projection and control surface over the persisted plan. It is not a second source of truth, not a dashboard, and not a LETTERS-specific page.
+
 Commercial plans may be created only from a persisted Production Release whose `releaseSource = ORDER` and whose Order provenance is valid.
 `sourceSnapshotId` / `sourceSnapshotHash` point at that Release. Upstream Order → Acceptance → Quote is transitive through the Release.
 

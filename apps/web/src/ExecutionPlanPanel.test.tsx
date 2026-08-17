@@ -33,6 +33,8 @@ const view: ExecutionPlanView = {
   },
   progressStatus: "PLANNED",
   statusLabel: "Planificat",
+  sourceKind: "PILOT",
+  sourceKindLabel: "Atelier / test tehnic",
   actualInternalCost: {
     status: "UNAVAILABLE",
     statusLabel: "Indisponibil",
@@ -147,9 +149,10 @@ describe("ExecutionPlanPanel", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Plan de execuție" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Rezumat cost intern" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Blocate" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Necesită configurare atelier" })).toBeInTheDocument();
     expect(screen.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeInTheDocument();
-    expect(screen.getByText("Cost intern real: indisponibil")).toBeInTheDocument();
+    expect(screen.queryByText("Cost intern real: indisponibil")).not.toBeInTheDocument();
     expect(screen.getByText("WORKOS")).toBeInTheDocument();
     expect(screen.getByText("0 / 2 finalizate")).toBeInTheDocument();
     expect(screen.getByText("Fără furnizor: 1")).toBeInTheDocument();
@@ -161,7 +164,9 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getAllByText("Executant: Nealocat").length).toBeGreaterThan(0);
     expect(screen.getByText("Cantitate planificată: 12,5 m")).toBeInTheDocument();
     expect(screen.getByText("Așteaptă: Debitare foaie CNC — Spate")).toBeInTheDocument();
-    expect(screen.getByText("Fără furnizor disponibil")).toBeInTheDocument();
+    expect(
+      screen.getByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
+    ).toBeInTheDocument();
     expect(screen.queryByText("task:1")).not.toBeInTheDocument();
     expect(screen.queryByText("QUALITY_CONTROL")).not.toBeInTheDocument();
     expect(screen.queryByText("CUT_SHEET_CNC")).not.toBeInTheDocument();

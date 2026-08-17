@@ -1,5 +1,6 @@
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
@@ -53,12 +54,12 @@ test("projects partial actual internal cost from LED consumption and frozen rate
   await confirmLetters(page, `AC${Date.now().toString().slice(-4)}`);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Rezumat cost intern" })).toBeVisible();
   await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
-  await expect(page.getByText("Cost intern real: indisponibil")).toBeVisible();
+  await expect(page.getByText("Cost intern real: indisponibil")).toHaveCount(0);
   await expect(page.getByText("Editează cost")).toHaveCount(0);
   await expect(page.getByText("ActualCostProjection")).toHaveCount(0);
 

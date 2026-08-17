@@ -1,5 +1,6 @@
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
@@ -52,6 +53,7 @@ test("records planned vs completed quantity on LETTERS tasks", async ({ page, re
     page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   const plan = page.locator(".execution-plan");
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
@@ -141,8 +143,8 @@ test("records planned vs completed quantity on LETTERS tasks", async ({ page, re
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Fără furnizor disponibil")).toBeVisible();
-  await expect(pack.getByText("Fără furnizor disponibil")).toBeVisible();
+  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
+  await expect(pack.getByText("Necesită configurare atelier")).toBeVisible();
   await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actuals-no-provider.png",

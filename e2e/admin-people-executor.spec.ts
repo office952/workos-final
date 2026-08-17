@@ -1,5 +1,6 @@
 import { type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import { openPeopleAdmin } from "./helpers/people";
 
 const ACTIVE_NAME = "Executor PEOPLE E2E";
@@ -89,6 +90,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
@@ -151,7 +153,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Fără furnizor disponibil")).toBeVisible();
+  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
   await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await expect(inspect.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   if (await inspect.getByRole("button", { name: "Alocă executant" }).isVisible()) {

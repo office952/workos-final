@@ -27,7 +27,7 @@ Atelier      Resurse, Stoc, Procese, Utilaje și zone
 Sistem       Sistem produs, Module și componente, Guvernanță, Stare sistem
 ```
 
-There is no empty Producție page. Execution lives on the confirmed product path.
+There is no empty Producție page and no Execution top-nav item. After plan creation the product page hands off with **Deschide execuția** to the generic job workspace `/execution/:planId`.
 
 ## Visual primitives
 
@@ -60,7 +60,7 @@ Task row: SEQ + operation, status, echipament/zonă, executant, quantity, action
 
 Wait reasons stay compact. Plan ID and capability stay in Detalii.
 
-Completed rows recede. Simple local filter: Toate / De făcut / În lucru / Finalizate.
+Completed rows recede. Tasks are grouped: Acum / următorul, Blocate, Urmează, Finalizate, then honest atelier gaps.
 
 ## Admin catalog pattern
 
@@ -86,7 +86,7 @@ While editing, the form leads. Construction facts are a compact summary of suppl
 
 Review is a concise operator summary. Confirm is primary. Modify is secondary.
 
-After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → Eliberează pentru producție → Creează planul de execuție → persisted execution. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. Release is not plan creation. On a commercial Order the next action is Eliberează pentru producție, then Creează planul de execuție. Acceptă pentru producție remains only the Atelier / test tehnic path when no Order exists. Previzualizare producție is an estimate, not the persisted plan.
+After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → Eliberează pentru producție → Creează planul de execuție → Deschide execuția. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. Release is not plan creation. After the plan exists, preview is hidden and task work leaves the product page. On a commercial Order the next action is Eliberează pentru producție, then Creează planul de execuție, then Deschide execuția. Acceptă pentru producție remains only the Atelier / test tehnic path when no Order exists.
 
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
 

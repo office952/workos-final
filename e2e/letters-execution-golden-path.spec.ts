@@ -1,5 +1,6 @@
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page) {
@@ -76,6 +77,7 @@ test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", a
     page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   const plan = page.locator(".execution-plan");
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
@@ -156,7 +158,7 @@ test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", a
 
   for (const card of [uniformity, inspect, pack]) {
     await expect(card.getByText("Stare: Planificat")).toBeVisible();
-    await expect(card.getByText("Fără furnizor disponibil")).toBeVisible();
+    await expect(card.getByText("Necesită configurare atelier")).toBeVisible();
     await expect(card.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
     await expect(card.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   }

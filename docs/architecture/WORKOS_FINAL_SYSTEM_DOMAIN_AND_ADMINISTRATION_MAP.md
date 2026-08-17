@@ -96,6 +96,7 @@ WorkOS Final
 │   ├── Accepted Production Snapshot        IMPLEMENTED_CURRENT
 │   ├── Production Release from Order       IMPLEMENTED_CURRENT / BASIC
 │   ├── Execution from Order Release        IMPLEMENTED_CURRENT / BASIC
+│   ├── Execution workspace                 IMPLEMENTED_CURRENT / BASIC
 │   ├── ExecutionPlan                       IMPLEMENTED_CURRENT
 │   ├── ExecutionTasks                      IMPLEMENTED_CURRENT
 │   ├── Provider assignment                 IMPLEMENTED_CURRENT / BASIC
@@ -375,7 +376,7 @@ Administrare
     └── Stare sistem
 ```
 
-Do not add an empty Producție page. Execution lives on the confirmed product path. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
+Do not add an empty Producție page or an Execution top-nav item. The job workspace is `/execution/:planId`, reached from the product path via **Deschide execuția**. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
 
 ## Operator vs admin surfaces
 
@@ -454,6 +455,7 @@ Settings versions: keep previous active values as history after a new version is
 | Frozen production input | IMPLEMENTED_CURRENT / BASIC |
 | Production Release from Order | IMPLEMENTED_CURRENT / BASIC |
 | Execution from Order Release | IMPLEMENTED_CURRENT / BASIC |
+| Execution workspace | IMPLEMENTED_CURRENT / BASIC |
 | Reporting, Documents | PLANNED |
 | Analyzer runtime | PLANNED / NOT_IMPLEMENTED |
 | Capability kernel promotion to ACTIVE | FOUNDATION_ONLY (IDs frozen) |

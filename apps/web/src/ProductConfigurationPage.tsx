@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import type {
   AcceptedProductionSnapshot,
   CommercialPriceProjection,
@@ -14,7 +14,6 @@ import type {
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
-import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
 import { FormRenderer } from "./FormRenderer";
 import {
   AcceptedSnapshotSection,
@@ -30,10 +29,7 @@ import {
 } from "./ProductConfigurationViews";
 import {
   acceptProductionSnapshot,
-  assignExecutionTaskExecutor,
-  assignExecutionTaskProvider,
   compileConfiguration,
-  completeExecutionTask,
   confirmReviewedConfiguration,
   createExecutionPlan,
   acceptQuoteSnapshot,
@@ -45,7 +41,6 @@ import {
   readOrderSnapshot,
   readProductionRelease,
   readQuoteAcceptance,
-  startExecutionTask,
   type TemplateProjection,
 } from "./productApi";
 import { Notice } from "./ui/Notice";
@@ -377,29 +372,6 @@ export function ProductConfigurationPage() {
     }
   }
 
-  async function applyTaskMutation(
-    action: () => Promise<
-      { ok: true; executionPlan: ExecutionPlanView } | { ok: false; error: string }
-    >,
-  ) {
-    setBusy(true);
-    setConfirmNotice(null);
-    try {
-      const result = await action();
-      if (!result.ok) {
-        setConfirmNotice(taskActionNotice(result.error));
-        return;
-      }
-      setConfirmed((current) =>
-        current ? { ...current, executionPlan: result.executionPlan } : current,
-      );
-    } catch {
-      setPage({ kind: "error" });
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
     <section className="product-page">
       <PageHeader
@@ -491,11 +463,13 @@ export function ProductConfigurationPage() {
               }
             />
           ) : null}
-          <ProductionPreviewSection
-            preview={confirmed.executionPlanPreview}
-            basedOnSnapshot={Boolean(confirmed.snapshot)}
-            commercial={Boolean(confirmed.orderSnapshot)}
-          />
+          {confirmed.executionPlan ? null : (
+            <ProductionPreviewSection
+              preview={confirmed.executionPlanPreview}
+              basedOnSnapshot={Boolean(confirmed.snapshot)}
+              commercial={Boolean(confirmed.orderSnapshot)}
+            />
+          )}
 
           {confirmed.snapshot || confirmed.orderSnapshot ? null : (
             <div className="lifecycle-cta">
@@ -566,21 +540,15 @@ export function ProductConfigurationPage() {
                     : "Plan de execuție creat."}
                 </p>
               </Notice>
-              <ExecutionPlanPanel
-                view={confirmed.executionPlan}
-                reused={Boolean(confirmed.executionPlanReused)}
-                busy={busy}
-                onAssignProvider={(taskId, providerId) =>
-                  void applyTaskMutation(() => assignExecutionTaskProvider(taskId, providerId))
-                }
-                onAssignExecutor={(taskId, personId) =>
-                  void applyTaskMutation(() => assignExecutionTaskExecutor(taskId, personId))
-                }
-                onStartTask={(taskId) => void applyTaskMutation(() => startExecutionTask(taskId))}
-                onCompleteTask={(taskId, input) =>
-                  void applyTaskMutation(() => completeExecutionTask(taskId, input))
-                }
-              />
+              <p className="page-lead">Lucrul pe taskuri se face în execuție, nu aici.</p>
+              <div className="action-row">
+                <Link
+                  className="button-link"
+                  to={`/execution/${confirmed.executionPlan.plan.planId}`}
+                >
+                  Deschide execuția
+                </Link>
+              </div>
             </div>
           ) : null}
         </div>
@@ -605,39 +573,4 @@ async function loadCommercialExecution(
     snapshot,
     executionPlan: executionPlan ?? undefined,
   };
-}
-
-function taskActionNotice(error: string): string {
-  switch (error) {
-    case "ineligible_provider":
-      return "Furnizorul ales nu este eligibil pentru această operație.";
-    case "reassignment_locked":
-      return "Alocarea nu mai poate fi schimbată după pornire.";
-    case "missing_assignment":
-      return "Taskul nu are furnizor alocat.";
-    case "missing_executor":
-      return "Taskul nu are executant alocat.";
-    case "provider_unavailable":
-      return "Furnizorul alocat nu mai este disponibil.";
-    case "executor_unavailable":
-      return "Executantul alocat nu mai este activ.";
-    case "unknown_person":
-      return "Persoana aleasă nu există.";
-    case "retired_person":
-      return "Persoana aleasă nu mai este activă.";
-    case "dependencies_incomplete":
-      return "Taskul așteaptă alte operații.";
-    case "invalid_transition":
-      return "Tranziția nu este permisă.";
-    case "invalid_quantity":
-      return "Cantitatea realizată nu este validă.";
-    case "invalid_unit":
-      return "Unitatea nu corespunde resursei planificate.";
-    case "invalid_resource":
-      return "Resursa aleasă nu face parte din planul taskului.";
-    case "invalid_note":
-      return "Nota de finalizare este prea lungă.";
-    default:
-      return "Acțiunea nu a putut fi aplicată.";
-  }
 }

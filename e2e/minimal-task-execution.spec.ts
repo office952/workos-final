@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import {
   assignExecutorIfNeeded,
   assignProviderIfNeeded,
@@ -47,6 +48,7 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
     page.getByRole("heading", { name: "Acceptat pentru producție" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   const plan = page.locator(".execution-plan");
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
@@ -175,7 +177,7 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Fără furnizor disponibil")).toBeVisible();
+  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
   await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await expect(inspect.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   await page.screenshot({

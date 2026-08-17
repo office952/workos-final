@@ -1,5 +1,6 @@
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { openExecutionWorkspace } from "./helpers/execution";
 import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
@@ -53,6 +54,7 @@ test("records planned vs actual resource consumption on LETTERS tasks", async ({
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(page.getByRole("heading", { name: "Acceptat pentru producție" })).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await openExecutionWorkspace(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
@@ -116,7 +118,7 @@ test("records planned vs actual resource consumption on LETTERS tasks", async ({
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Fără furnizor disponibil")).toBeVisible();
+  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
   await expect(inspect.getByText("Consum real")).toHaveCount(0);
   await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
 
