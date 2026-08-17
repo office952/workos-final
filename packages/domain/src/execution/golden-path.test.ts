@@ -121,6 +121,31 @@ function run(
   );
 }
 
+function runManual(
+  record: ExecutionPlanRecord,
+  taskId: string,
+  startedAt: string,
+  completedAt: string,
+): ExecutionPlanRecord {
+  const people = testPeople();
+  const withExecutor = unwrap(
+    assignExecutorToTask(record, taskId, people[0]!.personId, people),
+  );
+  expect(assignProviderToTask(withExecutor, taskId, WC_ASSEMBLY_01_ID)).toEqual({
+    ok: false,
+    error: "ineligible_provider",
+  });
+  const started = unwrap(startExecutionTask(withExecutor, taskId, startedAt, people));
+  const task = started.tasks.find((item) => item.taskId === taskId);
+  if (!task) {
+    throw new Error(`missing ${taskId}`);
+  }
+  expect(task.assignedProvider).toBeNull();
+  return unwrap(
+    completeExecutionTask(started, taskId, completedAt, plannedCompletionInput(task)),
+  );
+}
+
 function bySource(record: ExecutionPlanRecord, scope: "FACE" | "BACK" | "VOLUME", processId: string) {
   const task = record.tasks.find(
     (item) => item.sourceOperationId === compositionNodeId(scope, processId),
@@ -140,7 +165,7 @@ function byProcess(record: ExecutionPlanRecord, processId: string) {
 }
 
 describe("LETTERS execution golden path", () => {
-  it("executes every currently eligible task and keeps honest no-provider gaps", () => {
+  it("executes machine tasks and then the three manual operations without fake providers", () => {
     const snapshot = freeze();
     let record = materializeExecutionPlanFromSnapshot(snapshot, {
       createdAt: "2026-08-16T10:05:00.000Z",
@@ -220,23 +245,37 @@ describe("LETTERS execution golden path", () => {
       inProgress: 0,
       planned: 3,
       waitingDependencies: 2,
-      noProvider: 3,
+      noProvider: 0,
       noExecutor: 3,
       varianceCount: 0,
       status: "IN_PROGRESS",
     });
     expect(view.progress.status).not.toBe("COMPLETED");
     expect(remaining.every((item) => item?.status === "PLANNED")).toBe(true);
-    expect(remaining.every((item) => item?.canAssign === false && item?.canStart === false)).toBe(
-      true,
-    );
-    expect(remaining.every((item) => item?.eligibleProviders.length === 0)).toBe(true);
+    expect(remaining.every((item) => item?.canAssign === false)).toBe(true);
+    expect(remaining.every((item) => item?.requiresProvider === false)).toBe(true);
+    expect(remaining.every((item) => item?.canStart === false)).toBe(true);
     expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.waitingFor).toEqual([
       "Probă uniformitate — Iluminare",
     ]);
     expect(view.tasks.find((item) => item.taskId === pack.taskId)?.waitingFor).toEqual([
       "Control calitate final — Produs",
     ]);
+    record = runManual(record, uniformity.taskId, "2026-08-16T10:28:00.000Z", "2026-08-16T10:29:00.000Z");
+    record = runManual(record, inspect.taskId, "2026-08-16T10:30:00.000Z", "2026-08-16T10:31:00.000Z");
+    record = runManual(record, pack.taskId, "2026-08-16T10:32:00.000Z", "2026-08-16T10:33:00.000Z");
+    const finished = projectExecutionPlanView(record);
+    expect(finished.progress).toEqual({
+      total: 12,
+      completed: 12,
+      inProgress: 0,
+      planned: 0,
+      waitingDependencies: 0,
+      noProvider: 0,
+      noExecutor: 0,
+      varianceCount: 0,
+      status: "COMPLETED",
+    });
     expect(record.plan.eicTotal).toBe(382.5);
     expect(record.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(record.tasks.find((item) => item.taskId === placeLed.taskId)?.quantities[0]?.value).toBe(
@@ -260,7 +299,7 @@ describe("LETTERS execution golden path", () => {
     expect(view.tasks.find((item) => item.processId === APPLY_SURFACE_FINISH_ID)?.canAssign).toBe(
       true,
     );
-    expect(view.progress.noProvider).toBe(3);
+    expect(view.progress.noProvider).toBe(0);
     expect(view.progress.status).toBe("PLANNED");
     expect(record.plan.eicTotal).toBe(386);
   });

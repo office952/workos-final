@@ -26,7 +26,7 @@ const view: ExecutionPlanView = {
     inProgress: 0,
     planned: 2,
     waitingDependencies: 1,
-    noProvider: 1,
+    noProvider: 0,
     noExecutor: 2,
     varianceCount: 0,
     status: "PLANNED",
@@ -60,6 +60,7 @@ const view: ExecutionPlanView = {
       dependsOnTaskIds: [],
       requiredCapabilityId: "CNC_ROUTING",
       requiredCapabilityLabel: "Debitare CNC",
+      providerRequirement: "REQUIRED",
       status: "PLANNED",
       quantities: [{ label: "Lungime", value: 12.5, unit: "m" }],
       resourceDemands: [],
@@ -81,6 +82,8 @@ const view: ExecutionPlanView = {
       completionOutcomeLabel: null,
       completedQuantityLabel: null,
       varianceLabel: null,
+      requiresProvider: true,
+      providerRequirementLabel: "Necesită echipament / zonă",
       canAssign: true,
       canAssignExecutor: true,
       canStart: false,
@@ -101,6 +104,7 @@ const view: ExecutionPlanView = {
       dependsOnTaskIds: ["task:1"],
       requiredCapabilityId: "QUALITY_CONTROL",
       requiredCapabilityLabel: "Control calitate",
+      providerRequirement: "NOT_REQUIRED",
       status: "PLANNED",
       quantities: [],
       resourceDemands: [],
@@ -122,6 +126,8 @@ const view: ExecutionPlanView = {
       completionOutcomeLabel: null,
       completedQuantityLabel: null,
       varianceLabel: null,
+      requiresProvider: false,
+      providerRequirementLabel: "Nu necesită echipament",
       canAssign: false,
       canAssignExecutor: true,
       canStart: false,
@@ -150,12 +156,13 @@ describe("ExecutionPlanPanel", () => {
 
     expect(screen.getByRole("heading", { name: "Plan de execuție" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Blocate" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Necesită configurare atelier" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Urmează" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Necesită configurare atelier" })).not.toBeInTheDocument();
     expect(screen.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeInTheDocument();
     expect(screen.queryByText("Cost intern real: indisponibil")).not.toBeInTheDocument();
     expect(screen.getByText("WORKOS")).toBeInTheDocument();
     expect(screen.getByText("0 / 2 finalizate")).toBeInTheDocument();
-    expect(screen.getByText("Fără furnizor: 1")).toBeInTheDocument();
+    expect(screen.getByText("Fără furnizor: 0")).toBeInTheDocument();
     expect(screen.getByText("Stare: Planificat", { selector: ".execution-plan-head .task-status" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "01. Debitare foaie CNC" })).toBeInTheDocument();
     expect(screen.getByText("Componentă: Spate")).toBeInTheDocument();
@@ -164,9 +171,10 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getAllByText("Executant: Nealocat").length).toBeGreaterThan(0);
     expect(screen.getByText("Cantitate planificată: 12,5 m")).toBeInTheDocument();
     expect(screen.getByText("Așteaptă: Debitare foaie CNC — Spate")).toBeInTheDocument();
+    expect(screen.getByText("Nu necesită echipament")).toBeInTheDocument();
     expect(
-      screen.getByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
-    ).toBeInTheDocument();
+      screen.queryByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("task:1")).not.toBeInTheDocument();
     expect(screen.queryByText("QUALITY_CONTROL")).not.toBeInTheDocument();
     expect(screen.queryByText("CUT_SHEET_CNC")).not.toBeInTheDocument();
@@ -417,5 +425,45 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getByText("Modul LED 12V: Cost calculabil")).toBeInTheDocument();
     expect(screen.getByText("Lipire corp literă: Cost indisponibil")).toBeInTheDocument();
     expect(screen.queryByText("ActualCostProjection")).not.toBeInTheDocument();
+  });
+
+  it("keeps a genuine provider-required gap in the workshop-configuration lane", () => {
+    const gapView: ExecutionPlanView = {
+      ...view,
+      progress: { ...view.progress, noProvider: 1 },
+      tasks: [
+        {
+          ...view.tasks[0],
+          processId: "PAINT_RAL",
+          processLabel: "Vopsire RAL",
+          requiredCapabilityId: "PAINTING",
+          requiredCapabilityLabel: "Vopsire",
+          eligibleProviders: [],
+          canAssign: false,
+          canAssignExecutor: true,
+          canStart: false,
+        },
+      ],
+    };
+
+    render(
+      <MemoryRouter>
+        <ExecutionPlanPanel
+          view={gapView}
+          reused={false}
+          busy={false}
+          onAssignProvider={() => undefined}
+          onAssignExecutor={() => undefined}
+          onStartTask={() => undefined}
+          onCompleteTask={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Necesită configurare atelier" })).toBeInTheDocument();
+    expect(screen.getByText("Fără furnizor: 1")).toBeInTheDocument();
+    expect(
+      screen.getByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
+    ).toBeInTheDocument();
   });
 });

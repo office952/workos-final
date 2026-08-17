@@ -163,6 +163,9 @@ export {
   getOperationalProcess,
   getProductionCapability,
   operationalProcesses,
+  processProviderRequirement,
+  providerRequirementLabel,
+  PROVIDER_REQUIREMENTS,
   processWhereUsed,
   processesForType,
   productionCapabilityClasses,
@@ -172,6 +175,7 @@ export {
   type ProcessCompositionInspection,
   type ProductionCapabilityClass,
   type ProductProcessComposition,
+  type ProviderRequirement,
 } from "./processes/index.js";
 export {
   MCH_CNC_4020_ID,

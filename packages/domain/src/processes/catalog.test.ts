@@ -25,9 +25,11 @@ import {
   TEST_ILLUMINATION_UNIFORMITY_ID,
   TEST_LIGHTING_IGNITION_ID,
   WIRE_LIGHTING_ID,
+  frozenProviderRequirement,
   getOperationalProcess,
   getProductionCapability,
   operationalProcesses,
+  processProviderRequirement,
   processesForType,
   productionCapabilityClasses,
 } from "./catalog.js";
@@ -197,6 +199,24 @@ describe("operational process catalog", () => {
       "STYRO_CUTTING",
     );
     expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.requiredCapabilityId).toBe("CNC_ROUTING");
+  });
+
+  it("marks only genuine manual operations as provider-not-required", () => {
+    expect(processProviderRequirement(getOperationalProcess(CUT_SHEET_CNC_ID))).toBe("REQUIRED");
+    expect(processProviderRequirement(getOperationalProcess(BOND_LETTER_BODY_ID))).toBe(
+      "REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(PAINT_RAL_ID))).toBe("REQUIRED");
+    expect(
+      processProviderRequirement(getOperationalProcess(TEST_ILLUMINATION_UNIFORMITY_ID)),
+    ).toBe("NOT_REQUIRED");
+    expect(processProviderRequirement(getOperationalProcess(INSPECT_FINISHED_LETTER_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(PACK_PRODUCT_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(frozenProviderRequirement(undefined)).toBe("REQUIRED");
   });
 
   it("keeps shop-floor catalog processes out of Letters type demand", () => {

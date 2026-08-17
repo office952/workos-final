@@ -443,7 +443,7 @@ Settings versions: keep previous active values as history after a new version is
 | Provider assignment + minimal task lifecycle | IMPLEMENTED_CURRENT / BASIC |
 | Completion evidence | IMPLEMENTED_CURRENT / BASIC |
 | People operational identity + task executor | IMPLEMENTED_CURRENT / BASIC |
-| LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
+| LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 12 of 12 executable path |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
 | Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |

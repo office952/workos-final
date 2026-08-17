@@ -53,7 +53,8 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
   await expect(page.getByText("Montare module LED").first()).toBeVisible();
   await expect(page.getByText("Resursă: Modul LED 12V: 125 buc").first()).toBeVisible();
   await expect(page.getByText("Resursă: Sursă LED 12V 160W: 1 buc").first()).toBeVisible();
-  await expect(page.getByText("Fără furnizor configurat").first()).toBeVisible();
+  await expect(page.getByText("Nu necesită echipament").first()).toBeVisible();
+  await expect(page.getByText("Fără furnizor configurat")).toHaveCount(0);
   await expect(page.getByText("Aplicare folie")).toHaveCount(0);
   await expect(page.getByText("Vopsire RAL")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);

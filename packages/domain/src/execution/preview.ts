@@ -11,6 +11,8 @@ import {
   getOperationalProcess,
   getProductionCapability,
   processCategoryLabel,
+  processProviderRequirement,
+  type ProviderRequirement,
 } from "../processes/catalog.js";
 import type { ProductAggregate, ProductTemplate, ProductTruth } from "../product/types.js";
 import { compileEic, type EicResult } from "../resources/eic.js";
@@ -61,6 +63,7 @@ export type ExecutionPlanPreviewOperation = {
   dependsOn: readonly string[];
   dependsOnLabels: readonly string[];
   requiredCapabilityLabel: string;
+  providerRequirement: ProviderRequirement;
   eligibleProviders: readonly ExecutionPreviewProvider[];
   readiness: ExecutionOperationReadiness;
   readinessLabel: string;
@@ -198,12 +201,14 @@ function toOperation(
     .sort((left, right) => left.label.localeCompare(right.label, "ro"));
   const quantities = operationQuantities(node, aggregate, recipeQuantity);
   const resources = operationResources(node, aggregate, recipeQuantity);
+  const providerRequirement = processProviderRequirement(process);
   const readiness = operationReadiness({
     processExists: Boolean(process),
     capabilityExists: Boolean(capability),
     dependenciesValid: node.dependsOn.every((id) => byId.has(id)),
     quantityReady: recipe ? recipeQuantity !== undefined : true,
     hasProvider: providers.length > 0,
+    providerRequired: providerRequirement === "REQUIRED",
   });
   const depth = depths.get(node.id) ?? 0;
 
@@ -223,6 +228,7 @@ function toOperation(
       return dep ? [`${dep.processLabel} — ${dep.scopeLabel}`] : [];
     }),
     requiredCapabilityLabel: capability?.label ?? "Capabilitate necunoscută",
+    providerRequirement,
     eligibleProviders: providers,
     readiness,
     readinessLabel: executionOperationReadinessLabel(readiness),
@@ -239,6 +245,7 @@ function operationReadiness(input: {
   dependenciesValid: boolean;
   quantityReady: boolean;
   hasProvider: boolean;
+  providerRequired: boolean;
 }): ExecutionOperationReadiness {
   if (
     !input.processExists ||
@@ -248,7 +255,7 @@ function operationReadiness(input: {
   ) {
     return "INCOMPLETE";
   }
-  if (!input.hasProvider) {
+  if (input.providerRequired && !input.hasProvider) {
     return "NO_PROVIDER";
   }
   return "READY";

@@ -118,7 +118,7 @@ test("records planned vs actual resource consumption on LETTERS tasks", async ({
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
+  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
   await expect(inspect.getByText("Consum real")).toHaveCount(0);
   await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
 

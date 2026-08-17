@@ -32,9 +32,9 @@ Plan creation does not assign, start, complete, or move inventory.
 ## Frozen vs live vs assigned
 
 ```text
-Frozen:     required capability, quantities, resources, dependencies
-Live:       eligible-provider projection
-Assigned:   persisted operator choice of one eligible provider and one ACTIVE person
+Frozen:     required capability, provider requirement, quantities, resources, dependencies
+Live:       eligible-provider projection (only when a provider is required)
+Assigned:   persisted operator choice of one eligible provider, when required, and one ACTIVE person
 Lifecycle:  PLANNED → IN_PROGRESS → COMPLETED
 ```
 
@@ -57,7 +57,9 @@ Do not assign a random provider, a provider from another capability, or a fabric
 
 Reassignment is allowed while the task is `PLANNED`. After `IN_PROGRESS`, reassignment is rejected.
 
-If no eligible provider exists, the task stays unassigned. The plan still exists.
+If a provider is required and no eligible provider exists, the task stays unassigned. The plan still exists.
+
+If the frozen operation says the provider is not required, the task is manual. Do not assign a Machine or Workcenter just to satisfy Start. Provider assignment is rejected.
 
 ## Executor assignment
 
@@ -74,7 +76,9 @@ Backend validates the person against the People registry. Only `ACTIVE` people m
 
 Reassignment is allowed while the task is `PLANNED`. After `IN_PROGRESS`, executor reassignment is rejected.
 
-People cannot substitute a missing capability provider. A QC or Packaging task with an executor and no eligible provider still cannot Start.
+People cannot substitute a missing capability provider when the frozen operation requires one. A provider-required task with an executor and no eligible provider still cannot Start.
+
+A manual task still requires an ACTIVE executor. It does not require a provider.
 
 Preview, snapshot and plan materialization do not require People.
 
@@ -84,8 +88,8 @@ A task may Start only if:
 
 - status is `PLANNED`
 - every persisted dependency task is `COMPLETED`
-- an assigned provider exists and is still eligible for the frozen capability
 - an assigned executor exists and is still `ACTIVE`
+- the frozen provider is not required, or an assigned provider exists and is still eligible for the frozen capability
 
 Root tasks (no dependencies) may Start once assigned. SEQ is display order, not a start gate.
 
@@ -140,13 +144,13 @@ all COMPLETED → Finalizat
 ```
 
 A plan is Finalizat only when every task is COMPLETED.
-Executable work finishing while QC / pack remain without provider keeps the plan În lucru.
+`noProvider` counts only provider-required tasks with no eligible provider. Manual operations are not provider gaps.
 
 ## LETTERS none/none coverage
 
 Canonical WORKOS none/none has 12 tasks.
 
-Currently executable with the live registry:
+Machine / workcenter operations with the live registry:
 
 ```text
 FACE CNC, BACK CNC          → CNC 4020
@@ -155,15 +159,15 @@ PLACE LED, WIRE, PSU, IGNITION → Montaj LED / electric
 BOND, CLOSE                 → Masă asamblare 1 or 2
 ```
 
-Honest current gaps, no fabricated stations:
+Manual operations. No dedicated station. Executor required, provider not required:
 
 ```text
-Probă uniformitate     QUALITY_CONTROL  NO_PROVIDER
-Control calitate final QUALITY_CONTROL  NO_PROVIDER
-Ambalare               PACKAGING        NO_PROVIDER
+Probă uniformitate     QUALITY_CONTROL  PROVIDER_NOT_REQUIRED
+Control calitate final QUALITY_CONTROL  PROVIDER_NOT_REQUIRED
+Ambalare               PACKAGING        PROVIDER_NOT_REQUIRED
 ```
 
-Reachable end state: 9 completed, 3 planned, plan remains În lucru.
+All 12 have a truthful execution path when dependencies and an ACTIVE executor are satisfied. Do not invent a QC or packaging Workcenter.
 
 ## Completion evidence V1
 

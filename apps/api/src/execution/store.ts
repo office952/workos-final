@@ -45,6 +45,7 @@ type TaskRow = {
   seq_label: string;
   required_capability_id: string;
   required_capability_label: string;
+  provider_requirement: string | null;
   status: ExecutionTask["status"];
   created_at: string;
   quantities_json: string;
@@ -137,6 +138,7 @@ export function insertExecutionPlanRecord(
         seq_label,
         required_capability_id,
         required_capability_label,
+        provider_requirement,
         status,
         created_at,
         quantities_json,
@@ -152,7 +154,7 @@ export function insertExecutionPlanRecord(
         completed_quantity,
         completed_quantity_unit,
         completion_note
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     );
     const insertDependency = db.prepare(
@@ -178,6 +180,7 @@ export function insertExecutionPlanRecord(
         task.seqLabel,
         task.requiredCapabilityId,
         task.requiredCapabilityLabel,
+        task.providerRequirement,
         task.status,
         task.createdAt,
         JSON.stringify(task.quantities),
@@ -513,6 +516,8 @@ function hydrateRecord(db: SqliteDatabase, planRow: PlanRow): ExecutionPlanRecor
       dependsOnTaskIds: dependencies.get(row.task_id) ?? [],
       requiredCapabilityId: row.required_capability_id,
       requiredCapabilityLabel: row.required_capability_label,
+      providerRequirement:
+        row.provider_requirement === "NOT_REQUIRED" ? "NOT_REQUIRED" : "REQUIRED",
       status: row.status,
       quantities: JSON.parse(row.quantities_json) as ExecutionTask["quantities"],
       resourceDemands: JSON.parse(row.resources_json) as ExecutionTask["resourceDemands"],

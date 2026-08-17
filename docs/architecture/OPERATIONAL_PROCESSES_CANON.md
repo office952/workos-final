@@ -28,7 +28,16 @@ Do not collapse these layers.
 
 ## Process definition
 
-A process has a stable ID, a Romanian display label, a category, one required capability class, applicable constructive types, a semantic outcome, optional resource/service references, lifecycle, and readiness.
+A process has a stable ID, a Romanian display label, a category, one required capability class, applicable constructive types, a semantic outcome, optional resource/service references, lifecycle, readiness, and whether execution requires a Machine/Workcenter provider.
+
+```text
+REQUIRED      → machine/workcenter-dependent work; Start needs provider + executor
+NOT_REQUIRED  → manual work; Start needs executor only
+```
+
+The process owns this requirement. ExecutionTask consumes the frozen value. Historical records without the field stay REQUIRED.
+
+Provider-not-required does not mean free, no recipe, or no planned cost. Cost stays in Resources / Cost.
 
 It does not have: machine ID, employee ID, order ID, actual time, assignment, or a global sequence number.
 

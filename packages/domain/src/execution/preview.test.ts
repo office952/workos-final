@@ -210,8 +210,10 @@ describe("execution plan preview", () => {
       "Masă asamblare 1",
       "Masă asamblare 2",
     ]);
-    expect(inspect?.readiness).toBe("NO_PROVIDER");
-    expect(pack?.readiness).toBe("NO_PROVIDER");
+    expect(inspect?.providerRequirement).toBe("NOT_REQUIRED");
+    expect(pack?.providerRequirement).toBe("NOT_REQUIRED");
+    expect(inspect?.readiness).toBe("READY");
+    expect(pack?.readiness).toBe("READY");
     expect(JSON.stringify(preview.operations)).not.toMatch(
       /MCH-CNC-4020|WC_ASSEMBLY_01|selectedProvider/,
     );
@@ -249,7 +251,7 @@ describe("execution plan preview", () => {
     );
     expect(preview.summary.analyzerNote).toBe("");
     expect(preview.summary.analyzerNote).not.toMatch(/Analyzer/);
-    expect(preview.summary.noProviderCount).toBeGreaterThan(0);
+    expect(preview.summary.noProviderCount).toBe(0);
     expect(preview.readiness).toBe("READY");
   });
 });

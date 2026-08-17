@@ -44,9 +44,10 @@ Assignment is an explicit operator action. It is not inferred from provider, bro
 
 Only `ACTIVE` people may be newly assigned. After Start, assignment is locked.
 
-Start requires provider + ACTIVE executor + completed dependencies.
+Start requires completed dependencies, an ACTIVE executor, and a valid provider only when the frozen operation requires one.
 
-People cannot bypass a missing QC / PACKAGING provider.
+People cannot bypass a missing provider on a provider-required task.
+A manual task still needs an ACTIVE executor. It does not need a Machine or Workcenter.
 
 ## Historical attribution
 

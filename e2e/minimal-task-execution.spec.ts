@@ -177,7 +177,7 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
+  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
   await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await expect(inspect.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   await page.screenshot({

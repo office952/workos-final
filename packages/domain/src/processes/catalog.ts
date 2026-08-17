@@ -54,6 +54,9 @@ export const PRODUCTION_CAPABILITY_KINDS = [
 ] as const;
 export type ProductionCapabilityKind = (typeof PRODUCTION_CAPABILITY_KINDS)[number];
 
+export const PROVIDER_REQUIREMENTS = ["REQUIRED", "NOT_REQUIRED"] as const;
+export type ProviderRequirement = (typeof PROVIDER_REQUIREMENTS)[number];
+
 export type ProductionCapabilityClass = {
   id: ProductionCapabilityClassId;
   label: string;
@@ -73,6 +76,7 @@ export type OperationalProcess = {
   lifecycle: ProcessLifecycle;
   readiness: ProcessReadiness;
   readinessNote: string;
+  providerRequirement?: ProviderRequirement;
 };
 
 export const CUT_SHEET_CNC_ID = "CUT_SHEET_CNC";
@@ -366,6 +370,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Proces cunoscut. Fără măsurători instrumentale.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: INSPECT_FINISHED_LETTER_ID,
@@ -380,6 +385,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Nu este un QC generic fără rezultat.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: PACK_PRODUCT_ID,
@@ -394,6 +400,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Fără material de ambalare și fără tarif în acest build.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: WELD_STEEL_JOIN_ID,
@@ -534,6 +541,31 @@ export function getProductionCapability(
 
 export function getOperationalProcess(id: string): OperationalProcess | undefined {
   return operationalProcesses.find((item) => item.id === id);
+}
+
+export function processProviderRequirement(
+  process: Pick<OperationalProcess, "providerRequirement"> | undefined,
+): ProviderRequirement {
+  return process?.providerRequirement ?? "REQUIRED";
+}
+
+export function frozenProviderRequirement(
+  value: ProviderRequirement | undefined,
+): ProviderRequirement {
+  return value ?? "REQUIRED";
+}
+
+export function providerRequirementLabel(requirement: ProviderRequirement): string {
+  switch (requirement) {
+    case "REQUIRED":
+      return "Necesită echipament / zonă";
+    case "NOT_REQUIRED":
+      return "Nu necesită echipament";
+    default: {
+      const _exhaustive: never = requirement;
+      return _exhaustive;
+    }
+  }
 }
 
 export function processesForType(typeId: ComponentTypeId): OperationalProcess[] {

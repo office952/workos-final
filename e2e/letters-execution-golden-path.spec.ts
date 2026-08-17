@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { openExecutionWorkspace } from "./helpers/execution";
@@ -10,7 +11,7 @@ async function confirmLetters(page: Page) {
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     })
     .click();
-  await page.getByLabel("Textul literelor").fill("WORKOS");
+  await page.getByLabel("Textul literelor").fill(`GP${randomBytes(2).toString("hex")}`.toUpperCase());
   await page.getByLabel("Finisaj față").selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
@@ -66,7 +67,7 @@ async function startIfReady(card: Locator, providerLabel?: string) {
   return true;
 }
 
-test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", async ({
+test("executes the reachable LETTERS DAG and leaves a truthful manual path", async ({
   page,
   request,
 }) => {
@@ -152,16 +153,35 @@ test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", a
 
   await expect(plan.getByText("9 / 12 finalizate")).toBeVisible();
   await expect(plan.getByText("În lucru: 0")).toBeVisible();
-  await expect(plan.getByText("Fără furnizor: 3")).toBeVisible();
+  await expect(plan.getByText("Fără furnizor: 0")).toBeVisible();
   await expect(plan.getByText("Stare: În lucru").first()).toBeVisible();
   await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Necesită configurare atelier" })).toHaveCount(0);
 
   for (const card of [uniformity, inspect, pack]) {
     await expect(card.getByText("Stare: Planificat")).toBeVisible();
-    await expect(card.getByText("Necesită configurare atelier")).toBeVisible();
+    await expect(card.getByText("Nu necesită echipament")).toBeVisible();
+    await expect(card.getByText("Necesită configurare atelier")).toHaveCount(0);
     await expect(card.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
-    await expect(card.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   }
+  await expect(uniformity.getByText("Executant nealocat")).toBeVisible();
+  await expect(uniformity.getByRole("button", { name: "Pornește" })).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-uniformity.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-qc.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-packaging.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-executor-blocker.png",
+    fullPage: true,
+  });
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-golden-final-reachable.png",
     fullPage: true,
@@ -170,11 +190,27 @@ test("executes the reachable LETTERS DAG and keeps no-provider tasks planned", a
     path: "docs/worklog/screenshots/letters-golden-no-provider.png",
     fullPage: true,
   });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-plan-no-fake-gaps.png",
+    fullPage: true,
+  });
+
+  await assignExecutorIfNeeded(uniformity);
+  await expect(uniformity.getByRole("button", { name: "Pornește" })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-startable.png",
+    fullPage: true,
+  });
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(plan.getByText("9 / 12 finalizate")).toBeVisible();
+  await expect(plan.getByText("Nu necesită echipament").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-golden-narrow.png",
+    fullPage: true,
+  });
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-narrow.png",
     fullPage: true,
   });
 });

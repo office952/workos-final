@@ -5,6 +5,12 @@ import { freezeOrderSnapshot } from "../commercial/orderSnapshot.js";
 import { freezeQuoteSnapshot } from "../commercial/quoteSnapshot.js";
 import { projectCommercialPrice } from "../commercial/price.js";
 import { materializeExecutionPlanFromSnapshot } from "../execution/plan.js";
+import {
+  CUT_SHEET_CNC_ID,
+  INSPECT_FINISHED_LETTER_ID,
+  PACK_PRODUCT_ID,
+  TEST_ILLUMINATION_UNIFORMITY_ID,
+} from "../processes/catalog.js";
 import { composeProductProcessesFromTruth } from "../processes/composition.js";
 import {
   compileAggregate,
@@ -119,6 +125,18 @@ describe("frozen production input alignment", () => {
     const second = freezeProductionInput(aggregate, composition);
     expect(first.contentHash).toBe(second.contentHash);
     expect(first.operations).toHaveLength(12);
+    expect(
+      first.operations.filter((item) => item.providerRequirement === "NOT_REQUIRED").map(
+        (item) => item.processId,
+      ),
+    ).toEqual([
+      TEST_ILLUMINATION_UNIFORMITY_ID,
+      INSPECT_FINISHED_LETTER_ID,
+      PACK_PRODUCT_ID,
+    ]);
+    expect(
+      first.operations.find((item) => item.processId === CUT_SHEET_CNC_ID)?.providerRequirement,
+    ).toBe("REQUIRED");
     expect(first.requirements.length).toBeGreaterThan(0);
     expect(first.usedTechnicalSettings).toEqual(
       expect.arrayContaining([
@@ -179,6 +197,15 @@ describe("frozen production input alignment", () => {
     expect(record.plan.productCode).toBe(CANONICAL_PRODUCT_CODE);
     expect(record.tasks.every((task) => task.status === "PLANNED")).toBe(true);
     expect(record.tasks.some((task) => task.dependsOnTaskIds.length > 0)).toBe(true);
+    expect(
+      record.tasks
+        .filter((task) => task.providerRequirement === "NOT_REQUIRED")
+        .map((task) => task.processId),
+    ).toEqual([
+      TEST_ILLUMINATION_UNIFORMITY_ID,
+      INSPECT_FINISHED_LETTER_ID,
+      PACK_PRODUCT_ID,
+    ]);
   });
 
   it("does not know LETTERS internals in the frozen-input contract", () => {

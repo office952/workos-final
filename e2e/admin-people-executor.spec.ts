@@ -153,7 +153,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
+  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
   await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await expect(inspect.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   if (await inspect.getByRole("button", { name: "Alocă executant" }).isVisible()) {

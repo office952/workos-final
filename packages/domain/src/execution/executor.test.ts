@@ -178,7 +178,39 @@ describe("task executor assignment", () => {
     ).toEqual({ ok: false, error: "executor_unavailable" });
   });
 
-  it("does not let an executor bypass a missing QC provider", () => {
+  it("does not let an executor bypass a required missing provider", () => {
+    const { record } = planned();
+    const created = createPerson("Executor test");
+    if (!created.ok) {
+      throw new Error("expected person");
+    }
+    const backCnc = record.tasks.find(
+      (item) => item.processId === CUT_SHEET_CNC_ID && item.scope === "BACK",
+    );
+    if (!backCnc) {
+      throw new Error("missing back CNC");
+    }
+    const assigned = assignExecutorToTask(record, backCnc.taskId, created.person.personId, [
+      created.person,
+    ]);
+    expect(assigned.ok).toBe(true);
+    if (!assigned.ok) {
+      return;
+    }
+    expect(
+      startExecutionTask(
+        assigned.record,
+        backCnc.taskId,
+        "2026-08-16T17:14:00.000Z",
+        [created.person],
+      ),
+    ).toEqual({ ok: false, error: "missing_assignment" });
+    const view = projectExecutionPlanView(assigned.record, [created.person]);
+    expect(view.tasks.find((item) => item.taskId === backCnc.taskId)?.canStart).toBe(false);
+    expect(view.tasks.find((item) => item.taskId === backCnc.taskId)?.requiresProvider).toBe(true);
+  });
+
+  it("lets a manual task start with an executor once dependencies are complete", () => {
     const { record } = planned();
     const created = createPerson("Executor test");
     if (!created.ok) {
@@ -199,12 +231,15 @@ describe("task executor assignment", () => {
       startExecutionTask(
         assigned.record,
         inspect.taskId,
-        "2026-08-16T17:14:00.000Z",
+        "2026-08-16T17:15:00.000Z",
         [created.person],
       ),
-    ).toEqual({ ok: false, error: "missing_assignment" });
+    ).toEqual({ ok: false, error: "dependencies_incomplete" });
     const view = projectExecutionPlanView(assigned.record, [created.person]);
+    expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.canAssign).toBe(false);
+    expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.requiresProvider).toBe(
+      false,
+    );
     expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.canStart).toBe(false);
-    expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.eligibleProviders).toEqual([]);
   });
 });

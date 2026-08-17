@@ -95,7 +95,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
 | Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |
-| LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 9 of 12 |
+| LETTERS reachable execution DAG | IMPLEMENTED_CURRENT / 12 of 12 executable path |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |
 | HR, Pontaj, reservations, purchasing | LATER |
 | Commercial price rules foundation | IMPLEMENTED_CURRENT / BASIC |

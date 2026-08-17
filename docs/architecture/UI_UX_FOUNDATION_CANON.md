@@ -60,7 +60,7 @@ Task row: SEQ + operation, status, echipament/zonă, executant, quantity, action
 
 Wait reasons stay compact. Plan ID and capability stay in Detalii.
 
-Completed rows recede. Tasks are grouped: Acum / următorul, Blocate, Urmează, Finalizate, then honest atelier gaps.
+Completed rows recede. Tasks are grouped: Acum / următorul, Blocate, Urmează, Finalizate, then honest atelier gaps only for provider-required operations that have no eligible Machine/Workcenter. Manual operations are not workshop-configuration gaps.
 
 ## Admin catalog pattern
 

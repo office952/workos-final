@@ -376,7 +376,7 @@ describe("minimal execution task lifecycle", () => {
     expect(statuses).toEqual(["IN_PROGRESS", "IN_PROGRESS"]);
   });
 
-  it("keeps no-provider tasks unassigned and unstartable", () => {
+  it("rejects fake providers on manual tasks and still requires an executor", () => {
     const record = planned();
     const inspect = taskByProcess(record, INSPECT_FINISHED_LETTER_ID);
     const pack = taskByProcess(record, PACK_PRODUCT_ID);
@@ -386,10 +386,13 @@ describe("minimal execution task lifecycle", () => {
     });
     expect(startExecutionTask(record, pack.taskId, "2026-08-15T16:00:00.000Z")).toEqual({
       ok: false,
-      error: "missing_assignment",
+      error: "missing_executor",
     });
     const view = projectExecutionPlanView(record);
     expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.canAssign).toBe(false);
+    expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.requiresProvider).toBe(
+      false,
+    );
     expect(view.tasks.find((item) => item.taskId === inspect.taskId)?.canStart).toBe(false);
     expect(view.tasks.find((item) => item.taskId === pack.taskId)?.eligibleProviders).toEqual([]);
   });

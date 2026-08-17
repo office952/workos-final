@@ -874,6 +874,13 @@ describe("product configuration API", () => {
     const readView = (await readBody(read)).executionPlan as { tasks: Array<JsonObject> };
     expect(readView.tasks).toHaveLength(12);
     expect(
+      readView.tasks.filter((item) => item.providerRequirement === "NOT_REQUIRED"),
+    ).toHaveLength(3);
+    expect(
+      readView.tasks.find((item) => item.processLabel === "Control calitate final")
+        ?.requiresProvider,
+    ).toBe(false);
+    expect(
       readView.tasks.some((item) =>
         JSON.stringify(item.eligibleProviders).includes("CNC 4020"),
       ),
@@ -1190,8 +1197,8 @@ describe("product configuration API", () => {
     const inspectStart = await app.request(`/api/execution-tasks/${inspect.taskId}/start`, {
       method: "POST",
     });
-    expect(inspectStart.status).toBe(422);
-    expect((await readBody(inspectStart)).error).toBe("missing_assignment");
+    expect(inspectStart.status).toBe(409);
+    expect((await readBody(inspectStart)).error).toBe("dependencies_incomplete");
   });
 
   it("executes the reachable LETTERS DAG and does not complete the plan with open tasks", async () => {
@@ -1221,7 +1228,7 @@ describe("product configuration API", () => {
       total: 12,
       completed: 0,
       planned: 12,
-      noProvider: 3,
+      noProvider: 0,
       status: "PLANNED",
     });
 
@@ -1274,7 +1281,7 @@ describe("product configuration API", () => {
       inProgress: 0,
       planned: 3,
       waitingDependencies: 2,
-      noProvider: 3,
+      noProvider: 0,
       noExecutor: 3,
       varianceCount: 0,
       status: "IN_PROGRESS",

@@ -16,6 +16,8 @@ import {
 import {
   getProductionCapability,
   operationalProcesses,
+  processProviderRequirement,
+  providerRequirementLabel,
   processCategoryLabel,
   processLifecycleLabel,
   processReadinessLabel,
@@ -47,6 +49,8 @@ export type ProcessAdminRecord = {
   requiredCapabilityId: string;
   requiredCapabilityLabel: string;
   requiredCapabilityKindLabel: string;
+  providerRequirement: ReturnType<typeof processProviderRequirement>;
+  providerRequirementLabel: string;
   outcome: string;
   lifecycleLabel: string;
   readinessLabel: string;
@@ -136,6 +140,8 @@ function toAdminRecord(process: OperationalProcess): ProcessAdminRecord {
     requiredCapabilityKindLabel: capability
       ? productionCapabilityKindLabel(capability.kind)
       : process.requiredCapabilityId,
+    providerRequirement: processProviderRequirement(process),
+    providerRequirementLabel: providerRequirementLabel(processProviderRequirement(process)),
     outcome: process.outcome,
     lifecycleLabel: processLifecycleLabel(process.lifecycle),
     readinessLabel: processReadinessLabel(process.readiness),

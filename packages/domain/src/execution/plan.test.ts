@@ -133,15 +133,19 @@ describe("persisted execution plan materialization", () => {
       "Masă asamblare 2",
     ]);
     expect(inspect?.eligibleProviders).toEqual([]);
+    expect(inspect?.providerRequirement).toBe("NOT_REQUIRED");
+    expect(inspect?.requiresProvider).toBe(false);
     expect(inspect?.canAssign).toBe(false);
     expect(inspect?.canStart).toBe(false);
+    expect(cnc?.providerRequirement).toBe("REQUIRED");
+    expect(cnc?.requiresProvider).toBe(true);
     expect(view.progress).toEqual({
       total: 12,
       completed: 0,
       inProgress: 0,
       planned: 12,
       waitingDependencies: view.tasks.filter((item) => item.waitingFor.length > 0).length,
-      noProvider: 3,
+      noProvider: 0,
       noExecutor: 12,
       varianceCount: 0,
       status: "PLANNED",

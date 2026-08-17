@@ -100,6 +100,7 @@ function processSections(
       facts: [
         { label: "Necesită", value: process.requiredCapabilityLabel, emphasize: true },
         { label: "Fel", value: process.requiredCapabilityKindLabel },
+        { label: "Echipament", value: process.providerRequirementLabel },
         { label: "Acoperire furnizor", value: process.providerCoverageLabel },
         { label: "Furnizori actuali", value: providers },
         { label: "Rezultat", value: process.outcome },

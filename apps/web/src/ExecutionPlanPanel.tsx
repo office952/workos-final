@@ -231,9 +231,11 @@ function ExecutionTaskCard({
           <div>
             <dt>Echipament / zonă</dt>
             <dd>
-              {task.assignedProvider
-                ? `Alocat: ${task.assignedProvider.label}`
-                : "Alocare: Nealocat"}
+              {task.requiresProvider
+                ? task.assignedProvider
+                  ? `Alocat: ${task.assignedProvider.label}`
+                  : "Alocare: Nealocat"
+                : task.providerRequirementLabel}
             </dd>
           </div>
           <div>
@@ -393,7 +395,7 @@ function ExecutionTaskCard({
           <p>Așteaptă: {task.waitingFor.join("; ")}</p>
         </Notice>
       ) : null}
-      {task.eligibleProviders.length === 0 ? (
+      {task.requiresProvider && task.eligibleProviders.length === 0 ? (
         <Notice compact>
           <p>Necesită configurare atelier. Nu există echipament sau zonă eligibilă.</p>
         </Notice>
@@ -505,7 +507,7 @@ function taskLane(task: ExecutionTaskView): TaskLane {
   if (task.status === "COMPLETED") {
     return "completed";
   }
-  if (task.eligibleProviders.length === 0) {
+  if (task.requiresProvider && task.eligibleProviders.length === 0) {
     return "gap";
   }
   if (task.status === "IN_PROGRESS" || task.canStart) {

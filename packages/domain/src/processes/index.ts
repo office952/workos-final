@@ -26,9 +26,13 @@ export {
   PROCESS_READINESS,
   PRODUCTION_CAPABILITY_CLASS_IDS,
   PRODUCTION_CAPABILITY_KINDS,
+  PROVIDER_REQUIREMENTS,
+  frozenProviderRequirement,
   getOperationalProcess,
   getProductionCapability,
   operationalProcesses,
+  processProviderRequirement,
+  providerRequirementLabel,
   processCategoryLabel,
   processLifecycleLabel,
   processReadinessLabel,
@@ -44,6 +48,7 @@ export {
   type ProductionCapabilityClass,
   type ProductionCapabilityClassId,
   type ProductionCapabilityKind,
+  type ProviderRequirement,
 } from "./catalog.js";
 export {
   LIGHTING_CALCULATION_READINESS,

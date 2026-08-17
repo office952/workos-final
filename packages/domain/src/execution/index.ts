@@ -32,6 +32,7 @@ export {
   measurablePlannedQuantity,
   projectExecutionPlanView,
   summarizeExecutionProgress,
+  taskRequiresProvider,
   type AssignedExecutionExecutor,
   type AssignedExecutionProvider,
   type CompletionOutcome,

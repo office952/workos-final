@@ -1,11 +1,14 @@
 import { activePeople, type Person } from "../people/identity.js";
 import {
+  frozenProviderRequirement,
   getProductionCapability,
+  providerRequirementLabel,
   INSPECT_FINISHED_LETTER_ID,
   INSTALL_OR_CONNECT_PSU_ID,
   TEST_ILLUMINATION_UNIFORMITY_ID,
   TEST_LIGHTING_IGNITION_ID,
   WIRE_LIGHTING_ID,
+  type ProviderRequirement,
 } from "../processes/catalog.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 import { productionWorkFromSnapshot } from "../production/snapshot.js";
@@ -96,6 +99,7 @@ export type ExecutionTask = {
   dependsOnTaskIds: readonly string[];
   requiredCapabilityId: string;
   requiredCapabilityLabel: string;
+  providerRequirement: ProviderRequirement;
   status: ExecutionTaskStatus;
   quantities: AcceptedProductionSnapshot["operations"][number]["quantities"];
   resourceDemands: AcceptedProductionSnapshot["operations"][number]["resourceDemands"];
@@ -131,6 +135,8 @@ export type ExecutionTaskView = ExecutionTask & {
   completionOutcomeLabel: string | null;
   completedQuantityLabel: string | null;
   varianceLabel: string | null;
+  requiresProvider: boolean;
+  providerRequirementLabel: string;
   canAssign: boolean;
   canAssignExecutor: boolean;
   canStart: boolean;
@@ -199,6 +205,7 @@ export function materializeExecutionPlanFromSnapshot(
       ),
       requiredCapabilityId: operation.requiredCapabilityId,
       requiredCapabilityLabel: operation.requiredCapabilityLabel,
+      providerRequirement: frozenProviderRequirement(operation.providerRequirement),
       status: "PLANNED" as const,
       quantities: operation.quantities,
       resourceDemands: operation.resourceDemands,
@@ -267,7 +274,14 @@ export function projectExecutionPlanView(
         : null,
       completedQuantityLabel: completedQuantityLabel(task.completion),
       varianceLabel: varianceLabel(measurableQuantity, task.completion),
-      canAssign: task.status === "PLANNED" && eligibleProviders.length > 0,
+      requiresProvider: taskRequiresProvider(task),
+      providerRequirementLabel: providerRequirementLabel(
+        frozenProviderRequirement(task.providerRequirement),
+      ),
+      canAssign:
+        task.status === "PLANNED" &&
+        taskRequiresProvider(task) &&
+        eligibleProviders.length > 0,
       canAssignExecutor: task.status === "PLANNED" && eligibleExecutors.length > 0,
       canStart: canStartTask(task, byId, people),
       canComplete: task.status === "IN_PROGRESS",
@@ -315,7 +329,12 @@ function executionSourceKindLabel(kind: ExecutionSourceKind): string {
 export function summarizeExecutionProgress(
   tasks: readonly Pick<
     ExecutionTaskView,
-    "status" | "waitingFor" | "eligibleProviders" | "completion" | "assignedExecutor"
+    | "status"
+    | "waitingFor"
+    | "eligibleProviders"
+    | "completion"
+    | "assignedExecutor"
+    | "requiresProvider"
   >[],
 ): ExecutionPlanProgress {
   return {
@@ -324,7 +343,9 @@ export function summarizeExecutionProgress(
     inProgress: tasks.filter((task) => task.status === "IN_PROGRESS").length,
     planned: tasks.filter((task) => task.status === "PLANNED").length,
     waitingDependencies: tasks.filter((task) => task.waitingFor.length > 0).length,
-    noProvider: tasks.filter((task) => task.eligibleProviders.length === 0).length,
+    noProvider: tasks.filter(
+      (task) => task.requiresProvider && task.eligibleProviders.length === 0,
+    ).length,
     noExecutor: tasks.filter((task) => task.assignedExecutor === null).length,
     varianceCount: tasks.filter(
       (task) => task.completion?.outcome === "COMPLETED_WITH_VARIANCE",
@@ -516,6 +537,22 @@ export function dependenciesCompleted(
   return task.dependsOnTaskIds.every((id) => byId.get(id)?.status === "COMPLETED");
 }
 
+export function taskRequiresProvider(
+  task: Pick<ExecutionTask, "providerRequirement">,
+): boolean {
+  return frozenProviderRequirement(task.providerRequirement) === "REQUIRED";
+}
+
+function providerReadyForStart(task: ExecutionTask): boolean {
+  if (!taskRequiresProvider(task)) {
+    return true;
+  }
+  return (
+    task.assignedProvider !== null &&
+    assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider)
+  );
+}
+
 function canStartTask(
   task: ExecutionTask,
   byId: ReadonlyMap<string, ExecutionTask>,
@@ -523,8 +560,7 @@ function canStartTask(
 ): boolean {
   return (
     task.status === "PLANNED" &&
-    task.assignedProvider !== null &&
-    assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider) &&
+    providerReadyForStart(task) &&
     task.assignedExecutor !== null &&
     assignedExecutorStillActive(task.assignedExecutor, people) &&
     dependenciesCompleted(task, byId)

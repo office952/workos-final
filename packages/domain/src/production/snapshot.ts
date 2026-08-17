@@ -8,6 +8,8 @@ import {
   PLACE_LED_MODULES_ID,
   getOperationalProcess,
   getProductionCapability,
+  processProviderRequirement,
+  type ProviderRequirement,
 } from "../processes/catalog.js";
 import { listTypeTechnicalSettings } from "../product/technicalSettings.js";
 import type {
@@ -76,6 +78,7 @@ export type FrozenProductionOperation = {
   dependsOn: readonly string[];
   requiredCapabilityId: string;
   requiredCapabilityLabel: string;
+  providerRequirement?: ProviderRequirement;
   quantities: readonly FrozenOperationQuantity[];
   resourceDemands: readonly FrozenResourceDemand[];
 };
@@ -310,6 +313,7 @@ function freezeOperations(
       dependsOn: [...node.dependsOn],
       requiredCapabilityId: process?.requiredCapabilityId ?? "",
       requiredCapabilityLabel: capability?.label ?? "Capabilitate necunoscută",
+      providerRequirement: processProviderRequirement(process),
       quantities: operationQuantities(node.processId, aggregate, recipeQuantity, recipe?.unit),
       resourceDemands: operationResourceDemands(
         node.processId,

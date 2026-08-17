@@ -83,7 +83,9 @@ test("opens a dedicated commercial execution workspace and persists a real task"
   await expect(page.locator(".page-lead")).toContainText("Eliberată din comandă");
   await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Blocate" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Necesită configurare atelier" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Urmează" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Necesită configurare atelier" })).toHaveCount(0);
+  await expect(plan.getByText("Fără furnizor: 0")).toBeVisible();
   await expect(page.getByText("624,82")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-workspace-initial.png",
@@ -97,12 +99,19 @@ test("opens a dedicated commercial execution workspace and persists a real task"
     path: "docs/worklog/screenshots/letters-execution-workspace-blocked.png",
     fullPage: true,
   });
-  await expect(inspect.getByText("Necesită configurare atelier")).toBeVisible();
+  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
+  await expect(inspect.getByText("Necesită configurare atelier")).toHaveCount(0);
+  await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-workspace-gap.png",
     fullPage: true,
   });
 
+  await expect(faceCnc.getByRole("combobox", { name: "Echipament / zonă" })).toBeVisible();
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-manual-provider-required.png",
+    fullPage: true,
+  });
   await assignProviderIfNeeded(faceCnc, "CNC 4020");
   await expect(faceCnc.getByText("Alocat: CNC 4020")).toBeVisible();
   await page.screenshot({

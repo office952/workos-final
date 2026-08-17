@@ -11,6 +11,7 @@ import {
   dependenciesCompleted,
   liveEligibleProviders,
   measurablePlannedQuantity,
+  taskRequiresProvider,
   type AssignedExecutionExecutor,
   type AssignedExecutionProvider,
   type ExecutionPlanRecord,
@@ -58,6 +59,9 @@ export function assignProviderToTask(
   }
   if (task.status !== "PLANNED") {
     return { ok: false, error: "reassignment_locked" };
+  }
+  if (!taskRequiresProvider(task)) {
+    return { ok: false, error: "ineligible_provider" };
   }
   const provider = liveEligibleProviders(task.requiredCapabilityId).find(
     (item) => item.id === providerId,
@@ -137,13 +141,15 @@ export function startExecutionTask(
   if (task.status !== "PLANNED") {
     return { ok: false, error: "invalid_transition" };
   }
-  if (!task.assignedProvider) {
-    return { ok: false, error: "missing_assignment" };
-  }
-  if (
-    !assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider)
-  ) {
-    return { ok: false, error: "provider_unavailable" };
+  if (taskRequiresProvider(task)) {
+    if (!task.assignedProvider) {
+      return { ok: false, error: "missing_assignment" };
+    }
+    if (
+      !assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider)
+    ) {
+      return { ok: false, error: "provider_unavailable" };
+    }
   }
   if (!task.assignedExecutor) {
     return { ok: false, error: "missing_executor" };

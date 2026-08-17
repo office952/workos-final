@@ -634,10 +634,13 @@ export function ProductionPreviewSection({
             ))}
             <p>Capabilitate: {operation.requiredCapabilityLabel}</p>
             <p>
-              Furnizori disponibili:{" "}
-              {operation.eligibleProviders.length === 0
-                ? "Fără furnizor configurat"
-                : operation.eligibleProviders.map((item) => item.label).join("; ")}
+              {operation.providerRequirement === "NOT_REQUIRED"
+                ? "Nu necesită echipament"
+                : `Furnizori disponibili: ${
+                    operation.eligibleProviders.length === 0
+                      ? "Fără furnizor configurat"
+                      : operation.eligibleProviders.map((item) => item.label).join("; ")
+                  }`}
             </p>
             <p>
               {operation.canStart
