@@ -15,9 +15,12 @@ Primary navigation stays small so later domains do not accumulate in the top bar
 
 ```text
 WorkOS Final  →  /
+Lucrări       →  /
 Produse       →  /products
 Administrare  →  /admin
 ```
+
+`/` is the operational job overview. It is a read-only projection of commercial Orders and their Release / ExecutionPlan lineage. It does not own job status.
 
 Routes stay stable. Inspection surfaces live under Administrare:
 
@@ -27,7 +30,7 @@ Atelier      Resurse, Stoc, Procese, Utilaje și zone
 Sistem       Sistem produs, Module și componente, Guvernanță, Stare sistem
 ```
 
-There is no empty Producție page and no Execution top-nav item. After plan creation the product page hands off with **Deschide execuția** to the generic job workspace `/execution/:planId`.
+Stare sistem lives at `/system`, reached from Administrare. There is no empty Producție page and no Execution top-nav item. After plan creation the overview and the product page hand off with **Deschide execuția** to the generic job workspace `/execution/:planId`.
 
 ## Visual primitives
 
@@ -89,6 +92,16 @@ Review is a concise operator summary. Confirm is primary. Modify is secondary.
 After confirm, the form recedes. Hierarchy: confirmed product → compact internal cost → customer price → quote freeze → quote acceptance → order snapshot → Eliberează pentru producție → Creează planul de execuție → Deschide execuția. Customer price is more prominent than internal cost. PARTIAL commercial must not look like a final offer or allow quote freeze. Quote acceptance is not production acceptance. Creating an order is not production release. Release is not plan creation. After the plan exists, preview is hidden and task work leaves the product page. On a commercial Order the next action is Eliberează pentru producție, then Creează planul de execuție, then Deschide execuția. Acceptă pentru producție remains only the Atelier / test tehnic path when no Order exists.
 
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
+
+`?order=` on the product page continues an existing commercial job. It does not recompile or mint a new review.
+
+## Operational job overview
+
+`/` lists commercial jobs as compact rows: inscription, stage, progress, next action.
+Filters are Toate / Necesită acțiune / În execuție / Finalizate.
+Metrics stay one summary line. No KPI cards, revenue, or capacity.
+Stage, progress, blockers and next action come from `GET /api/jobs`.
+Pilot / atelier releases are not listed.
 
 ## Future migration
 

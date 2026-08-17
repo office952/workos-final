@@ -353,10 +353,11 @@ Do not add a top-nav link per domain.
 
 Current primary nav stays small so later domains do not accumulate in the header:
 
+- Lucrări
 - Produse
 - Administrare
 
-Brand `WorkOS Final` returns to Stare sistem (`/`). Inspection surfaces stay reachable from Administrare, not from the top bar.
+Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. The overview is a read-only projection: Order Snapshot is the commercial job root. It does not own a Job table or JobStatus.
 
 Inside Administrare, group only real current pages:
 
@@ -376,13 +377,13 @@ Administrare
     └── Stare sistem
 ```
 
-Do not add an empty Producție page or an Execution top-nav item. The job workspace is `/execution/:planId`, reached from the product path via **Deschide execuția**. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
+Do not add an empty Producție page or an Execution top-nav item. Lucrări is the operator landing for real commercial jobs. The job workspace is `/execution/:planId`, reached from Lucrări or the product path via **Deschide execuția**. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
 
 ## Operator vs admin surfaces
 
 | Kind | Use | Current / future example |
 |---|---|---|
-| Operator | Daily workflow | `/products` configure → review → confirm |
+| Operator | Daily workflow | `/` Lucrări → product continue or `/execution/:planId` |
 | Owner projection | System honesty / inspection | `/components`, `/governance` |
 | Admin | Configure or inspect system truth | `/admin` — Product System display-label write; Resources, Stoc, Processes and Workcenters inspection |
 

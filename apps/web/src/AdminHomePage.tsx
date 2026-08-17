@@ -62,7 +62,7 @@ const GROUPS = [
         description: "Autoritate, limite și maturitate. Fără write de business.",
       },
       {
-        to: "/",
+        to: "/system",
         label: "Stare sistem",
         description: "Verificare de sănătate a platformei.",
       },

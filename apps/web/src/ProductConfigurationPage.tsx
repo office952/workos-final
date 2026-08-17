@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import type {
   AcceptedProductionSnapshot,
   CommercialPriceProjection,
@@ -39,6 +39,7 @@ import {
   fetchTemplateProjection,
   readExecutionPlan,
   readOrderSnapshot,
+  readOrderSnapshotById,
   readProductionRelease,
   readQuoteAcceptance,
   type TemplateProjection,
@@ -52,9 +53,25 @@ type PageState =
   | { kind: "error" }
   | { kind: "ready"; projection: TemplateProjection };
 
+type RestoredJob = {
+  order: OrderSnapshot;
+  release?: AcceptedProductionSnapshot;
+  executionPlan?: ExecutionPlanView;
+};
+
+type RestoredJobState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "missing" }
+  | { kind: "error" }
+  | { kind: "ready"; job: RestoredJob };
+
 export function ProductConfigurationPage() {
   const { productCode = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const orderId = searchParams.get("order");
   const [page, setPage] = useState<PageState>({ kind: "loading" });
+  const [restoredJob, setRestoredJob] = useState<RestoredJobState>({ kind: "idle" });
   const [values, setValues] = useState<DraftValues>({});
   const [definition, setDefinition] = useState<ProductDefinition | null>(null);
   const [confirmed, setConfirmed] = useState<{
@@ -100,6 +117,45 @@ export function ProductConfigurationPage() {
       cancelled = true;
     };
   }, [productCode]);
+
+  useEffect(() => {
+    if (page.kind !== "ready" || !orderId) {
+      setRestoredJob({ kind: "idle" });
+      return;
+    }
+    let cancelled = false;
+    setRestoredJob({ kind: "loading" });
+    void readOrderSnapshotById(productCode, orderId)
+      .then(async (order) => {
+        if (cancelled) {
+          return;
+        }
+        if (!order) {
+          setRestoredJob({ kind: "missing" });
+          return;
+        }
+        const commercial = await loadCommercialExecution(productCode, order.orderSnapshotId);
+        if (cancelled) {
+          return;
+        }
+        setRestoredJob({
+          kind: "ready",
+          job: {
+            order,
+            release: commercial.snapshot,
+            executionPlan: commercial.executionPlan,
+          },
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRestoredJob({ kind: "error" });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId, page.kind, productCode]);
 
   if (page.kind === "loading") {
     return <p>Se încarcă produsul…</p>;
@@ -370,6 +426,112 @@ export function ProductConfigurationPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function handleRestoreRelease() {
+    if (restoredJob.kind !== "ready") {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createProductionRelease(productCode, restoredJob.job.order.orderSnapshotId);
+      if (result.ok) {
+        setRestoredJob({
+          kind: "ready",
+          job: {
+            ...restoredJob.job,
+            order: result.orderSnapshot,
+            release: result.snapshot,
+          },
+        });
+      } else {
+        setConfirmNotice("Eliberarea pentru producție nu a putut fi creată.");
+      }
+    } catch {
+      setConfirmNotice("Eliberarea pentru producție nu a putut fi creată.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRestoreCreatePlan() {
+    if (restoredJob.kind !== "ready" || !restoredJob.job.release) {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createExecutionPlan(productCode, restoredJob.job.release.snapshotId);
+      setRestoredJob({
+        kind: "ready",
+        job: {
+          ...restoredJob.job,
+          executionPlan: result.executionPlan,
+        },
+      });
+    } catch {
+      setConfirmNotice("Planul de execuție nu a putut fi creat.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (orderId) {
+    if (restoredJob.kind === "loading" || restoredJob.kind === "idle") {
+      return <p>Se încarcă lucrarea…</p>;
+    }
+    if (restoredJob.kind === "missing") {
+      return <p>Lucrarea cerută nu este disponibilă.</p>;
+    }
+    if (restoredJob.kind === "error") {
+      return <p>Lucrarea nu a putut fi încărcată.</p>;
+    }
+    return (
+      <section className="product-page">
+        <PageHeader
+          title={template.label}
+          lead={`${restoredJob.job.order.inscription} — continuare lucrare comercială.`}
+          meta={<ConstructionFacts facts={template.identityFacts} />}
+        />
+        {confirmNotice ? (
+          <Notice tone="warn" compact>
+            <p>{confirmNotice}</p>
+          </Notice>
+        ) : null}
+        <OrderSnapshotSection
+          snapshot={restoredJob.job.order}
+          release={restoredJob.job.release}
+          busy={busy}
+          onRelease={restoredJob.job.release ? undefined : () => void handleRestoreRelease()}
+        />
+        {restoredJob.job.release ? (
+          <AcceptedSnapshotSection
+            snapshot={restoredJob.job.release}
+            reused
+            onCreatePlan={() => void handleRestoreCreatePlan()}
+            busy={busy}
+            hasExecutionPlan={Boolean(restoredJob.job.executionPlan)}
+          />
+        ) : null}
+        {restoredJob.job.executionPlan ? (
+          <div id="execution-plan" className="execution-handoff">
+            <Notice tone="ok" compact>
+              <p>Plan de execuție creat.</p>
+            </Notice>
+            <p className="page-lead">Lucrul pe taskuri se face în execuție, nu aici.</p>
+            <div className="action-row">
+              <Link
+                className="button-link"
+                to={`/execution/${restoredJob.job.executionPlan.plan.planId}`}
+              >
+                Deschide execuția
+              </Link>
+            </div>
+          </div>
+        ) : null}
+      </section>
+    );
   }
 
   return (

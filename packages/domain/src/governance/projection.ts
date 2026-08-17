@@ -591,6 +591,11 @@ export function projectSystemGovernance(): GovernanceProjection {
         label: "Workspace execuție",
         state: "IMPLEMENTED",
       },
+      {
+        id: "operational-job-overview",
+        label: "Prezentare lucrări operaționale",
+        state: "IMPLEMENTED",
+      },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
     ],
     uiRules: [

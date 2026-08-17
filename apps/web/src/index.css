@@ -1061,6 +1061,68 @@ details summary {
   min-width: 10rem;
 }
 
+.jobs-overview {
+  overflow-wrap: anywhere;
+}
+
+.jobs-list {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.jobs-list li {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.5fr) minmax(9rem, 1.1fr) minmax(6rem, 0.7fr) auto;
+  gap: 0.45rem 0.85rem;
+  align-items: center;
+}
+
+.jobs-identity {
+  min-width: 0;
+}
+
+.jobs-identity a {
+  display: block;
+  color: inherit;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.jobs-identity a:hover {
+  text-decoration: underline;
+}
+
+.jobs-identity span,
+.jobs-status p,
+.jobs-date {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.jobs-status {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.jobs-attention {
+  color: var(--bad);
+}
+
+.jobs-list .button-link {
+  justify-self: end;
+  white-space: nowrap;
+}
+
 @media (max-width: 56rem) {
   .app-header-inner {
     align-items: flex-start;
@@ -1082,5 +1144,13 @@ details summary {
 
   .form-section-fields {
     grid-template-columns: 1fr;
+  }
+
+  .jobs-list li {
+    grid-template-columns: 1fr;
+  }
+
+  .jobs-list .button-link {
+    justify-self: start;
   }
 }

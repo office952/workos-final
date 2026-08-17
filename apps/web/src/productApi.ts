@@ -274,6 +274,23 @@ export async function acceptQuoteSnapshot(
   };
 }
 
+export async function readOrderSnapshotById(
+  productCode: string,
+  orderSnapshotId: string,
+): Promise<OrderSnapshot | null> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/orders/${encodeURIComponent(orderSnapshotId)}`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ orderSnapshot?: OrderSnapshot }>(response);
+  if (!response.ok || !body.orderSnapshot) {
+    throw new Error("order_unavailable");
+  }
+  return body.orderSnapshot;
+}
+
 export async function readOrderSnapshot(
   productCode: string,
   quoteSnapshotId: string,

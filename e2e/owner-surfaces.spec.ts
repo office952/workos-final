@@ -2,7 +2,7 @@ import { expect, test } from "./fixtures";
 
 test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Stare sistem" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
 
   await page.getByRole("link", { name: "Produse" }).click();
   await expect(page.getByRole("heading", { name: "Produse" })).toBeVisible();

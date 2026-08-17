@@ -224,6 +224,19 @@ export function getOrderSnapshotByAcceptanceId(
   return row ? parseOrderSnapshot(row.payload) : null;
 }
 
+export function listOrderSnapshots(db: SqliteDatabase): OrderSnapshot[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT order_snapshot_id, payload
+      FROM order_snapshots
+      ORDER BY created_at DESC
+    `,
+    )
+    .all() as OrderRow[];
+  return rows.map((row) => parseOrderSnapshot(row.payload));
+}
+
 export function getOrderSnapshotByQuoteSnapshotId(
   db: SqliteDatabase,
   quoteSnapshotId: string,

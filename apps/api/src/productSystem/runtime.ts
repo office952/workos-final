@@ -7,6 +7,10 @@ import {
   type InventoryStockProjection,
   type Person,
   type PersonMutationResult,
+  projectExecutionPlanView,
+  projectJobOverview,
+  projectJobOverviewItem,
+  type JobOverviewProjection,
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
@@ -44,6 +48,7 @@ import {
   getOrderSnapshotByQuoteSnapshotId,
   getQuoteAcceptanceBySnapshotId,
   getQuoteSnapshot,
+  listOrderSnapshots,
   insertOrderSnapshot,
   insertQuoteAcceptance,
   insertQuoteSnapshot,
@@ -110,6 +115,7 @@ export type ProductSystemRuntime = {
     note?: string,
   ): InventoryAdjustmentResult;
   listPeople(): Person[];
+  listJobOverview(): JobOverviewProjection;
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
   retirePerson(personId: string): PersonMutationResult;
@@ -188,6 +194,21 @@ export function createProductSystemRuntime(
     },
     listPeople() {
       return listPeople(db);
+    },
+    listJobOverview() {
+      const people = listPeople(db);
+      const jobs = listOrderSnapshots(db).map((order) => {
+        const release = getAcceptedProductionSnapshotByOrder(db, order.orderSnapshotId);
+        const record = release
+          ? getExecutionPlanBySnapshotId(db, release.snapshotId)
+          : null;
+        return projectJobOverviewItem({
+          order,
+          release,
+          planView: record ? projectExecutionPlanView(record, people, release) : null,
+        });
+      });
+      return projectJobOverview(jobs);
     },
     createPerson(displayName) {
       return persistCreatedPerson(db, displayName);

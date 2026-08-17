@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
+import { readExecutionPlan, readOrderSnapshotById, readProductionRelease } from "./productApi";
 
 vi.mock("./productApi", () => ({
   fetchTemplateProjection: () =>
@@ -48,6 +49,8 @@ vi.mock("./productApi", () => ({
   acceptProductionSnapshot: vi.fn(),
   createProductionRelease: vi.fn(),
   readProductionRelease: vi.fn(),
+  readOrderSnapshot: vi.fn(),
+  readOrderSnapshotById: vi.fn(),
   readExecutionPlan: vi.fn(),
   createExecutionPlan: vi.fn(),
   assignExecutionTaskProvider: vi.fn(),
@@ -77,5 +80,73 @@ describe("ProductConfigurationPage", () => {
     expect(screen.queryByText("PRD-LETTERS-FRONTLIT-PLEXI-AL06")).not.toBeInTheDocument();
     expect(screen.queryByText("ProductTruth")).not.toBeInTheDocument();
     expect(screen.queryByText("Aggregate")).not.toBeInTheDocument();
+  });
+
+  it("continues a commercial job from the order query without the configure form", async () => {
+    vi.mocked(readOrderSnapshotById).mockResolvedValue({
+      orderSnapshotId: "ord:test",
+      schemaVersion: 1,
+      status: "FROZEN",
+      createdAt: "2026-08-17T06:00:00.000Z",
+      sourceQuoteSnapshotId: "qts:test",
+      sourceQuoteContentHash: "hash",
+      sourceAcceptanceId: "qad:test",
+      sourceAcceptedAt: "2026-08-17T05:00:00.000Z",
+      productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      productLabel: "Litere",
+      inscription: "JOB01",
+      sourceReviewId: "rev:test",
+      contentHash: "hash",
+      truth: {
+        templateCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+        templateVersion: "1",
+        familyId: "fam",
+        selectedComponentIds: [],
+        values: {},
+        measurements: [],
+      },
+      quantities: [],
+      eic: { total: 382.5, currency: "EUR", completeness: "COMPLETE", lines: [] },
+      commercial: {
+        policyId: "policy",
+        policyVersion: 1,
+        markupPercent: 35,
+        markupAmount: 133.88,
+        discountPercent: 0,
+        discountAmount: 0,
+        adjustmentAmount: 0,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+        completeness: "COMPLETE",
+      },
+      productionInput: {
+        schemaVersion: 1,
+        contentHash: "hash",
+        requirements: [],
+        operations: [],
+        usedTechnicalSettings: [],
+        usedRecipes: [],
+      },
+    });
+    vi.mocked(readProductionRelease).mockResolvedValue(null);
+    vi.mocked(readExecutionPlan).mockResolvedValue(null);
+
+    render(
+      <MemoryRouter
+        initialEntries={["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?order=ord:test"]}
+      >
+        <Routes>
+          <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("JOB01 — continuare lucrare comercială.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Comandă creată" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Eliberează pentru producție" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Textul literelor")).not.toBeInTheDocument();
   });
 });
