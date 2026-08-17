@@ -12,7 +12,7 @@ const emptyOverview: JobOverviewProjection = {
 };
 
 const readyOverview: JobOverviewProjection = {
-  summary: { total: 2, active: 1, inExecution: 1, needsAttention: 1, completed: 1 },
+  summary: { total: 3, active: 2, inExecution: 1, needsAttention: 1, completed: 1 },
   jobs: [
     {
       jobId: "ord:active",
@@ -27,8 +27,8 @@ const readyOverview: JobOverviewProjection = {
       nextAction: "CONTINUE_EXECUTION",
       nextActionLabel: "Continuă execuția",
       href: "/execution/exp:active",
-      needsAttention: true,
-      attentionLabel: "Task în lucru",
+      needsAttention: false,
+      attentionLabel: null,
       completedCount: 3,
       taskCount: 12,
       inProgressCount: 1,
@@ -36,6 +36,29 @@ const readyOverview: JobOverviewProjection = {
       orderSnapshotId: "ord:active",
       releaseSnapshotId: "aps:active",
       planId: "exp:active",
+    },
+    {
+      jobId: "ord:gap",
+      productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      productLabel: "Litere volumetrice",
+      inscription: "GAP",
+      customerId: "cus:letters",
+      customerDisplayName: "Client Demo LETTERS",
+      createdAt: "2026-08-17T09:00:00.000Z",
+      stage: "EXECUTION_PLANNED",
+      stageLabel: "Plan creat",
+      nextAction: "OPEN_EXECUTION",
+      nextActionLabel: "Deschide execuția",
+      href: "/execution/exp:gap",
+      needsAttention: true,
+      attentionLabel: "Lipsă echipament",
+      completedCount: 0,
+      taskCount: 12,
+      inProgressCount: 0,
+      progressLabel: "0 / 12 finalizate",
+      orderSnapshotId: "ord:gap",
+      releaseSnapshotId: "aps:gap",
+      planId: "exp:gap",
     },
     {
       jobId: "ord:done",
@@ -94,15 +117,15 @@ describe("JobsOverviewPage", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText("ACTIV")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Client: Client Demo LETTERS" })).toHaveAttribute(
-      "href",
-      "/clients/cus%3Aletters",
+    expect(screen.getAllByRole("link", { name: "Client: Client Demo LETTERS" }).length).toBeGreaterThan(
+      0,
     );
     expect(screen.getByText("3 / 12 finalizate · 1 în lucru")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Continuă execuția" })).toHaveAttribute(
       "href",
       "/execution/exp:active",
     );
+    expect(screen.getByText("Lipsă echipament")).toBeInTheDocument();
     expect(screen.getByText("GATA")).toBeInTheDocument();
     expect(screen.queryByText("ExecutionPlanId")).not.toBeInTheDocument();
     expect(screen.queryByText("ProviderRequirement")).not.toBeInTheDocument();

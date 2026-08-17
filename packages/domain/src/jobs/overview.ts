@@ -1,8 +1,9 @@
 import type { OrderSnapshot } from "../commercial/orderSnapshot.js";
-import type {
-  ExecutionPlanProgress,
-  ExecutionPlanView,
-  ExecutionTaskView,
+import {
+  assignedProviderStillValid,
+  type ExecutionPlanProgress,
+  type ExecutionPlanView,
+  type ExecutionTaskView,
 } from "../execution/plan.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 
@@ -194,24 +195,29 @@ export function deriveJobAttention(input: {
   if (input.stage === "RELEASED") {
     return { needsAttention: true, attentionLabel: "Urmează planul de execuție" };
   }
-  if (input.progress?.noProvider && input.progress.noProvider > 0) {
+  // Claim-on-Start: PLANNED + executor null is normal. IN_PROGRESS alone is normal progress.
+  // Waiting dependencies are normal DAG flow — not job attention.
+  // Provider attention only when absence is a CURRENT blocker (deps done).
+  if (input.tasks.some(isCurrentProviderBlocker)) {
     return { needsAttention: true, attentionLabel: "Lipsă echipament" };
   }
-  const inProgress = input.tasks.find((task) => task.status === "IN_PROGRESS");
-  if (inProgress) {
-    return { needsAttention: true, attentionLabel: "Task în lucru" };
-  }
-  const missingExecutor = input.tasks.find(
-    (task) =>
-      task.status === "PLANNED" &&
-      task.waitingFor.length === 0 &&
-      task.assignedExecutor === null &&
-      !(task.requiresProvider && task.eligibleProviders.length === 0),
-  );
-  if (missingExecutor) {
-    return { needsAttention: true, attentionLabel: "Executant nealocat" };
-  }
   return { needsAttention: false, attentionLabel: null };
+}
+
+function isCurrentProviderBlocker(task: ExecutionTaskView): boolean {
+  if (task.status !== "PLANNED") {
+    return false;
+  }
+  if (task.waitingFor.length > 0) {
+    return false;
+  }
+  if (!task.requiresProvider) {
+    return false;
+  }
+  if (task.assignedProvider === null) {
+    return true;
+  }
+  return !assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider);
 }
 
 export function projectJobOverviewItem(input: {

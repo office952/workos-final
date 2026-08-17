@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { OrderSnapshot } from "../commercial/orderSnapshot.js";
-import type { ExecutionPlanView } from "../execution/plan.js";
+import type { ExecutionPlanView, ExecutionTaskView } from "../execution/plan.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 import {
   deriveJobNextAction,
@@ -10,6 +10,59 @@ import {
   projectJobOverview,
   projectJobOverviewItem,
 } from "./overview.js";
+
+function taskStub(
+  overrides: Partial<ExecutionTaskView> &
+    Pick<ExecutionTaskView, "status" | "requiresProvider">,
+): ExecutionTaskView {
+  return {
+    taskId: "task:1",
+    executionPlanId: "exp:test",
+    sourceOperationId: "op:1",
+    processId: "proc:cnc",
+    processLabel: "Debitare CNC",
+    scope: "FACE",
+    scopeLabel: "Față",
+    seq: 1,
+    seqLabel: "01",
+    dependsOnTaskIds: [],
+    requiredCapabilityId: "CNC_CUTTING",
+    requiredCapabilityLabel: "Debitare CNC",
+    providerRequirement: "REQUIRED",
+    quantities: [],
+    resourceDemands: [],
+    assignedProvider: null,
+    assignedExecutor: null,
+    startedAt: null,
+    completedAt: null,
+    completion: null,
+    actualConsumption: [],
+    createdAt: "2026-08-17T08:00:00.000Z",
+    statusLabel: "Planificat",
+    assignmentLabel: "Nealocat",
+    dependsOnLabels: [],
+    waitingFor: [],
+    eligibleProviders: [],
+    eligibleExecutors: [],
+    measurableQuantity: null,
+    requiresCompletedQuantity: false,
+    completionOutcomeLabel: null,
+    completedQuantityLabel: null,
+    varianceLabel: null,
+    providerRequirementLabel: "Necesită utilaj / zonă",
+    canAssign: false,
+    canAssignExecutor: false,
+    canStart: false,
+    canClaimStart: false,
+    startBlockReason: null,
+    operatorRelation: "missing_provider",
+    startedByLabel: null,
+    canComplete: false,
+    hasPlannedResources: false,
+    canRecordActualConsumption: false,
+    ...overrides,
+  };
+}
 
 function order(inscription = "WORKOS"): OrderSnapshot {
   return {
@@ -189,19 +242,72 @@ describe("job overview projection", () => {
     expect(done.progressLabel).toBe("12 / 12 finalizate");
   });
 
-  it("surfaces genuine provider gaps and never treats missing manual providers as attention", () => {
-    const gap = projectJobOverviewItem({
+  it("does not treat unclaimed PLANNED or IN_PROGRESS alone as attention after Claim-on-Start", () => {
+    const unclaimed = projectJobOverviewItem({
       order: order(),
       release: release(),
-      planView: planView("IN_PROGRESS", { noProvider: 1 }),
+      planView: planView("PLANNED", {
+        tasks: [taskStub({ status: "PLANNED", requiresProvider: false })],
+      }),
     });
-    const manualReady = projectJobOverviewItem({
+    const inProgress = projectJobOverviewItem({
       order: order(),
       release: release(),
-      planView: planView("PLANNED", { noProvider: 0 }),
+      planView: planView("IN_PROGRESS", {
+        tasks: [
+          taskStub({
+            status: "IN_PROGRESS",
+            requiresProvider: true,
+            assignedProvider: {
+              id: "wc:cnc",
+              kind: "WORKCENTER",
+              label: "CNC 4020",
+            },
+          }),
+        ],
+      }),
     });
-    expect(gap.attentionLabel).toBe("Lipsă echipament");
-    expect(manualReady.attentionLabel).not.toBe("Lipsă echipament");
+    expect(unclaimed.needsAttention).toBe(false);
+    expect(unclaimed.attentionLabel).toBeNull();
+    expect(inProgress.needsAttention).toBe(false);
+    expect(inProgress.attentionLabel).toBeNull();
+  });
+
+  it("flags only current provider blockers, not future dependency-gated provider gaps", () => {
+    const currentGap = projectJobOverviewItem({
+      order: order(),
+      release: release(),
+      planView: planView("PLANNED", {
+        noProvider: 1,
+        tasks: [
+          taskStub({
+            status: "PLANNED",
+            requiresProvider: true,
+            waitingFor: [],
+            assignedProvider: null,
+          }),
+        ],
+      }),
+    });
+    const futureGap = projectJobOverviewItem({
+      order: order(),
+      release: release(),
+      planView: planView("PLANNED", {
+        noProvider: 1,
+        tasks: [
+          taskStub({
+            status: "PLANNED",
+            requiresProvider: true,
+            waitingFor: ["Debitare CNC"],
+            assignedProvider: null,
+          }),
+        ],
+      }),
+    });
+    expect(currentGap.attentionLabel).toBe("Lipsă echipament");
+    expect(currentGap.needsAttention).toBe(true);
+    expect(futureGap.needsAttention).toBe(false);
+    expect(futureGap.attentionLabel).toBeNull();
   });
 
   it("excludes completed jobs from the needs-action filter", () => {

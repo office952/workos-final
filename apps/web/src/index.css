@@ -1557,6 +1557,26 @@ details summary {
   color: var(--text-muted);
 }
 
+.atelier-prep-lane {
+  margin: 1.1rem 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  padding: 0.45rem 0.7rem 0.65rem;
+  background: var(--surface-raised);
+}
+
+.atelier-prep-lane > summary {
+  cursor: pointer;
+  font-weight: 650;
+  font-size: 1.05rem;
+}
+
+.atelier-prep-hint {
+  margin: 0.4rem 0 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 .atelier-task-list {
   margin: 0;
   padding: 0;

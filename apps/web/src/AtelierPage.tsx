@@ -101,6 +101,8 @@ export function AtelierPage() {
     inbox.summary.inProgressMine === 0 &&
     noClaimable &&
     inbox.summary.waitingDependencies === 0;
+  const prepItems = inbox.availableNeedsProvider;
+  const collapsePrep = prepItems.length > 2;
 
   return (
     <section className="atelier-page">
@@ -131,7 +133,10 @@ export function AtelierPage() {
         <EmptyState title="Nu ai taskuri disponibile acum." />
       ) : null}
 
-      <InboxLane title="În lucru la mine" items={inbox.inProgressMine} renderActions={(item) => (
+      <InboxLane
+        title="În lucru la mine"
+        items={inbox.inProgressMine}
+        renderActions={(item) => (
           <Link className="button-quiet" to={item.workspaceHref}>
             Deschide lucrarea
           </Link>
@@ -139,38 +144,73 @@ export function AtelierPage() {
       />
 
       <InboxLane
-        title="Disponibile pentru mine"
+        title="Pot porni acum"
         empty={
           emptyAll
             ? null
             : unavailable
               ? "Nu poți revendica taskuri noi cât ești indisponibil."
-              : noClaimable
-                ? "Nu ai taskuri disponibile acum."
+              : inbox.summary.availableReady === 0
+                ? "Nu ai taskuri pe care le poți porni acum."
                 : null
         }
-        items={[...inbox.availableReady, ...inbox.availableNeedsProvider]}
+        items={inbox.availableReady}
         renderActions={(item) => (
           <>
-            {item.canClaimStart ? (
-              <button
-                type="button"
-                disabled={busyTaskId !== null}
-                onClick={() => void claimStart(item.taskId)}
-              >
-                {busyTaskId === item.taskId ? "Se pornește…" : "Pornește"}
-              </button>
-            ) : (
-              <span className="atelier-block-reason">
-                Necesită echipament / zonă înainte de pornire.
-              </span>
-            )}
+            <button
+              type="button"
+              disabled={busyTaskId !== null}
+              onClick={() => void claimStart(item.taskId)}
+            >
+              {busyTaskId === item.taskId ? "Se pornește…" : "Pornește"}
+            </button>
             <Link className="button-quiet" to={item.workspaceHref}>
               Deschide lucrarea
             </Link>
           </>
         )}
       />
+
+      {prepItems.length > 0 ? (
+        <details className="atelier-prep-lane" open={!collapsePrep}>
+          <summary>
+            Necesită pregătire atelier ({prepItems.length})
+          </summary>
+          <p className="atelier-prep-hint">
+            Lipsă echipament / zonă. Deschide lucrarea pentru alocare — nu din Atelier.
+          </p>
+          <ul className="atelier-task-list">
+            {prepItems.map((item) => (
+              <li key={item.taskId} className="atelier-task-row">
+                <div className="atelier-task-main">
+                  <p className="atelier-task-title">
+                    <span className="atelier-task-seq">{item.seqLabel}</span>{" "}
+                    {item.processLabel}
+                    <span className="atelier-task-scope"> · {item.scopeLabel}</span>
+                  </p>
+                  <p className="atelier-task-meta">
+                    {item.customerDisplayName ? `${item.customerDisplayName} · ` : null}
+                    {item.inscription}
+                  </p>
+                  <p className="atelier-task-meta">
+                    {item.productLabel}
+                    {" · "}
+                    {item.requiredCapabilityLabel}
+                  </p>
+                </div>
+                <div className="atelier-task-actions">
+                  <span className="atelier-block-reason">
+                    Necesită echipament / zonă înainte de pornire.
+                  </span>
+                  <Link className="button-quiet" to={item.workspaceHref}>
+                    Deschide lucrarea
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
 
       {inbox.waitingDependencies.length > 0 ? (
         <InboxLane
