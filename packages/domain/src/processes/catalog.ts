@@ -92,6 +92,7 @@ export const CLOSE_LETTER_BODY_ID = "CLOSE_LETTER_BODY";
 export const TEST_ILLUMINATION_UNIFORMITY_ID = "TEST_ILLUMINATION_UNIFORMITY";
 export const INSPECT_FINISHED_LETTER_ID = "INSPECT_FINISHED_LETTER";
 export const PACK_PRODUCT_ID = "PACK_PRODUCT";
+export const ATTACH_INTERNAL_FRAME_ID = "ATTACH_INTERNAL_FRAME";
 export const WELD_STEEL_JOIN_ID = "WELD_STEEL_JOIN";
 export const WELD_ALUMINIUM_JOIN_ID = "WELD_ALUMINIUM_JOIN";
 export const CUT_METAL_STOCK_ID = "CUT_METAL_STOCK";
@@ -215,10 +216,10 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     id: CUT_SHEET_CNC_ID,
     label: "Debitare foaie CNC",
     description:
-      "Debitare CNC a foii. Același proces servește față Plexiglas și spate Forex. Fără model de utilaj.",
+      "Debitare CNC a foii. Același proces servește față Plexiglas, spate Forex și casetă ACM. Fără model de utilaj.",
     category: "CUTTING",
     requiredCapabilityId: "CNC_ROUTING",
-    applicableTypeIds: ["PLEXIGLAS_FACE", "FOREX_BACK"],
+    applicableTypeIds: ["PLEXIGLAS_FACE", "FOREX_BACK", "ACM_CASSETTE_BODY"],
     outcome: "Geometrie debitată",
     resourceIds: [],
     lifecycle: "PLANNED",
@@ -403,6 +404,21 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     providerRequirement: "NOT_REQUIRED",
   },
   {
+    id: ATTACH_INTERNAL_FRAME_ID,
+    label: "Prindere cadru intern",
+    description:
+      "Prindere cadru metalic intern de corpul casetat. Nu este lipire față-volum de literă.",
+    category: "ASSEMBLY",
+    requiredCapabilityId: "MANUAL_ASSEMBLY",
+    applicableTypeIds: ["ACM_CASSETTE_BODY", "STEEL_INTERNAL_FRAME"],
+    outcome: "Cadru intern prins de casetă",
+    resourceIds: [],
+    lifecycle: "PLANNED",
+    readiness: "KNOWN_PROCESS",
+    readinessNote:
+      "Proces de atelier cunoscut. Fără rețetă de labor și fără tarif de prindere.",
+  },
+  {
     id: WELD_STEEL_JOIN_ID,
     label: "Îmbinare sudură oțel",
     description:
@@ -439,7 +455,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
       "Debitare de semifabricat metalic. Nu este debitare CNC de foi și nu este sudură.",
     category: "CUTTING",
     requiredCapabilityId: "METAL_CUTTING",
-    applicableTypeIds: [],
+    applicableTypeIds: ["STEEL_INTERNAL_FRAME"],
     outcome: "Semifabricat metalic debitat",
     resourceIds: [],
     lifecycle: "ACTIVE",

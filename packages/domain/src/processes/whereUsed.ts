@@ -1,5 +1,5 @@
 import { getComponentType } from "../product/componentTypes.js";
-import { productTemplates } from "../product/frontlitPlexiAl06.js";
+import { productTemplates } from "../product/productRegistry.js";
 import type { ComponentRole, ComponentTypeId } from "../product/types.js";
 import { getOperationalProcess } from "./catalog.js";
 import { lettersProcessCompositionInspections } from "./composition.js";

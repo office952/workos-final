@@ -1,7 +1,15 @@
 export const RESOURCE_KINDS = ["MATERIAL", "SERVICE", "LABOR"] as const;
 export type ResourceKind = (typeof RESOURCE_KINDS)[number];
 
-export const MATERIAL_FAMILY_IDS = ["PLEXIGLAS", "FOREX", "ALUMINIUM", "LED", "VINYL"] as const;
+export const MATERIAL_FAMILY_IDS = [
+  "PLEXIGLAS",
+  "FOREX",
+  "ALUMINIUM",
+  "LED",
+  "VINYL",
+  "ACM",
+  "STEEL",
+] as const;
 export type MaterialFamilyId = (typeof MATERIAL_FAMILY_IDS)[number];
 
 export type ResourceUnit = "m" | "m2" | "buc";
@@ -74,6 +82,8 @@ export const SVC_PLACE_LED_MODULES_ID = "SVC-PLACE-LED-MODULES";
 export const SVC_ELECTRICAL_FINISH_ID = "SVC-ELECTRICAL-FINISH";
 export const SVC_PAINT_RAL_ID = "SVC-PAINT-RAL";
 export const SVC_PACK_PRODUCT_ID = "SVC-PACK-PRODUCT";
+export const ACM_3MM_ID = "acm_3mm";
+export const STEEL_FRAME_PROFILE_ID = "steel_frame_profile";
 
 export const materialFamilies: readonly MaterialFamily[] = [
   {
@@ -102,6 +112,16 @@ export const materialFamilies: readonly MaterialFamily[] = [
     label: "Folie / colant",
     description:
       "Folie de aplicare. Materialul este separat de manopera de aplicare.",
+  },
+  {
+    id: "ACM",
+    label: "ACM",
+    description: "Familie de foi composite aluminiu-polietilenă. Grosimea este specificație.",
+  },
+  {
+    id: "STEEL",
+    label: "Oțel",
+    description: "Familie de oțel. Profilul de cadru este specificație, nu prinderea.",
   },
 ];
 
@@ -256,6 +276,29 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
     label: "Ambalare",
     kind: "SERVICE",
     unit: "m2",
+  },
+  {
+    id: ACM_3MM_ID,
+    label: "ACM 3 mm",
+    kind: "MATERIAL",
+    unit: "m2",
+    familyId: "ACM",
+    specification: {
+      familyId: "ACM",
+      form: "sheet",
+      thicknessMm: 3,
+    },
+  },
+  {
+    id: STEEL_FRAME_PROFILE_ID,
+    label: "Profil oțel cadru intern",
+    kind: "MATERIAL",
+    unit: "m",
+    familyId: "STEEL",
+    specification: {
+      familyId: "STEEL",
+      form: "profile",
+    },
   },
 ];
 

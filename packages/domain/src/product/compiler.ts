@@ -224,24 +224,40 @@ export function compileAggregate(
       ? truth.values["root.inscription"]
       : "";
 
-  const components = template.components
-    .filter((component) => truth.selectedComponentIds.includes(component.id))
-    .map((component) => {
-      const details = allFields(schema)
-        .filter(
-          (field) =>
-            field.componentId === component.id &&
-            field.id !== component.selectionFieldId &&
-            truth.values[field.id] !== undefined,
-        )
-        .map((field) => `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id])}`);
+  const rootDetails = allFields(schema)
+    .filter(
+      (field) =>
+        field.componentId === "ROOT" &&
+        field.id !== "root.inscription" &&
+        truth.values[field.id] !== undefined,
+    )
+    .map((field) => `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id])}`);
+  const components = [
+    ...(rootDetails.length > 0
+      ? [{ id: "ROOT", label: "Produs", details: rootDetails }]
+      : []),
+    ...template.components
+      .filter((component) => truth.selectedComponentIds.includes(component.id))
+      .map((component) => {
+        const details = allFields(schema)
+          .filter(
+            (field) =>
+              field.componentId === component.id &&
+              field.id !== component.selectionFieldId &&
+              truth.values[field.id] !== undefined,
+          )
+          .map(
+            (field) =>
+              `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id])}`,
+          );
 
-      return {
-        id: component.id,
-        label: component.label,
-        details,
-      };
-    });
+        return {
+          id: component.id,
+          label: component.label,
+          details,
+        };
+      }),
+  ];
 
   const calculations = evaluateProductComponents({
     template,

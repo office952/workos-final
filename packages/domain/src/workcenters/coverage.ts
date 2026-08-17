@@ -4,7 +4,8 @@ import {
   type ProductionCapabilityClassId,
 } from "../processes/catalog.js";
 import { lettersProcessCompositionInspections } from "../processes/composition.js";
-import { CANONICAL_PRODUCT_CODE, getProductTemplate } from "../product/frontlitPlexiAl06.js";
+import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
+import { getProductTemplate } from "../product/productRegistry.js";
 import {
   workcenterRegistry,
   type ProviderCoverageStatus,

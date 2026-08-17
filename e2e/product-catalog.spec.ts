@@ -10,8 +10,9 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(
     page.getByRole("heading", { name: "Litere și semne volumetrice luminoase" }),
   ).toBeVisible();
-  await expect(page.getByText("Familie", { exact: true })).toBeVisible();
-  await expect(page.getByText("Produs", { exact: true })).toBeVisible();
+  await expect(page.getByText("Familie", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Produs", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Panou ACM casetat" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ia-products.png",
     fullPage: true,

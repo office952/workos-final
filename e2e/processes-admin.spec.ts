@@ -253,7 +253,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await page.goto("/components");
   await page.getByRole("button", { name: "Componente de produs" }).click();
   await page.getByRole("button", { name: "Față" }).click();
-  await expect(page.getByText("Debitare foaie CNC")).toBeVisible();
+  await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
   await expect(page.getByText("Plexiglas 3 mm opal")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-components-face.png",

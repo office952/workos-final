@@ -16,7 +16,7 @@ import {
   presentedTemplates,
   type DisplayLabelCatalog,
 } from "./displayMetadata.js";
-import { getFormSchema } from "./frontlitPlexiAl06.js";
+import { getFormSchema } from "./productRegistry.js";
 import type { ComponentRole, ProductCategory } from "./types.js";
 import type { ComponentInspectionLine } from "./componentContract.js";
 import type { ComponentTechnicalSettingProjection } from "./technicalSettings.js";

@@ -1,7 +1,5 @@
-import {
-  CANONICAL_PRODUCT_CODE,
-  getProductTemplate,
-} from "../product/frontlitPlexiAl06.js";
+import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
+import { getProductTemplate } from "../product/productRegistry.js";
 import { getResource } from "../resources/catalog.js";
 import {
   recipeForProcess,

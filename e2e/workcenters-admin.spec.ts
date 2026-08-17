@@ -255,7 +255,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await page.goto("/components");
   await page.getByRole("button", { name: "Componente de produs" }).click();
   await page.getByRole("button", { name: "Față" }).click();
-  await expect(page.getByText("Debitare foaie CNC")).toBeVisible();
+  await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
 
   await page.goto("/products");
   await page

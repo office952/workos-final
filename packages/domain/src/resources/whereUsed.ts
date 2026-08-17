@@ -1,4 +1,4 @@
-import { productTemplates } from "../product/frontlitPlexiAl06.js";
+import { productTemplates } from "../product/productRegistry.js";
 import type { ComponentRole, ComponentTypeId } from "../product/types.js";
 import { liveResourceIdsForType } from "./resolve.js";
 

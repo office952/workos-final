@@ -51,11 +51,20 @@ function lightingUnavailableReason(aggregate: ProductAggregate): string {
   return ` Iluminarea nu este calculată: ${lighting.unavailable.join("; ")}.`;
 }
 
-function measurementCopy(value: number, unit: string): string {
-  if (unit === "mm2") {
-    return `Suprafață confirmată: ${value} mm² (introdusă de operator)`;
+function measurementCopy(measurement: {
+  value: number;
+  unit: string;
+  label?: string;
+}): string {
+  const unitLabel = measurement.unit === "mm2" ? "mm²" : "mm";
+  const introduced = measurement.unit === "mm2" ? "introdusă" : "introdus";
+  if (measurement.label) {
+    return `${measurement.label}: ${measurement.value} ${unitLabel} (${introduced} de operator)`;
   }
-  return `Perimetru confirmat: ${value} mm (introdus de operator)`;
+  if (measurement.unit === "mm2") {
+    return `Suprafață confirmată: ${measurement.value} mm² (introdusă de operator)`;
+  }
+  return `Perimetru confirmat: ${measurement.value} mm (introdus de operator)`;
 }
 
 export function ConstructionFacts({ facts }: { facts: readonly ProductIdentityFact[] }) {
@@ -182,7 +191,7 @@ export function ConfirmedSummary({
       </div>
       {truth.measurements.map((measurement) => (
         <p key={measurement.fieldId}>
-          {measurementCopy(measurement.value, measurement.unit)}
+          {measurementCopy(measurement)}
         </p>
       ))}
       {aggregate.quantities.length === 0 ? (

@@ -36,6 +36,8 @@ describe("resources administration projection", () => {
       "ALUMINIUM",
       "LED",
       "VINYL",
+      "ACM",
+      "STEEL",
     ]);
     const plexiglas = admin.materials.find((item) => item.id === PLEXIGLAS_3MM_OPAL_ID);
     expect(plexiglas?.familyLabel).toBe("Plexiglas");
@@ -98,12 +100,17 @@ describe("resources administration projection", () => {
       "INSPECT_FINISHED_LETTER",
     );
     expect(admin.costEvidence).toHaveLength(20);
-    expect(admin.costEvidence.map((item) => item.resourceId).sort()).toEqual(
-      admin.materials
-        .concat(admin.services)
-        .concat(admin.labor)
-        .map((item) => item.id)
-        .sort(),
+    const catalogIds = admin.materials
+      .concat(admin.services)
+      .concat(admin.labor)
+      .map((item) => item.id);
+    expect(admin.costEvidence.every((item) => catalogIds.includes(item.resourceId))).toBe(
+      true,
+    );
+    expect(catalogIds).toEqual(expect.arrayContaining(["acm_3mm", "steel_frame_profile"]));
+    expect(admin.costEvidence.map((item) => item.resourceId)).not.toContain("acm_3mm");
+    expect(admin.costEvidence.map((item) => item.resourceId)).not.toContain(
+      "steel_frame_profile",
     );
   });
 });

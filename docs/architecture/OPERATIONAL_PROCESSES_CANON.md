@@ -57,7 +57,7 @@ Kinds in this foundation: MACHINE, WORKSTATION, HUMAN_SKILL.
 
 ## Applicability and composition
 
-A process is reusable. `CUT_SHEET_CNC` applies to FACE and BACK.
+A process is reusable. `CUT_SHEET_CNC` applies to Plexiglas face, Forex back, and ACM cassette body.
 
 ```text
 PROCESS DEFINITION
@@ -113,7 +113,7 @@ Letters-used processes:
 
 | Process | Category | Capability | Types | Readiness |
 |---|---|---|---|---|
-| `CUT_SHEET_CNC` | CUTTING | CNC_ROUTING | FACE, BACK | KNOWN_PROCESS |
+| `CUT_SHEET_CNC` | CUTTING | CNC_ROUTING | Plexiglas face, Forex back, ACM cassette | KNOWN_PROCESS |
 | `FORM_ALUMINIUM_PROFILE` | FORMING | PROFILE_FORMING | VOLUME | IMPLEMENTED_PROCESS_FOUNDATION |
 | `APPLY_SURFACE_FINISH` | FINISHING | VINYL_APPLICATION | FACE, VOLUME | PLANNED |
 | `BOND_LETTER_BODY` | ASSEMBLY | MANUAL_ASSEMBLY | FACE, VOLUME | PLANNED |
@@ -127,13 +127,22 @@ Letters-used processes:
 | `INSPECT_FINISHED_LETTER` | QUALITY_CONTROL | QUALITY_CONTROL | product | PLANNED |
 | `PACK_PRODUCT` | PACKING | PACKAGING | product | PLANNED |
 
+ACM cassette extras, type-driven, not LETTERS role forks:
+
+| Process | Category | Capability | Types | Readiness |
+|---|---|---|---|---|
+| `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | steel internal frame | KNOWN_PROCESS |
+| `ATTACH_INTERNAL_FRAME` | ASSEMBLY | MANUAL_ASSEMBLY | ACM cassette + steel frame | KNOWN_PROCESS |
+
+Product extras are selected by constructive type ids. FACE+VOLUME roles alone do not create letter bond/close/inspect. Lighting readiness may be `NOT_APPLICABLE` when no LIGHTING component is selected.
+
 Reusable shop-floor processes. They exist because real equipment and operations exist. They are not Letters demand:
 
 | Process | Category | Capability | Current provider (derived) | Recipe |
 |---|---|---|---|---|
 | `WELD_STEEL_JOIN` | WELDING | WELD_STEEL | `MCH-WELD-STEEL` | SERVICE missing |
 | `WELD_ALUMINIUM_JOIN` | WELDING | WELD_ALUMINIUM | `MCH-WELD-ALU` | SERVICE missing |
-| `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | `MCH-METAL-CUTTER-AUTO` | SERVICE missing |
+| `CUT_METAL_STOCK` | CUTTING | METAL_CUTTING | `MCH-METAL-CUTTER-AUTO` | SERVICE missing; now also used by ACM frame |
 | `PRINT_WIDE_FORMAT` | PRINTING | PRINTING | `MCH-EPSON-60800` | SERVICE missing |
 | `LAMINATE_WIDE_FORMAT` | PRINTING | LAMINATION | `MCH-LAMINATOR-XPRO` | SERVICE missing |
 | `LAMINATE_RIGID_PLATE` | FINISHING | RIGID_FILM_LAMINATION | `MCH-RIGID-FILM-LAMINATOR` | SERVICE missing |

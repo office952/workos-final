@@ -6,7 +6,9 @@ export type ComponentTypeId =
   | "PLEXIGLAS_FACE"
   | "ALUMINIUM_VOLUME"
   | "FOREX_BACK"
-  | "LIGHTING_FRONT_LED";
+  | "LIGHTING_FRONT_LED"
+  | "ACM_CASSETTE_BODY"
+  | "STEEL_INTERNAL_FRAME";
 export type ComponentCalculationStatus =
   | "CALCULATED"
   | "PARTIAL"
@@ -128,6 +130,7 @@ export type TechnicalMeasurement = {
   unit: "mm" | "mm2";
   source: "OPERATOR_MANUAL";
   confirmed: true;
+  label?: string;
 };
 
 export type ProductDefinition = {

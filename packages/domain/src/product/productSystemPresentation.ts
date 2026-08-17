@@ -4,7 +4,7 @@ import {
   presentedTemplate,
   type DisplayLabelCatalog,
 } from "./displayMetadata.js";
-import { getFormSchemaForTemplate } from "./frontlitPlexiAl06.js";
+import { getFormSchemaForTemplate } from "./productRegistry.js";
 import { projectProductSystemAdministration } from "./productSystemAdmin.js";
 
 export function presentProductSystem(labels: DisplayLabelCatalog) {

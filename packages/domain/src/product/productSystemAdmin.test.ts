@@ -11,7 +11,7 @@ import type { ProductCategory } from "./types.js";
 describe("product system administration projection", () => {
   it("derives family category and product relationships from the catalog", () => {
     const admin = projectProductSystemAdministration(seededDisplayLabelCatalog());
-    expect(admin.families).toHaveLength(1);
+    expect(admin.families).toHaveLength(2);
     expect(admin.families[0]?.id).toBe("LIGHTED_VOLUMETRIC_SIGNS");
     expect(admin.families[0]?.label).toBe("Litere și semne volumetrice luminoase");
     expect(admin.families[0]?.id).not.toBe(admin.families[0]?.label);
@@ -19,10 +19,13 @@ describe("product system administration projection", () => {
     expect(admin.families[0]?.productCodes).toEqual([CANONICAL_PRODUCT_CODE]);
     expect(admin.families[0]?.readiness.lifecycle).toBe("ACTIVE");
     expect(admin.families[0]?.readiness.canDelete).toBe(false);
+    expect(admin.families[1]?.id).toBe("SIGN_PANELS");
+    expect(admin.families[1]?.productCodes).toEqual(["PRD-ACM-CASSETTE-NONE"]);
     expect(admin.categories.map((item) => item.id)).toEqual([
       "FRONT_LIT_VOLUMETRIC_LETTERS",
       "HALO_LIT_VOLUMETRIC_LETTERS",
       "FULL_ALUMINIUM_VOLUMETRIC_LETTERS",
+      "ACM_CASSETTE_PANELS",
     ]);
     const used = admin.categories.find((item) => item.id === "FRONT_LIT_VOLUMETRIC_LETTERS");
     const empty = admin.categories.find((item) => item.id === "HALO_LIT_VOLUMETRIC_LETTERS");

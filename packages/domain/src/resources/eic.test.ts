@@ -77,8 +77,17 @@ describe("resource ownership", () => {
       aggregate.quantities.find((item) => item.componentId === "VOLUME")?.value,
     ).toBe(12.5);
     expect(JSON.stringify(aggregate)).not.toMatch(/"amount":10|"amount":15/);
-    expect(costEvidence.map((item) => item.resourceId).sort()).toEqual(
-      resourceCatalog.map((item) => item.id).sort(),
+    expect(
+      costEvidence.every((item) =>
+        resourceCatalog.some((resource) => resource.id === item.resourceId),
+      ),
+    ).toBe(true);
+    expect(resourceCatalog.map((item) => item.id)).toEqual(
+      expect.arrayContaining(["acm_3mm", "steel_frame_profile"]),
+    );
+    expect(costEvidence.map((item) => item.resourceId)).not.toContain("acm_3mm");
+    expect(costEvidence.map((item) => item.resourceId)).not.toContain(
+      "steel_frame_profile",
     );
   });
 });

@@ -8,11 +8,8 @@ import {
   productCategories,
   productFamilies,
 } from "./catalog.js";
-import {
-  CANONICAL_PRODUCT_CODE,
-  frontlitPlexiAl06Template,
-  productTemplates,
-} from "./frontlitPlexiAl06.js";
+import { CANONICAL_PRODUCT_CODE, frontlitPlexiAl06Template } from "./frontlitPlexiAl06.js";
+import { productTemplates } from "./productRegistry.js";
 import { projectProductCatalog } from "./catalogProjection.js";
 import { seededDisplayLabelCatalog } from "./displayMetadata.js";
 import type { ProductCategory, ProductFamily } from "./types.js";

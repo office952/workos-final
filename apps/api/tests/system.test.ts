@@ -87,6 +87,8 @@ describe("system projection API", () => {
       "ALUMINIUM",
       "LED",
       "VINYL",
+      "ACM",
+      "STEEL",
     ]);
     expect(body.families[0]?.specifications[0]?.id).toBe("plexiglas_3mm_opal");
     expect(body.families[3]?.specifications.map((item) => item.id)).toEqual([
@@ -130,6 +132,7 @@ describe("system projection API", () => {
       "TEST_ILLUMINATION_UNIFORMITY",
       "INSPECT_FINISHED_LETTER",
       "PACK_PRODUCT",
+      "ATTACH_INTERNAL_FRAME",
       "WELD_STEEL_JOIN",
       "WELD_ALUMINIUM_JOIN",
       "CUT_METAL_STOCK",

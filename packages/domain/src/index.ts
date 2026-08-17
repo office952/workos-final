@@ -19,6 +19,7 @@ export {
   type SystemBoundary,
 } from "./governance/index.js";
 export {
+  ACM_CASSETTE_NONE_PRODUCT_CODE,
   BACK_COMPONENT_ID,
   CANONICAL_PRODUCT_CODE,
   FACE_AREA_FIELD,

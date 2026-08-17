@@ -96,10 +96,10 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.getByRole("button", { name: "Față" }).click();
   await expect(page.getByText("Tip constructiv").first()).toBeVisible();
   await expect(page.getByText("Opal", { exact: true })).toBeVisible();
-  await expect(page.getByText("3 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("3 mm", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Identitate / proprietate material").first()).toBeVisible();
-  await expect(page.getByText("Calcul independent")).toBeVisible();
-  await expect(page.getByText("Produse care o folosesc")).toBeVisible();
+  await expect(page.getByText("Calcul independent").first()).toBeVisible();
+  await expect(page.getByText("Produse care o folosesc").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/config-face.png",
     fullPage: true,

@@ -118,10 +118,15 @@ describe("product system admin catalog presentation", () => {
     expect(catalog.categories[0]?.items[0]?.label).toBe(
       "Litere și semne volumetrice luminoase",
     );
+    expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
+      "Litere și semne volumetrice luminoase",
+      "Panouri și casete",
+    ]);
     expect(catalog.categories[1]?.items.map((item) => item.label)).toEqual([
       "Litere volumetrice luminoase cu iluminare față",
       "Litere volumetrice luminoase cu iluminare halou",
       "Litere volumetrice luminoase integral aluminiu",
+      "Panouri ACM casetate",
     ]);
     const emptyCategory = catalog.categories[1]?.items[1];
     expect(
@@ -298,6 +303,8 @@ describe("resources catalog presentation", () => {
       "Aluminiu",
       "Iluminare LED",
       "Folie / colant",
+      "ACM",
+      "Oțel",
     ]);
     expect(catalog.categories[0]?.items[0]?.groups[0]?.title).toBe(
       "Plexiglas 3 mm opal",

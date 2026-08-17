@@ -1,4 +1,5 @@
 export {
+  ACM_3MM_ID,
   ALUMINIUM_RETURN_PROFILE_ID,
   FOREX_10MM_ID,
   MAT_LED_MODULE_ID,
@@ -10,6 +11,7 @@ export {
   PLEXIGLAS_3MM_OPAL_ID,
   RESOURCE_KINDS,
   RETURN_CANT_FORMING_ID,
+  STEEL_FRAME_PROFILE_ID,
   costEvidence,
   getCostEvidence,
   listCostEvidence,

@@ -59,7 +59,7 @@ FIRST CANONICAL PRODUCT = TECHNICAL_PARTIAL
 - PHASE 8 = PILOT_VALIDATED
 
 These phases are not universally COMPLETE.
-Commercial price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and Execution from Order Release are IMPLEMENTED_CURRENT / BASIC. The commercial spine now reaches persisted ExecutionPlan. QC / pack provider gaps, ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
+Commercial price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and Execution from Order Release are IMPLEMENTED_CURRENT / BASIC. The commercial spine now reaches persisted ExecutionPlan. The ACM cassette vertical slice is IMPLEMENTED_CURRENT / BASIC with honest PARTIAL EIC. QC / pack provider gaps, full ACM, Analyzer runtime, and resource admin write remain NOT_COMPLETE. Inventory stock movements are IMPLEMENTED_CURRENT / BASIC.
 
 ## Finalization map
 
@@ -107,6 +107,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Execution from Order Release | IMPLEMENTED_CURRENT / BASIC |
 | Commercial Execution workspace | IMPLEMENTED_CURRENT / BASIC |
 | Operational job overview | IMPLEMENTED_CURRENT / BASIC |
-| Reporting, Documents, ACM, Logo | LATER |
+| ACM cassette second-product vertical slice | IMPLEMENTED_CURRENT / BASIC / EIC PARTIAL |
+| Reporting, Documents, full ACM, Logo | LATER |
 
 Do not add a top-nav item per later domain. Future admin grows under one Administrare catalog.

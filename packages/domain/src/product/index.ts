@@ -1,8 +1,10 @@
 export {
+  ACM_CASSETTE_PANELS_CATEGORY_ID,
   FULL_ALUMINIUM_VOLUMETRIC_LETTERS_CATEGORY_ID,
   FRONT_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
   HALO_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
   LIGHTED_VOLUMETRIC_SIGNS_FAMILY_ID,
+  SIGN_PANELS_FAMILY_ID,
   buildCatalogTree,
   categoryHasCycle,
   getProductCategory,
@@ -78,14 +80,44 @@ export {
 } from "./face.js";
 export {
   CANONICAL_PRODUCT_CODE,
-  formSchemas,
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
+} from "./frontlitPlexiAl06.js";
+export {
+  ACM_CASSETTE_NONE_PRODUCT_CODE,
+  ACM_GOLDEN_DEPTH_MM,
+  ACM_GOLDEN_HEIGHT_MM,
+  ACM_GOLDEN_WIDTH_MM,
+  acmCassetteNoneFormSchema,
+  acmCassetteNoneTemplate,
+} from "./acmCassetteNone.js";
+export {
+  formSchemas,
   getFormSchema,
   getFormSchemaForTemplate,
   getProductTemplate,
   productTemplates,
-} from "./frontlitPlexiAl06.js";
+} from "./productRegistry.js";
+export {
+  ACM_FRAME_CLEARANCE_MM,
+  ACM_UNFOLD_RETURN_SIDES,
+  cassetteBlankMm,
+  frameExternalSizeMm,
+  rectanglePerimeterMm,
+} from "./acmGeometry.js";
+export {
+  ACM_CASSETTE_BODY_TYPE_ID,
+  FACE_CASSETTE_DEPTH_FIELD,
+  FACE_HEIGHT_FIELD,
+  FACE_THICKNESS_FIELD,
+  FACE_WIDTH_FIELD,
+  acmCassetteBodyContract,
+} from "./acmCassetteBody.js";
+export {
+  FRAME_MISSING_PANEL_GEOMETRY,
+  STEEL_INTERNAL_FRAME_TYPE_ID,
+  steelInternalFrameContract,
+} from "./steelInternalFrame.js";
 export {
   LIGHTING_COMPONENT_ID,
   LIGHTING_MISSING_LED_GEOMETRY,

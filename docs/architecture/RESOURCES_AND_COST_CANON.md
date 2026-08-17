@@ -42,7 +42,7 @@ Service / Labor Recipes now have their own canon: `docs/architecture/SERVICE_AND
 
 ```text
 MATERIAL FAMILY
-  Plexiglas / Forex / Aluminium / LED / Folie
+  Plexiglas / Forex / Aluminium / LED / Folie / ACM / Oțel
     → RESOURCE SPECIFICATION
       current purchasable/costable row
         → COST EVIDENCE
@@ -61,6 +61,8 @@ Current live specifications:
 - Modul LED 12V — buc
 - Sursă LED 12V 60 / 100 / 160 / 200 W — buc
 - Folie Oracal 651 — sheet, m² — only when vinyl is selected
+- ACM 3 mm — sheet, m² — identity only; no owner-confirmed rate yet
+- Profil oțel cadru intern — profile, m — identity only; no owner-confirmed rate yet
 
 Typed units currently used: `m`, `m²`, `buc`.
 `buc` is the piece-count unit for LED modules and PSU units. It is not a generic arbitrary-unit engine.

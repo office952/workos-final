@@ -37,6 +37,7 @@ export type ComponentCalculationResult = {
 export type ComponentMeasurementKind =
   | "confirmed_area_mm2"
   | "confirmed_perimeter_mm"
+  | "confirmed_outer_dimensions_mm"
   | "supplied_area_mm2"
   | "none";
 

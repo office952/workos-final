@@ -88,6 +88,8 @@ function measurementCopy(kind: ComponentMeasurementKind): string {
       return "Suprafață confirmată de operator (mm²)";
     case "confirmed_perimeter_mm":
       return "Perimetru confirmat de operator (mm)";
+    case "confirmed_outer_dimensions_mm":
+      return "Dimensiuni exterioare confirmate de operator (mm)";
     case "supplied_area_mm2":
       return "Suprafață primită din compoziția produsului (mm²)";
     case "none":

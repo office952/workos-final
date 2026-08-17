@@ -5,6 +5,7 @@ import {
   lightingEvaluationFrom,
   type ComponentEvaluation,
 } from "../product/componentEvaluation.js";
+import { selectedComponentIds } from "../product/compiler.js";
 import { getComponentType } from "../product/componentTypes.js";
 import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
 import {
@@ -25,8 +26,10 @@ import type {
 import { compileEic, costCompletenessLabel } from "../resources/eic.js";
 import {
   APPLY_SURFACE_FINISH_ID,
+  ATTACH_INTERNAL_FRAME_ID,
   BOND_LETTER_BODY_ID,
   CLOSE_LETTER_BODY_ID,
+  CUT_METAL_STOCK_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
   INSPECT_FINISHED_LETTER_ID,
@@ -67,6 +70,7 @@ export const COMPOSITION_COMPLETENESS = ["READY", "PARTIAL", "BLOCKED"] as const
 export type CompositionCompleteness = (typeof COMPOSITION_COMPLETENESS)[number];
 
 export const LIGHTING_CALCULATION_READINESS = [
+  "NOT_APPLICABLE",
   "BLOCKED",
   "PARTIAL",
   "CALCULATED",
@@ -173,7 +177,7 @@ export function composeProductProcesses(
   options: ProcessCompositionOptions = {},
 ): ProductProcessComposition {
   const merged: DraftValues = { ...template.fixedValues, ...values };
-  const selectedIds = template.components.map((item) => item.id);
+  const selectedIds = selectedComponentIds(template, merged);
   const measurements =
     options.measurements ??
     collectComponentMeasurements(template, selectedIds, merged);
@@ -185,8 +189,11 @@ export function composeProductProcesses(
       values: merged,
       measurements,
     });
-  const lightingResult = requireLightingEvaluation(evaluations);
-  const nodes = template.components.flatMap((component) =>
+  const lightingResult = lightingEvaluationFrom(evaluations);
+  const selectedComponents = template.components.filter((component) =>
+    selectedIds.includes(component.id),
+  );
+  const nodes = selectedComponents.flatMap((component) =>
     composeTypeProcessNodes(
       component.id as ComponentRole,
       component.typeId,
@@ -196,7 +203,7 @@ export function composeProductProcesses(
   );
   const withProduct = addProductComposition(
     nodes,
-    template.components.map((item) => item.id),
+    selectedComponents.map((item) => item.typeId),
     lightingResult,
   );
   const connected = applyProductDependencies(withProduct);
@@ -316,14 +323,12 @@ export function lettersProcessCompositionInspections(
 
 function addProductComposition(
   nodes: ProcessCompositionNode[],
-  selectedComponentIds: readonly string[],
-  lightingResult: ComponentCalculationResult,
+  selectedTypeIds: readonly ComponentTypeId[],
+  lightingResult?: ComponentCalculationResult,
 ): ProcessCompositionNode[] {
+  const types = new Set(selectedTypeIds);
   const extra: ProcessCompositionNode[] = [];
-  if (
-    selectedComponentIds.includes("FACE") &&
-    selectedComponentIds.includes("VOLUME")
-  ) {
+  if (types.has("PLEXIGLAS_FACE") && types.has("ALUMINIUM_VOLUME")) {
     extra.push(
       toNode({
         scope: "BODY",
@@ -337,9 +342,9 @@ function addProductComposition(
     );
   }
   if (
-    selectedComponentIds.includes("FACE") &&
-    selectedComponentIds.includes("VOLUME") &&
-    selectedComponentIds.includes("BACK")
+    types.has("PLEXIGLAS_FACE") &&
+    types.has("ALUMINIUM_VOLUME") &&
+    types.has("FOREX_BACK")
   ) {
     extra.push(
       toNode({
@@ -353,22 +358,39 @@ function addProductComposition(
       }),
     );
   }
+  if (types.has("PLEXIGLAS_FACE") && types.has("ALUMINIUM_VOLUME")) {
+    extra.push(
+      toNode({
+        scope: "PRODUCT",
+        typeId: null,
+        processId: INSPECT_FINISHED_LETTER_ID,
+        condition: { kind: "always" },
+        reason: "Controlul final verifică corpul, finisajul și închiderea.",
+        dependsOn: [],
+        lightingResult,
+      }),
+    );
+  }
+  if (types.has("ACM_CASSETTE_BODY") && types.has("STEEL_INTERNAL_FRAME")) {
+    extra.push(
+      toNode({
+        scope: "BODY",
+        typeId: null,
+        processId: ATTACH_INTERNAL_FRAME_ID,
+        condition: { kind: "always" },
+        reason: "Cadrul intern se prinde de corpul ACM după debitare.",
+        dependsOn: [],
+        lightingResult,
+      }),
+    );
+  }
   extra.push(
-    toNode({
-      scope: "PRODUCT",
-      typeId: null,
-      processId: INSPECT_FINISHED_LETTER_ID,
-      condition: { kind: "always" },
-      reason: "Controlul final verifică corpul, finisajul și închiderea.",
-      dependsOn: [],
-      lightingResult,
-    }),
     toNode({
       scope: "PRODUCT",
       typeId: null,
       processId: PACK_PRODUCT_ID,
       condition: { kind: "always" },
-      reason: "Ambalarea urmează după controlul final.",
+      reason: "Ambalarea închide traseul de produs.",
       dependsOn: [],
       lightingResult,
     }),
@@ -407,6 +429,8 @@ function explicitDependencies(
     "LIGHTING",
     TEST_ILLUMINATION_UNIFORMITY_ID,
   );
+  const metalCut = compositionNodeId("BACK", CUT_METAL_STOCK_ID);
+  const attach = compositionNodeId("BODY", ATTACH_INTERNAL_FRAME_ID);
   const inspect = compositionNodeId("PRODUCT", INSPECT_FINISHED_LETTER_ID);
   const pack = compositionNodeId("PRODUCT", PACK_PRODUCT_ID);
 
@@ -440,11 +464,14 @@ function explicitDependencies(
   if (node.id === testUniformity) {
     pushIfPresent(deps, ids, close, volumePaint);
   }
+  if (node.id === attach) {
+    pushIfPresent(deps, ids, faceCut, metalCut);
+  }
   if (node.id === inspect) {
     pushIfPresent(deps, ids, testUniformity, volumePaint, close);
   }
   if (node.id === pack) {
-    pushIfPresent(deps, ids, inspect);
+    pushIfPresent(deps, ids, inspect, attach);
   }
   return deps;
 }
@@ -461,19 +488,12 @@ function pushIfPresent(
   }
 }
 
-function requireLightingEvaluation(
-  evaluations: readonly ComponentEvaluation[],
-): ComponentCalculationResult {
-  const lighting = lightingEvaluationFrom(evaluations);
-  if (!lighting) {
-    throw new Error("lighting_evaluation_missing");
-  }
-  return lighting;
-}
-
 function lightingReadinessFrom(
-  result: ComponentCalculationResult,
+  result?: ComponentCalculationResult,
 ): LightingCalculationReadiness {
+  if (!result) {
+    return "NOT_APPLICABLE";
+  }
   switch (result.status) {
     case "CALCULATED":
       return "CALCULATED";
@@ -491,6 +511,8 @@ function lightingReadinessFrom(
 
 function lightingReadinessLabel(readiness: LightingCalculationReadiness): string {
   switch (readiness) {
+    case "NOT_APPLICABLE":
+      return "Nu se aplică";
     case "CALCULATED":
       return "Calculată";
     case "PARTIAL":

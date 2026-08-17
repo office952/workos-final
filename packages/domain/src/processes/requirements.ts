@@ -1,6 +1,7 @@
 import type { ComponentTypeId, DraftValues } from "../product/types.js";
 import {
   APPLY_SURFACE_FINISH_ID,
+  CUT_METAL_STOCK_ID,
   CUT_SHEET_CNC_ID,
   FORM_ALUMINIUM_PROFILE_ID,
   INSTALL_OR_CONNECT_PSU_ID,
@@ -61,6 +62,22 @@ const BACK_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
   },
 ];
 
+const ACM_CASSETTE_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
+  {
+    processId: CUT_SHEET_CNC_ID,
+    condition: { kind: "always" },
+    reason: "Foaia ACM trebuie debitată.",
+  },
+];
+
+const STEEL_FRAME_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
+  {
+    processId: CUT_METAL_STOCK_ID,
+    condition: { kind: "always" },
+    reason: "Profilul de cadru intern trebuie debitat.",
+  },
+];
+
 const LIGHTING_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
   {
     processId: PLACE_LED_MODULES_ID,
@@ -101,6 +118,10 @@ export function processRequirementsForType(
       return BACK_REQUIREMENTS;
     case "LIGHTING_FRONT_LED":
       return LIGHTING_REQUIREMENTS;
+    case "ACM_CASSETTE_BODY":
+      return ACM_CASSETTE_REQUIREMENTS;
+    case "STEEL_INTERNAL_FRAME":
+      return STEEL_FRAME_REQUIREMENTS;
     default: {
       const _exhaustive: never = typeId;
       return _exhaustive;

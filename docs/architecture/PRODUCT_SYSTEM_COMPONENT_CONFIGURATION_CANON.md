@@ -46,11 +46,13 @@ Applied vinyl/paint color is not the same fact as inherent material color or opt
 | Role | Type | Current product configuration |
 |---|---|---|
 | FACE | `PLEXIGLAS_FACE` | 3 mm, opal |
+| FACE | `ACM_CASSETTE_BODY` | ACM 3 mm cassette; width/height/depth/folds by order |
 | VOLUME | `ALUMINIUM_VOLUME` | 0.6 mm; depth/finish by order |
 | BACK | `FOREX_BACK` | 10 mm |
+| BACK | `STEEL_INTERNAL_FRAME` | steel profile; size from cassette formula |
 | LIGHTING | `LIGHTING_FRONT_LED` | technology fixed; LED pitch / module power / PSU reserve are settings |
 
-Product code `PRD-LETTERS-FRONTLIT-PLEXI-AL06` is unchanged.
+Product codes: `PRD-LETTERS-FRONTLIT-PLEXI-AL06` and `PRD-ACM-CASSETTE-NONE`. ACM V1 has no VOLUME and no LIGHTING. Unselected roles stay silent.
 
 Display labels for families, categories, templates, and constructive types are persisted metadata. They are not constructive configuration and do not change calculation lookup.
 

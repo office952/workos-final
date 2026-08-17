@@ -1,7 +1,9 @@
+import { acmCassetteBodyContract } from "./acmCassetteBody.js";
 import { forexBackContract } from "./back.js";
 import type { ComponentCalculationContract } from "./componentContract.js";
 import { plexiglasFaceContract } from "./face.js";
 import { lightingFrontLedContract } from "./lighting.js";
+import { steelInternalFrameContract } from "./steelInternalFrame.js";
 import { COMPONENT_TYPE_IDS, type ComponentTypeId } from "./componentTypes.js";
 import { aluminiumVolumeContract } from "./volume.js";
 
@@ -23,6 +25,10 @@ export function getComponentContract(
       return forexBackContract;
     case "LIGHTING_FRONT_LED":
       return lightingFrontLedContract;
+    case "ACM_CASSETTE_BODY":
+      return acmCassetteBodyContract;
+    case "STEEL_INTERNAL_FRAME":
+      return steelInternalFrameContract;
     default: {
       const _exhaustive: never = typeId;
       throw new Error(`Unknown component type: ${_exhaustive}`);

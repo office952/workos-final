@@ -425,6 +425,7 @@ Settings versions: keep previous active values as history after a new version is
 | System | Classification |
 |---|---|
 | Product catalog, first template, form, compiler, aggregate | IMPLEMENTED_CURRENT |
+| Second product ACM cassette vertical slice | IMPLEMENTED_CURRENT / BASIC / EIC PARTIAL |
 | Component-first FACE / VOLUME / BACK / LIGHTING roles + constructive types | IMPLEMENTED_CURRENT |
 | Product System component configuration law (role / type / configuration) | IMPLEMENTED_CURRENT |
 | Component technical settings (typed, read-only projection) | IMPLEMENTED_CURRENT |

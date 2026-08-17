@@ -171,19 +171,3 @@ export const frontlitPlexiAl06FormSchema: FormSchema = {
     },
   ],
 };
-
-export const productTemplates: readonly ProductTemplate[] = [frontlitPlexiAl06Template];
-export const formSchemas: readonly FormSchema[] = [frontlitPlexiAl06FormSchema];
-
-export function getProductTemplate(code: string): ProductTemplate | undefined {
-  return productTemplates.find((item) => item.code === code);
-}
-
-export function getFormSchema(id: string): FormSchema | undefined {
-  return formSchemas.find((item) => item.id === id);
-}
-
-export function getFormSchemaForTemplate(code: string): FormSchema | undefined {
-  const template = getProductTemplate(code);
-  return template ? getFormSchema(template.formSchemaId) : undefined;
-}

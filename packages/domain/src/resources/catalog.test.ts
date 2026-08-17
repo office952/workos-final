@@ -74,6 +74,8 @@ describe("resource catalog", () => {
       "SVC-ELECTRICAL-FINISH",
       "SVC-PAINT-RAL",
       "SVC-PACK-PRODUCT",
+      "acm_3mm",
+      "steel_frame_profile",
     ]);
   });
 
@@ -103,6 +105,8 @@ describe("resource catalog", () => {
       "ALUMINIUM",
       "LED",
       "VINYL",
+      "ACM",
+      "STEEL",
     ]);
     const plexiglas = getResource(PLEXIGLAS_3MM_OPAL_ID);
     expect(plexiglas?.familyId).toBe("PLEXIGLAS");
@@ -169,9 +173,13 @@ describe("resource catalog", () => {
   });
 
   it("keeps one active cost evidence row per live resource", () => {
-    expect(costEvidence.map((item) => item.resourceId).sort()).toEqual(
-      resourceCatalog.map((item) => item.id).sort(),
-    );
+    expect(
+      costEvidence.every((item) =>
+        resourceCatalog.some((resource) => resource.id === item.resourceId),
+      ),
+    ).toBe(true);
+    expect(getCostEvidence("acm_3mm")).toBeUndefined();
+    expect(getCostEvidence("steel_frame_profile")).toBeUndefined();
     expect(getCostEvidence(PLEXIGLAS_3MM_OPAL_ID)).toEqual(
       expect.objectContaining({
         amount: 16,

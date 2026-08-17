@@ -1,6 +1,6 @@
 import { productCategories, productFamilies } from "./catalog.js";
 import { componentTypes } from "./componentTypes.js";
-import { productTemplates } from "./frontlitPlexiAl06.js";
+import { productTemplates } from "./productRegistry.js";
 import type { ProductCategory, ProductFamily, ProductTemplate } from "./types.js";
 import type { ComponentTypeDefinition } from "./componentTypes.js";
 

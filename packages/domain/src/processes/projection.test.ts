@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ACM_CASSETTE_NONE_PRODUCT_CODE } from "../product/acmCassetteNone.js";
 import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
 import { RETURN_CANT_FORMING_ID } from "../resources/catalog.js";
 import { CUT_SHEET_CNC_ID, FORM_ALUMINIUM_PROFILE_ID } from "./catalog.js";
@@ -8,10 +9,12 @@ import { processWhereUsed } from "./whereUsed.js";
 describe("operational process projection", () => {
   it("derives where-used from type applicability and product composition", () => {
     const cncUses = processWhereUsed(CUT_SHEET_CNC_ID);
-    expect(cncUses.map((item) => item.role).sort()).toEqual(["BACK", "FACE"]);
-    expect(cncUses.every((item) => item.productCode === CANONICAL_PRODUCT_CODE)).toBe(
-      true,
-    );
+    expect(cncUses.map((item) => item.role).sort()).toEqual(["BACK", "FACE", "FACE"]);
+    expect(cncUses.map((item) => item.productCode).sort()).toEqual([
+      ACM_CASSETTE_NONE_PRODUCT_CODE,
+      CANONICAL_PRODUCT_CODE,
+      CANONICAL_PRODUCT_CODE,
+    ]);
     expect(processWhereUsed(FORM_ALUMINIUM_PROFILE_ID)[0]?.role).toBe("VOLUME");
   });
 

@@ -14,6 +14,8 @@ export const COMPONENT_TYPE_IDS = [
   "ALUMINIUM_VOLUME",
   "FOREX_BACK",
   "LIGHTING_FRONT_LED",
+  "ACM_CASSETTE_BODY",
+  "STEEL_INTERNAL_FRAME",
 ] as const satisfies readonly ComponentTypeId[];
 
 export const ATTRIBUTE_OWNERSHIPS = [
@@ -190,6 +192,72 @@ export const componentTypes: readonly ComponentTypeDefinition[] = [
         label: "Rezervă sursă de alimentare",
         ownership: "TECHNICAL_SETTING",
         kind: "technology",
+      },
+    ],
+  },
+  {
+    id: "ACM_CASSETTE_BODY",
+    role: "FACE",
+    label: "Casetă ACM",
+    description:
+      "Corp casetat din foaie ACM. Lățimea, înălțimea, adâncimea și îndoiturile sunt configurație, nu un tip nou.",
+    attributes: [
+      {
+        id: "face.materialFamily",
+        label: "Familie material",
+        ownership: "FIXED_BY_PRODUCT",
+        kind: "material_family",
+      },
+      {
+        id: "face.thicknessMm",
+        label: "Grosime",
+        ownership: "FIXED_BY_PRODUCT",
+        kind: "thickness",
+      },
+      {
+        id: "face.widthMm",
+        label: "Lățime exterioară",
+        ownership: "MEASUREMENT",
+        kind: "measurement",
+      },
+      {
+        id: "face.heightMm",
+        label: "Înălțime exterioară",
+        ownership: "MEASUREMENT",
+        kind: "measurement",
+      },
+      {
+        id: "face.cassetteDepthMm",
+        label: "Adâncime casetă",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "depth",
+      },
+      {
+        id: "face.foldCount",
+        label: "Număr de îndoituri",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "technology",
+      },
+      {
+        id: "face.finish",
+        label: "Finisaj aplicat",
+        ownership: "FIXED_BY_PRODUCT",
+        kind: "applied_finish",
+      },
+    ],
+  },
+  {
+    id: "STEEL_INTERNAL_FRAME",
+    role: "BACK",
+    label: "Cadru intern oțel",
+    description:
+      "Cadru metalic intern. Dimensiunea vine din formula confirmată pe casetă, nu dintr-un al doilea calculator de produs.",
+    attributes: [
+      {
+        id: "back.materialFamily",
+        label: "Familie material",
+        ownership: "FIXED_BY_PRODUCT",
+        kind: "material_family",
       },
     ],
   },

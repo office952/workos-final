@@ -155,7 +155,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   await page.goto("/components");
   await page.getByRole("button", { name: "Componente de produs" }).click();
   await page.getByRole("button", { name: "Față" }).click();
-  await expect(page.getByText("Debitare foaie CNC")).toBeVisible();
+  await expect(page.getByText("Debitare foaie CNC").first()).toBeVisible();
 
   await page.goto("/products");
   await page

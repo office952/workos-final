@@ -3,6 +3,7 @@ import { CAPABILITY_IDS } from "../capabilities.js";
 import { RETURN_CANT_FORMING_ID } from "../resources/catalog.js";
 import {
   APPLY_SURFACE_FINISH_ID,
+  ATTACH_INTERNAL_FRAME_ID,
   BOND_LETTER_BODY_ID,
   CLOSE_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
@@ -54,6 +55,7 @@ describe("operational process catalog", () => {
       TEST_ILLUMINATION_UNIFORMITY_ID,
       INSPECT_FINISHED_LETTER_ID,
       PACK_PRODUCT_ID,
+      ATTACH_INTERNAL_FRAME_ID,
       WELD_STEEL_JOIN_ID,
       WELD_ALUMINIUM_JOIN_ID,
       CUT_METAL_STOCK_ID,
@@ -116,6 +118,15 @@ describe("operational process catalog", () => {
     expect(getOperationalProcess(CUT_SHEET_CNC_ID)?.applicableTypeIds).toEqual([
       "PLEXIGLAS_FACE",
       "FOREX_BACK",
+      "ACM_CASSETTE_BODY",
+    ]);
+    expect(processesForType("ACM_CASSETTE_BODY").map((item) => item.id)).toEqual([
+      CUT_SHEET_CNC_ID,
+      ATTACH_INTERNAL_FRAME_ID,
+    ]);
+    expect(processesForType("STEEL_INTERNAL_FRAME").map((item) => item.id)).toEqual([
+      ATTACH_INTERNAL_FRAME_ID,
+      CUT_METAL_STOCK_ID,
     ]);
   });
 
