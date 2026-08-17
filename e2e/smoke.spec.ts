@@ -17,6 +17,7 @@ test("platform shell shows real health and no fake business menu", async ({
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Lucrări" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Oferte" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Produse" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Administrare" })).toBeVisible();
   await page.screenshot({

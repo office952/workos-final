@@ -468,7 +468,7 @@ export function QuoteSnapshotSection({
   onAccept,
   onCreateOrder,
 }: {
-  price: CommercialPriceProjection;
+  price?: CommercialPriceProjection;
   snapshot?: QuoteSnapshot;
   acceptance?: QuoteAcceptanceDecision;
   order?: OrderSnapshot;
@@ -539,12 +539,12 @@ export function QuoteSnapshotSection({
     );
   }
 
-  if (price.completeness !== "COMPLETE") {
+  if (!price || price.completeness !== "COMPLETE") {
     return (
       <section className="result-section quote-section">
         <h3>Ofertă</h3>
         <p>
-          {price.internalCostCompleteness === "COMPLETE"
+          {price?.internalCostCompleteness === "COMPLETE"
             ? "Prețul clientului nu poate fi calculat."
             : "Costul intern nu este complet."}
         </p>

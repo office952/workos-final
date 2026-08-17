@@ -60,6 +60,19 @@ export function getQuoteSnapshot(
   return row ? parseSnapshot(row.payload) : null;
 }
 
+export function listQuoteSnapshots(db: SqliteDatabase): QuoteSnapshot[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT quote_snapshot_id, payload
+      FROM quote_snapshots
+      ORDER BY created_at DESC
+    `,
+    )
+    .all() as StoredRow[];
+  return rows.map((row) => parseSnapshot(row.payload));
+}
+
 export function getQuoteSnapshotByHash(
   db: SqliteDatabase,
   contentHash: string,

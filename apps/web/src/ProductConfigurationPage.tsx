@@ -45,6 +45,7 @@ import {
   readOrderSnapshotById,
   readProductionRelease,
   readQuoteAcceptance,
+  readQuoteSnapshot,
   type TemplateProjection,
 } from "./productApi";
 import { Notice } from "./ui/Notice";
@@ -69,12 +70,27 @@ type RestoredJobState =
   | { kind: "error" }
   | { kind: "ready"; job: RestoredJob };
 
+type RestoredQuote = {
+  quote: QuoteSnapshot;
+  acceptance?: QuoteAcceptanceDecision;
+  order?: OrderSnapshot;
+};
+
+type RestoredQuoteState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "missing" }
+  | { kind: "error" }
+  | { kind: "ready"; offer: RestoredQuote };
+
 export function ProductConfigurationPage() {
   const { productCode = "" } = useParams();
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("order");
+  const quoteId = searchParams.get("quote");
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [restoredJob, setRestoredJob] = useState<RestoredJobState>({ kind: "idle" });
+  const [restoredQuote, setRestoredQuote] = useState<RestoredQuoteState>({ kind: "idle" });
   const [values, setValues] = useState<DraftValues>({});
   const [definition, setDefinition] = useState<ProductDefinition | null>(null);
   const [confirmed, setConfirmed] = useState<{
@@ -179,6 +195,48 @@ export function ProductConfigurationPage() {
       cancelled = true;
     };
   }, [orderId, page.kind, productCode]);
+
+  useEffect(() => {
+    if (page.kind !== "ready" || orderId || !quoteId) {
+      setRestoredQuote({ kind: "idle" });
+      return;
+    }
+    let cancelled = false;
+    setRestoredQuote({ kind: "loading" });
+    void readQuoteSnapshot(productCode, quoteId)
+      .then(async (quote) => {
+        if (cancelled) {
+          return;
+        }
+        if (!quote) {
+          setRestoredQuote({ kind: "missing" });
+          return;
+        }
+        const acceptance = await readQuoteAcceptance(productCode, quote.quoteSnapshotId);
+        const order = acceptance
+          ? await readOrderSnapshot(productCode, quote.quoteSnapshotId)
+          : null;
+        if (cancelled) {
+          return;
+        }
+        setRestoredQuote({
+          kind: "ready",
+          offer: {
+            quote,
+            acceptance: acceptance ?? undefined,
+            order: order ?? undefined,
+          },
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRestoredQuote({ kind: "error" });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId, page.kind, productCode, quoteId]);
 
   if (page.kind === "loading") {
     return <p>Se încarcă produsul…</p>;
@@ -484,6 +542,66 @@ export function ProductConfigurationPage() {
     }
   }
 
+  async function handleRestoreAcceptQuote() {
+    if (restoredQuote.kind !== "ready") {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await acceptQuoteSnapshot(
+        productCode,
+        restoredQuote.offer.quote.quoteSnapshotId,
+      );
+      if (result.ok) {
+        setRestoredQuote({
+          kind: "ready",
+          offer: {
+            ...restoredQuote.offer,
+            quote: result.quoteSnapshot,
+            acceptance: result.acceptance,
+          },
+        });
+      } else {
+        setConfirmNotice("Oferta nu a putut fi acceptată.");
+      }
+    } catch {
+      setConfirmNotice("Oferta nu a putut fi acceptată.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRestoreCreateOrder() {
+    if (restoredQuote.kind !== "ready") {
+      return;
+    }
+    setBusy(true);
+    setConfirmNotice(null);
+    try {
+      const result = await createOrderSnapshot(
+        productCode,
+        restoredQuote.offer.quote.quoteSnapshotId,
+      );
+      if (result.ok) {
+        setRestoredQuote({
+          kind: "ready",
+          offer: {
+            quote: result.quoteSnapshot,
+            acceptance: result.acceptance,
+            order: result.orderSnapshot,
+          },
+        });
+      } else {
+        setConfirmNotice("Comanda nu a putut fi creată.");
+      }
+    } catch {
+      setConfirmNotice("Comanda nu a putut fi creată.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleRestoreCreatePlan() {
     if (restoredJob.kind !== "ready" || !restoredJob.job.release) {
       return;
@@ -504,6 +622,61 @@ export function ProductConfigurationPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (quoteId && !orderId) {
+    if (restoredQuote.kind === "loading" || restoredQuote.kind === "idle") {
+      return <p>Se încarcă oferta…</p>;
+    }
+    if (restoredQuote.kind === "missing") {
+      return <p>Oferta cerută nu este disponibilă.</p>;
+    }
+    if (restoredQuote.kind === "error") {
+      return <p>Oferta nu a putut fi încărcată.</p>;
+    }
+    return (
+      <section className="product-page">
+        <PageHeader
+          title={template.label}
+          lead={`${restoredQuote.offer.quote.inscription}${
+            restoredQuote.offer.quote.customer
+              ? ` · ${restoredQuote.offer.quote.customer.displayName}`
+              : ""
+          } — continuare ofertă.`}
+          meta={<ConstructionFacts facts={template.identityFacts} />}
+        />
+        {confirmNotice ? (
+          <Notice tone="warn" compact>
+            <p>{confirmNotice}</p>
+          </Notice>
+        ) : null}
+        <QuoteSnapshotSection
+          snapshot={restoredQuote.offer.quote}
+          acceptance={restoredQuote.offer.acceptance}
+          order={restoredQuote.offer.order}
+          reused
+          busy={busy}
+          onFreeze={() => undefined}
+          onAccept={() => void handleRestoreAcceptQuote()}
+          onCreateOrder={() => void handleRestoreCreateOrder()}
+        />
+        {restoredQuote.offer.order ? (
+          <>
+            <OrderSnapshotSection snapshot={restoredQuote.offer.order} />
+            <div className="action-row">
+              <Link
+                className="button-link"
+                to={`/products/${productCode}?order=${encodeURIComponent(
+                  restoredQuote.offer.order.orderSnapshotId,
+                )}`}
+              >
+                Continuă lucrarea
+              </Link>
+            </div>
+          </>
+        ) : null}
+      </section>
+    );
   }
 
   if (orderId) {

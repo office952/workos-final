@@ -16,11 +16,13 @@ Primary navigation stays small so later domains do not accumulate in the top bar
 ```text
 WorkOS Final  →  /
 Lucrări       →  /
+Oferte        →  /quotes
 Produse       →  /products
 Administrare  →  /admin
 ```
 
 `/` is the operational job overview. It is a read-only projection of commercial Orders and their Release / ExecutionPlan lineage. It does not own job status.
+`/quotes` is the offer registry. It is a read-only projection of Quote Snapshots and their Acceptance / Order lineage. It does not own quote status.
 
 Routes stay stable. Inspection surfaces live under Administrare:
 
@@ -97,6 +99,7 @@ After confirm, the form recedes. Hierarchy: confirmed product → compact intern
 EIC total stays visible. Rates stay in Detalii. Preview is what production will require. Execution is persisted work.
 
 `?order=` on the product page continues an existing commercial job. It does not recompile or mint a new review.
+`?quote=` continues an existing frozen offer. It does not recompile or mint a new review.
 
 ## Operational job overview
 
@@ -105,6 +108,13 @@ Filters are Toate / Necesită acțiune / În execuție / Finalizate.
 Metrics stay one summary line. No KPI cards, revenue, or capacity.
 Stage, progress, blockers and next action come from `GET /api/jobs`.
 Pilot / atelier releases are not listed.
+
+## Offer registry
+
+`/quotes` lists frozen quotes as compact rows: inscription, client, reference, total, stage, next action.
+Filters are Toate / Necesită acțiune / Acceptate / Cu comandă.
+Stage and next action come from `GET /api/quotes`.
+There is no Draft or Sent chip.
 
 ## Future migration
 

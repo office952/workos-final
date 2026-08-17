@@ -2,7 +2,14 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { ProductConfigurationPage } from "./ProductConfigurationPage";
-import { readExecutionPlan, readOrderSnapshotById, readProductionRelease } from "./productApi";
+import {
+  readExecutionPlan,
+  readOrderSnapshot,
+  readOrderSnapshotById,
+  readProductionRelease,
+  readQuoteAcceptance,
+  readQuoteSnapshot,
+} from "./productApi";
 
 vi.mock("./customerApi", () => ({
   fetchCustomers: () => Promise.resolve([]),
@@ -54,6 +61,13 @@ vi.mock("./productApi", () => ({
   acceptProductionSnapshot: vi.fn(),
   createProductionRelease: vi.fn(),
   readProductionRelease: vi.fn(),
+  quoteDocumentUrl: (productCode: string, quoteSnapshotId: string) =>
+    `/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}/document`,
+  readQuoteSnapshot: vi.fn(),
+  readQuoteAcceptance: vi.fn(),
+  acceptQuoteSnapshot: vi.fn(),
+  createQuoteSnapshot: vi.fn(),
+  createOrderSnapshot: vi.fn(),
   readOrderSnapshot: vi.fn(),
   readOrderSnapshotById: vi.fn(),
   readExecutionPlan: vi.fn(),
@@ -156,6 +170,75 @@ describe("ProductConfigurationPage", () => {
     expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Comandă creată" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Eliberează pentru producție" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Textul literelor")).not.toBeInTheDocument();
+  });
+
+  it("continues a frozen quote from the quote query without the configure form", async () => {
+    vi.mocked(readQuoteSnapshot).mockResolvedValue({
+      quoteSnapshotId: "qts:test",
+      schemaVersion: 1,
+      status: "FROZEN",
+      productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      productLabel: "Litere",
+      inscription: "QTE01",
+      customer: { customerId: "cus:hidden", displayName: "Client Demo LETTERS" },
+      sourceReviewId: "rev:test",
+      sourceConfirmedAt: "2026-08-17T04:00:00.000Z",
+      createdAt: "2026-08-17T05:00:00.000Z",
+      contentHash: "abcdef0123456789",
+      truth: {
+        templateCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+        templateVersion: "1",
+        familyId: "fam",
+        selectedComponentIds: [],
+        values: {},
+        measurements: [],
+      },
+      quantities: [],
+      eic: { total: 382.5, currency: "EUR", completeness: "COMPLETE", lines: [] },
+      commercial: {
+        policyId: "policy",
+        policyVersion: 1,
+        markupPercent: 35,
+        markupAmount: 133.88,
+        discountPercent: 0,
+        discountAmount: 0,
+        adjustmentAmount: 0,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+        completeness: "COMPLETE",
+      },
+      productionInput: {
+        schemaVersion: 1,
+        contentHash: "hash",
+        requirements: [],
+        operations: [],
+        usedTechnicalSettings: [],
+        usedRecipes: [],
+      },
+    });
+    vi.mocked(readQuoteAcceptance).mockResolvedValue(null);
+    vi.mocked(readOrderSnapshot).mockResolvedValue(null);
+
+    render(
+      <MemoryRouter
+        initialEntries={["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:test"]}
+      >
+        <Routes>
+          <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByText("QTE01 · Client Demo LETTERS — continuare ofertă."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ofertă creată" })).toBeInTheDocument();
+    expect(screen.getByText("Client: Client Demo LETTERS")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Marchează acceptată" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Textul literelor")).not.toBeInTheDocument();
   });
 });

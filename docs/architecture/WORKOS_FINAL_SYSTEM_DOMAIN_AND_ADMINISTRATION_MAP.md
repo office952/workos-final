@@ -93,6 +93,7 @@ WorkOS Final
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
+│   ├── Quote registry (Oferte projection)  IMPLEMENTED_CURRENT / BASIC
 │   ├── Frozen customer identity            IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Document PDF                  IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote acceptance                    IMPLEMENTED_CURRENT / BASIC
@@ -378,10 +379,11 @@ Do not add a top-nav link per domain.
 Current primary nav stays small so later domains do not accumulate in the header:
 
 - Lucrări
+- Oferte
 - Produse
 - Administrare
 
-Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. The overview is a read-only projection: Order Snapshot is the commercial job root. It does not own a Job table or JobStatus.
+Brand `WorkOS Final` and **Lucrări** return to the operational job overview (`/`). **Oferte** opens the quote registry (`/quotes`). Stare sistem is `/system`, reached from Administrare. Inspection surfaces stay reachable from Administrare, not from the top bar. Lucrări is a read-only projection: Order Snapshot is the commercial job root. Oferte is a read-only projection of Quote Snapshots. Neither owns a second status table.
 
 Inside Administrare, group only real current pages:
 

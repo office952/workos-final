@@ -15,7 +15,10 @@ import {
   projectExecutionPlanView,
   projectJobOverview,
   projectJobOverviewItem,
+  projectQuoteOverview,
+  projectQuoteOverviewItem,
   type JobOverviewProjection,
+  type QuoteOverviewProjection,
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
@@ -62,6 +65,7 @@ import {
   getQuoteAcceptanceBySnapshotId,
   getQuoteSnapshot,
   listOrderSnapshots,
+  listQuoteSnapshots,
   insertOrderSnapshot,
   insertQuoteAcceptance,
   insertQuoteSnapshot,
@@ -133,6 +137,7 @@ export type ProductSystemRuntime = {
   getSellerProfile(): SellerProfile;
   updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
   listJobOverview(): JobOverviewProjection;
+  listQuoteOverview(): QuoteOverviewProjection;
   createPerson(displayName: string): PersonMutationResult;
   renamePerson(personId: string, displayName: string): PersonMutationResult;
   retirePerson(personId: string): PersonMutationResult;
@@ -241,6 +246,18 @@ export function createProductSystemRuntime(
         });
       });
       return projectJobOverview(jobs);
+    },
+    listQuoteOverview() {
+      const quotes = listQuoteSnapshots(db).map((quote) => {
+        const acceptance = getQuoteAcceptanceBySnapshotId(db, quote.quoteSnapshotId);
+        const order = getOrderSnapshotByQuoteSnapshotId(db, quote.quoteSnapshotId);
+        return projectQuoteOverviewItem({
+          quote,
+          acceptance,
+          order,
+        });
+      });
+      return projectQuoteOverview(quotes);
     },
     createPerson(displayName) {
       return persistCreatedPerson(db, displayName);

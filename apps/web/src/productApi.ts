@@ -237,6 +237,23 @@ export async function createQuoteSnapshot(
   };
 }
 
+export async function readQuoteSnapshot(
+  productCode: string,
+  quoteSnapshotId: string,
+): Promise<QuoteSnapshot | null> {
+  const response = await fetch(
+    `${baseUrl}/api/products/${productCode}/quote-snapshots/${encodeURIComponent(quoteSnapshotId)}`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const body = await readJson<{ quoteSnapshot?: QuoteSnapshot }>(response);
+  if (!response.ok || !body.quoteSnapshot) {
+    throw new Error("quote_unavailable");
+  }
+  return body.quoteSnapshot;
+}
+
 export async function readQuoteAcceptance(
   productCode: string,
   quoteSnapshotId: string,

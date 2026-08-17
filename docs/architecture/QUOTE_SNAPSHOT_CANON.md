@@ -74,3 +74,18 @@ Do not recompute from the current Commercial policy or current resource rates.
 
 One `quote_snapshots` table. Indexed lookup fields plus JSON payload.
 No update. No delete. A correction creates a new snapshot later.
+
+## Registry projection
+
+`GET /api/quotes` and `/quotes` (Oferte) list existing Quote Snapshots.
+The list is a read-only projection. It does not freeze, reprice, accept, or create quotes.
+Stage is derived from Acceptance and Order facts already stored:
+
+```text
+Creată        → Marchează acceptată  → /products/:code?quote=
+Acceptată     → Creează comanda      → /products/:code?quote=
+Cu comandă    → Deschide comanda     → /products/:code?order=
+```
+
+`?quote=` continues the frozen offer without recompiling.
+There is no Draft or Sent quote status. Assisted delivery is not a quote state.

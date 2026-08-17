@@ -5,6 +5,7 @@ import { ComponentsPage } from "./ComponentsPage";
 import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
 import { GovernancePage } from "./GovernancePage";
 import { JobsOverviewPage } from "./JobsOverviewPage";
+import { QuotesOverviewPage } from "./QuotesOverviewPage";
 import { CustomerAdminPage } from "./CustomerAdminPage";
 import { SellerAdminPage } from "./SellerAdminPage";
 import { PeopleAdminPage } from "./PeopleAdminPage";
@@ -19,6 +20,7 @@ import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
 
 const NAV_ITEMS = [
   { to: "/", label: "Lucrări" },
+  { to: "/quotes", label: "Oferte" },
   { to: "/products", label: "Produse" },
   { to: "/admin", label: "Administrare" },
 ];
@@ -28,6 +30,7 @@ export function App() {
     <AppShell navItems={NAV_ITEMS}>
       <Routes>
         <Route path="/" element={<JobsOverviewPage />} />
+        <Route path="/quotes" element={<QuotesOverviewPage />} />
         <Route path="/system" element={<SystemStatusPage />} />
         <Route path="/products" element={<ProductCatalogPage />} />
         <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
