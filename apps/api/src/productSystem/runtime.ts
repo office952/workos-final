@@ -113,6 +113,7 @@ import {
   personHasOperatorPin,
   resolveOperatorSession,
   setOperatorPin,
+  createDevOperatorSession,
 } from "../operator/store.js";
 import {
   getOrderSnapshot,
@@ -211,6 +212,14 @@ export type ProductSystemRuntime = {
       }
     | { ok: false; error: string }
   >;
+  createDevOperatorSession(env?: NodeJS.ProcessEnv):
+    | {
+        ok: true;
+        person: Person;
+        session: OperatorSessionRecord;
+        rawToken: string;
+      }
+    | { ok: false; error: string };
   resolveOperatorSession(rawToken: string | undefined | null):
     | {
         ok: true;
@@ -402,6 +411,9 @@ export function createProductSystemRuntime(
     },
     identifyOperator(personId, pin) {
       return identifyOperator(db, personId, pin);
+    },
+    createDevOperatorSession(env) {
+      return createDevOperatorSession(db, env);
     },
     resolveOperatorSession(rawToken) {
       return resolveOperatorSession(db, rawToken);

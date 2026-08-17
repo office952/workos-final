@@ -7,6 +7,7 @@ import { registerRequestRoutes } from "./requests/routes.js";
 import { registerCustomerRoutes } from "./customers/routes.js";
 import { registerSellerRoutes } from "./seller/routes.js";
 import { registerPeopleRoutes } from "./people/routes.js";
+import { assertDevOperatorConfigSafe } from "./operator/devMode.js";
 import { registerOperatorRoutes } from "./operator/routes.js";
 import { registerProductRoutes } from "./product.js";
 import { registerProductSystemAdminRoutes } from "./productSystem/routes.js";
@@ -30,9 +31,14 @@ const DEV_WEB_ORIGINS = [
 
 export type CreateAppOptions = {
   productSystem?: ProductSystemRuntime;
+  /** Test override for DEV operator fail-fast / enablement. Defaults to process.env. */
+  env?: NodeJS.ProcessEnv;
 };
 
 export function createApp(options: CreateAppOptions = {}): Hono {
+  const env = options.env ?? process.env;
+  assertDevOperatorConfigSafe(env);
+
   const app = new Hono();
   const productSystem = options.productSystem ?? createProductSystemRuntime();
 
@@ -57,7 +63,7 @@ export function createApp(options: CreateAppOptions = {}): Hono {
   registerQuoteRoutes(app, productSystem);
   registerRequestRoutes(app, productSystem);
   registerPeopleRoutes(app, productSystem);
-  registerOperatorRoutes(app, productSystem);
+  registerOperatorRoutes(app, productSystem, env);
   registerCustomerRoutes(app, productSystem);
   registerSellerRoutes(app, productSystem);
   registerInventoryRoutes(app, productSystem);

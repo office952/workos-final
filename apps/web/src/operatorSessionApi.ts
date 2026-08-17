@@ -82,6 +82,30 @@ export async function logoutOperator(): Promise<void> {
   });
 }
 
+/** Development-only auto identity. Failures are expected when bypass is OFF. */
+export async function createDevOperatorSession(): Promise<
+  | { ok: true; operator: OperatorSessionOperator; session: OperatorSessionInfo }
+  | { ok: false; error: string; status: number }
+> {
+  const response = await fetch(`${baseUrl}/api/dev/operator-session`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const body = await readJson<{
+    operator?: OperatorSessionOperator;
+    session?: OperatorSessionInfo;
+    error?: string;
+  }>(response);
+  if (!response.ok || !body.operator || !body.session) {
+    return {
+      ok: false,
+      error: body.error ?? "dev_operator_failed",
+      status: response.status,
+    };
+  }
+  return { ok: true, operator: body.operator, session: body.session };
+}
+
 export async function setOperatorPin(
   personId: string,
   pin: string,

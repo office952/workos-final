@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import type { OperatorCandidate } from "@workos-final/domain";
-import { useOperatorSession } from "./OperatorSessionContext";
+import { useOperatorSession, isDevOperatorUiEnabled } from "./OperatorSessionContext";
 import { fetchOperatorCandidates } from "./operatorSessionApi";
 import { Field } from "./ui/Field";
 
@@ -112,6 +112,9 @@ export function AppShell({ children, navItems }: AppShellProps) {
               ) : operator ? (
                 <>
                   <span>
+                    {isDevOperatorUiEnabled() ? (
+                      <span className="operator-dev-badge">DEV · </span>
+                    ) : null}
                     Operator: <strong>{operator.displayName}</strong>
                   </span>
                   <button

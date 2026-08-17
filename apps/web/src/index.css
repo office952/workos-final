@@ -78,6 +78,12 @@ body {
   color: var(--muted, #667);
 }
 
+.operator-dev-badge {
+  color: var(--muted, #667);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
 .operator-modal {
   position: fixed;
   inset: 0;

@@ -16,6 +16,10 @@ import {
   hashRawSessionToken,
   verifyOperatorPin,
 } from "./crypto.js";
+import {
+  getConfiguredDevOperatorPersonId,
+  isDevOperatorModeEnabled,
+} from "./devMode.js";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_MS = 60_000;
@@ -139,12 +143,24 @@ export async function identifyOperator(
     return { ok: false, error: "invalid_pin" };
   }
   clearFailedAttempts(personId);
+  const created = createOperatorSessionForPerson(db, person);
+  return { ok: true, person, session: created.session, rawToken: created.rawToken };
+}
+
+/**
+ * Shared session persistence for PIN identify and DEV operator mode.
+ * Caller must already validate Person identity/status.
+ */
+export function createOperatorSessionForPerson(
+  db: SqliteDatabase,
+  person: Person,
+): { session: OperatorSessionRecord; rawToken: string } {
   const createdAt = new Date().toISOString();
   const sessionId = generateOperatorSessionId();
   const token = createSessionToken();
   const session: OperatorSessionRecord = {
     sessionId,
-    personId,
+    personId: person.personId,
     createdAt,
     expiresAt: sessionExpiresAt(createdAt),
     revokedAt: null,
@@ -155,7 +171,38 @@ export async function identifyOperator(
     VALUES (?, ?, ?, ?, ?, NULL)
   `,
   ).run(session.sessionId, session.personId, token.tokenHash, session.createdAt, session.expiresAt);
-  return { ok: true, person, session, rawToken: token.rawToken };
+  return { session, rawToken: token.rawToken };
+}
+
+export function createDevOperatorSession(
+  db: SqliteDatabase,
+  env: NodeJS.ProcessEnv = process.env,
+):
+  | { ok: true; person: Person; session: OperatorSessionRecord; rawToken: string }
+  | { ok: false; error: string } {
+  if (!isDevOperatorModeEnabled(env)) {
+    return { ok: false, error: "dev_operator_disabled" };
+  }
+  const personId = getConfiguredDevOperatorPersonId(env);
+  if (!personId) {
+    return { ok: false, error: "dev_operator_person_missing" };
+  }
+  const person = getPerson(db, personId);
+  if (!person) {
+    return { ok: false, error: "unknown_person" };
+  }
+  switch (person.status) {
+    case "RETIRED":
+      return { ok: false, error: "retired_person" };
+    case "ACTIVE": {
+      const created = createOperatorSessionForPerson(db, person);
+      return { ok: true, person, session: created.session, rawToken: created.rawToken };
+    }
+    default: {
+      const _exhaustive: never = person.status;
+      return _exhaustive;
+    }
+  }
 }
 
 export function resolveOperatorSession(

@@ -1,11 +1,16 @@
-import type { Hono } from "hono";
+import type { Context, Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { isDevOperatorModeEnabled } from "./devMode.js";
 import { OPERATOR_SESSION_COOKIE } from "./store.js";
 
 const SESSION_MAX_AGE_SEC = 12 * 60 * 60;
 
-export function registerOperatorRoutes(app: Hono, runtime: ProductSystemRuntime): void {
+export function registerOperatorRoutes(
+  app: Hono,
+  runtime: ProductSystemRuntime,
+  env: NodeJS.ProcessEnv = process.env,
+): void {
   app.get("/api/operator-candidates", (c) => {
     return c.json({ candidates: runtime.listOperatorCandidates() });
   });
@@ -48,12 +53,7 @@ export function registerOperatorRoutes(app: Hono, runtime: ProductSystemRuntime)
     if (!result.ok) {
       return c.json({ error: result.error }, operatorHttpStatus(result.error));
     }
-    setCookie(c, OPERATOR_SESSION_COOKIE, result.rawToken, {
-      httpOnly: true,
-      path: "/",
-      sameSite: "Lax",
-      maxAge: SESSION_MAX_AGE_SEC,
-    });
+    setOperatorSessionCookie(c, result.rawToken);
     return c.json({
       operator: {
         personId: result.person.personId,
@@ -71,6 +71,32 @@ export function registerOperatorRoutes(app: Hono, runtime: ProductSystemRuntime)
     runtime.logoutOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     deleteCookie(c, OPERATOR_SESSION_COOKIE, { path: "/" });
     return c.json({ ok: true });
+  });
+
+  /**
+   * Development-only: create a normal OperatorSession without PIN.
+   * Fail-closed: 404 unless non-production + WORKOS_DEV_OPERATOR_BYPASS=1.
+   */
+  app.post("/api/dev/operator-session", (c) => {
+    if (!isDevOperatorModeEnabled(env)) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const result = runtime.createDevOperatorSession(env);
+    if (!result.ok) {
+      return c.json({ error: result.error }, devOperatorHttpStatus(result.error));
+    }
+    setOperatorSessionCookie(c, result.rawToken);
+    return c.json({
+      operator: {
+        personId: result.person.personId,
+        displayName: result.person.displayName,
+        availability: result.person.availability,
+      },
+      session: {
+        sessionId: result.session.sessionId,
+        expiresAt: result.session.expiresAt,
+      },
+    });
   });
 
   app.get("/api/operator-task-inbox", (c) => {
@@ -114,6 +140,15 @@ export function registerOperatorRoutes(app: Hono, runtime: ProductSystemRuntime)
   });
 }
 
+function setOperatorSessionCookie(c: Context, rawToken: string): void {
+  setCookie(c, OPERATOR_SESSION_COOKIE, rawToken, {
+    httpOnly: true,
+    path: "/",
+    sameSite: "Lax",
+    maxAge: SESSION_MAX_AGE_SEC,
+  });
+}
+
 function operatorHttpStatus(error: string): 400 | 401 | 404 | 409 | 429 {
   switch (error) {
     case "invalid_pin":
@@ -130,6 +165,21 @@ function operatorHttpStatus(error: string): 400 | 401 | 404 | 409 | 429 {
       return 409;
     case "rate_limited":
       return 429;
+    default:
+      return 400;
+  }
+}
+
+function devOperatorHttpStatus(error: string): 400 | 404 | 409 {
+  switch (error) {
+    case "dev_operator_disabled":
+      return 404;
+    case "dev_operator_person_missing":
+      return 400;
+    case "unknown_person":
+      return 404;
+    case "retired_person":
+      return 409;
     default:
       return 400;
   }

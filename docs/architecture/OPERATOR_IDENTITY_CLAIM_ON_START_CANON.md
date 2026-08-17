@@ -38,6 +38,12 @@ Person           =  canonical human identity
 - Typical TTL ≈ 12h; explicit logout; multi-device allowed.
 - Transport: HttpOnly cookie on same-origin `/api` (Vite proxy).
 - TEMPORARILY_UNAVAILABLE Person may remain identified; may not Claim-on-Start.
+
+## Developer note
+
+Local `WORKOS_DEV_OPERATOR_BYPASS` can mint a normal OperatorSession without PIN for
+development convenience. It is non-production infrastructure only. See
+`docs/development/DEV_OPERATOR_MODE.md`. It does not change Claim-on-Start law.
 - Skill / availability changes do not rewrite an already started executor.
 
 ## Claim-on-Start

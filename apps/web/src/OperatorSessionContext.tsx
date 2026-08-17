@@ -3,10 +3,12 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import {
+  createDevOperatorSession,
   fetchOperatorSession,
   identifyOperator,
   logoutOperator,
@@ -28,10 +30,17 @@ type OperatorSessionState = {
 
 const OperatorSessionContext = createContext<OperatorSessionState | null>(null);
 
+function isDevAutoOperatorEnabled(): boolean {
+  return (
+    import.meta.env.DEV === true && import.meta.env.VITE_WORKOS_DEV_AUTO_OPERATOR === "1"
+  );
+}
+
 export function OperatorSessionProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [operator, setOperator] = useState<OperatorSessionOperator | null>(null);
   const [session, setSession] = useState<OperatorSessionInfo | null>(null);
+  const devAutoAttempted = useRef(false);
 
   const refresh = useCallback(async () => {
     const current = await fetchOperatorSession();
@@ -42,22 +51,55 @@ export function OperatorSessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    void fetchOperatorSession()
-      .then((current) => {
+    void (async () => {
+      try {
+        const current = await fetchOperatorSession();
         if (cancelled) {
           return;
         }
-        setOperator(current.operator);
-        setSession(current.session);
+        if (current.operator) {
+          setOperator(current.operator);
+          setSession(current.session);
+          setReady(true);
+          return;
+        }
+        if (isDevAutoOperatorEnabled() && !devAutoAttempted.current) {
+          devAutoAttempted.current = true;
+          const created = await createDevOperatorSession();
+          if (cancelled) {
+            return;
+          }
+          if (!created.ok) {
+            console.warn(
+              "[workos] DEV auto-operator unavailable:",
+              created.error,
+              `(HTTP ${created.status})`,
+            );
+            setOperator(null);
+            setSession(null);
+            setReady(true);
+            return;
+          }
+          const again = await fetchOperatorSession();
+          if (cancelled) {
+            return;
+          }
+          setOperator(again.operator);
+          setSession(again.session);
+          setReady(true);
+          return;
+        }
+        setOperator(null);
+        setSession(null);
         setReady(true);
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) {
           setOperator(null);
           setSession(null);
           setReady(true);
         }
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -94,4 +136,8 @@ export function useOperatorSession(): OperatorSessionState {
     throw new Error("OperatorSessionProvider missing");
   }
   return value;
+}
+
+export function isDevOperatorUiEnabled(): boolean {
+  return isDevAutoOperatorEnabled();
 }
