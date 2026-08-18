@@ -1,10 +1,14 @@
 import {
   isCommercialRequestStatus,
+  MAX_REQUEST_ATTACHMENT_BYTES,
+  safeAttachmentDownloadAsciiName,
   type CommercialRequestLinkError,
   type CommercialRequestMutationError,
   type CommercialRequestStatus,
+  type RequestAttachmentError,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import type { ProductSystemRuntime } from "../productSystem/runtime.js";
 
 export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime): void {
@@ -68,6 +72,68 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
       alreadyApplied: result.alreadyApplied,
       link: result.link,
       detail: runtime.readRequestDetail(c.req.param("requestId")),
+    });
+  });
+
+  app.get("/api/requests/:requestId/attachments", (c) => {
+    const attachments = runtime.listRequestAttachments(c.req.param("requestId"));
+    if (!attachments) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    return c.json({ attachments });
+  });
+
+  app.post(
+    "/api/requests/:requestId/attachments",
+    bodyLimit({
+      maxSize: MAX_REQUEST_ATTACHMENT_BYTES,
+      onError: (c) => c.json({ error: "file_too_large" }, 413),
+    }),
+    async (c) => {
+      const body = await c.req.parseBody();
+      const file = body["file"];
+      if (!(file instanceof File) || file.size === 0) {
+        return c.json({ error: "invalid_file" }, 400);
+      }
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const result = runtime.createRequestAttachment(c.req.param("requestId"), {
+        originalFileName: file.name || "fisier",
+        mimeType: file.type || null,
+        bytes,
+      });
+      if (!result.ok) {
+        return c.json(
+          { error: result.error },
+          requestAttachmentStatus(result.error),
+        );
+      }
+      return c.json(
+        {
+          attachment: result.attachment,
+          detail: runtime.readRequestDetail(c.req.param("requestId")),
+        },
+        201,
+      );
+    },
+  );
+
+  app.get("/api/requests/:requestId/attachments/:attachmentId/download", (c) => {
+    const result = runtime.readRequestAttachmentDownload(
+      c.req.param("requestId"),
+      c.req.param("attachmentId"),
+    );
+    if (!result.ok) {
+      return c.json(
+        { error: result.error },
+        requestAttachmentStatus(result.error),
+      );
+    }
+    const ascii = safeAttachmentDownloadAsciiName(result.attachment.originalFileName);
+    const utf8 = encodeURIComponent(result.attachment.originalFileName);
+    return c.body(Buffer.from(result.bytes), 200, {
+      "Content-Type": result.attachment.mimeType ?? "application/octet-stream",
+      "Content-Disposition": `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`,
+      "Content-Length": String(result.bytes.byteLength),
     });
   });
 }
@@ -196,6 +262,27 @@ function requestLinkStatus(error: CommercialRequestLinkError): 400 | 404 | 409 {
       return 404;
     case "quote_already_linked":
       return 409;
+    default: {
+      const _exhaustive: never = error;
+      return _exhaustive;
+    }
+  }
+}
+
+function requestAttachmentStatus(
+  error: RequestAttachmentError,
+): 400 | 404 | 409 | 413 | 503 {
+  switch (error) {
+    case "invalid_file":
+    case "request_cancelled":
+      return 400;
+    case "file_too_large":
+      return 413;
+    case "not_found":
+    case "file_missing":
+      return 404;
+    case "storage_unavailable":
+      return 503;
     default: {
       const _exhaustive: never = error;
       return _exhaustive;

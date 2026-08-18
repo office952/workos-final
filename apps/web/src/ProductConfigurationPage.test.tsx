@@ -265,6 +265,8 @@ describe("ProductConfigurationPage", () => {
       commercialProgressLabel: null,
       canChangeCustomer: true,
       canUpdateStatus: true,
+      canUploadAttachments: true,
+      attachments: [],
       linkedOffers: [],
     });
 

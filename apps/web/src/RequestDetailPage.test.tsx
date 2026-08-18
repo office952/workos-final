@@ -24,6 +24,8 @@ const detail: RequestDetailProjection = {
   commercialProgressLabel: "Ofertă creată",
   canChangeCustomer: false,
   canUpdateStatus: true,
+  canUploadAttachments: true,
+  attachments: [],
   linkedOffers: [
     {
       quoteSnapshotId: "qts:1",
@@ -54,6 +56,8 @@ const detail: RequestDetailProjection = {
 vi.mock("./requestsApi", () => ({
   readRequestDetail: vi.fn(),
   updateCommercialRequest: vi.fn(),
+  uploadRequestAttachment: vi.fn(),
+  requestAttachmentErrorMessage: (error: string) => error,
 }));
 
 vi.mock("./productApi", () => ({
@@ -100,6 +104,10 @@ describe("RequestDetailPage", () => {
       "/clients/cus%3A1",
     );
     expect(screen.getByLabelText("Descriere")).toHaveValue("Pe fațadă, text HUB MEDIA.");
+    expect(screen.getByRole("heading", { name: "Fișiere client" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Nu există încă fișiere atașate acestei cereri."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Oferte legate" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "OF-ABCDEF01" })).toHaveAttribute(
       "href",

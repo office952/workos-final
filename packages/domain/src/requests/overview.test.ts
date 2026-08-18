@@ -126,8 +126,33 @@ describe("request overview projection", () => {
     });
     expect(detail.canChangeCustomer).toBe(false);
     expect(detail.canUpdateStatus).toBe(true);
+    expect(detail.canUploadAttachments).toBe(true);
+    expect(detail.attachments).toEqual([]);
     expect(detail.linkedOffers).toHaveLength(1);
     expect(detail.request.description).toContain("fațadă");
     expect(detail.request).not.toHaveProperty("eic");
+  });
+
+  it("blocks uploads on cancelled requests while keeping attachment projection", () => {
+    const detail = projectRequestDetail({
+      request: request({ status: "CANCELLED" }),
+      customerDisplayName: "HUB MEDIA",
+      quotes: [],
+      attachments: [
+        {
+          attachmentId: "att:1",
+          requestId: "crq:11111111-2222-3333-4444-555555555555",
+          originalFileName: "brief.pdf",
+          mimeType: "application/pdf",
+          sizeBytes: 2048,
+          storageKey: "abc",
+          sha256: "deadbeef",
+          createdAt: "2026-08-17T12:00:00.000Z",
+        },
+      ],
+    });
+    expect(detail.canUploadAttachments).toBe(false);
+    expect(detail.attachments).toHaveLength(1);
+    expect(detail.attachments[0]?.sizeLabel).toBe("2.0 KB");
   });
 });

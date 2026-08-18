@@ -18,14 +18,14 @@ Do not treat the old phase list as the active plan.
 7. Operator Task Inbox / Atelier — DONE / IMPLEMENTED_CURRENT / BASIC
 8. Operational Attention + Atelier Hygiene — DONE / IMPLEMENTED_CURRENT
 9. Commercial Findability + Return Flow V1 — DONE / IMPLEMENTED_CURRENT
-10. Later, as re-prioritized: Documents, Pontaj, salary/internal HR, ACM expansion, LETTERS polish
+10. Documents V1 / Request Attachments — DONE / IMPLEMENTED_CURRENT / BASIC
+11. Later, as re-prioritized: global Documents, Pontaj, salary/internal HR, ACM expansion, LETTERS polish
 
-Documents remains the strong next office candidate after findability, but is not started and not DONE.
-The previous “LETTERS closure then ACM” sequence after Oferte is stale relative to the accepted Legacy Commercial / Client / People audit. Historical product milestones stay below. Do not treat that old product-polish list as the active office sequence.
+Documents V1 is Request-scoped client files only. Global DMS, production documents, signed documents, and job photos remain NOT_IMPLEMENTED.
 
 ## Later, not now
 
-Reports, invoice/proforma, integrations, full ACM, Analyzer runtime, Documents, Pontaj, internal HR.
+Reports, invoice/proforma, integrations, full ACM, Analyzer runtime, global Documents / DMS, Pontaj, internal HR.
 
 ## Generalization
 
@@ -99,6 +99,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Operator Task Inbox / Atelier | IMPLEMENTED_CURRENT / BASIC |
 | Operational Attention + Atelier Hygiene | IMPLEMENTED_CURRENT |
 | Commercial Findability + Return Flow | IMPLEMENTED_CURRENT |
+| Documents V1 / Request Attachments | IMPLEMENTED_CURRENT / BASIC |
 | Actual resource consumption | IMPLEMENTED_CURRENT / BASIC |
 | Inventory stock identity and movements | IMPLEMENTED_CURRENT / BASIC |
 | Actual internal cost projection | IMPLEMENTED_CURRENT / BASIC |
@@ -120,6 +121,7 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Operational job overview | IMPLEMENTED_CURRENT / BASIC |
 | Quote registry (Oferte) | IMPLEMENTED_CURRENT / BASIC |
 | Commercial Request (Cereri de ofertă) | IMPLEMENTED_CURRENT / BASIC |
+| Documents V1 / Request Attachments | IMPLEMENTED_CURRENT / BASIC |
 | Client Workspace | IMPLEMENTED_CURRENT / BASIC |
 | ACM cassette second-product vertical slice | IMPLEMENTED_CURRENT / BASIC / EIC COMPLETE / QUOTE READY |
 | Quote Document PDF (Ofertă) | IMPLEMENTED_CURRENT / BASIC |

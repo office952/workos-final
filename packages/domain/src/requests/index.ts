@@ -21,6 +21,20 @@ export {
   type CommercialRequestStatus,
 } from "./commercialRequest.js";
 export {
+  MAX_REQUEST_ATTACHMENT_BYTES,
+  REQUEST_ATTACHMENT_ERRORS,
+  canUploadRequestAttachment,
+  formatAttachmentSize,
+  generateAttachmentId,
+  generateAttachmentStorageKey,
+  projectRequestAttachment,
+  requestAttachmentDownloadHref,
+  safeAttachmentDownloadAsciiName,
+  type CommercialRequestAttachment,
+  type RequestAttachmentError,
+  type RequestAttachmentProjection,
+} from "./attachment.js";
+export {
   REQUEST_COMMERCIAL_PROGRESS,
   REQUEST_OVERVIEW_FILTERS,
   REQUEST_OVERVIEW_NEXT_ACTIONS,

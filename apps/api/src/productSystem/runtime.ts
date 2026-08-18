@@ -43,12 +43,19 @@ import {
   projectRequestOverview,
   projectRequestOverviewItem,
   commercialRequestReference,
+  canUploadRequestAttachment,
+  generateAttachmentId,
+  projectRequestAttachment,
+  MAX_REQUEST_ATTACHMENT_BYTES,
   type CommercialRequest,
+  type CommercialRequestAttachment,
   type CommercialRequestLinkResult,
   type CommercialRequestMutationResult,
   type CommercialRequestStatus,
   type JobOverviewProjection,
   type QuoteOverviewProjection,
+  type RequestAttachmentError,
+  type RequestAttachmentProjection,
   type RequestDetailProjection,
   type RequestOverviewProjection,
   type OrderSnapshot,
@@ -134,13 +141,22 @@ import {
 } from "../production/store.js";
 import {
   getCommercialRequest,
+  getCommercialRequestAttachment,
   getCommercialRequestQuoteLinkByQuote,
+  insertCommercialRequestAttachment,
+  listCommercialRequestAttachments,
   listCommercialRequestQuoteLinks,
   listCommercialRequests,
   persistCommercialRequestQuoteLink,
   persistCreatedCommercialRequest,
   persistUpdatedCommercialRequest,
 } from "../requests/store.js";
+import {
+  readRequestAttachmentBytes,
+  removeRequestAttachmentFile,
+  resolveDocumentsRoot,
+  writeRequestAttachmentBytes,
+} from "../requests/attachmentStorage.js";
 import {
   bootstrapProductSystemDisplayStore,
   loadDisplayLabelCatalog,
@@ -270,6 +286,27 @@ export type ProductSystemRuntime = {
   listRequestOverview(): RequestOverviewProjection;
   readCommercialRequest(requestId: string): CommercialRequest | null;
   readRequestDetail(requestId: string): RequestDetailProjection | null;
+  listRequestAttachments(requestId: string): RequestAttachmentProjection[] | null;
+  createRequestAttachment(
+    requestId: string,
+    input: {
+      originalFileName: string;
+      mimeType: string | null;
+      bytes: Uint8Array;
+    },
+  ):
+    | { ok: true; attachment: RequestAttachmentProjection }
+    | { ok: false; error: RequestAttachmentError };
+  readRequestAttachmentDownload(
+    requestId: string,
+    attachmentId: string,
+  ):
+    | {
+        ok: true;
+        attachment: CommercialRequestAttachment;
+        bytes: Uint8Array;
+      }
+    | { ok: false; error: RequestAttachmentError };
   createCommercialRequest(
     customerId: string,
     title: string,
@@ -561,7 +598,75 @@ export function createProductSystemRuntime(
         request,
         customerDisplayName: getCustomer(db, request.customerId)?.displayName ?? null,
         quotes: linkedQuoteOverviewItems(db, request.requestId),
+        attachments: listCommercialRequestAttachments(db, request.requestId),
       });
+    },
+    listRequestAttachments(requestId) {
+      const request = getCommercialRequest(db, requestId);
+      if (!request) {
+        return null;
+      }
+      return listCommercialRequestAttachments(db, requestId).map(projectRequestAttachment);
+    },
+    createRequestAttachment(requestId, input) {
+      const request = getCommercialRequest(db, requestId);
+      if (!request) {
+        return { ok: false, error: "not_found" };
+      }
+      if (!canUploadRequestAttachment(request.status)) {
+        return { ok: false, error: "request_cancelled" };
+      }
+      const originalFileName = input.originalFileName.trim();
+      if (!originalFileName || input.bytes.byteLength === 0) {
+        return { ok: false, error: "invalid_file" };
+      }
+      if (input.bytes.byteLength > MAX_REQUEST_ATTACHMENT_BYTES) {
+        return { ok: false, error: "file_too_large" };
+      }
+      let stored: { storageKey: string; sha256: string } | null = null;
+      try {
+        stored = writeRequestAttachmentBytes({
+          requestId,
+          bytes: input.bytes,
+          documentsRoot: resolveDocumentsRoot(),
+        });
+        const attachment: CommercialRequestAttachment = {
+          attachmentId: generateAttachmentId(),
+          requestId,
+          originalFileName,
+          mimeType: input.mimeType && input.mimeType.trim() ? input.mimeType.trim() : null,
+          sizeBytes: input.bytes.byteLength,
+          storageKey: stored.storageKey,
+          sha256: stored.sha256,
+          createdAt: new Date().toISOString(),
+        };
+        insertCommercialRequestAttachment(db, attachment);
+        return { ok: true, attachment: projectRequestAttachment(attachment) };
+      } catch {
+        if (stored) {
+          removeRequestAttachmentFile(requestId, stored.storageKey, resolveDocumentsRoot());
+        }
+        return { ok: false, error: "storage_unavailable" };
+      }
+    },
+    readRequestAttachmentDownload(requestId, attachmentId) {
+      const request = getCommercialRequest(db, requestId);
+      if (!request) {
+        return { ok: false, error: "not_found" };
+      }
+      const attachment = getCommercialRequestAttachment(db, attachmentId);
+      if (!attachment || attachment.requestId !== requestId) {
+        return { ok: false, error: "not_found" };
+      }
+      const bytes = readRequestAttachmentBytes(
+        requestId,
+        attachment.storageKey,
+        resolveDocumentsRoot(),
+      );
+      if (!bytes) {
+        return { ok: false, error: "file_missing" };
+      }
+      return { ok: true, attachment, bytes };
     },
     createCommercialRequest(customerId, title, description) {
       const customer = getCustomer(db, customerId);

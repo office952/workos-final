@@ -7,16 +7,29 @@ export type SqliteDatabase = InstanceType<typeof Database>;
 
 const MIGRATIONS_DIR = fileURLToPath(new URL("./migrations", import.meta.url));
 
-export function resolveProductSystemSqlitePath(): string {
-  if (process.env.WORKOS_SQLITE_PATH) {
-    return process.env.WORKOS_SQLITE_PATH;
+/**
+ * Canonical WorkOS application data root.
+ * SQLite and document bytes both live under this boundary (unless SQLITE_PATH overrides DB).
+ */
+export function resolveWorkosDataDir(): string {
+  if (process.env.WORKOS_DATA_DIR) {
+    const dataDir = process.env.WORKOS_DATA_DIR;
+    mkdirSync(dataDir, { recursive: true });
+    return dataDir;
   }
+  const dataDir = join(process.cwd(), "data");
+  mkdirSync(dataDir, { recursive: true });
+  return dataDir;
+}
+
+export function resolveProductSystemSqlitePath(): string {
   if (process.env.VITEST) {
     return ":memory:";
   }
-  const dataDir = process.env.WORKOS_DATA_DIR ?? join(process.cwd(), "data");
-  mkdirSync(dataDir, { recursive: true });
-  return join(dataDir, "product-system.sqlite");
+  if (process.env.WORKOS_SQLITE_PATH) {
+    return process.env.WORKOS_SQLITE_PATH;
+  }
+  return join(resolveWorkosDataDir(), "product-system.sqlite");
 }
 
 export function openSqliteDatabase(filePath: string): SqliteDatabase {

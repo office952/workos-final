@@ -92,6 +92,7 @@ WorkOS Final
 │   └── CRM / contacts / billing            NOT_IMPLEMENTED
 ├── Commercial                              IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial Request (Cerere)         IMPLEMENTED_CURRENT / BASIC
+│   ├── Request Attachments (client files)  IMPLEMENTED_CURRENT / BASIC
 │   ├── Commercial rules / customer price   IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote Snapshot                      IMPLEMENTED_CURRENT / BASIC
 │   ├── Quote registry (Oferte projection)  IMPLEMENTED_CURRENT / BASIC
@@ -134,7 +135,8 @@ WorkOS Final
 ├── Reporting                               PLANNED (projection only)
 └── Documents
     ├── Quote Document PDF                  IMPLEMENTED_CURRENT / BASIC
-    └── Order / invoice / production docs   PLANNED
+    ├── Request client-file attachments     IMPLEMENTED_CURRENT / BASIC (owned by CommercialRequest; bytes under WORKOS_DATA_DIR)
+    └── Order / invoice / production docs / global DMS   NOT_IMPLEMENTED
 ```
 
 Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first product is missing. Governance projection is the honest operational status for what the pilot actually does.
@@ -149,7 +151,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Resources / Cost | Resource identity, material family/spec, cost evidence, EIC | Process identity, customer price, stock, Product Truth, attendance |
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
 | Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth, seller identity, Request office status |
-| Commercial Request | Mutable incoming request: customerId, title, description, office status, Request↔Quote link. | Product Truth, EIC, pricing, Quote/Acceptance/Order status, CRM, People, documents |
+| Commercial Request | Mutable incoming request: customerId, title, description, office status, Request↔Quote link, CommercialRequestAttachment metadata (client-file evidence on the Cerere). | Product Truth, EIC, pricing, Quote/Acceptance/Order status, CRM, People, global DMS, file preview/analysis |
 | Seller | Current company / vânzător identity for new Quotes. Owner-confirmed HUB MEDIA PRODUCTION profile. | Customer catalog, CRM, invoices, global Settings, ProductTemplate |
 | Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer and seller identities, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. CommercialRequest is the incoming office object and may link to Quotes without entering Quote content. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, live seller profile, CRM, Product Truth |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
@@ -319,7 +321,7 @@ The preview consumes current confirmed Product Truth because it is deterministic
 
 ## Commercial
 
-Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and ExecutionPlan from that Release are implemented. Plan creation remains a separate operator action after Release. CommercialRequest records the incoming ask before Product Truth exists and may link to frozen Quotes without changing them. See `docs/architecture/COMMERCIAL_REQUEST_CANON.md`.
+Price rules, Quote Snapshot, Quote Acceptance, Order Snapshot, frozen production-input alignment, Production Release from Order, and ExecutionPlan from that Release are implemented. Plan creation remains a separate operator action after Release. CommercialRequest records the incoming ask before Product Truth exists and may link to frozen Quotes without changing them. Client files attached to a Cerere are Request evidence (`CommercialRequestAttachment`); metadata lives in SQLite and bytes under `WORKOS_DATA_DIR/documents/`. They are not Product Truth, Quote Snapshot content, or a global Documents domain. See `docs/architecture/COMMERCIAL_REQUEST_CANON.md`.
 
 ```text
 CommercialRequest

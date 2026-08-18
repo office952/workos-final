@@ -83,3 +83,45 @@ export async function updateCommercialRequest(
   }
   return body.detail;
 }
+
+export async function uploadRequestAttachment(
+  requestId: string,
+  file: File,
+): Promise<RequestDetailProjection> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch(
+    `${baseUrl}/api/requests/${encodeURIComponent(requestId)}/attachments`,
+    {
+      method: "POST",
+      body: form,
+    },
+  );
+  const body = await readJson<{
+    detail?: RequestDetailProjection;
+    error?: string;
+  }>(response);
+  if (!response.ok || !body.detail) {
+    throw new Error(body.error ?? "attachment_unavailable");
+  }
+  return body.detail;
+}
+
+export function requestAttachmentErrorMessage(error: string): string {
+  switch (error) {
+    case "file_too_large":
+      return "Fișierul depășește limita permisă.";
+    case "request_cancelled":
+      return "Cererea anulată nu mai acceptă fișiere noi.";
+    case "invalid_file":
+      return "Fișierul nu este valid.";
+    case "not_found":
+      return "Cererea sau fișierul nu este disponibil.";
+    case "file_missing":
+      return "Fișierul nu este disponibil în stocarea aplicației.";
+    case "storage_unavailable":
+      return "Fișierul nu a putut fi salvat.";
+    default:
+      return "Fișierul nu a putut fi încărcat.";
+  }
+}

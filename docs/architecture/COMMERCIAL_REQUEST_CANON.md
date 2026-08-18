@@ -28,8 +28,25 @@ Mutable office facts about an incoming request:
 - title, description
 - office status
 - createdAt / updatedAt
+- optional client-file attachments (`CommercialRequestAttachment`) — evidence received with the request
 
 A Request may point into a Product workspace and may later relate to one or more Quote Snapshots.
+
+## Client-file attachments (Documents V1)
+
+Bounded concept: **CommercialRequestAttachment**.
+
+- Identity: `attachmentId` = `att:{uuid}`
+- Metadata in SQLite (`commercial_request_attachments`)
+- Bytes under `WORKOS_DATA_DIR/documents/requests/...` with opaque storage keys
+- Upload / list / download only; no delete, versioning, preview, or analysis
+- CANCELLED Request: existing files remain readable; new uploads blocked
+- Client / Quote / Order reach files only through the existing Request relationship
+- Attaching a file must not mutate Quote `contentHash`, Product Truth, or Order
+
+Backup requires both the SQLite database and the documents directory.
+
+Uploaded files are opaque untrusted content. WorkOS Final does not parse SVG/DWG/AI/CDR here.
 
 ## What this does not own
 
@@ -124,7 +141,7 @@ Client Workspace projects requests by `customerId`. It does not own Request trut
 
 ## Persistence
 
-Additive tables `commercial_requests` and `commercial_request_quote_links`.
-Normalized mutable columns. No payload JSON. No seed. No legacy import.
+Additive tables `commercial_requests`, `commercial_request_quote_links`, and `commercial_request_attachments`.
+Normalized mutable columns. Attachment bytes are filesystem objects under the WorkOS data root, not SQLite BLOBs. No seed. No legacy import.
 
 See `docs/architecture/QUOTE_SNAPSHOT_CANON.md` and `docs/architecture/CUSTOMER_IDENTITY_CANON.md`.

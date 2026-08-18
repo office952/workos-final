@@ -2,6 +2,12 @@ import type { QuoteOverviewItem, QuoteOverviewStage } from "../quotes/overview.j
 import { quoteOverviewHref } from "../quotes/overview.js";
 import { matchesSearchFields } from "../searchNormalize.js";
 import {
+  canUploadRequestAttachment,
+  projectRequestAttachment,
+  type CommercialRequestAttachment,
+  type RequestAttachmentProjection,
+} from "./attachment.js";
+import {
   commercialRequestStatusLabel,
   type CommercialRequest,
   type CommercialRequestStatus,
@@ -75,7 +81,9 @@ export type RequestDetailProjection = {
   commercialProgressLabel: string | null;
   canChangeCustomer: boolean;
   canUpdateStatus: boolean;
+  canUploadAttachments: boolean;
   linkedOffers: readonly QuoteOverviewItem[];
+  attachments: readonly RequestAttachmentProjection[];
 };
 
 export function requestOverviewFilterLabel(filter: RequestOverviewFilter): string {
@@ -334,8 +342,10 @@ export function projectRequestDetail(input: {
   request: CommercialRequest;
   customerDisplayName: string | null;
   quotes: readonly QuoteOverviewItem[];
+  attachments?: readonly CommercialRequestAttachment[];
 }): RequestDetailProjection {
   const commercialProgress = deriveRequestCommercialProgress(input.quotes);
+  const attachments = (input.attachments ?? []).map(projectRequestAttachment);
   return {
     request: input.request,
     customerDisplayName: input.customerDisplayName,
@@ -346,6 +356,8 @@ export function projectRequestDetail(input: {
       : null,
     canChangeCustomer: input.quotes.length === 0,
     canUpdateStatus: input.request.status !== "CANCELLED",
+    canUploadAttachments: canUploadRequestAttachment(input.request.status),
     linkedOffers: input.quotes,
+    attachments,
   };
 }

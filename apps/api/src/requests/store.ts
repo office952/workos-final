@@ -3,6 +3,7 @@ import {
   linkCommercialRequestQuote,
   updateCommercialRequest,
   type CommercialRequest,
+  type CommercialRequestAttachment,
   type CommercialRequestLinkResult,
   type CommercialRequestMutationResult,
   type CommercialRequestQuoteLink,
@@ -235,4 +236,86 @@ export function persistCommercialRequestQuoteLink(
   `,
   ).run(linked.link.requestId, linked.link.quoteSnapshotId, linked.link.linkedAt);
   return linked;
+}
+
+type AttachmentRow = {
+  attachment_id: string;
+  request_id: string;
+  original_file_name: string;
+  mime_type: string | null;
+  size_bytes: number;
+  storage_key: string;
+  sha256: string;
+  created_at: string;
+};
+
+function attachmentFromRow(row: AttachmentRow): CommercialRequestAttachment {
+  return {
+    attachmentId: row.attachment_id,
+    requestId: row.request_id,
+    originalFileName: row.original_file_name,
+    mimeType: row.mime_type,
+    sizeBytes: row.size_bytes,
+    storageKey: row.storage_key,
+    sha256: row.sha256,
+    createdAt: row.created_at,
+  };
+}
+
+export function listCommercialRequestAttachments(
+  db: SqliteDatabase,
+  requestId: string,
+): CommercialRequestAttachment[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT attachment_id, request_id, original_file_name, mime_type, size_bytes,
+             storage_key, sha256, created_at
+      FROM commercial_request_attachments
+      WHERE request_id = ?
+      ORDER BY created_at DESC, attachment_id DESC
+    `,
+    )
+    .all(requestId) as AttachmentRow[];
+  return rows.map(attachmentFromRow);
+}
+
+export function getCommercialRequestAttachment(
+  db: SqliteDatabase,
+  attachmentId: string,
+): CommercialRequestAttachment | null {
+  const row = db
+    .prepare(
+      `
+      SELECT attachment_id, request_id, original_file_name, mime_type, size_bytes,
+             storage_key, sha256, created_at
+      FROM commercial_request_attachments
+      WHERE attachment_id = ?
+    `,
+    )
+    .get(attachmentId) as AttachmentRow | undefined;
+  return row ? attachmentFromRow(row) : null;
+}
+
+export function insertCommercialRequestAttachment(
+  db: SqliteDatabase,
+  attachment: CommercialRequestAttachment,
+): void {
+  db.prepare(
+    `
+    INSERT INTO commercial_request_attachments (
+      attachment_id, request_id, original_file_name, mime_type, size_bytes,
+      storage_key, sha256, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `,
+  ).run(
+    attachment.attachmentId,
+    attachment.requestId,
+    attachment.originalFileName,
+    attachment.mimeType,
+    attachment.sizeBytes,
+    attachment.storageKey,
+    attachment.sha256,
+    attachment.createdAt,
+  );
 }
