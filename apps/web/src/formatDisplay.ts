@@ -24,6 +24,10 @@ export function formatMoney(value: number): string {
   });
 }
 
+export function formatDateTime(value: string): string {
+  return new Date(value).toLocaleString("ro-RO");
+}
+
 export function formatCostCompleteness(
   completeness: "PARTIAL" | "COMPLETE",
 ): string {

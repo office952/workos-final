@@ -47,6 +47,13 @@ export type CostEvidenceWhen = {
   volumeDepthMm?: number;
 };
 
+export function costEvidenceQualifierIdentity(when?: CostEvidenceWhen): string {
+  if (when?.volumeDepthMm !== undefined) {
+    return `volumeDepthMm=${when.volumeDepthMm}`;
+  }
+  return "unqualified";
+}
+
 export type CostEvidence = {
   resourceId: string;
   amount: number;

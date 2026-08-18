@@ -6,7 +6,7 @@ type CostEvidenceItem = ResourcesAdminProjection["costEvidence"][number];
 
 type CostEvidenceEditorProps = {
   evidence: CostEvidenceItem;
-  onSaved: () => Promise<void>;
+  onSaved: (admin: ResourcesAdminProjection) => void;
 };
 
 export function CostEvidenceEditor({ evidence, onSaved }: CostEvidenceEditorProps) {
@@ -43,12 +43,16 @@ export function CostEvidenceEditor({ evidence, onSaved }: CostEvidenceEditorProp
     setSaving(true);
     setError(null);
     try {
-      await patchCostEvidence({
+      const admin = await patchCostEvidence({
         evidenceRowId: evidence.evidenceRowId,
         amount,
         note,
       });
-      await onSaved();
+      try {
+        onSaved(admin);
+      } catch {
+        // PATCH already confirmed. A later UI refresh must not become a failed Save.
+      }
       setEditing(false);
     } catch (cause) {
       setError(messageForWriteError(cause));

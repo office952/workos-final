@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ResourcesAdminProjection } from "@workos-final/domain";
 import { CostEvidenceEditor } from "./CostEvidenceEditor";
 import { OwnerCatalogView } from "./OwnerCatalogView";
 import {
   buildResourcesCatalog,
+  costEvidenceItemId,
   formatResourcesAdminSummary,
   resourcesAdminSummary,
 } from "./resourcesCatalog";
@@ -18,11 +19,6 @@ type PageState =
 
 export function ResourcesAdminPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
-
-  const load = useCallback(async () => {
-    const admin = await fetchResourcesAdministration();
-    setPage({ kind: "ready", admin });
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,18 +90,16 @@ export function ResourcesAdminPage() {
           return null;
         }
         const evidence = page.admin.costEvidence.find(
-          (row) =>
-            (row.evidenceRowId && item.id === `cost:${row.evidenceRowId}`) ||
-            item.id === `cost:${row.resourceId}:${row.qualifierLabel ?? "none"}`,
+          (row) => costEvidenceItemId(row) === item.id,
         );
         if (!evidence?.evidenceRowId) {
           return null;
         }
         return (
           <CostEvidenceEditor
-            key={evidence.evidenceRowId}
+            key={costEvidenceItemId(evidence)}
             evidence={evidence}
-            onSaved={load}
+            onSaved={(admin) => setPage({ kind: "ready", admin })}
           />
         );
       }}

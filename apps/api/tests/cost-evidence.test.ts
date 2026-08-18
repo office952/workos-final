@@ -8,6 +8,8 @@ import {
   CANONICAL_PRODUCT_CODE,
   PLEXIGLAS_3MM_OPAL_ID,
 } from "@workos-final/domain";
+
+const SVC_CNC_FACE_ID = "SVC-CNC-FACE";
 import { createApp } from "../src/app.js";
 import { openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
@@ -335,6 +337,156 @@ describe("resource cost evidence live compile and freeze", () => {
       },
     );
     expect(zero.status).toBe(400);
+    runtime.close();
+  });
+
+  it("uses an owner-edited SERVICE rate in new EIC and FrozenRecipeTrace", async () => {
+    const runtime = createProductSystemRuntime(":memory:");
+    const app = createApp({ productSystem: runtime });
+    const firstQuote = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "Client CNC vechi",
+    );
+    expect(firstQuote.status).toBe(200);
+    const frozen = firstQuote.body.quoteSnapshot as JsonObject;
+    const frozenCnc = ((frozen.eic as JsonObject).lines as JsonObject[]).find(
+      (item) => item.resourceId === SVC_CNC_FACE_ID,
+    );
+    expect(frozenCnc?.rate).toBe(3);
+    const frozenTrace = (
+      (frozen.productionInput as JsonObject).usedRecipes as JsonObject[]
+    ).find((item) => item.resourceId === SVC_CNC_FACE_ID);
+    expect(frozenTrace?.rate).toBe(3);
+
+    const admin = await readBody(await app.request("/api/resources-admin"));
+    const cnc = (admin.costEvidence as JsonObject[]).find(
+      (item) => item.resourceId === SVC_CNC_FACE_ID,
+    );
+    expect(cnc?.amount).toBe(3);
+    const saved = await app.request(
+      `/api/resources-admin/cost-evidence/${cnc?.evidenceRowId as string}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ amount: 4, note: "CNC față 4" }),
+      },
+    );
+    expect(saved.status).toBe(200);
+    const active = runtime
+      .listActiveCostEvidence()
+      .find((item) => item.resourceId === SVC_CNC_FACE_ID);
+    expect(active?.amount).toBe(4);
+
+    const next = await confirmProduct(app, CANONICAL_PRODUCT_CODE, lettersValues);
+    const eicLine = ((next.body.eic as JsonObject).lines as JsonObject[]).find(
+      (item) => item.resourceId === SVC_CNC_FACE_ID,
+    );
+    expect(eicLine?.rate).toBe(4);
+    expect(eicLine?.rate).toBe(active?.amount);
+
+    const secondQuote = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "Client CNC nou",
+    );
+    const nextFrozen = secondQuote.body.quoteSnapshot as JsonObject;
+    const nextEic = ((nextFrozen.eic as JsonObject).lines as JsonObject[]).find(
+      (item) => item.resourceId === SVC_CNC_FACE_ID,
+    );
+    const nextTrace = (
+      (nextFrozen.productionInput as JsonObject).usedRecipes as JsonObject[]
+    ).find((item) => item.resourceId === SVC_CNC_FACE_ID);
+    expect(nextEic?.rate).toBe(4);
+    expect(nextTrace?.rate).toBe(4);
+    expect(nextTrace?.rate).toBe(active?.amount);
+    expect(nextTrace?.rate).toBe(nextEic?.rate);
+    expect(
+      runtime.readQuoteSnapshot(frozen.quoteSnapshotId as string)?.eic.lines.find(
+        (item) => item.resourceId === SVC_CNC_FACE_ID,
+      )?.rate,
+    ).toBe(3);
+    runtime.close();
+  });
+
+  it("copies frozen Quote A through acceptance, order and release after a later rate edit", async () => {
+    const runtime = createProductSystemRuntime(":memory:");
+    const app = createApp({ productSystem: runtime });
+    const firstQuote = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "Client lanț vechi",
+    );
+    const quote = firstQuote.body.quoteSnapshot as JsonObject;
+    const quoteId = quote.quoteSnapshotId as string;
+    expect((quote.eic as JsonObject).total).toBe(382.5);
+
+    const admin = await readBody(await app.request("/api/resources-admin"));
+    const plexi = (admin.costEvidence as JsonObject[]).find(
+      (item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID,
+    );
+    const saved = await app.request(
+      `/api/resources-admin/cost-evidence/${plexi?.evidenceRowId as string}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ amount: 18, note: "după ofertă" }),
+      },
+    );
+    expect(saved.status).toBe(200);
+
+    const live = await confirmProduct(app, CANONICAL_PRODUCT_CODE, lettersValues);
+    expect((live.body.eic as JsonObject).total).toBe(383);
+
+    const accepted = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/acceptance`,
+      { method: "POST" },
+    );
+    expect(accepted.status).toBe(200);
+    const decision = (await readBody(accepted)).acceptanceDecision as JsonObject;
+    expect(decision.quoteContentHash).toBe(quote.contentHash);
+
+    const createdOrder = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteId}/order`,
+      { method: "POST" },
+    );
+    expect(createdOrder.status).toBe(200);
+    const order = (await readBody(createdOrder)).orderSnapshot as JsonObject;
+    expect((order.eic as JsonObject).total).toBe(382.5);
+    expect(
+      ((order.eic as JsonObject).lines as JsonObject[]).find(
+        (item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID,
+      )?.rate,
+    ).toBe(16);
+    expect(
+      ((order.productionInput as JsonObject).usedRecipes as JsonObject[]).find(
+        (item) => item.resourceId === SVC_CNC_FACE_ID,
+      )?.rate,
+    ).toBe(3);
+
+    const released = await app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/${order.orderSnapshotId as string}/production-release`,
+      { method: "POST" },
+    );
+    expect(released.status).toBe(200);
+    const snapshot = (await readBody(released)).snapshot as JsonObject;
+    expect((snapshot.eic as JsonObject).total).toBe(382.5);
+    expect(
+      ((snapshot.eic as JsonObject).lines as JsonObject[]).find(
+        (item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID,
+      )?.rate,
+    ).toBe(16);
+    expect(
+      (snapshot.usedRecipes as JsonObject[]).find(
+        (item) => item.resourceId === SVC_CNC_FACE_ID,
+      )?.rate,
+    ).toBe(3);
+    expect(
+      runtime.readQuoteSnapshot(quoteId)?.eic.total,
+    ).toBe(382.5);
     runtime.close();
   });
 });

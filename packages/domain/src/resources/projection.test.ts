@@ -130,5 +130,9 @@ describe("resources administration projection", () => {
     );
     expect(admin.writeState).toBe("READY");
     expect(admin.costEvidence[0]?.evidenceRowId).toMatch(/^cev:test:/);
+    expect(admin.costEvidence[0]?.qualifierIdentity).toBe("volumeDepthMm=60");
+    expect(admin.costEvidence[0]?.lastChangedAt).toBe("2026-08-18T00:00:00.000Z");
+    const plexi = admin.costEvidence.find((item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID);
+    expect(plexi?.qualifierIdentity).toBe("unqualified");
   });
 });

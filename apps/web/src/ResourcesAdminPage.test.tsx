@@ -1,9 +1,13 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { costEvidence, projectResourcesAdministration } from "@workos-final/domain";
+import {
+  PLEXIGLAS_3MM_OPAL_ID,
+  costEvidence,
+  projectResourcesAdministration,
+} from "@workos-final/domain";
 import { ResourcesAdminPage } from "./ResourcesAdminPage";
-import { fetchResourcesAdministration } from "./systemApi";
+import { fetchResourcesAdministration, patchCostEvidence } from "./systemApi";
 
 vi.mock("./systemApi", () => ({
   fetchResourcesAdministration: vi.fn(),
@@ -102,5 +106,50 @@ describe("ResourcesAdminPage", () => {
     await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
     expect(screen.getByRole("button", { name: "Editează" })).toBeInTheDocument();
     expect(screen.queryByText("Editarea tarifelor nu este disponibilă în această etapă.")).not.toBeInTheDocument();
+    expect(screen.getByText("Ultima modificare")).toBeInTheDocument();
+  });
+
+  it("keeps Plexiglas selected after save even when the version token changes", async () => {
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
+    const savedAdmin = projectResourcesAdministration(
+      costEvidence.map((item, index) => ({
+        ...item,
+        amount: item.resourceId === PLEXIGLAS_3MM_OPAL_ID ? 18 : item.amount,
+        evidenceRowId:
+          item.resourceId === PLEXIGLAS_3MM_OPAL_ID
+            ? "cev:plexi-after-save"
+            : `cev:test:${index}`,
+        createdAt: "2026-08-18T12:00:00.000Z",
+      })),
+    );
+    vi.mocked(patchCostEvidence).mockResolvedValue(savedAdmin);
+    const user = userEvent.setup();
+    render(<ResourcesAdminPage />);
+    await user.click(await screen.findByRole("button", { name: "Dovezi de cost" }));
+    await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
+    expect(
+      screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }),
+    ).toHaveAttribute("aria-current", "true");
+    await user.click(screen.getByRole("button", { name: "Editează" }));
+    const amount = screen.getByLabelText("Tarif");
+    await user.clear(amount);
+    await user.type(amount, "18");
+    const fetchesBeforeSave = vi.mocked(fetchResourcesAdministration).mock.calls.length;
+    await user.click(screen.getByRole("button", { name: "Salvează" }));
+    expect(patchCostEvidence).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetchResourcesAdministration).mock.calls.length).toBe(
+      fetchesBeforeSave,
+    );
+    const selected = screen.getByRole("article");
+    expect(
+      screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }),
+    ).toHaveAttribute("aria-current", "true");
+    expect(
+      within(selected).getByRole("heading", { name: "Plexiglas 3 mm opal" }),
+    ).toBeInTheDocument();
+    expect(within(selected).getAllByText("18,00 EUR / m²").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("button", { name: /Profil aluminiu/ }),
+    ).not.toHaveAttribute("aria-current");
   });
 });

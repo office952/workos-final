@@ -21,6 +21,7 @@ export {
   lookupCostEvidence,
   listCostEvidence,
   listCostEvidenceFrom,
+  costEvidenceQualifierIdentity,
   ownerConfirmedCostSource,
   isValidCostAmount,
   getMaterialFamily,

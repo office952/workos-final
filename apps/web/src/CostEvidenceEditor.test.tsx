@@ -9,6 +9,7 @@ const evidence = {
   kindLabel: "Material",
   evidenceRowId: "cev:plexi",
   lastChangedAt: "2026-08-18T00:00:00.000Z",
+  qualifierIdentity: "unqualified",
   qualifierLabel: null,
   usedBy: [],
   amount: 16,
@@ -28,7 +29,7 @@ afterEach(() => {
 describe("CostEvidenceEditor", () => {
   it("saves amount and note without exposing identity fields as editable", async () => {
     const user = userEvent.setup();
-    const onSaved = vi.fn(async () => undefined);
+    const onSaved = vi.fn();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -48,6 +49,7 @@ describe("CostEvidenceEditor", () => {
     await user.type(amount, "18");
     await user.click(screen.getByRole("button", { name: "Salvează" }));
     expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledWith({ writeState: "READY" });
     expect(fetch).toHaveBeenCalledWith(
       "/api/resources-admin/cost-evidence/cev:plexi",
       expect.objectContaining({ method: "PATCH" }),
@@ -64,7 +66,7 @@ describe("CostEvidenceEditor", () => {
       }),
     );
     render(
-      <CostEvidenceEditor evidence={evidence} onSaved={vi.fn(async () => undefined)} />,
+      <CostEvidenceEditor evidence={evidence} onSaved={vi.fn()} />,
     );
     await user.click(screen.getByRole("button", { name: "Editează" }));
     await user.clear(screen.getByLabelText("Tarif"));
@@ -74,5 +76,32 @@ describe("CostEvidenceEditor", () => {
       screen.getByText("Tariful a fost schimbat între timp. Reîncarcă și încearcă din nou."),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Tarif")).toHaveValue("18");
+  });
+
+  it("does not report a failed save when PATCH succeeds and the follow-up update throws", async () => {
+    const user = userEvent.setup();
+    const onSaved = vi.fn(() => {
+      throw new Error("resources_admin_unavailable");
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          evidence: { ...evidence, amount: 18 },
+          admin: { writeState: "READY" },
+        }),
+      }),
+    );
+    render(<CostEvidenceEditor evidence={evidence} onSaved={onSaved} />);
+    await user.click(screen.getByRole("button", { name: "Editează" }));
+    await user.clear(screen.getByLabelText("Tarif"));
+    await user.type(screen.getByLabelText("Tarif"), "18");
+    await user.click(screen.getByRole("button", { name: "Salvează" }));
+    expect(onSaved).toHaveBeenCalledWith({ writeState: "READY" });
+    expect(
+      screen.queryByText("Salvarea a eșuat. Tariful curent nu a fost schimbat."),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editează" })).toBeInTheDocument();
   });
 });

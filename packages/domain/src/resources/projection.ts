@@ -3,6 +3,7 @@ import { getComponentType } from "../product/componentTypes.js";
 import {
   costClassificationLabel,
   costEvidence,
+  costEvidenceQualifierIdentity,
   costSourceLabel,
   getMaterialFamily,
   getResource,
@@ -106,6 +107,7 @@ export type ResourcesAdminProjection = {
     kindLabel: string;
     evidenceRowId: string | null;
     lastChangedAt: string | null;
+    qualifierIdentity: string;
     qualifierLabel: string | null;
     usedBy: readonly ResourceUseProjection[];
   })[];
@@ -144,6 +146,7 @@ export function projectResourcesAdministration(
         kindLabel: resource ? resourceKindLabel(resource.kind) : item.resourceId,
         evidenceRowId: item.evidenceRowId ?? null,
         lastChangedAt: item.createdAt ?? null,
+        qualifierIdentity: costEvidenceQualifierIdentity(item.when),
         qualifierLabel:
           item.when?.volumeDepthMm !== undefined
             ? `adâncime ${item.when.volumeDepthMm} mm`

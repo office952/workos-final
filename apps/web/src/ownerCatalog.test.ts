@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  costEvidence,
   projectComponentArchitecture,
   projectProductSystemAdministration,
   projectOperationalProcessesAdministration,
@@ -349,9 +350,17 @@ describe("resources catalog presentation", () => {
     expect(catalog.categories[2]?.items[0]?.kindLabel).toBe("Rețetă manoperă");
     expect(catalog.categories[2]?.items[0]?.listHint).toBe("5,00 EUR / m²");
     expect(catalog.categories[3]?.items[0]?.kindLabel).toBe("Dovadă de cost intern");
+    expect(catalog.categories[3]?.items[0]?.id).toBe(
+      "cost:aluminium_return_profile:volumeDepthMm=60",
+    );
+    expect(catalog.categories[3]?.items.map((item) => item.id)).toContain(
+      "cost:plexiglas_3mm_opal:unqualified",
+    );
     expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
       "Plexiglas 3 mm opal",
     );
+    expect(JSON.stringify(catalog.categories[3])).not.toMatch(/cev:/);
+    expect(JSON.stringify(catalog.categories[3])).not.toMatch(/Ultima modificare/);
     expect(formatResourcesAdminSummary(resourcesAdminSummary(projectResourcesAdministration()))).toMatch(
       /^Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+$/,
     );
@@ -364,6 +373,34 @@ describe("resources catalog presentation", () => {
       true,
     );
     expect(JSON.stringify(catalog)).not.toMatch(/Preț client|ofertă|TVA/i);
+  });
+
+  it("keeps cost evidence catalog ids stable across a new version token", () => {
+    const first = buildResourcesCatalog(
+      projectResourcesAdministration(
+        costEvidence.map((item, index) => ({
+          ...item,
+          evidenceRowId: `cev:before:${index}`,
+          createdAt: "2026-08-18T00:00:00.000Z",
+        })),
+      ),
+    );
+    const second = buildResourcesCatalog(
+      projectResourcesAdministration(
+        costEvidence.map((item, index) => ({
+          ...item,
+          amount: item.resourceId === "plexiglas_3mm_opal" ? 18 : item.amount,
+          evidenceRowId: `cev:after:${index}`,
+          createdAt: "2026-08-18T12:00:00.000Z",
+        })),
+      ),
+    );
+    const firstIds = first.categories[3]?.items.map((item) => item.id);
+    const secondIds = second.categories[3]?.items.map((item) => item.id);
+    expect(firstIds).toEqual(secondIds);
+    expect(firstIds).toContain("cost:plexiglas_3mm_opal:unqualified");
+    expect(JSON.stringify(second.categories[3])).toMatch(/Ultima modificare/);
+    expect(JSON.stringify(second.categories[3])).not.toMatch(/cev:after:/);
   });
 });
 

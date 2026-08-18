@@ -1,4 +1,5 @@
 import type { ResourcesAdminProjection } from "@workos-final/domain";
+import { formatDateTime } from "./formatDisplay";
 import type {
   CatalogChip,
   CatalogDetailSection,
@@ -87,7 +88,7 @@ export function buildResourcesCatalog(
           chips: costChips(item),
           groups: [
             {
-              id: item.evidenceRowId ?? item.resourceId,
+              id: costEvidenceItemId(item),
               kindLabel: "Dovadă de cost intern",
               title: item.resourceLabel,
               sections: costEvidenceSections(item),
@@ -99,13 +100,13 @@ export function buildResourcesCatalog(
   };
 }
 
-function costEvidenceItemId(
-  item: ResourcesAdminProjection["costEvidence"][number],
+export function costEvidenceItemId(
+  item: Pick<
+    ResourcesAdminProjection["costEvidence"][number],
+    "resourceId" | "qualifierIdentity"
+  >,
 ): string {
-  if (item.evidenceRowId) {
-    return `cost:${item.evidenceRowId}`;
-  }
-  return `cost:${item.resourceId}:${item.qualifierLabel ?? "none"}`;
+  return `cost:${item.resourceId}:${item.qualifierIdentity}`;
 }
 
 function recipeItem(
@@ -299,6 +300,14 @@ function costEvidenceSections(
         { label: "Resursă", value: item.resourceLabel },
         { label: "Fel", value: item.kindLabel },
         { label: "Sursă", value: item.sourceLabel },
+        ...(item.lastChangedAt
+          ? [
+              {
+                label: "Ultima modificare",
+                value: formatDateTime(item.lastChangedAt),
+              },
+            ]
+          : []),
       ],
     },
     usedBySection(item.usedBy),

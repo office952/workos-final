@@ -10,6 +10,7 @@ import {
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
   costEvidence,
+  costEvidenceQualifierIdentity,
   getCostEvidence,
   getResource,
   lookupCostEvidence,
@@ -261,5 +262,9 @@ describe("resource catalog", () => {
     expect(isValidCostAmount(18)).toBe(true);
     expect(isValidCostAmount(0)).toBe(false);
     expect(isValidCostAmount(-1)).toBe(false);
+    expect(costEvidenceQualifierIdentity()).toBe("unqualified");
+    expect(costEvidenceQualifierIdentity({ volumeDepthMm: 60 })).toBe(
+      "volumeDepthMm=60",
+    );
   });
 });
