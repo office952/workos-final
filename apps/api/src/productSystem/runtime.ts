@@ -66,7 +66,9 @@ import {
   type CostEvidence,
 } from "@workos-final/domain";
 import {
+  applyMigrations,
   openSqliteDatabase,
+  openSqliteDatabaseWithoutMigrations,
   resolveProductSystemSqlitePath,
   type SqliteDatabase,
 } from "../persistence/sqlite.js";
@@ -381,7 +383,35 @@ export function createProductSystemRuntime(
   sqlitePath = resolveProductSystemSqlitePath(),
   options: ProductSystemRuntimeOptions = {},
 ): ProductSystemRuntime {
-  const db: SqliteDatabase = openSqliteDatabase(sqlitePath);
+  if (options.planeIdentity && options.bindPlaneIdentity === false) {
+    const db = openVerifiedCloudRequestDatabase(sqlitePath, options.planeIdentity);
+    return createProductSystemRuntimeFromOpenDb(db, sqlitePath, options);
+  }
+  const db = openSqliteDatabase(sqlitePath);
+  return createProductSystemRuntimeFromOpenDb(db, sqlitePath, options);
+}
+
+function openVerifiedCloudRequestDatabase(
+  sqlitePath: string,
+  expected: { planeId: string; organizationId: string },
+): SqliteDatabase {
+  const db = openSqliteDatabaseWithoutMigrations(sqlitePath);
+  try {
+    assertExistingPlaneIdentity(db, expected);
+    applyMigrations(db);
+    assertExistingPlaneIdentity(db, expected);
+    return db;
+  } catch (error) {
+    db.close();
+    throw error;
+  }
+}
+
+export function createProductSystemRuntimeFromOpenDb(
+  db: SqliteDatabase,
+  sqlitePath: string,
+  options: ProductSystemRuntimeOptions = {},
+): ProductSystemRuntime {
   const documentsRoot = options.documentsRoot ?? resolveDocumentsRoot();
   let planeIdentity;
   try {

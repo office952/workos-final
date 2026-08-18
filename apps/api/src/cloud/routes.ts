@@ -17,26 +17,30 @@ export function registerCloudRoutes(app: Hono<ApiEnv>): void {
     if (!controlPlane) {
       return c.json({ mode: "cloud", user: null, organization: null, memberships: [] });
     }
-    const resolved = controlPlane.resolveSession(getCookie(c, CLOUD_SESSION_COOKIE));
+    const cookie = getCookie(c, CLOUD_SESSION_COOKIE);
+    const resolved = controlPlane.resolveSession(cookie);
     if (!resolved.ok) {
       return c.json({ mode: "cloud", user: null, organization: null, memberships: [] });
     }
-    const memberships = controlPlane.listMembershipsForUser(resolved.user.userId);
     const organization = controlPlane.getOrganization(resolved.session.activeOrganizationId);
-    const membership = memberships.find(
-      (item) => item.organizationId === resolved.session.activeOrganizationId,
+    const membership = controlPlane.getActiveMembership(
+      resolved.user.userId,
+      resolved.session.activeOrganizationId,
     );
+    if (!organization || organization.status !== "ACTIVE" || !membership) {
+      controlPlane.revokeSession(cookie);
+      return c.json({ mode: "cloud", user: null, organization: null, memberships: [] });
+    }
+    const memberships = controlPlane.listMembershipsForUser(resolved.user.userId);
     return c.json({
       mode: "cloud",
       user: { userId: resolved.user.userId, email: resolved.user.email },
-      organization: organization
-        ? {
-            organizationId: organization.organizationId,
-            displayName: organization.displayName,
-            slug: organization.slug,
-            role: membership?.role ?? null,
-          }
-        : null,
+      organization: {
+        organizationId: organization.organizationId,
+        displayName: organization.displayName,
+        slug: organization.slug,
+        role: membership.role,
+      },
       memberships,
     });
   });
@@ -91,10 +95,16 @@ export function registerCloudRoutes(app: Hono<ApiEnv>): void {
     } else if (requested && requested !== organizationId) {
       return c.json({ error: "forbidden" }, 403);
     }
-    const { session, rawToken } = controlPlane.createSession({
-      userId: verified.user.userId,
-      activeOrganizationId: organizationId,
-    });
+    let created: ReturnType<typeof controlPlane.createSession>;
+    try {
+      created = controlPlane.createSession({
+        userId: verified.user.userId,
+        activeOrganizationId: organizationId,
+      });
+    } catch {
+      return c.json({ error: "no_membership" }, 403);
+    }
+    const { session, rawToken } = created;
     setCloudSessionCookie(c, rawToken);
     const organization = controlPlane.getOrganization(organizationId);
     const membership = memberships.find((item) => item.organizationId === organizationId);
@@ -178,7 +188,13 @@ export function registerCloudRoutes(app: Hono<ApiEnv>): void {
       runtime.logoutOperatorSession(operatorToken);
     }
     deleteCookie(c, OPERATOR_SESSION_COOKIE, { path: "/" });
-    controlPlane.switchActiveOrganization(resolved.session.sessionId, organizationId);
+    const switchedSession = controlPlane.switchActiveOrganization(
+      resolved.session.sessionId,
+      organizationId,
+    );
+    if (!switchedSession) {
+      return c.json({ error: "forbidden" }, 403);
+    }
     const memberships = controlPlane.listMembershipsForUser(user.userId);
     return c.json({
       mode: "cloud",
@@ -195,11 +211,12 @@ export function registerCloudRoutes(app: Hono<ApiEnv>): void {
 }
 
 function setCloudSessionCookie(c: Context<ApiEnv>, rawToken: string): void {
+  const env = c.get("env") ?? process.env;
   setCookie(c, CLOUD_SESSION_COOKIE, rawToken, {
     httpOnly: true,
     path: "/",
     sameSite: "Lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     maxAge: CLOUD_SESSION_MAX_AGE_SEC,
   });
 }

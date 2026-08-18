@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -14,10 +15,12 @@ import {
   type CloudLoginResult,
   type CloudSessionSnapshot,
 } from "./cloudSessionApi";
+import { canAdministerOrganization } from "./organizationAccess";
 
 type CloudSessionState = CloudSessionSnapshot & {
   ready: boolean;
   unavailable: boolean;
+  canAdministerOrganization: boolean;
   login: (
     email: string,
     password: string,
@@ -97,18 +100,25 @@ export function CloudSessionProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
+  const value = useMemo(
+    () => ({
+      ...session,
+      ready,
+      unavailable,
+      canAdministerOrganization: canAdministerOrganization({
+        mode: session.mode,
+        role: session.organization?.role ?? null,
+      }),
+      login,
+      logout,
+      switchOrganization,
+      refresh,
+    }),
+    [session, ready, unavailable, login, logout, switchOrganization, refresh],
+  );
+
   return (
-    <CloudSessionContext.Provider
-      value={{
-        ...session,
-        ready,
-        unavailable,
-        login,
-        logout,
-        switchOrganization,
-        refresh,
-      }}
-    >
+    <CloudSessionContext.Provider value={value}>
       {children}
     </CloudSessionContext.Provider>
   );
@@ -124,4 +134,40 @@ export function useCloudSession(): CloudSessionState {
 
 export function useCloudSessionOptional(): CloudSessionState | null {
   return useContext(CloudSessionContext);
+}
+
+export function useCanAdministerOrganization(): boolean {
+  const session = useCloudSessionOptional();
+  if (!session) {
+    return true;
+  }
+  return session.canAdministerOrganization;
+}
+
+export function CloudSessionTestProvider({
+  snapshot,
+  children,
+}: {
+  snapshot: CloudSessionSnapshot;
+  children: ReactNode;
+}) {
+  const value = useMemo(
+    () => ({
+      ...snapshot,
+      ready: true,
+      unavailable: false,
+      canAdministerOrganization: canAdministerOrganization({
+        mode: snapshot.mode,
+        role: snapshot.organization?.role ?? null,
+      }),
+      login: async () => ({ ok: false, error: "test" }),
+      logout: async () => undefined,
+      switchOrganization: async () => ({ ok: false, error: "test" }),
+      refresh: async () => undefined,
+    }),
+    [snapshot],
+  );
+  return (
+    <CloudSessionContext.Provider value={value}>{children}</CloudSessionContext.Provider>
+  );
 }

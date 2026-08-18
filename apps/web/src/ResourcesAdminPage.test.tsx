@@ -6,8 +6,33 @@ import {
   costEvidence,
   projectResourcesAdministration,
 } from "@workos-final/domain";
+import { CloudSessionTestProvider } from "./CloudSessionContext";
+import { OWNER_WRITE_HINT } from "./organizationAccess";
 import { ResourcesAdminPage } from "./ResourcesAdminPage";
 import { fetchResourcesAdministration, patchCostEvidence } from "./systemApi";
+import type { CloudSessionSnapshot } from "./cloudSessionApi";
+
+function cloudSnapshot(role: "owner" | "member"): CloudSessionSnapshot {
+  return {
+    mode: "cloud",
+    user: { userId: "usr:test", email: "user@example.test" },
+    organization: {
+      organizationId: "org:test",
+      displayName: "Atelier Alpha",
+      slug: "atelier-alpha",
+      role,
+    },
+    memberships: [
+      {
+        organizationId: "org:test",
+        displayName: "Atelier Alpha",
+        slug: "atelier-alpha",
+        role,
+        status: "ACTIVE",
+      },
+    ],
+  };
+}
 
 vi.mock("./systemApi", () => ({
   fetchResourcesAdministration: vi.fn(),
@@ -151,5 +176,26 @@ describe("ResourcesAdminPage", () => {
     expect(
       screen.getByRole("button", { name: /Profil aluminiu/ }),
     ).not.toHaveAttribute("aria-current");
+  });
+
+  it("shows cost-evidence edit for a Cloud owner and hides it for a Cloud member", async () => {
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
+    const user = userEvent.setup();
+    const ownerView = render(
+      <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
+        <ResourcesAdminPage />
+      </CloudSessionTestProvider>,
+    );
+    await user.click(await screen.findByRole("button", { name: "Dovezi de cost" }));
+    expect(screen.getByRole("button", { name: "Editează" })).toBeInTheDocument();
+    ownerView.unmount();
+
+    render(
+      <CloudSessionTestProvider snapshot={cloudSnapshot("member")}>
+        <ResourcesAdminPage />
+      </CloudSessionTestProvider>,
+    );
+    expect(await screen.findByText(OWNER_WRITE_HINT)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Editează" })).not.toBeInTheDocument();
   });
 });

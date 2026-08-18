@@ -3,6 +3,8 @@ import type { ProductSystemAdminProjection } from "@workos-final/domain";
 import { DisplayLabelEditor } from "./DisplayLabelEditor";
 import { OwnerCatalogView } from "./OwnerCatalogView";
 import { buildProductSystemAdministrationCatalog } from "./ownerCatalog";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { fetchProductSystemAdministration } from "./systemApi";
 
 type PageState =
@@ -11,6 +13,7 @@ type PageState =
   | { kind: "ready"; admin: ProductSystemAdminProjection };
 
 export function ProductSystemAdminPage() {
+  const canAdminister = useCanAdministerOrganization();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
 
   const load = useCallback(async () => {
@@ -48,8 +51,9 @@ export function ProductSystemAdminPage() {
       catalog={buildProductSystemAdministrationCatalog(page.admin)}
       title="Sistem produs"
       lead="Editează eticheta afișată. Identitatea tehnică, compoziția și setările tehnice rămân neschimbate."
+      summary={!canAdminister ? <OwnerWriteHint /> : null}
       renderItemActions={(item) =>
-        item.editTarget ? (
+        canAdminister && item.editTarget ? (
           <DisplayLabelEditor
             key={`${item.editTarget.entityKind}:${item.editTarget.entityId}:${item.editTarget.revision}`}
             target={item.editTarget}

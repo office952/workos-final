@@ -39,20 +39,47 @@ export function resolveProductSystemSqlitePath(): string {
   return join(resolveWorkosDataDir(), "product-system.sqlite");
 }
 
-export function openSqliteDatabase(filePath: string): SqliteDatabase {
-  if (filePath !== ":memory:") {
-    mkdirSync(dirname(filePath), { recursive: true });
-  }
-  const db = new Database(filePath);
+export function configureOperationalSqlite(
+  db: SqliteDatabase,
+  filePath: string,
+): void {
   db.pragma("foreign_keys = ON");
   if (filePath !== ":memory:") {
     db.pragma("journal_mode = WAL");
   }
+}
+
+export function openSqliteDatabaseWithoutMigrations(
+  filePath: string,
+): SqliteDatabase {
+  if (filePath !== ":memory:") {
+    mkdirSync(dirname(filePath), { recursive: true });
+  }
+  const db = new Database(filePath);
+  configureOperationalSqlite(db, filePath);
+  return db;
+}
+
+export function openSqliteDatabase(filePath: string): SqliteDatabase {
+  const db = openSqliteDatabaseWithoutMigrations(filePath);
   applyMigrations(db);
   return db;
 }
 
+export function listOperationalMigrationFiles(): string[] {
+  return readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+}
+
 export function applyMigrations(db: SqliteDatabase): void {
+  applySelectedMigrations(db, listOperationalMigrationFiles());
+}
+
+export function applySelectedMigrations(
+  db: SqliteDatabase,
+  files: readonly string[],
+): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       id TEXT PRIMARY KEY NOT NULL,
@@ -66,10 +93,6 @@ export function applyMigrations(db: SqliteDatabase): void {
       .all()
       .map((row) => (row as { id: string }).id),
   );
-
-  const files = readdirSync(MIGRATIONS_DIR)
-    .filter((name) => name.endsWith(".sql"))
-    .sort();
 
   for (const file of files) {
     if (applied.has(file)) {

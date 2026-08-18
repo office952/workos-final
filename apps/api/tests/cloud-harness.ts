@@ -38,11 +38,14 @@ export function cleanupCloudTemps(): void {
   }
 }
 
-export function createCloudFixture(): CloudFixture {
+export function createCloudFixture(options: { env?: NodeJS.ProcessEnv } = {}): CloudFixture {
   const cloudRoot = trackTempDir();
   const controlPlane = openProvisionedControlPlane(cloudRoot);
   const registry = createRuntimeRegistry();
-  const app = createApp({ cloud: { controlPlane, registry } });
+  const app = createApp({
+    cloud: { controlPlane, registry },
+    env: options.env,
+  });
   return {
     cloudRoot,
     controlPlane,

@@ -11,7 +11,7 @@ Status: PASS on `feat/workos-cloud-foundation-v1`. Owner GO authorized Control P
 - Owner writes gated in Cloud mode only: cost evidence, display-label, seller, people/skills/PIN, inventory adjust, execution provider/executor. Single-plane owner checks stay allow.
 - OperatorSession remains. Org switch and Cloud logout revoke/clear the PIN cookie. DEV Operator Mode still cannot mint a Cloud session.
 - Login wall when `mode === "cloud"` and there is no user. AppShell shows the organization name, a switcher only for multiple memberships, and **Ieși din cont**.
-- Provision helper/CLI: `pnpm --filter @workos-final/api cloud:provision -- --root <dir> --org "…" --email … --password …`
+- Provision helper/CLI: local/synthetic only. Password via TTY prompt or `--password-stdin`. `--password` on argv is forbidden. Example: `pnpm --filter @workos-final/api cloud:provision -- --root <dir> --org "…" --email … --password-stdin`
 
 ## Proofs
 
@@ -19,13 +19,37 @@ Status: PASS on `feat/workos-cloud-foundation-v1`. Owner GO authorized Control P
 - Anonymous Cloud `/api/resources-admin` → 401 `invalid_session`. Member cost-evidence PATCH → 403. Owner PATCH → 200. Client org header does not change the session org.
 - Plane identity mismatch / missing → 503. Failed open closes the SQLite handle.
 - Isolated QA on API `8799` / web `5181` with `WORKOS_CLOUD_ROOT=%TEMP%\workos-cloud-foundation-qa-s12`. Synthetic owner logged in; shell showed **Atelier Alpha**. Browser console clean.
+- Correction QA on API `8801` / web `5183` with `WORKOS_CLOUD_ROOT=%TEMP%\workos-cloud-foundation-qa-s12-corr`. Owner sees **Editează** / **Salvează datele firmei**. Member sees the owner-write hint and no write buttons; member cost-evidence PATCH remains 403. Logout returns to the login wall. `--password` argv is rejected.
 
 ## Screenshots
 
 1. Login desktop: `docs/worklog/screenshots/cloud-foundation-login.png`
 2. Login 390 px: `docs/worklog/screenshots/cloud-foundation-login-390.png`
 3. After login: `docs/worklog/screenshots/cloud-foundation-logged-in.png`
+4. Member read-only Resources: `docs/worklog/screenshots/cloud-correction-member-resources.png`
+5. Member read-only Date firmă desktop: `docs/worklog/screenshots/cloud-correction-member-seller.png`
+6. Member read-only Date firmă 390 px: `docs/worklog/screenshots/cloud-correction-member-seller-390.png`
+7. Owner editable Resources: `docs/worklog/screenshots/cloud-correction-owner-resources.png`
 
 ## Out of scope
 
 HUB MEDIA dataset adopt, official TEST COMPANY fixture / hostile isolation matrix, bootstrap-policy honesty (seller / people / OWNER_CONFIRMED), WorkcenterRegistry through `liveEligibleProviders`, Postgres, Hub, billing, signup, SSO, merge to `main`.
+
+## Independent review corrections
+
+Status: PASS on the same branch after a bounded security + UX correction. Architecture unchanged. Slice 3 not started.
+
+- Cloud request open: raw SQLite → assert `operational_plane_identity` → then operational migrations. A wrong-plane DB with pending `023+` stays unchanged after a failed open (`plane_identity_mismatch`). Provision still migrates then binds once.
+- Stored `users.kdf` is the verifier authority. Unsupported/malformed descriptors fail closed. Unknown email consumes the current scrypt cost. Disabled users verify first; wrong password stays `invalid_credentials`.
+- Dev provision CLI refuses `--password` and `NODE_ENV=production`. Password comes from a no-echo TTY prompt or `--password-stdin`.
+- Control Plane `createSession` / `switchActiveOrganization` require an ACTIVE user, ACTIVE organization, and ACTIVE membership. `GET /api/cloud/session` revokes and returns an empty projection when the current org/membership is unusable. AppGate requires both user and organization.
+- Cookie Secure comes from request `env.NODE_ENV`. Production does not advertise credentialed CORS to Vite DEV origins. API shutdown closes the runtime registry + Control Plane (or the single-plane runtime).
+- Frontend `canAdministerOrganization`: single-plane and Cloud owner writable; Cloud member sees owner-only writes hidden/disabled with „Doar ownerul organizației poate modifica această zonă.” Backend 403 remains authority.
+
+## METODA DE LUCRU SI LOGICA ABORDARII
+
+Independent review accepted the Slice 1+2 Control Plane + verified-plane architecture. The task was therefore a bounded correction, not a Cloud redesign: each finding had a single owner seam, and Slice 3 items (HUB MEDIA adopt, TEST COMPANY isolation, provider-registry isolation, bootstrap-policy honesty) stayed deferred.
+
+Research was read-only against the existing open/migrate/runtime, password verifier, provision CLI, session routes, and owner-write UI. Implementation stayed on `feat/workos-cloud-foundation-v1` with one implementation owner. Verification used targeted Cloud tests first (zero-migration side-effect, KDF matrix, session invariants, argv password, member UI), then the full API/web suites, typecheck, React Doctor on changed React, and an isolated synthetic Cloud stack. No real HUB MEDIA database was opened. No PR and no `main` write.
+
+Bounded correction was appropriate because the accepted law already had the right objects. The defects were sequence and authority leaks: migrate-before-identity, unused stored KDF, cheap unknown-email path, argv secrets, session projection that outlived membership, and owner write buttons shown to members. Fixing those seams preserved LETTERS/ACM truth and the single-plane path.

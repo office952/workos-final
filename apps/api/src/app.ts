@@ -61,13 +61,15 @@ export function createApp(options: CreateAppOptions = {}): Hono<ApiEnv> {
 
   const app = new Hono<ApiEnv>();
 
-  app.use(
-    "/api/*",
-    cors({
-      origin: [...DEV_WEB_ORIGINS],
-      credentials: true,
-    }),
-  );
+  if (env.NODE_ENV !== "production") {
+    app.use(
+      "/api/*",
+      cors({
+        origin: [...DEV_WEB_ORIGINS],
+        credentials: true,
+      }),
+    );
+  }
 
   if (options.cloud) {
     const registry = options.cloud.registry ?? createRuntimeRegistry();

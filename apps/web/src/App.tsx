@@ -49,14 +49,14 @@ export function App() {
 }
 
 function AppGate() {
-  const { ready, unavailable, mode, user } = useCloudSession();
+  const { ready, unavailable, mode, user, organization } = useCloudSession();
   if (!ready) {
     return <p className="app-boot">Se încarcă…</p>;
   }
   if (unavailable) {
     return <p className="app-boot">Sistemul nu răspunde. Reîncearcă.</p>;
   }
-  if (mode === "cloud" && !user) {
+  if (mode === "cloud" && (!user || !organization)) {
     return <LoginPage />;
   }
   return (

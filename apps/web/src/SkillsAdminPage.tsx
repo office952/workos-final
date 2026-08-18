@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { productionCapabilityClasses, type Skill } from "@workos-final/domain";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createSkill, fetchEligibility, fetchSkills, retireSkill } from "./peopleApi";
 import { EmptyState } from "./ui/EmptyState";
@@ -8,6 +10,7 @@ import { PageHeader } from "./ui/PageHeader";
 import { StatusChip } from "./ui/StatusChip";
 
 export function SkillsAdminPage() {
+  const canAdminister = useCanAdministerOrganization();
   const [skills, setSkills] = useState<Skill[] | null>(null);
   const [error, setError] = useState(false);
   const [code, setCode] = useState("");
@@ -42,6 +45,8 @@ export function SkillsAdminPage() {
         lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
       />
       <PeopleAdminNav />
+      {!canAdminister ? <OwnerWriteHint /> : null}
+      {canAdminister ? (
       <form
         className="people-create"
         onSubmit={(event) => {
@@ -68,6 +73,7 @@ export function SkillsAdminPage() {
           Adaugă skill
         </button>
       </form>
+      ) : null}
       {notice ? <p className="status-bad">{notice}</p> : null}
       {skills.length === 0 ? (
         <EmptyState title="Nu există skill-uri." />
@@ -83,7 +89,7 @@ export function SkillsAdminPage() {
                 label={skill.status === "ACTIVE" ? "Activ" : "Retras"}
                 tone={skill.status === "ACTIVE" ? "ok" : "neutral"}
               />
-              {skill.status === "ACTIVE" ? (
+              {canAdminister && skill.status === "ACTIVE" ? (
                 <button
                   type="button"
                   className="button-quiet"

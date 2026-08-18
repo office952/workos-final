@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { PersonRegistryItem, Skill } from "@workos-final/domain";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import {
   assignPersonSkill,
@@ -26,6 +28,7 @@ type PageState =
     };
 
 export function PersonAdminPage() {
+  const canAdminister = useCanAdministerOrganization();
   const { personId = "" } = useParams();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [name, setName] = useState("");
@@ -120,6 +123,7 @@ export function PersonAdminPage() {
         </div>
       </header>
       {notice ? <p className="status-bad">{notice}</p> : null}
+      {!canAdminister ? <OwnerWriteHint /> : null}
 
       <article className="client-current-card">
         <h2>Identitate</h2>
@@ -134,11 +138,17 @@ export function PersonAdminPage() {
           }}
         >
           <Field label="Nume">
-            <input value={name} onChange={(event) => setName(event.target.value)} disabled={busy} />
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              disabled={busy || !canAdminister}
+            />
           </Field>
-          <button type="submit" disabled={busy || name.trim().length === 0}>
-            Salvează numele
-          </button>
+          {canAdminister ? (
+            <button type="submit" disabled={busy || name.trim().length === 0}>
+              Salvează numele
+            </button>
+          ) : null}
         </form>
       </article>
 
@@ -151,7 +161,7 @@ export function PersonAdminPage() {
         <p>
           Stare PIN: <strong>{operatorPinConfigured ? "Configurat" : "Neconfigurat"}</strong>
         </p>
-        {item.status === "ACTIVE" ? (
+        {canAdminister && item.status === "ACTIVE" ? (
           <form
             className="people-create"
             onSubmit={(event) => {
@@ -199,7 +209,7 @@ export function PersonAdminPage() {
           Indisponibilitatea temporară scoate persoana din eligibilitatea curentă. Skill-urile rămân.
           Nu este concediu HR.
         </p>
-        {item.status === "ACTIVE" ? (
+        {canAdminister && item.status === "ACTIVE" ? (
           <form
             className="people-create"
             onSubmit={(event) => {
@@ -263,7 +273,7 @@ export function PersonAdminPage() {
                   {skill.displayLabel}
                   <small> {skill.code}</small>
                 </span>
-                {item.status === "ACTIVE" ? (
+                {canAdminister && item.status === "ACTIVE" ? (
                   <button
                     type="button"
                     className="button-quiet"
@@ -282,7 +292,7 @@ export function PersonAdminPage() {
             ))}
           </ul>
         )}
-        {item.status === "ACTIVE" && assignable.length > 0 ? (
+        {canAdminister && item.status === "ACTIVE" && assignable.length > 0 ? (
           <form
             className="people-create"
             onSubmit={(event) => {
@@ -317,7 +327,7 @@ export function PersonAdminPage() {
         ) : null}
       </article>
 
-      {item.status === "ACTIVE" ? (
+      {canAdminister && item.status === "ACTIVE" ? (
         <button
           type="button"
           className="button-secondary"

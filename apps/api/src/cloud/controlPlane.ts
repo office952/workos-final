@@ -5,10 +5,22 @@ import {
   hashRawSessionToken,
 } from "../operator/crypto.js";
 import {
+  CloudKdfError,
+  cloudLoginCost,
   hashCloudPassword,
   validateCloudPassword,
   verifyCloudPassword,
 } from "./password.js";
+
+export class ControlPlaneInvariantError extends Error {
+  readonly code: "no_membership" | "organization_disabled" | "user_unavailable";
+
+  constructor(code: "no_membership" | "organization_disabled" | "user_unavailable") {
+    super(code);
+    this.name = "ControlPlaneInvariantError";
+    this.code = code;
+  }
+}
 
 export const CLOUD_SESSION_COOKIE = "workos_cloud_session" as const;
 export const CLOUD_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
@@ -325,6 +337,7 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
       return row ? mapPlane(row) : null;
     },
     createSession(input) {
+      assertUsableMembership(db, input.userId, input.activeOrganizationId);
       const now = new Date();
       const createdAt = now.toISOString();
       const expiresAt = new Date(now.getTime() + CLOUD_SESSION_TTL_MS).toISOString();
@@ -383,6 +396,24 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
       return { ok: true, user, session: mapSession(row) };
     },
     switchActiveOrganization(sessionId, organizationId) {
+      const current = db
+        .prepare(
+          `SELECT session_id, user_id, active_organization_id, created_at, expires_at, revoked_at, last_seen_at
+           FROM platform_sessions
+           WHERE session_id = ?`,
+        )
+        .get(sessionId) as SessionRow | undefined;
+      if (!current || current.revoked_at || Date.parse(current.expires_at) <= Date.now()) {
+        return null;
+      }
+      try {
+        assertUsableMembership(db, current.user_id, organizationId);
+      } catch (error) {
+        if (error instanceof ControlPlaneInvariantError) {
+          return null;
+        }
+        throw error;
+      }
       const now = new Date().toISOString();
       const result = db
         .prepare(
@@ -427,28 +458,39 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
       }
       const row = db
         .prepare(
-          `SELECT user_id, email, password_hash, password_salt, status, created_at, updated_at
+          `SELECT user_id, email, password_hash, password_salt, kdf, status, created_at, updated_at
            FROM users
            WHERE email = ?`,
         )
         .get(normalized) as
-        | (UserRow & { password_hash: Buffer; password_salt: Buffer })
+        | (UserRow & { password_hash: Buffer; password_salt: Buffer; kdf: string })
         | undefined;
       if (!row) {
+        await cloudLoginCost.consumeUnknownEmail(password);
+        recordLoginFailure(normalized);
+        return { ok: false, error: "invalid_credentials" };
+      }
+      let matches = false;
+      try {
+        matches = await verifyCloudPassword(
+          password,
+          row.password_hash,
+          row.password_salt,
+          row.kdf,
+        );
+      } catch (error) {
+        if (error instanceof CloudKdfError) {
+          recordLoginFailure(normalized);
+          return { ok: false, error: "invalid_credentials" };
+        }
+        throw error;
+      }
+      if (!matches) {
         recordLoginFailure(normalized);
         return { ok: false, error: "invalid_credentials" };
       }
       if (row.status !== "ACTIVE") {
         return { ok: false, error: "disabled" };
-      }
-      const matches = await verifyCloudPassword(
-        password,
-        row.password_hash,
-        row.password_salt,
-      );
-      if (!matches) {
-        recordLoginFailure(normalized);
-        return { ok: false, error: "invalid_credentials" };
       }
       loginAttempts.delete(normalized);
       return {
@@ -618,6 +660,31 @@ function readUserByEmail(db: SqliteDatabase, email: string): CloudUser | null {
     )
     .get(normalizeEmail(email)) as UserRow | undefined;
   return row ? mapUser(row) : null;
+}
+
+function assertUsableMembership(
+  db: SqliteDatabase,
+  userId: string,
+  organizationId: string,
+): void {
+  const user = readUser(db, userId);
+  if (!user || user.status !== "ACTIVE") {
+    throw new ControlPlaneInvariantError("user_unavailable");
+  }
+  const organization = readOrganization(db, organizationId);
+  if (!organization || organization.status !== "ACTIVE") {
+    throw new ControlPlaneInvariantError("organization_disabled");
+  }
+  const membership = db
+    .prepare(
+      `SELECT membership_id
+       FROM organization_memberships
+       WHERE user_id = ? AND organization_id = ? AND status = 'ACTIVE'`,
+    )
+    .get(userId, organizationId) as { membership_id: string } | undefined;
+  if (!membership) {
+    throw new ControlPlaneInvariantError("no_membership");
+  }
 }
 
 function mapUser(row: UserRow): CloudUser {

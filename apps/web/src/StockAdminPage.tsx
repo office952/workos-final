@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { InventoryItemDetail, InventoryStockProjection } from "@workos-final/domain";
 import { formatQuantity } from "./formatDisplay";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import {
   fetchInventory,
   fetchInventoryItem,
@@ -95,6 +97,7 @@ function StockOverviewPage() {
 }
 
 function StockItemPage({ resourceId }: { resourceId: string }) {
+  const canAdminister = useCanAdministerOrganization();
   const navigate = useNavigate();
   const [page, setPage] = useState<
     { kind: "loading" } | { kind: "error" } | { kind: "ready"; detail: InventoryItemDetail }
@@ -176,6 +179,8 @@ function StockItemPage({ resourceId }: { resourceId: string }) {
         Sold curent: {formatQuantity(item.balance)} {item.unitLabel}
       </p>
       <StatusChip label={item.statusLabel} tone={stockTone(item.status)} />
+      {!canAdminister ? <OwnerWriteHint /> : null}
+      {canAdminister ? (
       <form
         className="people-create"
         onSubmit={(event) => {
@@ -207,6 +212,7 @@ function StockItemPage({ resourceId }: { resourceId: string }) {
           {hasMovements ? "Ajustare stoc" : "Înregistrează stoc inițial"}
         </button>
       </form>
+      ) : null}
       {notice ? <p className="status-bad">{notice}</p> : null}
       <h2>Mișcări</h2>
       {movements.length === 0 ? (

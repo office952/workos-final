@@ -14,6 +14,8 @@ import {
   formatQuantity,
   formatUnit,
 } from "./formatDisplay";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
@@ -56,6 +58,9 @@ export function ExecutionPlanPanel({
   onStartTask,
   onCompleteTask,
 }: ExecutionPlanPanelProps) {
+  const canAdminister = useCanAdministerOrganization();
+  const hasOwnerAssign =
+    view.tasks.some((task) => task.canAssign || task.canAssignExecutor);
   const lanes = LANES.map((lane) => ({
     ...lane,
     tasks: view.tasks.filter((task) => taskLane(task) === lane.id),
@@ -70,6 +75,7 @@ export function ExecutionPlanPanel({
           Stare: {view.statusLabel}
         </p>
       </header>
+      {!canAdminister && hasOwnerAssign ? <OwnerWriteHint /> : null}
       <p className="execution-plan-cost">
         Cost intern planificat: {formatMoney(view.plan.eicTotal)} {view.plan.eicCurrency}
         {formatCostCompleteness(view.plan.eicCompleteness)}
@@ -168,6 +174,7 @@ function ExecutionTaskCard({
     },
   ) => void;
 }) {
+  const canAdminister = useCanAdministerOrganization();
   const [providerId, setProviderId] = useState(
     task.assignedProvider?.id ?? task.eligibleProviders[0]?.id ?? "",
   );
@@ -282,7 +289,7 @@ function ExecutionTaskCard({
           ) : null}
         </dl>
         <div className="task-actions">
-        {task.canAssign ? (
+        {canAdminister && task.canAssign ? (
           <>
             <Field label="Echipament / zonă">
               <select
@@ -306,7 +313,7 @@ function ExecutionTaskCard({
             </button>
           </>
         ) : null}
-        {task.canAssignExecutor ? (
+        {canAdminister && task.canAssignExecutor ? (
           <>
             <Field label="Executant">
               <select

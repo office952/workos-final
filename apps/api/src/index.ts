@@ -25,6 +25,10 @@ if (isCloudRootConfigured()) {
       console.log(`workos cloud root: ${cloudRoot}`);
     },
   );
+  installShutdown(() => {
+    registry.closeAll();
+    controlPlane.close();
+  });
 } else {
   const productSystem = createProductSystemRuntime();
   serve(
@@ -36,4 +40,20 @@ if (isCloudRootConfigured()) {
       console.log(`product-system sqlite: ${productSystem.sqlitePath}`);
     },
   );
+  installShutdown(() => {
+    productSystem.close();
+  });
+}
+
+function installShutdown(close: () => void): void {
+  let closed = false;
+  const shutdown = () => {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    close();
+  };
+  process.once("SIGINT", shutdown);
+  process.once("SIGTERM", shutdown);
 }

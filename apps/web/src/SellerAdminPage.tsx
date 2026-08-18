@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SellerProfile, SellerProfileInput } from "@workos-final/domain";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { fetchSellerProfile, updateSellerProfile } from "./sellerApi";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
@@ -21,6 +23,7 @@ const EMPTY_DRAFT: SellerProfileInput = {
 };
 
 export function SellerAdminPage() {
+  const canAdminister = useCanAdministerOrganization();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [draft, setDraft] = useState<SellerProfileInput>(EMPTY_DRAFT);
   const [busy, setBusy] = useState(false);
@@ -61,6 +64,7 @@ export function SellerAdminPage() {
       <p className="page-lead">
         Vânzător curent: {page.seller.legalName}. Ofertele deja create păstrează datele de atunci.
       </p>
+      {!canAdminister ? <OwnerWriteHint /> : null}
       <form
         className="seller-form"
         onSubmit={(event) => {
@@ -84,63 +88,65 @@ export function SellerAdminPage() {
           <input
             value={draft.legalName}
             onChange={(event) => setDraft({ ...draft, legalName: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="Marcă">
           <input
             value={draft.brand}
             onChange={(event) => setDraft({ ...draft, brand: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="CIF">
           <input
             value={draft.fiscalId}
             onChange={(event) => setDraft({ ...draft, fiscalId: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="Registrul comerțului">
           <input
             value={draft.tradeRegister}
             onChange={(event) => setDraft({ ...draft, tradeRegister: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="Adresă">
           <input
             value={draft.address}
             onChange={(event) => setDraft({ ...draft, address: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="Localitate">
           <input
             value={draft.locality}
             onChange={(event) => setDraft({ ...draft, locality: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="IBAN">
           <input
             value={draft.iban}
             onChange={(event) => setDraft({ ...draft, iban: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
         <Field label="Bancă">
           <input
             value={draft.bank}
             onChange={(event) => setDraft({ ...draft, bank: event.target.value })}
-            disabled={busy}
+            disabled={busy || !canAdminister}
           />
         </Field>
-        <div className="action-row">
-          <button type="submit" disabled={busy || draft.legalName.trim().length === 0}>
-            Salvează datele firmei
-          </button>
-        </div>
+        {canAdminister ? (
+          <div className="action-row">
+            <button type="submit" disabled={busy || draft.legalName.trim().length === 0}>
+              Salvează datele firmei
+            </button>
+          </div>
+        ) : null}
       </form>
       {notice ? <p className="status-bad">{notice}</p> : null}
     </section>

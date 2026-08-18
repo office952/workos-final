@@ -19,23 +19,34 @@ export class PlaneIdentityError extends Error {
 export function readOperationalPlaneIdentity(
   db: SqliteDatabase,
 ): OperationalPlaneIdentity | null {
-  const row = db
-    .prepare(
-      `SELECT plane_id, organization_id, bound_at
-       FROM operational_plane_identity
-       WHERE id = 'current'`,
-    )
-    .get() as
-    | { plane_id: string; organization_id: string; bound_at: string }
-    | undefined;
-  if (!row) {
-    return null;
+  try {
+    const row = db
+      .prepare(
+        `SELECT plane_id, organization_id, bound_at
+         FROM operational_plane_identity
+         WHERE id = 'current'`,
+      )
+      .get() as
+      | { plane_id: string; organization_id: string; bound_at: string }
+      | undefined;
+    if (!row) {
+      return null;
+    }
+    return {
+      planeId: row.plane_id,
+      organizationId: row.organization_id,
+      boundAt: row.bound_at,
+    };
+  } catch (error) {
+    if (isMissingIdentityTable(error)) {
+      return null;
+    }
+    throw error;
   }
-  return {
-    planeId: row.plane_id,
-    organizationId: row.organization_id,
-    boundAt: row.bound_at,
-  };
+}
+
+function isMissingIdentityTable(error: unknown): boolean {
+  return error instanceof Error && /no such table/i.test(error.message);
 }
 
 export function bindOperationalPlaneIdentity(

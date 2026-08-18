@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  CLOUD_SESSION_TTL_MS,
+  ControlPlaneInvariantError,
   createControlPlane,
   resetCloudLoginAttemptGuard,
 } from "../src/cloud/controlPlane.js";
@@ -74,6 +76,91 @@ describe("Cloud Control Plane", () => {
       ok: false,
       error: "rate_limited",
     });
+    plane.close();
+  });
+
+  it("refuses createSession and switch without a usable membership", async () => {
+    const db = openControlPlaneDatabase(":memory:");
+    const plane = createControlPlane(db, trackTempDir());
+    const organization = plane.createOrganization({ displayName: "Atelier Alpha" });
+    const other = plane.createOrganization({ displayName: "Atelier Beta" });
+    const user = await plane.createUser({
+      email: "owner@example.test",
+      password: OWNER_PASSWORD,
+    });
+    expect(() =>
+      plane.createSession({
+        userId: user.userId,
+        activeOrganizationId: organization.organizationId,
+      }),
+    ).toThrow(ControlPlaneInvariantError);
+
+    plane.addMembership({
+      userId: user.userId,
+      organizationId: organization.organizationId,
+      role: "owner",
+    });
+    const { session } = plane.createSession({
+      userId: user.userId,
+      activeOrganizationId: organization.organizationId,
+    });
+    expect(
+      plane.switchActiveOrganization(session.sessionId, other.organizationId),
+    ).toBeNull();
+
+    db.prepare(`UPDATE organizations SET status = 'DISABLED' WHERE organization_id = ?`).run(
+      organization.organizationId,
+    );
+    expect(() =>
+      plane.createSession({
+        userId: user.userId,
+        activeOrganizationId: organization.organizationId,
+      }),
+    ).toThrow(/organization_disabled/);
+    expect(
+      plane.switchActiveOrganization(session.sessionId, organization.organizationId),
+    ).toBeNull();
+    plane.close();
+  });
+
+  it("rejects expired and revoked sessions", async () => {
+    const db = openControlPlaneDatabase(":memory:");
+    const plane = createControlPlane(db, trackTempDir());
+    const organization = plane.createOrganization({ displayName: "Atelier Alpha" });
+    const user = await plane.createUser({
+      email: "owner@example.test",
+      password: OWNER_PASSWORD,
+    });
+    plane.addMembership({
+      userId: user.userId,
+      organizationId: organization.organizationId,
+      role: "owner",
+    });
+    const created = plane.createSession({
+      userId: user.userId,
+      activeOrganizationId: organization.organizationId,
+    });
+    expect(plane.resolveSession(created.rawToken).ok).toBe(true);
+
+    db.prepare(`UPDATE platform_sessions SET expires_at = ? WHERE session_id = ?`).run(
+      new Date(Date.now() - 60_000).toISOString(),
+      created.session.sessionId,
+    );
+    expect(plane.resolveSession(created.rawToken)).toEqual({
+      ok: false,
+      error: "invalid_session",
+    });
+
+    const fresh = plane.createSession({
+      userId: user.userId,
+      activeOrganizationId: organization.organizationId,
+    });
+    plane.revokeSession(fresh.rawToken);
+    expect(plane.resolveSession(fresh.rawToken)).toEqual({
+      ok: false,
+      error: "invalid_session",
+    });
+    expect(CLOUD_SESSION_TTL_MS).toBe(12 * 60 * 60 * 1000);
     plane.close();
   });
 });

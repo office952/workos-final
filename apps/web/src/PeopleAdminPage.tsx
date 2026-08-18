@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { PeopleRegistryProjection } from "@workos-final/domain";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createPerson, fetchPeopleRegistry } from "./peopleApi";
 import { EmptyState } from "./ui/EmptyState";
@@ -14,6 +16,7 @@ type PageState =
   | { kind: "ready"; registry: PeopleRegistryProjection };
 
 export function PeopleAdminPage() {
+  const canAdminister = useCanAdministerOrganization();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -64,6 +67,8 @@ export function PeopleAdminPage() {
         }
       />
       <PeopleAdminNav />
+      {!canAdminister ? <OwnerWriteHint /> : null}
+      {canAdminister ? (
       <form
         className="people-create"
         onSubmit={(event) => {
@@ -90,11 +95,12 @@ export function PeopleAdminPage() {
           Adaugă persoană
         </button>
       </form>
+      ) : null}
       {notice ? <p className="status-bad">{notice}</p> : null}
       {registry.people.length === 0 ? (
         <EmptyState
           title="Nu există persoane active configurate."
-          action={<p>Adaugă prima persoană.</p>}
+          action={canAdminister ? <p>Adaugă prima persoană.</p> : undefined}
         />
       ) : (
         <ul className="people-list">

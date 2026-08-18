@@ -194,4 +194,119 @@ describe("Cloud auth and authorization", () => {
     expect(setCookies).toMatch(/workos_operator_session=/);
     fixture.close();
   });
+
+  it("sets an HttpOnly Lax cookie and Secure in production", async () => {
+    const fixture = createCloudFixture();
+    const alpha = await addOrganization(fixture, "Atelier Alpha");
+    await addUser(fixture, {
+      email: "owner@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: alpha.organization.organizationId,
+      role: "owner",
+    });
+    const login = await loginCloud(fixture.app, "owner@example.test", OWNER_PASSWORD);
+    const cookie = login.response.headers.getSetCookie().find((item) =>
+      item.startsWith("workos_cloud_session="),
+    );
+    expect(cookie).toMatch(/HttpOnly/i);
+    expect(cookie).toMatch(/SameSite=Lax/i);
+    expect(cookie).toMatch(/Max-Age=43200/);
+    expect(cookie).not.toMatch(/Secure/i);
+    fixture.close();
+
+    const production = createCloudFixture({ env: { NODE_ENV: "production" } });
+    const prodOrg = await addOrganization(production, "Atelier Alpha");
+    await addUser(production, {
+      email: "owner@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: prodOrg.organization.organizationId,
+      role: "owner",
+    });
+    const prodLogin = await loginCloud(
+      production.app,
+      "owner@example.test",
+      OWNER_PASSWORD,
+    );
+    const prodCookie = prodLogin.response.headers.getSetCookie().find((item) =>
+      item.startsWith("workos_cloud_session="),
+    );
+    expect(prodCookie).toMatch(/Secure/i);
+    expect(prodCookie).toMatch(/HttpOnly/i);
+    expect(prodCookie).toMatch(/SameSite=Lax/i);
+    production.close();
+  });
+
+  it("does not advertise credentialed CORS to Vite origins in production", async () => {
+    const fixture = createCloudFixture({ env: { NODE_ENV: "production" } });
+    const response = await fixture.app.request("/api/health", {
+      headers: { Origin: "http://127.0.0.1:5173" },
+    });
+    expect(response.headers.get("access-control-allow-origin")).toBeNull();
+    fixture.close();
+  });
+
+  it("revokes the Cloud session projection when membership is no longer usable", async () => {
+    const fixture = createCloudFixture();
+    const alpha = await addOrganization(fixture, "Atelier Alpha");
+    const user = await addUser(fixture, {
+      email: "owner@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: alpha.organization.organizationId,
+      role: "owner",
+    });
+    const login = await loginCloud(fixture.app, "owner@example.test", OWNER_PASSWORD);
+    expect(login.response.status).toBe(200);
+
+    fixture.controlPlane.db
+      .prepare(
+        `UPDATE organization_memberships SET status = 'REVOKED' WHERE user_id = ?`,
+      )
+      .run(user.userId);
+
+    const protectedRead = await fixture.app.request("/api/resources-admin", {
+      headers: { cookie: login.cookie ?? "" },
+    });
+    expect(protectedRead.status).toBe(403);
+
+    const session = await fixture.app.request("/api/cloud/session", {
+      headers: { cookie: login.cookie ?? "" },
+    });
+    expect(session.status).toBe(200);
+    await expect(session.json()).resolves.toMatchObject({
+      mode: "cloud",
+      user: null,
+      organization: null,
+    });
+    fixture.close();
+  });
+
+  it("does not project a disabled organization as a usable Cloud session", async () => {
+    const fixture = createCloudFixture();
+    const alpha = await addOrganization(fixture, "Atelier Alpha");
+    await addUser(fixture, {
+      email: "owner@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: alpha.organization.organizationId,
+      role: "owner",
+    });
+    const login = await loginCloud(fixture.app, "owner@example.test", OWNER_PASSWORD);
+    fixture.controlPlane.db
+      .prepare(`UPDATE organizations SET status = 'DISABLED' WHERE organization_id = ?`)
+      .run(alpha.organization.organizationId);
+
+    const protectedRead = await fixture.app.request("/api/resources-admin", {
+      headers: { cookie: login.cookie ?? "" },
+    });
+    expect(protectedRead.status).toBe(403);
+    await expect(protectedRead.json()).resolves.toEqual({ error: "organization_disabled" });
+
+    const session = await fixture.app.request("/api/cloud/session", {
+      headers: { cookie: login.cookie ?? "" },
+    });
+    await expect(session.json()).resolves.toMatchObject({
+      user: null,
+      organization: null,
+    });
+    fixture.close();
+  });
 });

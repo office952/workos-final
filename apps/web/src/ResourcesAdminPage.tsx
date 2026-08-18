@@ -8,6 +8,8 @@ import {
   formatResourcesAdminSummary,
   resourcesAdminSummary,
 } from "./resourcesCatalog";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { OwnerWriteHint } from "./OwnerWriteHint";
 import { fetchResourcesAdministration } from "./systemApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
@@ -18,6 +20,7 @@ type PageState =
   | { kind: "ready"; admin: ResourcesAdminProjection };
 
 export function ResourcesAdminPage() {
+  const canAdminister = useCanAdministerOrganization();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export function ResourcesAdminPage() {
   }
 
   const summary = resourcesAdminSummary(page.admin);
-  const writable = page.admin.writeState === "READY";
+  const writable = page.admin.writeState === "READY" && canAdminister;
 
   return (
     <OwnerCatalogView
@@ -72,7 +75,9 @@ export function ResourcesAdminPage() {
       summary={<p className="page-summary">{formatResourcesAdminSummary(summary)}</p>}
       notice={
         <Notice compact>
-          {writable ? (
+          {!canAdminister ? (
+            <OwnerWriteHint />
+          ) : writable ? (
             <p>
               Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și
               lucrările înghețate nu se schimbă.
