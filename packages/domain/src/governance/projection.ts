@@ -376,7 +376,7 @@ export function projectSystemGovernance(): GovernanceProjection {
       "Documentația explică; calculul consumă; Intake nu administrează setările de sistem.",
       "Fiecare domeniu deține setările sale. Nu există un Settings global care deține tot adevărul.",
       "Eticheta de afișare persistată este autoritatea runtime după bootstrap. Codul rămâne default de inițializare, nu a doua valoare activă.",
-      "Setările tehnice, lifecycle-ul și resursele nu au write persistat.",
+      "Setările tehnice, lifecycle-ul și identitatea resurselor nu au write persistat. Tariful activ din dovada de cost se salvează de owner pentru calcule noi.",
       "Identitatea resursei, specificația, dovada de cost, cererea de componentă și prețul client rămân separate.",
       "Commercial consumă EIC planificat. Nu recalculează cantități și nu repricează din costul real.",
       "Customer deține profilul curent. Workspace-ul client nu deține adevăr de business. Quote și Order rămân imutabile.",

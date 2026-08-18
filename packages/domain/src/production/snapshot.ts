@@ -17,7 +17,7 @@ import type {
   ProductTruth,
   TechnicalQuantity,
 } from "../product/types.js";
-import { getCostEvidence, getResource, MAT_LED_MODULE_ID } from "../resources/catalog.js";
+import { getResource, MAT_LED_MODULE_ID, costEvidence, lookupCostEvidence, type CostEvidence } from "../resources/catalog.js";
 import type { EicResult } from "../resources/eic.js";
 import {
   quantityForRecipe,
@@ -178,6 +178,7 @@ export function freezeAcceptedProductionSnapshot(
   options?: {
     createdAt?: string;
     technicalSettings?: readonly FrozenTechnicalSetting[];
+    costEvidenceRows?: readonly CostEvidence[];
   },
 ): AcceptedProductionSnapshot {
   const productionInput = freezeProductionInput(aggregate, composition, options);
@@ -249,7 +250,10 @@ export function copyFrozenProductionInput(
 export function freezeProductionInput(
   aggregate: ProductAggregate,
   composition: ProductProcessComposition,
-  options?: { technicalSettings?: readonly FrozenTechnicalSetting[] },
+  options?: {
+    technicalSettings?: readonly FrozenTechnicalSetting[];
+    costEvidenceRows?: readonly CostEvidence[];
+  },
 ): FrozenProductionInput {
   const hashedContent = {
     schemaVersion: FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
@@ -257,7 +261,11 @@ export function freezeProductionInput(
     operations: freezeOperations(composition, aggregate),
     usedTechnicalSettings:
       options?.technicalSettings ?? usedTechnicalSettingsFromAggregate(aggregate),
-    usedRecipes: freezeRecipeTraces(composition, aggregate),
+    usedRecipes: freezeRecipeTraces(
+      composition,
+      aggregate,
+      options?.costEvidenceRows ?? costEvidence,
+    ),
   };
   return deepFreeze({
     ...hashedContent,
@@ -330,6 +338,7 @@ function freezeOperations(
 function freezeRecipeTraces(
   composition: ProductProcessComposition,
   aggregate: ProductAggregate,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
 ): FrozenRecipeTrace[] {
   const traces: FrozenRecipeTrace[] = [];
   for (const node of composition.nodes) {
@@ -338,7 +347,7 @@ function freezeRecipeTraces(
       continue;
     }
     const quantity = quantityForRecipe(recipe, aggregate);
-    const evidence = getCostEvidence(recipe.costEvidenceId);
+    const evidence = lookupCostEvidence(evidenceRows, recipe.costEvidenceId);
     const resource = getResource(recipe.costEvidenceId);
     if (quantity === undefined || !evidence || !resource) {
       continue;

@@ -63,6 +63,7 @@ import {
   type QuoteSnapshot,
   type TaskCompletionInput,
   type TaskMutationResult,
+  type CostEvidence,
 } from "@workos-final/domain";
 import {
   openSqliteDatabase,
@@ -164,6 +165,12 @@ import {
   updateDisplayLabel,
   type DisplayLabelWriteResult,
 } from "./store.js";
+import {
+  ensureCostEvidence,
+  listActiveCostEvidence as readActiveCostEvidence,
+  supersedeCostEvidence as persistSupersededCostEvidence,
+  type CostEvidenceWriteResult,
+} from "../resources/store.js";
 
 export type ProductSystemRuntime = {
   sqlitePath: string;
@@ -257,6 +264,12 @@ export type ProductSystemRuntime = {
     quantityDelta: number,
     note?: string,
   ): InventoryAdjustmentResult;
+  listActiveCostEvidence(): CostEvidence[];
+  supersedeCostEvidence(
+    evidenceRowId: string,
+    amount: unknown,
+    note: unknown,
+  ): CostEvidenceWriteResult;
   listPeople(): Person[];
   getPerson(personId: string): Person | null;
   listPeopleRegistry(): PeopleRegistryProjection;
@@ -357,6 +370,7 @@ export function createProductSystemRuntime(
   const db: SqliteDatabase = openSqliteDatabase(sqlitePath);
   const documentsRoot = options.documentsRoot ?? resolveDocumentsRoot();
   bootstrapProductSystemDisplayStore(db);
+  ensureCostEvidence(db);
   if (!process.env.VITEST) {
     ensureTrustedWorkforce(db);
   }
@@ -753,6 +767,12 @@ export function createProductSystemRuntime(
         new Date().toISOString(),
         note,
       );
+    },
+    listActiveCostEvidence() {
+      return readActiveCostEvidence(db);
+    },
+    supersedeCostEvidence(evidenceRowId, amount, note) {
+      return persistSupersededCostEvidence(db, evidenceRowId, amount, note);
     },
     close() {
       db.close();

@@ -28,7 +28,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(page.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeVisible();
   await expect(
     page.getByText(
-      "Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este disponibilă în această etapă.",
+      "Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și lucrările înghețate nu se schimbă.",
     ),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Materiale" })).toHaveAttribute(
@@ -211,6 +211,7 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Dovezi de cost" }).click();
   await expect(page.getByText("Dovadă de cost intern").first()).toBeVisible();
   await expect(page.getByText("3,00 EUR / m · adâncime 60 mm").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Editează" })).toBeVisible();
   await page.getByRole("button", { name: /Plexiglas 3 mm opal/ }).click();
   await expect(page.getByText("16,00 EUR / m²").first()).toBeVisible();
   await expect(page.getByText("Achiziție confirmată de owner").first()).toBeVisible();

@@ -7,6 +7,7 @@ import {
   MAT_LED_PSU_12V_160W_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
+  costEvidence,
 } from "./catalog.js";
 import { projectResourcesAdministration } from "./projection.js";
 import { resourceWhereUsed } from "./whereUsed.js";
@@ -117,5 +118,17 @@ describe("resources administration projection", () => {
     expect(admin.costEvidence.map((item) => item.resourceId)).toEqual(
       expect.arrayContaining(["acm_3mm", "steel_frame_profile"]),
     );
+  });
+
+  it("marks write ready only when every active row has a persistence identity", () => {
+    const admin = projectResourcesAdministration(
+      costEvidence.map((item, index) => ({
+        ...item,
+        evidenceRowId: `cev:test:${index}`,
+        createdAt: "2026-08-18T00:00:00.000Z",
+      })),
+    );
+    expect(admin.writeState).toBe("READY");
+    expect(admin.costEvidence[0]?.evidenceRowId).toMatch(/^cev:test:/);
   });
 });

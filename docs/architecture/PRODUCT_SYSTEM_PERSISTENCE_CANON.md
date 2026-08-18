@@ -16,7 +16,7 @@ Kinds: `PRODUCT_FAMILY`, `PRODUCT_CATEGORY`, `PRODUCT_TEMPLATE`, `COMPONENT_TYPE
 
 ## What remains code
 
-Roles, constructive type IDs, catalog relationships, composition, formulas, compiler, reviewId, technical settings, resources, and calculations stay typed contracts. Resources / Cost remains typed until a specific resource field is writable.
+Roles, constructive type IDs, catalog relationships, composition, formulas, compiler, reviewId, technical settings, resource identity, and calculations stay typed contracts. Active cost-evidence amounts live in SQLite after bootstrap; see `docs/architecture/RESOURCES_AND_COST_CANON.md`.
 
 ## Runtime authority
 

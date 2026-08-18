@@ -1,6 +1,6 @@
 import { CANONICAL_PRODUCT_CODE } from "../product/frontlitPlexiAl06.js";
 import { getProductTemplate } from "../product/productRegistry.js";
-import { getResource } from "../resources/catalog.js";
+import { getResource, type CostEvidence, costEvidence } from "../resources/catalog.js";
 import {
   recipeForProcess,
   recipeKindLabel,
@@ -86,13 +86,19 @@ export type OperationalProcessesAdminProjection = {
   writeState: "NOT_IMPLEMENTED";
 };
 
-export function projectOperationalProcessesAdministration(): OperationalProcessesAdminProjection {
-  const processes = operationalProcesses.map(toAdminRecord);
+export function projectOperationalProcessesAdministration(
+  costEvidenceRows: readonly CostEvidence[] = costEvidence,
+): OperationalProcessesAdminProjection {
+  const processes = operationalProcesses.map((process) =>
+    toAdminRecord(process, costEvidenceRows),
+  );
   return {
     categories: PROCESS_CATEGORIES.map((category) => ({
       id: category,
       label: processCategoryLabel(category),
-      processes: processesForCategory(category).map(toAdminRecord),
+      processes: processesForCategory(category).map((process) =>
+        toAdminRecord(process, costEvidenceRows),
+      ),
     })).filter((item) => item.processes.length > 0),
     processes,
     capabilities: productionCapabilityClasses.map((capability) => {
@@ -100,7 +106,9 @@ export function projectOperationalProcessesAdministration(): OperationalProcesse
       return {
         ...capability,
         kindLabel: productionCapabilityKindLabel(capability.kind),
-        processes: processesForCapability(capability.id).map(toAdminRecord),
+        processes: processesForCapability(capability.id).map((process) =>
+          toAdminRecord(process, costEvidenceRows),
+        ),
         providerCoverage: coverage,
         providerCoverageLabel: providerCoverageLabel(coverage),
         providers: providersForCapability(capability.id).map((item) => ({
@@ -122,11 +130,14 @@ function lettersCompositions(): ProcessCompositionInspection[] {
   return template ? lettersProcessCompositionInspections(template) : [];
 }
 
-function toAdminRecord(process: OperationalProcess): ProcessAdminRecord {
+function toAdminRecord(
+  process: OperationalProcess,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
+): ProcessAdminRecord {
   const capability = getProductionCapability(process.requiredCapabilityId);
   const coverage = processProviderCoverage(process.id);
   const recipe = recipeForProcess(process.id);
-  const recipeState = recipeGapForProcess(process.id);
+  const recipeState = recipeGapForProcess(process.id, evidenceRows);
   return {
     id: process.id,
     label: process.label,

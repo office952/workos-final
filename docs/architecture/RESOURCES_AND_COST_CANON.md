@@ -118,22 +118,19 @@ No hourly or elapsed-time costing.
 
 ## Persistence
 
-Resources remain a typed catalog.
-SQLite is not an authority for resource identity or cost in this foundation.
-A persistent table becomes authority only when a specific field is writable.
+Resource identity, kind, unit, labels, specifications and recipes remain typed code.
 
-Resource admin write is `NOT_IMPLEMENTED`.
+SQLite owns the active CostEvidence amount after one-time bootstrap (`RESOURCE_COST_EVIDENCE_V1_APPLIED`). Seed `costEvidence[]` is bootstrap plus pure domain tests. Live compile, freeze and admin projection read active database rows. They do not fall back to seed amounts.
+
+One active row per resource, or per resource plus configuration qualifier. Aluminium 60 mm is a qualified row; unqualified lookup does not inherit it. 30 / 80 / 100 mm stay without a profile rate until that exact row exists.
+
+Owner save appends a new row and supersedes the previous active row. Amount is never updated in place. Optimistic concurrency uses `evidenceRowId` of the current active row.
+
+A saved Admin rate is `OWNER_CONFIRMED` for new calculations. Frozen Quote, Acceptance, Order, Release and actual cost keep the rates copied at freeze.
 
 ## Administration
 
-`/admin` → Resurse și cost intern is inspection:
-
-- Materiale
-- Servicii
-- Manoperă
-- Dovezi de cost
-
-Servicii and Manoperă present reusable recipes. Resource identity and rates remain the same catalog facts. The page does not write.
+`/admin` → Resurse și cost intern inspects materials, services, labor and cost evidence. Dovezi de cost can save a new amount and note. Resource identity, unit, currency and qualifier are not editable here.
 
 Where-used is derived from live type resolution and product composition.
 `/products` does not administer the catalog.

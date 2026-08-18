@@ -24,6 +24,7 @@ import type {
   TechnicalMeasurement,
 } from "../product/types.js";
 import { compileEic, costCompletenessLabel } from "../resources/eic.js";
+import type { CostEvidence } from "../resources/catalog.js";
 import {
   APPLY_SURFACE_FINISH_ID,
   ATTACH_INTERNAL_FRAME_ID,
@@ -144,6 +145,7 @@ export type ProcessCompositionInspection = {
 export type ProcessCompositionOptions = {
   readonly measurements?: readonly TechnicalMeasurement[];
   readonly evaluations?: readonly ComponentEvaluation[];
+  readonly costEvidenceRows?: readonly CostEvidence[];
 };
 
 export function compositionNodeId(
@@ -235,6 +237,7 @@ export function composeProductProcesses(
   const eic = compileEic(
     costAggregateFromEvaluations(template, merged, evaluations),
     composition,
+    options.costEvidenceRows,
   );
   return {
     ...composition,
@@ -246,6 +249,7 @@ export function composeProductProcesses(
 export function composeProductProcessesFromTruth(
   truth: ProductTruth,
   template: ProductTemplate,
+  costEvidenceRows?: readonly CostEvidence[],
 ): ProductProcessComposition {
   if (truth.templateCode !== template.code) {
     throw new Error(`process_composition_template_mismatch:${truth.templateCode}`);
@@ -259,6 +263,7 @@ export function composeProductProcessesFromTruth(
   return composeProductProcesses(template, truth.values, {
     measurements: truth.measurements,
     evaluations,
+    costEvidenceRows,
   });
 }
 

@@ -4,7 +4,7 @@ import {
   processesForCapability,
   type ProductionCapabilityClassId,
 } from "../processes/catalog.js";
-import { getCostEvidence } from "../resources/catalog.js";
+import { lookupCostEvidence, costEvidence, type CostEvidence } from "../resources/catalog.js";
 import {
   expectedRecipeKindForProcess,
   recipeForProcess,
@@ -50,14 +50,17 @@ export function recipeGapLabel(state: RecipeGapState): string {
   }
 }
 
-export function recipeGapForProcess(processId: string): RecipeGapState {
+export function recipeGapForProcess(
+  processId: string,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
+): RecipeGapState {
   const process = getOperationalProcess(processId);
   if (!process) {
     return "UNKNOWN";
   }
   const recipe = recipeForProcess(processId);
   if (recipe) {
-    return getCostEvidence(recipe.costEvidenceId)
+    return lookupCostEvidence(evidenceRows, recipe.costEvidenceId)
       ? "CANONICAL_COST_EXISTS"
       : "RESOURCE_COST_MISSING";
   }
@@ -73,6 +76,7 @@ export function recipeGapForProcess(processId: string): RecipeGapState {
 
 export function recipeGapsForCapability(
   capabilityId: ProductionCapabilityClassId,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
 ): readonly RecipeGapRow[] {
   const capability = getProductionCapability(capabilityId);
   const capabilityLabel = capability?.label ?? capabilityId;
@@ -90,7 +94,7 @@ export function recipeGapsForCapability(
     ];
   }
   return processes.map((process) => {
-    const state = recipeGapForProcess(process.id);
+    const state = recipeGapForProcess(process.id, evidenceRows);
     return {
       processId: process.id,
       processLabel: process.label,

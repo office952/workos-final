@@ -2,7 +2,8 @@ import type { ProductProcessComposition } from "../processes/composition.js";
 import type { ProductAggregate } from "../product/types.js";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
-  getCostEvidence,
+  costEvidence,
+  lookupCostEvidence,
   getResource,
   type CostEvidence,
   type CostEvidenceWhen,
@@ -63,12 +64,19 @@ export function missingCostEvidenceReason(
   return "Evidență de cost indisponibilă";
 }
 
-export function applyRequirement(requirement: ResourceRequirement): EicLine {
+export function applyRequirement(
+  requirement: ResourceRequirement,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
+): EicLine {
   const resource = getResource(requirement.resourceId);
   if (!resource) {
     throw new Error(`Unknown resource ${requirement.resourceId}`);
   }
-  const evidence = getCostEvidence(requirement.resourceId, requirement.costQualifier);
+  const evidence = lookupCostEvidence(
+    evidenceRows,
+    requirement.resourceId,
+    requirement.costQualifier,
+  );
   if (!evidence) {
     throw new Error(`Cost evidence unavailable for ${requirement.resourceId}`);
   }
@@ -91,6 +99,7 @@ export function applyRequirement(requirement: ResourceRequirement): EicLine {
 export function compileEic(
   aggregate: ProductAggregate,
   composition?: ProductProcessComposition,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
 ): EicResult {
   const requirements = resourceRequirements(aggregate, composition);
   const missingEvidenceReasons: string[] = [];
@@ -100,14 +109,18 @@ export function compileEic(
     if (!resource) {
       throw new Error(`Unknown resource ${requirement.resourceId}`);
     }
-    const evidence = getCostEvidence(requirement.resourceId, requirement.costQualifier);
+    const evidence = lookupCostEvidence(
+      evidenceRows,
+      requirement.resourceId,
+      requirement.costQualifier,
+    );
     if (!evidence) {
       missingEvidenceReasons.push(
         missingCostEvidenceReason(requirement.resourceId, requirement.costQualifier),
       );
       continue;
     }
-    lines.push(applyRequirement(requirement));
+    lines.push(applyRequirement(requirement, evidenceRows));
   }
   const excludedComponentLabels = aggregate.componentStatuses
     .filter((item) => item.status !== "CALCULATED")
@@ -116,7 +129,11 @@ export function compileEic(
     aggregate.componentStatuses.flatMap((item) => item.unavailable),
   );
   const hasProvisionalCost = requirements.some((requirement) => {
-    const evidence = getCostEvidence(requirement.resourceId, requirement.costQualifier);
+    const evidence = lookupCostEvidence(
+      evidenceRows,
+      requirement.resourceId,
+      requirement.costQualifier,
+    );
     return evidence !== undefined && costEvidenceKeepsEicPartial(evidence);
   });
   const completenessReasons = uniqueReasons([

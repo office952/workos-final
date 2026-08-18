@@ -18,6 +18,7 @@ import {
   type WorkcenterRegistry,
 } from "./catalog.js";
 import { lettersCapabilityCoverage } from "./coverage.js";
+import type { CostEvidence } from "../resources/catalog.js";
 import { coverageForCapability, providersForCapability } from "./providers.js";
 import {
   recipeGapForProcess,
@@ -127,12 +128,19 @@ export type WorkcentersAdminProjection = {
 
 export function projectWorkcentersAdministration(
   registry: WorkcenterRegistry = workcenterRegistry,
+  costEvidenceRows?: readonly CostEvidence[],
 ): WorkcentersAdminProjection {
   const capabilityRecords = productionCapabilityClasses.map((capability) =>
     toCapabilityRecord(capability.id, registry),
   );
   const processCoverage = operationalProcesses.map((process) =>
-    toProcessCoverage(process.id, process.label, process.requiredCapabilityId, registry),
+    toProcessCoverage(
+      process.id,
+      process.label,
+      process.requiredCapabilityId,
+      registry,
+      costEvidenceRows,
+    ),
   );
   const serviceMap = buildServiceMap(registry);
   const letters = lettersCapabilityCoverage(registry);
@@ -285,9 +293,10 @@ function toProcessCoverage(
   processLabel: string,
   capabilityId: ProductionCapabilityClassId,
   registry: WorkcenterRegistry,
+  costEvidenceRows?: readonly CostEvidence[],
 ): ProcessCoverageAdminRecord {
   const coverage = coverageForCapability(capabilityId, registry);
-  const recipeState = recipeGapForProcess(processId);
+  const recipeState = recipeGapForProcess(processId, costEvidenceRows);
   return {
     processId,
     processLabel,

@@ -20,8 +20,11 @@ import {
 } from "../processes/catalog.js";
 import type { ComponentTypeId, ProductAggregate } from "../product/types.js";
 import {
+  costEvidence,
   getCostEvidence,
   getResource,
+  lookupCostEvidence,
+  type CostEvidence,
   LAB_ATTACH_INTERNAL_FRAME_ID,
   LAB_BOND_LETTER_BODY_ID,
   LAB_CLOSE_LETTER_BODY_ID,
@@ -410,13 +413,14 @@ export function recipeLifecycleLabel(lifecycle: RecipeLifecycle): string {
 export function resolveRecipeInternalCost(
   recipeId: string,
   quantity: number,
+  evidenceRows: readonly CostEvidence[] = costEvidence,
 ): RecipeCostResolution {
   const recipe = getCostRecipe(recipeId);
   if (!recipe) {
     return { status: "INCOMPLETE", recipeId, reason: "Rețeta nu există." };
   }
   const resource = getResource(recipe.costEvidenceId);
-  const evidence = getCostEvidence(recipe.costEvidenceId);
+  const evidence = lookupCostEvidence(evidenceRows, recipe.costEvidenceId);
   if (!resource || !evidence) {
     return {
       status: "INCOMPLETE",

@@ -12,6 +12,9 @@ import {
   costEvidence,
   getCostEvidence,
   getResource,
+  lookupCostEvidence,
+  ownerConfirmedCostSource,
+  isValidCostAmount,
   listMaterialSpecifications,
   listServiceResources,
   matchMaterialSpecification,
@@ -217,5 +220,46 @@ describe("resource catalog", () => {
     expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.amount).toBe(5);
     expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.source).toBe("OWNER_CONFIRMED_WORKSHOP");
     expect(JSON.stringify(resourceCatalog)).not.toMatch(/"amount":/);
+  });
+
+  it("looks up injected rows without inheriting a qualified aluminium rate", () => {
+    const plexi18 = {
+      resourceId: PLEXIGLAS_3MM_OPAL_ID,
+      amount: 18,
+      currency: "EUR" as const,
+      perUnit: "m2" as const,
+      source: "OWNER_CONFIRMED_PURCHASE" as const,
+      classification: "OWNER_CONFIRMED" as const,
+      note: "Owner save",
+      evidenceRowId: "cev:plexi",
+      createdAt: "2026-08-18T00:00:00.000Z",
+    };
+    const aluminium60 = {
+      resourceId: ALUMINIUM_RETURN_PROFILE_ID,
+      amount: 3,
+      currency: "EUR" as const,
+      perUnit: "m" as const,
+      source: "OWNER_CONFIRMED_PURCHASE" as const,
+      classification: "OWNER_CONFIRMED" as const,
+      note: "60 mm only",
+      when: { volumeDepthMm: 60 },
+      evidenceRowId: "cev:al60",
+      createdAt: "2026-08-18T00:00:00.000Z",
+    };
+    const rows = [plexi18, aluminium60];
+    expect(lookupCostEvidence(rows, PLEXIGLAS_3MM_OPAL_ID)?.amount).toBe(18);
+    expect(lookupCostEvidence(rows, ALUMINIUM_RETURN_PROFILE_ID)).toBeUndefined();
+    expect(
+      lookupCostEvidence(rows, ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 60 })?.amount,
+    ).toBe(3);
+    expect(
+      lookupCostEvidence(rows, ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 30 }),
+    ).toBeUndefined();
+    expect(ownerConfirmedCostSource("MATERIAL")).toBe("OWNER_CONFIRMED_PURCHASE");
+    expect(ownerConfirmedCostSource("SERVICE")).toBe("OWNER_CONFIRMED_WORKSHOP");
+    expect(ownerConfirmedCostSource("LABOR")).toBe("OWNER_CONFIRMED_WORKSHOP");
+    expect(isValidCostAmount(18)).toBe(true);
+    expect(isValidCostAmount(0)).toBe(false);
+    expect(isValidCostAmount(-1)).toBe(false);
   });
 });

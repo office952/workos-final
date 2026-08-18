@@ -78,9 +78,9 @@ describe("system projection API", () => {
       writeState: string;
       families: Array<{ id: string; specifications: Array<{ id: string }> }>;
       services: Array<{ id: string; kind: string }>;
-      costEvidence: Array<{ resourceId: string; amount: number }>;
+      costEvidence: Array<{ resourceId: string; amount: number; evidenceRowId: string | null }>;
     };
-    expect(body.writeState).toBe("NOT_IMPLEMENTED");
+    expect(body.writeState).toBe("READY");
     expect(body.families.map((item) => item.id)).toEqual([
       "PLEXIGLAS",
       "FOREX",
@@ -102,6 +102,9 @@ describe("system projection API", () => {
       expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
     );
     expect(body.costEvidence).toHaveLength(26);
+    expect(body.costEvidence.every((item) => typeof item.evidenceRowId === "string")).toBe(
+      true,
+    );
     expect(JSON.stringify(body)).not.toMatch(/plexiglas_face_3mm|forex_back_10mm/);
   });
 

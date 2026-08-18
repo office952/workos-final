@@ -1,14 +1,29 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
-import { projectResourcesAdministration } from "@workos-final/domain";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { costEvidence, projectResourcesAdministration } from "@workos-final/domain";
 import { ResourcesAdminPage } from "./ResourcesAdminPage";
+import { fetchResourcesAdministration } from "./systemApi";
 
 vi.mock("./systemApi", () => ({
-  fetchResourcesAdministration: () => Promise.resolve(projectResourcesAdministration()),
+  fetchResourcesAdministration: vi.fn(),
+  patchCostEvidence: vi.fn(),
 }));
 
+const seedAdmin = projectResourcesAdministration();
+const writableAdmin = projectResourcesAdministration(
+  costEvidence.map((item, index) => ({
+    ...item,
+    evidenceRowId: `cev:test:${index}`,
+    createdAt: "2026-08-18T00:00:00.000Z",
+  })),
+);
+
 describe("ResourcesAdminPage", () => {
+  beforeEach(() => {
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(seedAdmin);
+  });
+
   it("shows owner hierarchy materials services labor and provenance without writes", async () => {
     const user = userEvent.setup();
     render(<ResourcesAdminPage />);
@@ -73,5 +88,19 @@ describe("ResourcesAdminPage", () => {
     expect(within(evidence).getAllByText("3,00 EUR / m · adâncime 60 mm").length).toBeGreaterThan(0);
     expect(screen.queryByText("Preț client")).not.toBeInTheDocument();
     expect(screen.queryByText("ofertă")).not.toBeInTheDocument();
+  });
+
+  it("offers owner write on persisted cost evidence", async () => {
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
+    const user = userEvent.setup();
+    render(<ResourcesAdminPage />);
+    expect(
+      await screen.findByText(
+        "Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și lucrările înghețate nu se schimbă.",
+      ),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
+    expect(screen.getByRole("button", { name: "Editează" })).toBeInTheDocument();
+    expect(screen.queryByText("Editarea tarifelor nu este disponibilă în această etapă.")).not.toBeInTheDocument();
   });
 });

@@ -79,7 +79,7 @@ export function buildResourcesCatalog(
         label: "Dovezi de cost",
         kindLabel: "Categorie",
         items: admin.costEvidence.map((item) => ({
-          id: `cost:${item.resourceId}`,
+          id: costEvidenceItemId(item),
           label: item.resourceLabel,
           kindLabel: "Dovadă de cost intern",
           summary: item.amountDisplay,
@@ -87,7 +87,7 @@ export function buildResourcesCatalog(
           chips: costChips(item),
           groups: [
             {
-              id: item.resourceId,
+              id: item.evidenceRowId ?? item.resourceId,
               kindLabel: "Dovadă de cost intern",
               title: item.resourceLabel,
               sections: costEvidenceSections(item),
@@ -97,6 +97,15 @@ export function buildResourcesCatalog(
       },
     ].filter((category) => category.items.length > 0),
   };
+}
+
+function costEvidenceItemId(
+  item: ResourcesAdminProjection["costEvidence"][number],
+): string {
+  if (item.evidenceRowId) {
+    return `cost:${item.evidenceRowId}`;
+  }
+  return `cost:${item.resourceId}:${item.qualifierLabel ?? "none"}`;
 }
 
 function recipeItem(

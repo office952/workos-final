@@ -131,7 +131,9 @@ export function registerProductRoutes(
       ...(volumeFinish ? { "volume.finish": volumeFinish } : {}),
     };
     return c.json({
-      composition: composeProductProcesses(template, values),
+      composition: composeProductProcesses(template, values, {
+        costEvidenceRows: runtime.listActiveCostEvidence(),
+      }),
       inspections: lettersProcessCompositionInspections(template),
     });
   });
@@ -190,6 +192,7 @@ export function registerProductRoutes(
       compiled.aggregate,
       compiled.composition,
       compiled.eic,
+      { costEvidenceRows: compiled.costEvidenceRows },
     );
     const stored = runtime.acceptProductionSnapshot(frozen);
     return c.json({
@@ -273,6 +276,7 @@ export function registerProductRoutes(
           displayName: customer.displayName,
         },
         seller,
+        costEvidenceRows: compiled.costEvidenceRows,
       },
     );
     if (!frozen.ok) {
@@ -636,8 +640,13 @@ function compileAcceptedProduct(
     formSchema,
     runtime.labels(),
   );
-  const composition = composeProductProcessesFromTruth(confirmed, template);
-  const eic = compileEic(aggregate, composition);
+  const costEvidenceRows = runtime.listActiveCostEvidence();
+  const composition = composeProductProcessesFromTruth(
+    confirmed,
+    template,
+    costEvidenceRows,
+  );
+  const eic = compileEic(aggregate, composition, costEvidenceRows);
   return {
     ok: true as const,
     template,
@@ -645,6 +654,7 @@ function compileAcceptedProduct(
     aggregate,
     composition,
     eic,
+    costEvidenceRows,
   };
 }
 

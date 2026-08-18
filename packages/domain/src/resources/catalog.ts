@@ -61,6 +61,14 @@ export type CostEvidence = {
   classification: "AI_DECISION" | "OWNER_CONFIRMED" | "DEVELOPMENT_DEFAULT";
   note: string;
   when?: CostEvidenceWhen;
+  evidenceRowId?: string;
+  createdAt?: string;
+};
+
+export type CostEvidenceRecord = CostEvidence & {
+  evidenceRowId: string;
+  createdAt: string;
+  supersededAt: string | null;
 };
 
 export const PLEXIGLAS_3MM_OPAL_ID = "plexiglas_3mm_opal";
@@ -577,17 +585,21 @@ export function getResource(id: string): ResourceDefinition | undefined {
   return resourceCatalog.find((item) => item.id === id);
 }
 
-export function listCostEvidence(resourceId: string): readonly CostEvidence[] {
-  return costEvidence.filter((item) => item.resourceId === resourceId);
+export function listCostEvidenceFrom(
+  rows: readonly CostEvidence[],
+  resourceId: string,
+): readonly CostEvidence[] {
+  return rows.filter((item) => item.resourceId === resourceId);
 }
 
-export function getCostEvidence(
+export function lookupCostEvidence(
+  rows: readonly CostEvidence[],
   resourceId: string,
   when?: CostEvidenceWhen,
 ): CostEvidence | undefined {
-  const rows = listCostEvidence(resourceId);
-  const qualified = rows.filter((item) => item.when?.volumeDepthMm !== undefined);
-  const unqualified = rows.filter((item) => item.when?.volumeDepthMm === undefined);
+  const resourceRows = listCostEvidenceFrom(rows, resourceId);
+  const qualified = resourceRows.filter((item) => item.when?.volumeDepthMm !== undefined);
+  const unqualified = resourceRows.filter((item) => item.when?.volumeDepthMm === undefined);
   if (when?.volumeDepthMm !== undefined) {
     return (
       qualified.find((item) => item.when?.volumeDepthMm === when.volumeDepthMm) ??
@@ -595,6 +607,35 @@ export function getCostEvidence(
     );
   }
   return unqualified[0];
+}
+
+export function listCostEvidence(resourceId: string): readonly CostEvidence[] {
+  return listCostEvidenceFrom(costEvidence, resourceId);
+}
+
+export function getCostEvidence(
+  resourceId: string,
+  when?: CostEvidenceWhen,
+): CostEvidence | undefined {
+  return lookupCostEvidence(costEvidence, resourceId, when);
+}
+
+export function ownerConfirmedCostSource(kind: ResourceKind): CostEvidence["source"] {
+  switch (kind) {
+    case "MATERIAL":
+      return "OWNER_CONFIRMED_PURCHASE";
+    case "SERVICE":
+    case "LABOR":
+      return "OWNER_CONFIRMED_WORKSHOP";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
+
+export function isValidCostAmount(amount: number): boolean {
+  return Number.isFinite(amount) && amount > 0;
 }
 
 export function listMaterialSpecifications(

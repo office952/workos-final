@@ -4,12 +4,12 @@ import {
   costClassificationLabel,
   costEvidence,
   costSourceLabel,
-  getCostEvidence,
   getMaterialFamily,
   getResource,
-  listCostEvidence,
+  listCostEvidenceFrom,
   listLaborResources,
   listServiceResources,
+  lookupCostEvidence,
   materialFamilies,
   resourceCatalog,
   resourceKindLabel,
@@ -104,17 +104,23 @@ export type ResourcesAdminProjection = {
     resourceId: string;
     resourceLabel: string;
     kindLabel: string;
+    evidenceRowId: string | null;
+    lastChangedAt: string | null;
+    qualifierLabel: string | null;
     usedBy: readonly ResourceUseProjection[];
   })[];
-  writeState: "NOT_IMPLEMENTED";
+  writeState: "READY" | "NOT_IMPLEMENTED";
 };
 
-export function projectResourcesAdministration(): ResourcesAdminProjection {
+export function projectResourcesAdministration(
+  evidenceRows: readonly CostEvidence[] = costEvidence,
+): ResourcesAdminProjection {
   const materials = resourceCatalog
     .filter((item) => item.kind === "MATERIAL")
-    .map(toAdminRecord);
-  const services = listServiceResources().map(toAdminRecord);
-  const labor = listLaborResources().map(toAdminRecord);
+    .map((item) => toAdminRecord(item, evidenceRows));
+  const services = listServiceResources().map((item) => toAdminRecord(item, evidenceRows));
+  const labor = listLaborResources().map((item) => toAdminRecord(item, evidenceRows));
+  const writable = evidenceRows.every((item) => Boolean(item.evidenceRowId));
   return {
     families: materialFamilies.map((family) => ({
       ...family,
@@ -123,26 +129,38 @@ export function projectResourcesAdministration(): ResourcesAdminProjection {
     materials,
     services,
     labor,
-    serviceRecipes: recipesOfKind("SERVICE").map(toRecipeRecord),
-    laborRecipes: recipesOfKind("LABOR").map(toRecipeRecord),
+    serviceRecipes: recipesOfKind("SERVICE").map((recipe) =>
+      toRecipeRecord(recipe, evidenceRows),
+    ),
+    laborRecipes: recipesOfKind("LABOR").map((recipe) => toRecipeRecord(recipe, evidenceRows)),
     missingServiceRecipes: processesMissingRecipe("SERVICE").map(toMissingRecipe),
     missingLaborRecipes: processesMissingRecipe("LABOR").map(toMissingRecipe),
-    costEvidence: costEvidence.map((item) => {
+    costEvidence: evidenceRows.map((item) => {
       const resource = resourceCatalog.find((entry) => entry.id === item.resourceId);
+      const projected = toCostProjection(item);
       return {
         resourceId: item.resourceId,
         resourceLabel: resource?.label ?? item.resourceId,
         kindLabel: resource ? resourceKindLabel(resource.kind) : item.resourceId,
+        evidenceRowId: item.evidenceRowId ?? null,
+        lastChangedAt: item.createdAt ?? null,
+        qualifierLabel:
+          item.when?.volumeDepthMm !== undefined
+            ? `adâncime ${item.when.volumeDepthMm} mm`
+            : null,
         usedBy: projectUses(item.resourceId),
-        ...toCostProjection(item),
+        ...projected,
       };
     }),
-    writeState: "NOT_IMPLEMENTED",
+    writeState: writable && evidenceRows.length > 0 ? "READY" : "NOT_IMPLEMENTED",
   };
 }
 
-function toRecipeRecord(recipe: CostRecipe): RecipeAdminRecord {
-  const evidence = getCostEvidence(recipe.costEvidenceId);
+function toRecipeRecord(
+  recipe: CostRecipe,
+  evidenceRows: readonly CostEvidence[],
+): RecipeAdminRecord {
+  const evidence = lookupCostEvidence(evidenceRows, recipe.costEvidenceId);
   const resource = getResource(recipe.costEvidenceId);
   return {
     id: recipe.id,
@@ -174,10 +192,15 @@ function toMissingRecipe(processId: string): MissingRecipeAdminRecord {
   };
 }
 
-function toAdminRecord(resource: ResourceDefinition): ResourceAdminRecord {
+function toAdminRecord(
+  resource: ResourceDefinition,
+  evidenceRows: readonly CostEvidence[],
+): ResourceAdminRecord {
   const family = resource.familyId ? getMaterialFamily(resource.familyId) : undefined;
   const spec = resource.specification;
-  const evidence = getCostEvidence(resource.id) ?? listCostEvidence(resource.id)[0];
+  const evidence =
+    lookupCostEvidence(evidenceRows, resource.id) ??
+    listCostEvidenceFrom(evidenceRows, resource.id)[0];
   return {
     id: resource.id,
     label: resource.label,

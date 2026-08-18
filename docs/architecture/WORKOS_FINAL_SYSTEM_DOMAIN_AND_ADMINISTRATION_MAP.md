@@ -190,7 +190,7 @@ Separate facts:
 
 Do not merge internal cost with Commercial. Do not put stock here.
 
-Admin inspection lives under `/admin` → Resurse și cost intern. No resource write yet.
+Admin inspection lives under `/admin` → Resurse și cost intern. Owner can save a new active cost-evidence amount; resource identity stays code.
 
 Current live catalog: Plexiglas 3 mm opal, Forex 10 mm, aluminium return profile 0.6 mm, forming service. Labor recipes remain planned. Operational processes are a separate foundation.
 
@@ -482,6 +482,7 @@ Settings versions: keep previous active values as history after a new version is
 | Settings edit / persistence / versioning | PLANNED |
 | Global Administrare nav / display-label write | IMPLEMENTED_CURRENT |
 | Operational Processes foundation (typed catalog + capability class) | DONE / FOUNDATION |
+| Resource cost evidence admin write | IMPLEMENTED_CURRENT / BASIC |
 | Process admin write, labor recipes | PLANNED / NOT_IMPLEMENTED |
 | Workcenters / Machines capability-provider foundation | DONE / FOUNDATION |
 | Capacity planning, scheduling, MachineRun | NOT_IMPLEMENTED |

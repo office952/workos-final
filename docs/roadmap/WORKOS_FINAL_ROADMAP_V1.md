@@ -85,7 +85,8 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Real shop-floor equipment and capability map | DONE / FOUNDATION |
 | Service / Labor Recipe foundation | DONE / FOUNDATION |
 | Real shop-floor Operational Process completion | DONE / FOUNDATION |
-| Resources admin write / process admin write | NOT_IMPLEMENTED |
+| Resources admin write (cost evidence amount) | IMPLEMENTED_CURRENT / BASIC |
+| Process admin write | NOT_IMPLEMENTED |
 | Lighting resource calculation | IMPLEMENTED_CURRENT / functional V1 |
 | Letters functional internal-cost recipes / EIC | IMPLEMENTED_CURRENT / functional V1 |
 | Letters Execution Plan Preview | IMPLEMENTED_CURRENT |

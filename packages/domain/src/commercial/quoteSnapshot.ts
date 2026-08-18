@@ -18,6 +18,7 @@ import {
 export type { FrozenCustomerIdentity, FrozenSellerIdentity };
 import type { ProductAggregate, ProductTruth } from "../product/types.js";
 import type { EicResult } from "../resources/eic.js";
+import type { CostEvidence } from "../resources/catalog.js";
 import type { CommercialPriceProjection } from "./price.js";
 
 export const QUOTE_SNAPSHOT_SCHEMA_VERSION = 1 as const;
@@ -95,6 +96,7 @@ export function freezeQuoteSnapshot(
     createdAt?: string;
     customer?: FrozenCustomerIdentity;
     seller?: FrozenSellerIdentity;
+    costEvidenceRows?: readonly CostEvidence[];
   },
 ): QuoteSnapshotResult {
   if (eic.completeness !== "COMPLETE" || commercial.completeness !== "COMPLETE") {
@@ -157,7 +159,9 @@ export function freezeQuoteSnapshot(
     },
     quantities: freezeQuantities(aggregate),
     eic: freezeEic(eic),
-    productionInput: freezeProductionInput(aggregate, composition),
+    productionInput: freezeProductionInput(aggregate, composition, {
+      costEvidenceRows: options?.costEvidenceRows,
+    }),
     commercial: {
       policyId: commercial.policyId,
       policyVersion: commercial.policyVersion,

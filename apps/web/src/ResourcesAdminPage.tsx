@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ResourcesAdminProjection } from "@workos-final/domain";
+import { CostEvidenceEditor } from "./CostEvidenceEditor";
 import { OwnerCatalogView } from "./OwnerCatalogView";
 import {
   buildResourcesCatalog,
@@ -17,6 +18,11 @@ type PageState =
 
 export function ResourcesAdminPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
+
+  const load = useCallback(async () => {
+    const admin = await fetchResourcesAdministration();
+    setPage({ kind: "ready", admin });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +66,7 @@ export function ResourcesAdminPage() {
   }
 
   const summary = resourcesAdminSummary(page.admin);
+  const writable = page.admin.writeState === "READY";
 
   return (
     <OwnerCatalogView
@@ -69,12 +76,39 @@ export function ResourcesAdminPage() {
       summary={<p className="page-summary">{formatResourcesAdminSummary(summary)}</p>}
       notice={
         <Notice compact>
-          <p>
-            Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este
-            disponibilă în această etapă.
-          </p>
+          {writable ? (
+            <p>
+              Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și
+              lucrările înghețate nu se schimbă.
+            </p>
+          ) : (
+            <p>
+              Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este
+              disponibilă în această etapă.
+            </p>
+          )}
         </Notice>
       }
+      renderItemActions={(item) => {
+        if (!writable) {
+          return null;
+        }
+        const evidence = page.admin.costEvidence.find(
+          (row) =>
+            (row.evidenceRowId && item.id === `cost:${row.evidenceRowId}`) ||
+            item.id === `cost:${row.resourceId}:${row.qualifierLabel ?? "none"}`,
+        );
+        if (!evidence?.evidenceRowId) {
+          return null;
+        }
+        return (
+          <CostEvidenceEditor
+            key={evidence.evidenceRowId}
+            evidence={evidence}
+            onSaved={load}
+          />
+        );
+      }}
     />
   );
 }
