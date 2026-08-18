@@ -1,5 +1,17 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { registerCloudRoutes } from "./cloud/routes.js";
+import type { ApiEnv } from "./cloud/context.js";
+import type { ControlPlane } from "./cloud/controlPlane.js";
+import {
+  attachCloudHost,
+  attachSinglePlaneRuntime,
+  requireCloudSession,
+} from "./cloud/middleware.js";
+import {
+  createRuntimeRegistry,
+  type RuntimeRegistry,
+} from "./cloud/runtimeRegistry.js";
 import { registerInventoryRoutes } from "./inventory/routes.js";
 import { registerJobRoutes } from "./jobs/routes.js";
 import { registerQuoteRoutes } from "./quotes/routes.js";
@@ -33,14 +45,21 @@ export type CreateAppOptions = {
   productSystem?: ProductSystemRuntime;
   /** Test override for DEV operator fail-fast / enablement. Defaults to process.env. */
   env?: NodeJS.ProcessEnv;
+  cloud?: {
+    controlPlane: ControlPlane;
+    registry?: RuntimeRegistry;
+  };
 };
 
-export function createApp(options: CreateAppOptions = {}): Hono {
+export function createApp(options: CreateAppOptions = {}): Hono<ApiEnv> {
   const env = options.env ?? process.env;
   assertDevOperatorConfigSafe(env);
 
-  const app = new Hono();
-  const productSystem = options.productSystem ?? createProductSystemRuntime();
+  if (options.cloud && options.productSystem) {
+    throw new Error("createApp cannot take both productSystem and cloud");
+  }
+
+  const app = new Hono<ApiEnv>();
 
   app.use(
     "/api/*",
@@ -50,6 +69,15 @@ export function createApp(options: CreateAppOptions = {}): Hono {
     }),
   );
 
+  if (options.cloud) {
+    const registry = options.cloud.registry ?? createRuntimeRegistry();
+    app.use("/api/*", attachCloudHost(options.cloud.controlPlane, registry, env));
+    app.use("/api/*", requireCloudSession());
+  } else {
+    const productSystem = options.productSystem ?? createProductSystemRuntime();
+    app.use("/api/*", attachSinglePlaneRuntime(productSystem, env));
+  }
+
   app.get("/api/health", (c) => {
     const body: HealthResponse = {
       status: "ok",
@@ -58,17 +86,18 @@ export function createApp(options: CreateAppOptions = {}): Hono {
     return c.json(body);
   });
 
-  registerProductRoutes(app, productSystem);
-  registerJobRoutes(app, productSystem);
-  registerQuoteRoutes(app, productSystem);
-  registerRequestRoutes(app, productSystem);
-  registerPeopleRoutes(app, productSystem);
-  registerOperatorRoutes(app, productSystem, env);
-  registerCustomerRoutes(app, productSystem);
-  registerSellerRoutes(app, productSystem);
-  registerInventoryRoutes(app, productSystem);
-  registerSystemProjectionRoutes(app, productSystem);
-  registerProductSystemAdminRoutes(app, productSystem);
+  registerCloudRoutes(app);
+  registerProductRoutes(app);
+  registerJobRoutes(app);
+  registerQuoteRoutes(app);
+  registerRequestRoutes(app);
+  registerPeopleRoutes(app);
+  registerOperatorRoutes(app);
+  registerCustomerRoutes(app);
+  registerSellerRoutes(app);
+  registerInventoryRoutes(app);
+  registerSystemProjectionRoutes(app);
+  registerProductSystemAdminRoutes(app);
 
   return app;
 }

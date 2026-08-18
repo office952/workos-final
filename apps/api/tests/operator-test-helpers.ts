@@ -1,9 +1,12 @@
 import type { Hono } from "hono";
+import type { ApiEnv } from "../src/cloud/context.js";
 import type { ProductSystemRuntime } from "../src/productSystem/runtime.js";
 import { OPERATOR_SESSION_COOKIE } from "../src/operator/store.js";
 
+type TestApp = Hono<ApiEnv>;
+
 export async function setPinViaHttp(
-  app: Hono,
+  app: TestApp,
   personId: string,
   pin = "246810",
 ): Promise<void> {
@@ -19,7 +22,7 @@ export async function setPinViaHttp(
 }
 
 export async function sessionCookieViaHttp(
-  app: Hono,
+  app: TestApp,
   personId: string,
   pin = "246810",
 ): Promise<string> {
@@ -84,12 +87,12 @@ export function withCookie(init: RequestInit | undefined, cookie: string): Reque
   return { ...init, headers };
 }
 
-export async function startTaskAs(app: Hono, taskId: string, cookie: string): Promise<Response> {
+export async function startTaskAs(app: TestApp, taskId: string, cookie: string): Promise<Response> {
   return app.request(`/api/execution-tasks/${taskId}/start`, withCookie({ method: "POST" }, cookie));
 }
 
 export async function completeTaskAs(
-  app: Hono,
+  app: TestApp,
   taskId: string,
   cookie: string,
   body: Record<string, unknown> = {},

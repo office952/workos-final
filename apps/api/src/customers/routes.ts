@@ -3,10 +3,11 @@ import type {
   CustomerProfilePatch,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
-import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
 
-export function registerCustomerRoutes(app: Hono, runtime: ProductSystemRuntime): void {
+export function registerCustomerRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/customers", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({
       customers: runtime.listCustomers(),
       registry: runtime.listCustomerRegistry(),
@@ -14,6 +15,7 @@ export function registerCustomerRoutes(app: Hono, runtime: ProductSystemRuntime)
   });
 
   app.get("/api/customers/:customerId/workspace", (c) => {
+    const runtime = getProductSystem(c);
     const workspace = runtime.readCustomerWorkspace(c.req.param("customerId"));
     if (!workspace) {
       return c.json({ error: "not_found" }, 404);
@@ -22,6 +24,7 @@ export function registerCustomerRoutes(app: Hono, runtime: ProductSystemRuntime)
   });
 
   app.get("/api/customers/:customerId", (c) => {
+    const runtime = getProductSystem(c);
     const customer = runtime.getCustomer(c.req.param("customerId"));
     if (!customer) {
       return c.json({ error: "not_found" }, 404);
@@ -30,6 +33,7 @@ export function registerCustomerRoutes(app: Hono, runtime: ProductSystemRuntime)
   });
 
   app.post("/api/customers", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const displayName = readDisplayName(body);
     if (displayName === null) {
@@ -43,6 +47,7 @@ export function registerCustomerRoutes(app: Hono, runtime: ProductSystemRuntime)
   });
 
   app.patch("/api/customers/:customerId", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null || Array.isArray(body)) {
       return c.json({ error: "invalid_payload" }, 400);

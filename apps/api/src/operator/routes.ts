@@ -1,21 +1,20 @@
 import type { Context, Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { requireOwnerRole } from "../cloud/middleware.js";
 import { isDevOperatorModeEnabled } from "./devMode.js";
 import { OPERATOR_SESSION_COOKIE } from "./store.js";
 
 const SESSION_MAX_AGE_SEC = 12 * 60 * 60;
 
-export function registerOperatorRoutes(
-  app: Hono,
-  runtime: ProductSystemRuntime,
-  env: NodeJS.ProcessEnv = process.env,
-): void {
+export function registerOperatorRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/operator-candidates", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({ candidates: runtime.listOperatorCandidates() });
   });
 
   app.get("/api/operator-session", (c) => {
+    const runtime = getProductSystem(c);
     const resolved = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     if (!resolved.ok) {
       return c.json({ operator: null, session: null });
@@ -34,6 +33,7 @@ export function registerOperatorRoutes(
   });
 
   app.post("/api/operator-session", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -68,6 +68,7 @@ export function registerOperatorRoutes(
   });
 
   app.delete("/api/operator-session", (c) => {
+    const runtime = getProductSystem(c);
     runtime.logoutOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     deleteCookie(c, OPERATOR_SESSION_COOKIE, { path: "/" });
     return c.json({ ok: true });
@@ -78,6 +79,8 @@ export function registerOperatorRoutes(
    * Fail-closed: 404 unless non-production + WORKOS_DEV_OPERATOR_BYPASS=1.
    */
   app.post("/api/dev/operator-session", (c) => {
+    const runtime = getProductSystem(c);
+    const env = c.get("env") ?? process.env;
     if (!isDevOperatorModeEnabled(env)) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -100,6 +103,7 @@ export function registerOperatorRoutes(
   });
 
   app.get("/api/operator-task-inbox", (c) => {
+    const runtime = getProductSystem(c);
     const resolved = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     if (!resolved.ok) {
       return c.json({ operator: null, inbox: null });
@@ -118,7 +122,8 @@ export function registerOperatorRoutes(
     });
   });
 
-  app.put("/api/people/:personId/operator-pin", async (c) => {
+  app.put("/api/people/:personId/operator-pin", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -140,7 +145,7 @@ export function registerOperatorRoutes(
   });
 }
 
-function setOperatorSessionCookie(c: Context, rawToken: string): void {
+function setOperatorSessionCookie(c: Context<ApiEnv>, rawToken: string): void {
   setCookie(c, OPERATOR_SESSION_COOKIE, rawToken, {
     httpOnly: true,
     path: "/",

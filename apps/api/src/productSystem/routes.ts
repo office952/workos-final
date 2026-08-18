@@ -1,13 +1,13 @@
 import type { Hono } from "hono";
-import type { ProductSystemRuntime } from "./runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { requireOwnerRole } from "../cloud/middleware.js";
 
-export function registerProductSystemAdminRoutes(
-  app: Hono,
-  runtime: ProductSystemRuntime,
-): void {
+export function registerProductSystemAdminRoutes(app: Hono<ApiEnv>): void {
   app.patch(
     "/api/admin/product-system/entities/:entityKind/:entityId/display-label",
+    requireOwnerRole(),
     async (c) => {
+      const runtime = getProductSystem(c);
       const entityKind = c.req.param("entityKind");
       const entityId = c.req.param("entityId");
       const body = (await c.req.json().catch(() => null)) as {

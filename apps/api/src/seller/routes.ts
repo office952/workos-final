@@ -1,13 +1,16 @@
 import type { SellerMutationError, SellerProfileInput } from "@workos-final/domain";
 import type { Hono } from "hono";
-import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { requireOwnerRole } from "../cloud/middleware.js";
 
-export function registerSellerRoutes(app: Hono, runtime: ProductSystemRuntime): void {
+export function registerSellerRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/seller", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({ seller: runtime.getSellerProfile() });
   });
 
-  app.patch("/api/seller", async (c) => {
+  app.patch("/api/seller", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const input = readSellerInput(await c.req.json().catch(() => null));
     if (!input) {
       return c.json({ error: "invalid_payload" }, 400);

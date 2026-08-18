@@ -3,7 +3,20 @@ import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
+import { CloudSessionProvider } from "./CloudSessionContext";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
+
+vi.mock("./cloudSessionApi", () => ({
+  fetchCloudSession: vi.fn(async () => ({
+    mode: "single_plane",
+    user: null,
+    organization: null,
+    memberships: [],
+  })),
+  loginCloud: vi.fn(),
+  logoutCloud: vi.fn(),
+  switchCloudOrganization: vi.fn(),
+}));
 
 vi.mock("./operatorSessionApi", () => ({
   fetchOperatorSession: vi.fn(async () => ({ operator: null, session: null })),
@@ -126,5 +139,45 @@ describe("AppShell", () => {
       "aria-current",
       "page",
     );
+  });
+
+  it("shows the organization name only in Cloud mode", async () => {
+    const { fetchCloudSession } = await import("./cloudSessionApi");
+    vi.mocked(fetchCloudSession).mockResolvedValue({
+      mode: "cloud",
+      user: { userId: "usr:1", email: "owner@example.test" },
+      organization: {
+        organizationId: "org:1",
+        displayName: "Atelier Alpha",
+        slug: "alpha",
+        role: "owner",
+      },
+      memberships: [
+        {
+          organizationId: "org:1",
+          displayName: "Atelier Alpha",
+          slug: "alpha",
+          role: "owner",
+          status: "ACTIVE",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter>
+        <CloudSessionProvider>
+          <OperatorSessionProvider>
+            <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+              <p>conținut</p>
+            </AppShell>
+          </OperatorSessionProvider>
+        </CloudSessionProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("Organizație curentă")).toBeInTheDocument();
+    expect(screen.getByText("Atelier Alpha")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ieși din cont" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Schimbă organizația")).not.toBeInTheDocument();
   });
 });

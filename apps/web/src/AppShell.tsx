@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import type { OperatorCandidate } from "@workos-final/domain";
+import { useCloudSessionOptional } from "./CloudSessionContext";
 import { useOperatorSession, isDevOperatorUiEnabled } from "./OperatorSessionContext";
 import { fetchOperatorCandidates } from "./operatorSessionApi";
 import { Field } from "./ui/Field";
@@ -23,6 +24,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
   const { pathname, search } = useLocation();
   const commercial =
     isPrefixActive(pathname, COMMERCIAL_PREFIXES) || isProductCommercialPath(pathname, search);
+  const cloud = useCloudSessionOptional();
   const { ready, operator, identify, logout } = useOperatorSession();
   const [open, setOpen] = useState(false);
   const [candidates, setCandidates] = useState<OperatorCandidate[]>([]);
@@ -106,6 +108,37 @@ export function AppShell({ children, navItems }: AppShellProps) {
                 ),
               )}
             </nav>
+            {cloud?.mode === "cloud" && cloud.organization ? (
+              <div className="organization-chip" aria-label="Organizație curentă">
+                <span>
+                  Organizație: <strong>{cloud.organization.displayName}</strong>
+                </span>
+                {cloud.memberships.length > 1 ? (
+                  <select
+                    aria-label="Schimbă organizația"
+                    value={cloud.organization.organizationId}
+                    onChange={(event) => {
+                      void cloud.switchOrganization(event.target.value);
+                    }}
+                  >
+                    {cloud.memberships.map((item) => (
+                      <option key={item.organizationId} value={item.organizationId}>
+                        {item.displayName}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+                <button
+                  type="button"
+                  className="button-quiet"
+                  onClick={() => {
+                    void cloud.logout();
+                  }}
+                >
+                  Ieși din cont
+                </button>
+              </div>
+            ) : null}
             <div className="operator-chip" aria-label="Operator curent">
               {!ready ? (
                 <span className="operator-chip-muted">Se verifică operatorul…</span>

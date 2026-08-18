@@ -5,10 +5,12 @@ import {
   type SkillMutationError,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
-import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { requireOwnerRole } from "../cloud/middleware.js";
 
-export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): void {
+export function registerPeopleRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/people", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({
       people: runtime.listPeople(),
       registry: runtime.listPeopleRegistry(),
@@ -16,10 +18,12 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
   });
 
   app.get("/api/people/skills", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({ skills: runtime.listSkills() });
   });
 
   app.get("/api/people/eligibility", (c) => {
+    const runtime = getProductSystem(c);
     const capabilityId = c.req.query("capabilityId") ?? "";
     if (!isCapabilityId(capabilityId)) {
       return c.json({ error: "invalid_capability" }, 400);
@@ -27,7 +31,8 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     return c.json(runtime.readEligibility(capabilityId));
   });
 
-  app.post("/api/people/skills", async (c) => {
+  app.post("/api/people/skills", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null || Array.isArray(body)) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -51,7 +56,8 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     return c.json({ skill: result.skill, skills: runtime.listSkills() }, 201);
   });
 
-  app.patch("/api/people/skills/:skillId", async (c) => {
+  app.patch("/api/people/skills/:skillId", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null || Array.isArray(body)) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -75,6 +81,7 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
   });
 
   app.get("/api/people/:personId", (c) => {
+    const runtime = getProductSystem(c);
     const person = runtime.getPerson(c.req.param("personId"));
     if (!person) {
       return c.json({ error: "not_found" }, 404);
@@ -88,7 +95,8 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     });
   });
 
-  app.post("/api/people", async (c) => {
+  app.post("/api/people", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const displayName = readDisplayName(body);
     if (displayName === null) {
@@ -106,7 +114,8 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     );
   });
 
-  app.patch("/api/people/:personId", async (c) => {
+  app.patch("/api/people/:personId", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (typeof body !== "object" || body === null || Array.isArray(body)) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -161,7 +170,8 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     });
   });
 
-  app.post("/api/people/:personId/skills", async (c) => {
+  app.post("/api/people/:personId/skills", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const skillId = readOptionalString(body, "skillId");
     if (!skillId) {
@@ -177,7 +187,8 @@ export function registerPeopleRoutes(app: Hono, runtime: ProductSystemRuntime): 
     });
   });
 
-  app.patch("/api/people/:personId/skills/:skillId", async (c) => {
+  app.patch("/api/people/:personId/skills/:skillId", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     if (
       typeof body !== "object" ||

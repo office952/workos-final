@@ -24,6 +24,8 @@ import { ResourcesAdminPage } from "./ResourcesAdminPage";
 import { StockAdminPage } from "./StockAdminPage";
 import { SystemStatusPage } from "./SystemStatusPage";
 import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
+import { CloudSessionProvider, useCloudSession } from "./CloudSessionContext";
+import { LoginPage } from "./LoginPage";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
 
 const NAV_ITEMS = [
@@ -39,6 +41,24 @@ const NAV_ITEMS = [
 ];
 
 export function App() {
+  return (
+    <CloudSessionProvider>
+      <AppGate />
+    </CloudSessionProvider>
+  );
+}
+
+function AppGate() {
+  const { ready, unavailable, mode, user } = useCloudSession();
+  if (!ready) {
+    return <p className="app-boot">Se încarcă…</p>;
+  }
+  if (unavailable) {
+    return <p className="app-boot">Sistemul nu răspunde. Reîncearcă.</p>;
+  }
+  if (mode === "cloud" && !user) {
+    return <LoginPage />;
+  }
   return (
     <OperatorSessionProvider>
       <AppShell navItems={NAV_ITEMS}>

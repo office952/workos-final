@@ -171,6 +171,11 @@ import {
   supersedeCostEvidence as persistSupersededCostEvidence,
   type CostEvidenceWriteResult,
 } from "../resources/store.js";
+import {
+  assertPlaneIdentity,
+  bindOperationalPlaneIdentity,
+  readOperationalPlaneIdentity,
+} from "../cloud/planeIdentity.js";
 
 export type ProductSystemRuntime = {
   sqlitePath: string;
@@ -357,10 +362,19 @@ export type ProductSystemRuntime = {
   renameCustomer(customerId: string, displayName: string): CustomerMutationResult;
   retireCustomer(customerId: string): CustomerMutationResult;
   close(): void;
+  organizationId: string | null;
+  planeId: string | null;
+  assertBoundPlaneIdentity(expected: {
+    planeId: string;
+    organizationId: string;
+  }): void;
 };
 
 export type ProductSystemRuntimeOptions = {
   documentsRoot?: string;
+  planeIdentity?: { planeId: string; organizationId: string };
+  /** Provision may bind once. Request open must only assert. Defaults to bind. */
+  bindPlaneIdentity?: boolean;
 };
 
 export function createProductSystemRuntime(
@@ -369,6 +383,17 @@ export function createProductSystemRuntime(
 ): ProductSystemRuntime {
   const db: SqliteDatabase = openSqliteDatabase(sqlitePath);
   const documentsRoot = options.documentsRoot ?? resolveDocumentsRoot();
+  let planeIdentity;
+  try {
+    planeIdentity = options.planeIdentity
+      ? options.bindPlaneIdentity === false
+        ? assertExistingPlaneIdentity(db, options.planeIdentity)
+        : bindOperationalPlaneIdentity(db, options.planeIdentity)
+      : readOperationalPlaneIdentity(db);
+  } catch (error) {
+    db.close();
+    throw error;
+  }
   bootstrapProductSystemDisplayStore(db);
   ensureCostEvidence(db);
   if (!process.env.VITEST) {
@@ -377,6 +402,8 @@ export function createProductSystemRuntime(
   return {
     sqlitePath,
     documentsRoot,
+    organizationId: planeIdentity?.organizationId ?? null,
+    planeId: planeIdentity?.planeId ?? null,
     labels() {
       return loadDisplayLabelCatalog(db);
     },
@@ -777,6 +804,9 @@ export function createProductSystemRuntime(
     close() {
       db.close();
     },
+    assertBoundPlaneIdentity(expected) {
+      assertPlaneIdentity(readOperationalPlaneIdentity(db), expected);
+    },
   };
 }
 
@@ -825,6 +855,15 @@ function jobOverviewItems(db: SqliteDatabase) {
         : null,
     });
   });
+}
+
+function assertExistingPlaneIdentity(
+  db: SqliteDatabase,
+  expected: { planeId: string; organizationId: string },
+) {
+  const current = readOperationalPlaneIdentity(db);
+  assertPlaneIdentity(current, expected);
+  return current;
 }
 
 function linkedQuoteOverviewItems(db: SqliteDatabase, requestId: string) {

@@ -30,6 +30,8 @@ import {
 import type { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import type { ProductSystemRuntime } from "./productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "./cloud/context.js";
+import { requireOwnerRole } from "./cloud/middleware.js";
 import { OPERATOR_SESSION_COOKIE } from "./operator/store.js";
 import { renderQuoteDocumentPdf } from "./quoteDocument/renderQuoteDocumentPdf.js";
 
@@ -99,15 +101,14 @@ function readReviewedDefinition(body: unknown): {
   };
 }
 
-export function registerProductRoutes(
-  app: Hono,
-  runtime: ProductSystemRuntime,
-): void {
+export function registerProductRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/product-catalog", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({ tree: runtime.present().catalog });
   });
 
   app.get("/api/products/:productCode", (c) => {
+    const runtime = getProductSystem(c);
     const productCode = c.req.param("productCode");
     const presented = runtime.present();
     const template = presented.template(productCode);
@@ -119,6 +120,7 @@ export function registerProductRoutes(
   });
 
   app.get("/api/products/:productCode/process-composition", (c) => {
+    const runtime = getProductSystem(c);
     const productCode = c.req.param("productCode");
     const template = runtime.present().template(productCode);
     if (!template) {
@@ -139,6 +141,7 @@ export function registerProductRoutes(
   });
 
   app.post("/api/products/:productCode/compile", async (c) => {
+    const runtime = getProductSystem(c);
     const productCode = c.req.param("productCode");
     const presented = runtime.present();
     const template = presented.template(productCode);
@@ -156,6 +159,7 @@ export function registerProductRoutes(
   });
 
   app.post("/api/products/:productCode/confirm", async (c) => {
+    const runtime = getProductSystem(c);
     const compiled = compileAcceptedProduct(
       runtime,
       c.req.param("productCode"),
@@ -179,6 +183,7 @@ export function registerProductRoutes(
   });
 
   app.post("/api/products/:productCode/accepted-production-snapshot", async (c) => {
+    const runtime = getProductSystem(c);
     const compiled = compileAcceptedProduct(
       runtime,
       c.req.param("productCode"),
@@ -202,6 +207,7 @@ export function registerProductRoutes(
   });
 
   app.post("/api/products/:productCode/quote-snapshots", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const compiled = compileAcceptedProduct(
       runtime,
@@ -309,6 +315,7 @@ export function registerProductRoutes(
   });
 
   app.get("/api/products/:productCode/quote-snapshots/:quoteSnapshotId", (c) => {
+    const runtime = getProductSystem(c);
     const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
     if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
       return c.json({ error: "not_found" }, 404);
@@ -319,6 +326,7 @@ export function registerProductRoutes(
   app.get(
     "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/document",
     async (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -335,6 +343,7 @@ export function registerProductRoutes(
   app.post(
     "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/acceptance",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -358,6 +367,7 @@ export function registerProductRoutes(
   app.get(
     "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/acceptance",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -376,6 +386,7 @@ export function registerProductRoutes(
   app.post(
     "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/order",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -410,6 +421,7 @@ export function registerProductRoutes(
   app.get(
     "/api/products/:productCode/quote-snapshots/:quoteSnapshotId/order",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -427,6 +439,7 @@ export function registerProductRoutes(
   );
 
   app.get("/api/products/:productCode/orders/:orderSnapshotId", (c) => {
+    const runtime = getProductSystem(c);
     const orderSnapshot = runtime.readOrderSnapshot(c.req.param("orderSnapshotId"));
     if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
       return c.json({ error: "not_found" }, 404);
@@ -437,6 +450,7 @@ export function registerProductRoutes(
   app.post(
     "/api/products/:productCode/orders/:orderSnapshotId/production-release",
     (c) => {
+      const runtime = getProductSystem(c);
       const orderSnapshot = runtime.readOrderSnapshot(c.req.param("orderSnapshotId"));
       if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -460,6 +474,7 @@ export function registerProductRoutes(
   app.get(
     "/api/products/:productCode/orders/:orderSnapshotId/production-release",
     (c) => {
+      const runtime = getProductSystem(c);
       const orderSnapshot = runtime.readOrderSnapshot(c.req.param("orderSnapshotId"));
       if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -478,6 +493,7 @@ export function registerProductRoutes(
   app.get(
     "/api/products/:productCode/accepted-production-snapshots/:snapshotId",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readProductionSnapshot(c.req.param("snapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -489,6 +505,7 @@ export function registerProductRoutes(
   app.post(
     "/api/products/:productCode/accepted-production-snapshots/:snapshotId/execution-plan",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readProductionSnapshot(c.req.param("snapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -516,6 +533,7 @@ export function registerProductRoutes(
   app.get(
     "/api/products/:productCode/accepted-production-snapshots/:snapshotId/execution-plan",
     (c) => {
+      const runtime = getProductSystem(c);
       const snapshot = runtime.readProductionSnapshot(c.req.param("snapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
@@ -531,6 +549,7 @@ export function registerProductRoutes(
   );
 
   app.get("/api/execution-plans/:planId", (c) => {
+    const runtime = getProductSystem(c);
     const record = runtime.readExecutionPlan(c.req.param("planId"));
     if (!record) {
       return c.json({ error: "not_found" }, 404);
@@ -545,7 +564,8 @@ export function registerProductRoutes(
     });
   });
 
-  app.post("/api/execution-tasks/:taskId/provider", async (c) => {
+  app.post("/api/execution-tasks/:taskId/provider", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const providerId = readProviderId(await c.req.json());
     if (!providerId) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -558,7 +578,8 @@ export function registerProductRoutes(
     );
   });
 
-  app.post("/api/execution-tasks/:taskId/executor", async (c) => {
+  app.post("/api/execution-tasks/:taskId/executor", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const personId = readPersonId(await c.req.json().catch(() => null));
     if (!personId) {
       return c.json({ error: "invalid_payload" }, 400);
@@ -572,6 +593,7 @@ export function registerProductRoutes(
   });
 
   app.post("/api/execution-tasks/:taskId/start", (c) => {
+    const runtime = getProductSystem(c);
     const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     if (!session.ok) {
       return c.json({ error: "invalid_session" }, 401);
@@ -586,6 +608,7 @@ export function registerProductRoutes(
   });
 
   app.post("/api/execution-tasks/:taskId/complete", async (c) => {
+    const runtime = getProductSystem(c);
     const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     if (!session.ok) {
       return c.json({ error: "invalid_session" }, 401);

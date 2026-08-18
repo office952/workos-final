@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useCloudSessionOptional } from "./CloudSessionContext";
 import {
   createDevOperatorSession,
   fetchOperatorSession,
@@ -37,6 +38,8 @@ function isDevAutoOperatorEnabled(): boolean {
 }
 
 export function OperatorSessionProvider({ children }: { children: ReactNode }) {
+  const cloud = useCloudSessionOptional();
+  const organizationId = cloud?.organization?.organizationId ?? null;
   const [ready, setReady] = useState(false);
   const [operator, setOperator] = useState<OperatorSessionOperator | null>(null);
   const [session, setSession] = useState<OperatorSessionInfo | null>(null);
@@ -104,6 +107,15 @@ export function OperatorSessionProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!organizationId) {
+      return;
+    }
+    setOperator(null);
+    setSession(null);
+    void refresh();
+  }, [organizationId, refresh]);
 
   const identify = useCallback(async (personId: string, pin: string) => {
     const result = await identifyOperator(personId, pin);

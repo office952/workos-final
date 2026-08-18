@@ -1,13 +1,16 @@
 import type { InventoryMutationError } from "@workos-final/domain";
 import type { Hono } from "hono";
-import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { requireOwnerRole } from "../cloud/middleware.js";
 
-export function registerInventoryRoutes(app: Hono, runtime: ProductSystemRuntime): void {
+export function registerInventoryRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/inventory", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({ inventory: runtime.readInventory() });
   });
 
   app.get("/api/inventory/:resourceId", (c) => {
+    const runtime = getProductSystem(c);
     const detail = runtime.readInventoryItem(c.req.param("resourceId"));
     if (!detail) {
       return c.json({ error: "not_found" }, 404);
@@ -15,7 +18,8 @@ export function registerInventoryRoutes(app: Hono, runtime: ProductSystemRuntime
     return c.json({ item: detail.item, movements: detail.movements });
   });
 
-  app.post("/api/inventory/:resourceId/adjustments", async (c) => {
+  app.post("/api/inventory/:resourceId/adjustments", requireOwnerRole(), async (c) => {
+    const runtime = getProductSystem(c);
     const input = readAdjustmentInput(await c.req.json().catch(() => null));
     if (!input) {
       return c.json({ error: "invalid_payload" }, 400);

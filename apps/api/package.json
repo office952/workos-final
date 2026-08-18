@@ -8,6 +8,7 @@
     "lint": "eslint src tests",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "cloud:provision": "tsx src/cloud/devProvisionCli.ts",
     "build": "tsc --noEmit"
   },
   "dependencies": {

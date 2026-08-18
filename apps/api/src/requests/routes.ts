@@ -9,14 +9,16 @@ import {
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import type { ProductSystemRuntime } from "../productSystem/runtime.js";
+import { getProductSystem, type ApiEnv } from "../cloud/context.js";
 
-export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime): void {
+export function registerRequestRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/requests", (c) => {
+    const runtime = getProductSystem(c);
     return c.json({ overview: runtime.listRequestOverview() });
   });
 
   app.post("/api/requests", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const input = readCreateInput(body);
     if (!input) {
@@ -34,6 +36,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
   });
 
   app.get("/api/requests/:requestId", (c) => {
+    const runtime = getProductSystem(c);
     const detail = runtime.readRequestDetail(c.req.param("requestId"));
     if (!detail) {
       return c.json({ error: "not_found" }, 404);
@@ -42,6 +45,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
   });
 
   app.patch("/api/requests/:requestId", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const patch = readUpdateInput(body);
     if (!patch) {
@@ -59,6 +63,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
   });
 
   app.post("/api/requests/:requestId/quotes", async (c) => {
+    const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const quoteSnapshotId = readQuoteSnapshotId(body);
     if (!quoteSnapshotId) {
@@ -76,6 +81,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
   });
 
   app.get("/api/requests/:requestId/attachments", (c) => {
+    const runtime = getProductSystem(c);
     const attachments = runtime.listRequestAttachments(c.req.param("requestId"));
     if (!attachments) {
       return c.json({ error: "not_found" }, 404);
@@ -90,6 +96,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
       onError: (c) => c.json({ error: "file_too_large" }, 413),
     }),
     async (c) => {
+      const runtime = getProductSystem(c);
       const body = await c.req.parseBody();
       const file = body["file"];
       if (!(file instanceof File) || file.size === 0) {
@@ -118,6 +125,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
   );
 
   app.get("/api/requests/:requestId/attachments/:attachmentId/download", (c) => {
+    const runtime = getProductSystem(c);
     const result = runtime.readRequestAttachmentDownload(
       c.req.param("requestId"),
       c.req.param("attachmentId"),

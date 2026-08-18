@@ -14,7 +14,9 @@ async function readJson<T>(response: Response): Promise<T> {
 }
 
 export async function fetchProductSystemAdministration(): Promise<ProductSystemAdminProjection> {
-  const response = await fetch(`${baseUrl}/api/product-system-admin`);
+  const response = await fetch(`${baseUrl}/api/product-system-admin`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error("product_system_admin_unavailable");
   }
@@ -31,6 +33,7 @@ export async function patchDisplayLabel(input: {
     `${baseUrl}/api/admin/product-system/entities/${input.entityKind}/${input.entityId}/display-label`,
     {
       method: "PATCH",
+      credentials: "include",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         displayLabel: input.displayLabel,
@@ -53,7 +56,9 @@ export async function patchDisplayLabel(input: {
 }
 
 export async function fetchOperationalProcessesAdministration(): Promise<OperationalProcessesAdminProjection> {
-  const response = await fetch(`${baseUrl}/api/operational-processes`);
+  const response = await fetch(`${baseUrl}/api/operational-processes`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error("operational_processes_unavailable");
   }
@@ -61,7 +66,9 @@ export async function fetchOperationalProcessesAdministration(): Promise<Operati
 }
 
 export async function fetchResourcesAdministration(): Promise<ResourcesAdminProjection> {
-  const response = await fetch(`${baseUrl}/api/resources-admin`);
+  const response = await fetch(`${baseUrl}/api/resources-admin`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error("resources_admin_unavailable");
   }
@@ -77,6 +84,7 @@ export async function patchCostEvidence(input: {
     `${baseUrl}/api/resources-admin/cost-evidence/${input.evidenceRowId}`,
     {
       method: "PATCH",
+      credentials: "include",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         amount: input.amount,
@@ -98,7 +106,9 @@ export async function patchCostEvidence(input: {
 }
 
 export async function fetchWorkcentersAdministration(): Promise<WorkcentersAdminProjection> {
-  const response = await fetch(`${baseUrl}/api/workcenters`);
+  const response = await fetch(`${baseUrl}/api/workcenters`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error("workcenters_admin_unavailable");
   }
@@ -106,7 +116,9 @@ export async function fetchWorkcentersAdministration(): Promise<WorkcentersAdmin
 }
 
 export async function fetchSystemGovernance(): Promise<GovernanceProjection> {
-  const response = await fetch(`${baseUrl}/api/governance`);
+  const response = await fetch(`${baseUrl}/api/governance`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error("governance_unavailable");
   }
