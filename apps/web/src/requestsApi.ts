@@ -119,6 +119,8 @@ export function requestAttachmentErrorMessage(error: string): string {
       return "Cererea sau fișierul nu este disponibil.";
     case "file_missing":
       return "Fișierul nu este disponibil în stocarea aplicației.";
+    case "file_corrupt":
+      return "Fișierul salvat nu mai corespunde înregistrării din WorkOS.";
     case "storage_unavailable":
       return "Fișierul nu a putut fi salvat.";
     default:

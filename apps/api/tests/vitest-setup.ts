@@ -1,9 +1,20 @@
 /**
- * Vitest must never inherit a developer WORKOS_SQLITE_PATH that points at a
- * real DEV database. Force in-memory SQLite for the default createApp() path.
+ * Vitest must never inherit developer DEV persistence.
+ * SQLite defaults to :memory: (see resolveProductSystemSqlitePath).
+ * Filesystem writes go only under an OS-temp WorkOS data root.
  */
-delete process.env.WORKOS_SQLITE_PATH;
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterAll } from "vitest";
 
-if (!process.env.VITEST) {
-  process.env.VITEST = "true";
-}
+delete process.env.WORKOS_SQLITE_PATH;
+process.env.VITEST = "true";
+
+const isolatedRoot = mkdtempSync(join(tmpdir(), "workos-vitest-data-"));
+process.env.WORKOS_TEST_DATA_DIR = isolatedRoot;
+process.env.WORKOS_DATA_DIR = isolatedRoot;
+
+afterAll(() => {
+  rmSync(isolatedRoot, { recursive: true, force: true });
+});

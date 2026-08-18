@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import {
   copyFileSync,
   existsSync,
@@ -56,7 +56,7 @@ export function writeRequestAttachmentBytes(input: {
   const tempPath = join(dir, `.tmp-${randomUUID()}`);
   try {
     writeFileSync(tempPath, input.bytes);
-    const sha256 = createHash("sha256").update(input.bytes).digest("hex");
+    const sha256 = sha256Hex(input.bytes);
     try {
       renameSync(tempPath, finalPath);
     } catch {
@@ -101,4 +101,20 @@ function safePathSegment(value: string): string {
     throw new Error("invalid_storage_segment");
   }
   return cleaned;
+}
+
+export function sha256Hex(bytes: Uint8Array): string {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+export function attachmentIntegrityMatches(bytes: Uint8Array, expectedSha256: string): boolean {
+  const actual = sha256Hex(bytes);
+  if (actual.length !== expectedSha256.length || actual.length === 0) {
+    return false;
+  }
+  try {
+    return timingSafeEqual(Buffer.from(actual, "hex"), Buffer.from(expectedSha256, "hex"));
+  } catch {
+    return false;
+  }
 }

@@ -22,7 +22,9 @@ export {
 } from "./commercialRequest.js";
 export {
   MAX_REQUEST_ATTACHMENT_BYTES,
+  MAX_REQUEST_ATTACHMENT_HTTP_BODY_BYTES,
   REQUEST_ATTACHMENT_ERRORS,
+  REQUEST_ATTACHMENT_MULTIPART_ENVELOPE_BYTES,
   canUploadRequestAttachment,
   formatAttachmentSize,
   generateAttachmentId,

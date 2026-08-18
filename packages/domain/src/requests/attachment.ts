@@ -1,5 +1,11 @@
 export const MAX_REQUEST_ATTACHMENT_BYTES = 50 * 1024 * 1024;
 
+/** HTTP envelope headroom above file bytes for multipart boundaries/headers. */
+export const REQUEST_ATTACHMENT_MULTIPART_ENVELOPE_BYTES = 256 * 1024;
+
+export const MAX_REQUEST_ATTACHMENT_HTTP_BODY_BYTES =
+  MAX_REQUEST_ATTACHMENT_BYTES + REQUEST_ATTACHMENT_MULTIPART_ENVELOPE_BYTES;
+
 export const REQUEST_ATTACHMENT_ERRORS = [
   "not_found",
   "request_cancelled",
@@ -7,6 +13,7 @@ export const REQUEST_ATTACHMENT_ERRORS = [
   "invalid_file",
   "storage_unavailable",
   "file_missing",
+  "file_corrupt",
 ] as const;
 export type RequestAttachmentError = (typeof REQUEST_ATTACHMENT_ERRORS)[number];
 

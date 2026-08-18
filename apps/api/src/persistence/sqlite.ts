@@ -1,5 +1,6 @@
 import { mkdirSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
 
@@ -10,8 +11,14 @@ const MIGRATIONS_DIR = fileURLToPath(new URL("./migrations", import.meta.url));
 /**
  * Canonical WorkOS application data root.
  * SQLite and document bytes both live under this boundary (unless SQLITE_PATH overrides DB).
+ *
+ * Under Vitest, ambient DEV WORKOS_DATA_DIR cannot win. Tests may still set
+ * WORKOS_DATA_DIR to an OS-temp directory for per-suite isolation.
  */
 export function resolveWorkosDataDir(): string {
+  if (process.env.VITEST) {
+    return resolveVitestDataDir();
+  }
   if (process.env.WORKOS_DATA_DIR) {
     const dataDir = process.env.WORKOS_DATA_DIR;
     mkdirSync(dataDir, { recursive: true });
@@ -74,4 +81,26 @@ export function applyMigrations(db: SqliteDatabase): void {
       "INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)",
     ).run(file, new Date().toISOString());
   }
+}
+
+function resolveVitestDataDir(): string {
+  const requested = process.env.WORKOS_DATA_DIR;
+  if (requested && isUnderOsTemp(requested)) {
+    mkdirSync(requested, { recursive: true });
+    return requested;
+  }
+  const fallback = process.env.WORKOS_TEST_DATA_DIR;
+  if (fallback && isUnderOsTemp(fallback)) {
+    mkdirSync(fallback, { recursive: true });
+    return fallback;
+  }
+  const auto = join(tmpdir(), "workos-vitest-fallback");
+  mkdirSync(auto, { recursive: true });
+  return auto;
+}
+
+function isUnderOsTemp(dir: string): boolean {
+  const tmp = resolve(tmpdir());
+  const candidate = resolve(dir);
+  return candidate === tmp || candidate.startsWith(tmp + sep);
 }

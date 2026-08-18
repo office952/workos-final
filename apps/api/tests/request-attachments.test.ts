@@ -5,6 +5,7 @@ import {
   readdirSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,6 +15,7 @@ import {
   MAX_REQUEST_ATTACHMENT_BYTES,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
+import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import {
   resolveDocumentsRoot,
   resolveRequestAttachmentPath,
@@ -246,7 +248,7 @@ describe("request attachments documents V1", () => {
     huge.fill(7);
 
     const uploaded = await uploadFile(app, requestId, "huge.bin", huge);
-    expect([400, 413]).toContain(uploaded.status);
+    expect(uploaded.status).toBe(413);
     expect((await readBody(uploaded)).error).toBe("file_too_large");
 
     const list = await readBody(
@@ -331,6 +333,102 @@ describe("request attachments documents V1", () => {
       await app.request(`/api/requests/${encodeURIComponent(requestId)}/attachments`),
     );
     expect(list.attachments).toHaveLength(1);
+  });
+
+  it("rejects download when stored bytes no longer match sha256", async () => {
+    const app = createApp();
+    const customer = await createCustomer(app, "Corrupt Client");
+    const request = await createRequest(app, String(customer.customerId), "Corrupt");
+    const requestId = String(request.requestId);
+    const original = new TextEncoder().encode("integrity-original");
+    const uploaded = await readBody(
+      await uploadFile(app, requestId, "integrity.txt", original, "text/plain"),
+    );
+    const attachmentId = String((uploaded.attachment as JsonObject).attachmentId);
+    const leaves = listDocumentLeaves();
+    expect(leaves).toHaveLength(1);
+    const storageKey = leaves[0]!.split(/[\\/]/).at(-1)!;
+    writeFileSync(
+      resolveRequestAttachmentPath(requestId, storageKey),
+      new TextEncoder().encode("tampered-bytes"),
+    );
+
+    const download = await app.request(
+      `/api/requests/${encodeURIComponent(requestId)}/attachments/${encodeURIComponent(
+        attachmentId,
+      )}/download`,
+    );
+    expect(download.status).toBe(409);
+    expect((await readBody(download)).error).toBe("file_corrupt");
+
+    const list = await readBody(
+      await app.request(`/api/requests/${encodeURIComponent(requestId)}/attachments`),
+    );
+    expect(list.attachments).toHaveLength(1);
+    expect((list.attachments as JsonObject[])[0]?.originalFileName).toBe("integrity.txt");
+
+    const detail = (
+      await readBody(await app.request(`/api/requests/${encodeURIComponent(requestId)}`))
+    ).detail as JsonObject;
+    expect(detail.request).toMatchObject({ requestId, title: "Corrupt" });
+  });
+
+  it("accepts a file of exactly 50 MiB despite multipart envelope", async () => {
+    const app = createApp();
+    const customer = await createCustomer(app, "Exact Limit");
+    const request = await createRequest(app, String(customer.customerId), "Exact");
+    const requestId = String(request.requestId);
+    const exact = new Uint8Array(MAX_REQUEST_ATTACHMENT_BYTES);
+    exact.fill(3);
+
+    const uploaded = await uploadFile(app, requestId, "exact.bin", exact);
+    expect(uploaded.status).toBe(201);
+    const body = await readBody(uploaded);
+    expect((body.attachment as JsonObject).sizeBytes).toBe(MAX_REQUEST_ATTACHMENT_BYTES);
+
+    const download = await app.request(
+      `/api/requests/${encodeURIComponent(requestId)}/attachments/${encodeURIComponent(
+        String((body.attachment as JsonObject).attachmentId),
+      )}/download`,
+    );
+    expect(download.status).toBe(200);
+    expect((await download.arrayBuffer()).byteLength).toBe(MAX_REQUEST_ATTACHMENT_BYTES);
+  }, 30_000);
+
+  it("binds documents root for the lifetime of one runtime", async () => {
+    const bound = mkdtempSync(join(tmpdir(), "workos-bound-docs-"));
+    const drifted = mkdtempSync(join(tmpdir(), "workos-drift-docs-"));
+    temps.push(bound, drifted);
+    process.env.WORKOS_DATA_DIR = bound;
+    const runtime = createProductSystemRuntime(join(bound, "product-system.sqlite"));
+    expect(runtime.documentsRoot).toBe(join(bound, "documents"));
+
+    process.env.WORKOS_DATA_DIR = drifted;
+    const customer = runtime.createCustomer("Stable Root");
+    expect(customer.ok).toBe(true);
+    if (!customer.ok) {
+      runtime.close();
+      return;
+    }
+    const created = runtime.createCommercialRequest(
+      customer.customer.customerId,
+      "Stable",
+      "Root remains bound.",
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      runtime.close();
+      return;
+    }
+    const uploaded = runtime.createRequestAttachment(created.request.requestId, {
+      originalFileName: "bound.txt",
+      mimeType: "text/plain",
+      bytes: new TextEncoder().encode("bound-bytes"),
+    });
+    expect(uploaded.ok).toBe(true);
+    expect(existsSync(join(drifted, "documents"))).toBe(false);
+    expect(existsSync(join(bound, "documents", "requests"))).toBe(true);
+    runtime.close();
   });
 
   it("does not mutate quote contentHash when attaching after freeze", async () => {

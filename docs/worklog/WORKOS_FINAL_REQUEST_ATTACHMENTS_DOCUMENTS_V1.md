@@ -35,7 +35,24 @@ Request Detail (`/requests/:requestId`) section **Fișiere client** after reques
 
 ## Test isolation note
 
-Vitest prefers `:memory:` even when the shell exports `WORKOS_SQLITE_PATH`. Attachment tests also set a temporary `WORKOS_DATA_DIR`.
+Vitest never consumes ambient WorkOS DEV persistence.
+
+- `VITEST` forces SQLite `:memory:` even if `WORKOS_SQLITE_PATH` is set.
+- `VITEST` accepts filesystem `WORKOS_DATA_DIR` only when it is under the OS temp directory; otherwise it uses `WORKOS_TEST_DATA_DIR` created by `tests/vitest-setup.ts`.
+- Each Vitest worker gets an isolated temp data root and cleans it.
+- Tests may still set a more-specific temp `WORKOS_DATA_DIR` (must remain under OS temp).
+
+## Attachment integrity
+
+SHA-256 is stored at upload and **verified on download**. Mismatch returns `file_corrupt` without serving bytes and without deleting metadata. Missing physical bytes remain `file_missing`.
+
+## HTTP vs file size
+
+Business file limit is exactly 50 MiB (`MAX_REQUEST_ATTACHMENT_BYTES`). Hono `bodyLimit` allows a 256 KiB multipart envelope above that. Runtime file-byte validation is the final authority.
+
+## Runtime documents root
+
+`ProductSystemRuntime` binds `documentsRoot` once at construction. Later `process.env` changes do not move storage for that runtime.
 
 ## Runtime proof (isolated QA data root)
 

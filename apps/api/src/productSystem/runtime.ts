@@ -156,6 +156,7 @@ import {
   removeRequestAttachmentFile,
   resolveDocumentsRoot,
   writeRequestAttachmentBytes,
+  attachmentIntegrityMatches,
 } from "../requests/attachmentStorage.js";
 import {
   bootstrapProductSystemDisplayStore,
@@ -166,6 +167,7 @@ import {
 
 export type ProductSystemRuntime = {
   sqlitePath: string;
+  documentsRoot: string;
   labels(): DisplayLabelCatalog;
   present(): ReturnType<typeof presentProductSystem>;
   updateDisplayLabel(
@@ -344,16 +346,23 @@ export type ProductSystemRuntime = {
   close(): void;
 };
 
+export type ProductSystemRuntimeOptions = {
+  documentsRoot?: string;
+};
+
 export function createProductSystemRuntime(
   sqlitePath = resolveProductSystemSqlitePath(),
+  options: ProductSystemRuntimeOptions = {},
 ): ProductSystemRuntime {
   const db: SqliteDatabase = openSqliteDatabase(sqlitePath);
+  const documentsRoot = options.documentsRoot ?? resolveDocumentsRoot();
   bootstrapProductSystemDisplayStore(db);
   if (!process.env.VITEST) {
     ensureTrustedWorkforce(db);
   }
   return {
     sqlitePath,
+    documentsRoot,
     labels() {
       return loadDisplayLabelCatalog(db);
     },
@@ -628,7 +637,7 @@ export function createProductSystemRuntime(
         stored = writeRequestAttachmentBytes({
           requestId,
           bytes: input.bytes,
-          documentsRoot: resolveDocumentsRoot(),
+          documentsRoot,
         });
         const attachment: CommercialRequestAttachment = {
           attachmentId: generateAttachmentId(),
@@ -644,7 +653,7 @@ export function createProductSystemRuntime(
         return { ok: true, attachment: projectRequestAttachment(attachment) };
       } catch {
         if (stored) {
-          removeRequestAttachmentFile(requestId, stored.storageKey, resolveDocumentsRoot());
+          removeRequestAttachmentFile(requestId, stored.storageKey, documentsRoot);
         }
         return { ok: false, error: "storage_unavailable" };
       }
@@ -661,10 +670,13 @@ export function createProductSystemRuntime(
       const bytes = readRequestAttachmentBytes(
         requestId,
         attachment.storageKey,
-        resolveDocumentsRoot(),
+        documentsRoot,
       );
       if (!bytes) {
         return { ok: false, error: "file_missing" };
+      }
+      if (!attachmentIntegrityMatches(bytes, attachment.sha256)) {
+        return { ok: false, error: "file_corrupt" };
       }
       return { ok: true, attachment, bytes };
     },

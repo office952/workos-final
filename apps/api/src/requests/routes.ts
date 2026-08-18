@@ -1,6 +1,6 @@
 import {
   isCommercialRequestStatus,
-  MAX_REQUEST_ATTACHMENT_BYTES,
+  MAX_REQUEST_ATTACHMENT_HTTP_BODY_BYTES,
   safeAttachmentDownloadAsciiName,
   type CommercialRequestLinkError,
   type CommercialRequestMutationError,
@@ -86,7 +86,7 @@ export function registerRequestRoutes(app: Hono, runtime: ProductSystemRuntime):
   app.post(
     "/api/requests/:requestId/attachments",
     bodyLimit({
-      maxSize: MAX_REQUEST_ATTACHMENT_BYTES,
+      maxSize: MAX_REQUEST_ATTACHMENT_HTTP_BODY_BYTES,
       onError: (c) => c.json({ error: "file_too_large" }, 413),
     }),
     async (c) => {
@@ -281,6 +281,8 @@ function requestAttachmentStatus(
     case "not_found":
     case "file_missing":
       return 404;
+    case "file_corrupt":
+      return 409;
     case "storage_unavailable":
       return 503;
     default: {
