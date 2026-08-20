@@ -4,18 +4,14 @@ import {
   getResource,
   isValidCostAmount,
   ownerConfirmedCostSource,
-  PLEXIGLAS_3MM_OPAL_ID,
   type CostEvidence,
   type ResourceUnit,
 } from "@workos-final/domain";
-import { TEST_COMPANY_PLEXI_AMOUNT } from "../cloud/fixtures/testCompany.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 import type { BootstrapPolicy } from "../cloud/controlPlane.js";
 
 export const PLATFORM_DEFAULT_COST_NOTE =
   "Valoare implicită de platformă. Trebuie confirmată de owner.";
-export const SYNTHETIC_COST_NOTE =
-  "Evidență sintetică de test. Nu este cost HUB MEDIA confirmat.";
 
 export const RESOURCE_COST_EVIDENCE_MARKER = "RESOURCE_COST_EVIDENCE_V1_APPLIED";
 
@@ -133,17 +129,11 @@ function costSeedsForPolicy(
   if (policy === "SINGLE_PLANE") {
     return costEvidence;
   }
-  const note =
-    policy === "SYNTHETIC_TEST" ? SYNTHETIC_COST_NOTE : PLATFORM_DEFAULT_COST_NOTE;
   return costEvidence.map((row) => ({
     ...row,
-    amount:
-      policy === "SYNTHETIC_TEST" && row.resourceId === PLEXIGLAS_3MM_OPAL_ID
-        ? TEST_COMPANY_PLEXI_AMOUNT
-        : row.amount,
     source: "PLATFORM_DEFAULT",
     classification: "DEVELOPMENT_DEFAULT",
-    note,
+    note: PLATFORM_DEFAULT_COST_NOTE,
   }));
 }
 

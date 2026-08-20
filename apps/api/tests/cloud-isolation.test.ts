@@ -9,7 +9,7 @@ import {
   ALPHA_PIN,
   TEST_COMPANY_ATTACHMENT_BYTES,
   TEST_COMPANY_PIN,
-} from "../src/cloud/fixtures/testCompany.js";
+} from "./fixtures/cloudIsolation.js";
 import { OPERATOR_SESSION_COOKIE } from "../src/operator/store.js";
 import { cleanupCloudTemps } from "./cloud-harness.js";
 import {
@@ -238,7 +238,8 @@ describe("Cloud two-organization hostile isolation", () => {
       expect(plexiA?.amount).toBe(alpha.plexiAmount);
       expect(plexiA?.classificationLabel).toBe("Confirmat de owner");
       expect(plexiB?.amount).toBe(testCompany.plexiAmount);
-      expect(plexiB?.classificationLabel).toBe("Default de dezvoltare");
+      expect(plexiB?.classificationLabel).toBe("Confirmat de owner");
+      expect(plexiA?.amount).not.toBe(plexiB?.amount);
 
       const stockA = (await (
         await fixture.app.request(`/api/inventory/${PLEXIGLAS_3MM_OPAL_ID}`, {

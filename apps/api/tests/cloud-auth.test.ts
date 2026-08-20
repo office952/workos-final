@@ -280,6 +280,50 @@ describe("Cloud auth and authorization", () => {
     fixture.close();
   });
 
+  it("still requires real Cloud login for a SYNTHETIC_TEST organization", async () => {
+    const fixture = createCloudFixture();
+    const org = await addOrganization(fixture, "Sintetic Auth", "SYNTHETIC_TEST");
+    expect((await fixture.app.request("/api/resources-admin")).status).toBe(401);
+    await addUser(fixture, {
+      email: "synth-auth@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: org.organization.organizationId,
+      role: "owner",
+    });
+    const missingPassword = await fixture.app.request("/api/cloud/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: "synth-auth@example.test" }),
+    });
+    expect(missingPassword.status).toBe(400);
+    const wrongPassword = await loginCloud(
+      fixture.app,
+      "synth-auth@example.test",
+      "not-the-password",
+      org.organization.organizationId,
+    );
+    expect(wrongPassword.response.status).toBe(401);
+    expect(wrongPassword.cookie).toBeNull();
+    const headerSpoof = await fixture.app.request("/api/resources-admin", {
+      headers: { "X-Organization-Id": org.organization.organizationId },
+    });
+    expect(headerSpoof.status).toBe(401);
+    const login = await loginCloud(
+      fixture.app,
+      "synth-auth@example.test",
+      OWNER_PASSWORD,
+      org.organization.organizationId,
+    );
+    expect(login.response.status).toBe(200);
+    expect(login.cookie).toMatch(/^workos_cloud_session=/);
+    expect((await fixture.app.request("/api/resources-admin")).status).toBe(401);
+    expect(
+      (await fixture.app.request("/api/resources-admin", { headers: { cookie: login.cookie ?? "" } }))
+        .status,
+    ).toBe(200);
+    fixture.close();
+  });
+
   it("does not project a disabled organization as a usable Cloud session", async () => {
     const fixture = createCloudFixture();
     const alpha = await addOrganization(fixture, "Atelier Alpha");

@@ -55,7 +55,7 @@ Created only inside isolated Cloud test/QA roots.
 - Organization B display name: `TEST COMPANY`
 - Bootstrap: `SYNTHETIC_TEST`
 - Provider registry: `EMPTY_FOUNDATION`
-- Distinct plexi amount: `11.5` (`PLATFORM_DEFAULT` / `DEVELOPMENT_DEFAULT`)
+- Distinct plexi amount: `11.5`, created by fixture owner write after generic bootstrap (see testability-boundary correction)
 - Seller, person, customer, request, attachment, inventory, display label seeded through existing owner APIs
 - No HUB MEDIA legal data, people, OWNER_CONFIRMED seed rates, or `MCH-CNC-4020`
 
@@ -174,3 +174,59 @@ Provider, data, document, and operator isolation were tested independently: empt
 The adopt fingerprint was hardened before any real dataset is in range, because WAL/SHM appearance was previously treated as unchanged.
 
 No HR, supplier, module, or Machine Admin work was added. Those remain later on purpose.
+
+## Testability-boundary correction
+
+Independent review accepted Slice 4 isolation and security, then put canonical `main` integration on HOLD for one hygiene leak: named TEST COMPANY fixture truth (`11.5`, PINs, emails, seller) lived under `apps/api/src/cloud/fixtures/testCompany.ts` and `resources/store.ts` imported `TEST_COMPANY_PLEXI_AMOUNT` for `SYNTHETIC_TEST` bootstrap.
+
+That was not an auth backdoor and not a cross-org leak. It was test truth inside the production runtime graph.
+
+Closed here without reopening Slice 4:
+
+### Permanent law — `TESTABILITY_WITHOUT_AUTH_BYPASS`
+
+```text
+TESTABILITY MAY BYPASS UI SETUP,
+BUT MUST NOT BYPASS SECURITY INVARIANTS.
+
+TEST FIXTURE MUST NOT BECOME PLATFORM OR ORGANIZATION RUNTIME TRUTH.
+```
+
+Allowed: temporary Control / Operational Planes, synthetic fixtures, deterministic builders, direct harness setup, isolated `WORKOS_CLOUD_ROOT`, multiple browser contexts, real login after setup, internal failure-injection seams that are not reachable from normal HTTP/CLI.
+
+Forbidden: magic Cloud credentials, `X-Test-User` / `X-Test-Role`, `X-Organization-Id` authority, auth-bypass headers, query impersonation, `NODE_ENV` → Cloud owner, DEV Cloud authentication bypass, `/api/test-login`, production auto-created test users, production password fallbacks, company-name business behavior, production stores importing named TEST COMPANY fixtures.
+
+### Taxonomy
+
+```text
+PLATFORM DEFAULT     = runtime product truth supplied by WorkOS
+ORGANIZATION CONFIG  = organization-owned runtime truth
+TEST FIXTURE         = tests only
+SYNTHETIC QA DATA    = created by isolated test/QA provisioning
+```
+
+`SYNTHETIC_TEST` remains a generic empty-foundation bootstrap policy (same non-owner-confirmed platform cost defaults as `NEW_ORGANIZATION`, empty people, empty provider registry, no seller). It does not create Cloud Users, memberships, or sessions.
+
+Hostile isolation now starts both Organizations from generic WorkOS defaults, then fixture/API setup writes distinct seller, people, customers, plexi amounts (`11.5` vs `18.5`), inventory, requests, documents, and metadata. Those amounts are owner writes through the existing cost-evidence API, so both become `OWNER_CONFIRMED` after setup. Named constants live in `apps/api/tests/fixtures/cloudIsolation.ts`. The Slice 4 screenshot of TEST COMPANY plexi at `11,50` / Default de dezvoltare is historical bootstrap evidence, superseded by this boundary.
+
+Playwright Cloud E2E no longer falls back to `OwnerPass12`. `WORKOS_CLOUD_E2E=1` requires explicit `WORKOS_CLOUD_E2E_USER_A/B/C` and `WORKOS_CLOUD_E2E_PASSWORD`.
+
+`failAt` on adopt stays a test-only seam. Production adopt CLI does not accept it. No HTTP route accepts it.
+
+### Future signup law (not implemented here)
+
+Organization registration, User registration, and Membership creation will be separate product operations. Future public signup UI will orchestrate them. Tests may call the underlying provisioning services directly. Signup tests themselves must cross the real signup UI/API path.
+
+### Correction flags
+
+```text
+TEST_FIXTURE_IMPORTED_BY_PRODUCTION_STORE = NO
+NAMED_TEST_COMPANY_RUNTIME_LOGIC = NO
+HARDCODED_E2E_PASSWORD_FALLBACK = NO
+SYNTHETIC_TEST_CREATES_CLOUD_USER = NO
+SYNTHETIC_TEST_MINTS_SESSION = NO
+HEADER_AUTHORITY = NO
+TESTABILITY_WITHOUT_AUTH_BYPASS = PASS
+FOUNDATION_READY_FOR_CANONICAL_INTEGRATION = YES
+REAL_HUB_MEDIA_ADOPTION = NOT_EXECUTED
+```

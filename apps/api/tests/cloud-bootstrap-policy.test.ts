@@ -1,10 +1,13 @@
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   CANONICAL_PRODUCT_CODE,
+  costEvidence,
   MCH_CNC_4020_ID,
   OWNER_CONFIRMED_SELLER,
   PLEXIGLAS_3MM_OPAL_ID,
 } from "@workos-final/domain";
+import { PLATFORM_DEFAULT_COST_NOTE } from "../src/resources/store.js";
 import {
   addOrganization,
   addUser,
@@ -20,6 +23,11 @@ afterEach(() => {
 });
 
 describe("Cloud bootstrap policy", () => {
+  it("does not import named TEST COMPANY fixtures into production resource bootstrap", () => {
+    const store = readFileSync(new URL("../src/resources/store.ts", import.meta.url), "utf8");
+    expect(store).not.toMatch(/TEST_COMPANY|testCompany|cloud\/fixtures/);
+  });
+
   it("keeps NEW_ORGANIZATION free of HUB seller, people, confirmed costs, and machines", async () => {
     const fixture = createCloudFixture();
     try {
@@ -262,22 +270,34 @@ describe("Cloud bootstrap policy", () => {
     }
   });
 
-  it("uses only synthetic non-owner-confirmed truth for SYNTHETIC_TEST", async () => {
+  it("uses the same generic platform defaults as NEW_ORGANIZATION for SYNTHETIC_TEST", async () => {
     const fixture = createCloudFixture();
     try {
     const org = await addOrganization(fixture, "Test Sintetic", "SYNTHETIC_TEST");
+    expect((await fixture.app.request("/api/resources-admin")).status).toBe(401);
     await addUser(fixture, {
       email: "synth@test.example",
       password: OWNER_PASSWORD,
       organizationId: org.organization.organizationId,
       role: "owner",
     });
+    const rejected = await loginCloud(
+      fixture.app,
+      "synth@test.example",
+      "wrong-password",
+      org.organization.organizationId,
+    );
+    expect(rejected.response.status).toBe(401);
+    expect(rejected.cookie).toBeNull();
+    expect((await fixture.app.request("/api/resources-admin")).status).toBe(401);
     const login = await loginCloud(
       fixture.app,
       "synth@test.example",
       OWNER_PASSWORD,
       org.organization.organizationId,
     );
+    expect(login.response.status).toBe(200);
+    expect(login.cookie).toBeTruthy();
     const headers = { cookie: login.cookie ?? "" };
     const seller = (await (await fixture.app.request("/api/seller", { headers })).json()) as {
       seller: null;
@@ -304,9 +324,10 @@ describe("Cloud bootstrap policy", () => {
     expect(
       admin.costEvidence.every((row) => row.sourceLabel === "Valoare implicită de platformă"),
     ).toBe(true);
-    expect(admin.costEvidence[0]?.note).toContain("sintetică");
+    expect(admin.costEvidence.every((row) => row.note === PLATFORM_DEFAULT_COST_NOTE)).toBe(true);
     const plexi = admin.costEvidence.find((row) => row.resourceId === PLEXIGLAS_3MM_OPAL_ID);
-    expect(plexi?.amount).toBe(11.5);
+    const platformPlexi = costEvidence.find((row) => row.resourceId === PLEXIGLAS_3MM_OPAL_ID);
+    expect(plexi?.amount).toBe(platformPlexi?.amount);
     const workcenters = await (
       await fixture.app.request("/api/workcenters", { headers })
     ).text();

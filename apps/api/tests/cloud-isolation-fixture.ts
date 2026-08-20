@@ -27,7 +27,7 @@ import {
   TEST_COMPANY_PLEXI_AMOUNT,
   TEST_COMPANY_REQUEST_TITLE,
   TEST_COMPANY_SELLER,
-} from "../src/cloud/fixtures/testCompany.js";
+} from "./fixtures/cloudIsolation.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import { backCncTaskId, materializeCanonicalLettersPlan } from "./letters-plan-fixture.js";
 import { provisionMembership } from "../src/cloud/provision.js";
@@ -315,19 +315,36 @@ async function seedPlaneViaApi(
   if (!plexi) {
     throw new Error("missing plexi");
   }
+  let costEvidenceRowId = plexi.evidenceRowId;
   if (input.plexiAmount !== undefined && input.plexiAmount !== plexi.amount) {
-    await app.request(`/api/resources-admin/cost-evidence/${plexi.evidenceRowId}`, {
-      method: "PATCH",
-      headers: hdr,
-      body: JSON.stringify({ amount: input.plexiAmount, note: "alpha confirmat" }),
-    });
+    const edited = await app.request(
+      `/api/resources-admin/cost-evidence/${plexi.evidenceRowId}`,
+      {
+        method: "PATCH",
+        headers: hdr,
+        body: JSON.stringify({ amount: input.plexiAmount, note: "izolatie confirmat" }),
+      },
+    );
+    if (edited.status !== 200) {
+      throw new Error(`plexi ${edited.status}`);
+    }
+    const after = (await readJson(
+      await app.request("/api/resources-admin", { headers: { cookie } }),
+    )) as {
+      costEvidence: Array<{ resourceId: string; evidenceRowId: string; amount: number }>;
+    };
+    const plexiAfter = after.costEvidence.find((row) => row.resourceId === PLEXIGLAS_3MM_OPAL_ID);
+    if (!plexiAfter) {
+      throw new Error("missing plexi after edit");
+    }
+    costEvidenceRowId = plexiAfter.evidenceRowId;
   }
   return {
     personId,
     customerId,
     requestId,
     attachmentId,
-    costEvidenceRowId: plexi.evidenceRowId,
+    costEvidenceRowId,
   };
 }
 
@@ -465,6 +482,7 @@ export async function provisionHostileIsolationWorld(): Promise<HostileIsolation
     requestTitle: TEST_COMPANY_REQUEST_TITLE,
     attachmentBytes: TEST_COMPANY_ATTACHMENT_BYTES,
     inventoryQty: TEST_COMPANY_INVENTORY_QTY,
+    plexiAmount: TEST_COMPANY_PLEXI_AMOUNT,
     displayLabel: "Familie Test",
   });
 

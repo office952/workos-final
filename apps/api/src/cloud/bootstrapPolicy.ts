@@ -19,12 +19,13 @@ export const PROVIDER_REGISTRY_KINDS = [
 
 export type ProviderRegistryKind = (typeof PROVIDER_REGISTRY_KINDS)[number];
 
-export {
-  PLATFORM_DEFAULT_COST_NOTE,
-  SYNTHETIC_COST_NOTE,
-} from "../resources/store.js";
+export { PLATFORM_DEFAULT_COST_NOTE } from "../resources/store.js";
 
 /**
+ * SYNTHETIC_TEST is a generic empty-foundation bootstrap policy for isolated
+ * test/QA planes. It must not encode named TEST COMPANY truth, Cloud Users,
+ * memberships, or sessions. Differentiation belongs to test fixture setup.
+ *
  * ADOPT_EXISTING uses the current curated HUB MEDIA workcenter catalog only as
  * first-pilot compatibility. It is not the permanent law that every adopted
  * existing company receives HUB MEDIA equipment. Future adoption must resolve
