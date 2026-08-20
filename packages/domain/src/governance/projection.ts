@@ -131,8 +131,43 @@ export function projectSystemGovernance(): GovernanceProjection {
       {
         id: "AUTHORIZATION",
         label: "Autorizare",
-        owns: ["enforcement-ul pe write-uri de administrare"],
-        state: "NOT_IMPLEMENTED",
+        owns: [
+          "enforcement-ul owner/member pe write-uri de administrare în Cloud",
+          "single-plane rămâne compatibilitate explicită, nu autoritate Cloud",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "CLOUD_CONTROL_PLANE",
+        label: "WorkOS Cloud — Control Plane",
+        owns: [
+          "Organization",
+          "User",
+          "Membership",
+          "PlatformSession",
+          "OperationalPlane descriptor",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "CLOUD_AUTH",
+        label: "Autentificare Cloud",
+        owns: [
+          "email și parolă",
+          "sesiune platformă HttpOnly",
+          "organizația activă pe sesiune",
+        ],
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "CLOUD_OPERATIONAL_PLANE",
+        label: "Plan operațional per organizație",
+        owns: [
+          "identitate plane verificată",
+          "runtime request-scoped",
+          "izolarea adevărului operațional",
+        ],
+        state: "IMPLEMENTED",
       },
       {
         id: "RESOURCES_COST",
@@ -270,8 +305,15 @@ export function projectSystemGovernance(): GovernanceProjection {
         id: "authorization",
         label: "Autorizare",
         statement:
-          "Write-urile de administrare sunt acțiuni de owner. Enforcement-ul de autorizare nu este implementat.",
-        state: "NOT_IMPLEMENTED",
+          "Write-urile de administrare sunt acțiuni de owner. În Cloud, membership owner/member este enforcement-ul. Single-plane rămâne compatibilitate explicită.",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "cloud-foundation",
+        label: "WorkOS Cloud Foundation",
+        statement:
+          "Control Plane partajat plus un Operational Plane verificat per Organization. User ≠ Person ≠ OperatorSession. OperatorSession este valid doar în organizația deja autentificată. Nu există Hub, billing sau signup public.",
+        state: "IMPLEMENTED",
       },
       {
         id: "inventory",
@@ -652,6 +694,21 @@ export function projectSystemGovernance(): GovernanceProjection {
         state: "IMPLEMENTED",
       },
       { id: "execution", label: "Execuție", state: "NOT_IMPLEMENTED" },
+      {
+        id: "cloud-foundation-v1",
+        label: "WorkOS Cloud Foundation V1",
+        state: "IMPLEMENTED",
+      },
+      {
+        id: "real-hub-media-cloud-pilot",
+        label: "Pilot Cloud HUB MEDIA real",
+        state: "NOT_IMPLEMENTED",
+      },
+      {
+        id: "self-service-onboarding",
+        label: "Onboarding self-service",
+        state: "NOT_IMPLEMENTED",
+      },
     ],
     uiRules: [
       "Interfața operator este în română.",

@@ -4,9 +4,11 @@ import {
   getResource,
   isValidCostAmount,
   ownerConfirmedCostSource,
+  PLEXIGLAS_3MM_OPAL_ID,
   type CostEvidence,
   type ResourceUnit,
 } from "@workos-final/domain";
+import { TEST_COMPANY_PLEXI_AMOUNT } from "../cloud/fixtures/testCompany.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 import type { BootstrapPolicy } from "../cloud/controlPlane.js";
 
@@ -135,6 +137,10 @@ function costSeedsForPolicy(
     policy === "SYNTHETIC_TEST" ? SYNTHETIC_COST_NOTE : PLATFORM_DEFAULT_COST_NOTE;
   return costEvidence.map((row) => ({
     ...row,
+    amount:
+      policy === "SYNTHETIC_TEST" && row.resourceId === PLEXIGLAS_3MM_OPAL_ID
+        ? TEST_COMPANY_PLEXI_AMOUNT
+        : row.amount,
     source: "PLATFORM_DEFAULT",
     classification: "DEVELOPMENT_DEFAULT",
     note,

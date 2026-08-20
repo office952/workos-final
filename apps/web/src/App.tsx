@@ -60,9 +60,9 @@ function AppGate() {
     return <LoginPage />;
   }
   return (
-    <OperatorSessionProvider>
+    <OperatorSessionProvider key={organization?.organizationId ?? "single-plane"}>
       <AppShell navItems={NAV_ITEMS}>
-        <Routes>
+        <Routes key={organization?.organizationId ?? "single-plane"}>
           <Route path="/" element={<JobsOverviewPage />} />
           <Route path="/atelier" element={<AtelierPage />} />
           <Route path="/requests" element={<RequestsOverviewPage />} />

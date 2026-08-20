@@ -66,6 +66,11 @@ Entities need not share one schema. They must share these principles.
 
 ```text
 WorkOS Final
+├── WorkOS Cloud Foundation V1              IMPLEMENTED_CURRENT / BASIC (feature branch; synthetic isolation verified)
+│   ├── Control Plane                       Organization, User, Membership, PlatformSession
+│   ├── Cloud Authentication                email/password, HttpOnly session, active Organization
+│   ├── Operational Plane                   verified descriptor → plane identity → request-scoped runtime
+│   └── Isolation law                       separate planes, not organization_id on every business table
 ├── Product System                          IMPLEMENTED_CURRENT (typed structure + persisted display labels)
 │   ├── ProductFamily / ProductCategory
 │   ├── ProductTemplate
@@ -145,6 +150,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 
 | Domain | Owns | Does not own |
 |---|---|---|
+| WorkOS Cloud Foundation | Control Plane (Organization, User, Membership, PlatformSession), Cloud authentication, Operational Plane descriptor and verified routing, owner/member write gates | Hub, billing, public signup, SSO, real HUB MEDIA dataset, Machine Admin, commercial policy admin |
 | Product System | Family, category, template, composition, variants, component technical settings, allowed configuration | Purchase rates, commercial price, execution actuals, attendance |
 | Form / Intake | Schema, fields, visibility, order-specific operator input | System technical settings, formulas, rates, Product Truth |
 | Truth compiler | ProductDefinition, confirmation of the reviewed definition, ProductTruth, ProductAggregate | Resource catalogs, commercial price, actuals |
@@ -152,7 +158,7 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Operational Processes | Process definition, required capability class, type applicability, product/component process composition | Resource price, ExecutionTask, machine identity, employee |
 | Customer | Current reusable commercial identity (`displayName`, ACTIVE/RETIRED). Minimal catalog only. | Quote/Order historical identity, CRM, contacts, billing, invoices, Product Truth, seller identity, Request office status |
 | Commercial Request | Mutable incoming request: customerId, title, description, office status, Request↔Quote link, CommercialRequestAttachment metadata (client-file evidence on the Cerere). | Product Truth, EIC, pricing, Quote/Acceptance/Order status, CRM, People, global DMS, file preview/analysis |
-| Seller | Current company / vânzător identity for new Quotes. Owner-confirmed HUB MEDIA PRODUCTION profile. | Customer catalog, CRM, invoices, global Settings, ProductTemplate |
+| Seller | Current company / vânzător identity for new Quotes, stored on the active Operational Plane. Lazy HUB MEDIA seed is single-plane compatibility only. | Customer catalog, CRM, invoices, global Settings, ProductTemplate, Control Plane copy |
 | Commercial | Customer price rules, current-policy projection, Quote Snapshot freeze including frozen customer and seller identities, customer Quote Document PDF projection, Quote Acceptance, and Order Snapshot. Quote/Order carry frozen production-input evidence; they do not own production composition or Production Release. The PDF does not reprice. CommercialRequest is the incoming office object and may link to Quotes without entering Quote content. | EIC authority, ProductTemplate, execution actuals, resource rates, production composition, Production Release, live Customer catalog, live seller profile, CRM, Product Truth |
 | Execution | Plan, tasks, assignments, MachineRun, operational actuals | Attendance truth, rewriting Product Truth, historical commercial reprice, stock balance |
 | Inventory | Stock movements and derived balance for stockable materials | Resource identity, reservations, purchasing, warehouses, valuation, actual cost |
@@ -161,6 +167,17 @@ Capability kernel IDs stay frozen and `PLANNED`. That does not mean the first pr
 | Reporting | Read-only projections | Underlying business truth |
 | Documentation | Explanation, history, architecture | Active configurable values |
 | Analyzer | Geometric proposals after operator confirmation | Product Truth, settings, price |
+
+## WorkOS Cloud Foundation
+
+WorkOS Cloud is a shared Control Plane plus one verified Operational Plane per Organization.
+A Cloud User reaches an Organization only through Membership. The active Organization lives on `PlatformSession`. OperatorSession is a separate shop-floor identity and is valid only inside that already authenticated Organization.
+
+Operational isolation is the separate plane (SQLite + documents root + request-scoped runtime), not `organization_id` on every business table. Platform-curated Resource IDs may be shared; cost evidence, inventory, seller, people, documents, and execution state stay plane-specific.
+
+`ADOPT_EXISTING` currently maps the provider registry to the curated HUB MEDIA catalog as **PILOT_COMPATIBILITY** for the first HUB MEDIA pilot. That is not the permanent law that every adopted company receives HUB MEDIA equipment. Machine Admin remains later.
+
+Real HUB MEDIA dataset adoption, the first real Cloud owner, Hub, billing, and public signup are not part of this Foundation.
 
 ## Product System
 

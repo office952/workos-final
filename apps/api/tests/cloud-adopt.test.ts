@@ -1,9 +1,13 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import Database from "better-sqlite3";
 import { MCH_CNC_4020_ID, OWNER_CONFIRMED_SELLER } from "@workos-final/domain";
-import { adoptOperationalPlane, fingerprintSqlite } from "../src/cloud/adoptOperationalPlane.js";
+import {
+  adoptOperationalPlane,
+  fingerprintSqlite,
+  sourceFingerprintsEqual,
+} from "../src/cloud/adoptOperationalPlane.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import {
   addOrganization,
@@ -112,9 +116,11 @@ describe("ADOPT_EXISTING machinery", () => {
     expect(dry.verification).toBeUndefined();
     expect(existsSync(join(fixture.cloudRoot, "backups"))).toBe(false);
     expect(existsSync(org.paths.planeRoot)).toBe(false);
-    expect(fingerprintSqlite(source.sqlitePath).sqliteHash).toBe(before.sqliteHash);
-    expect(fixture.controlPlane.getPlaneByOrganization(org.organization.organizationId)?.planeId).toBe(
-      org.plane.planeId,
+    expect(existsSync(`${org.paths.planeRoot}.staging`)).toBe(false);
+    expect(sourceFingerprintsEqual(fingerprintSqlite(source.sqlitePath), before)).toBe(true);
+    expect(fixture.controlPlane.listOrganizations()).toEqual([org.organization]);
+    expect(fixture.controlPlane.getPlaneByOrganization(org.organization.organizationId)).toEqual(
+      org.plane,
     );
 
     const executed = await adoptOperationalPlane({
@@ -125,7 +131,7 @@ describe("ADOPT_EXISTING machinery", () => {
       mode: "execute",
     });
     expect(executed.executed).toBe(true);
-    expect(executed.sourceAfter.sqliteHash).toBe(before.sqliteHash);
+    expect(sourceFingerprintsEqual(executed.sourceAfter, before)).toBe(true);
     expect(executed.verification?.people).toBe(source.peopleCount);
     expect(executed.verification?.customers).toBe(1);
     expect(executed.verification?.quotes).toBe(1);
@@ -211,6 +217,77 @@ describe("ADOPT_EXISTING machinery", () => {
         mode: "dry-run",
       }),
     ).rejects.toMatchObject({ code: "source_inside_cloud_root" });
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it("compares WAL and SHM appearance, disappearance, and hash changes", () => {
+    const source = buildSyntheticSource();
+    const before = fingerprintSqlite(source.sqlitePath);
+    expect(before.walHash).toBeNull();
+    expect(before.shmHash).toBeNull();
+    writeFileSync(`${source.sqlitePath}-wal`, "wal-appeared");
+    expect(sourceFingerprintsEqual(before, fingerprintSqlite(source.sqlitePath))).toBe(false);
+    writeFileSync(`${source.sqlitePath}-shm`, "shm-appeared");
+    const withSidecars = fingerprintSqlite(source.sqlitePath);
+    expect(sourceFingerprintsEqual(before, withSidecars)).toBe(false);
+    writeFileSync(`${source.sqlitePath}-wal`, "wal-changed");
+    expect(sourceFingerprintsEqual(withSidecars, fingerprintSqlite(source.sqlitePath))).toBe(
+      false,
+    );
+    unlinkSync(`${source.sqlitePath}-shm`);
+    expect(sourceFingerprintsEqual(withSidecars, fingerprintSqlite(source.sqlitePath))).toBe(
+      false,
+    );
+  });
+
+  it("keeps a backup after an injected failure and does not serve the plane", async () => {
+    const source = buildSyntheticSource();
+    const before = fingerprintSqlite(source.sqlitePath);
+    const fixture = createCloudFixture();
+    try {
+      const org = await addOrganization(fixture, "Adopt Backup Fail", "ADOPT_EXISTING");
+      await expect(
+        adoptOperationalPlane({
+          controlPlane: fixture.controlPlane,
+          organizationId: org.organization.organizationId,
+          sourceSqlite: source.sqlitePath,
+          sourceDocumentsRoot: source.documentsRoot,
+          mode: "execute",
+          failAt: "after-backup",
+        }),
+      ).rejects.toMatchObject({ code: "injected_failure" });
+      expect(sourceFingerprintsEqual(fingerprintSqlite(source.sqlitePath), before)).toBe(true);
+      expect(existsSync(join(fixture.cloudRoot, "backups"))).toBe(true);
+      expect(existsSync(org.paths.planeRoot)).toBe(false);
+      expect(fixture.controlPlane.getPlaneByOrganization(org.organization.organizationId)).toBeNull();
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it("rolls back a failed execute so the incomplete plane is not served", async () => {
+    const source = buildSyntheticSource();
+    const before = fingerprintSqlite(source.sqlitePath);
+    const fixture = createCloudFixture();
+    try {
+      const org = await addOrganization(fixture, "Adopt Fail", "ADOPT_EXISTING");
+      await expect(
+        adoptOperationalPlane({
+          controlPlane: fixture.controlPlane,
+          organizationId: org.organization.organizationId,
+          sourceSqlite: source.sqlitePath,
+          sourceDocumentsRoot: source.documentsRoot,
+          mode: "execute",
+          failAt: "after-stage-copy",
+        }),
+      ).rejects.toMatchObject({ code: "injected_failure" });
+      expect(sourceFingerprintsEqual(fingerprintSqlite(source.sqlitePath), before)).toBe(true);
+      expect(existsSync(org.paths.planeRoot)).toBe(false);
+      expect(existsSync(`${org.paths.planeRoot}.staging`)).toBe(false);
+      expect(fixture.controlPlane.getPlaneByOrganization(org.organization.organizationId)).toBeNull();
+      expect(existsSync(join(fixture.cloudRoot, "backups"))).toBe(true);
     } finally {
       fixture.close();
     }

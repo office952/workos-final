@@ -180,4 +180,50 @@ describe("AppShell", () => {
     expect(screen.getByRole("button", { name: "Ieși din cont" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Schimbă organizația")).not.toBeInTheDocument();
   });
+
+  it("shows the organization switcher only for multi-membership accounts", async () => {
+    const { fetchCloudSession } = await import("./cloudSessionApi");
+    vi.mocked(fetchCloudSession).mockResolvedValue({
+      mode: "cloud",
+      user: { userId: "usr:c", email: "user.c@isolation.test" },
+      organization: {
+        organizationId: "org:a",
+        displayName: "Atelier Alpha",
+        slug: "alpha",
+        role: "owner",
+      },
+      memberships: [
+        {
+          organizationId: "org:a",
+          displayName: "Atelier Alpha",
+          slug: "alpha",
+          role: "owner",
+          status: "ACTIVE",
+        },
+        {
+          organizationId: "org:b",
+          displayName: "TEST COMPANY",
+          slug: "test-company",
+          role: "owner",
+          status: "ACTIVE",
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter>
+        <CloudSessionProvider>
+          <OperatorSessionProvider>
+            <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+              <p>conținut</p>
+            </AppShell>
+          </OperatorSessionProvider>
+        </CloudSessionProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("Schimbă organizația")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Atelier Alpha" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "TEST COMPANY" })).toBeInTheDocument();
+  });
 });

@@ -20,12 +20,20 @@ import { derivePlanePaths } from "./paths.js";
 
 export type AdoptMode = "dry-run" | "execute";
 
+export type AdoptFailPoint =
+  | "after-backup"
+  | "after-stage-copy"
+  | "before-identity-bind"
+  | "during-verification";
+
 export type AdoptInput = {
   controlPlane: ControlPlane;
   organizationId: string;
   sourceSqlite: string;
   sourceDocumentsRoot: string;
   mode: AdoptMode;
+  /** Test-only seam. Production CLI never sets this. */
+  failAt?: AdoptFailPoint;
 };
 
 export type SourceFingerprint = {
@@ -59,7 +67,7 @@ export type AdoptPlan = {
   destinationPlaneRoot: string;
   stagingRoot: string;
   backupRoot: string;
-  precondition: "Source writers must be stopped. Copy uses SQLite backup from a read-only handle.";
+  precondition: "Source writers must be stopped or the source must be a known-consistent snapshot. Adopt is not online live migration. Copy uses SQLite backup from a read-only handle.";
   wouldCopySqlite: true;
   wouldCopyDocuments: true;
   wouldMigrateDestinationOnly: true;
@@ -135,7 +143,7 @@ export async function adoptOperationalPlane(input: AdoptInput): Promise<AdoptRes
     stagingRoot,
     backupRoot,
     precondition:
-      "Source writers must be stopped. Copy uses SQLite backup from a read-only handle.",
+      "Source writers must be stopped or the source must be a known-consistent snapshot. Adopt is not online live migration. Copy uses SQLite backup from a read-only handle.",
     wouldCopySqlite: true,
     wouldCopyDocuments: true,
     wouldMigrateDestinationOnly: true,
@@ -155,12 +163,16 @@ export async function adoptOperationalPlane(input: AdoptInput): Promise<AdoptRes
   let promoted = false;
   try {
     writeAdoptBackup(backupRoot, sourceSqlite, sourceDocumentsRoot, sourceBefore, plane);
+    failIf(input.failAt, "after-backup");
     rmSync(stagingRoot, { recursive: true, force: true });
     mkdirSync(join(stagingRoot, "documents"), { recursive: true });
     const stagedSqlite = join(stagingRoot, "product-system.sqlite");
     await copySqliteViaBackup(sourceSqlite, stagedSqlite);
     cpSync(sourceDocumentsRoot, join(stagingRoot, "documents"), { recursive: true });
+    failIf(input.failAt, "after-stage-copy");
+    failIf(input.failAt, "before-identity-bind");
     migrateAndBindDestination(stagedSqlite, plane);
+    failIf(input.failAt, "during-verification");
     const verification = readVerification(stagedSqlite, join(stagingRoot, "documents"));
     const sourceAfter = fingerprintSqlite(sourceSqlite);
     assertUnchanged(sourceBefore, sourceAfter);
@@ -319,12 +331,28 @@ function rejectIfInsideCloudRoot(target: string, cloudRoot: string): void {
   }
 }
 
+export function sourceFingerprintsEqual(
+  left: SourceFingerprint,
+  right: SourceFingerprint,
+): boolean {
+  return (
+    left.sqlitePath === right.sqlitePath &&
+    left.sqliteHash === right.sqliteHash &&
+    left.sqliteSize === right.sqliteSize &&
+    left.walHash === right.walHash &&
+    left.shmHash === right.shmHash
+  );
+}
+
 function assertUnchanged(before: SourceFingerprint, after: SourceFingerprint): void {
-  if (before.sqliteHash !== after.sqliteHash || before.sqliteSize !== after.sqliteSize) {
+  if (!sourceFingerprintsEqual(before, after)) {
     throw new AdoptError("source_mutated");
   }
-  if (before.walHash && before.walHash !== after.walHash) {
-    throw new AdoptError("source_mutated");
+}
+
+function failIf(actual: AdoptFailPoint | undefined, expected: AdoptFailPoint): void {
+  if (actual === expected) {
+    throw new AdoptError("injected_failure");
   }
 }
 

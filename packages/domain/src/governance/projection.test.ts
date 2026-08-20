@@ -164,6 +164,19 @@ describe("system governance projection", () => {
     );
     expect(
       governance.authorities.find((item) => item.id === "AUTHORIZATION")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.authorities.find((item) => item.id === "CLOUD_CONTROL_PLANE")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.boundaries.find((item) => item.id === "cloud-foundation")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "cloud-foundation-v1")?.state,
+    ).toBe("IMPLEMENTED");
+    expect(
+      governance.roadmap.find((item) => item.id === "real-hub-media-cloud-pilot")
+        ?.state,
     ).toBe("NOT_IMPLEMENTED");
     expect(
       governance.boundaries.find((item) => item.id === "intake-settings")?.statement,

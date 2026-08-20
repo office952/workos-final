@@ -290,7 +290,13 @@ describe("Cloud bootstrap policy", () => {
     const admin = (await (
       await fixture.app.request("/api/resources-admin", { headers })
     ).json()) as {
-      costEvidence: Array<{ classificationLabel: string; sourceLabel: string; note: string }>;
+      costEvidence: Array<{
+        resourceId: string;
+        amount: number;
+        classificationLabel: string;
+        sourceLabel: string;
+        note: string;
+      }>;
     };
     expect(
       admin.costEvidence.every((row) => row.classificationLabel === "Default de dezvoltare"),
@@ -299,6 +305,8 @@ describe("Cloud bootstrap policy", () => {
       admin.costEvidence.every((row) => row.sourceLabel === "Valoare implicită de platformă"),
     ).toBe(true);
     expect(admin.costEvidence[0]?.note).toContain("sintetică");
+    const plexi = admin.costEvidence.find((row) => row.resourceId === PLEXIGLAS_3MM_OPAL_ID);
+    expect(plexi?.amount).toBe(11.5);
     const workcenters = await (
       await fixture.app.request("/api/workcenters", { headers })
     ).text();

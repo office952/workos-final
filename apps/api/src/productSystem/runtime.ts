@@ -70,6 +70,8 @@ import {
 import {
   applyOperationalBootstrap,
   resolveProviderRegistry,
+  resolveProviderRegistryKind,
+  type ProviderRegistryKind,
 } from "../cloud/bootstrapPolicy.js";
 import type { BootstrapPolicy } from "../cloud/controlPlane.js";
 import {
@@ -309,6 +311,7 @@ export type ProductSystemRuntime = {
   getSellerProfile(): SellerProfile | null;
   bootstrapPolicy: BootstrapPolicy | null;
   providerRegistry: WorkcenterRegistry;
+  providerRegistryKind: ProviderRegistryKind;
   updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
   listJobOverview(): JobOverviewProjection;
   listQuoteOverview(): QuoteOverviewProjection;
@@ -445,6 +448,9 @@ export function createProductSystemRuntimeFromOpenDb(
     (bootstrapPolicy
       ? resolveProviderRegistry(bootstrapPolicy)
       : workcenterRegistry);
+  const providerRegistryKind = resolveProviderRegistryKind(
+    bootstrapPolicy ?? "SINGLE_PLANE",
+  );
   applyOperationalBootstrap(db, bootstrapPolicy ?? undefined);
   return {
     sqlitePath,
@@ -453,6 +459,7 @@ export function createProductSystemRuntimeFromOpenDb(
     planeId: planeIdentity?.planeId ?? null,
     bootstrapPolicy,
     providerRegistry,
+    providerRegistryKind,
     labels() {
       return loadDisplayLabelCatalog(db);
     },

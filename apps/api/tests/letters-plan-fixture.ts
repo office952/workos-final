@@ -23,11 +23,16 @@ const readyValues = {
   "volume.confirmedPerimeterMm": 12500,
 };
 
-export function materializeCanonicalLettersPlan(): ExecutionPlanRecord {
+export function materializeCanonicalLettersPlan(
+  inscription = "WORKOS",
+): ExecutionPlanRecord {
   const definition = compileDefinition(
     frontlitPlexiAl06Template,
     frontlitPlexiAl06FormSchema,
-    { templateCode: CANONICAL_PRODUCT_CODE, values: readyValues },
+    {
+      templateCode: CANONICAL_PRODUCT_CODE,
+      values: { ...readyValues, "root.inscription": inscription },
+    },
   );
   const truth = confirmReviewedDefinition(definition, definition.reviewId);
   if ("ok" in truth) {

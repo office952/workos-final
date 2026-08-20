@@ -124,6 +124,10 @@ Cross-system ownership: `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINI
 | Commercial Request (Cereri de ofertă) | IMPLEMENTED_CURRENT / BASIC |
 | Documents V1 / Request Attachments | IMPLEMENTED_CURRENT / BASIC |
 | Client Workspace | IMPLEMENTED_CURRENT / BASIC |
+| WorkOS Cloud Foundation V1 | IMPLEMENTED_CURRENT / BASIC (feature branch) |
+| Multi-org hostile isolation | VERIFIED_SYNTHETIC |
+| Real HUB MEDIA Cloud pilot | NOT_STARTED |
+| Self-service onboarding | NOT_IMPLEMENTED |
 | ACM cassette second-product vertical slice | IMPLEMENTED_CURRENT / BASIC / EIC COMPLETE / QUOTE READY |
 | Quote Document PDF (Ofertă) | IMPLEMENTED_CURRENT / BASIC |
 | Reporting, Order/invoice/production documents, full ACM, Logo | LATER |

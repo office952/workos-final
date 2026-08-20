@@ -11,23 +11,56 @@ import type { BootstrapPolicy } from "./controlPlane.js";
 
 export const EMPTY_WORKCENTER_REGISTRY = createWorkcenterRegistry([], []);
 
+export const PROVIDER_REGISTRY_KINDS = [
+  "HUB_MEDIA_PILOT_COMPATIBILITY",
+  "EMPTY_FOUNDATION",
+  "LEGACY_SINGLE_PLANE",
+] as const;
+
+export type ProviderRegistryKind = (typeof PROVIDER_REGISTRY_KINDS)[number];
+
 export {
   PLATFORM_DEFAULT_COST_NOTE,
   SYNTHETIC_COST_NOTE,
 } from "../resources/store.js";
 
+/**
+ * ADOPT_EXISTING uses the current curated HUB MEDIA workcenter catalog only as
+ * first-pilot compatibility. It is not the permanent law that every adopted
+ * existing company receives HUB MEDIA equipment. Future adoption must resolve
+ * that Organization's own provider configuration. Machine Admin is later.
+ */
+export function resolveProviderRegistryKind(
+  policy: BootstrapPolicy | "SINGLE_PLANE" | undefined,
+): ProviderRegistryKind {
+  switch (policy) {
+    case "ADOPT_EXISTING":
+      return "HUB_MEDIA_PILOT_COMPATIBILITY";
+    case "NEW_ORGANIZATION":
+    case "SYNTHETIC_TEST":
+      return "EMPTY_FOUNDATION";
+    case "SINGLE_PLANE":
+    case undefined:
+      return "LEGACY_SINGLE_PLANE";
+    default: {
+      const _exhaustive: never = policy;
+      return _exhaustive;
+    }
+  }
+}
+
 export function resolveProviderRegistry(
   policy: BootstrapPolicy | "SINGLE_PLANE",
 ): WorkcenterRegistry {
-  switch (policy) {
-    case "ADOPT_EXISTING":
-    case "SINGLE_PLANE":
+  const kind = resolveProviderRegistryKind(policy);
+  switch (kind) {
+    case "HUB_MEDIA_PILOT_COMPATIBILITY":
+    case "LEGACY_SINGLE_PLANE":
       return workcenterRegistry;
-    case "NEW_ORGANIZATION":
-    case "SYNTHETIC_TEST":
+    case "EMPTY_FOUNDATION":
       return EMPTY_WORKCENTER_REGISTRY;
     default: {
-      const _exhaustive: never = policy;
+      const _exhaustive: never = kind;
       return _exhaustive;
     }
   }
