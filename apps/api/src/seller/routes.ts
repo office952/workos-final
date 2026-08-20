@@ -6,7 +6,8 @@ import { requireOwnerRole } from "../cloud/middleware.js";
 export function registerSellerRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/seller", (c) => {
     const runtime = getProductSystem(c);
-    return c.json({ seller: runtime.getSellerProfile() });
+    const seller = runtime.getSellerProfile();
+    return c.json({ seller, configured: seller !== null });
   });
 
   app.patch("/api/seller", requireOwnerRole(), async (c) => {

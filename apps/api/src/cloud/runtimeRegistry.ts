@@ -1,5 +1,6 @@
 import { createProductSystemRuntime, type ProductSystemRuntime } from "../productSystem/runtime.js";
 import type { OperationalPlaneDescriptor } from "./controlPlane.js";
+import { resolveProviderRegistry } from "./bootstrapPolicy.js";
 import { PlaneIdentityError } from "./planeIdentity.js";
 import { derivePlanePaths } from "./paths.js";
 
@@ -34,6 +35,8 @@ export function createRuntimeRegistry(): RuntimeRegistry {
         const runtime = createProductSystemRuntime(paths.sqlitePath, {
           documentsRoot: paths.documentsRoot,
           bindPlaneIdentity: false,
+          bootstrapPolicy: descriptor.bootstrapPolicy,
+          providerRegistry: resolveProviderRegistry(descriptor.bootstrapPolicy),
           planeIdentity: {
             planeId: descriptor.planeId,
             organizationId: descriptor.organizationId,

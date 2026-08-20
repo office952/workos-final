@@ -1,6 +1,5 @@
 import type { OrderSnapshot } from "../commercial/orderSnapshot.js";
 import {
-  assignedProviderStillValid,
   type ExecutionPlanProgress,
   type ExecutionPlanView,
   type ExecutionTaskView,
@@ -218,7 +217,10 @@ function isCurrentProviderBlocker(task: ExecutionTaskView): boolean {
   if (task.assignedProvider === null) {
     return true;
   }
-  return !assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider);
+  return !task.eligibleProviders.some(
+    (item) =>
+      item.id === task.assignedProvider?.id && item.kind === task.assignedProvider.kind,
+  );
 }
 
 export function projectJobOverviewItem(input: {

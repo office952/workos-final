@@ -169,6 +169,7 @@ describe("planned start current eligibility", () => {
       [returned.person],
       null,
       setup.eligibility,
+      returned.person.personId,
     );
     expect(restored.tasks.find((item) => item.taskId === ready.taskId)?.canStart).toBe(true);
     expect(
@@ -241,6 +242,7 @@ describe("planned start current eligibility", () => {
       [away.person],
       null,
       setup.eligibility,
+      away.person.personId,
     );
     expect(view.tasks.find((item) => item.taskId === ready.taskId)?.canComplete).toBe(true);
     const completed = completeExecutionTask(

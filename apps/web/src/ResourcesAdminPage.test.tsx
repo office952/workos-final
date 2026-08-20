@@ -125,7 +125,7 @@ describe("ResourcesAdminPage", () => {
     render(<ResourcesAdminPage />);
     expect(
       await screen.findByText(
-        "Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și lucrările înghețate nu se schimbă.",
+        /Valorile implicite de platformă nu sunt cost confirmat/,
       ),
     ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
@@ -176,6 +176,33 @@ describe("ResourcesAdminPage", () => {
     expect(
       screen.getByRole("button", { name: /Profil aluminiu/ }),
     ).not.toHaveAttribute("aria-current");
+  });
+
+  it("shows platform-default cost provenance as not owner-confirmed", async () => {
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(
+      projectResourcesAdministration(
+        costEvidence.map((item, index) => ({
+          ...item,
+          source: "PLATFORM_DEFAULT",
+          classification: "DEVELOPMENT_DEFAULT",
+          evidenceRowId: `cev:default:${index}`,
+          createdAt: "2026-08-19T00:00:00.000Z",
+        })),
+      ),
+    );
+    const user = userEvent.setup();
+    render(
+      <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
+        <ResourcesAdminPage />
+      </CloudSessionTestProvider>,
+    );
+    expect(
+      await screen.findByText(/Valorile implicite de platformă nu sunt cost confirmat/),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
+    expect(screen.getAllByText("Valoare implicită de platformă").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Default de dezvoltare").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Confirmat de owner")).not.toBeInTheDocument();
   });
 
   it("shows cost-evidence edit for a Cloud owner and hides it for a Cloud member", async () => {

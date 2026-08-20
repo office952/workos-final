@@ -18,7 +18,11 @@ import {
 } from "../processes/catalog.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
 import { productionWorkFromSnapshot } from "../production/snapshot.js";
-import type { ProviderKind } from "../workcenters/catalog.js";
+import {
+  workcenterRegistry,
+  type ProviderKind,
+  type WorkcenterRegistry,
+} from "../workcenters/catalog.js";
 import { providersForCapability } from "../workcenters/providers.js";
 import {
   projectActualInternalCost,
@@ -274,6 +278,7 @@ export function projectExecutionPlanView(
   snapshot: AcceptedProductionSnapshot | null = null,
   eligibility: PeopleEligibilityContext | null = null,
   currentOperatorId: string | null = null,
+  providerRegistry: WorkcenterRegistry = workcenterRegistry,
 ): ExecutionPlanView {
   const byId = new Map(record.tasks.map((task) => [task.taskId, task]));
   const availablePeople = activePeople(people).filter(
@@ -292,7 +297,10 @@ export function projectExecutionPlanView(
           id: person.personId,
           label: person.displayName,
         }));
-    const eligibleProviders = liveEligibleProviders(task.requiredCapabilityId);
+    const eligibleProviders = liveEligibleProviders(
+      task.requiredCapabilityId,
+      providerRegistry,
+    );
     const dependsOnLabels = task.dependsOnTaskIds.flatMap((id) => {
       const dependency = byId.get(id);
       return dependency ? [taskDependencyLabel(dependency)] : [];
@@ -306,6 +314,7 @@ export function projectExecutionPlanView(
       people,
       eligibility,
       currentOperatorId,
+      providerRegistry,
     );
     const operatorRelation = projectOperatorRelation({
       task,
@@ -315,6 +324,7 @@ export function projectExecutionPlanView(
       eligibility,
       currentOperatorId,
       canClaimStart,
+      providerRegistry,
     });
     const ownedByCurrent =
       task.status === "IN_PROGRESS" &&
@@ -349,7 +359,13 @@ export function projectExecutionPlanView(
       canAssignExecutor: false,
       canStart: canClaimStart,
       canClaimStart,
-      startBlockReason: plannedStartBlockReason(task, byId, people, eligibility),
+      startBlockReason: plannedStartBlockReason(
+        task,
+        byId,
+        people,
+        eligibility,
+        providerRegistry,
+      ),
       operatorRelation,
       startedByLabel:
         task.status === "IN_PROGRESS" || task.status === "COMPLETED"
@@ -566,12 +582,13 @@ export function executionTaskStatusLabel(status: ExecutionTaskStatus): string {
 
 export function liveEligibleProviders(
   capabilityId: string,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): ExecutionEligibleProvider[] {
   const capability = getProductionCapability(capabilityId);
   if (!capability) {
     return [];
   }
-  return providersForCapability(capability.id)
+  return providersForCapability(capability.id, registry)
     .filter((item) => item.lifecycle === "ACTIVE")
     .map((item) => ({
       id: item.id,
@@ -584,8 +601,9 @@ export function liveEligibleProviders(
 export function assignedProviderStillValid(
   capabilityId: string,
   assigned: AssignedExecutionProvider,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): boolean {
-  return liveEligibleProviders(capabilityId).some(
+  return liveEligibleProviders(capabilityId, registry).some(
     (item) => item.id === assigned.id && item.kind === assigned.kind,
   );
 }
@@ -616,13 +634,20 @@ export function taskRequiresProvider(
   return frozenProviderRequirement(task.providerRequirement) === "REQUIRED";
 }
 
-function providerReadyForStart(task: ExecutionTask): boolean {
+function providerReadyForStart(
+  task: ExecutionTask,
+  registry: WorkcenterRegistry,
+): boolean {
   if (!taskRequiresProvider(task)) {
     return true;
   }
   return (
     task.assignedProvider !== null &&
-    assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider)
+    assignedProviderStillValid(
+      task.requiredCapabilityId,
+      task.assignedProvider,
+      registry,
+    )
   );
 }
 
@@ -632,11 +657,12 @@ function canClaimStartTask(
   people: readonly Person[],
   eligibility: PeopleEligibilityContext | null,
   currentOperatorId: string | null,
+  providerRegistry: WorkcenterRegistry,
 ): boolean {
   if (
     task.status !== "PLANNED" ||
     !currentOperatorId ||
-    !providerReadyForStart(task) ||
+    !providerReadyForStart(task, providerRegistry) ||
     !dependenciesCompleted(task, byId)
   ) {
     return false;
@@ -662,6 +688,7 @@ function projectOperatorRelation(input: {
   eligibility: PeopleEligibilityContext | null;
   currentOperatorId: string | null;
   canClaimStart: boolean;
+  providerRegistry: WorkcenterRegistry;
 }): OperatorTaskRelation {
   const { task, assignedExecutor, waitingFor, currentOperatorId, canClaimStart } = input;
   if (task.status === "IN_PROGRESS" || task.status === "COMPLETED") {
@@ -679,7 +706,7 @@ function projectOperatorRelation(input: {
   if (waitingFor.length > 0) {
     return "waiting_dependencies";
   }
-  if (!providerReadyForStart(task)) {
+  if (!providerReadyForStart(task, input.providerRegistry)) {
     return "missing_provider";
   }
   if (task.assignedExecutor && task.assignedExecutor.id !== currentOperatorId) {
@@ -705,11 +732,12 @@ function plannedStartBlockReason(
   byId: ReadonlyMap<string, ExecutionTask>,
   people: readonly Person[],
   eligibility: PeopleEligibilityContext | null,
+  providerRegistry: WorkcenterRegistry,
 ): PlannedStartBlockReason | null {
   if (
     task.status !== "PLANNED" ||
     !task.assignedExecutor ||
-    !providerReadyForStart(task) ||
+    !providerReadyForStart(task, providerRegistry) ||
     !dependenciesCompleted(task, byId)
   ) {
     return null;

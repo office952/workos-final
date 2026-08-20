@@ -6,6 +6,7 @@ import {
   type MembershipRole,
 } from "./controlPlane.js";
 import { derivePlanePaths } from "./paths.js";
+import { resolveProviderRegistry } from "./bootstrapPolicy.js";
 import { createProductSystemRuntime } from "../productSystem/runtime.js";
 import {
   openControlPlaneDatabase,
@@ -34,15 +35,19 @@ export async function provisionOrganizationWithPlane(
     bootstrapPolicy: input.bootstrapPolicy ?? "NEW_ORGANIZATION",
   });
   const paths = derivePlanePaths(controlPlane.cloudRoot, plane.planeKey);
-  mkdirSync(paths.documentsRoot, { recursive: true });
-  const runtime = createProductSystemRuntime(paths.sqlitePath, {
-    documentsRoot: paths.documentsRoot,
-    planeIdentity: {
-      planeId: plane.planeId,
-      organizationId: organization.organizationId,
-    },
-  });
-  runtime.close();
+  if (plane.bootstrapPolicy !== "ADOPT_EXISTING") {
+    mkdirSync(paths.documentsRoot, { recursive: true });
+    const runtime = createProductSystemRuntime(paths.sqlitePath, {
+      documentsRoot: paths.documentsRoot,
+      bootstrapPolicy: plane.bootstrapPolicy,
+      providerRegistry: resolveProviderRegistry(plane.bootstrapPolicy),
+      planeIdentity: {
+        planeId: plane.planeId,
+        organizationId: organization.organizationId,
+      },
+    });
+    runtime.close();
+  }
   return { organization, plane, paths };
 }
 

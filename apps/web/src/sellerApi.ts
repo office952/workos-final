@@ -6,13 +6,13 @@ async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function fetchSellerProfile(): Promise<SellerProfile> {
+export async function fetchSellerProfile(): Promise<SellerProfile | null> {
   const response = await fetch(`${baseUrl}/api/seller`);
-  const body = await readJson<{ seller?: SellerProfile }>(response);
-  if (!response.ok || !body.seller) {
+  const body = await readJson<{ seller?: SellerProfile | null }>(response);
+  if (!response.ok) {
     throw new Error("seller_unavailable");
   }
-  return body.seller;
+  return body.seller ?? null;
 }
 
 export async function updateSellerProfile(input: SellerProfileInput): Promise<SellerProfile> {

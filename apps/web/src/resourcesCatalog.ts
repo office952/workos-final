@@ -343,19 +343,20 @@ function costChips(
   if (!cost) {
     return [];
   }
+  const chips: CatalogChip[] = [];
   if (cost.classificationLabel === "Confirmat de owner") {
-    return [{ label: cost.classificationLabel, tone: "ok" }];
+    chips.push({ label: cost.classificationLabel, tone: "ok" });
+  } else if (cost.classificationLabel === "Default de dezvoltare") {
+    chips.push({ label: cost.classificationLabel, tone: "warn" });
+  } else if (cost.classificationLabel === "Decizie AI / pilot") {
+    chips.push({ label: cost.classificationLabel, tone: "neutral" });
   }
-  if (cost.classificationLabel === "Default de dezvoltare") {
-    return [{ label: cost.classificationLabel, tone: "warn" }];
+  if (cost.sourceLabel === "Valoare implicită de platformă") {
+    chips.push({ label: cost.sourceLabel, tone: "warn" });
+  } else if (cost.sourceLabel === "Evidență legacy" && chips.length === 0) {
+    chips.push({ label: cost.sourceLabel, tone: "neutral" });
   }
-  if (cost.sourceLabel === "Evidență legacy") {
-    return [{ label: cost.sourceLabel, tone: "neutral" }];
-  }
-  if (cost.classificationLabel === "Decizie AI / pilot") {
-    return [{ label: cost.classificationLabel, tone: "neutral" }];
-  }
-  return [];
+  return chips;
 }
 
 function completenessChips(label: string): CatalogChip[] {

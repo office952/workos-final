@@ -63,6 +63,25 @@ export function ownerConfirmedSellerProfile(updatedAt = "2026-08-17T00:00:00.000
   };
 }
 
+export function initializeSellerProfile(
+  input: SellerProfileInput,
+  updatedAt = new Date().toISOString(),
+): SellerMutationResult {
+  const next = readSellerInput(input);
+  if (!next) {
+    return { ok: false, error: "invalid_profile" };
+  }
+  return {
+    ok: true,
+    alreadyApplied: false,
+    profile: {
+      profileId: SELLER_PROFILE_ID,
+      ...next,
+      updatedAt,
+    },
+  };
+}
+
 export function updateSellerProfile(
   current: SellerProfile,
   input: SellerProfileInput,

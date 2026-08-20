@@ -42,6 +42,20 @@ describe("SellerAdminPage", () => {
     expect(screen.queryByLabelText(/telefon|email/i)).not.toBeInTheDocument();
   });
 
+  it("projects an unconfigured seller so the owner can save the first Date firmă", async () => {
+    vi.mocked(fetchSellerProfile).mockResolvedValue(null);
+    render(
+      <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
+        <SellerAdminPage />
+      </CloudSessionTestProvider>,
+    );
+    expect(
+      await screen.findByText(/Datele firmei nu sunt configurate/),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Denumire legală")).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Salvează datele firmei" })).toBeDisabled();
+  });
+
   it("keeps seller write for a Cloud owner and presents a member as read-only", async () => {
     vi.mocked(fetchSellerProfile).mockResolvedValue({
       profileId: "seller:current",

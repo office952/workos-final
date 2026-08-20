@@ -79,8 +79,9 @@ export function ResourcesAdminPage() {
             <OwnerWriteHint />
           ) : writable ? (
             <p>
-              Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și
-              lucrările înghețate nu se schimbă.
+              Valorile implicite de platformă nu sunt cost confirmat. Salvezi un
+              tarif = confirmat de owner pentru calcule noi. Ofertele și lucrările
+              înghețate nu se schimbă.
             </p>
           ) : (
             <p>

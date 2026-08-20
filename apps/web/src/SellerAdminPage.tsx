@@ -9,7 +9,7 @@ import { PageHeader } from "./ui/PageHeader";
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "ready"; seller: SellerProfile };
+  | { kind: "ready"; seller: SellerProfile | null };
 
 const EMPTY_DRAFT: SellerProfileInput = {
   legalName: "",
@@ -35,7 +35,7 @@ export function SellerAdminPage() {
       .then((seller) => {
         if (!cancelled) {
           setPage({ kind: "ready", seller });
-          setDraft(toDraft(seller));
+          setDraft(seller ? toDraft(seller) : EMPTY_DRAFT);
         }
       })
       .catch(() => {
@@ -62,7 +62,9 @@ export function SellerAdminPage() {
         lead="Identitatea vânzătorului folosită pe oferte noi. Nu este catalogul de clienți și nu este un Settings general."
       />
       <p className="page-lead">
-        Vânzător curent: {page.seller.legalName}. Ofertele deja create păstrează datele de atunci.
+        {page.seller
+          ? `Vânzător curent: ${page.seller.legalName}. Ofertele deja create păstrează datele de atunci.`
+          : "Datele firmei nu sunt configurate. Ownerul poate salva prima identitate. Ofertele noi rămân blocate până atunci."}
       </p>
       {!canAdminister ? <OwnerWriteHint /> : null}
       <form

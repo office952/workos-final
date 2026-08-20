@@ -175,7 +175,7 @@ describe("task executor assignment", () => {
         "2026-08-16T17:13:00.000Z",
         [retired.person],
       ),
-    ).toEqual({ ok: false, error: "executor_unavailable" });
+    ).toEqual({ ok: false, error: "retired_person" });
   });
 
   it("does not let an executor bypass a required missing provider", () => {

@@ -270,6 +270,15 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     }
     const commercialPrice = projectCommercialPrice(compiled.eic);
     const seller = runtime.getSellerProfile();
+    if (!seller) {
+      return c.json(
+        {
+          error: "seller_unconfigured",
+          reasons: ["Datele firmei trebuie configurate înainte de a crea o ofertă."],
+        },
+        422,
+      );
+    }
     const frozen = freezeQuoteSnapshot(
       compiled.truth,
       compiled.aggregate,
@@ -822,6 +831,7 @@ function projectPlanView(
     runtime.readProductionSnapshot(record.plan.sourceSnapshotId),
     runtime.peopleEligibilityContext(),
     currentOperatorId,
+    runtime.providerRegistry,
   );
 }
 

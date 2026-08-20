@@ -15,6 +15,8 @@ import {
   type Person,
   type TaskCompletionInput,
   type TaskMutationResult,
+  workcenterRegistry,
+  type WorkcenterRegistry,
 } from "@workos-final/domain";
 import { writeInventoryOutFromTask } from "../inventory/store.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
@@ -287,9 +289,10 @@ export function persistAssignedProvider(
   db: SqliteDatabase,
   taskId: string,
   providerId: string,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    assignProviderToTask(record, taskId, providerId),
+    assignProviderToTask(record, taskId, providerId, registry),
   );
 }
 
@@ -311,9 +314,10 @@ export function persistTaskStart(
   startedAt: string,
   people: readonly Person[],
   eligibility: PeopleEligibilityContext | null = null,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    startExecutionTask(record, taskId, startedAt, people, eligibility),
+    startExecutionTask(record, taskId, startedAt, people, eligibility, registry),
   );
 }
 
@@ -324,9 +328,18 @@ export function persistClaimAndStart(
   startedAt: string,
   people: readonly Person[],
   eligibility: PeopleEligibilityContext | null = null,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): TaskMutationResult {
   return applyMutation(db, taskId, (record) =>
-    claimAndStartExecutionTask(record, taskId, personId, startedAt, people, eligibility),
+    claimAndStartExecutionTask(
+      record,
+      taskId,
+      personId,
+      startedAt,
+      people,
+      eligibility,
+      registry,
+    ),
   );
 }
 

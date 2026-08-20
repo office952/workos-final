@@ -7,6 +7,7 @@ export {
   copyFrozenSellerIdentity,
   freezeSellerIdentity,
   ownerConfirmedSellerProfile,
+  initializeSellerProfile,
   sellerFromRow,
   updateSellerProfile,
   type FrozenSellerIdentity,

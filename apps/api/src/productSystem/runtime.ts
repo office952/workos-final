@@ -64,7 +64,14 @@ import {
   type TaskCompletionInput,
   type TaskMutationResult,
   type CostEvidence,
+  workcenterRegistry,
+  type WorkcenterRegistry,
 } from "@workos-final/domain";
+import {
+  applyOperationalBootstrap,
+  resolveProviderRegistry,
+} from "../cloud/bootstrapPolicy.js";
+import type { BootstrapPolicy } from "../cloud/controlPlane.js";
 import {
   applyMigrations,
   openSqliteDatabase,
@@ -98,7 +105,7 @@ import {
   persistRetiredCustomer,
   persistUpdatedCustomer,
 } from "../customers/store.js";
-import { getSellerProfile, persistUpdatedSeller } from "../seller/store.js";
+import { getSellerProfile, persistUpdatedSeller, readSellerProfile } from "../seller/store.js";
 import {
   ensureTrustedWorkforce,
   getPerson,
@@ -162,13 +169,11 @@ import {
   attachmentIntegrityMatches,
 } from "../requests/attachmentStorage.js";
 import {
-  bootstrapProductSystemDisplayStore,
   loadDisplayLabelCatalog,
   updateDisplayLabel,
   type DisplayLabelWriteResult,
 } from "./store.js";
 import {
-  ensureCostEvidence,
   listActiveCostEvidence as readActiveCostEvidence,
   supersedeCostEvidence as persistSupersededCostEvidence,
   type CostEvidenceWriteResult,
@@ -301,7 +306,9 @@ export type ProductSystemRuntime = {
   getCustomer(customerId: string): Customer | null;
   listCustomerRegistry(): CustomerRegistryProjection;
   readCustomerWorkspace(customerId: string): CustomerWorkspaceProjection | null;
-  getSellerProfile(): SellerProfile;
+  getSellerProfile(): SellerProfile | null;
+  bootstrapPolicy: BootstrapPolicy | null;
+  providerRegistry: WorkcenterRegistry;
   updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
   listJobOverview(): JobOverviewProjection;
   listQuoteOverview(): QuoteOverviewProjection;
@@ -377,6 +384,8 @@ export type ProductSystemRuntimeOptions = {
   planeIdentity?: { planeId: string; organizationId: string };
   /** Provision may bind once. Request open must only assert. Defaults to bind. */
   bindPlaneIdentity?: boolean;
+  bootstrapPolicy?: BootstrapPolicy;
+  providerRegistry?: WorkcenterRegistry;
 };
 
 export function createProductSystemRuntime(
@@ -424,16 +433,26 @@ export function createProductSystemRuntimeFromOpenDb(
     db.close();
     throw error;
   }
-  bootstrapProductSystemDisplayStore(db);
-  ensureCostEvidence(db);
-  if (!process.env.VITEST) {
-    ensureTrustedWorkforce(db);
+  if (options.bindPlaneIdentity === false) {
+    if (!options.bootstrapPolicy || !options.providerRegistry) {
+      db.close();
+      throw new Error("cloud_request_runtime_requires_bootstrap_context");
+    }
   }
+  const bootstrapPolicy = options.bootstrapPolicy ?? null;
+  const providerRegistry =
+    options.providerRegistry ??
+    (bootstrapPolicy
+      ? resolveProviderRegistry(bootstrapPolicy)
+      : workcenterRegistry);
+  applyOperationalBootstrap(db, bootstrapPolicy ?? undefined);
   return {
     sqlitePath,
     documentsRoot,
     organizationId: planeIdentity?.organizationId ?? null,
     planeId: planeIdentity?.planeId ?? null,
+    bootstrapPolicy,
+    providerRegistry,
     labels() {
       return loadDisplayLabelCatalog(db);
     },
@@ -492,7 +511,7 @@ export function createProductSystemRuntimeFromOpenDb(
       return getExecutionPlanByTaskId(db, taskId);
     },
     assignExecutionTaskProvider(taskId, providerId) {
-      return persistAssignedProvider(db, taskId, providerId);
+      return persistAssignedProvider(db, taskId, providerId, providerRegistry);
     },
     assignExecutionTaskExecutor(taskId, personId) {
       return persistAssignedExecutor(
@@ -510,6 +529,7 @@ export function createProductSystemRuntimeFromOpenDb(
         new Date().toISOString(),
         listPeople(db),
         runtimePeopleEligibilityContext(db),
+        providerRegistry,
       );
     },
     claimAndStartExecutionTask(taskId, personId) {
@@ -520,6 +540,7 @@ export function createProductSystemRuntimeFromOpenDb(
         new Date().toISOString(),
         listPeople(db),
         runtimePeopleEligibilityContext(db),
+        providerRegistry,
       );
     },
     listOperatorCandidates() {
@@ -566,6 +587,7 @@ export function createProductSystemRuntimeFromOpenDb(
         people,
         eligibility,
         plans,
+        providerRegistry,
       });
     },
     listPeople() {
@@ -616,6 +638,9 @@ export function createProductSystemRuntimeFromOpenDb(
       return persistUpdatedPerson(db, personId, patch);
     },
     materializeTrustedWorkforce() {
+      if (bootstrapPolicy) {
+        return;
+      }
       ensureTrustedWorkforce(db);
     },
     listCustomers() {
@@ -625,13 +650,15 @@ export function createProductSystemRuntimeFromOpenDb(
       return getCustomer(db, customerId);
     },
     getSellerProfile() {
-      return getSellerProfile(db);
+      return bootstrapPolicy
+        ? readSellerProfile(db)
+        : getSellerProfile(db, { lazyHubSeed: true });
     },
     updateSellerProfile(input) {
       return persistUpdatedSeller(db, input);
     },
     listJobOverview() {
-      return projectJobOverview(jobOverviewItems(db));
+      return projectJobOverview(jobOverviewItems(db, providerRegistry));
     },
     listQuoteOverview() {
       return projectQuoteOverview(quoteOverviewItems(db));
@@ -642,7 +669,7 @@ export function createProductSystemRuntimeFromOpenDb(
     listCustomerRegistry() {
       const requests = requestOverviewItems(db);
       const quotes = quoteOverviewItems(db);
-      const jobs = jobOverviewItems(db);
+      const jobs = jobOverviewItems(db, providerRegistry);
       return projectCustomerRegistry(
         listCustomers(db).map((customer) =>
           projectCustomerRegistryItem({
@@ -663,7 +690,7 @@ export function createProductSystemRuntimeFromOpenDb(
         customer,
         requests: requestsForCustomer(requestOverviewItems(db), customerId),
         quotes: quotesForCustomer(quoteOverviewItems(db), customerId),
-        jobs: jobsForCustomer(jobOverviewItems(db), customerId),
+        jobs: jobsForCustomer(jobOverviewItems(db, providerRegistry), customerId),
       });
     },
     readCommercialRequest(requestId) {
@@ -865,7 +892,7 @@ function quoteOverviewItems(db: SqliteDatabase) {
   });
 }
 
-function jobOverviewItems(db: SqliteDatabase) {
+function jobOverviewItems(db: SqliteDatabase, providerRegistry: WorkcenterRegistry) {
   const people = listPeople(db);
   return listOrderSnapshots(db).map((order) => {
     const release = getAcceptedProductionSnapshotByOrder(db, order.orderSnapshotId);
@@ -881,6 +908,8 @@ function jobOverviewItems(db: SqliteDatabase) {
             people,
             release,
             runtimePeopleEligibilityContext(db),
+            null,
+            providerRegistry,
           )
         : null,
     });

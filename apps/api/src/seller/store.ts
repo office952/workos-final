@@ -1,5 +1,6 @@
 import {
   OWNER_CONFIRMED_SELLER,
+  initializeSellerProfile,
   ownerConfirmedSellerProfile,
   sellerFromRow,
   updateSellerProfile,
@@ -24,7 +25,7 @@ type SellerRow = {
 
 const SEED_UPDATED_AT = "2026-08-17T00:00:00.000Z";
 
-export function getSellerProfile(db: SqliteDatabase): SellerProfile {
+export function readSellerProfile(db: SqliteDatabase): SellerProfile | null {
   const row = db
     .prepare(
       `
@@ -35,29 +36,33 @@ export function getSellerProfile(db: SqliteDatabase): SellerProfile {
     `,
     )
     .get() as SellerRow | undefined;
-  if (row) {
-    const profile = sellerFromRow(
-      row.profile_id,
-      row.legal_name,
-      row.brand,
-      row.fiscal_id,
-      row.trade_register,
-      row.address,
-      row.locality,
-      row.iban,
-      row.bank,
-      row.updated_at,
-    );
-    if (profile && profile.updatedAt !== SEED_UPDATED_AT) {
-      return profile;
-    }
-    if (
-      profile &&
-      profile.address === OWNER_CONFIRMED_SELLER.address &&
-      profile.locality === OWNER_CONFIRMED_SELLER.locality
-    ) {
-      return profile;
-    }
+  if (!row) {
+    return null;
+  }
+  return sellerFromRow(
+    row.profile_id,
+    row.legal_name,
+    row.brand,
+    row.fiscal_id,
+    row.trade_register,
+    row.address,
+    row.locality,
+    row.iban,
+    row.bank,
+    row.updated_at,
+  );
+}
+
+export function getSellerProfile(
+  db: SqliteDatabase,
+  options: { lazyHubSeed?: boolean } = {},
+): SellerProfile | null {
+  const current = readSellerProfile(db);
+  if (current) {
+    return current;
+  }
+  if (!options.lazyHubSeed) {
+    return null;
   }
   const seeded = ownerConfirmedSellerProfile(SEED_UPDATED_AT);
   persistSellerProfile(db, seeded);
@@ -68,8 +73,10 @@ export function persistUpdatedSeller(
   db: SqliteDatabase,
   input: SellerProfileInput,
 ): SellerMutationResult {
-  const current = getSellerProfile(db);
-  const updated = updateSellerProfile(current, input);
+  const current = readSellerProfile(db);
+  const updated = current
+    ? updateSellerProfile(current, input)
+    : initializeSellerProfile(input);
   if (!updated.ok || updated.alreadyApplied) {
     return updated;
   }
@@ -77,7 +84,7 @@ export function persistUpdatedSeller(
   return updated;
 }
 
-function persistSellerProfile(db: SqliteDatabase, profile: SellerProfile): void {
+export function persistSellerProfile(db: SqliteDatabase, profile: SellerProfile): void {
   db.prepare(
     `
     INSERT INTO seller_profile (
@@ -107,5 +114,12 @@ function persistSellerProfile(db: SqliteDatabase, profile: SellerProfile): void 
     profile.iban,
     profile.bank,
     profile.updatedAt,
+  );
+}
+
+export function isHubMediaSeller(profile: SellerProfile | null): boolean {
+  return (
+    profile?.legalName === OWNER_CONFIRMED_SELLER.legalName &&
+    profile.fiscalId === OWNER_CONFIRMED_SELLER.fiscalId
   );
 }

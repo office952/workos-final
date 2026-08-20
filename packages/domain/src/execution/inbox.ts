@@ -12,6 +12,10 @@ import {
   type ExecutionTaskView,
 } from "./plan.js";
 import type { AcceptedProductionSnapshot } from "../production/snapshot.js";
+import {
+  workcenterRegistry,
+  type WorkcenterRegistry,
+} from "../workcenters/catalog.js";
 
 export type OperatorInboxLaneKind =
   | "in_progress_mine"
@@ -74,8 +78,10 @@ export function projectOperatorTaskInbox(input: {
   people: readonly Person[];
   eligibility: PeopleEligibilityContext | null;
   plans: readonly OperatorInboxPlanSource[];
+  providerRegistry?: WorkcenterRegistry;
 }): OperatorTaskInboxProjection {
   const { currentOperator, people, eligibility, plans } = input;
+  const providerRegistry = input.providerRegistry ?? workcenterRegistry;
   const items: OperatorInboxTaskItem[] = [];
 
   for (const plan of plans) {
@@ -85,6 +91,7 @@ export function projectOperatorTaskInbox(input: {
       plan.snapshot,
       eligibility,
       currentOperator.personId,
+      providerRegistry,
     );
     const byId = new Map(view.tasks.map((task) => [task.taskId, task]));
     for (const task of view.tasks) {
@@ -97,6 +104,7 @@ export function projectOperatorTaskInbox(input: {
         eligibility,
         customerDisplayName: plan.customerDisplayName,
         planCreatedAt: view.plan.createdAt,
+        providerRegistry,
       });
       if (item) {
         items.push(item);
@@ -143,6 +151,7 @@ function classifyInboxTask(input: {
   eligibility: PeopleEligibilityContext | null;
   customerDisplayName: string | null;
   planCreatedAt: string;
+  providerRegistry: WorkcenterRegistry;
 }): OperatorInboxTaskItem | null {
   const { task, view, byId, currentOperatorId, people, eligibility } = input;
 
@@ -180,7 +189,11 @@ function classifyInboxTask(input: {
   if (taskRequiresProvider(task)) {
     const providerOk =
       task.assignedProvider !== null &&
-      assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider);
+      assignedProviderStillValid(
+        task.requiredCapabilityId,
+        task.assignedProvider,
+        input.providerRegistry,
+      );
     if (!providerOk) {
       return toInboxItem(input, "available_needs_provider");
     }

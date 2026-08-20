@@ -64,7 +64,8 @@ export type CostEvidence = {
     | "OWNER_CONFIRMED_PURCHASE"
     | "OWNER_CONFIRMED_WORKSHOP"
     | "LEGACY_EVIDENCE"
-    | "AI_DECISION";
+    | "AI_DECISION"
+    | "PLATFORM_DEFAULT";
   classification: "AI_DECISION" | "OWNER_CONFIRMED" | "DEVELOPMENT_DEFAULT";
   note: string;
   when?: CostEvidenceWhen;
@@ -768,6 +769,8 @@ export function costSourceLabel(source: CostEvidence["source"]): string {
       return "Evidență legacy";
     case "AI_DECISION":
       return "Decizie AI / default de dezvoltare";
+    case "PLATFORM_DEFAULT":
+      return "Valoare implicită de platformă";
     default: {
       const _exhaustive: never = source;
       return _exhaustive;

@@ -8,6 +8,12 @@ import {
   type ResourceUnit,
 } from "@workos-final/domain";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
+import type { BootstrapPolicy } from "../cloud/controlPlane.js";
+
+export const PLATFORM_DEFAULT_COST_NOTE =
+  "Valoare implicită de platformă. Trebuie confirmată de owner.";
+export const SYNTHETIC_COST_NOTE =
+  "Evidență sintetică de test. Nu este cost HUB MEDIA confirmat.";
 
 export const RESOURCE_COST_EVIDENCE_MARKER = "RESOURCE_COST_EVIDENCE_V1_APPLIED";
 
@@ -17,6 +23,7 @@ const COST_SOURCES = [
   "OWNER_CONFIRMED_WORKSHOP",
   "LEGACY_EVIDENCE",
   "AI_DECISION",
+  "PLATFORM_DEFAULT",
 ] as const;
 
 const COST_CLASSIFICATIONS = [
@@ -61,10 +68,17 @@ export function isCostEvidenceApplied(db: SqliteDatabase): boolean {
   return Boolean(row);
 }
 
-export function ensureCostEvidence(db: SqliteDatabase): void {
+export function ensureCostEvidence(
+  db: SqliteDatabase,
+  policy: BootstrapPolicy | "SINGLE_PLANE" = "SINGLE_PLANE",
+): void {
+  if (policy === "ADOPT_EXISTING") {
+    return;
+  }
   if (isCostEvidenceApplied(db)) {
     return;
   }
+  const seeds = costSeedsForPolicy(policy);
   const apply = db.transaction(() => {
     if (isCostEvidenceApplied(db)) {
       return;
@@ -87,7 +101,7 @@ export function ensureCostEvidence(db: SqliteDatabase): void {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
     `,
     );
-    for (const seed of costEvidence) {
+    for (const seed of seeds) {
       insert.run(
         `cev:${randomUUID()}`,
         seed.resourceId,
@@ -109,6 +123,22 @@ export function ensureCostEvidence(db: SqliteDatabase): void {
     ).run(RESOURCE_COST_EVIDENCE_MARKER, createdAt);
   });
   apply();
+}
+
+function costSeedsForPolicy(
+  policy: Exclude<BootstrapPolicy | "SINGLE_PLANE", "ADOPT_EXISTING">,
+): readonly CostEvidence[] {
+  if (policy === "SINGLE_PLANE") {
+    return costEvidence;
+  }
+  const note =
+    policy === "SYNTHETIC_TEST" ? SYNTHETIC_COST_NOTE : PLATFORM_DEFAULT_COST_NOTE;
+  return costEvidence.map((row) => ({
+    ...row,
+    source: "PLATFORM_DEFAULT",
+    classification: "DEVELOPMENT_DEFAULT",
+    note,
+  }));
 }
 
 export function listActiveCostEvidence(db: SqliteDatabase): CostEvidence[] {

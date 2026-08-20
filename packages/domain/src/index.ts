@@ -211,6 +211,7 @@ export {
   type Machine,
   type RecipeGapState,
   type Workcenter,
+  type WorkcenterRegistry,
   type WorkcentersAdminProjection,
 } from "./workcenters/index.js";
 export {
@@ -345,6 +346,7 @@ export {
   SELLER_TEXT_MAX_LENGTH,
   copyFrozenSellerIdentity,
   freezeSellerIdentity,
+  initializeSellerProfile,
   ownerConfirmedSellerProfile,
   sellerFromRow,
   updateSellerProfile,

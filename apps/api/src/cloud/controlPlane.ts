@@ -125,6 +125,7 @@ export type ControlPlane = {
   getPlaneByOrganization(
     organizationId: string,
   ): OperationalPlaneDescriptor | null;
+  removePlane(planeId: string): void;
   createSession(input: {
     userId: string;
     activeOrganizationId: string;
@@ -335,6 +336,9 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
         )
         .get(organizationId) as PlaneRow | undefined;
       return row ? mapPlane(row) : null;
+    },
+    removePlane(planeId) {
+      db.prepare(`DELETE FROM operational_planes WHERE plane_id = ?`).run(planeId);
     },
     createSession(input) {
       assertUsableMembership(db, input.userId, input.activeOrganizationId);

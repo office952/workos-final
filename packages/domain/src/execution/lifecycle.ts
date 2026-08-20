@@ -1,6 +1,10 @@
 import { resolveEligiblePeople, type PeopleEligibilityContext } from "../people/eligibility.js";
 import { findPerson, type Person } from "../people/identity.js";
-import type { ProviderKind } from "../workcenters/catalog.js";
+import {
+  workcenterRegistry,
+  type ProviderKind,
+  type WorkcenterRegistry,
+} from "../workcenters/catalog.js";
 import type { ProductionCapabilityClassId } from "../processes/catalog.js";
 import {
   buildActualConsumption,
@@ -58,6 +62,7 @@ export function assignProviderToTask(
   record: ExecutionPlanRecord,
   taskId: string,
   providerId: string,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -69,7 +74,7 @@ export function assignProviderToTask(
   if (!taskRequiresProvider(task)) {
     return { ok: false, error: "ineligible_provider" };
   }
-  const provider = liveEligibleProviders(task.requiredCapabilityId).find(
+  const provider = liveEligibleProviders(task.requiredCapabilityId, registry).find(
     (item) => item.id === providerId,
   );
   if (!provider) {
@@ -153,6 +158,7 @@ export function startExecutionTask(
   startedAt: string,
   people: readonly Person[] = [],
   eligibility: PeopleEligibilityContext | null = null,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -164,6 +170,20 @@ export function startExecutionTask(
   if (task.status !== "PLANNED") {
     return { ok: false, error: "invalid_transition" };
   }
+  if (taskRequiresProvider(task)) {
+    if (!task.assignedProvider) {
+      return { ok: false, error: "missing_assignment" };
+    }
+    if (
+      !assignedProviderStillValid(
+        task.requiredCapabilityId,
+        task.assignedProvider,
+        registry,
+      )
+    ) {
+      return { ok: false, error: "provider_unavailable" };
+    }
+  }
   if (!task.assignedExecutor) {
     return { ok: false, error: "missing_executor" };
   }
@@ -174,6 +194,7 @@ export function startExecutionTask(
     startedAt,
     people,
     eligibility,
+    registry,
   );
 }
 
@@ -184,6 +205,7 @@ export function claimAndStartExecutionTask(
   startedAt: string,
   people: readonly Person[] = [],
   eligibility: PeopleEligibilityContext | null = null,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): TaskMutationResult {
   const task = findTask(record, taskId);
   if (!task) {
@@ -206,7 +228,11 @@ export function claimAndStartExecutionTask(
       return { ok: false, error: "missing_assignment" };
     }
     if (
-      !assignedProviderStillValid(task.requiredCapabilityId, task.assignedProvider)
+      !assignedProviderStillValid(
+        task.requiredCapabilityId,
+        task.assignedProvider,
+        registry,
+      )
     ) {
       return { ok: false, error: "provider_unavailable" };
     }

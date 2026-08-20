@@ -33,6 +33,8 @@ import {
   providerKindLabel,
   providerLifecycleLabel,
   type ProviderCoverageStatus,
+  workcenterRegistry,
+  type WorkcenterRegistry,
 } from "../workcenters/catalog.js";
 import { processProviderCoverage } from "../workcenters/projection.js";
 import { coverageForCapability, providersForCapability } from "../workcenters/providers.js";
@@ -88,30 +90,31 @@ export type OperationalProcessesAdminProjection = {
 
 export function projectOperationalProcessesAdministration(
   costEvidenceRows: readonly CostEvidence[] = costEvidence,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): OperationalProcessesAdminProjection {
   const processes = operationalProcesses.map((process) =>
-    toAdminRecord(process, costEvidenceRows),
+    toAdminRecord(process, costEvidenceRows, registry),
   );
   return {
     categories: PROCESS_CATEGORIES.map((category) => ({
       id: category,
       label: processCategoryLabel(category),
       processes: processesForCategory(category).map((process) =>
-        toAdminRecord(process, costEvidenceRows),
+        toAdminRecord(process, costEvidenceRows, registry),
       ),
     })).filter((item) => item.processes.length > 0),
     processes,
     capabilities: productionCapabilityClasses.map((capability) => {
-      const coverage = coverageForCapability(capability.id);
+      const coverage = coverageForCapability(capability.id, registry);
       return {
         ...capability,
         kindLabel: productionCapabilityKindLabel(capability.kind),
         processes: processesForCapability(capability.id).map((process) =>
-          toAdminRecord(process, costEvidenceRows),
+          toAdminRecord(process, costEvidenceRows, registry),
         ),
         providerCoverage: coverage,
         providerCoverageLabel: providerCoverageLabel(coverage),
-        providers: providersForCapability(capability.id).map((item) => ({
+        providers: providersForCapability(capability.id, registry).map((item) => ({
           kind: item.kind,
           kindLabel: providerKindLabel(item.kind),
           id: item.id,
@@ -133,9 +136,10 @@ function lettersCompositions(): ProcessCompositionInspection[] {
 function toAdminRecord(
   process: OperationalProcess,
   evidenceRows: readonly CostEvidence[] = costEvidence,
+  registry: WorkcenterRegistry = workcenterRegistry,
 ): ProcessAdminRecord {
   const capability = getProductionCapability(process.requiredCapabilityId);
-  const coverage = processProviderCoverage(process.id);
+  const coverage = processProviderCoverage(process.id, registry);
   const recipe = recipeForProcess(process.id);
   const recipeState = recipeGapForProcess(process.id, evidenceRows);
   return {

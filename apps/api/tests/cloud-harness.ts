@@ -10,7 +10,7 @@ import {
   provisionOrganizationWithPlane,
 } from "../src/cloud/provision.js";
 import { createRuntimeRegistry } from "../src/cloud/runtimeRegistry.js";
-import type { ControlPlane, MembershipRole } from "../src/cloud/controlPlane.js";
+import type { BootstrapPolicy, ControlPlane, MembershipRole } from "../src/cloud/controlPlane.js";
 import type { RuntimeRegistry } from "../src/cloud/runtimeRegistry.js";
 
 export const OWNER_PASSWORD = "OwnerPass12";
@@ -34,7 +34,11 @@ export function trackTempDir(): string {
 
 export function cleanupCloudTemps(): void {
   for (const dir of temps.splice(0)) {
-    rmSync(dir, { recursive: true, force: true });
+    try {
+      rmSync(dir, { recursive: true, force: true });
+    } catch {
+      // Windows may briefly keep a handle on a closed SQLite file.
+    }
   }
 }
 
@@ -61,10 +65,11 @@ export function createCloudFixture(options: { env?: NodeJS.ProcessEnv } = {}): C
 export async function addOrganization(
   fixture: CloudFixture,
   displayName: string,
+  bootstrapPolicy: BootstrapPolicy = "SYNTHETIC_TEST",
 ) {
   return provisionOrganizationWithPlane(fixture.controlPlane, {
     displayName,
-    bootstrapPolicy: "SYNTHETIC_TEST",
+    bootstrapPolicy,
   });
 }
 

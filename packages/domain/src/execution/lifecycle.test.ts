@@ -26,6 +26,7 @@ import {
   MCH_CNC_CANT_LITERE_ID,
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
+  createWorkcenterRegistry,
 } from "../workcenters/catalog.js";
 import { createPerson, type Person } from "../people/identity.js";
 import {
@@ -138,6 +139,17 @@ describe("minimal execution task lifecycle", () => {
       error: "ineligible_provider",
     });
     expect(assignProviderToTask(record, backCnc.taskId, MCH_CNC_CANT_LITERE_ID)).toEqual({
+      ok: false,
+      error: "ineligible_provider",
+    });
+    expect(
+      assignProviderToTask(
+        record,
+        backCnc.taskId,
+        MCH_CNC_4020_ID,
+        createWorkcenterRegistry([], []),
+      ),
+    ).toEqual({
       ok: false,
       error: "ineligible_provider",
     });

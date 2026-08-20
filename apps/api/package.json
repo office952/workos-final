@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "cloud:provision": "tsx src/cloud/devProvisionCli.ts",
+    "cloud:adopt": "tsx src/cloud/adoptCli.ts",
     "build": "tsc --noEmit"
   },
   "dependencies": {

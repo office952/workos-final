@@ -3,7 +3,6 @@ import {
   projectResourcesAdministration,
   projectSystemGovernance,
   projectWorkcentersAdministration,
-  workcenterRegistry,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import { getProductSystem, type ApiEnv } from "./cloud/context.js";
@@ -65,7 +64,10 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/operational-processes", (c) => {
     const runtime = getProductSystem(c);
     return c.json(
-      projectOperationalProcessesAdministration(runtime.listActiveCostEvidence()),
+      projectOperationalProcessesAdministration(
+        runtime.listActiveCostEvidence(),
+        runtime.providerRegistry,
+      ),
     );
   });
 
@@ -73,7 +75,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
     const runtime = getProductSystem(c);
     return c.json(
       projectWorkcentersAdministration(
-        workcenterRegistry,
+        runtime.providerRegistry,
         runtime.listActiveCostEvidence(),
       ),
     );
