@@ -127,19 +127,46 @@ skilled LED before BACK done   409 dependencies_incomplete
 
 Evidence pack: `docs/worklog/screenshots/machine-strict-v1/`
 
-- `01-jobs-list-empty.png`
-- `02-execution-plan-preview.png`
-- `03-execution-workspace-planned.png`
-- `04-machine-start-blocked.png`
-- `05-back-cnc-in-progress-face-blocked.png`
-- `06-led-startable-without-table.png`
-- `07-led-unskilled-blocked.png`
-- `08-led-started-without-table.png`
-- `09-atelier-inbox.png`
-- `10-jobs-list-no-commercial-order.png`
-- `11-processes-bond-not-required.png`
-- `12-workcenters-tables-remain.png`
-- `13-governance.png`
+Repaired 2026-08-21 from a fresh isolated runtime (no Cloud, no HUB MEDIA):
+
+```text
+WORKOS_DATA_DIR = .tmp/machine-strict-evidence-v3
+API = http://127.0.0.1:8822
+UI  = http://127.0.0.1:5192
+FIXTURE = QAE23 (accepted-production-snapshot, compatibility atelier path)
+PLAN = exp:aps:PRD-LETTERS-FRONTLIT-PLEXI-AL06:29dcea6f5abdfc8129d3463fb5f7600bc4e73a3680575dd82d4c207695a88ecf
+OPERATOR_SKILLED = QA Evidence Skilled / PIN 246810
+OPERATOR_UNSKILLED = QA Evidence Unskilled / PIN 135790
+```
+
+Each file was asserted in Playwright against the named runtime state before capture. Blob SHA is `git hash-object`.
+
+| File | Route | Runtime state | Visible assertion | Blob SHA |
+|---|---|---|---|---|
+| `01-jobs-list-empty.png` | `/` | No commercial Order exists yet | EmptyState `Nu există încă lucrări comerciale.` | `d41136d4fd12c7bc1cd4700dd55bf210cc5089aa` |
+| `02-execution-plan-preview.png` | `/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06` | Confirmed none/none 60 mm preview, 12 ops | `Nu necesită utilaj dedicat` + `Furnizori disponibili: CNC 4020`; no old copy | `1c7fab31a08a666a9995ab4f3133673ea23c96bf` |
+| `03-execution-workspace-planned.png` | `/execution/:planId` | New plan, 0/12, nothing started | `0 / 12 finalizate`; FACE `Alocă utilaj`; LED `Nu necesită utilaj dedicat`; no FACE `Pornește` | `a53c83e970412daf97ed9a741be1321c37c15ed9` |
+| `04-machine-start-blocked.png` | `/execution/:planId` FACE CNC card | FACE CNC PLANNED, no machine, Start blocked | `Alocă utilaj` + `Alocă mai întâi utilajul`; `Pornește` absent | `b389e0efb3a457d32c4cd1da09be70424ef2ae72` |
+| `05-back-cnc-in-progress-face-blocked.png` | `/execution/:planId` | BACK CNC IN_PROGRESS on CNC 4020; FACE still unassigned | BACK `Stare: În lucru`; FACE `Alocă utilaj` and no `Pornește`; current copy | `edd25cfe24e6338571aa4d82435804e1e3fd3843` |
+| `06-led-startable-without-table.png` | `/execution/:planId` | BACK complete; LED PLANNED and startable; no table/post | LED `Nu necesită utilaj dedicat` + visible `Pornește`; no `Alocă utilaj` | `6d4b6aea793bd0a5a1319310f0b46e02dc8bd474` |
+| `07-led-unskilled-blocked.png` | `/execution/:planId` | Unskilled operator on startable LED | LED `Nu ești eligibil acum pentru această operație.`; current copy; no `Pornește` | `ad381f04fd413638a1a8d87e2f5d4a3793106acc` |
+| `08-led-started-without-table.png` | `/execution/:planId` | Skilled operator started LED; IN_PROGRESS; no table/post | LED `Stare: În lucru` + `Nu necesită utilaj dedicat` + executor skilled | `0bd4c6db7d5aa9b988a3e4a9d30429332780c02e` |
+| `09-atelier-inbox.png` | `/atelier` | LED in progress; only genuine machine tasks in prep | `În lucru la mine` contains LED; prep `(2)` FACE CNC + FORM; `Lipsă utilaj dedicat` | `7f3401bdb5811efdd13b3c2db1f5c606819e6d75` |
+| `10-jobs-list-no-commercial-order.png` | `/` | Same technical fixture; still no commercial Order | EmptyState `Nu există încă lucrări comerciale.` after the plan exists | `7a9fa3204db2758ec59544ba85942f2945d95566` |
+| `11-processes-bond-not-required.png` | `/admin/processes` Asamblare / Lipire față-volum | Catalog process inspection | `Utilaj dedicat` = `Nu necesită utilaj dedicat`; Masa 1/2 remain coverage | `7fc9ac6831e8e44987f99cf55fa4a12be36a96a2` |
+| `12-workcenters-tables-remain.png` | `/admin/workcenters` Asamblare | Workcenters catalog, not the product form | Heading `Utilaje și zone`; `Masă asamblare 1` and `Masă asamblare 2` visible | `4ccb96dee1f5dfa636123dda66b3b812bc33cc04` |
+| `13-governance.png` | `/governance` | Current governance page | Heading `Guvernanța sistemului` | `3271ede840d3a45d6fc9d0930e97fbaf83ba8566` |
+
+Proof 03/04/06/08 are distinct blobs:
+
+```text
+03  a53c83e970412daf97ed9a741be1321c37c15ed9  full planned workspace, 0/12
+04  b389e0efb3a457d32c4cd1da09be70424ef2ae72  FACE CNC card only: Start blocked
+06  6d4b6aea793bd0a5a1319310f0b46e02dc8bd474  LED PLANNED + Pornește
+08  0bd4c6db7d5aa9b988a3e4a9d30429332780c02e  LED IN_PROGRESS, no table
+```
+
+02, 05 and 07 were asserted to contain no old operator-facing copy (`echipament / zonă`, `Necesită echipament`, `Nu necesită echipament`). 12 is `/admin/workcenters`, not the empty product form.
 
 ## What did not change
 
@@ -221,8 +248,10 @@ Atelier prep (2) = FACE CNC + FORM only; copy = Lipsă utilaj dedicat
 
 ## Commit
 
-Amended local commit on `feat/machine-strict-manual-work-areas-flexible`. Message unchanged. `PUSH = NO`. Exact hash is the current branch HEAD.
+Implementation remains `0c04618241789949ff961cae0719fddb9f688b98` on `feat/machine-strict-manual-work-areas-flexible`. This evidence-pack repair is a follow-up docs commit only.
 
 ## What remains
 
-`WAIT_FOR_OWNER_GO_PUSH`. Do not start allowlist, HUB MEDIA org, or first Cloud login.
+Published implementation commit: `0c04618241789949ff961cae0719fddb9f688b98`.
+
+This follow-up only repairs the evidence pack and this worklog. Do not start allowlist, HUB MEDIA org, or first Cloud login.
