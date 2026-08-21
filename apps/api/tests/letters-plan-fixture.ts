@@ -57,6 +57,27 @@ export function materializeCanonicalLettersPlan(
   });
 }
 
+export function faceCncTaskId(record: ExecutionPlanRecord): string {
+  const task = record.tasks.find(
+    (item) => item.processId === CUT_SHEET_CNC_ID && item.scope === "FACE",
+  );
+  if (!task) {
+    throw new Error("missing FACE CNC task");
+  }
+  return task.taskId;
+}
+
+export function taskIdForProcess(
+  record: ExecutionPlanRecord,
+  processId: string,
+): string {
+  const task = record.tasks.find((item) => item.processId === processId);
+  if (!task) {
+    throw new Error(`missing process ${processId}`);
+  }
+  return task.taskId;
+}
+
 export function backCncTaskId(record: ExecutionPlanRecord): string {
   const task = record.tasks.find(
     (item) => item.processId === CUT_SHEET_CNC_ID && item.scope === "BACK",

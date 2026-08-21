@@ -24,6 +24,11 @@ import {
 } from "@workos-final/domain";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 import {
+  OPERATIONAL_FOUNDATION_CAPABILITY_SKILLS,
+  OPERATIONAL_FOUNDATION_SKILLS,
+  OPERATIONAL_SKILL_FOUNDATION_MARKER,
+} from "./operationalSkillFoundation.js";
+import {
   TRUSTED_CAPABILITY_SKILLS,
   TRUSTED_PEOPLE,
   TRUSTED_SKILLS,
@@ -175,9 +180,13 @@ export function readPeopleEligibilityContext(db: SqliteDatabase): PeopleEligibil
 
 export function runtimePeopleEligibilityContext(
   db: SqliteDatabase,
+  options?: { failClosedWhenUnmapped?: boolean },
 ): PeopleEligibilityContext | null {
   const context = readPeopleEligibilityContext(db);
-  return context.requirements.length === 0 ? null : context;
+  if (context.requirements.length === 0) {
+    return options?.failClosedWhenUnmapped ? context : null;
+  }
+  return context;
 }
 
 export function readPeopleRegistry(db: SqliteDatabase): PeopleRegistryProjection {
@@ -403,7 +412,34 @@ export function isTrustedWorkforceApplied(db: SqliteDatabase): boolean {
   return Boolean(row);
 }
 
+export function isOperationalSkillFoundationApplied(db: SqliteDatabase): boolean {
+  const row = db
+    .prepare("SELECT marker_id FROM runtime_bootstrap_markers WHERE marker_id = ?")
+    .get(OPERATIONAL_SKILL_FOUNDATION_MARKER) as { marker_id: string } | undefined;
+  return Boolean(row);
+}
+
+export function applyOperationalSkillFoundation(db: SqliteDatabase): void {
+  if (isOperationalSkillFoundationApplied(db)) {
+    return;
+  }
+  const apply = db.transaction(() => {
+    if (isOperationalSkillFoundationApplied(db)) {
+      return;
+    }
+    materializeSkillSeeds(db, OPERATIONAL_FOUNDATION_SKILLS, OPERATIONAL_FOUNDATION_CAPABILITY_SKILLS);
+    db.prepare(
+      `
+      INSERT INTO runtime_bootstrap_markers (marker_id, applied_at)
+      VALUES (?, ?)
+    `,
+    ).run(OPERATIONAL_SKILL_FOUNDATION_MARKER, new Date().toISOString());
+  });
+  apply();
+}
+
 export function ensureTrustedWorkforce(db: SqliteDatabase): void {
+  applyOperationalSkillFoundation(db);
   if (isTrustedWorkforceApplied(db)) {
     return;
   }
@@ -438,9 +474,13 @@ function allTrustedPeoplePresent(db: SqliteDatabase): boolean {
   return TRUSTED_PEOPLE.every((seed) => trustedPersonPresent(db, seed));
 }
 
-function materializeTrustedWorkforceOnce(db: SqliteDatabase): void {
-  const createdAt = "2026-08-17T12:00:00.000Z";
-  for (const seed of TRUSTED_SKILLS) {
+function materializeSkillSeeds(
+  db: SqliteDatabase,
+  skills: readonly { skillId: string; code: string; displayLabel: string; description: string | null }[],
+  mappings: ReadonlyArray<{ capabilityId: string; skillCode: string }>,
+  createdAt = "2026-08-17T12:00:00.000Z",
+): void {
+  for (const seed of skills) {
     const existing = db
       .prepare("SELECT skill_id FROM skills WHERE code = ? OR skill_id = ?")
       .get(seed.code, seed.skillId) as { skill_id: string } | undefined;
@@ -458,9 +498,8 @@ function materializeTrustedWorkforceOnce(db: SqliteDatabase): void {
       insertSkill(db, created.skill);
     }
   }
-  const skills = listSkills(db);
-  const skillIdByCode = new Map(skills.map((skill) => [skill.code, skill.skillId]));
-  for (const mapping of TRUSTED_CAPABILITY_SKILLS) {
+  const skillIdByCode = new Map(listSkills(db).map((skill) => [skill.code, skill.skillId]));
+  for (const mapping of mappings) {
     const skillId = skillIdByCode.get(mapping.skillCode);
     if (!skillId) {
       continue;
@@ -472,6 +511,12 @@ function materializeTrustedWorkforceOnce(db: SqliteDatabase): void {
     `,
     ).run(mapping.capabilityId, skillId);
   }
+}
+
+function materializeTrustedWorkforceOnce(db: SqliteDatabase): void {
+  const createdAt = "2026-08-17T12:00:00.000Z";
+  materializeSkillSeeds(db, TRUSTED_SKILLS, TRUSTED_CAPABILITY_SKILLS, createdAt);
+  const skillIdByCode = new Map(listSkills(db).map((skill) => [skill.code, skill.skillId]));
   for (const seed of TRUSTED_PEOPLE) {
     const byId = getPerson(db, seed.personId);
     const byName = listPeople(db).find((item) => item.displayName === seed.displayName);

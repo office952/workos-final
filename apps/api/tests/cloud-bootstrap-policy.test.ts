@@ -75,6 +75,22 @@ describe("Cloud bootstrap policy", () => {
     expect(people.people).toEqual([]);
     expect(JSON.stringify(people)).not.toMatch(/Florin CNC|Calin|HUB MEDIA|per:legacy/i);
 
+    const skills = (await (
+      await fixture.app.request("/api/people/skills", { headers })
+    ).json()) as { skills: Array<{ code: string }> };
+    expect(skills.skills.map((item) => item.code).sort()).toEqual([
+      "SK_ASSEMBLY",
+      "SK_CNC_OPERATOR",
+      "SK_ELECTRICIAN",
+      "SK_LETTER_CANT_OPERATOR",
+      "SK_LETTER_MODELING",
+    ]);
+
+    const eligibility = (await (
+      await fixture.app.request("/api/people/eligibility?capabilityId=CNC_ROUTING", { headers })
+    ).json()) as { eligiblePeople: unknown[] };
+    expect(eligibility.eligiblePeople).toEqual([]);
+
     const admin = (await (
       await fixture.app.request("/api/resources-admin", { headers })
     ).json()) as {
@@ -307,6 +323,10 @@ describe("Cloud bootstrap policy", () => {
       people: unknown[];
     };
     expect(people.people).toEqual([]);
+    const skills = (await (
+      await fixture.app.request("/api/people/skills", { headers })
+    ).json()) as { skills: Array<{ code: string }> };
+    expect(skills.skills.map((item) => item.code)).toContain("SK_CNC_OPERATOR");
     const admin = (await (
       await fixture.app.request("/api/resources-admin", { headers })
     ).json()) as {

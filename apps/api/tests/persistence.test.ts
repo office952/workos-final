@@ -23,7 +23,7 @@ import {
   seedDisplayLabelRecords,
 } from "@workos-final/domain";
 import { persistCreatedCustomer } from "../src/customers/store.js";
-import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
+import { applyMigrations, listOperationalMigrationFiles, openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import { persistCreatedCommercialRequest } from "../src/requests/store.js";
 
@@ -72,7 +72,7 @@ describe("product system persistence", () => {
     const count = first
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(count.count).toBe(23);
+    expect(count.count).toBe(listOperationalMigrationFiles().length);
     first.close();
 
     const second = openSqliteDatabase(sqlitePath);
@@ -80,7 +80,7 @@ describe("product system persistence", () => {
     const again = second
       .prepare("SELECT COUNT(*) AS count FROM schema_migrations")
       .get() as { count: number };
-    expect(again.count).toBe(23);
+    expect(again.count).toBe(listOperationalMigrationFiles().length);
     second.close();
   });
 

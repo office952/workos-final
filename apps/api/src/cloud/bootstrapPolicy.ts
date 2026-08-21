@@ -6,7 +6,7 @@ import {
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 import { bootstrapProductSystemDisplayStore } from "../productSystem/store.js";
 import { ensureCostEvidence } from "../resources/store.js";
-import { ensureTrustedWorkforce } from "../people/store.js";
+import { applyOperationalSkillFoundation, ensureTrustedWorkforce } from "../people/store.js";
 import type { BootstrapPolicy } from "./controlPlane.js";
 
 export const EMPTY_WORKCENTER_REGISTRY = createWorkcenterRegistry([], []);
@@ -77,6 +77,7 @@ export function applyOperationalBootstrap(
   }
   if (policy === "NEW_ORGANIZATION" || policy === "SYNTHETIC_TEST") {
     ensureCostEvidence(db, policy);
+    applyOperationalSkillFoundation(db);
     return;
   }
   ensureCostEvidence(db, "SINGLE_PLANE");

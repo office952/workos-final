@@ -62,7 +62,9 @@ Do not restore generic `WC_ASSEMBLY` as a live Workcenter. Do not migrate `WA-AS
 
 ## Current live topology
 
-The typed catalog is the authority. There is no write path and no SQLite persistence for this domain.
+The typed catalog remains the authority for single-plane DEV and `ADOPT_EXISTING` compatibility. There is no Machine Admin UI.
+
+Cloud `NEW_ORGANIZATION` / `SYNTHETIC_TEST` start with an empty organization-owned provider registry. Machines and workcenters persist in the Operational Plane only after an explicit CLI/service apply (`pnpm --filter @workos-final/api cloud:configure-providers`). Restart reloads those rows. Bootstrap does not insert HUB MEDIA equipment, assembly tables, or company-name conditions.
 
 Owner-confirmed assembly foundation, unchanged:
 

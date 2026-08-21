@@ -73,6 +73,7 @@ import {
   resolveProviderRegistryKind,
   type ProviderRegistryKind,
 } from "../cloud/bootstrapPolicy.js";
+import { loadOrganizationProviderRegistry } from "../workcenters/organizationProviderStore.js";
 import type { BootstrapPolicy } from "../cloud/controlPlane.js";
 import {
   applyMigrations,
@@ -443,22 +444,35 @@ export function createProductSystemRuntimeFromOpenDb(
     }
   }
   const bootstrapPolicy = options.bootstrapPolicy ?? null;
-  const providerRegistry =
+  const providerRegistryKind = resolveProviderRegistryKind(
+    bootstrapPolicy ?? "SINGLE_PLANE",
+  );
+  const codeOrInjectedRegistry =
     options.providerRegistry ??
     (bootstrapPolicy
       ? resolveProviderRegistry(bootstrapPolicy)
       : workcenterRegistry);
-  const providerRegistryKind = resolveProviderRegistryKind(
-    bootstrapPolicy ?? "SINGLE_PLANE",
-  );
   applyOperationalBootstrap(db, bootstrapPolicy ?? undefined);
+  const eligibilityFailClosed = bootstrapPolicy !== null;
+  const currentProviderRegistry = (): WorkcenterRegistry => {
+    if (providerRegistryKind === "EMPTY_FOUNDATION") {
+      return loadOrganizationProviderRegistry(db);
+    }
+    return codeOrInjectedRegistry;
+  };
+  const currentEligibility = () =>
+    runtimePeopleEligibilityContext(db, {
+      failClosedWhenUnmapped: eligibilityFailClosed,
+    });
   return {
     sqlitePath,
     documentsRoot,
     organizationId: planeIdentity?.organizationId ?? null,
     planeId: planeIdentity?.planeId ?? null,
     bootstrapPolicy,
-    providerRegistry,
+    get providerRegistry() {
+      return currentProviderRegistry();
+    },
     providerRegistryKind,
     labels() {
       return loadDisplayLabelCatalog(db);
@@ -518,7 +532,7 @@ export function createProductSystemRuntimeFromOpenDb(
       return getExecutionPlanByTaskId(db, taskId);
     },
     assignExecutionTaskProvider(taskId, providerId) {
-      return persistAssignedProvider(db, taskId, providerId, providerRegistry);
+      return persistAssignedProvider(db, taskId, providerId, currentProviderRegistry());
     },
     assignExecutionTaskExecutor(taskId, personId) {
       return persistAssignedExecutor(
@@ -526,7 +540,7 @@ export function createProductSystemRuntimeFromOpenDb(
         taskId,
         personId,
         listPeople(db),
-        runtimePeopleEligibilityContext(db),
+        currentEligibility(),
       );
     },
     startExecutionTask(taskId) {
@@ -535,8 +549,8 @@ export function createProductSystemRuntimeFromOpenDb(
         taskId,
         new Date().toISOString(),
         listPeople(db),
-        runtimePeopleEligibilityContext(db),
-        providerRegistry,
+        currentEligibility(),
+        currentProviderRegistry(),
       );
     },
     claimAndStartExecutionTask(taskId, personId) {
@@ -546,8 +560,8 @@ export function createProductSystemRuntimeFromOpenDb(
         personId,
         new Date().toISOString(),
         listPeople(db),
-        runtimePeopleEligibilityContext(db),
-        providerRegistry,
+        currentEligibility(),
+        currentProviderRegistry(),
       );
     },
     listOperatorCandidates() {
@@ -577,7 +591,7 @@ export function createProductSystemRuntimeFromOpenDb(
         return null;
       }
       const people = listPeople(db);
-      const eligibility = runtimePeopleEligibilityContext(db);
+      const eligibility = currentEligibility();
       const openPlans = listOpenExecutionPlanRecords(db);
       const plans = openPlans.map((record) => {
         const snapshot = getAcceptedProductionSnapshot(db, record.plan.sourceSnapshotId);
@@ -594,7 +608,7 @@ export function createProductSystemRuntimeFromOpenDb(
         people,
         eligibility,
         plans,
-        providerRegistry,
+        providerRegistry: currentProviderRegistry(),
       });
     },
     listPeople() {
@@ -610,7 +624,7 @@ export function createProductSystemRuntimeFromOpenDb(
       return listSkills(db);
     },
     peopleEligibilityContext() {
-      return runtimePeopleEligibilityContext(db);
+      return currentEligibility();
     },
     readEligibility(capabilityId) {
       const context = readPeopleEligibilityContext(db);
@@ -665,7 +679,7 @@ export function createProductSystemRuntimeFromOpenDb(
       return persistUpdatedSeller(db, input);
     },
     listJobOverview() {
-      return projectJobOverview(jobOverviewItems(db, providerRegistry));
+      return projectJobOverview(jobOverviewItems(db, currentProviderRegistry(), currentEligibility()));
     },
     listQuoteOverview() {
       return projectQuoteOverview(quoteOverviewItems(db));
@@ -676,7 +690,7 @@ export function createProductSystemRuntimeFromOpenDb(
     listCustomerRegistry() {
       const requests = requestOverviewItems(db);
       const quotes = quoteOverviewItems(db);
-      const jobs = jobOverviewItems(db, providerRegistry);
+      const jobs = jobOverviewItems(db, currentProviderRegistry(), currentEligibility());
       return projectCustomerRegistry(
         listCustomers(db).map((customer) =>
           projectCustomerRegistryItem({
@@ -697,7 +711,10 @@ export function createProductSystemRuntimeFromOpenDb(
         customer,
         requests: requestsForCustomer(requestOverviewItems(db), customerId),
         quotes: quotesForCustomer(quoteOverviewItems(db), customerId),
-        jobs: jobsForCustomer(jobOverviewItems(db, providerRegistry), customerId),
+        jobs: jobsForCustomer(
+          jobOverviewItems(db, currentProviderRegistry(), currentEligibility()),
+          customerId,
+        ),
       });
     },
     readCommercialRequest(requestId) {
@@ -899,7 +916,11 @@ function quoteOverviewItems(db: SqliteDatabase) {
   });
 }
 
-function jobOverviewItems(db: SqliteDatabase, providerRegistry: WorkcenterRegistry) {
+function jobOverviewItems(
+  db: SqliteDatabase,
+  providerRegistry: WorkcenterRegistry,
+  eligibility: PeopleEligibilityContext | null,
+) {
   const people = listPeople(db);
   return listOrderSnapshots(db).map((order) => {
     const release = getAcceptedProductionSnapshotByOrder(db, order.orderSnapshotId);
@@ -914,7 +935,7 @@ function jobOverviewItems(db: SqliteDatabase, providerRegistry: WorkcenterRegist
             record,
             people,
             release,
-            runtimePeopleEligibilityContext(db),
+            eligibility,
             null,
             providerRegistry,
           )

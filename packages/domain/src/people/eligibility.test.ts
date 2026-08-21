@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { assignPersonSkill, retirePersonSkill } from "./assignment.js";
-import { diagnoseEligibility, resolveEligiblePeople } from "./eligibility.js";
+import {
+  diagnoseEligibility,
+  personIsCurrentlyEligible,
+  resolveEligiblePeople,
+} from "./eligibility.js";
 import { createPerson, retirePerson, setPersonAvailability } from "./identity.js";
 import { createSkill, retireSkill } from "./skills.js";
 
@@ -255,5 +259,25 @@ describe("current operational eligibility", () => {
         reason: "CAPABILITY_UNMAPPED",
       },
     ]);
+  });
+
+  it("keeps null eligibility permissive and empty mappings fail-closed", () => {
+    const ana = person("Ana Noua", "per:ana");
+    expect(
+      personIsCurrentlyEligible({
+        personId: ana.personId,
+        capabilityId: "CNC_ROUTING",
+        people: [ana],
+        eligibility: null,
+      }),
+    ).toBe(true);
+    expect(
+      personIsCurrentlyEligible({
+        personId: ana.personId,
+        capabilityId: "CNC_ROUTING",
+        people: [ana],
+        eligibility: { skills: [], assignments: [], requirements: [] },
+      }),
+    ).toBe(false);
   });
 });

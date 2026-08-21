@@ -57,10 +57,15 @@ ACTIVE
 
 ```text
 UNMAPPED CAPABILITY  ≠  ANY PERSON
+CLOUD_MISSING_MAPPING = FAIL_CLOSED
 ```
 
 A capability with no human-skill mapping is unresolved. Eligible people = none.
 Absence of mapping is not “no qualification required”. That would need explicit future truth.
+
+Cloud runtimes must never treat `requirements.length === 0` as “any active person is eligible”. They pass the empty context through so Claim/Start returns `ineligible_executor`. Single-plane DEV may still keep the historical permissive `eligibility === null` path, and only there.
+
+`NEW_ORGANIZATION` / `SYNTHETIC_TEST` receive a generic operational skill foundation (skill codes + LETTERS capability mappings, no people). Trusted workforce reuses that foundation and then adds legacy people. People stay organization-owned.
 
 METAL_CUTTING, LASER_CUTTING and STYRO_CUTTING stay unmapped until owner-confirmed evidence exists.
 

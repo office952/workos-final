@@ -273,6 +273,8 @@ Do not put named employees on product templates. Templates may require a skill o
 
 Foundation implemented. See `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md`.
 
+Cloud `NEW_ORGANIZATION` owns an empty provider registry until an explicit organization-scoped configuration is applied. That configuration is Operational Plane truth, not Control Plane identity and not HUB MEDIA bootstrap. Machine Admin remains deferred.
+
 Processes must require a **capability class**, not a hardcoded machine identity. The live shop-floor map includes the accepted assembly tables plus real welding, metal-cutting, CNC, forming, electrical, print and related stations. Those real capabilities now have reusable Operational Processes. Capacity planning is not implemented.
 
 ```text

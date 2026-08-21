@@ -10,6 +10,7 @@
     "test": "vitest run",
     "cloud:provision": "tsx src/cloud/devProvisionCli.ts",
     "cloud:adopt": "tsx src/cloud/adoptCli.ts",
+    "cloud:configure-providers": "tsx src/cloud/configureProvidersCli.ts",
     "build": "tsc --noEmit"
   },
   "dependencies": {
