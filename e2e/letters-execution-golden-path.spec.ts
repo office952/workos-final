@@ -3,7 +3,13 @@ import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
+import {
+  assignExecutorIfNeeded,
+  assignProviderIfNeeded,
+  configureTestExecutorPin,
+  ensureTestExecutor,
+  identifyTestExecutorOnPage,
+} from "./helpers/people";
 
 async function confirmLetters(page: Page) {
   await page.goto("/products");
@@ -73,8 +79,10 @@ test("executes the reachable LETTERS DAG and leaves a truthful manual path", asy
   page,
   request,
 }) => {
-  await ensureTestExecutor(request);
+  const person = await ensureTestExecutor(request);
+  await configureTestExecutorPin(request, person.personId);
   await confirmLetters(page);
+  await identifyTestExecutorOnPage(page);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(
     page.getByRole("heading", { name: "Acceptat pentru producție" }),
@@ -133,21 +141,21 @@ test("executes the reachable LETTERS DAG and leaves a truthful manual path", asy
   });
 
   await expect(placeLed.getByText("Așteaptă:")).toHaveCount(0);
-  await executeTask(placeLed, "Montaj LED / electric");
-  await executeTask(wire, "Montaj LED / electric");
-  await executeTask(psu, "Montaj LED / electric");
-  await executeTask(ignition, "Montaj LED / electric");
+  await executeTask(placeLed);
+  await executeTask(wire);
+  await executeTask(psu);
+  await executeTask(ignition);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-golden-lighting.png",
     fullPage: true,
   });
 
-  await executeTask(bond, "Masă asamblare 1");
+  await executeTask(bond);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-golden-assembly.png",
     fullPage: true,
   });
-  await executeTask(close, "Masă asamblare 1");
+  await executeTask(close);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-golden-dependency-released.png",
     fullPage: true,
@@ -156,18 +164,18 @@ test("executes the reachable LETTERS DAG and leaves a truthful manual path", asy
   await expect(plan.getByText("9 / 12 finalizate")).toBeVisible();
   await expect(plan.getByText("În lucru: 0")).toBeVisible();
   await expect(plan.getByText("Fără furnizor: 0")).toBeVisible();
-  await expect(plan.getByText("Stare: În lucru").first()).toBeVisible();
+  await expect(plan.getByText("Stare: Planificat").first()).toBeVisible();
   await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Necesită configurare atelier" })).toHaveCount(0);
 
   for (const card of [uniformity, inspect, pack]) {
     await expect(card.getByText("Stare: Planificat")).toBeVisible();
-    await expect(card.getByText("Nu necesită echipament")).toBeVisible();
+    await expect(card.getByText("Nu necesită utilaj dedicat")).toBeVisible();
     await expect(card.getByText("Necesită configurare atelier")).toHaveCount(0);
-    await expect(card.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
+    await expect(card.getByRole("button", { name: "Alocă utilaj", exact: true })).toHaveCount(0);
   }
-  await expect(uniformity.getByText("Executant nealocat")).toBeVisible();
-  await expect(uniformity.getByRole("button", { name: "Pornește" })).toHaveCount(0);
+  await expect(uniformity.getByText("Executant: Nealocat")).toBeVisible();
+  await expect(uniformity.getByRole("button", { name: "Pornește" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-manual-uniformity.png",
     fullPage: true,
@@ -206,7 +214,7 @@ test("executes the reachable LETTERS DAG and leaves a truthful manual path", asy
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(plan.getByText("9 / 12 finalizate")).toBeVisible();
-  await expect(plan.getByText("Nu necesită echipament").first()).toBeVisible();
+  await expect(plan.getByText("Nu necesită utilaj dedicat").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-golden-narrow.png",
     fullPage: true,

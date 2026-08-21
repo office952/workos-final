@@ -50,12 +50,12 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
   await expect(page.getByText("Componentă: Față").first()).toBeVisible();
   await expect(page.getByText("Furnizori disponibili: CNC 4020").first()).toBeVisible();
   await expect(
-    page.getByText("Furnizori disponibili: Masă asamblare 1; Masă asamblare 2").first(),
-  ).toBeVisible();
+    page.getByText("Furnizori disponibili: Masă asamblare 1; Masă asamblare 2"),
+  ).toHaveCount(0);
   await expect(page.getByText("Montare module LED").first()).toBeVisible();
   await expect(page.getByText("Resursă: Modul LED 12V: 125 buc").first()).toBeVisible();
   await expect(page.getByText("Resursă: Sursă LED 12V 160W: 1 buc").first()).toBeVisible();
-  await expect(page.getByText("Nu necesită echipament").first()).toBeVisible();
+  await expect(page.getByText("Nu necesită utilaj dedicat").first()).toBeVisible();
   await expect(page.getByText("Fără furnizor configurat")).toHaveCount(0);
   await expect(page.getByText("Aplicare folie")).toHaveCount(0);
   await expect(page.getByText("Vopsire RAL")).toHaveCount(0);

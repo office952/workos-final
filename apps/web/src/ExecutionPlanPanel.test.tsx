@@ -83,7 +83,7 @@ const view: ExecutionPlanView = {
       completedQuantityLabel: null,
       varianceLabel: null,
       requiresProvider: true,
-      providerRequirementLabel: "Necesită echipament / zonă",
+          providerRequirementLabel: "Necesită utilaj dedicat",
       canAssign: true,
       canAssignExecutor: true,
       canStart: false,
@@ -131,7 +131,7 @@ const view: ExecutionPlanView = {
       completedQuantityLabel: null,
       varianceLabel: null,
       requiresProvider: false,
-      providerRequirementLabel: "Nu necesită echipament",
+      providerRequirementLabel: "Nu necesită utilaj dedicat",
       canAssign: false,
       canAssignExecutor: true,
       canStart: false,
@@ -174,14 +174,14 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getByText("Stare: Planificat", { selector: ".execution-plan-head .task-status" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "01. Debitare foaie CNC" })).toBeInTheDocument();
     expect(screen.getByText("Componentă: Spate")).toBeInTheDocument();
-    expect(screen.getAllByText("Echipament / zonă").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Utilaj dedicat").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Alocare: Nealocat").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Executant: Nealocat").length).toBeGreaterThan(0);
     expect(screen.getByText("Cantitate planificată: 12,5 m")).toBeInTheDocument();
     expect(screen.getByText("Așteaptă: Debitare foaie CNC — Spate")).toBeInTheDocument();
-    expect(screen.getByText("Nu necesită echipament")).toBeInTheDocument();
+    expect(screen.getByText("Nu necesită utilaj dedicat")).toBeInTheDocument();
     expect(
-      screen.queryByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
+      screen.queryByText("Necesită configurare atelier. Nu există utilaj dedicat eligibil."),
     ).not.toBeInTheDocument();
     expect(screen.queryByText("task:1")).not.toBeInTheDocument();
     expect(screen.queryByText("QUALITY_CONTROL")).not.toBeInTheDocument();
@@ -491,7 +491,7 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getByRole("heading", { name: "Necesită configurare atelier" })).toBeInTheDocument();
     expect(screen.getByText("Fără furnizor: 1")).toBeInTheDocument();
     expect(
-      screen.getByText("Necesită configurare atelier. Nu există echipament sau zonă eligibilă."),
+      screen.getByText("Necesită configurare atelier. Nu există utilaj dedicat eligibil."),
     ).toBeInTheDocument();
   });
 

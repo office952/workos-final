@@ -209,5 +209,9 @@ describe("AtelierPage", () => {
     const details = prep.closest("details");
     expect(details).not.toBeNull();
     expect(details?.open).toBe(false);
+    expect(
+      screen.getByText("Lipsă utilaj dedicat. Deschide lucrarea pentru alocare — nu din Atelier."),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Necesită utilaj dedicat înainte de pornire.")).toHaveLength(3);
   });
 });

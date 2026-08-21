@@ -145,9 +145,9 @@ test("records planned vs completed quantity on LETTERS tasks", async ({ page, re
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
-  await expect(pack.getByText("Nu necesită echipament")).toBeVisible();
-  await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
+  await expect(inspect.getByText("Nu necesită utilaj dedicat")).toBeVisible();
+  await expect(pack.getByText("Nu necesită utilaj dedicat")).toBeVisible();
+  await expect(inspect.getByRole("button", { name: "Alocă utilaj", exact: true })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actuals-no-provider.png",
     fullPage: true,

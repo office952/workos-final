@@ -9,7 +9,6 @@ import {
   PLACE_LED_MODULES_ID,
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
-  WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 import {
@@ -904,7 +903,7 @@ describe("product configuration API", () => {
     expect(readView.tasks).toHaveLength(12);
     expect(
       readView.tasks.filter((item) => item.providerRequirement === "NOT_REQUIRED"),
-    ).toHaveLength(3);
+    ).toHaveLength(9);
     expect(
       readView.tasks.find((item) => item.processLabel === "Control calitate final")
         ?.requiresProvider,
@@ -988,15 +987,34 @@ describe("product configuration API", () => {
 
     const personId = await createExecutor(app);
     const cookie = await sessionCookieViaHttp(app, personId);
+    const assignWithSession = await app.request(
+      `/api/execution-tasks/${backCnc.taskId}/provider`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json", cookie },
+        body: JSON.stringify({ providerId: MCH_CNC_4020_ID }),
+      },
+    );
+    expect(assignWithSession.status).toBe(200);
+    const assignWithSessionView = (await readBody(assignWithSession)).executionPlan as {
+      tasks: Array<JsonObject>;
+    };
+    const assignedCnc = assignWithSessionView.tasks.find(
+      (item) => item.taskId === backCnc.taskId,
+    );
+    expect(assignedCnc?.canClaimStart).toBe(true);
+    expect(assignedCnc?.operatorRelation).not.toBe("identify_required");
     const blockedLighting = await startTaskAs(app, String(lighting.taskId), cookie);
-    expect(blockedLighting.status).toBe(422);
+    expect(blockedLighting.status).toBe(409);
+    expect((await readBody(blockedLighting)).error).toBe("dependencies_incomplete");
 
     const assignLighting = await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: "WC_LED_ASSEMBLY" }),
     });
-    expect(assignLighting.status).toBe(200);
+    expect(assignLighting.status).toBe(422);
+    expect((await readBody(assignLighting)).error).toBe("ineligible_provider");
     const lightingStartBefore = await startTaskAs(app, String(lighting.taskId), cookie);
     expect(lightingStartBefore.status).toBe(409);
     expect((await readBody(lightingStartBefore)).error).toBe("dependencies_incomplete");
@@ -1082,20 +1100,15 @@ describe("product configuration API", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_ASSEMBLY_01_ID }),
     });
-    expect(firstAssembly.status).toBe(200);
+    expect(firstAssembly.status).toBe(422);
+    expect((await readBody(firstAssembly)).error).toBe("ineligible_provider");
     const secondAssembly = await app.request(`/api/execution-tasks/${bond.taskId}/provider`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ providerId: WC_ASSEMBLY_02_ID }),
     });
-    const assemblyView = (await readBody(secondAssembly)).executionPlan as {
-      tasks: Array<JsonObject>;
-    };
-    expect(
-      (assemblyView.tasks.find((item) => item.taskId === bond.taskId)?.assignedProvider as JsonObject)
-        .label,
-    ).toBe("Masă asamblare 2");
-    expect(JSON.stringify(assemblyView)).not.toMatch(/employeeId|plannedStart|capacity|pontaj/);
+    expect(secondAssembly.status).toBe(422);
+    expect((await readBody(secondAssembly)).error).toBe("ineligible_provider");
   });
 
   it("requires a session, claims an empty task, and respects preassignment", async () => {
@@ -1252,13 +1265,15 @@ describe("product configuration API", () => {
     const personId = await createExecutor(app);
     const cookie = await sessionCookieViaHttp(app, personId);
 
-    async function execute(taskId: unknown, providerId: string) {
-      const assigned = await app.request(`/api/execution-tasks/${taskId}/provider`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ providerId }),
-      });
-      expect(assigned.status).toBe(200);
+    async function execute(taskId: unknown, providerId?: string) {
+      if (providerId) {
+        const assigned = await app.request(`/api/execution-tasks/${taskId}/provider`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ providerId }),
+        });
+        expect(assigned.status).toBe(200);
+      }
       const started = await startTaskAs(app, String(taskId), cookie);
       expect(started.status).toBe(200);
       const startedView = (await readBody(started)).executionPlan as { tasks: Array<JsonObject> };
@@ -1281,12 +1296,12 @@ describe("product configuration API", () => {
     await execute(task("Debitare foaie CNC", "Față").taskId, MCH_CNC_4020_ID);
     await execute(task("Debitare foaie CNC", "Spate").taskId, MCH_CNC_4020_ID);
     await execute(task("Formare profil aluminiu", "Volum").taskId, MCH_CNC_CANT_LITERE_ID);
-    await execute(task("Montare module LED", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
-    await execute(task("Cablare electrică", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
-    await execute(task("Pregătire sursă de alimentare", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
-    await execute(task("Probă aprindere", "Iluminare").taskId, WC_LED_ASSEMBLY_ID);
-    await execute(task("Lipire față-volum", "Corp").taskId, WC_ASSEMBLY_01_ID);
-    const finalView = await execute(task("Închidere corp", "Corp").taskId, WC_ASSEMBLY_01_ID);
+    await execute(task("Montare module LED", "Iluminare").taskId);
+    await execute(task("Cablare electrică", "Iluminare").taskId);
+    await execute(task("Pregătire sursă de alimentare", "Iluminare").taskId);
+    await execute(task("Probă aprindere", "Iluminare").taskId);
+    await execute(task("Lipire față-volum", "Corp").taskId);
+    const finalView = await execute(task("Închidere corp", "Corp").taskId);
 
     expect(finalView.progress).toEqual({
       total: 12,
@@ -1378,11 +1393,6 @@ describe("product configuration API", () => {
       completedQuantityUnit: "m",
     });
 
-    await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
-    });
     await startTaskAs(app, String(lighting.taskId), cookie);
     const completedLed = await completeTaskAs(app, String(lighting.taskId), cookie, {
       completedQuantity: 123,
@@ -1421,11 +1431,6 @@ describe("product configuration API", () => {
       note: "2 module înlocuite în timpul montajului",
     });
 
-    await app.request(`/api/execution-tasks/${wire.taskId}/provider`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
-    });
     await startTaskAs(app, String(wire.taskId), cookie);
     const unexpected = await completeTaskAs(app, String(wire.taskId), cookie, {
       completedQuantity: 1,
@@ -1495,11 +1500,6 @@ describe("product configuration API", () => {
     });
     expect(completedCnc.status).toBe(200);
 
-    await app.request(`/api/execution-tasks/${lighting.taskId}/provider`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ providerId: WC_LED_ASSEMBLY_ID }),
-    });
     await startTaskAs(app, String(lighting.taskId), cookie);
 
     const badUnit = await completeTaskAs(app, String(lighting.taskId), cookie, {

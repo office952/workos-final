@@ -103,15 +103,15 @@ test("opens a dedicated commercial execution workspace and persists a real task"
     path: "docs/worklog/screenshots/letters-execution-workspace-blocked.png",
     fullPage: true,
   });
-  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
+  await expect(inspect.getByText("Nu necesită utilaj dedicat")).toBeVisible();
   await expect(inspect.getByText("Necesită configurare atelier")).toHaveCount(0);
-  await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
+  await expect(inspect.getByRole("button", { name: "Alocă utilaj", exact: true })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-workspace-gap.png",
     fullPage: true,
   });
 
-  await expect(faceCnc.getByRole("combobox", { name: "Echipament / zonă" })).toBeVisible();
+  await expect(faceCnc.getByRole("combobox", { name: "Utilaj dedicat" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-manual-provider-required.png",
     fullPage: true,

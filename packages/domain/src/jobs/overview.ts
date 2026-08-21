@@ -199,7 +199,7 @@ export function deriveJobAttention(input: {
   // Waiting dependencies are normal DAG flow — not job attention.
   // Provider attention only when absence is a CURRENT blocker (deps done).
   if (input.tasks.some(isCurrentProviderBlocker)) {
-    return { needsAttention: true, attentionLabel: "Lipsă echipament" };
+    return { needsAttention: true, attentionLabel: "Lipsă utilaj dedicat" };
   }
   return { needsAttention: false, attentionLabel: null };
 }

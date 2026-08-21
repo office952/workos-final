@@ -129,7 +129,10 @@ describe("actual internal cost projection", () => {
         completedQuantity: 12.7,
       }),
     );
-    next = unwrap(assignProviderToTask(next, lighting.taskId, WC_LED_ASSEMBLY_ID));
+    expect(assignProviderToTask(next, lighting.taskId, WC_LED_ASSEMBLY_ID)).toEqual({
+      ok: false,
+      error: "ineligible_provider",
+    });
     next = unwrap(assignExecutorToTask(next, lighting.taskId, executor.personId, [executor]));
     next = unwrap(
       startExecutionTask(next, lighting.taskId, "2026-08-16T13:20:00.000Z", [executor]),

@@ -271,6 +271,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Identitate de proces manual. Fără rețetă de labor și fără Pontaj.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: PLACE_LED_MODULES_ID,
@@ -286,6 +287,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     readiness: "KNOWN_PROCESS",
     readinessNote:
       "Proces cunoscut. Cantitatea de module se calculează din perimetrul de volum. Fără rețetă de labor.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: PAINT_RAL_ID,
@@ -315,6 +317,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Proces cunoscut. Fără rețetă de labor.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: INSTALL_OR_CONNECT_PSU_ID,
@@ -330,6 +333,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     readiness: "KNOWN_PROCESS",
     readinessNote:
       "Proces cunoscut. Selecția sursei se calculează din catalogul 12V. Fără rețetă de labor.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: TEST_LIGHTING_IGNITION_ID,
@@ -344,6 +348,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Proces cunoscut. Fără telemetrie de măsură.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: CLOSE_LETTER_BODY_ID,
@@ -358,6 +363,7 @@ export const operationalProcesses: readonly OperationalProcess[] = [
     lifecycle: "PLANNED",
     readiness: "PLANNED",
     readinessNote: "Fără SKU de șurub și fără stoc în acest build.",
+    providerRequirement: "NOT_REQUIRED",
   },
   {
     id: TEST_ILLUMINATION_UNIFORMITY_ID,
@@ -590,9 +596,9 @@ export function frozenProviderRequirement(
 export function providerRequirementLabel(requirement: ProviderRequirement): string {
   switch (requirement) {
     case "REQUIRED":
-      return "Necesită echipament / zonă";
+      return "Necesită utilaj dedicat";
     case "NOT_REQUIRED":
-      return "Nu necesită echipament";
+      return "Nu necesită utilaj dedicat";
     default: {
       const _exhaustive: never = requirement;
       return _exhaustive;

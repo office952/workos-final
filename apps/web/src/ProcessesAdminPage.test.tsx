@@ -52,6 +52,11 @@ describe("ProcessesAdminPage", () => {
     expect(screen.getByRole("heading", { name: "Formare profil aluminiu" })).toBeInTheDocument();
     expect(screen.getAllByText("Formare profil").length).toBeGreaterThan(0);
 
+    await user.click(screen.getByRole("button", { name: "Asamblare" }));
+    await user.click(screen.getByRole("button", { name: /Lipire față-volum/ }));
+    expect(screen.getByRole("heading", { name: "Lipire față-volum" })).toBeInTheDocument();
+    expect(screen.getByText("Nu necesită utilaj dedicat")).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Control calitate" }));
     expect(screen.getByRole("heading", { name: "Probă uniformitate" })).toBeInTheDocument();
     expect(screen.getAllByText("Fără furnizor").length).toBeGreaterThan(0);

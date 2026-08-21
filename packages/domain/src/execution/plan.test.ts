@@ -132,6 +132,12 @@ describe("persisted execution plan materialization", () => {
       "Masă asamblare 1",
       "Masă asamblare 2",
     ]);
+    expect(bond?.providerRequirement).toBe("NOT_REQUIRED");
+    expect(bond?.requiresProvider).toBe(false);
+    expect(bond?.canAssign).toBe(false);
+    expect(placeLed?.providerRequirement).toBe("NOT_REQUIRED");
+    expect(placeLed?.requiresProvider).toBe(false);
+    expect(placeLed?.canAssign).toBe(false);
     expect(inspect?.eligibleProviders).toEqual([]);
     expect(inspect?.providerRequirement).toBe("NOT_REQUIRED");
     expect(inspect?.requiresProvider).toBe(false);

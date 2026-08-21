@@ -93,7 +93,7 @@ vi.mock("./productApi", () => ({
           completedQuantityLabel: null,
           varianceLabel: null,
           requiresProvider: true,
-          providerRequirementLabel: "Necesită echipament / zonă",
+          providerRequirementLabel: "Necesită utilaj dedicat",
           canAssign: true,
           canAssignExecutor: true,
           canStart: false,

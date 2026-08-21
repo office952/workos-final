@@ -40,8 +40,8 @@ test("processes admin inspects capability-bound operational processes", async ({
   await expect(page.getByRole("button", { name: "Print / finisare", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Debitare foaie CNC" })).toBeVisible();
   await expect(page.getByText("Necesită", { exact: true })).toBeVisible();
-  await expect(page.getByText("Echipament", { exact: true })).toBeVisible();
-  await expect(page.getByText("Necesită echipament / zonă")).toBeVisible();
+  await expect(page.getByText("Utilaj dedicat", { exact: true })).toBeVisible();
+  await expect(page.getByText("Necesită utilaj dedicat")).toBeVisible();
   await expect(page.getByText("Debitare CNC", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Acoperită").first()).toBeVisible();
   await expect(page.getByText("CNC 4020").first()).toBeVisible();
@@ -166,6 +166,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await page.getByRole("button", { name: "Asamblare", exact: true }).click();
   await page.getByRole("button", { name: /Lipire față-volum/ }).click();
   await expect(page.getByRole("heading", { name: "Lipire față-volum" })).toBeVisible();
+  await expect(page.getByText("Nu necesită utilaj dedicat")).toBeVisible();
   await expect(page.getByText("Îndemânare umană").first()).toBeVisible();
   await expect(page.getByText("nicio referință de cost")).toBeVisible();
   await page.screenshot({
@@ -205,7 +206,7 @@ test("processes admin inspects capability-bound operational processes", async ({
 
   await page.getByRole("button", { name: "Control calitate", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Probă uniformitate" })).toBeVisible();
-  await expect(page.getByText("Nu necesită echipament")).toBeVisible();
+  await expect(page.getByText("Nu necesită utilaj dedicat")).toBeVisible();
   await expect(page.getByText("Fără furnizor").first()).toBeVisible();
   await expect(page.getByText("Fără furnizor configurat")).toBeVisible();
   await page.screenshot({
@@ -215,7 +216,7 @@ test("processes admin inspects capability-bound operational processes", async ({
 
   await page.getByRole("button", { name: "Ambalare", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Ambalare", exact: true })).toBeVisible();
-  await expect(page.getByText("Nu necesită echipament")).toBeVisible();
+  await expect(page.getByText("Nu necesită utilaj dedicat")).toBeVisible();
   await expect(page.getByText("Fără furnizor configurat")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ui-processes-pack.png",

@@ -56,7 +56,7 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   ).toBeVisible();
   await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
   await expect(plan.getByText(/Stare: (Planificat|În lucru)/).first()).toBeVisible();
-  await expect(plan.getByText("Nu necesită echipament").first()).toBeVisible();
+  await expect(plan.getByText("Nu necesită utilaj dedicat").first()).toBeVisible();
   await expect(plan.getByRole("heading", { name: /Montare module LED/ })).toBeVisible();
   await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
   await expect(plan.getByText(/Fără furnizor: 0/)).toBeVisible();
@@ -134,7 +134,7 @@ test("vinyl snapshot persists the frozen vinyl task", async ({ page }) => {
   const plan = page.locator(".execution-plan");
   await expect(plan.getByText(/\/ 13 finalizate/)).toBeVisible();
   await expect(plan.getByRole("heading", { name: /Aplicare folie/ })).toBeVisible();
-  await expect(plan.getByRole("combobox", { name: "Echipament / zonă" }).first()).toBeVisible();
+  await expect(plan.getByRole("combobox", { name: "Utilaj dedicat" }).first()).toBeVisible();
   await expect(plan.getByText("Vopsire RAL")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
 });

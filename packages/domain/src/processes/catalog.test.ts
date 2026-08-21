@@ -217,10 +217,28 @@ describe("operational process catalog", () => {
 
   it("marks only genuine manual operations as provider-not-required", () => {
     expect(processProviderRequirement(getOperationalProcess(CUT_SHEET_CNC_ID))).toBe("REQUIRED");
-    expect(processProviderRequirement(getOperationalProcess(BOND_LETTER_BODY_ID))).toBe(
+    expect(processProviderRequirement(getOperationalProcess(FORM_ALUMINIUM_PROFILE_ID))).toBe(
       "REQUIRED",
     );
     expect(processProviderRequirement(getOperationalProcess(PAINT_RAL_ID))).toBe("REQUIRED");
+    expect(processProviderRequirement(getOperationalProcess(BOND_LETTER_BODY_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(PLACE_LED_MODULES_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(WIRE_LIGHTING_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(INSTALL_OR_CONNECT_PSU_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(TEST_LIGHTING_IGNITION_ID))).toBe(
+      "NOT_REQUIRED",
+    );
+    expect(processProviderRequirement(getOperationalProcess(CLOSE_LETTER_BODY_ID))).toBe(
+      "NOT_REQUIRED",
+    );
     expect(
       processProviderRequirement(getOperationalProcess(TEST_ILLUMINATION_UNIFORMITY_ID)),
     ).toBe("NOT_REQUIRED");

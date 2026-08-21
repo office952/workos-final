@@ -21,7 +21,6 @@ import {
   MCH_CNC_4020_ID,
   PLACE_LED_MODULES_ID,
   seedDisplayLabelRecords,
-  WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { persistCreatedCustomer } from "../src/customers/store.js";
 import { applyMigrations, openSqliteDatabase } from "../src/persistence/sqlite.js";
@@ -823,7 +822,6 @@ describe("product system persistence", () => {
     first.assignExecutionTaskExecutor(backCnc.taskId, person.person.personId);
     first.startExecutionTask(backCnc.taskId);
     first.completeExecutionTask(backCnc.taskId, { completedQuantity: 12.5 });
-    first.assignExecutionTaskProvider(lighting.taskId, WC_LED_ASSEMBLY_ID);
     first.assignExecutionTaskExecutor(lighting.taskId, person.person.personId);
     first.startExecutionTask(lighting.taskId);
     const completed = first.completeExecutionTask(lighting.taskId, {

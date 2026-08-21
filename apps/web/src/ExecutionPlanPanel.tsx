@@ -243,7 +243,7 @@ function ExecutionTaskCard({
         </div>
         <dl className="task-facts">
           <div>
-            <dt>Echipament / zonă</dt>
+            <dt>Utilaj dedicat</dt>
             <dd>
               {task.requiresProvider
                 ? task.assignedProvider
@@ -291,7 +291,7 @@ function ExecutionTaskCard({
         <div className="task-actions">
         {canAdminister && task.canAssign ? (
           <>
-            <Field label="Echipament / zonă">
+            <Field label="Utilaj dedicat">
               <select
                 value={providerId}
                 onChange={(event) => setProviderId(event.target.value)}
@@ -309,7 +309,7 @@ function ExecutionTaskCard({
               disabled={busy || providerId.length === 0}
               onClick={() => onAssignProvider(task.taskId, providerId)}
             >
-              Alocă
+              Alocă utilaj
             </button>
           </>
         ) : null}
@@ -345,7 +345,7 @@ function ExecutionTaskCard({
         ) : null}
         {task.operatorRelation === "missing_provider" ? (
           <Notice compact>
-            <p>Alocă mai întâi echipamentul sau zona. Fără furnizor taskul nu poate fi revendicat.</p>
+            <p>Alocă mai întâi utilajul. Fără utilaj dedicat taskul nu poate fi revendicat.</p>
           </Notice>
         ) : null}
         {task.operatorRelation === "unavailable" ? (
@@ -449,7 +449,7 @@ function ExecutionTaskCard({
       ) : null}
       {task.requiresProvider && task.eligibleProviders.length === 0 ? (
         <Notice compact>
-          <p>Necesită configurare atelier. Nu există echipament sau zonă eligibilă.</p>
+          <p>Necesită configurare atelier. Nu există utilaj dedicat eligibil.</p>
         </Notice>
       ) : null}
       {task.status === "PLANNED" &&

@@ -51,7 +51,7 @@ const readyOverview: JobOverviewProjection = {
       nextActionLabel: "Deschide execuția",
       href: "/execution/exp:gap",
       needsAttention: true,
-      attentionLabel: "Lipsă echipament",
+      attentionLabel: "Lipsă utilaj dedicat",
       completedCount: 0,
       taskCount: 12,
       inProgressCount: 0,
@@ -125,7 +125,7 @@ describe("JobsOverviewPage", () => {
       "href",
       "/execution/exp:active",
     );
-    expect(screen.getByText("Lipsă echipament")).toBeInTheDocument();
+    expect(screen.getByText("Lipsă utilaj dedicat")).toBeInTheDocument();
     expect(screen.getByText("GATA")).toBeInTheDocument();
     expect(screen.queryByText("ExecutionPlanId")).not.toBeInTheDocument();
     expect(screen.queryByText("ProviderRequirement")).not.toBeInTheDocument();

@@ -3,8 +3,6 @@ import {
   CANONICAL_PRODUCT_CODE,
   MCH_CNC_4020_ID,
   MCH_CNC_CANT_LITERE_ID,
-  WC_ASSEMBLY_01_ID,
-  WC_LED_ASSEMBLY_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 import {
@@ -174,18 +172,18 @@ describe("job overview API", () => {
       ["Debitare foaie CNC", "Față", MCH_CNC_4020_ID],
       ["Debitare foaie CNC", "Spate", MCH_CNC_4020_ID],
       ["Formare profil aluminiu", "Volum", MCH_CNC_CANT_LITERE_ID],
-      ["Montare module LED", "Iluminare", WC_LED_ASSEMBLY_ID],
-      ["Cablare electrică", "Iluminare", WC_LED_ASSEMBLY_ID],
-      ["Pregătire sursă de alimentare", "Iluminare", WC_LED_ASSEMBLY_ID],
-      ["Probă aprindere", "Iluminare", WC_LED_ASSEMBLY_ID],
-      ["Lipire față-volum", "Corp", WC_ASSEMBLY_01_ID],
-      ["Închidere corp", "Corp", WC_ASSEMBLY_01_ID],
     ];
     for (const [label, scope, providerId] of machineSteps) {
       const next = await executeTask(app, taskOf(tasks, label, scope), cookie, providerId);
       tasks = next.tasks;
     }
     for (const [label, scope] of [
+      ["Montare module LED", "Iluminare"],
+      ["Cablare electrică", "Iluminare"],
+      ["Pregătire sursă de alimentare", "Iluminare"],
+      ["Probă aprindere", "Iluminare"],
+      ["Lipire față-volum", "Corp"],
+      ["Închidere corp", "Corp"],
       ["Probă uniformitate", "Iluminare"],
       ["Control calitate final", "Produs"],
       ["Ambalare", "Produs"],

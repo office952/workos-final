@@ -177,7 +177,7 @@ export function AtelierPage() {
             Necesită pregătire atelier ({prepItems.length})
           </summary>
           <p className="atelier-prep-hint">
-            Lipsă echipament / zonă. Deschide lucrarea pentru alocare — nu din Atelier.
+            Lipsă utilaj dedicat. Deschide lucrarea pentru alocare — nu din Atelier.
           </p>
           <ul className="atelier-task-list">
             {prepItems.map((item) => (
@@ -200,7 +200,7 @@ export function AtelierPage() {
                 </div>
                 <div className="atelier-task-actions">
                   <span className="atelier-block-reason">
-                    Necesită echipament / zonă înainte de pornire.
+                    Necesită utilaj dedicat înainte de pornire.
                   </span>
                   <Link className="button-quiet" to={item.workspaceHref}>
                     Deschide lucrarea
@@ -301,7 +301,7 @@ function startNotice(result: TaskMutationFailure): string {
     case "ineligible_executor":
       return "Nu ești eligibil pentru această operație.";
     case "missing_assignment":
-      return "Taskul necesită echipament / zonă înainte de pornire.";
+      return "Taskul necesită utilaj dedicat înainte de pornire.";
     case "dependencies_incomplete":
       return "Taskul așteaptă alte operații.";
     case "invalid_session":

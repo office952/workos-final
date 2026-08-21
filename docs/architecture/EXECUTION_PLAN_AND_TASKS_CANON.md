@@ -150,24 +150,28 @@ A plan is Finalizat only when every task is COMPLETED.
 
 Canonical WORKOS none/none has 12 tasks.
 
-Machine / workcenter operations with the live registry:
+Dedicated-machine operations. Provider required. Missing machine blocks Start:
 
 ```text
 FACE CNC, BACK CNC          → CNC 4020
 VOLUME forming              → CNC Cant Litere
-PLACE LED, WIRE, PSU, IGNITION → Montaj LED / electric
-BOND, CLOSE                 → Masă asamblare 1 or 2
 ```
 
-Manual operations. No dedicated station. Executor required, provider not required:
+Manual work-area operations. No dedicated station assignment. Executor required, provider not required:
 
 ```text
-Probă uniformitate     QUALITY_CONTROL  PROVIDER_NOT_REQUIRED
-Control calitate final QUALITY_CONTROL  PROVIDER_NOT_REQUIRED
-Ambalare               PACKAGING        PROVIDER_NOT_REQUIRED
+Lipire față-volum      MANUAL_ASSEMBLY     PROVIDER_NOT_REQUIRED
+Montare module LED     ELECTRICAL_ASSEMBLY PROVIDER_NOT_REQUIRED
+Cablare electrică      ELECTRICAL_ASSEMBLY PROVIDER_NOT_REQUIRED
+Pregătire sursă        ELECTRICAL_ASSEMBLY PROVIDER_NOT_REQUIRED
+Probă aprindere        ELECTRICAL_ASSEMBLY PROVIDER_NOT_REQUIRED
+Închidere corp         MANUAL_ASSEMBLY     PROVIDER_NOT_REQUIRED
+Probă uniformitate     QUALITY_CONTROL     PROVIDER_NOT_REQUIRED
+Control calitate final QUALITY_CONTROL     PROVIDER_NOT_REQUIRED
+Ambalare               PACKAGING           PROVIDER_NOT_REQUIRED
 ```
 
-All 12 have a truthful execution path when dependencies and an ACTIVE executor are satisfied. Do not invent a QC or packaging Workcenter.
+All 12 have a truthful execution path when dependencies and an ACTIVE executor are satisfied. Do not invent a QC or packaging Workcenter. Do not require Masa 1 / Masa 2 / LED post assignment for the nine manuals.
 
 ## Completion evidence V1
 

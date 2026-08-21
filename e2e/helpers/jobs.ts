@@ -98,15 +98,15 @@ const MACHINE_STEPS: Array<[string, string, string]> = [
   ["Debitare foaie CNC", "Față", "MCH-CNC-4020"],
   ["Debitare foaie CNC", "Spate", "MCH-CNC-4020"],
   ["Formare profil aluminiu", "Volum", "MCH-CNC-CANT-LITERE"],
-  ["Montare module LED", "Iluminare", "WC_LED_ASSEMBLY"],
-  ["Cablare electrică", "Iluminare", "WC_LED_ASSEMBLY"],
-  ["Pregătire sursă de alimentare", "Iluminare", "WC_LED_ASSEMBLY"],
-  ["Probă aprindere", "Iluminare", "WC_LED_ASSEMBLY"],
-  ["Lipire față-volum", "Corp", "WC_ASSEMBLY_01"],
-  ["Închidere corp", "Corp", "WC_ASSEMBLY_01"],
 ];
 
 const MANUAL_STEPS: Array<[string, string]> = [
+  ["Montare module LED", "Iluminare"],
+  ["Cablare electrică", "Iluminare"],
+  ["Pregătire sursă de alimentare", "Iluminare"],
+  ["Probă aprindere", "Iluminare"],
+  ["Lipire față-volum", "Corp"],
+  ["Închidere corp", "Corp"],
   ["Probă uniformitate", "Iluminare"],
   ["Control calitate final", "Produs"],
   ["Ambalare", "Produs"],

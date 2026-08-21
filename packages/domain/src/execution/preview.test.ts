@@ -210,6 +210,8 @@ describe("execution plan preview", () => {
       "Masă asamblare 1",
       "Masă asamblare 2",
     ]);
+    expect(bond?.providerRequirement).toBe("NOT_REQUIRED");
+    expect(bond?.readiness).toBe("READY");
     expect(inspect?.providerRequirement).toBe("NOT_REQUIRED");
     expect(pack?.providerRequirement).toBe("NOT_REQUIRED");
     expect(inspect?.readiness).toBe("READY");

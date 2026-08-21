@@ -32,7 +32,6 @@ import {
   MCH_CNC_4020_ID,
   MCH_CNC_CANT_LITERE_ID,
   WC_ASSEMBLY_01_ID,
-  WC_LED_ASSEMBLY_ID,
 } from "../workcenters/catalog.js";
 import { createPerson, type Person } from "../people/identity.js";
 import {
@@ -228,12 +227,12 @@ describe("LETTERS execution golden path", () => {
     ).toEqual([]);
 
     record = run(record, volumeForm.taskId, MCH_CNC_CANT_LITERE_ID, "2026-08-16T10:14:00.000Z", "2026-08-16T10:15:00.000Z");
-    record = run(record, placeLed.taskId, WC_LED_ASSEMBLY_ID, "2026-08-16T10:16:00.000Z", "2026-08-16T10:17:00.000Z");
-    record = run(record, wire.taskId, WC_LED_ASSEMBLY_ID, "2026-08-16T10:18:00.000Z", "2026-08-16T10:19:00.000Z");
-    record = run(record, psu.taskId, WC_LED_ASSEMBLY_ID, "2026-08-16T10:20:00.000Z", "2026-08-16T10:21:00.000Z");
-    record = run(record, ignition.taskId, WC_LED_ASSEMBLY_ID, "2026-08-16T10:22:00.000Z", "2026-08-16T10:23:00.000Z");
-    record = run(record, bond.taskId, WC_ASSEMBLY_01_ID, "2026-08-16T10:24:00.000Z", "2026-08-16T10:25:00.000Z");
-    record = run(record, close.taskId, WC_ASSEMBLY_01_ID, "2026-08-16T10:26:00.000Z", "2026-08-16T10:27:00.000Z");
+    record = runManual(record, placeLed.taskId, "2026-08-16T10:16:00.000Z", "2026-08-16T10:17:00.000Z");
+    record = runManual(record, wire.taskId, "2026-08-16T10:18:00.000Z", "2026-08-16T10:19:00.000Z");
+    record = runManual(record, psu.taskId, "2026-08-16T10:20:00.000Z", "2026-08-16T10:21:00.000Z");
+    record = runManual(record, ignition.taskId, "2026-08-16T10:22:00.000Z", "2026-08-16T10:23:00.000Z");
+    record = runManual(record, bond.taskId, "2026-08-16T10:24:00.000Z", "2026-08-16T10:25:00.000Z");
+    record = runManual(record, close.taskId, "2026-08-16T10:26:00.000Z", "2026-08-16T10:27:00.000Z");
 
     const view = projectExecutionPlanView(record);
     const remaining = [uniformity, inspect, pack].map((task) =>

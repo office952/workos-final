@@ -304,7 +304,7 @@ describe("job overview projection", () => {
         ],
       }),
     });
-    expect(currentGap.attentionLabel).toBe("Lipsă echipament");
+    expect(currentGap.attentionLabel).toBe("Lipsă utilaj dedicat");
     expect(currentGap.needsAttention).toBe(true);
     expect(futureGap.needsAttention).toBe(false);
     expect(futureGap.attentionLabel).toBeNull();

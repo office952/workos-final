@@ -6,10 +6,16 @@ import { freezeQuoteSnapshot } from "../commercial/quoteSnapshot.js";
 import { projectCommercialPrice } from "../commercial/price.js";
 import { materializeExecutionPlanFromSnapshot } from "../execution/plan.js";
 import {
+  BOND_LETTER_BODY_ID,
+  CLOSE_LETTER_BODY_ID,
   CUT_SHEET_CNC_ID,
   INSPECT_FINISHED_LETTER_ID,
+  INSTALL_OR_CONNECT_PSU_ID,
   PACK_PRODUCT_ID,
+  PLACE_LED_MODULES_ID,
   TEST_ILLUMINATION_UNIFORMITY_ID,
+  TEST_LIGHTING_IGNITION_ID,
+  WIRE_LIGHTING_ID,
 } from "../processes/catalog.js";
 import { composeProductProcessesFromTruth } from "../processes/composition.js";
 import {
@@ -130,6 +136,12 @@ describe("frozen production input alignment", () => {
         (item) => item.processId,
       ),
     ).toEqual([
+      PLACE_LED_MODULES_ID,
+      WIRE_LIGHTING_ID,
+      INSTALL_OR_CONNECT_PSU_ID,
+      TEST_LIGHTING_IGNITION_ID,
+      BOND_LETTER_BODY_ID,
+      CLOSE_LETTER_BODY_ID,
       TEST_ILLUMINATION_UNIFORMITY_ID,
       INSPECT_FINISHED_LETTER_ID,
       PACK_PRODUCT_ID,
@@ -202,6 +214,12 @@ describe("frozen production input alignment", () => {
         .filter((task) => task.providerRequirement === "NOT_REQUIRED")
         .map((task) => task.processId),
     ).toEqual([
+      PLACE_LED_MODULES_ID,
+      WIRE_LIGHTING_ID,
+      INSTALL_OR_CONNECT_PSU_ID,
+      TEST_LIGHTING_IGNITION_ID,
+      BOND_LETTER_BODY_ID,
+      CLOSE_LETTER_BODY_ID,
       TEST_ILLUMINATION_UNIFORMITY_ID,
       INSPECT_FINISHED_LETTER_ID,
       PACK_PRODUCT_ID,

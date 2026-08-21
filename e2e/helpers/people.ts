@@ -1,6 +1,7 @@
 import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 
 export const TEST_EXECUTOR_NAME = "Executor test E2E";
+export const TEST_OPERATOR_PIN = "246810";
 
 const LETTERS_EXECUTION_SKILL_CODES = [
   "SK_CNC_OPERATOR",
@@ -74,13 +75,40 @@ export async function assignExecutorIfNeeded(card: Locator, personName = TEST_EX
   await expect(card.getByText(`Executant: ${personName}`)).toBeVisible();
 }
 
+export async function configureTestExecutorPin(
+  request: APIRequestContext,
+  personId: string,
+  pin = TEST_OPERATOR_PIN,
+) {
+  const configured = await request.put(
+    `/api/people/${encodeURIComponent(personId)}/operator-pin`,
+    { data: { pin, confirmPin: pin } },
+  );
+  expect(configured.ok()).toBeTruthy();
+}
+
+export async function identifyTestExecutorOnPage(
+  page: Page,
+  displayName = TEST_EXECUTOR_NAME,
+  pin = TEST_OPERATOR_PIN,
+) {
+  if (await page.getByRole("button", { name: "Ieși" }).isVisible()) {
+    return;
+  }
+  await page.getByRole("button", { name: "Identifică-te" }).click();
+  await page.getByLabel("Persoană").selectOption({ label: displayName });
+  await page.getByRole("textbox", { name: "PIN" }).fill(pin);
+  await page.getByRole("button", { name: "Confirmă" }).click();
+  await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
+}
+
 export async function assignProviderIfNeeded(card: Locator, providerLabel?: string) {
-  const assign = card.getByRole("button", { name: "Alocă", exact: true });
+  const assign = card.getByRole("button", { name: "Alocă utilaj", exact: true });
   if (!(await assign.isVisible())) {
     return;
   }
   if (providerLabel) {
-    await card.getByRole("combobox", { name: "Echipament / zonă" }).selectOption({
+    await card.getByRole("combobox", { name: "Utilaj dedicat" }).selectOption({
       label: providerLabel,
     });
   }

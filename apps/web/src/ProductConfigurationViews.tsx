@@ -3,6 +3,7 @@ import {
   commercialCompletenessLabel,
   commercialPrimaryActionLabel,
   eicLineGroupLabel,
+  providerRequirementLabel,
   quoteDocumentReference,
   type AcceptedProductionSnapshot,
   type CommercialExperienceProjection,
@@ -698,7 +699,7 @@ export function ProductionPreviewSection({
             <p>Capabilitate: {operation.requiredCapabilityLabel}</p>
             <p>
               {operation.providerRequirement === "NOT_REQUIRED"
-                ? "Nu necesită echipament"
+                ? providerRequirementLabel("NOT_REQUIRED")
                 : `Furnizori disponibili: ${
                     operation.eligibleProviders.length === 0
                       ? "Fără furnizor configurat"

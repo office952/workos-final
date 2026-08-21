@@ -16,7 +16,7 @@ import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { MAT_LED_MODULE_ID, PLEXIGLAS_3MM_OPAL_ID } from "../resources/catalog.js";
 import { freezeAcceptedProductionSnapshot } from "../production/snapshot.js";
-import { MCH_CNC_4020_ID, WC_LED_ASSEMBLY_ID } from "../workcenters/catalog.js";
+import { MCH_CNC_4020_ID } from "../workcenters/catalog.js";
 import { createPerson, type Person } from "../people/identity.js";
 import {
   assignExecutorToTask,
@@ -92,12 +92,14 @@ function testPeople(): Person[] {
 function startAssigned(
   record: ExecutionPlanRecord,
   taskId: string,
-  providerId: string,
+  providerId?: string,
 ): ExecutionPlanRecord {
   const people = testPeople();
-  const assigned = unwrap(assignProviderToTask(record, taskId, providerId));
+  const withProvider = providerId
+    ? unwrap(assignProviderToTask(record, taskId, providerId))
+    : record;
   const withExecutor = unwrap(
-    assignExecutorToTask(assigned, taskId, people[0]!.personId, people),
+    assignExecutorToTask(withProvider, taskId, people[0]!.personId, people),
   );
   return unwrap(startExecutionTask(withExecutor, taskId, "2026-08-16T12:10:00.000Z", people));
 }
@@ -134,7 +136,7 @@ describe("execution actual resource consumption", () => {
       [],
     );
 
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     const completedLed = unwrap(
       completeExecutionTask(startedLed, lighting.taskId, "2026-08-16T12:12:00.000Z", {
         completedQuantity: 125,
@@ -196,7 +198,7 @@ describe("execution actual resource consumption", () => {
         plannedCompletionInput(backCnc),
       ),
     );
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     const completedLed = unwrap(
       completeExecutionTask(startedLed, lighting.taskId, "2026-08-16T12:12:00.000Z", {
         completedQuantity: 125,
@@ -249,7 +251,7 @@ describe("execution actual resource consumption", () => {
         plannedCompletionInput(backCnc),
       ),
     );
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     expect(
       completeExecutionTask(startedLed, lighting.taskId, "2026-08-16T12:12:00.000Z", {
         completedQuantity: 125,
@@ -300,7 +302,7 @@ describe("execution actual resource consumption", () => {
         plannedCompletionInput(backCnc),
       ),
     );
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     const completedLed = unwrap(
       completeExecutionTask(startedLed, lighting.taskId, "2026-08-16T12:12:00.000Z", {
         completedQuantity: 125,
@@ -317,7 +319,7 @@ describe("execution actual resource consumption", () => {
         ?.actualQuantity,
     ).toBe(127);
 
-    const startedWire = startAssigned(completedLed, wire.taskId, WC_LED_ASSEMBLY_ID);
+    const startedWire = startAssigned(completedLed, wire.taskId);
     const completedWire = unwrap(
       completeExecutionTask(startedWire, wire.taskId, "2026-08-16T12:13:00.000Z"),
     );

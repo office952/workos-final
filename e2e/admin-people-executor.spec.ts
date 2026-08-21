@@ -117,7 +117,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   const inspect = taskCard(page, "Control calitate final", "Produs");
 
   if (await backCnc.getByText("Alocare: Nealocat").isVisible()) {
-    await backCnc.getByRole("button", { name: "Alocă", exact: true }).click();
+    await backCnc.getByRole("button", { name: "Alocă utilaj", exact: true }).click();
   }
   await expect(backCnc.getByText("Alocat: CNC 4020")).toBeVisible();
   if (await backCnc.getByText("Executant: Nealocat").isVisible()) {
@@ -171,8 +171,8 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     fullPage: true,
   });
 
-  await expect(inspect.getByText("Nu necesită echipament")).toBeVisible();
-  await expect(inspect.getByRole("button", { name: "Alocă", exact: true })).toHaveCount(0);
+  await expect(inspect.getByText("Nu necesită utilaj dedicat")).toBeVisible();
+  await expect(inspect.getByRole("button", { name: "Alocă utilaj", exact: true })).toHaveCount(0);
   await expect(inspect.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   if (await inspect.getByRole("button", { name: "Alocă executant" }).isVisible()) {
     await inspect.getByRole("combobox", { name: "Executant" }).selectOption({

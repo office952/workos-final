@@ -579,11 +579,15 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!providerId) {
       return c.json({ error: "invalid_payload" }, 400);
     }
+    const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     return respondTaskMutation(
       c,
       runtime,
       runtime.assignExecutionTaskProvider(c.req.param("taskId"), providerId),
-      { taskId: c.req.param("taskId") },
+      {
+        taskId: c.req.param("taskId"),
+        operatorId: session.ok ? session.person.personId : null,
+      },
     );
   });
 
@@ -593,11 +597,15 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!personId) {
       return c.json({ error: "invalid_payload" }, 400);
     }
+    const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     return respondTaskMutation(
       c,
       runtime,
       runtime.assignExecutionTaskExecutor(c.req.param("taskId"), personId),
-      { taskId: c.req.param("taskId") },
+      {
+        taskId: c.req.param("taskId"),
+        operatorId: session.ok ? session.person.personId : null,
+      },
     );
   });
 

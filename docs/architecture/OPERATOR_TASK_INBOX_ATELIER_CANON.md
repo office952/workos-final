@@ -33,7 +33,7 @@ Derived lanes (not persisted):
 1. **În lucru la mine** — `IN_PROGRESS` + assignedExecutor = current Person (execution fact survives later skill/availability loss)
 2. **Disponibile pentru mine** — person-eligible `PLANNED` work:
    - ready (`canClaimStart`) → **Pornește**
-   - provider required but missing → visible, not startable (“Necesită echipament / zonă…”)
+   - provider required but missing → visible, not startable (“Necesită utilaj dedicat…”)
 3. **Urmează** — eligible Person, dependencies incomplete
 
 Display order: `plan.createdAt` then `task.seq`.

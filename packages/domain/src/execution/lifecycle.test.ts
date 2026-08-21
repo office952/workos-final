@@ -25,7 +25,6 @@ import {
   MCH_CNC_4020_ID,
   MCH_CNC_CANT_LITERE_ID,
   WC_ASSEMBLY_01_ID,
-  WC_ASSEMBLY_02_ID,
   createWorkcenterRegistry,
 } from "../workcenters/catalog.js";
 import { createPerson, type Person } from "../people/identity.js";
@@ -158,19 +157,10 @@ describe("minimal execution task lifecycle", () => {
   it("allows reassignment before start and rejects it after start", () => {
     const record = planned();
     const bond = taskByProcess(record, BOND_LETTER_BODY_ID);
-    const first = assignProviderToTask(record, bond.taskId, WC_ASSEMBLY_01_ID);
-    expect(first.ok).toBe(true);
-    if (!first.ok) {
-      return;
-    }
-    const second = assignProviderToTask(first.record, bond.taskId, WC_ASSEMBLY_02_ID);
-    expect(second.ok).toBe(true);
-    if (!second.ok) {
-      return;
-    }
-    expect(
-      second.record.tasks.find((item) => item.taskId === bond.taskId)?.assignedProvider?.id,
-    ).toBe(WC_ASSEMBLY_02_ID);
+    expect(assignProviderToTask(record, bond.taskId, WC_ASSEMBLY_01_ID)).toEqual({
+      ok: false,
+      error: "ineligible_provider",
+    });
 
     const backCnc = taskBySource(record, "BACK", CUT_SHEET_CNC_ID);
     const assigned = assignProviderToTask(record, backCnc.taskId, MCH_CNC_4020_ID);
@@ -234,17 +224,12 @@ describe("minimal execution task lifecycle", () => {
     const record = planned();
     const backCnc = taskBySource(record, "BACK", CUT_SHEET_CNC_ID);
     const lighting = taskByProcess(record, PLACE_LED_MODULES_ID);
-    const assignedLighting = assignProviderToTask(
-      record,
-      lighting.taskId,
-      "WC_LED_ASSEMBLY",
-    );
-    expect(assignedLighting.ok).toBe(true);
-    if (!assignedLighting.ok) {
-      return;
-    }
+    expect(assignProviderToTask(record, lighting.taskId, "WC_LED_ASSEMBLY")).toEqual({
+      ok: false,
+      error: "ineligible_provider",
+    });
     const people = testPeople();
-    const lightingReady = withExecutor(assignedLighting.record, lighting.taskId, people);
+    const lightingReady = withExecutor(record, lighting.taskId, people);
     expect(
       startExecutionTask(
         lightingReady.record,

@@ -15,7 +15,7 @@ import {
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { freezeAcceptedProductionSnapshot } from "../production/snapshot.js";
-import { MCH_CNC_4020_ID, WC_LED_ASSEMBLY_ID } from "../workcenters/catalog.js";
+import { MCH_CNC_4020_ID } from "../workcenters/catalog.js";
 import { createPerson, type Person } from "../people/identity.js";
 import {
   assignExecutorToTask,
@@ -90,12 +90,14 @@ function testPeople(): Person[] {
 function startAssigned(
   record: ExecutionPlanRecord,
   taskId: string,
-  providerId: string,
+  providerId?: string,
 ): ExecutionPlanRecord {
   const people = testPeople();
-  const assigned = unwrap(assignProviderToTask(record, taskId, providerId));
+  const withProvider = providerId
+    ? unwrap(assignProviderToTask(record, taskId, providerId))
+    : record;
   const withExecutor = unwrap(
-    assignExecutorToTask(assigned, taskId, people[0]!.personId, people),
+    assignExecutorToTask(withProvider, taskId, people[0]!.personId, people),
   );
   return unwrap(startExecutionTask(withExecutor, taskId, "2026-08-16T12:10:00.000Z", people));
 }
@@ -131,7 +133,7 @@ describe("minimal execution completion evidence", () => {
     });
     expect(cncDone?.quantities[0]?.value).toBe(12.5);
 
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     const completedLed = unwrap(
       completeExecutionTask(startedLed, lighting.taskId, "2026-08-16T12:12:00.000Z", {
         completedQuantity: 125,
@@ -168,7 +170,7 @@ describe("minimal execution completion evidence", () => {
         plannedCompletionInput(backCnc),
       ),
     );
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     const completedLed = unwrap(
       completeExecutionTask(startedLed, lighting.taskId, "2026-08-16T12:12:00.000Z", {
         completedQuantity: 123,
@@ -230,7 +232,7 @@ describe("minimal execution completion evidence", () => {
     if (!lighting) {
       throw new Error("missing lighting");
     }
-    const startedLed = startAssigned(completedCnc, lighting.taskId, WC_LED_ASSEMBLY_ID);
+    const startedLed = startAssigned(completedCnc, lighting.taskId);
     const completedLed = unwrap(
       completeExecutionTask(
         startedLed,
@@ -239,7 +241,7 @@ describe("minimal execution completion evidence", () => {
         plannedCompletionInput(lighting),
       ),
     );
-    const startedWire = startAssigned(completedLed, wire.taskId, WC_LED_ASSEMBLY_ID);
+    const startedWire = startAssigned(completedLed, wire.taskId);
     expect(
       completeExecutionTask(startedWire, wire.taskId, "2026-08-16T12:13:00.000Z", {
         completedQuantity: 1,
