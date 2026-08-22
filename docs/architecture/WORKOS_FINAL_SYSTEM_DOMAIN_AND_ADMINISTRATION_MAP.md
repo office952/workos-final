@@ -11,7 +11,9 @@ Related current canons:
 - `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md` — service / labor recipe layer
 - `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition and capability class
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — operator/admin visual and interaction grammar
-- `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — construction order and finalization status
+- `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction
+- `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery sequence
+- `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — historical construction map; not the live V1 sequence
 - `packages/domain/src/capabilities.ts` — frozen capability IDs (kernel status remains PLANNED by design)
 - `packages/domain/src/governance/projection.ts` — honest implemented vs planned runtime projection
 

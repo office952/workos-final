@@ -19,7 +19,7 @@ It supersedes, for that role only:
 - `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — earlier construction and finalization map; keep it; do not treat it as the live V1 sequence
 - `21_WORKOS_IMPLEMENTATION_ROUTE.md` — historical implementation-route document. It is not required to live in this repository. If it appears in evidence, keep it; do not delete it; do not rewrite it; it is not the current V1 roadmap
 
-`README.md` and some older architecture pointers still cite `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md`. Those inbound pointers are stale. This build does not retarget them. Agents must read this file.
+`README.md` points at this file as the active V1 delivery roadmap. Older worklogs and plans may still cite `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` as construction evidence. Do not treat that file as the live sequence.
 
 Do not create a second V1 delivery roadmap.
 

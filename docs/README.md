@@ -6,7 +6,8 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 
 - `AGENTS.md` — working rules and current position
 - `README.md` — how to run the app
-- `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — construction order and phase status
+- `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery sequence
+- `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction
 - `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings single-truth law
 - `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration law
 - `docs/architecture/PRODUCT_SYSTEM_PERSISTENCE_CANON.md` — persisted display metadata and first write path
@@ -62,6 +63,7 @@ These describe the live system. If they disagree with runtime, the runtime wins 
 
 Worklogs of earlier builds. They may use old names (`RETURN_CANT`, `/products/letters`). They are not current canon.
 
+- `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — historical construction map; not the live V1 sequence
 - `docs/worklog/WORKOS_FINAL_REPOSITORY_BOOTSTRAP_V1.md`
 - `docs/worklog/WORKOS_FINAL_CAPABILITY_BOUNDARY_KERNEL_V1.md`
 - `docs/worklog/WORKOS_FINAL_PLATFORM_SHELL_V1.md`
