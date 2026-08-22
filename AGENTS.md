@@ -3,6 +3,30 @@
 WorkOS Final is a clean reconstruction of the product operating system.
 It is not a cleanup or fork of previous WorkOS repositories.
 
+## Canonical direction
+
+Active V1 delivery authority: `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`.
+Active UI/UX direction authority: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
+`docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` is construction history.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` is the current implemented presentation law.
+
+Before any implementation:
+- read `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`
+
+Before any UI/UX change:
+- read `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`
+- read `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`
+
+Any agent must report:
+
+```text
+ROADMAP_READ
+UI_UX_CANON_READ
+DIRECTION_CONFLICT
+```
+
+Implementation reports also include the V1 roadmap checkpoint. UI changes also include the UI canon change-governance fields.
+
 ## Current position
 
 Hierarchical product catalog plus two live products: LETTERS and Panou ACM casetat.

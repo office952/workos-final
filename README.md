@@ -63,4 +63,8 @@ Previous WorkOS repositories are read-only evidence. Do not write to them and do
 
 ## Roadmap
 
-See [docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md](docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md).
+Active V1 delivery: [docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md](docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md).
+
+Active UI/UX direction: [docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md](docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md).
+
+Historical construction map: [docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md](docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md).

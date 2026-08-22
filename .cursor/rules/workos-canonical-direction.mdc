@@ -1,0 +1,22 @@
+---
+description: Read the V1 roadmap and UI/UX direction canon before implementation
+alwaysApply: true
+---
+
+# Canonical direction
+
+Before any implementation, read `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`.
+
+Before any UI/UX task, also read `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
+
+Stop and report if the prompt contradicts those documents. Do not update the canons only to justify a build after the fact.
+
+Do not hardcode business truth in the UI. Do not expose backend details in operator UI. Do not expand beyond the active milestone.
+
+Report:
+
+```text
+ROADMAP_READ
+UI_UX_CANON_READ
+DIRECTION_CONFLICT
+```
