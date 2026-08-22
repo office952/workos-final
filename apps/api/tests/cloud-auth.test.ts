@@ -156,6 +156,12 @@ describe("Cloud auth and authorization", () => {
       organizationId: alpha.organization.organizationId,
       role: "owner",
     });
+    await addUser(fixture, {
+      email: "beta-owner@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: beta.organization.organizationId,
+      role: "owner",
+    });
     fixture.controlPlane.addMembership({
       userId: user.userId,
       organizationId: beta.organization.organizationId,

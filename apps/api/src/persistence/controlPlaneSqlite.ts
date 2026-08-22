@@ -49,10 +49,12 @@ export function applyControlPlaneMigrations(db: SqliteDatabase): void {
       continue;
     }
     const sql = readFileSync(join(CONTROL_PLANE_MIGRATIONS_DIR, file), "utf8");
-    db.exec(sql);
-    db.prepare("INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)").run(
-      file,
-      new Date().toISOString(),
-    );
+    db.transaction(() => {
+      db.exec(sql);
+      db.prepare("INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)").run(
+        file,
+        new Date().toISOString(),
+      );
+    })();
   }
 }

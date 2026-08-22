@@ -1,7 +1,13 @@
 import { Readable } from "node:stream";
 import { afterEach, describe, expect, it } from "vitest";
 import { runConfigureProvidersCli } from "../src/cloud/configureProvidersCli.js";
-import { addOrganization, cleanupCloudTemps, createCloudFixture } from "./cloud-harness.js";
+import {
+  addOrganization,
+  addUser,
+  cleanupCloudTemps,
+  createCloudFixture,
+  OWNER_PASSWORD,
+} from "./cloud-harness.js";
 import { LETTERS_TWO_MACHINE_PROVIDER_CONFIG } from "./fixtures/lettersTwoMachineProviderConfig.js";
 
 afterEach(() => {
@@ -28,6 +34,12 @@ describe("configure providers CLI", () => {
     const fixture = createCloudFixture();
     try {
       const org = await addOrganization(fixture, "Firma Noua", "NEW_ORGANIZATION");
+      await addUser(fixture, {
+        email: "owner@providers.test",
+        password: OWNER_PASSWORD,
+        organizationId: org.organization.organizationId,
+        role: "owner",
+      });
       const stdin = Readable.from([JSON.stringify(LETTERS_TWO_MACHINE_PROVIDER_CONFIG)]);
       await runConfigureProvidersCli(
         [

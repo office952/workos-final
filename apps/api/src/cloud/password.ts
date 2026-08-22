@@ -33,6 +33,16 @@ export class CloudKdfError extends Error {
 
 const SCRYPT_DESCRIPTOR = /^scrypt:N=(\d+),r=(\d+),p=(\d+)$/;
 
+export class CloudPasswordError extends Error {
+  readonly issue: CloudPasswordIssue;
+
+  constructor(issue: CloudPasswordIssue) {
+    super(`invalid_password:${issue}`);
+    this.name = "CloudPasswordError";
+    this.issue = issue;
+  }
+}
+
 export function validateCloudPassword(password: string): CloudPasswordIssue | null {
   if (password.length < MIN_PASSWORD_LENGTH) {
     return "too_short";
@@ -44,6 +54,13 @@ export function validateCloudPassword(password: string): CloudPasswordIssue | nu
     return "too_simple";
   }
   return null;
+}
+
+export function assertCloudPassword(password: string): void {
+  const issue = validateCloudPassword(password);
+  if (issue) {
+    throw new CloudPasswordError(issue);
+  }
 }
 
 export function parseCloudPasswordKdf(descriptor: string): ParsedCloudPasswordKdf {

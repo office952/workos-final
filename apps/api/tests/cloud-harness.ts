@@ -42,8 +42,10 @@ export function cleanupCloudTemps(): void {
   }
 }
 
-export function createCloudFixture(options: { env?: NodeJS.ProcessEnv } = {}): CloudFixture {
-  const cloudRoot = trackTempDir();
+export function openCloudFixture(
+  cloudRoot: string,
+  options: { env?: NodeJS.ProcessEnv } = {},
+): CloudFixture {
   const controlPlane = openProvisionedControlPlane(cloudRoot);
   const registry = createRuntimeRegistry();
   const app = createApp({
@@ -60,6 +62,10 @@ export function createCloudFixture(options: { env?: NodeJS.ProcessEnv } = {}): C
       controlPlane.close();
     },
   };
+}
+
+export function createCloudFixture(options: { env?: NodeJS.ProcessEnv } = {}): CloudFixture {
+  return openCloudFixture(trackTempDir(), options);
 }
 
 export async function addOrganization(
@@ -86,6 +92,12 @@ export async function addUser(
     organizationId: input.organizationId,
     role: input.role,
   });
+  if (fixture.controlPlane.countOwnerMemberships(input.organizationId) > 0) {
+    const organization = fixture.controlPlane.getOrganization(input.organizationId);
+    if (organization && organization.status !== "ACTIVE") {
+      fixture.controlPlane.activateOrganization(input.organizationId);
+    }
+  }
   return user;
 }
 

@@ -20,6 +20,7 @@ describe("Cloud Control Plane", () => {
     const plane = createControlPlane(db, trackTempDir());
     const organization = plane.createOrganization({ displayName: "Atelier Alpha" });
     expect(organization.organizationId.startsWith("org:")).toBe(true);
+    expect(organization.status).toBe("PROVISIONING");
     expect(organization.slug).toMatch(/^[a-z0-9-]{3,48}$/);
 
     const user = await plane.createUser({
@@ -88,6 +89,9 @@ describe("Cloud Control Plane", () => {
       email: "owner@example.test",
       password: OWNER_PASSWORD,
     });
+    expect(() => plane.activateOrganization(organization.organizationId)).toThrow(
+      /organization_not_ready/,
+    );
     expect(() =>
       plane.createSession({
         userId: user.userId,
@@ -100,6 +104,13 @@ describe("Cloud Control Plane", () => {
       organizationId: organization.organizationId,
       role: "owner",
     });
+    expect(() =>
+      plane.createSession({
+        userId: user.userId,
+        activeOrganizationId: organization.organizationId,
+      }),
+    ).toThrow(/organization_not_ready/);
+    plane.activateOrganization(organization.organizationId);
     const { session } = plane.createSession({
       userId: user.userId,
       activeOrganizationId: organization.organizationId,
@@ -136,6 +147,7 @@ describe("Cloud Control Plane", () => {
       organizationId: organization.organizationId,
       role: "owner",
     });
+    plane.activateOrganization(organization.organizationId);
     const created = plane.createSession({
       userId: user.userId,
       activeOrganizationId: organization.organizationId,

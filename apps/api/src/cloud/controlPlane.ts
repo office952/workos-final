@@ -13,9 +13,19 @@ import {
 } from "./password.js";
 
 export class ControlPlaneInvariantError extends Error {
-  readonly code: "no_membership" | "organization_disabled" | "user_unavailable";
+  readonly code:
+    | "no_membership"
+    | "organization_disabled"
+    | "organization_not_ready"
+    | "user_unavailable";
 
-  constructor(code: "no_membership" | "organization_disabled" | "user_unavailable") {
+  constructor(
+    code:
+      | "no_membership"
+      | "organization_disabled"
+      | "organization_not_ready"
+      | "user_unavailable",
+  ) {
     super(code);
     this.name = "ControlPlaneInvariantError";
     this.code = code;
@@ -36,7 +46,14 @@ export type BootstrapPolicy = (typeof BOOTSTRAP_POLICIES)[number];
 export const MEMBERSHIP_ROLES = ["owner", "member"] as const;
 export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
 
-export type OrganizationStatus = "ACTIVE" | "DISABLED";
+export const ORGANIZATION_STATUSES = [
+  "PROVISIONING",
+  "ACTIVE",
+  "FAILED_RETRYABLE",
+  "DISABLED",
+] as const;
+export type OrganizationStatus = (typeof ORGANIZATION_STATUSES)[number];
+export const ORGANIZATION_LOGIN_STATUSES = ["ACTIVE"] as const;
 export type UserStatus = "ACTIVE" | "DISABLED";
 export type MembershipStatus = "ACTIVE" | "REVOKED";
 export type PlaneStatus = "ACTIVE" | "RETIRED";
@@ -46,6 +63,8 @@ export type CloudOrganization = {
   slug: string;
   displayName: string;
   status: OrganizationStatus;
+  provisionOwnerEmail: string | null;
+  provisionFailureCode: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -99,12 +118,44 @@ export type ControlPlane = {
   db: SqliteDatabase;
   cloudRoot: string;
   close(): void;
+  runTransaction<T>(work: () => T): T;
+  runImmediateTransaction<T>(work: () => T): T;
   createOrganization(input: {
     displayName: string;
     slug?: string;
+    ownerEmail?: string;
   }): CloudOrganization;
   getOrganization(organizationId: string): CloudOrganization | null;
   listOrganizations(): CloudOrganization[];
+  markOrganizationFailed(organizationId: string, failureCode: string): CloudOrganization;
+  claimProvisionOwnerEmail(
+    organizationId: string,
+    email: string,
+  ): { ok: true; organization: CloudOrganization } | { ok: false; error: "email_mismatch" | "organization_missing" };
+  activateOrganization(organizationId: string): CloudOrganization;
+  activateOrganizationForInitialProvision(
+    organizationId: string,
+    ownerUserId: string,
+  ): CloudOrganization;
+  listActiveOwnerMemberships(organizationId: string): CloudMembership[];
+  countUsers(): number;
+  countMemberships(organizationId: string): number;
+  countActiveMemberships(organizationId: string): number;
+  countPlanes(organizationId: string): number;
+  countOwnerMemberships(organizationId: string): number;
+  listMembershipsForOrganization(organizationId: string): CloudMembership[];
+  insertHashedUser(input: {
+    email: string;
+    passwordHash: Buffer;
+    passwordSalt: Buffer;
+    kdf: string;
+  }): CloudUser;
+  updateHashedUserPassword(input: {
+    userId: string;
+    passwordHash: Buffer;
+    passwordSalt: Buffer;
+    kdf: string;
+  }): void;
   createUser(input: { email: string; password: string }): Promise<CloudUser>;
   getUserByEmail(email: string): CloudUser | null;
   getUser(userId: string): CloudUser | null;
@@ -166,25 +217,36 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
     close() {
       db.close();
     },
+    runTransaction(work) {
+      return db.transaction(work)();
+    },
+    runImmediateTransaction(work) {
+      return db.transaction(work).immediate();
+    },
     createOrganization(input) {
       const now = new Date().toISOString();
+      const ownerEmail = input.ownerEmail ? normalizeEmail(input.ownerEmail) : null;
       const organization: CloudOrganization = {
         organizationId: `org:${randomUUID()}`,
         slug: input.slug?.trim() || allocateSlug(input.displayName),
         displayName: input.displayName.trim(),
-        status: "ACTIVE",
+        status: "PROVISIONING",
+        provisionOwnerEmail: ownerEmail,
+        provisionFailureCode: null,
         createdAt: now,
         updatedAt: now,
       };
       db.prepare(
         `INSERT INTO organizations
-         (organization_id, slug, display_name, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+         (organization_id, slug, display_name, status, provision_owner_email, provision_failure_code, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       ).run(
         organization.organizationId,
         organization.slug,
         organization.displayName,
         organization.status,
+        organization.provisionOwnerEmail,
+        organization.provisionFailureCode,
         organization.createdAt,
         organization.updatedAt,
       );
@@ -196,12 +258,170 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
     listOrganizations() {
       return db
         .prepare(
-          `SELECT organization_id, slug, display_name, status, created_at, updated_at
+          `SELECT organization_id, slug, display_name, status, provision_owner_email, provision_failure_code, created_at, updated_at
            FROM organizations
            ORDER BY display_name COLLATE NOCASE`,
         )
         .all()
         .map((row) => mapOrganization(row as OrganizationRow));
+    },
+    markOrganizationFailed(organizationId, failureCode) {
+      const now = new Date().toISOString();
+      db.prepare(
+        `UPDATE organizations
+         SET status = 'FAILED_RETRYABLE', provision_failure_code = ?, updated_at = ?
+         WHERE organization_id = ?`,
+      ).run(failureCode, now, organizationId);
+      const organization = readOrganization(db, organizationId);
+      if (!organization) {
+        throw new ControlPlaneInvariantError("organization_disabled");
+      }
+      return organization;
+    },
+    claimProvisionOwnerEmail(organizationId, email) {
+      const normalized = normalizeEmail(email);
+      const current = readOrganization(db, organizationId);
+      if (!current) {
+        return { ok: false as const, error: "organization_missing" as const };
+      }
+      if (current.provisionOwnerEmail === normalized) {
+        return { ok: true as const, organization: current };
+      }
+      if (current.provisionOwnerEmail) {
+        return { ok: false as const, error: "email_mismatch" as const };
+      }
+      const taken = db
+        .prepare(
+          `SELECT organization_id FROM organizations
+           WHERE provision_owner_email = ? AND organization_id != ?`,
+        )
+        .get(normalized, organizationId) as { organization_id: string } | undefined;
+      if (taken) {
+        return { ok: false as const, error: "email_mismatch" as const };
+      }
+      const now = new Date().toISOString();
+      db.prepare(
+        `UPDATE organizations
+         SET provision_owner_email = ?, updated_at = ?
+         WHERE organization_id = ? AND provision_owner_email IS NULL`,
+      ).run(normalized, now, organizationId);
+      const after = readOrganization(db, organizationId);
+      if (!after) {
+        return { ok: false as const, error: "organization_missing" as const };
+      }
+      if (after.provisionOwnerEmail === normalized) {
+        return { ok: true as const, organization: after };
+      }
+      return { ok: false as const, error: "email_mismatch" as const };
+    },
+    activateOrganization(organizationId) {
+      const current = readOrganization(db, organizationId);
+      if (!current) {
+        throw new ControlPlaneInvariantError("organization_disabled");
+      }
+      if (current.status === "DISABLED") {
+        throw new ControlPlaneInvariantError("organization_disabled");
+      }
+      const owners = countOwnerMemberships(db, organizationId);
+      if (owners < 1) {
+        throw new ControlPlaneInvariantError("organization_not_ready");
+      }
+      return markOrganizationActive(db, organizationId);
+    },
+    activateOrganizationForInitialProvision(organizationId, ownerUserId) {
+      const current = readOrganization(db, organizationId);
+      if (!current) {
+        throw new ControlPlaneInvariantError("organization_disabled");
+      }
+      if (current.status === "DISABLED") {
+        throw new ControlPlaneInvariantError("organization_disabled");
+      }
+      const owners = listActiveOwnerMemberships(db, organizationId);
+      if (owners.length !== 1 || owners[0].userId !== ownerUserId) {
+        throw new ControlPlaneInvariantError("organization_not_ready");
+      }
+      return markOrganizationActive(db, organizationId);
+    },
+    listActiveOwnerMemberships(organizationId) {
+      return listActiveOwnerMemberships(db, organizationId);
+    },
+    countUsers() {
+      const row = db.prepare(`SELECT count(*) AS n FROM users`).get() as { n: number };
+      return row.n;
+    },
+    countMemberships(organizationId) {
+      const row = db
+        .prepare(`SELECT count(*) AS n FROM organization_memberships WHERE organization_id = ?`)
+        .get(organizationId) as { n: number };
+      return row.n;
+    },
+    countActiveMemberships(organizationId) {
+      const row = db
+        .prepare(
+          `SELECT count(*) AS n FROM organization_memberships WHERE organization_id = ? AND status = 'ACTIVE'`,
+        )
+        .get(organizationId) as { n: number };
+      return row.n;
+    },
+    countPlanes(organizationId) {
+      const row = db
+        .prepare(`SELECT count(*) AS n FROM operational_planes WHERE organization_id = ?`)
+        .get(organizationId) as { n: number };
+      return row.n;
+    },
+    countOwnerMemberships(organizationId) {
+      return countOwnerMemberships(db, organizationId);
+    },
+    listMembershipsForOrganization(organizationId) {
+      return db
+        .prepare(
+          `SELECT membership_id, user_id, organization_id, role, status, created_at
+           FROM organization_memberships
+           WHERE organization_id = ?
+           ORDER BY created_at`,
+        )
+        .all(organizationId)
+        .map((row) => mapMembership(row as MembershipRow));
+    },
+    insertHashedUser(input) {
+      const email = normalizeEmail(input.email);
+      const now = new Date().toISOString();
+      const user: CloudUser = {
+        userId: `usr:${randomUUID()}`,
+        email,
+        status: "ACTIVE",
+        createdAt: now,
+        updatedAt: now,
+      };
+      db.prepare(
+        `INSERT INTO users
+         (user_id, email, password_hash, password_salt, kdf, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).run(
+        user.userId,
+        user.email,
+        input.passwordHash,
+        input.passwordSalt,
+        input.kdf,
+        user.status,
+        user.createdAt,
+        user.updatedAt,
+      );
+      return user;
+    },
+    updateHashedUserPassword(input) {
+      const now = new Date().toISOString();
+      db.prepare(
+        `UPDATE users
+         SET password_hash = ?, password_salt = ?, kdf = ?, updated_at = ?
+         WHERE user_id = ?`,
+      ).run(
+        input.passwordHash,
+        input.passwordSalt,
+        input.kdf,
+        now,
+        input.userId,
+      );
     },
     async createUser(input) {
       const email = normalizeEmail(input.email);
@@ -250,6 +470,25 @@ export function createControlPlane(db: SqliteDatabase, cloudRoot: string): Contr
         status: "ACTIVE",
         createdAt: now,
       };
+      const existing = db
+        .prepare(
+          `SELECT membership_id, user_id, organization_id, role, status, created_at
+           FROM organization_memberships
+           WHERE user_id = ? AND organization_id = ?`,
+        )
+        .get(input.userId, input.organizationId) as MembershipRow | undefined;
+      if (existing) {
+        db.prepare(
+          `UPDATE organization_memberships
+           SET role = ?, status = 'ACTIVE'
+           WHERE membership_id = ?`,
+        ).run(input.role, existing.membership_id);
+        return mapMembership({
+          ...existing,
+          role: input.role,
+          status: "ACTIVE",
+        });
+      }
       db.prepare(
         `INSERT INTO organization_memberships
          (membership_id, user_id, organization_id, role, status, created_at)
@@ -543,6 +782,8 @@ type OrganizationRow = {
   slug: string;
   display_name: string;
   status: OrganizationStatus;
+  provision_owner_email: string | null;
+  provision_failure_code: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -590,6 +831,8 @@ function mapOrganization(row: OrganizationRow): CloudOrganization {
     slug: row.slug,
     displayName: row.display_name,
     status: row.status,
+    provisionOwnerEmail: row.provision_owner_email ?? null,
+    provisionFailureCode: row.provision_failure_code ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -636,7 +879,7 @@ function readOrganization(
 ): CloudOrganization | null {
   const row = db
     .prepare(
-      `SELECT organization_id, slug, display_name, status, created_at, updated_at
+      `SELECT organization_id, slug, display_name, status, provision_owner_email, provision_failure_code, created_at, updated_at
        FROM organizations
        WHERE organization_id = ?`,
     )
@@ -666,6 +909,39 @@ function readUserByEmail(db: SqliteDatabase, email: string): CloudUser | null {
   return row ? mapUser(row) : null;
 }
 
+function countOwnerMemberships(db: SqliteDatabase, organizationId: string): number {
+  return listActiveOwnerMemberships(db, organizationId).length;
+}
+
+function listActiveOwnerMemberships(
+  db: SqliteDatabase,
+  organizationId: string,
+): CloudMembership[] {
+  return db
+    .prepare(
+      `SELECT membership_id, user_id, organization_id, role, status, created_at
+       FROM organization_memberships
+       WHERE organization_id = ? AND role = 'owner' AND status = 'ACTIVE'
+       ORDER BY created_at`,
+    )
+    .all(organizationId)
+    .map((row) => mapMembership(row as MembershipRow));
+}
+
+function markOrganizationActive(db: SqliteDatabase, organizationId: string): CloudOrganization {
+  const now = new Date().toISOString();
+  db.prepare(
+    `UPDATE organizations
+     SET status = 'ACTIVE', provision_failure_code = NULL, updated_at = ?
+     WHERE organization_id = ?`,
+  ).run(now, organizationId);
+  const organization = readOrganization(db, organizationId);
+  if (!organization) {
+    throw new ControlPlaneInvariantError("organization_disabled");
+  }
+  return organization;
+}
+
 function assertUsableMembership(
   db: SqliteDatabase,
   userId: string,
@@ -676,8 +952,14 @@ function assertUsableMembership(
     throw new ControlPlaneInvariantError("user_unavailable");
   }
   const organization = readOrganization(db, organizationId);
-  if (!organization || organization.status !== "ACTIVE") {
+  if (!organization) {
     throw new ControlPlaneInvariantError("organization_disabled");
+  }
+  if (organization.status === "DISABLED") {
+    throw new ControlPlaneInvariantError("organization_disabled");
+  }
+  if (organization.status !== "ACTIVE") {
+    throw new ControlPlaneInvariantError("organization_not_ready");
   }
   const membership = db
     .prepare(

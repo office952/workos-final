@@ -1,12 +1,18 @@
 import { createInterface } from "node:readline";
 import { stdin, stderr } from "node:process";
 import { fileURLToPath } from "node:url";
+import { assertCloudPassword } from "./password.js";
 import {
-  openProvisionedControlPlane,
-  provisionCloudUser,
-  provisionMembership,
-  provisionOrganizationWithPlane,
+  ProvisionConflictError,
+  provisionNewOrganization,
+  resumeOrganizationProvision,
+  type ProvisionResult,
 } from "./provision.js";
+
+type PasswordInput = NodeJS.ReadableStream & {
+  isTTY?: boolean;
+  setRawMode?: (mode: boolean) => void;
+};
 
 export function assertDevProvisionSafe(env: NodeJS.ProcessEnv = process.env): void {
   if (env.NODE_ENV === "production") {
@@ -17,7 +23,7 @@ export function assertDevProvisionSafe(env: NodeJS.ProcessEnv = process.env): vo
 }
 
 export function rejectArgvPassword(argv: readonly string[]): void {
-  if (argv.includes("--password")) {
+  if (argv.some((item) => item === "--password" || item.startsWith("--password="))) {
     throw new Error(
       "Passwords must not be passed as --password. Use a TTY prompt or --password-stdin.",
     );
@@ -33,9 +39,13 @@ function readArg(argv: readonly string[], name: string): string {
   return value;
 }
 
+function hasFlag(argv: readonly string[], name: string): boolean {
+  return argv.includes(`--${name}`);
+}
+
 export async function readProvisionPassword(
   argv: readonly string[],
-  input: NodeJS.ReadableStream = stdin,
+  input: PasswordInput = stdin,
 ): Promise<string> {
   if (argv.includes("--password-stdin")) {
     const chunks: Buffer[] = [];
@@ -44,22 +54,24 @@ export async function readProvisionPassword(
     }
     return Buffer.concat(chunks).toString("utf8").replace(/\r?\n$/, "");
   }
-  if (!("isTTY" in input) || !input.isTTY) {
+  if (!input.isTTY) {
     throw new Error("Password required via TTY prompt or --password-stdin.");
   }
-  return promptHiddenPassword("Cloud password: ");
+  return promptHiddenPassword("Cloud password: ", input);
 }
 
-function promptHiddenPassword(label: string): Promise<string> {
+function promptHiddenPassword(label: string, input: PasswordInput): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (!stdin.isTTY) {
+    if (!input.isTTY) {
       reject(new Error("Password required via TTY prompt or --password-stdin."));
       return;
     }
     stderr.write(label);
-    stdin.setRawMode?.(true);
-    stdin.resume();
-    const rl = createInterface({ input: stdin, terminal: true });
+    input.setRawMode?.(true);
+    if ("resume" in input && typeof input.resume === "function") {
+      input.resume();
+    }
+    const rl = createInterface({ input, terminal: true });
     let value = "";
     const onData = (chunk: Buffer | string) => {
       const text = chunk.toString("utf8");
@@ -83,41 +95,73 @@ function promptHiddenPassword(label: string): Promise<string> {
       }
     };
     function cleanup(): void {
-      stdin.off("data", onData);
-      stdin.setRawMode?.(false);
+      input.off("data", onData);
+      input.setRawMode?.(false);
       rl.close();
     }
-    stdin.on("data", onData);
+    input.on("data", onData);
   });
+}
+
+function printProvisionResult(result: ProvisionResult): void {
+  console.log("dev-helper: local Cloud setup only. Not Slice 3 adopt/production bootstrap.");
+  if (result.alreadyActive) {
+    console.log("already_active");
+  }
+  console.log(`organization: ${result.organization.displayName}`);
+  console.log(`organizationId: ${result.organization.organizationId}`);
+  console.log(`status: ${result.organization.status}`);
+  console.log(`user: ${result.user.email}`);
+  console.log(`plane: ${result.paths.sqlitePath}`);
 }
 
 export async function runDevProvisionCli(
   argv: readonly string[] = process.argv,
   env: NodeJS.ProcessEnv = process.env,
-  input: NodeJS.ReadableStream = stdin,
+  input: PasswordInput = stdin,
 ): Promise<void> {
   assertDevProvisionSafe(env);
   rejectArgvPassword(argv);
+  const resume = hasFlag(argv, "resume");
+  if (resume && hasFlag(argv, "org")) {
+    throw new Error("Resume forbids --org. Use --organization-id.");
+  }
   const cloudRoot = readArg(argv, "root");
-  const displayName = readArg(argv, "org");
   const email = readArg(argv, "email");
   const password = await readProvisionPassword(argv, input);
-  const controlPlane = openProvisionedControlPlane(cloudRoot);
-  const { organization, paths } = await provisionOrganizationWithPlane(controlPlane, {
-    displayName,
-    bootstrapPolicy: "NEW_ORGANIZATION",
-  });
-  const user = await provisionCloudUser(controlPlane, { email, password });
-  provisionMembership(controlPlane, {
-    userId: user.userId,
-    organizationId: organization.organizationId,
-    role: "owner",
-  });
-  controlPlane.close();
-  console.log("dev-helper: local Cloud setup only. Not Slice 3 adopt/production bootstrap.");
-  console.log(`organization: ${organization.displayName}`);
-  console.log(`user: ${user.email}`);
-  console.log(`plane: ${paths.sqlitePath}`);
+  assertCloudPassword(password);
+  if (resume) {
+    const organizationId = readArg(argv, "organization-id");
+    const result = await resumeOrganizationProvision({
+      cloudRoot,
+      organizationId,
+      email,
+      password,
+      env,
+    });
+    printProvisionResult(result);
+    return;
+  }
+  const displayName = readArg(argv, "org");
+  try {
+    const result = await provisionNewOrganization({
+      cloudRoot,
+      displayName,
+      email,
+      password,
+      env,
+    });
+    printProvisionResult(result);
+  } catch (error) {
+    if (error instanceof ProvisionConflictError && error.code === "incomplete_organization_exists") {
+      console.error("incomplete_organization_exists");
+      if (error.detail) {
+        console.error(`organizationId: ${error.detail}`);
+      }
+      console.error("Resume with --resume --root <root> --organization-id <id> --email <email>.");
+    }
+    throw error;
+  }
 }
 
 const invokedDirectly = process.argv[1]
