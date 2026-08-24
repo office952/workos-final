@@ -5,7 +5,7 @@ This file keeps **state and direction**. Worklogs keep execution detail. Plans k
 
 ```text
 AUTHORITY         = ACTIVE_V1_DELIVERY
-THIS_BUILD        = CANONICAL_DIRECTION_CONTROL_V1
+THIS_BUILD        = REAL_CLOUD_OWNER_RECOVERY_ROADMAP_STATE_SYNC_V1
 REAL_CLOUD_RESUME = NOT_AUTHORIZED_BY_THIS_DOCUMENT
 UI_IMPLEMENTATION = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
 ```
@@ -43,16 +43,20 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = 95f2df88a66815610241d9f82780474bdd7be8f7
+ORIGIN_MAIN                          = bc809bbd8064a78b69cedc17f6b80ac7b7dad6d9
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
 OWNER_GATE                           = COMPLETE
-REAL_CLOUD_CHECKPOINT                = PARTIAL
-FIRST_REAL_CLOUD_OWNER               = NOT_CREATED
-REAL_HUB_MEDIA_OPERATION             = NOT_PROVEN
-PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 CANONICAL_DIRECTION_CONTROL_V1       = ESTABLISHED
+REAL_CLOUD_CHECKPOINT                = RECOVERED_ACTIVE
+FIRST_REAL_CLOUD_OWNER               = CREATED
+REAL_CLOUD_OWNER_RECOVERY_V1         = COMPLETE
+OWNER_LOGIN                          = VERIFIED
+REAL_HUB_MEDIA_OPERATION             = NOT_PROVEN
+BUSINESS_DATA_CONFIGURATION          = NOT_STARTED
+FULL_OLD_AND_NEW_UI_UX_AUDIT         = NEXT
+PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 ```
 
 `OWNER_GATE = COMPLETE` means the Cloud initial-Owner product law is closed: fail-closed activation, exactly one initial Owner, explicit resume. It does not mean later operational Owner GOs are already granted.
@@ -61,7 +65,8 @@ Meaning, without reopening closed builds:
 
 - The product spine already runs in single-plane DEV: LETTERS none/none 60 mm through Quote, Acceptance, Order, Release, 12-operation ExecutionPlan, Claim/Start/Complete, actuals, stock movements, and actual cost.
 - Cloud Foundation plus atomic resume are merged. Synthetic isolation is verified. That is not a real HUB MEDIA operation.
-- A real Cloud checkpoint exists only as a partial, resume-eligible organization from an earlier failed provision. This roadmap does not describe that root and does not authorize touching it.
+- A separate Owner GO recovered the existing HUB MEDIA Cloud organization and created the first real Cloud Owner. Login is verified. This file did not authorize that write. Execution detail lives in `docs/worklog/WORKOS_REAL_CLOUD_OWNER_RECOVERY_V1.md`.
+- The recovered organization is ACTIVE. People, workcenters, machines, provider configuration, seller, customers, requests, quotes, orders, execution plans, and inventory movements are still empty. Real HUB MEDIA operation is not proven.
 - Product System UI inspects and records current typed truth, including persisted display labels. It is not a full product-administration product.
 
 Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem paths in this file.
@@ -70,11 +75,11 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 
 ```text
 TARGET_MILESTONE = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP     = CANONICAL_DIRECTION_CONTROL_V1
-NEXT_STEP        = REAL_CLOUD_OWNER_RECOVERY
+CURRENT_STEP     = REAL_CLOUD_OWNER_RECOVERY
+NEXT_STEP        = FULL_OLD_AND_NEW_UI_UX_AUDIT
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` is the target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10).
+`HUB_MEDIA_CLEAN_PILOT` is the target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit is the next sequence step inside this milestone. It is not a second target milestone.
 
 Implementation reports fill:
 
@@ -83,7 +88,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_MILESTONE    = <current NEXT_STEP>
 ```
 
-After this document exists, `NEXT_MILESTONE` is `REAL_CLOUD_OWNER_RECOVERY` until that later GO starts. Do not report a sequence step as if it were a second target milestone.
+`NEXT_MILESTONE` is `FULL_OLD_AND_NEW_UI_UX_AUDIT` until that later GO starts. Do not report a sequence step as if it were a second target milestone.
 
 Target flow:
 
@@ -111,19 +116,19 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 ## Current sequence
 
 ```text
-1. CANONICAL_DIRECTION_CONTROL_V1
-2. REAL_CLOUD_OWNER_RECOVERY
-3. FULL_OLD_AND_NEW_UI_UX_AUDIT
-4. UI_UX_CANON_UPDATE_FROM_EVIDENCE
-5. FIGMA_INFORMATION_ARCHITECTURE_AND_DESIGN_SYSTEM
-6. OWNER_VISUAL_ACCEPTANCE
-7. SCOPED_UI_IMPLEMENTATION
-8. HUB_MEDIA_ORGANIZATION_CONFIGURATION
-9. FIRST_REAL_LETTERS_JOB
-10. PLANNED_VS_ACTUAL_OWNER_SIGN_OFF
+1. CANONICAL_DIRECTION_CONTROL_V1    = COMPLETE
+2. REAL_CLOUD_OWNER_RECOVERY         = COMPLETE
+3. FULL_OLD_AND_NEW_UI_UX_AUDIT      = NEXT
+4. UI_UX_CANON_UPDATE_FROM_EVIDENCE  = NOT_STARTED
+5. FIGMA_INFORMATION_ARCHITECTURE_AND_DESIGN_SYSTEM = NOT_STARTED
+6. OWNER_VISUAL_ACCEPTANCE           = NOT_STARTED
+7. SCOPED_UI_IMPLEMENTATION          = NOT_STARTED
+8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = NOT_STARTED
+9. FIRST_REAL_LETTERS_JOB            = NOT_STARTED
+10. PLANNED_VS_ACTUAL_OWNER_SIGN_OFF = NOT_STARTED
 ```
 
-Step 1 is this document and its governance pointers. It does not recover Cloud, audit UI, or change product code.
+Step 1 established the living canons and governance pointers. Step 2 recovered the existing HUB MEDIA Cloud organization under a later Owner GO. This file did not authorize that write.
 
 `FULL_OLD_AND_NEW_UI_UX_AUDIT` still inventories every reachable route in both applications, per `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. Capture work may finish pilot-blocking surfaces first. Steps 4–7 (canon update, Figma, visual acceptance, scoped UI implementation) may then be limited to those surfaces. That is not an unlimited redesign of the whole product.
 
@@ -131,20 +136,11 @@ The current implemented shell remains the operator surface until a later scoped 
 
 Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
 
-Do not start step 2 from this document. Do not start steps 3–10 from this document.
+Do not start steps 3–10 from this document.
 
 ## Real Cloud recovery
 
-The next operational write after this canon is integrated will be a **separate Owner GO**. That later GO, not this file, is the runnable plan. This file only records the required gates:
-
-- backup first
-- read-only inspection of the partial state
-- explicit `--resume` on the organization ID
-- password only through TTY or `--password-stdin`
-- verification of exactly one Owner
-- login
-- backup after success
-- STOP
+This roadmap never authorized the real resume. A **separate Owner GO** authorized recovery of the existing organization. That recovery is now complete. Any later real write needs another Owner GO.
 
 ```text
 REAL_CLOUD_RESUME = NOT_AUTHORIZED_BY_THIS_DOCUMENT
@@ -152,9 +148,30 @@ REAL_CLOUD_ROOT   = UNTOUCHED_BY_THIS_DOCUMENT
 SECOND_REAL_ORG   = FORBIDDEN_HERE
 ```
 
-This file does not authorize that write. It is not a playbook to execute. It does not name the real root. It does not carry credentials.
+This file is not a playbook. It does not name the real root. It does not carry credentials.
 
-The intended first Owner path is resume of the existing incomplete organization. “Clean HUB MEDIA organization” means that recovered organization, configured later in step 8, without wholesale old-database adoption and without creating a second real organization from this document. If that leftover is no longer resume-eligible, stop and wait for a later Owner GO. Do not invent a create path here.
+“Clean HUB MEDIA organization” means that recovered ACTIVE organization, configured later in step 8, without wholesale old-database adoption and without creating a second real organization from this document.
+
+## Current Cloud business state
+
+State only. No identities, emails, or machine paths.
+
+```text
+HUB_MEDIA_ORGANIZATION        = ACTIVE
+CLOUD_OWNER                   = EXISTS
+OWNER_LOGIN                   = PROVEN
+PEOPLE                        = 0
+WORKCENTERS                   = 0
+MACHINES                      = 0
+PROVIDER_CONFIGURATION        = 0
+SELLER_PROFILE                = 0
+CUSTOMERS                     = 0
+REQUESTS                      = 0
+QUOTES                        = 0
+ORDERS                        = 0
+EXECUTION_PLANS               = 0
+INVENTORY_MOVEMENTS           = 0
+```
 
 ## Pilot configuration truths
 
