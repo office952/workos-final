@@ -5,10 +5,10 @@ This file keeps **state and direction**. Worklogs keep execution detail. Plans k
 
 ```text
 AUTHORITY         = ACTIVE_V1_DELIVERY
-THIS_BUILD        = UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1
+THIS_BUILD        = ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1
 REAL_CLOUD_RESUME = NOT_AUTHORIZED_BY_THIS_DOCUMENT
 UI_IMPLEMENTATION = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
-FIGMA             = NOT_AUTHORIZED_BY_THIS_DOCUMENT
+HIGH_FIDELITY     = NOT_AUTHORIZED_BY_THIS_DOCUMENT
 ```
 
 ## Authority
@@ -59,6 +59,11 @@ BUSINESS_DATA_CONFIGURATION          = NOT_STARTED
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
 UI_UX_CANON_UPDATE_FROM_EVIDENCE     = COMPLETE
+FIGMA_ACCESS_GATE                    = COMPLETE
+INFORMATION_ARCHITECTURE             = OWNER_ACCEPTED
+OWNER_IA_GATE                        = CLOSED
+HIGH_FIDELITY                        = NOT_STARTED
+UI_IMPLEMENTATION                    = NOT_STARTED
 PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 ```
 
@@ -77,14 +82,14 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 ## Active milestone
 
 ```text
-TARGET_MILESTONE = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP     = UI_UX_CANON_UPDATE_FROM_EVIDENCE
-NEXT_STEP        = FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE
-FIGMA            = NOT_STARTED
+TARGET_MILESTONE  = HUB_MEDIA_CLEAN_PILOT
+CURRENT_STEP      = FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE
+NEXT_STEP         = PILOT_HIGH_FIDELITY_SCOPE_DEFINITION
+HIGH_FIDELITY     = NOT_STARTED
 UI_IMPLEMENTATION = NOT_AUTHORIZED
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` is the target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit and the evidence-driven direction-canon update inside this milestone are complete. The next sequence step is `FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE`. This file does not authorize Figma, Mobbin, or UI implementation. The audit is not a second target milestone.
+`HUB_MEDIA_CLEAN_PILOT` is the target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit, the evidence-driven direction-canon update, Figma access, and Owner-accepted information architecture inside this milestone are complete. The next sequence step is `PILOT_HIGH_FIDELITY_SCOPE_DEFINITION`. This file does not authorize high-fidelity drawing, Mobbin, or UI implementation. The audit is not a second target milestone.
 
 Implementation reports fill:
 
@@ -93,7 +98,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_MILESTONE    = <current NEXT_STEP>
 ```
 
-`NEXT_MILESTONE` is `FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` until that later GO starts. Do not report a sequence step as if it were a second target milestone.
+`NEXT_MILESTONE` is `PILOT_HIGH_FIDELITY_SCOPE_DEFINITION` until that later GO starts. Do not report a sequence step as if it were a second target milestone. This file does not authorize drawing that later set.
 
 Target flow:
 
@@ -125,7 +130,7 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 2. REAL_CLOUD_OWNER_RECOVERY         = COMPLETE
 3. FULL_OLD_AND_NEW_UI_UX_AUDIT      = COMPLETE
 4. UI_UX_CANON_UPDATE_FROM_EVIDENCE  = COMPLETE
-5. FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE = NOT_STARTED
+5. FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE = OWNER_ACCEPTED
 6. OWNER_VISUAL_ACCEPTANCE           = NOT_STARTED
 7. SCOPED_UI_IMPLEMENTATION          = NOT_STARTED
 8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = NOT_STARTED
@@ -137,15 +142,17 @@ Step 1 established the living canons and governance pointers. Step 2 recovered t
 
 `FULL_OLD_AND_NEW_UI_UX_AUDIT` is complete. The accepted evidence pack is `docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md`. Route inventory is source-proven, not full page coverage and not cartesian state coverage.
 
-`UI_UX_CANON_UPDATE_FROM_EVIDENCE` is complete. Direction now distinguishes invariants, evidence-supported conclusions, Figma candidates, and explicit deferrals. It does not declare a sidebar, a Catalog label, a visual style, or a component library as final. Execution detail lives in `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md`.
+`UI_UX_CANON_UPDATE_FROM_EVIDENCE` is complete. That revision distinguished invariants, evidence-supported conclusions, Figma candidates, and explicit deferrals. It did not declare a sidebar, a Catalog label, a visual style, or a component library as final. Execution detail lives in `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md`.
 
-Steps 5–7 (Figma access and IA, visual acceptance, scoped UI implementation) may be limited to pilot-blocking surfaces. That is not an unlimited redesign of the whole product. This file does not authorize Figma, Mobbin, or UI implementation.
+`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is Owner-accepted with amendments. Global navigation is top nav. Level 1 is Lucrări | Atelier | Comercial | Catalog | Administrare. `Configurează` is a contextual action. Product System stays in Administrare. Visual style, tokens, components, and high-fidelity remain unselected. Execution detail lives in `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md`.
+
+The next sequence work is `PILOT_HIGH_FIDELITY_SCOPE_DEFINITION`. It may later limit high-fidelity to pilot-blocking surfaces. That is not an unlimited redesign of the whole product. This file does not authorize high-fidelity drawing, Mobbin, or UI implementation.
 
 The current implemented shell remains the operator surface until a later scoped UI GO. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
 
 Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
 
-Do not start steps 5–10 from this document.
+Do not start high-fidelity or steps 6–10 from this document.
 
 ## Real Cloud recovery
 

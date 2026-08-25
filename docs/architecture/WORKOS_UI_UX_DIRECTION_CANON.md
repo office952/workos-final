@@ -5,17 +5,24 @@ This document is normative for **how UI may evolve**. It is not a frozen mockup,
 
 ```text
 AUTHORITY                         = ACTIVE_UI_UX_DIRECTION
-SOURCE_OF_THIS_REVISION           = ACCEPTED_FULL_OLD_NEW_UI_UX_AUDIT
+SOURCE_OF_THIS_REVISION           = OWNER_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE
+PREVIOUS_REVISION_SOURCE          = ACCEPTED_FULL_OLD_NEW_UI_UX_AUDIT
 EVIDENCE_PACK                     = docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md
+IA_ACCEPTANCE                     = docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md
+FIGMA_FILE                        = WorkOS V1 — Information Architecture
+FIGMA_FILE_KEY                    = 7elwvIscvMPDiEHrX4f6kQ
 UI_IMPLEMENTATION                 = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
-FIGMA                             = NOT_STARTED
-SIDEBAR_FINAL                     = NO
-CATALOG_LABEL_FINAL               = NO
+FIGMA_ACCESS_GATE                 = COMPLETE
+INFORMATION_ARCHITECTURE          = OWNER_ACCEPTED
+OWNER_IA_GATE                     = CLOSED
+HIGH_FIDELITY                     = NOT_STARTED
+GLOBAL_NAV_STRUCTURE              = TOP_NAV
+CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = NO
 THEME_TOKEN_IMPLEMENTATION        = FORBIDDEN_UNTIL_FIGMA_DESIGN_TOKEN_FOUNDATION_AND_SCOPED_UI_GO
 ```
 
-This document is not the Owner GO for Figma, Mobbin, visual acceptance, or scoped UI implementation.
+Figma access and information architecture are accepted. This document is not the Owner GO for high-fidelity drawing, Mobbin, visual acceptance, design-system build, or scoped UI implementation.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s shell, routes, and primitives). This canon does not replace that record. It governs later Owner decisions and later UI change.
@@ -25,9 +32,41 @@ Related living authority:
 - `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery sequence
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain ownership
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation
-- `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md` — evidence citations for this revision
+- `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md` — evidence citations for the previous direction revision
+- `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md` — Owner IA acceptance record
 
 Do not create a second UI/UX direction canon.
+
+## ACCEPTED OWNER IA DECISION
+
+Recorded 2026-08-25. These are Owner-accepted information-architecture decisions. They do not approve visual style, tokens, components, or implementation.
+
+```text
+OWNER_IA_DECISION         = ACCEPTED_WITH_AMENDMENTS
+GLOBAL_NAV_STRUCTURE      = TOP_NAV
+LEVEL_1_DOMAINS           = Lucrări | Atelier | Comercial | Catalog | Administrare
+LEVEL_2_RULE              = CONTEXTUAL_ONLY
+CATALOG_LABEL             = ACCEPTED
+CONFIGUREAZĂ_ROLE         = CONTEXTUAL_ACTION
+PRODUCT_SYSTEM_LOCATION   = ADMINISTRARE
+PRIMARY_DETAIL_PATTERN    = STABLE_PAGE
+ADMIN_COLLECTION_PATTERN  = SPLIT_LIST_DETAIL
+SHORT_ACTION_PATTERN      = DRAWER_OR_DIALOG
+INFORMATION_DENSITY       = INTERMEDIATE
+```
+
+Still unselected:
+
+- final visual style
+- palette
+- token values
+- final components
+- shadcn or another UI kit
+- high-fidelity layouts
+- full responsive implementation
+- mobile rewrite
+
+The implemented shell still shows today’s `Produse` label until a later scoped UI GO changes runtime presentation. See `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
 
 ## Classification
 
@@ -43,7 +82,7 @@ DEFERRED
 - **INVARIANTS** — must hold in every later UI task. Changing one is an Owner direction change and requires updating this canon.
 - **EVIDENCE_SUPPORTED** — conclusions clear enough from the accepted OLD + NEW audit. They guide Figma and later implementation. They are not final visual, component, or layout decisions.
 - **FIGMA_CANDIDATE** — solutions that must be compared visually before Owner accepts them. Do not treat a candidate as an invariant.
-- **DEFERRED** — outside the HUB MEDIA pilot or the current Figma gate. Do not implement to “get ahead.”
+- **DEFERRED** — outside the HUB MEDIA pilot or later high-fidelity / scoped UI work. Do not implement to “get ahead.”
 
 Do not promote a Figma candidate into an invariant to keep moving.
 
@@ -114,15 +153,14 @@ Subcategories must not appear as new Level 1 items.
 
 Permissions may hide inaccessible domains. They must not change the meaning of the remaining routes.
 
-Do not lock, from this document:
+Owner accepted the Level 1 set, order, `Catalog` label, and top navigation. Do not reopen those from documentation alone.
 
-- the final count of Level 1 items
-- the final order
-- the final label for today’s `Produse`
-- top navigation versus sidebar
-- the final narrow-width chrome
+Still unselected from this document:
 
-Those are FIGMA_CANDIDATE.
+- the final narrow-width visual chrome
+- the final visual style of the accepted top navigation
+
+Those remain later Figma / visual-acceptance work.
 
 ### 4. Large collections use list/detail, not menu trees
 
@@ -160,7 +198,12 @@ Product System is the administrative truth about families, templates, components
 
 Product System stays in Administrare. It must not become a commercial menu.
 
-The current global label `Produse` is ambiguous. The label fork is FIGMA_CANDIDATE. Do not choose the final word from documentation alone.
+The accepted Level 1 label for that commercial work area is `Catalog`. `Configurează` is a contextual action, not a Level 1 domain. Existing URLs do not change:
+
+```text
+/products             = catalog + configurator comercial
+/admin/product-system = Product System
+```
 
 ### 6. Technical detail is hidden by default
 
@@ -307,35 +350,37 @@ Do not copy the old structure, menus, CSS, or visual hierarchy by default.
 
 ### 16. No UI implementation from this canon alone
 
-This document does not authorize UI implementation, Figma production, plugin installation, or a restructure prompt.
+This document does not authorize UI implementation, high-fidelity production, plugin installation, or a restructure prompt.
 
-Figma starts only after a later Owner GO for the Figma access gate.
+The Figma access gate and Owner IA selection are closed. High-fidelity drawing starts only after a later Owner GO for pilot high-fidelity scope.
 
-`OWNER_VISUAL_ACCEPTANCE` is a later, second Owner gate after Figma and a prerequisite of scoped UI implementation. Do not treat those two Owner reviews as the same gate.
+`OWNER_VISUAL_ACCEPTANCE` is a later Owner gate after high-fidelity and a prerequisite of scoped UI implementation. Do not treat the closed IA gate and that later visual gate as the same review.
 
 ## EVIDENCE_SUPPORTED
 
-These conclusions are clear enough from the accepted 283-PNG pack and the audit report. They are not final chrome, labels, or layouts.
+These conclusions are clear enough from the accepted 283-PNG pack and the audit report. They are not final visual chrome or layouts. The accepted IA labels and navigation structure are recorded in the Owner decision above.
 
 ### Navigation and information architecture
 
-- NEW’s short global set of work areas scales better than OLD’s long sidebar. Keep the **bounded-domain** principle. Do not freeze today’s five labels or top-bar placement.
+- NEW’s short global set of work areas scales better than OLD’s long sidebar. Keep the **bounded-domain** principle. Owner later accepted five Level 1 domains and top navigation; that acceptance is recorded above, not invented here.
 - Comercial is a work area, not four Level 1 siblings. Cereri, Oferte, and Clienți belong in Level 2.
 - Product System administration already lives under Administrare in NEW. Keep that domain split.
 - Categories and items already leak into page-local trees on NEW `/products` and several admin catalogs. That pattern does not scale. Treat those trees as collections, not as a second global menu.
 - OLD master–detail on Oferte and Clienți is operationally useful. NEW list-only quote rows lose inspect-one-offer density. Restoring a local master–detail pattern is allowed later; the commercial engine must stay one.
 
-Hypothesized Level 1 names are not a lock. `Catalog / Configurare` is a work-area hypothesis. `Configurează` is a separate action-label candidate in the Figma fork. They are not the same word and neither is final:
+Before Owner acceptance, Level 1 names were a hypothesis. The accepted set is now:
 
 ```text
 Lucrări
 Atelier
 Comercial
-Catalog / Configurare
+Catalog
 Administrare
 ```
 
-Today’s implemented names remain recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
+`Configurează` is not a Level 1 name. It is the contextual action that opens configuration from Catalog or from a selected sellable product.
+
+Today’s implemented names remain recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md` until a later scoped UI GO.
 
 ### OLD — keep as principle
 
@@ -392,73 +437,77 @@ Keyboard, focus, landmarks, dialog modality, and contrast still have gaps. Those
 
 ## FIGMA_CANDIDATE
 
-Figma must compare at least three information-architecture variants:
+Figma compared three information-architecture variants. That comparison is closed for navigation structure. Keep the candidate history. Do not rewrite the scores after the Owner decision.
 
-1. evolved top navigation
-2. compact / collapsible sidebar
-3. hybrid navigation
+1. **A — evolved top navigation** — Owner accepted for the next design stage
+2. **B — compact / collapsible sidebar** — evaluated, not selected
+3. **C — hybrid navigation** — evaluated, not selected
 
-Each variant must be tested with a realistic WorkOS volume, not with two demo items.
-
-Figma must demonstrate:
-
-- menu scale
-- catalog scale
-- Lucrări
-- Atelier
-- Comercial
-- catalog / configurator
-- administrative Product System
-- resource administration
-- LIGHT / DARK / SYSTEM
-- wide desktop
-- narrow desktop
-- progressive disclosure
-
-Recorded decision forks for Figma. Do not resolve them here:
-
-- final Level 1 count and order
-- top navigation versus sidebar versus hybrid
-- final label for today’s `Produse`: `Produse` / `Catalog` / `Configurează` / catalog plus a contextual action
-- which collections use page detail versus drawer
-- token values, type ramp, density, and motion
-- whether shadcn/ui is accepted as the implementation base
-- which current surfaces enter the scoped HUB MEDIA pilot UI
-- which current pages are keep / restructure / remove after visual acceptance
+Evidence scores on page 07 were not restated after acceptance:
 
 ```text
-SIDEBAR_FINAL              = NO
-CATALOG_LABEL_FINAL        = NO
-OWNER_VISUAL_ACCEPTANCE    = REQUIRED
+A_TOP_NAV = 85
+B_SIDEBAR = 76
+C_HYBRID  = 77
 ```
 
-No variant is accepted without `OWNER_VISUAL_ACCEPTANCE` (Owner Visual Gate). That is the same later Owner gate. It is not the Figma access gate.
+Each variant was tested with a realistic WorkOS volume, not with two demo items, and demonstrated menu scale, catalog scale, Lucrări, Atelier, Comercial, catalog / configurator, administrative Product System, resource administration, LIGHT / DARK / SYSTEM structure, wide desktop, narrow foundation, and progressive disclosure.
+
+Closed by Owner IA acceptance:
+
+- Level 1 count and order
+- top navigation versus sidebar versus hybrid
+- Level 1 label: `Catalog`
+- `Configurează` as contextual action, not a Level 1 domain
+- primary entity detail = stable page
+- admin collections = split list/detail
+- short actions = drawer or dialog
+- information density = intermediate
+
+Still FIGMA_CANDIDATE / unselected:
+
+- token values, type ramp, and motion
+- whether shadcn/ui is accepted as the implementation base
+- high-fidelity layouts
+- which of the twelve proposed pilot screens enter the next high-fidelity scope
+- which current pages are keep / restructure / remove after visual acceptance
+- final visual style and palette
+
+```text
+GLOBAL_NAV_STRUCTURE       = TOP_NAV
+CATALOG_LABEL              = ACCEPTED
+OWNER_VISUAL_ACCEPTANCE    = REQUIRED
+HIGH_FIDELITY              = NOT_STARTED
+```
+
+`OWNER_VISUAL_ACCEPTANCE` (Owner Visual Gate) remains a later Owner gate after high-fidelity. It is not the closed IA gate.
 
 ## Figma gate
 
-The active V1 roadmap `NEXT_STEP` is `FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE`. That later GO may open Figma access. It is not started by this file.
+`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is accepted. The active V1 roadmap `NEXT_STEP` is `PILOT_HIGH_FIDELITY_SCOPE_DEFINITION`. This file does not authorize high-fidelity drawing.
 
-Inside that later sequence, and only after an Owner GO for it, the process is:
+Recorded process, without rewriting earlier steps as if Mobbin had run:
 
 ```text
-1. FIGMA_ACCESS_GATE
-2. MOBBIN_RESEARCH
-3. THREE_INFORMATION_ARCHITECTURE_CANDIDATES
-4. OWNER_IA_SELECTION
-5. DESIGN_TOKEN_FOUNDATION
-6. COMPONENT_LIBRARY
-7. PILOT_SCREEN_SET
-8. OWNER_VISUAL_ACCEPTANCE
-9. SCOPED_UI_IMPLEMENTATION
+1. FIGMA_ACCESS_GATE                         = COMPLETE
+2. MOBBIN_RESEARCH                           = NOT_STARTED
+3. THREE_INFORMATION_ARCHITECTURE_CANDIDATES = COMPLETE
+4. OWNER_IA_SELECTION                        = ACCEPTED_WITH_AMENDMENTS
+5. PILOT_HIGH_FIDELITY_SCOPE_DEFINITION      = NEXT
+6. DESIGN_TOKEN_FOUNDATION                   = NOT_STARTED
+7. COMPONENT_LIBRARY                         = NOT_STARTED
+8. PILOT_SCREEN_SET                          = PROPOSED_NOT_AUTHORIZED
+9. OWNER_VISUAL_ACCEPTANCE                   = NOT_STARTED
+10. SCOPED_UI_IMPLEMENTATION                 = NOT_STARTED
 ```
 
-Each IA variant must also show an operator frame (Atelier / Execution) and an owner frame (Administrare / Product System door).
+The twelve proposed high-fidelity screens live in the acceptance worklog. They are a proposal for the next scope definition. They are not a drawing authorization.
 
-This file does not start step 1.
+This file does not start step 5 or later.
 
 ## DEFERRED
 
-Keep outside this stage and outside the current Figma gate:
+Keep outside this stage and outside high-fidelity / scoped UI implementation:
 
 - mobile-first rewrite
 - employee-mobile routes
@@ -480,7 +529,7 @@ Historical Machine Strict pixels are reference-only. They are not captures of th
 
 ## Current implementation versus target
 
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items with the implemented `Produse` label, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens. The accepted Level 1 label is `Catalog`; do not edit the foundation canon to pretend that label is already in the shell.
 
 This canon records where later authorized UI work must go. Do not edit the foundation canon to pretend the target shell already exists.
 
