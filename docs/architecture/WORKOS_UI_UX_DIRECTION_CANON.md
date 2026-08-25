@@ -1,25 +1,31 @@
 # WorkOS UI/UX direction canon
 
 Living direction for WorkOS operator and owner presentation.
-This document is normative for **how UI may evolve**. It is not a frozen mockup and not a page-by-page specification.
+This document is normative for **how UI may evolve**. It is not a frozen mockup, not a page-by-page specification, and not a promise that visual design will never change.
 
 ```text
-AUTHORITY                  = ACTIVE_UI_UX_DIRECTION
-UI_IMPLEMENTATION          = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
-SIDEBAR_FINAL              = NOT_DECLARED
-THEME_TOKENS_IMPLEMENTED   = NO
+AUTHORITY                         = ACTIVE_UI_UX_DIRECTION
+SOURCE_OF_THIS_REVISION           = ACCEPTED_FULL_OLD_NEW_UI_UX_AUDIT
+EVIDENCE_PACK                     = docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md
+UI_IMPLEMENTATION                 = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
+FIGMA                             = NOT_STARTED
+SIDEBAR_FINAL                     = NO
+CATALOG_LABEL_FINAL               = NO
+THEME_TOKENS_IMPLEMENTED          = NO
+THEME_TOKEN_IMPLEMENTATION        = FORBIDDEN_UNTIL_FIGMA_DESIGN_TOKEN_FOUNDATION_AND_SCOPED_UI_GO
 ```
 
-This document is not the Owner GO for scoped UI implementation (roadmap step 7). That GO cannot precede the audit, the evidence-pack review, the direction-canon update, Figma, and visual acceptance (roadmap steps 3–6).
+This document is not the Owner GO for Figma, Mobbin, visual acceptance, or scoped UI implementation.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s shell, routes, and primitives). This canon does not replace that record. It governs audit, Owner decisions, and later UI change.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s shell, routes, and primitives). This canon does not replace that record. It governs later Owner decisions and later UI change.
 
 Related living authority:
 
 - `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery sequence
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain ownership
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation
+- `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md` — evidence citations for this revision
 
 Do not create a second UI/UX direction canon.
 
@@ -29,15 +35,17 @@ Every UI direction statement in this file belongs to exactly one class:
 
 ```text
 INVARIANTS
-CANDIDATE_DIRECTION_TO_VALIDATE
-OWNER_DECISIONS_PENDING
+EVIDENCE_SUPPORTED
+FIGMA_CANDIDATE
 DEFERRED
 ```
 
 - **INVARIANTS** — must hold in every later UI task. Changing one is an Owner direction change and requires updating this canon.
-- **CANDIDATE_DIRECTION_TO_VALIDATE** — hypothesis for the mandatory old+new UI/UX audit. Not approved implementation.
-- **OWNER_DECISIONS_PENDING** — Owner must decide after evidence. Agents must not invent the answer.
-- **DEFERRED** — out of this direction’s current horizon. Do not implement to “get ahead.”
+- **EVIDENCE_SUPPORTED** — conclusions clear enough from the accepted OLD + NEW audit. They guide Figma and later implementation. They are not final visual, component, or layout decisions.
+- **FIGMA_CANDIDATE** — solutions that must be compared visually before Owner accepts them. Do not treat a candidate as an invariant.
+- **DEFERRED** — outside the HUB MEDIA pilot or the current Figma gate. Do not implement to “get ahead.”
+
+Do not promote a Figma candidate into an invariant to keep moving.
 
 ## Objective
 
@@ -61,6 +69,13 @@ OPERATOR_UI_LANGUAGE = Romanian
 INTERNAL_CODE_AND_IDS = English
 ```
 
+NEW remains the domain authority. Restructuring UI does not change business truth.
+
+```text
+OLD_APP = OPERATIONAL_EVIDENCE
+OLD_APP ≠ VISUAL_BLUEPRINT
+```
+
 ## INVARIANTS
 
 ### 1. Business truth is not a UI text file
@@ -75,50 +90,110 @@ See `docs/architecture/UI_UX_FOUNDATION_CANON.md` and `.cursor/rules/one-truth.m
 
 ### 2. Three navigation layers
 
-Global navigation, local navigation, and page content are different layers.
+```text
+LEVEL 1 = global work areas
+LEVEL 2 = local navigation inside the selected area
+LEVEL 3 = page content and object context
+```
 
-- **Global** — how the person moves between work areas.
-- **Local** — how the person moves inside one work area (tabs, segments, category → item).
-- **Content** — the work itself: list, detail, form, decision, result.
+- **Level 1** — how the person moves between work areas.
+- **Level 2** — tabs, filters, saved views, subsections, categories, breadcrumbs, contextual search.
+- **Level 3** — the work itself: list, detail, form, decision, result.
 
-Current work-area names (Lucrări, Atelier, Comercial, Produse, Administrare) are examples recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md`. They are not the final global set. The final global navigation model is OWNER_DECISIONS_PENDING.
+Level 2 is not an infinite extension of the global menu.
 
-A category and the items inside that category must not stay permanently crammed into the same menu.
+### 3. Global navigation stays bounded
 
-### 3. Collections and stable selection
+Global navigation must stay short and stable.
 
-Large lists must be able to use search, filters, sort, and pagination or virtualization when volume requires it.
+It contains **work domains**, not catalog categories.
+
+It must not grow with every product, resource, operation, or subcategory.
+
+Subcategories must not appear as new Level 1 items.
+
+Permissions may hide inaccessible domains. They must not change the meaning of the remaining routes.
+
+Do not lock, from this document:
+
+- the final count of Level 1 items
+- the final order
+- the final label for today’s `Produse`
+- top navigation versus sidebar
+- the final narrow-width chrome
+
+Those are FIGMA_CANDIDATE.
+
+### 4. Large collections use list/detail, not menu trees
+
+For products, resources, costs, people, clients, and other registries:
+
+```text
+SEARCH + FILTERS + LIST/DETAIL + PROGRESSIVE DISCLOSURE
+```
+
+Commercial catalog collections and Product System / admin collections may share that mechanic. They must stay distinguishable by job, language, and primary action: sell / configure versus inspect / administer truth.
+
+Not:
+
+```text
+CATEGORY MENU → SUBCATEGORY MENU → LONG ITEM MENU
+```
+
+Lists must be able to scale to hundreds or thousands of records without growing global navigation.
 
 Selecting an item must have a stable URL and a clear detail surface.
 
 Do not rely on ephemeral in-memory selection as the only way to reopen the same record.
 
-### 4. Technical detail is hidden by default
+### 5. Commercial catalog is not Product System administration
 
-Technical information is available only in:
+```text
+Commercial catalog/configurator
+≠
+Product System administration
+```
+
+`/products` is the sellable catalog and the entry toward cerere / ofertă / comandă.
+
+Product System is the administrative truth about families, templates, components, contracts, structure, lifecycle / publication, and readiness.
+
+Product System stays in Administrare. It must not become a commercial menu.
+
+The current global label `Produse` is ambiguous. The label fork is FIGMA_CANDIDATE. Do not choose the final word from documentation alone.
+
+### 6. Technical detail is hidden by default
+
+Technical information is available only through progressive disclosure:
 
 - Detalii
 - diagnostics
 - admin
 - developer mode
 
-Normal operator UI must not expose hashes, DTO names, raw codes, service names, compiler vocabulary, raw provenance, debug objects, capability IDs, bootstrap markers, or internal JSON.
+Normal operator UI must not expose hashes, DTO names, raw codes, service names, compiler vocabulary, raw provenance, debug objects, capability IDs, bootstrap markers, or internal JSON as primary language.
 
 The operator should see what to complete, what is selected, what is missing, what to confirm, what is blocked and why, the result, and what comes next.
 
-### 5. Badges are for actionable states
+IDs and internal codes may exist as secondary identifiers. They must not be the hero title when a human name, product, or task exists.
+
+### 7. Badges are for actionable states
 
 Badges are used only for states the user can act on or must notice to act.
 
+Informative statuses use calmer visual treatment.
+
 Do not display a decorative badge for every property.
 
-### 6. States are designed, not accidental
+Do not revive COMPAT / AUDIT / Live DB / STAGING chrome as operator language.
+
+### 8. States are designed, not accidental
 
 Empty, loading, error, blocked, unauthorized, and success are designed states.
 
 Screenshots or hardcoded happy-path UI are not PASS. See `.cursor/rules/e2e-first.mdc`.
 
-### 7. One primary action
+### 9. One primary action
 
 The page’s primary action must be visible and unambiguous.
 
@@ -126,7 +201,7 @@ Forms and user decisions outrank long explanations.
 
 Important warnings stay visible, but compact and in context. They must not bury the decision.
 
-### 8. Language and role
+### 10. Language, role, and People names
 
 Operator-facing UI stays in Romanian.
 
@@ -134,226 +209,282 @@ Copy adapts to the current role. An operator, an owner, and a later diagnostic v
 
 Do not teach the workshop the product’s internal architecture.
 
-### 9. Responsive foundation, mobile last
+Authorized People UI may show real staff names. The defect is real identities in demo, evidence, or unauthorized exposure — not names in the authorized operational catalog.
 
-Do not block a coherent responsive foundation.
+### 11. Operator attention order in Atelier and Execution
+
+The operator sees first what they have to do.
+
+In Atelier and Execution, present in this order:
+
+1. the task
+2. the job and the product
+3. the relevant component
+4. the dependencies
+5. the person / machine
+6. the possible action
+7. extra details
+
+### 12. Responsive foundation, mobile last
+
+Desktop is the primary pilot surface.
+
+A coherent responsive foundation must be included in the later Figma foundation. This line does not start Figma and does not authorize responsive CSS from this document.
 
 ```text
-MOBILE = LAST
+MOBILE_OPERATIONS = DEFERRED
 RESPONSIVE_FOUNDATION = MUST_NOT_BE_BLOCKED
 ```
 
-Phone-first redesign of the whole product is DEFERRED.
+Narrow desktop must not collapse into an infinite single column with no hierarchy.
 
-### 10. Accessibility from the start
+Global navigation must have deterministic behavior at reduced widths.
 
-Keep accessibility from the first later UI implementation: focus, keyboard, contrast, labels, and reduced motion.
+Phone-first rewrite of the whole product is DEFERRED.
+
+### 13. Accessibility from the start
+
+Keep accessibility from the first later UI implementation:
+
+- focus
+- keyboard
+- contrast
+- labels, including screen-reader labels
+- touch targets
+- information not conveyed by color alone
+- reduced motion
 
 Accessibility is not a post-visual polish pass.
 
-### 11. One visual system
+Dark theme must be designed and checked separately. It must not be an uncontrolled automatic inversion of light styles.
+
+### 14. One semantic visual system
 
 ```text
-LIGHT  = REQUIRED
-DARK   = REQUIRED
-SYSTEM = REQUIRED
+THEME = LIGHT + DARK + SYSTEM
 ```
 
-All three modes use the same semantic token system.
+This is a later-UI invariant. It does not authorize adding tokens, CSS variables, dark stylesheets, or theme plumbing from this document.
 
-The current app already has a small light-only token set recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md`. That is not the required LIGHT / DARK / SYSTEM system. Later work extends one semantic system; it does not start a second kit.
+`SYSTEM` follows the operating-system preference and still allows an explicit persisted choice.
+
+One semantic token system covers:
+
+- color
+- typography
+- spacing
+- radius
+- elevation
+- borders
+- focus
+- motion
+- density, if Figma later proves it is needed
+
+Primitive tokens stay separate from semantic tokens.
+
+Components and pages use semantic tokens.
 
 Forbidden in later UI work:
 
 - hex colors copied into pages
+- inline colors for normal layout
 - arbitrary repeated spacing
 - local font sizes without a token
-- inline styles for normal layout
 - CSS duplicated per page
-- near-identical components created in parallel
-- dark theme obtained through chaotic overrides
+- chaotic dark overrides
 - a second UI kit
+- business truth in CSS
 
-### 12. Old application is evidence, not a skin
+The current app already has a small light-only token set recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md`. That is not the required LIGHT / DARK / SYSTEM system. Later work extends one semantic system; it does not start a second kit.
 
-```text
-OLD_APP = OPERATIONAL_EVIDENCE
-OLD_APP = NOT_VISUAL_BLUEPRINT
-```
+shadcn may be the later implementation base. It does not decide the product or the information architecture.
+
+Token names and values remain FIGMA_CANDIDATE.
+
+### 15. Old application is evidence, not a skin
 
 Do not copy the old structure, menus, CSS, or visual hierarchy by default.
 
-### 13. No UI implementation from this canon alone
+### 16. No UI implementation from this canon alone
 
-This document does not authorize UI implementation, Figma production, or a restructure prompt.
+This document does not authorize UI implementation, Figma production, plugin installation, or a restructure prompt.
 
-The mandatory audit in this canon must finish. Owner independent review of that evidence pack is a prerequisite of roadmap step 5 (Figma). `OWNER_VISUAL_ACCEPTANCE` is a later, second Owner gate after Figma and a prerequisite of step 7. Do not treat those two Owner reviews as the same gate.
+Figma starts only after a later Owner GO for the Figma access gate.
 
-## CANDIDATE_DIRECTION_TO_VALIDATE
+`OWNER_VISUAL_ACCEPTANCE` is a later, second Owner gate after Figma and a prerequisite of scoped UI implementation. Do not treat those two Owner reviews as the same gate.
 
-These are audit hypotheses. They are not approved implementation. Do not treat them as the next coding spec.
+## EVIDENCE_SUPPORTED
 
-### Information architecture
+These conclusions are clear enough from the accepted 283-PNG pack and the audit report. They are not final chrome, labels, or layouts.
 
-Candidate pattern to validate against both the old application and the current WorkOS Final shell:
+### Navigation and information architecture
 
-- persistent, collapsible global navigation
-- top bar for context, actions, and the signed-in user
-- breadcrumb for orientation
-- local sub-navigation through tabs or segments
-- list / table / search for collections
-- page or drawer for detail
-- stable routes
-- actions that depend on role
-- progressive disclosure
+- NEW’s short global set of work areas scales better than OLD’s long sidebar. Keep the **bounded-domain** principle. Do not freeze today’s five labels or top-bar placement.
+- Comercial is a work area, not four Level 1 siblings. Cereri, Oferte, and Clienți belong in Level 2.
+- Product System administration already lives under Administrare in NEW. Keep that domain split.
+- Categories and items already leak into page-local trees on NEW `/products` and several admin catalogs. That pattern does not scale. Treat those trees as collections, not as a second global menu.
+- OLD master–detail on Oferte and Clienți is operationally useful. NEW list-only quote rows lose inspect-one-offer density. Restoring a local master–detail pattern is allowed later; the commercial engine must stay one.
+
+Hypothesized Level 1 names are not a lock. `Catalog / Configurare` is a work-area hypothesis. `Configurează` is a separate action-label candidate in the Figma fork. They are not the same word and neither is final:
 
 ```text
-SIDEBAR_FINAL = NOT_DECLARED
+Lucrări
+Atelier
+Comercial
+Catalog / Configurare
+Administrare
 ```
 
-Do not declare the current top navigation final. Do not declare a sidebar final. The audit must compare both applications before Owner accepts an information architecture.
+Today’s implemented names remain recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
 
-Today’s implemented shell remains recorded in `docs/architecture/UI_UX_FOUNDATION_CANON.md`. Roadmap step 4 updates **this** direction canon from audit evidence. The foundation canon is updated when the implemented shell actually changes, after scoped UI implementation lands. The foundation line that named Product System admin as the next UI candidate is historical to that foundation build. It is not the active next UI task.
+### OLD — keep as principle
 
-### Theme and design tokens
+- master–detail for large registries
+- global search as a findability hint, not as a second architecture
+- clear local context
+- operational summaries
+- role-adapted entry pages
+- fast access to the next action
+- useful density on operational screens
 
-Direction only. Do not implement tokens in this build.
+### OLD — do not copy
 
-Later implementation must define one semantic token set used by LIGHT, DARK, and SYSTEM:
+- a very long global sidebar
+- mixing work domains with technical, legacy, and DEV pages
+- competing visual levels (sidebar + flow rail + breadcrumbs + banners + KPIs)
+- debug / backend / internal status in operator UI
+- overloaded Product Studio / compiler vocabulary on operator paths
+- a menu structure that grows with every feature
+- the OLD skin, CSS, or visual hierarchy
 
-- background
-- surface
-- elevated surface
-- text primary / secondary / muted
-- border
-- accent
-- success / warning / danger / info
-- focus
-- spacing
-- radius
-- shadow
-- typography
-- motion
+### NEW — keep
 
-Token names and values are OWNER_DECISIONS_PENDING after audit and Figma. This canon only requires that the system exist and stay semantic.
+- cleaner domain truth
+- Commercial / Execution / Product System separation
+- stable routes
+- fail-closed states (empty, blocked, ineligible, invalid credentials, invalid PIN)
+- machine-capability honesty
+- no HUB MEDIA business-data copy in bootstrap
+- operator UI in Romanian
 
-### Later component system
+### NEW — change / improve
 
-Direction for a later, authorized UI implementation — not this build:
+- long card walls
+- repeated metadata at the same visual weight
+- too much text before the action
+- vertical category / item rails that become the page
+- weak use of wide desktop space
+- Product System hard to discover — improve the Administrare door and label only; do not add Product System as a Level 1 work area or a second product app
+- near-duplicate administrative inspection pages
+- unnecessary backend details in the default view
+- weak hierarchy between summary, decision, and detail
+- missing LIGHT / DARK / SYSTEM
 
-- shadcn/ui as the base **if** the later technical audit confirms compatibility with the current React app
-- shared components before local variants
-- 21st.dev for inspiration only
-- Figma for the design system and prototypes, only after the audit evidence pack and Owner independent review of that pack (not the later visual-acceptance gate)
-- Context7 for current library documentation at implementation time
-- React Doctor before closing a UI implementation
-- BrowserStack for later accessibility and real-device checks
+### Theme and CSS readiness
 
-Cursor plugins, MCP servers, and design tools are not runtime product dependencies.
+NEW is light-only. OLD already shows a theme toggle. That proves the need. It does not license copying the OLD control or palette.
 
-## OWNER_DECISIONS_PENDING
+Page-local hex and duplicate token names exist in the current CSS. Later implementation must retire that drift into one semantic system. Do not “fix” it by copying more page CSS from this canon.
 
-Owner decides after the mandatory audit and independent review. Agents must not fill these in to keep moving.
+### Accessibility readiness
 
-- Final global navigation model (including whether a sidebar exists)
-- Final local-navigation pattern per work area
-- Which collections use page detail vs drawer
-- Token values and type ramp
-- Whether shadcn/ui is accepted as the implementation base
-- Which current surfaces are in the scoped UI implementation for the HUB MEDIA pilot
-- Which current pages are keep / restructure / remove
+Keyboard, focus, landmarks, dialog modality, and contrast still have gaps. Those gaps are evidence that accessibility must be designed with the foundation, not added after a skin.
+
+## FIGMA_CANDIDATE
+
+Figma must compare at least three information-architecture variants:
+
+1. evolved top navigation
+2. compact / collapsible sidebar
+3. hybrid navigation
+
+Each variant must be tested with a realistic WorkOS volume, not with two demo items.
+
+Figma must demonstrate:
+
+- menu scale
+- catalog scale
+- Lucrări
+- Atelier
+- Comercial
+- catalog / configurator
+- administrative Product System
+- resource administration
+- LIGHT / DARK / SYSTEM
+- wide desktop
+- narrow desktop
+- progressive disclosure
+
+Recorded decision forks for Figma. Do not resolve them here:
+
+- final Level 1 count and order
+- top navigation versus sidebar versus hybrid
+- final label for today’s `Produse`: `Produse` / `Catalog` / `Configurează` / catalog plus a contextual action
+- which collections use page detail versus drawer
+- token values, type ramp, density, and motion
+- whether shadcn/ui is accepted as the implementation base
+- which current surfaces enter the scoped HUB MEDIA pilot UI
+- which current pages are keep / restructure / remove after visual acceptance
+
+```text
+SIDEBAR_FINAL              = NO
+CATALOG_LABEL_FINAL        = NO
+OWNER_VISUAL_ACCEPTANCE    = REQUIRED
+```
+
+No variant is accepted without `OWNER_VISUAL_ACCEPTANCE` (Owner Visual Gate). That is the same later Owner gate. It is not the Figma access gate.
+
+## Figma gate
+
+The active V1 roadmap `NEXT_STEP` is `FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE`. That later GO may open Figma access. It is not started by this file.
+
+Inside that later sequence, and only after an Owner GO for it, the process is:
+
+```text
+1. FIGMA_ACCESS_GATE
+2. MOBBIN_RESEARCH
+3. THREE_INFORMATION_ARCHITECTURE_CANDIDATES
+4. OWNER_IA_SELECTION
+5. DESIGN_TOKEN_FOUNDATION
+6. COMPONENT_LIBRARY
+7. PILOT_SCREEN_SET
+8. OWNER_VISUAL_ACCEPTANCE
+9. SCOPED_UI_IMPLEMENTATION
+```
+
+Each IA variant must also show an operator frame (Atelier / Execution) and an owner frame (Administrare / Product System door).
+
+This file does not start step 1.
 
 ## DEFERRED
 
-- Mobile-first redesign of the whole product
-- A second visual language for Cloud vs single-plane DEV
-- Decorative marketing chrome
-- Per-page custom illustration systems
-- Universal CRUD shells
-- A global Settings dump or a top-nav item per future domain
-- Analyzer UI inside WorkOS
-- Figma or implementation prompts before the audit evidence pack and Owner analysis
+Keep outside this stage and outside the current Figma gate:
 
-## Mandatory UI/UX audit before implementation
+- mobile-first rewrite
+- employee-mobile routes
+- universal redesign of every page
+- all V2 pages
+- complex decorative animation
+- free-form theme personalization
+- universal CRUD
+- universal Machine Admin
+- SVG / DWG analysis inside WorkOS
+- Logo
+- Analyzer inside WorkOS
+- HR / pontaj / payroll
+- post-pilot roadmap features
+- shop-floor machine-map UI as a replacement for Atelier inbox
+- command palette as the primary catalog architecture
 
-Owner rule:
+Historical Machine Strict pixels are reference-only. They are not captures of the accepted 283-PNG pack and must not be treated as current visual proof.
 
-Before any prompt that restructures UI/UX, audit the old application and the new application.
+## Current implementation versus target
 
-The audit must inventory every route and page reachable through:
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens.
 
-- router
-- navigation
-- direct link
-- role
-- hidden states
-- dialogs
-- drawers
-- tabs
-- menus
-- categories
-- filters
+This canon records where later authorized UI work must go. Do not edit the foundation canon to pretend the target shell already exists.
 
-For each inventoried surface, capture each **applicable designed state**. Do not require the cartesian product of page regions × states.
-
-Required states, when they exist:
-
-- empty
-- populated
-- loading
-- error
-- blocked
-- unauthorized
-- success
-
-Location notes recorded on the capture, not extra required screenshots:
-
-- full page
-- top / middle / bottom when the state is only visible there
-- dialog / drawer open
-- relevant tab / category / filter
-
-Required manifest for every capture:
-
-| Field                                 |
-| ------------------------------------- |
-| Application                           |
-| Route                                 |
-| Role                                  |
-| Runtime fixture                       |
-| State                                 |
-| Viewport                              |
-| Screenshot                            |
-| Actions required                      |
-| Visible business purpose              |
-| Problems observed                     |
-| Keep / restructure / remove candidate |
-
-Screenshots alone are not PASS. Each captured state on the **new** application must be backed by runtime or E2E assertions in this repository. For the old application, use live runtime observation only. Do not write tests, harnesses, or E2E into previous WorkOS repositories.
-
-Cursor stops after the evidence pack. Owner sends the report and every capture for independent analysis. That analysis is the prerequisite of Figma (roadmap step 5). Do not generate a Figma prompt or a UI implementation prompt before that analysis.
-
-```text
-ALL_PAGE_SCREENSHOT_AUDIT = REQUIRED_BEFORE_UI_BUILD
-UI_IMPLEMENTATION         = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
-```
-
-`ALL_PAGE_SCREENSHOT_AUDIT` means: inventory every reachable route and page in both applications before any UI restructure prompt. Capture work may be sequenced so pilot-blocking surfaces finish first. Roadmap steps 4–7 may then be limited to those blocking surfaces. That limit is not permission to skip the inventory, skip the manifest, or treat screenshots as PASS. A restructure prompt cannot proceed on a surface that was never inventoried.
-
-## Old application
-
-Extract from the old application:
-
-- workshop language people already use
-- flows people already know
-- useful concepts
-- business data and relationships
-- what was easy to use
-- what was hard to scale
-
-Do not automatically copy structure, menus, CSS, or visual hierarchy.
-
-Previous WorkOS repositories remain read-only evidence. Do not write there.
+The foundation line that named Product System admin as the next UI candidate is historical to that foundation build. It is not the active next UI task.
 
 ## Change governance
 
