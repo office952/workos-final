@@ -43,7 +43,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = bc809bbd8064a78b69cedc17f6b80ac7b7dad6d9
+ORIGIN_MAIN                          = 9c2c4246b5fd873a3ca5b3630e1198a273fd9e7e
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -55,7 +55,8 @@ REAL_CLOUD_OWNER_RECOVERY_V1         = COMPLETE
 OWNER_LOGIN                          = VERIFIED
 REAL_HUB_MEDIA_OPERATION             = NOT_PROVEN
 BUSINESS_DATA_CONFIGURATION          = NOT_STARTED
-FULL_OLD_AND_NEW_UI_UX_AUDIT         = NEXT
+FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
+EVIDENCE_PACK                        = ACCEPTED
 PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 ```
 
@@ -75,11 +76,13 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 
 ```text
 TARGET_MILESTONE = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP     = REAL_CLOUD_OWNER_RECOVERY
-NEXT_STEP        = FULL_OLD_AND_NEW_UI_UX_AUDIT
+CURRENT_STEP     = FULL_OLD_AND_NEW_UI_UX_AUDIT
+NEXT_STEP        = UI_UX_CANON_UPDATE_FROM_EVIDENCE
+FIGMA            = NOT_STARTED
+UI_IMPLEMENTATION = NOT_AUTHORIZED
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` is the target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit is the next sequence step inside this milestone. It is not a second target milestone.
+`HUB_MEDIA_CLEAN_PILOT` is the target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit inside this milestone is complete. The next sequence step is the canon update from that evidence. The audit is not a second target milestone.
 
 Implementation reports fill:
 
@@ -88,7 +91,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_MILESTONE    = <current NEXT_STEP>
 ```
 
-`NEXT_MILESTONE` is `FULL_OLD_AND_NEW_UI_UX_AUDIT` until that later GO starts. Do not report a sequence step as if it were a second target milestone.
+`NEXT_MILESTONE` is `UI_UX_CANON_UPDATE_FROM_EVIDENCE` until that later GO starts. Do not report a sequence step as if it were a second target milestone.
 
 Target flow:
 
@@ -118,7 +121,7 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 ```text
 1. CANONICAL_DIRECTION_CONTROL_V1    = COMPLETE
 2. REAL_CLOUD_OWNER_RECOVERY         = COMPLETE
-3. FULL_OLD_AND_NEW_UI_UX_AUDIT      = NEXT
+3. FULL_OLD_AND_NEW_UI_UX_AUDIT      = COMPLETE
 4. UI_UX_CANON_UPDATE_FROM_EVIDENCE  = NOT_STARTED
 5. FIGMA_INFORMATION_ARCHITECTURE_AND_DESIGN_SYSTEM = NOT_STARTED
 6. OWNER_VISUAL_ACCEPTANCE           = NOT_STARTED
@@ -130,13 +133,13 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 
 Step 1 established the living canons and governance pointers. Step 2 recovered the existing HUB MEDIA Cloud organization under a later Owner GO. This file did not authorize that write.
 
-`FULL_OLD_AND_NEW_UI_UX_AUDIT` still inventories every reachable route in both applications, per `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. Capture work may finish pilot-blocking surfaces first. Steps 4–7 (canon update, Figma, visual acceptance, scoped UI implementation) may then be limited to those surfaces. That is not an unlimited redesign of the whole product.
+`FULL_OLD_AND_NEW_UI_UX_AUDIT` is complete. The accepted evidence pack is `docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md`. Route inventory is source-proven, not full page coverage and not cartesian state coverage. Steps 4–7 (canon update, Figma, visual acceptance, scoped UI implementation) may be limited to pilot-blocking surfaces. That is not an unlimited redesign of the whole product. This file does not authorize the canon update.
 
 The current implemented shell remains the operator surface until a later scoped UI GO. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
 
 Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
 
-Do not start steps 3–10 from this document.
+Do not start steps 4–10 from this document.
 
 ## Real Cloud recovery
 
