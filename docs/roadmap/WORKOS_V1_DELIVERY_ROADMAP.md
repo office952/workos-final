@@ -5,9 +5,9 @@ This file keeps **state and direction**. Worklogs keep execution detail. Plans k
 
 ```text
 AUTHORITY         = ACTIVE_V1_DELIVERY
-THIS_BUILD        = FIRST_HF_LOT_SCREEN_DESIGN_V1
+THIS_BUILD        = FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS_V1
 REAL_CLOUD_RESUME = NOT_AUTHORIZED_BY_THIS_DOCUMENT
-UI_IMPLEMENTATION = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
+UI_IMPLEMENTATION = NOT_AUTHORIZED
 HIGH_FIDELITY     = FIRST_LOT_OWNER_ACCEPTED
 ```
 
@@ -27,6 +27,7 @@ Do not create a second V1 delivery roadmap.
 Related living authority:
 
 - `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction
+- `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md` — accepted first-lot route, access, mapping, and wave contracts
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain and administration map
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation law
 
@@ -44,7 +45,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = fb7b9cb843edf1cdd95e34f4ac4de258da7c5d53
+ORIGIN_MAIN                          = e06a5365da6248249cfc2d0c41470add55788820
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -72,7 +73,13 @@ FIRST_HF_LOT_SCREEN_DESIGN           = OWNER_ACCEPTED
 OWNER_FIRST_HF_LOT_REVIEW            = COMPLETE
 HF_LOT_GATE                          = CLOSED
 HIGH_FIDELITY                        = FIRST_LOT_OWNER_ACCEPTED
-UI_IMPLEMENTATION                    = NOT_AUTHORIZED
+HIGH_FIDELITY_DESIGN                 = FIRST_LOT_OWNER_ACCEPTED
+FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
+IMPLEMENTATION_READINESS_GATE        = CLOSED
+IMPLEMENTATION_READY                 = YES
+VISIBLE_RUNTIME                      = CURRENT_FOUNDATION_NOT_YET_UPDATED
+UI_IMPLEMENTATION                    = NOT_STARTED
+UI_IMPLEMENTATION_AUTHORIZED         = NO
 PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 ```
 
@@ -94,16 +101,21 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 TARGET_MILESTONE  = HUB_MEDIA_CLEAN_PILOT
 CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 CURRENT_STEP      = FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS
-NEXT_STEP         = FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS
+NEXT_STEP         = FIRST_HF_LOT_UI_IMPLEMENTATION_OWNER_GO
 HIGH_FIDELITY     = FIRST_LOT_OWNER_ACCEPTED
 FIRST_HF_LOT_SCREEN_DESIGN = OWNER_ACCEPTED
 OWNER_FIRST_HF_LOT_REVIEW = COMPLETE
 HF_LOT_GATE       = CLOSED
 FINAL_VISUAL_DIRECTION = A_INDUSTRIAL_CLARITY
-UI_IMPLEMENTATION = NOT_AUTHORIZED
+FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
+IMPLEMENTATION_READINESS_GATE = CLOSED
+IMPLEMENTATION_READY = YES
+VISIBLE_RUNTIME   = CURRENT_FOUNDATION_NOT_YET_UPDATED
+UI_IMPLEMENTATION = NOT_STARTED
+UI_IMPLEMENTATION_AUTHORIZED = NO
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit, the evidence-driven direction-canon update, Figma access, Owner-accepted information architecture, Owner-accepted high-fidelity scope, Owner-accepted visual direction A (Industrial Clarity, with amendments), and the first high-fidelity lot inside this milestone are complete. `PILOT_HIGH_FIDELITY_FOUNDATION_AND_VISUAL_DIRECTION` is `OWNER_ACCEPTED`. B and C stay as comparative reference only. `FIRST_HF_LOT_SCREEN_DESIGN` is `OWNER_ACCEPTED`. `HF_LOT_GATE` is `CLOSED`. Acceptance is a visual baseline for the pilot; later refinement after real implementation remains allowed. This file does not authorize React/CSS, Mobbin, or a production component library. The next sequence step is `FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS`. That step is not a second target milestone and is not an implementation GO.
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). The UI/UX audit, the evidence-driven direction-canon update, Figma access, Owner-accepted information architecture, Owner-accepted high-fidelity scope, Owner-accepted visual direction A (Industrial Clarity, with amendments), the first high-fidelity lot, and the implementation-readiness contracts inside this milestone are complete. `PILOT_HIGH_FIDELITY_FOUNDATION_AND_VISUAL_DIRECTION` is `OWNER_ACCEPTED`. B and C stay as comparative reference only. `FIRST_HF_LOT_SCREEN_DESIGN` is `OWNER_ACCEPTED`. `HF_LOT_GATE` is `CLOSED`. `FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS` is `OWNER_ACCEPTED`. `IMPLEMENTATION_READINESS_GATE` is `CLOSED`. `IMPLEMENTATION_READY = YES` is not a UI implementation GO. The next sequence step is `FIRST_HF_LOT_UI_IMPLEMENTATION_OWNER_GO`. That step is not a second target milestone and is not opened by this file.
 
 Implementation reports fill:
 
@@ -112,7 +124,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_STEP         = <current next sequence step>
 ```
 
-`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner accepted the first lot, that value is `FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS`. That step must close, before code: the stable job-detail route contract; the stable quote-inspection route contract; the internal-cost / markup access policy; Figma → existing component / token / route mapping; and the lot implementation-and-verification plan. This file does not open those contracts and does not authorize implementing the selected direction.
+`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner accepted the readiness contracts, that value is `FIRST_HF_LOT_UI_IMPLEMENTATION_OWNER_GO`. The contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Closed: `/jobs/:jobId` over existing `orderSnapshotId`; `/quotes/:quoteSnapshotId`; `MONEY_POLICY = ALT_B_SCOPED`. This file does not authorize implementing those contracts.
 
 Target flow:
 
@@ -145,7 +157,8 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 3. FULL_OLD_AND_NEW_UI_UX_AUDIT      = COMPLETE
 4. UI_UX_CANON_UPDATE_FROM_EVIDENCE  = COMPLETE
 5. FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE = OWNER_ACCEPTED
-6. OWNER_VISUAL_ACCEPTANCE           = NOT_STARTED
+6. OWNER_VISUAL_ACCEPTANCE           = FIRST_LOT_CLOSED
+6a. IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
 7. SCOPED_UI_IMPLEMENTATION          = NOT_STARTED
 8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = NOT_STARTED
 9. FIRST_REAL_LETTERS_JOB            = NOT_STARTED
@@ -158,19 +171,19 @@ Step 1 established the living canons and governance pointers. Step 2 recovered t
 
 `UI_UX_CANON_UPDATE_FROM_EVIDENCE` is complete. That revision distinguished invariants, evidence-supported conclusions, Figma candidates, and explicit deferrals. It did not declare a sidebar, a Catalog label, a visual style, or a component library as final. Execution detail lives in `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md`.
 
-`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is Owner-accepted with amendments. Global navigation is top nav. Level 1 is Lucrări | Atelier | Comercial | Catalog | Administrare. `Configurează` is a contextual action. Product System stays in Administrare. Visual style, tokens, components, and high-fidelity remain unselected. Execution detail lives in `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md`.
+`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is Owner-accepted with amendments. Global navigation is top nav. Level 1 is Lucrări | Atelier | Comercial | Catalog | Administrare. `Configurează` is a contextual action. Product System stays in Administrare. Visual direction A and the first HF lot are now accepted; they were unselected at IA time. Execution detail lives in `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md`.
 
-`PILOT_HIGH_FIDELITY_SCOPE_DEFINITION` is Owner-accepted with amendments. The first lot includes job detail, quote decision inspection, and execution so the pilot can be validated through planned-vs-actual. A stable job URL contract is required before UI implementation; this file does not invent `/jobs/:id` or `/orders/:id`. Admin pattern reuse stays domain-aware; universal CRUD is forbidden. Execution detail lives in `docs/worklog/WORKOS_PILOT_HIGH_FIDELITY_SCOPE_DEFINITION_V1.md`.
+`PILOT_HIGH_FIDELITY_SCOPE_DEFINITION` is Owner-accepted with amendments. The first lot includes job detail, quote decision inspection, and execution so the pilot can be validated through planned-vs-actual. The stable job URL is `/jobs/:jobId` with `jobId = orderSnapshotId`. `/orders/:orderSnapshotId` is rejected as the primary UI route. No Job table. Admin pattern reuse stays domain-aware; universal CRUD is forbidden. Execution detail lives in `docs/worklog/WORKOS_PILOT_HIGH_FIDELITY_SCOPE_DEFINITION_V1.md`.
 
 `PILOT_HIGH_FIDELITY_FOUNDATION_AND_VISUAL_DIRECTION` is Owner-accepted with amendments. Final visual direction is A — Industrial Clarity. B and C remain visible comparative reference. Execution detail lives in `docs/worklog/WORKOS_PILOT_HIGH_FIDELITY_FOUNDATION_AND_VISUAL_DIRECTION_V1.md`.
 
-`FIRST_HF_LOT_SCREEN_DESIGN` is `OWNER_ACCEPTED`. The first lot is drawn in Figma on pages 12–21, in direction A, with Lucide plus WorkOS custom icons and a same-page E2E prototype. Job detail and quote inspection are in the lot; their URL contracts stay unselected. Internal-cost / markup access remains `NOT_CANONIZED`. Execution detail lives in `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md`. This file does not authorize React/CSS, Mobbin, or a production component library.
+`FIRST_HF_LOT_SCREEN_DESIGN` is `OWNER_ACCEPTED`. The first lot is drawn in Figma on pages 12–21, in direction A, with Lucide plus WorkOS custom icons and a same-page E2E prototype. Job detail and quote inspection are in the lot. Their URL and money contracts are `OWNER_ACCEPTED` in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`: `/jobs/:jobId`, `/quotes/:quoteSnapshotId`, `MONEY_POLICY = ALT_B_SCOPED`. Execution detail lives in `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md`. This file does not authorize React/CSS, Mobbin, or a production component library.
 
 The current implemented shell remains the operator surface until a later scoped UI GO. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
 
 Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
 
-Do not start scoped UI implementation or steps 7–10 from this document. The visual-direction gate and the first-lot gate are closed. Sequence step 6 `OWNER_VISUAL_ACCEPTANCE` does not authorize code. The next named step is `FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS`.
+Do not start scoped UI implementation or steps 7–10 from this document. The visual-direction gate, the first-lot gate, and the implementation-readiness gate are closed. Sequence step 6 `OWNER_VISUAL_ACCEPTANCE` does not authorize code. `IMPLEMENTATION_READY = YES` does not authorize code. The next named step is `FIRST_HF_LOT_UI_IMPLEMENTATION_OWNER_GO`.
 
 ## Real Cloud recovery
 

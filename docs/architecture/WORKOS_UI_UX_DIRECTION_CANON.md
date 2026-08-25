@@ -5,24 +5,35 @@ This document is normative for **how UI may evolve**. It is not a frozen mockup,
 
 ```text
 AUTHORITY                         = ACTIVE_UI_UX_DIRECTION
-SOURCE_OF_THIS_REVISION           = OWNER_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE
-PREVIOUS_REVISION_SOURCE          = ACCEPTED_FULL_OLD_NEW_UI_UX_AUDIT
+SOURCE_OF_THIS_REVISION           = FIRST_HF_LOT_OWNER_ACCEPTED_PLUS_READINESS_CONTRACTS
+PREVIOUS_REVISION_SOURCE          = OWNER_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE
 EVIDENCE_PACK                     = docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md
 IA_ACCEPTANCE                     = docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md
+HF_LOT_ACCEPTANCE                 = docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md
+READINESS_CONTRACTS               = docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md
 FIGMA_FILE                        = WorkOS V1 — Information Architecture
 FIGMA_FILE_KEY                    = 7elwvIscvMPDiEHrX4f6kQ
-UI_IMPLEMENTATION                 = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
+HIGH_FIDELITY_DESIGN              = FIRST_LOT_OWNER_ACCEPTED
+HF_LOT_GATE                       = CLOSED
+FINAL_VISUAL_DIRECTION            = A_INDUSTRIAL_CLARITY
+IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
+IMPLEMENTATION_READINESS_GATE     = CLOSED
+IMPLEMENTATION_READY              = YES
+VISIBLE_RUNTIME                   = CURRENT_FOUNDATION_NOT_YET_UPDATED
+UI_IMPLEMENTATION                 = NOT_STARTED
+UI_IMPLEMENTATION_AUTHORIZED      = NO
+UI_IMPLEMENTATION_AUTHORIZATION   = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
 FIGMA_ACCESS_GATE                 = COMPLETE
 INFORMATION_ARCHITECTURE          = OWNER_ACCEPTED
 OWNER_IA_GATE                     = CLOSED
-HIGH_FIDELITY                     = NOT_STARTED
+HIGH_FIDELITY                     = FIRST_LOT_OWNER_ACCEPTED
 GLOBAL_NAV_STRUCTURE              = TOP_NAV
 CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = NO
-THEME_TOKEN_IMPLEMENTATION        = FORBIDDEN_UNTIL_FIGMA_DESIGN_TOKEN_FOUNDATION_AND_SCOPED_UI_GO
+THEME_TOKEN_IMPLEMENTATION        = FORBIDDEN_UNTIL_OWNER_SCOPED_UI_GO
 ```
 
-Figma access and information architecture are accepted. This document is not the Owner GO for high-fidelity drawing, Mobbin, visual acceptance, design-system build, or scoped UI implementation.
+Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s shell, routes, and primitives). This canon does not replace that record. It governs later Owner decisions and later UI change.
@@ -34,6 +45,8 @@ Related living authority:
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation
 - `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md` — evidence citations for the previous direction revision
 - `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md` — Owner IA acceptance record
+- `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md` — accepted first HF lot
+- `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md` — accepted route, access, mapping, and wave contracts
 
 Do not create a second UI/UX direction canon.
 
@@ -350,11 +363,11 @@ Do not copy the old structure, menus, CSS, or visual hierarchy by default.
 
 ### 16. No UI implementation from this canon alone
 
-This document does not authorize UI implementation, high-fidelity production, plugin installation, or a restructure prompt.
+This document does not authorize UI implementation, plugin installation, or a restructure prompt.
 
-The Figma access gate and Owner IA selection are closed. High-fidelity drawing starts only after a later Owner GO for pilot high-fidelity scope.
+The Figma access gate, Owner IA selection, visual-direction gate, and first-lot visual gate are closed. High-fidelity **design** for the first lot is `FIRST_LOT_OWNER_ACCEPTED`. Visible runtime is still the current foundation. UI implementation is `NOT_STARTED`.
 
-`OWNER_VISUAL_ACCEPTANCE` is a later Owner gate after high-fidelity and a prerequisite of scoped UI implementation. Do not treat the closed IA gate and that later visual gate as the same review.
+`OWNER_VISUAL_ACCEPTANCE` for the first lot is closed as `HF_LOT_GATE`. That closed visual gate is not a scoped UI implementation GO. Do not treat accepted Figma screens as if they already exist in the product.
 
 ## EVIDENCE_SUPPORTED
 
@@ -476,15 +489,18 @@ Still FIGMA_CANDIDATE / unselected:
 ```text
 GLOBAL_NAV_STRUCTURE       = TOP_NAV
 CATALOG_LABEL              = ACCEPTED
-OWNER_VISUAL_ACCEPTANCE    = REQUIRED
-HIGH_FIDELITY              = NOT_STARTED
+HIGH_FIDELITY_DESIGN       = FIRST_LOT_OWNER_ACCEPTED
+OWNER_VISUAL_ACCEPTANCE    = FIRST_LOT_CLOSED
+HIGH_FIDELITY              = FIRST_LOT_OWNER_ACCEPTED
+VISIBLE_RUNTIME            = CURRENT_FOUNDATION_NOT_YET_UPDATED
+UI_IMPLEMENTATION          = NOT_STARTED
 ```
 
-`OWNER_VISUAL_ACCEPTANCE` (Owner Visual Gate) remains a later Owner gate after high-fidelity. It is not the closed IA gate.
+`OWNER_VISUAL_ACCEPTANCE` for the first lot is closed. It is not the closed IA gate and it is not a scoped UI implementation GO.
 
 ## Figma gate
 
-`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is accepted. The active V1 roadmap `NEXT_STEP` is `PILOT_HIGH_FIDELITY_SCOPE_DEFINITION`. This file does not authorize high-fidelity drawing.
+`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is accepted. Visual direction A and the first HF lot are accepted. Implementation-readiness contracts are `OWNER_ACCEPTED`. This file does not authorize React/CSS.
 
 Recorded process, without rewriting earlier steps as if Mobbin had run:
 
@@ -493,17 +509,18 @@ Recorded process, without rewriting earlier steps as if Mobbin had run:
 2. MOBBIN_RESEARCH                           = NOT_STARTED
 3. THREE_INFORMATION_ARCHITECTURE_CANDIDATES = COMPLETE
 4. OWNER_IA_SELECTION                        = ACCEPTED_WITH_AMENDMENTS
-5. PILOT_HIGH_FIDELITY_SCOPE_DEFINITION      = NEXT
-6. DESIGN_TOKEN_FOUNDATION                   = NOT_STARTED
-7. COMPONENT_LIBRARY                         = NOT_STARTED
-8. PILOT_SCREEN_SET                          = PROPOSED_NOT_AUTHORIZED
-9. OWNER_VISUAL_ACCEPTANCE                   = NOT_STARTED
-10. SCOPED_UI_IMPLEMENTATION                 = NOT_STARTED
+5. PILOT_HIGH_FIDELITY_SCOPE_DEFINITION      = OWNER_ACCEPTED
+6. DESIGN_TOKEN_FOUNDATION                   = ACCEPTED_IN_FIGMA_NOT_IMPLEMENTED
+7. COMPONENT_LIBRARY                         = FIGMA_ONLY_NOT_IMPLEMENTED
+8. PILOT_SCREEN_SET                          = FIRST_LOT_OWNER_ACCEPTED
+9. OWNER_VISUAL_ACCEPTANCE                   = FIRST_LOT_CLOSED
+10. IMPLEMENTATION_READINESS_CONTRACTS       = OWNER_ACCEPTED
+11. SCOPED_UI_IMPLEMENTATION                 = NOT_STARTED
 ```
 
-The twelve proposed high-fidelity screens live in the acceptance worklog. They are a proposal for the next scope definition. They are not a drawing authorization.
+The first lot lives in the lot worklog and in Figma pages 12–21. Route, money, and wave contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. They are not implemented.
 
-This file does not start step 5 or later.
+This file does not start scoped UI implementation.
 
 ## DEFERRED
 
@@ -530,6 +547,8 @@ Historical Machine Strict pixels are reference-only. They are not captures of th
 ## Current implementation versus target
 
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items with the implemented `Produse` label, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens. The accepted Level 1 label is `Catalog`; do not edit the foundation canon to pretend that label is already in the shell.
+
+Accepted Figma screens are design truth. They are not visible runtime. `VISIBLE_RUNTIME = CURRENT_FOUNDATION_NOT_YET_UPDATED`.
 
 This canon records where later authorized UI work must go. Do not edit the foundation canon to pretend the target shell already exists.
 
