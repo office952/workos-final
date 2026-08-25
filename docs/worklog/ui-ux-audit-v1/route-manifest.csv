@@ -1,0 +1,160 @@
+app,route,screen_id,entry_point,role,business_purpose,data_source,states_relevant,interactive_regions,capture_required,capture_reason,status
+NEW,(boot),app-boot-loading,direct,any,Așteptare sesiune,GET /api/cloud/session,loading,none,no,transient boot,not-applicable
+NEW,(boot),app-boot-unavailable,direct,any,Backend indisponibil,GET /api/cloud/session,error,none,yes,error shell,captured
+NEW,(cloud gate),cloud-login,direct,cloud-unauthenticated,Autentificare email/parolă,POST /api/cloud/login,empty;org-select;error,form,yes,cloud gate,captured
+NEW,(shell overlay),operator-identify-dialog,global header,operator,Identitate PIN terminal,operator-candidates + operator-session,empty-list;populated;pin-error,modal,yes,shop-floor identity,captured
+NEW,/,jobs-overview,global menu Lucrări,operator,Coadă lucrări comerciale,GET /api/jobs,loading;error;empty;populated;filter-empty;search-empty,filters;search,yes,primary hub,captured
+NEW,/atelier,atelier-inbox,global menu Atelier,operator,Inbox sarcini operator,GET /api/operator-task-inbox,loading;error;no_session;empty;populated,lanes;Pornește,yes,shop floor,captured
+NEW,/requests,requests-overview,Comercial subnav,operator,Coadă cereri de ofertă,GET /api/requests,loading;error;empty;populated;filter-empty,filters;search;create-form,yes,commercial intake,captured
+NEW,/requests/:requestId,request-detail,internal link,operator,Lucru pe o cerere,GET /api/requests/:id,loading;missing;error;populated;cancelled,edit;files;offers;product-picker,yes,request workspace,captured
+NEW,/quotes,quotes-overview,Comercial subnav,operator,Registru oferte înghețate,GET /api/quotes,loading;error;empty;populated,filters;search,yes,offer registry,captured
+NEW,/clients,clients-overview,Comercial subnav,operator,Registru clienți,GET /api/customers,loading;error;empty;populated,filters;search;create,yes,client registry,captured
+NEW,/clients/:customerId,client-workspace,registry link,operator,Hub client,GET /api/customers/:id/workspace,loading;missing;error;populated;retired,section tabs;edit,yes,client hub,captured
+NEW,/clients/:customerId?section=prezentare,client-workspace-overview,section tab,operator,Profil și activitate,workspace API,view;edit,profile;cards,yes,default tab,captured
+NEW,/clients/:customerId?section=cereri,client-workspace-cereri,section tab,operator,Cereri ale clientului,workspace API,empty;populated,list,yes,tab variant,captured
+NEW,/clients/:customerId?section=oferte,client-workspace-oferte,section tab,operator,Oferte ale clientului,workspace API,empty;populated,list;pdf,yes,tab variant,captured
+NEW,/clients/:customerId?section=lucrari,client-workspace-lucrari,section tab,operator,Lucrări ale clientului,workspace API,empty;populated,list,yes,tab variant,captured
+NEW,/products,product-catalog,global menu Produse,operator,Alegere produs din ierarhie,GET /api/product-catalog,loading;error;populated,family-category-product tree,yes,catalog entry,captured
+NEW,/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06,product-config-letters-edit,catalog link,operator,Configurare litere luminoase,GET /api/products/:code,loading;editing;blocked;reviewing;confirmed,form sections,yes,distinct LETTERS form,captured
+NEW,/products/PRD-ACM-CASSETTE-NONE,product-config-acm-edit,catalog link,operator,Configurare panou ACM,GET /api/products/:code,loading;editing;reviewing;confirmed,form sections,yes,distinct ACM form,captured
+NEW,/products/:productCode,product-config-confirmed,after Confirmă,operator,Parcurs comercial pe produs,confirm + quote/order APIs,pre-quote;quoted;accepted;ordered;released;plan,commercial actions;details,yes,commercial spine,captured
+NEW,/products/:productCode?request=,product-config-with-request,request Configurează,operator,Configurare cu client blocat,product + request APIs,request context + edit,cerere banner,yes,request handoff,captured
+NEW,/products/:productCode?quote=,product-config-quote-restore,quotes link,operator,Continuare ofertă înghețată,quote snapshot APIs,loading;populated,quote actions,yes,restore layout,captured
+NEW,/products/:productCode?order=,product-config-order-restore,jobs link,operator,Continuare comandă,order/release/plan APIs,loading;populated,order actions,yes,restore layout,captured
+NEW,/execution/:planId,execution-workspace,Deschide execuția,operator,Spațiu sarcini lucrare,GET /api/execution-plans/:id,loading;missing;populated,task lanes;start;complete,yes,execution UI,captured
+NEW,/admin,admin-home,global menu Administrare,operator,Index domenii admin,static,populated,category cards,yes,admin entry,captured
+NEW,/admin/seller,admin-seller,admin Comercial,owner-write/operator-read,Identitate vânzător,GET/PUT /api/seller,loading;unconfigured;configured,form,yes,seller admin,captured
+NEW,/admin/customers,admin-customers-lifecycle,admin Comercial,operator,Ciclu viață clienți,GET/POST/PATCH /api/customers,empty;populated,create;rename;retire,yes,lifecycle admin,captured
+NEW,/admin/people,admin-people-list,admin Operațiuni,owner-write/operator-read,Registru persoane,GET /api/people,empty;populated,add;row links,yes,people admin,captured
+NEW,/admin/people/skills,admin-skills,PeopleAdminNav,owner-write/operator-read,Catalog skill-uri,GET /api/people/skills,empty;populated,add;retire;filter,yes,skills admin,captured
+NEW,/admin/people/:personId,admin-person-detail,people list,owner-write/operator-read,"Persoană: PIN, disponibilitate, skill-uri",GET /api/people/:id,loading;active;retired,PIN;availability;skills;retire,yes,person detail,captured
+NEW,/admin/resources,admin-resources-catalog,admin Atelier,owner-write/operator-read,Resurse și dovezi cost,GET /api/resources-admin,loading;populated,category-item;cost editor,yes,cost admin,captured
+NEW,/admin/stock,admin-stock-overview,admin Atelier,operator,Solduri stoc,GET /api/inventory,loading;populated,material list,yes,stock list,captured
+NEW,/admin/stock/:resourceId,admin-stock-item,stock list,owner-write/operator-read,Sold și mișcări material,GET /api/inventory/:id,populated;no-movements,adjust form;movements,yes,stock detail,captured
+NEW,/admin/processes,admin-processes-catalog,admin Atelier,operator,Inspecție procese,GET /api/operational-processes,loading;populated,category-process-detail,yes,process map,captured
+NEW,/admin/workcenters,admin-workcenters-catalog,admin Atelier,operator,Zone și utilaje,GET /api/workcenters,loading;populated,zone-equipment tree,yes,shop map,captured
+NEW,/admin/product-system,admin-product-system,admin Sistem,owner-write/operator-read,Administrare etichete catalog,GET /api/product-system-admin,loading;populated,category-item;label editor,yes,product system admin,captured
+NEW,/components,components-inspection,admin Sistem,operator,Inspecție module/componente,GET /api/product-system-admin,loading;populated,OwnerCatalogView,yes,component inspection,captured
+NEW,/governance,governance-inspection,admin Sistem,operator,Autoritate și maturitate,GET /api/governance,loading;populated,OwnerCatalogView,yes,governance,captured
+NEW,/system,system-status,admin Stare sistem,operator,Sănătate platformă,GET /api/health,loading;connected;unavailable,none,yes,health surface,captured
+NEW,*,catch-all-redirect,direct typo,any,Redirect la Lucrări,router,redirect,none,no,immediate redirect,not-applicable
+OLD,/,role-home-redirect,root,all,Landing după rol,RBAC,redirect,none,no,redirect only,not-applicable
+OLD,(pre-shell),login-gate,unauthenticated,all,Zid OIDC,AuthContext,unauthenticated,login button,yes,auth entry,captured
+OLD,(pre-shell),auth-config-missing,auth 503,all,Auth backend lipsă,Auth 503,blocked,none,yes,error honesty,captured
+OLD,/shop-floor,atelier-overview,nav Atelier / role home,operator;manager;admin,Situație atelier,shop floor API,live;mock;empty;blocked,workcenter grid,yes,operator home,captured
+OLD,/dashboard,control-productie,nav / admin home,admin;manager;sales;viewer,Control producție,dashboard API,db;mock;gaps,KPI;quick actions,yes,admin landing,captured
+OLD,/intake,cereri-list,nav Cereri,admin;manager;sales,Coadă cereri,Intake API,pipeline filters;empty;populated,search;status cards;NewIntakeDialog,yes,intake queue,captured
+OLD,/intake,cereri-pipeline-filter,status cards,admin;manager;sales,Filtru pipeline cereri,Intake list,each status,pipeline cards,yes,filter states,captured
+OLD,/intake,new-intake-dialog,Cerere nouă,admin;manager;sales,Creare cerere,Intake create,3-step dialog,dialog,yes,create flow,captured
+OLD,/intake-v6/operator,intake-v6-bootstrap,quick action,admin;manager;sales,Bootstrap workspace V6,Intake V6 API,loading;error,SVG drop,yes,intake boot,captured
+OLD,/intake-v6/:workspaceId/operator,intake-v6-workspace,cereri row,admin;manager;sales,Workspace definire produs,Intake V6 API,layers;review;confirm,stepper,yes,core intake form,captured
+OLD,/intake-v6/:workspaceId/operator,intake-v6-step-layers,step Straturi,admin;manager;sales,Mapare straturi SVG,analyzer,persisting;blockers,canvas;layers,yes,step 1,captured
+OLD,/intake-v6/:workspaceId/operator,intake-v6-step-review,step Configurare,admin;manager;sales,Configurare modulară,form contract,review tabs,review nav,yes,step 2,captured
+OLD,/intake-v6/:workspaceId/operator,intake-v6-review-finisaje,review tab,admin;manager;sales,Finisaje,workspace fields,pending;confirmed,artwork cards,yes,review domain,captured
+OLD,/intake-v6/:workspaceId/operator,intake-v6-review-iluminare,review tab,admin;manager;sales,Iluminare,workspace fields,illuminated;partial,LED panels,yes,review domain,captured
+OLD,/intake-v6/:workspaceId/operator,intake-v6-review-panou-carcasa,review domain,admin;manager;sales,Panou/carcasă,ACM contract,draft,ACM region,yes,review domain,explained
+OLD,/intake-v6/:workspaceId/operator,intake-v6-review-montaj-comercial,review domain,admin;manager;sales,Montaj comercial,workspace montaj,template;site,montaj fields,yes,review domain,explained
+OLD,/intake-v6/:workspaceId/operator,intake-v6-step-confirm,step Confirmare,admin;manager;sales,Confirmare și predare ofertă,Intake V6 + quotes,ready;blocked,confirm,yes,step 3,captured
+OLD,/intake-v6-app/*,intake-v6-standalone,direct,admin;manager;sales,V6 fără shell desktop,same V6,same,same,yes,standalone shell,captured
+OLD,/product-system/products,product-system-catalog,nav Produse,admin;manager;sales,Catalog șabloane ofertabile,Product System API,library;search,grid;create;intake link,yes,catalog vs editor,captured
+OLD,/product-system/products/:templateCode,product-system-editor,catalog row,admin;manager;sales,Studio șablon,Product System API,editor,tabs,yes,template studio,captured
+OLD,/product-system/products/:templateCode,ps-studio-tab-structure,editor tab,admin;manager;sales,Structură/compiler,template draft,structure,tree;compiler,yes,studio tab,captured
+OLD,/product-system/products/:templateCode,ps-studio-tab-operational,editor tab,admin;manager;sales,Compoziție operațională,template draft,operational,ops nodes,yes,studio tab,captured
+OLD,/product-system/products/:templateCode,ps-studio-tab-form-system,editor tab,admin;manager;sales,Contract formular intake,form contract,form-system,FormSystemAdmin,yes,studio tab,explained
+OLD,/product-system/products/:templateCode,ps-studio-tab-general,editor tab,admin;manager;sales,Metadate șablon,template draft,general,metadata,yes,studio tab,explained
+OLD,/product-system/products/:templateCode/structure/vizual-fata,ps-structure-face,structure deep link,admin;manager;sales,Structură față,PS structure API,readonly,detail,yes,structure page,captured
+OLD,/product-system/products/:templateCode/structure/volum-aluminiu,ps-structure-volume-al,structure deep link,admin;manager;sales,Structură volum aluminiu,PS structure API,readonly,detail,yes,structure page,captured
+OLD,/product-system/products/:templateCode/structure/capac-spate,ps-structure-back,structure deep link,admin;manager;sales,Structură spate,PS structure API,readonly,detail,yes,structure page,captured
+OLD,/product-system/products/:templateCode/structure/sistem-led,ps-structure-led,structure deep link,admin;manager;sales,Structură LED,PS structure API,readonly,detail,yes,structure page,captured
+OLD,/product-system/products/:templateCode/structure/conexiune-litere-acm-preturi,ps-structure-acm-prices,structure deep link,admin;manager;sales,Conexiune prețuri ACM,PS + pricing,readonly,table,yes,structure page,captured
+OLD,/product-system/blueprint-dossier,blueprint-dossier-studio,DEV nav,admin-dev,Autorare dossier,dossier API,sections,sidebar;editors,yes,dev audit,captured
+OLD,/product-system/output-blocks-preview,output-blocks-preview,direct/module map,admin-dev,Preview output blocks,preview API,investigate,preview,yes,INVESTIGATE,captured
+OLD,/quotes,oferte-list,nav Oferte / sales home,admin;manager;sales,Registru oferte,Quotes API,empty;populated,list;filters,yes,quote registry,captured
+OLD,/quotes/:quoteId,oferte-detail,list selection,admin;manager;sales,Workspace ofertă,Quotes API,selected;gates,actions;send;revision dialogs,yes,quote detail,captured
+OLD,/orders,comenzi-list,nav Comenzi,admin;manager;sales,Registru comenzi,Orders API,empty;populated,list,yes,order registry,captured
+OLD,/orders/:orderId,comenzi-detail,list selection,admin;manager;sales,Detaliu comandă,Orders API,selected;not-found,detail;execution CTA,yes,order detail,captured
+OLD,/execution,planificare-dashboard,nav Planificare,admin;manager;sales,Planificare execuție,Execution API,loading;empty;table,jobs table,yes,planning,captured
+OLD,/execution/:order_id,execution-detail,planificare row,admin;manager;sales,Workspace execuție comandă,execution API,loading;missing-plan;reality,header;work panel,yes,execution UX,captured
+OLD,/execution/machine-runs,machine-runs-list,nav Rulări utilaj,operator;manager;admin,Registru rulări CNC,Machine runs API,empty;error;scope,scope;create dialog,yes,machine runs,captured
+OLD,/execution/machine-runs/:machineRunId,machine-run-detail,list,operator;manager;admin,Ciclu rulare utilaj,machine runs API,statuses,actions,yes,run detail,explained
+OLD,/execution/ops-graph,ops-graph,nav Ops-Graph,manager;admin,Graf sarcini read-only,Execution plan V2,order picker,table;assign,yes,audit surface,captured
+OLD,/execution/reality-review,operational-reality-review,direct/deep,admin;manager;sales,Dashboard gap-uri,operational-reality API,filters,gap list,yes,hidden nav,captured
+OLD,/operator,operator-task-legacy,nav legacy,operator;manager;admin,Acțiuni pe un task,Operator API,task selected,start;complete;materials,yes,legacy compat,captured
+OLD,/tablet,tablet-station-select,nav legacy,operator;manager;admin,Alegere stație,tablet config,demo;live;empty,station cards,yes,legacy tablet,captured
+OLD,/tablet/:stationId,tablet-station-queue,station pick,operator;manager;admin,Coadă stație,tablet API,live;demo;error,queue,yes,tablet queue,explained
+OLD,/tablet/:stationId/:taskId,tablet-task-detail,queue row,operator;manager;admin,Execuție task stație,tablet API,in_coada;completed,start;complete;help,yes,tablet task,explained
+OLD,/employees,angajati-registry,nav Angajați,manager;admin,Registru forță de muncă,Employees API,list,inline edit,yes,HR registry,captured
+OLD,/attendance,pontaj,nav Pontaj,manager;admin,Pontaj,Attendance API,periods,calendar/table,yes,attendance,captured
+OLD,/attendance/effects,attendance-effects,pontaj link,manager;admin,Efecte pontaj,attendance effects API,list,table,yes,attendance effects,captured
+OLD,/employees-records,evidenta-hr-list,nav Evidență HR,manager;admin,Listă dosare HR,HR API,list,profile links,yes,HR records,captured
+OLD,/employees-records/:employeeId,employee-profile,HR row,manager;admin,Profil HR,HR API,loaded;not-found,sections,yes,employee profile,captured
+OLD,/employee-payments,plati-angajati,nav Plăți,manager;admin,Plăți interne,Payments API,list,rows,yes,payments,captured
+OLD,/employee-advances,avansuri,nav Avansuri,admin,Avansuri,Advances API,list,rows,yes,advances,captured
+OLD,/utilaje,utilaje,nav Utilaje,operator;manager;admin,Utilaje/zone,Utilaje API,filter;selected,filter;side panel,yes,machines,captured
+OLD,/inventory,inventar,nav Inventar,admin;manager;sales,Solduri materiale,Inventory API,tabbed,material tabs,yes,inventory,captured
+OLD,/inventory?tab=all,inventory-tab-all,tab,admin;manager;sales,Toate materialele,inventory API,mock;live,grid,yes,tab,captured
+OLD,/inventory?tab=placi,inventory-tab-placi,tab,admin;manager;sales,Plăci,inventory API,detail,picker,yes,tab,captured
+OLD,/inventory?tab=role,inventory-tab-role,tab,admin;manager;sales,Role,inventory API,list,list,yes,tab,captured
+OLD,/inventory?tab=cerneala,inventory-tab-cerneala,tab,admin;manager;sales,Cerneluri,inventory API,mock notes,list,yes,tab,captured
+OLD,/inventory?tab=altele,inventory-tab-altele,tab,admin;manager;sales,Alte materiale,inventory API,list,list,yes,tab,captured
+OLD,/inventory?tab=sheet-quality,inventory-sheet-quality,tab,admin;manager;sales,Calitate formate,sheet quality API,filters,quality panel,yes,tab,captured
+OLD,/inventory/pricing,preturi,nav Prețuri,admin,Prețuri materiale / adaos,Pricing API,cost;source;markup,tables;edit,yes,pricing,captured
+OLD,/clients,clienti-list,nav Clienți,admin;manager;sales,Registru clienți,Clients API,search;list,open workspace,yes,clients,captured
+OLD,/clients/:clientName,client-workspace,client list,admin;manager;sales,Hub 360 client,clients + commercial,tabbed,header;tabs,yes,client hub,captured
+OLD,/clients/:clientName,client-tab-overview,tab,admin;manager;sales,Sumar client,aggregated,overview,cards,yes,tab,captured
+OLD,/clients/:clientName,client-tab-cereri,tab,admin;manager;sales,Cereri client,intakes,list,links,yes,tab,captured
+OLD,/clients/:clientName,client-tab-oferte,tab,admin;manager;sales,Oferte client,quotes,list,links,yes,tab,captured
+OLD,/clients/:clientName,client-tab-comenzi,tab,admin;manager;sales,Comenzi client,orders,list,links,yes,tab,captured
+OLD,/clients/:clientName,client-tab-timeline,tab,admin;manager;sales,Timeline comercial,linked objects,timeline,events,yes,tab,explained
+OLD,/clients/:clientName,client-tab-facturi,tab,admin;manager;sales,Facturi placeholder,static empty,placeholder,empty,no,placeholder,not-applicable
+OLD,/clients/:clientName,client-tab-documente,tab,admin;manager;sales,Documente placeholder,static,placeholder,empty,no,placeholder,not-applicable
+OLD,/clients/:clientName,client-tab-note,tab,admin;manager;sales,Note placeholder,static,placeholder,empty,no,placeholder,not-applicable
+OLD,/colaboratori,colaboratori,nav Colaboratori,manager;admin,Colaboratori externi,Colaboratori API,list,cards,yes,collaborators,captured
+OLD,/documents,document-center,direct/deep,admin;manager;sales,Centru documente,docs API/mock,filtered list,search;filters,yes,hidden nav,captured
+OLD,/documents,document-detail-drawer,row select,admin;manager;sales,Detaliu document,docs,drawer open,drawer,yes,drawer,explained
+OLD,/reports,rapoarte,nav Rapoarte,admin;manager;sales,Rapoarte comerciale/ops,Reports API,db;mock,metric cards,yes,reports,captured
+OLD,/reports/operational,operational-reports,DEV nav,admin-dev,Rapoarte realitate operațională,operational-reports API,5 tabs,tabs;filters,yes,dev audit,captured
+OLD,/modules,harta-module,nav Harta,admin,Hartă module,static + links,reference,cross-links,yes,admin map,captured
+OLD,/governance,guvernanta,nav Guvernanță,admin,Referință adevăr/politici,governanceData,tabbed,tabs;search,yes,owner surface,captured
+OLD,/governance,gov-tab-ownership,tab,admin,Hartă ownership,static + docs,reference,sections,yes,gov tab,captured
+OLD,/governance,gov-tab-boundaries,tab,admin,Limite sistem,governanceData,reference,cards,yes,gov tab,captured
+OLD,/governance,gov-tab-status-flows,tab,admin,Fluxuri status,governanceData,reference,diagrams,yes,gov tab,explained
+OLD,/governance,gov-tab-agents,tab,admin,Autoritate agenți,governanceData,reference,table,yes,gov tab,explained
+OLD,/governance,gov-tab-truth,tab,admin,Ierarhie adevăr,governanceData,reference,tree,yes,gov tab,captured
+OLD,/governance,gov-tab-gates,tab,admin,Owner gates,governanceData,reference,list,yes,gov tab,captured
+OLD,/governance,gov-tab-guardrails,tab,admin,Guardrails,governanceData,reference,rules,yes,gov tab,explained
+OLD,/governance,gov-tab-products-ref,tab,admin,Catalog referință,productCatalog static,reference,table,yes,gov tab,explained
+OLD,/governance,gov-tab-ui-rules,tab,admin,Reguli UI,uiTruthRules,reference,rules,yes,gov tab,captured
+OLD,/settings,setari-shell,nav Setări,admin,Mega-pagină setări,mixed API,tabbed,tabs,yes,settings,captured
+OLD,/settings,settings-tab-societate,tab Societate,admin,Profil firmă + TVA/FX,static + commercial settings,warning,company;VAT;FX,yes,settings tab,captured
+OLD,/settings,settings-tab-plati-repetitive,tab,admin,Plăți repetitive,recurring-payments API,CRUD,list;edit,yes,settings tab,captured
+OLD,/settings,settings-tab-cost-intern,tab,admin,Config CostEngine,cost-engine API,readonly;edit,CostEngineTab,yes,settings tab,captured
+OLD,/settings,settings-tab-integrari,tab,admin,Integrări,integrations API,health,IntegrationsTab,yes,settings tab,captured
+OLD,(shell),shell-sidebar-drawer,all in-shell,role-filtered,Navigație globală,rbac,collapsed;drawer,nav sections,yes,IA matrix,captured
+OLD,(shell),shell-topbar,all in-shell,authenticated,"Context, search, user",mock alerts,narrow;desktop,search;theme;logout,yes,chrome,captured
+OLD,/employee-app,emp-mobile-v1-home,bottom nav,workforce,Acasă mobil,employee mobile API,blueprint;live,cards,yes,mobile home,captured
+OLD,/employee-app/tasks,emp-mobile-v1-tasks,bottom nav,workforce,Sarcinile mele,operator tasks API,list;empty,list,yes,mobile tasks,captured
+OLD,/employee-app/tasks/orders/:orderId/blueprint,emp-mobile-v1-order-blueprint,task drill,workforce,Blueprint comandă,order API,valid;invalid,blueprint,yes,mobile blueprint,explained
+OLD,/employee-app/personal,emp-mobile-v1-personal,bottom nav,workforce,Hub personal,mixed,hub,links,yes,mobile personal,captured
+OLD,/employee-app/requests,emp-mobile-v1-requests,personal,workforce,Cereri self-service,requests API,tabs,list;create,yes,mobile requests,captured
+OLD,/employee-app/review,emp-mobile-v1-review,bottom nav,manager-mobile,Aprobare cereri,requests API,protected,review,yes,mobile review,captured
+OLD,/employee-app/team,emp-mobile-v1-team,direct,manager-mobile,Echipă,INVESTIGATE,protected,team,yes,INVESTIGATE,captured
+OLD,/employee-app/attendance,emp-mobile-v1-attendance,personal,workforce,Pontaj propriu,attendance API,self-only,panel,yes,mobile attendance,captured
+OLD,/employee-app-v2,emp-mobile-v2-home,bottom nav,workforce,Acasă v2,v2 components,prototype,cards,yes,parallel prototype,captured
+OLD,/employee-app-v2/tasks,emp-mobile-v2-tasks,bottom nav,workforce,Inbox sarcini v2,tasks API,list,cards,yes,v2 tasks,captured
+OLD,/employee-app-v2/tasks/:taskId,emp-mobile-v2-task-detail,task row,workforce,Detaliu sarcină v2,tasks API,detail,actions,yes,v2 task,explained
+OLD,/employee-app-v2/pipeline,emp-mobile-v2-pipeline,home links,workforce,Pipeline v2,INVESTIGATE,prototype,pipeline,yes,INVESTIGATE,captured
+OLD,/employee-app-v2/documents,emp-mobile-v2-documents,home links,workforce,Documente v2,INVESTIGATE,prototype,docs,yes,INVESTIGATE,captured
+OLD,/employee-app-v2/blockers,emp-mobile-v2-blockers,home links,workforce,Blocaje v2,INVESTIGATE,prototype,list,yes,INVESTIGATE,captured
+OLD,/employee-app-v2/upcoming,emp-mobile-v2-upcoming,home links,workforce,Urmează v2,INVESTIGATE,prototype,list,yes,INVESTIGATE,captured
+OLD,/employee-app-v2/personal,emp-mobile-v2-personal-hub,bottom nav,workforce,Personal v2,mixed,subroutes,hub,yes,v2 personal,captured
+OLD,/employee-app-v2/personal/requests,emp-mobile-v2-personal-requests,subnav,workforce,Cereri v2,requests API,self-only,panel,yes,v2 requests,captured
+OLD,/employee-app-v2/personal/attendance,emp-mobile-v2-personal-attendance,subnav,workforce,Pontaj v2,attendance API,self-only,panel,yes,v2 attendance,captured
+OLD,/employee-app-v2/personal/info,emp-mobile-v2-personal-info,subnav,workforce,Info/acces v2,static/API,info,page,yes,v2 info,captured
+OLD,/employee-app-v2/personal/review,emp-mobile-v2-personal-review,subnav,manager-mobile,Review v2,requests API,protected,review,yes,v2 review,captured
+OLD,/intake/:id,intake-legacy-redirect,old bookmark,admin;manager;sales,Redirect V6,redirect,instant,none,no,redirect,not-applicable
+OLD,/pricing,redirect-pricing,legacy,admin,Redirect prețuri,redirect,instant,none,no,redirect,not-applicable
+OLD,/products,redirect-products,legacy,admin;manager;sales,Redirect catalog PS,redirect,instant,none,no,redirect,not-applicable
+OLD,/product-system/components,ps-planned-section,direct only,admin,Secțiune PS planificată,static placeholder,non-operational,back link,no,placeholder,not-applicable
+OLD,/demo/commercial-spine,demo-commercial-spine,DEV nav,admin-dev,Demo spine comercial,demo fixtures,audit,panels,no,dev demo,not-applicable
+OLD,/demo/volumetric-letter-preview,demo-volumetric-preview,DEV nav,admin-dev,Demo preview volumetric,demo,audit,canvas,no,dev demo,not-applicable

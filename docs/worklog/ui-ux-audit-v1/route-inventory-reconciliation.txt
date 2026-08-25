@@ -1,0 +1,34 @@
+SUPERSEDED by docs/worklog/ui-ux-audit-v1/source-to-manifest-reconciliation.md
+This first-pack file was harness-authored. Do not use it for FULL or UNEXPLAINED_ROUTE_GAPS claims.
+
+ROUTES_DISCOVERED=159
+ROUTES_CAPTURE_REQUIRED=147
+ROUTES_CAPTURE_SKIPPED=12
+ROUTES_CAPTURED=132
+ROUTES_BLOCKED=2
+ROUTES_EXPLAINED=15
+UNEXPLAINED_ROUTE_GAPS=0
+OLD_PNG=124
+NEW_PNG=135
+SCREENSHOT_ROWS_KEPT=263
+DUPLICATE_HASH_GROUPS=2
+WITHDRAWN_PII=2
+
+EXPLAINED
+OLD,intake-v6-review-panou-carcasa,Same as finisaje.
+OLD,intake-v6-review-montaj-comercial,Same as finisaje.
+OLD,ps-studio-tab-form-system,Form tab not present on ACM support template studio.
+OLD,ps-studio-tab-general,General tab not present on ACM support template studio.
+OLD,machine-run-detail,Machine-runs list empty in demo; no row to open.
+OLD,tablet-station-queue,Tablet station-select captured; demo cards did not expose a /tablet/:id href.
+OLD,tablet-task-detail,Blocked on missing station queue; same legacy tablet family already captured.
+OLD,client-tab-timeline,Client hub captured; Timeline tab not present as a distinct local tab on Demo Client Alpha.
+OLD,document-detail-drawer,Document center list captured; no table row opened a drawer in demo.
+OLD,gov-tab-status-flows,Governance uses different tab labels; captured Autoritate/Limite/Adevăr/Gates/UI.
+OLD,gov-tab-agents,No Agents tab visible in captured governance.
+OLD,gov-tab-guardrails,Guardrails is not a visible governance tab in this build; Gates/UI captured.
+OLD,gov-tab-products-ref,No products-ref tab visible in captured governance.
+OLD,emp-mobile-v1-order-blueprint,employee-app/personal navigation timed out; same mobile shell already captured.
+OLD,emp-mobile-v2-task-detail,No v2 task row with a distinct detail route in demo.
+
+UNEXPLAINED
