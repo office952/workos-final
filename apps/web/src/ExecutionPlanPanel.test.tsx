@@ -35,6 +35,7 @@ const view: ExecutionPlanView = {
   statusLabel: "Planificat",
   sourceKind: "PILOT",
   sourceKindLabel: "Atelier / test tehnic",
+  jobHref: null,
   actualInternalCost: {
     status: "UNAVAILABLE",
     statusLabel: "Indisponibil",
@@ -166,8 +167,7 @@ describe("ExecutionPlanPanel", () => {
     expect(screen.getByRole("heading", { name: "Blocate" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Urmează" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Necesită configurare atelier" })).not.toBeInTheDocument();
-    expect(screen.getByText("Cost intern planificat: 595,00 EUR (parțial)")).toBeInTheDocument();
-    expect(screen.queryByText("Cost intern real: indisponibil")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Cost intern/)).not.toBeInTheDocument();
     expect(screen.getByText("WORKOS")).toBeInTheDocument();
     expect(screen.getByText("0 / 2 finalizate")).toBeInTheDocument();
     expect(screen.getByText("Fără furnizor: 0")).toBeInTheDocument();
@@ -444,10 +444,8 @@ describe("ExecutionPlanPanel", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Cost intern real: 63,50 EUR (parțial)")).toBeInTheDocument();
-    expect(screen.getByText("Diferență pe costurile disponibile: +1,00 EUR")).toBeInTheDocument();
-    expect(screen.getByText("Modul LED 12V: Cost calculabil")).toBeInTheDocument();
-    expect(screen.getByText("Lipire corp literă: Cost indisponibil")).toBeInTheDocument();
+    expect(screen.queryByText(/Cost intern/)).not.toBeInTheDocument();
+    expect(screen.queryByText("63,50")).not.toBeInTheDocument();
     expect(screen.queryByText("ActualCostProjection")).not.toBeInTheDocument();
   });
 

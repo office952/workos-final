@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -268,10 +269,13 @@ describe("AppShell", () => {
       ["/jobs/ord:1"],
     );
 
-    expect(screen.getByRole("link", { name: "Sari la conținut" })).toHaveAttribute(
-      "href",
-      "#continut-principal",
-    );
+    const skip = screen.getByRole("link", { name: "Sari la conținut" });
+    expect(skip).toHaveAttribute("href", "#continut-principal");
+    const user = userEvent.setup();
+    await user.tab();
+    expect(skip).toHaveFocus();
+    await user.click(skip);
+    expect(document.getElementById("continut-principal")).toHaveFocus();
     expect(screen.getByRole("group", { name: "Temă" })).toBeInTheDocument();
     expect(screen.getByLabelText("Cont")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Lucrări" })).toHaveAttribute(

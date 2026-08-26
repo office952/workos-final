@@ -45,6 +45,7 @@ vi.mock("./productApi", () => ({
       statusLabel: "Planificat",
       sourceKind: "ORDER",
       sourceKindLabel: "Eliberată din comandă",
+      jobHref: "/jobs/ord%3AWORKOS",
       actualInternalCost: {
         status: "UNAVAILABLE",
         statusLabel: "Indisponibil",
@@ -129,10 +130,15 @@ describe("ExecutionWorkspacePage", () => {
     expect(screen.getByText("Litere. Eliberată din comandă.")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Blocate" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "01. Debitare foaie CNC" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Înapoi la lucrare" })).toHaveAttribute(
+      "href",
+      "/jobs/ord%3AWORKOS",
+    );
     expect(screen.getByRole("link", { name: "Înapoi la produs" })).toHaveAttribute(
       "href",
       "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06",
     );
+    expect(screen.getByRole("heading", { name: "Planificat versus realizat" })).toBeInTheDocument();
     expect(screen.queryByText("624,82")).not.toBeInTheDocument();
     expect(screen.queryByText("TVA")).not.toBeInTheDocument();
     expect(screen.queryByText("exp:aps:test")).not.toBeInTheDocument();

@@ -167,6 +167,7 @@ describe("financial access", () => {
       statusLabel: "Planificat",
       sourceKind: "ORDER" as const,
       sourceKindLabel: "Comandă",
+      jobHref: "/jobs/ord%3A1",
       tasks: [],
       actualInternalCost: {
         status: "UNAVAILABLE" as const,

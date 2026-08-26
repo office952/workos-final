@@ -1,5 +1,6 @@
 import type { OperatorTaskInboxProjection } from "@workos-final/domain";
 import type { OperatorSessionOperator } from "./operatorSessionApi";
+import { notifyCloudUnauthorized } from "./sessionExpiryBridge";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -12,6 +13,10 @@ export async function fetchOperatorTaskInbox(): Promise<OperatorTaskInboxRespons
   const response = await fetch(`${baseUrl}/api/operator-task-inbox`, {
     credentials: "include",
   });
+  if (response.status === 401) {
+    notifyCloudUnauthorized();
+    throw new Error("operator_task_inbox_unavailable");
+  }
   if (!response.ok) {
     throw new Error("operator_task_inbox_unavailable");
   }

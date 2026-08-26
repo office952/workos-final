@@ -19,6 +19,10 @@ vi.mock("./OperatorSessionContext", () => ({
   useOperatorSession: () => useOperatorSession(),
 }));
 
+vi.mock("./operatorSessionApi", () => ({
+  fetchOperatorCandidates: () => Promise.resolve([]),
+}));
+
 describe("AtelierPage", () => {
   beforeEach(() => {
     fetchOperatorTaskInbox.mockReset();
@@ -30,6 +34,8 @@ describe("AtelierPage", () => {
     useOperatorSession.mockReturnValue({
       ready: true,
       operator: null,
+      expired: false,
+      identify: vi.fn(),
     });
     render(
       <MemoryRouter>
@@ -39,28 +45,48 @@ describe("AtelierPage", () => {
     expect(
       await screen.findByText("Identifică-te pentru a vedea munca disponibilă."),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("PIN")).toBeInTheDocument();
     expect(fetchOperatorTaskInbox).not.toHaveBeenCalled();
+  });
+
+  it("keeps Cloud context and asks again when the operator session expired", async () => {
+    useOperatorSession.mockReturnValue({
+      ready: true,
+      operator: null,
+      expired: true,
+      identify: vi.fn(),
+    });
+    render(
+      <MemoryRouter>
+        <AtelierPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText(/Sesiunea operatorului a expirat/)).toBeInTheDocument();
+    expect(screen.getByText(/Contul Cloud rămâne deschis/)).toBeInTheDocument();
+    expect(screen.getByLabelText("PIN")).toBeInTheDocument();
   });
 
   it("renders ready work and claims through the existing start API", async () => {
     useOperatorSession.mockReturnValue({
       ready: true,
       operator: {
-        personId: "per:florin",
-        displayName: "Florin CNC",
+        personId: "per:eligible",
+        displayName: "Operator eligibil",
         availability: "AVAILABLE",
       },
+      expired: false,
+      identify: vi.fn(),
     });
     fetchOperatorTaskInbox.mockResolvedValue({
       operator: {
-        personId: "per:florin",
-        displayName: "Florin CNC",
+        personId: "per:eligible",
+        displayName: "Operator eligibil",
         availability: "AVAILABLE",
       },
       inbox: {
         operator: {
-          personId: "per:florin",
-          displayName: "Florin CNC",
+          personId: "per:eligible",
+          displayName: "Operator eligibil",
           availability: "AVAILABLE",
         },
         summary: {
@@ -115,16 +141,20 @@ describe("AtelierPage", () => {
     expect(screen.getByText(/Client A/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pornește" })).toBeInTheDocument();
     expect(screen.getByText(/nu reprezintă programare/)).toBeInTheDocument();
+    const headings = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent);
+    expect(headings.indexOf("Pot porni acum")).toBeLessThan(headings.indexOf("În lucru") === -1 ? headings.length : headings.indexOf("În lucru"));
   });
 
   it("keeps provider-needed work secondary and without Pornește", async () => {
     useOperatorSession.mockReturnValue({
       ready: true,
       operator: {
-        personId: "per:florin",
-        displayName: "Florin CNC",
+        personId: "per:eligible",
+        displayName: "Operator eligibil",
         availability: "AVAILABLE",
       },
+      expired: false,
+      identify: vi.fn(),
     });
     const needsProvider = Array.from({ length: 3 }, (_, index) => ({
       taskId: `task:need:${index}`,
@@ -149,14 +179,14 @@ describe("AtelierPage", () => {
     }));
     fetchOperatorTaskInbox.mockResolvedValue({
       operator: {
-        personId: "per:florin",
-        displayName: "Florin CNC",
+        personId: "per:eligible",
+        displayName: "Operator eligibil",
         availability: "AVAILABLE",
       },
       inbox: {
         operator: {
-          personId: "per:florin",
-          displayName: "Florin CNC",
+          personId: "per:eligible",
+          displayName: "Operator eligibil",
           availability: "AVAILABLE",
         },
         summary: {
@@ -202,16 +232,14 @@ describe("AtelierPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("heading", { name: "Pot porni acum" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Blocate" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pot porni acum" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pornește" })).toBeInTheDocument();
-    const prep = screen.getByText(/Necesită pregătire atelier \(3\)/);
-    expect(prep).toBeInTheDocument();
-    const details = prep.closest("details");
-    expect(details).not.toBeNull();
-    expect(details?.open).toBe(false);
-    expect(
-      screen.getByText("Lipsă utilaj dedicat. Deschide lucrarea pentru alocare — nu din Atelier."),
-    ).toBeInTheDocument();
+    const headings = screen.getAllByRole("heading", { level: 2 }).map((node) => node.textContent);
+    expect(headings.indexOf("Blocate")).toBeLessThan(headings.indexOf("Pot porni acum"));
     expect(screen.getAllByText("Necesită utilaj dedicat înainte de pornire.")).toHaveLength(3);
+    expect(screen.getAllByRole("link", { name: "Deschide lucrarea" })[0]).toHaveClass(
+      "button-quiet",
+    );
   });
 });

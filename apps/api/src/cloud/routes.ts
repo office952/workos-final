@@ -15,7 +15,13 @@ export function registerCloudRoutes(app: Hono<ApiEnv>): void {
     }
     const controlPlane = c.get("controlPlane");
     if (!controlPlane) {
-      return c.json({ mode: "cloud", user: null, organization: null, memberships: [] });
+      return c.json({
+        mode: "cloud",
+        authConfigured: false,
+        user: null,
+        organization: null,
+        memberships: [],
+      });
     }
     const cookie = getCookie(c, CLOUD_SESSION_COOKIE);
     const resolved = controlPlane.resolveSession(cookie);

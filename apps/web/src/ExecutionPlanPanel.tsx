@@ -2,18 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   COMPLETION_NOTE_MAX_LENGTH,
-  type ActualInternalCostLine,
-  type ActualInternalCostProjection,
   type ExecutionPlanView,
   type ExecutionTaskView,
   type PlannedStartBlockReason,
 } from "@workos-final/domain";
-import {
-  formatCostCompleteness,
-  formatMoney,
-  formatQuantity,
-  formatUnit,
-} from "./formatDisplay";
+import { formatQuantity, formatUnit } from "./formatDisplay";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { EmptyState } from "./ui/EmptyState";
@@ -23,11 +16,11 @@ import { Notice } from "./ui/Notice";
 type TaskLane = "next" | "blocked" | "upcoming" | "completed" | "gap";
 
 const LANES: readonly { id: TaskLane; label: string }[] = [
-  { id: "next", label: "Acum / următorul" },
   { id: "blocked", label: "Blocate" },
+  { id: "gap", label: "Necesită configurare atelier" },
+  { id: "next", label: "Acum / următorul" },
   { id: "upcoming", label: "Urmează" },
   { id: "completed", label: "Finalizate" },
-  { id: "gap", label: "Necesită configurare atelier" },
 ];
 
 type ExecutionPlanPanelProps = {
@@ -76,30 +69,6 @@ export function ExecutionPlanPanel({
         </p>
       </header>
       {!canAdminister && hasOwnerAssign ? <OwnerWriteHint /> : null}
-      {"eicTotal" in view.plan && view.plan.eicTotal !== undefined ? (
-        <p className="execution-plan-cost">
-          Cost intern planificat: {formatMoney(view.plan.eicTotal)} {view.plan.eicCurrency}
-          {formatCostCompleteness(view.plan.eicCompleteness)}
-        </p>
-      ) : null}
-      {view.actualInternalCost && view.actualInternalCost.status !== "UNAVAILABLE" ? (
-        <section className="execution-internal-cost" aria-label="Rezumat cost intern">
-          <p className="execution-plan-cost">
-            Cost intern real: {actualCostSummary(view.actualInternalCost)}
-          </p>
-          {view.actualInternalCost.availableDifference !== null ? (
-            <p className="execution-plan-cost">
-              Diferență pe costurile disponibile:{" "}
-              {formatSignedMoney(view.actualInternalCost.availableDifference)}{" "}
-              {view.actualInternalCost.currency}
-            </p>
-          ) : null}
-          <details className="execution-actual-cost-wrap">
-            <summary>Detalii cost real</summary>
-            <ActualInternalCostDetails cost={view.actualInternalCost} />
-          </details>
-        </section>
-      ) : null}
       <ul className="execution-progress metric-row">
         <li>
           {view.progress.completed} / {view.progress.total} finalizate
@@ -118,7 +87,6 @@ export function ExecutionPlanPanel({
         <ul className="execution-plan-meta">
           <li>Produs: {view.plan.productLabel}</li>
           <li>Proveniență: {view.sourceKindLabel}</li>
-          <li>Referință: {view.plan.planId}</li>
         </ul>
       </details>
       {lanes.length === 0 ? (
@@ -484,79 +452,6 @@ function ExecutionTaskCard({
       </details>
     </li>
   );
-}
-
-function ActualInternalCostDetails({ cost }: { cost: ActualInternalCostProjection }) {
-  if (cost.lines.length === 0) {
-    return <p>Nu există încă un cost intern real calculabil.</p>;
-  }
-  const groups = groupActualCostLines(cost.lines);
-  return (
-    <div className="actual-internal-cost-details">
-      {groups.map((group) => (
-        <section key={group.label}>
-          <h5>{group.label}</h5>
-          <ul>
-            {group.lines.map((line) => (
-              <li key={line.resourceId}>
-                <p>
-                  {line.label}: {line.statusLabel}
-                </p>
-                {line.status === "CALCULABLE" ? (
-                  <p>
-                    {formatQuantity(line.actualQuantity ?? 0)} {formatUnit(line.unit)} · tarif{" "}
-                    {formatMoney(line.rate ?? 0)} {line.currency} ·{" "}
-                    {formatMoney(line.actualCost ?? 0)} {line.currency}
-                  </p>
-                ) : (
-                  <p>{line.unavailableReason}</p>
-                )}
-                <p>
-                  {line.quantitySourceLabel}. {line.costSourceLabel}.
-                </p>
-                {line.sourceTaskLabels.length > 0 ? (
-                  <p>Task: {line.sourceTaskLabels.join(", ")}</p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
-  );
-}
-
-function groupActualCostLines(lines: readonly ActualInternalCostLine[]) {
-  const groups = new Map<string, ActualInternalCostLine[]>();
-  for (const line of lines) {
-    const label = line.groupLabel ?? "Alte";
-    const current = groups.get(label) ?? [];
-    current.push(line);
-    groups.set(label, current);
-  }
-  return [...groups.entries()].map(([label, groupLines]) => ({
-    label,
-    lines: groupLines,
-  }));
-}
-
-function actualCostSummary(cost: ActualInternalCostProjection): string {
-  if (cost.status === "UNAVAILABLE" || cost.calculableTotal === null) {
-    return "indisponibil";
-  }
-  const partial = cost.status === "PARTIAL" ? " (parțial)" : "";
-  return `${formatMoney(cost.calculableTotal)} ${cost.currency}${partial}`;
-}
-
-function formatSignedMoney(value: number): string {
-  const labeled = formatMoney(Math.abs(value));
-  if (value > 0) {
-    return `+${labeled}`;
-  }
-  if (value < 0) {
-    return `−${labeled}`;
-  }
-  return labeled;
 }
 
 function taskLane(task: ExecutionTaskView): TaskLane {

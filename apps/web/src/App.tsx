@@ -51,15 +51,26 @@ export function App() {
 }
 
 function AppGate() {
-  const { ready, unavailable, mode, user, organization } = useCloudSession();
+  const {
+    ready,
+    unavailable,
+    mode,
+    user,
+    organization,
+    authConfigured,
+    sessionExpired,
+  } = useCloudSession();
   if (!ready) {
-    return <p className="app-boot">Se încarcă…</p>;
+    return <LoginPage gate="boot" />;
   }
   if (unavailable) {
-    return <p className="app-boot">Sistemul nu răspunde. Reîncearcă.</p>;
+    return <LoginPage gate="network" />;
+  }
+  if (mode === "cloud" && authConfigured === false) {
+    return <LoginPage gate="auth_config_missing" />;
   }
   if (mode === "cloud" && (!user || !organization)) {
-    return <LoginPage />;
+    return <LoginPage gate={sessionExpired ? "session_expired" : "unauthenticated"} />;
   }
   return (
     <OperatorSessionProvider key={organization?.organizationId ?? "single-plane"}>

@@ -272,6 +272,7 @@ export function scopeExecutionPlanView(
     statusLabel: view.statusLabel,
     sourceKind: view.sourceKind,
     sourceKindLabel: view.sourceKindLabel,
+    jobHref: view.jobHref,
     tasks: view.tasks,
   };
   if (access === "owner") {

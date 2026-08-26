@@ -11,8 +11,10 @@ import {
   startExecutionTask,
   type TaskMutationFailure,
 } from "./productApi";
+import { PlannedVersusActual } from "./PlannedVersusActual";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -101,15 +103,19 @@ export function ExecutionWorkspacePage() {
   }
 
   if (page.kind === "loading") {
-    return <p>Se încarcă execuția…</p>;
+    return (
+      <section className="execution-workspace">
+        <PageHeader title="Execuție" lead="Planul de execuție." />
+        <PageStatus kind="loading">Se încarcă execuția…</PageStatus>
+      </section>
+    );
   }
   if (page.kind === "missing") {
     return (
       <section className="execution-workspace">
         <PageHeader title="Execuție" lead="Planul de execuție nu este disponibil." />
-        <p>
-          <Link to="/products">Înapoi la produse</Link>
-          {" · "}
+        <PageStatus kind="missing">Planul cerut nu este disponibil.</PageStatus>
+        <p className="execution-workspace-nav">
           <Link to="/atelier">Înapoi la Atelier</Link>
         </p>
       </section>
@@ -119,9 +125,8 @@ export function ExecutionWorkspacePage() {
     return (
       <section className="execution-workspace">
         <PageHeader title="Execuție" lead="Execuția nu a putut fi încărcată." />
-        <p>
-          <Link to="/products">Înapoi la produse</Link>
-          {" · "}
+        <PageStatus kind="error">Execuția nu a putut fi încărcată.</PageStatus>
+        <p className="execution-workspace-nav">
           <Link to="/atelier">Înapoi la Atelier</Link>
         </p>
       </section>
@@ -147,6 +152,12 @@ export function ExecutionWorkspacePage() {
         }
       />
       <p className="execution-workspace-nav">
+        {view.jobHref ? (
+          <>
+            <Link to={view.jobHref}>Înapoi la lucrare</Link>
+            {" · "}
+          </>
+        ) : null}
         <Link to={`/products/${view.plan.productCode}`}>Înapoi la produs</Link>
         {" · "}
         <Link to="/atelier">Înapoi la Atelier</Link>
@@ -172,6 +183,7 @@ export function ExecutionWorkspacePage() {
           void applyTaskMutation(() => completeExecutionTask(taskId, input))
         }
       />
+      <PlannedVersusActual view={view} />
     </section>
   );
 }

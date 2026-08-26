@@ -117,6 +117,7 @@ describe("persisted execution plan materialization", () => {
     const view = projectExecutionPlanView(record, [], snapshot);
     expect(view.sourceKind).toBe("PILOT");
     expect(view.sourceKindLabel).toBe("Atelier / test tehnic");
+    expect(view.jobHref).toBeNull();
     const placeLed = view.tasks.find((item) => item.processId === PLACE_LED_MODULES_ID);
     const inspect = view.tasks.find((item) => item.processId === INSPECT_FINISHED_LETTER_ID);
     const pack = view.tasks.find((item) => item.processId === PACK_PRODUCT_ID);

@@ -25,6 +25,7 @@ export type CloudSessionMembership = {
 
 export type CloudSessionSnapshot = {
   mode: CloudAccessMode;
+  authConfigured?: boolean;
   user: CloudSessionUser | null;
   organization: CloudSessionOrganization | null;
   memberships: CloudSessionMembership[];
@@ -49,9 +50,10 @@ export async function fetchCloudSession(): Promise<CloudSessionSnapshot> {
   if (!response.ok) {
     throw new Error("cloud_session_unavailable");
   }
-  const body = await readJson<CloudSessionSnapshot>(response);
+  const body = await readJson<CloudSessionSnapshot & { error?: string }>(response);
   return {
     mode: body.mode === "cloud" ? "cloud" : "single_plane",
+    authConfigured: body.authConfigured !== false,
     user: body.user ?? null,
     organization: body.organization ?? null,
     memberships: body.memberships ?? [],
@@ -87,6 +89,7 @@ export async function loginCloud(
     ok: true,
     session: {
       mode: "cloud",
+      authConfigured: true,
       user: body.user,
       organization: body.organization ?? null,
       memberships: body.memberships ?? [],
@@ -118,6 +121,7 @@ export async function switchCloudOrganization(
     ok: true,
     session: {
       mode: "cloud",
+      authConfigured: true,
       user: body.user,
       organization: body.organization ?? null,
       memberships: body.memberships ?? [],

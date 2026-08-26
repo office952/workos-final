@@ -5,16 +5,20 @@ This file keeps **state and direction**. Worklogs keep execution detail. Plans k
 
 ```text
 AUTHORITY         = ACTIVE_V1_DELIVERY
-THIS_BUILD        = FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2
+THIS_BUILD        = FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3
 REAL_CLOUD_RESUME = NOT_AUTHORIZED_BY_THIS_DOCUMENT
-UI_IMPLEMENTATION = WAVE_2_OWNER_ACCEPTED
+UI_IMPLEMENTATION = WAVE_3_OWNER_ACCEPTED
 UI_IMPLEMENTATION_COMPLETE = NO
 FULL_FIRST_HF_LOT_IMPLEMENTED = NO
 HIGH_FIDELITY     = FIRST_LOT_OWNER_ACCEPTED
 WAVE_1_GATE       = CLOSED
 WAVE_2_GATE       = CLOSED
+WAVE_3_GATE       = CLOSED
+WAVE_1            = OWNER_ACCEPTED
 WAVE_2            = OWNER_ACCEPTED
-WAVE_3            = NOT_STARTED
+WAVE_3            = OWNER_ACCEPTED
+FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3 = OWNER_ACCEPTED
+WAVE_4            = NOT_STARTED
 ```
 
 ## Authority
@@ -83,20 +87,24 @@ HIGH_FIDELITY_DESIGN                 = FIRST_LOT_OWNER_ACCEPTED
 FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
 IMPLEMENTATION_READINESS_GATE        = CLOSED
 IMPLEMENTATION_READY                 = YES
-VISIBLE_RUNTIME                      = WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR
-UI_IMPLEMENTATION                    = WAVE_2_OWNER_ACCEPTED
-UI_IMPLEMENTATION_AUTHORIZED         = WAVE_2
+VISIBLE_RUNTIME                      = WAVE_3_CLOUD_ATELIER_EXECUTION_PVA
+UI_IMPLEMENTATION                    = WAVE_3_OWNER_ACCEPTED
+UI_IMPLEMENTATION_AUTHORIZED         = WAVE_3
 FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1 = OWNER_ACCEPTED
 OWNER_FIRST_HF_IMPLEMENTATION_WAVE_1_REVIEW = PASS
 FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2 = OWNER_ACCEPTED
 OWNER_FIRST_HF_IMPLEMENTATION_WAVE_2_REVIEW = PASS
+FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3 = OWNER_ACCEPTED
+OWNER_FIRST_HF_IMPLEMENTATION_WAVE_3_REVIEW = PASS
 OWNER_DECISION                       = ACCEPTED_WITH_ADVISORIES
 WAVE_1_GATE                          = CLOSED
 WAVE_2_GATE                          = CLOSED
+WAVE_3_GATE                          = CLOSED
 UI_IMPLEMENTATION_COMPLETE           = NO
 FULL_FIRST_HF_LOT_IMPLEMENTED         = NO
 WAVE_2                               = OWNER_ACCEPTED
-WAVE_3                               = NOT_STARTED
+WAVE_3                               = OWNER_ACCEPTED
+WAVE_4                               = NOT_STARTED
 PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 ```
 
@@ -117,8 +125,8 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 ```text
 TARGET_MILESTONE  = HUB_MEDIA_CLEAN_PILOT
 CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP      = FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2
-NEXT_STEP         = FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_OWNER_GO
+CURRENT_STEP      = FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3
+NEXT_STEP         = FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_OWNER_GO
 HIGH_FIDELITY     = FIRST_LOT_OWNER_ACCEPTED
 FIRST_HF_LOT_SCREEN_DESIGN = OWNER_ACCEPTED
 OWNER_FIRST_HF_LOT_REVIEW = COMPLETE
@@ -131,19 +139,23 @@ FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1 = OWNER_ACCEPTED
 OWNER_FIRST_HF_IMPLEMENTATION_WAVE_1_REVIEW = PASS
 FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2 = OWNER_ACCEPTED
 OWNER_FIRST_HF_IMPLEMENTATION_WAVE_2_REVIEW = PASS
+FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3 = OWNER_ACCEPTED
+OWNER_FIRST_HF_IMPLEMENTATION_WAVE_3_REVIEW = PASS
 OWNER_DECISION    = ACCEPTED_WITH_ADVISORIES
 WAVE_1_GATE       = CLOSED
 WAVE_2_GATE       = CLOSED
-VISIBLE_RUNTIME   = WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR
-UI_IMPLEMENTATION = WAVE_2_OWNER_ACCEPTED
+WAVE_3_GATE       = CLOSED
+VISIBLE_RUNTIME   = WAVE_3_CLOUD_ATELIER_EXECUTION_PVA
+UI_IMPLEMENTATION = WAVE_3_OWNER_ACCEPTED
 UI_IMPLEMENTATION_COMPLETE = NO
 FULL_FIRST_HF_LOT_IMPLEMENTED = NO
-UI_IMPLEMENTATION_AUTHORIZED = WAVE_2
+UI_IMPLEMENTATION_AUTHORIZED = WAVE_3
 WAVE_2            = OWNER_ACCEPTED
-WAVE_3            = NOT_STARTED
+WAVE_3            = OWNER_ACCEPTED
+WAVE_4            = NOT_STARTED
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. It does not implement the entire first lot. Wave 3 is not started. The next sequence step is `FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_OWNER_GO`.
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. It does not implement the entire first lot. Wave 4 is not started. The next sequence step is `FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_OWNER_GO`.
 
 Implementation reports fill:
 
@@ -152,7 +164,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_STEP         = <current next sequence step>
 ```
 
-`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner accept of Wave 2, that value is `FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_OWNER_GO`. Contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Wave 2 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR_V1.md`.
+`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After this Wave 3 accept, that value is `FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_OWNER_GO`. That later Owner GO is not started here. Contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Wave 2 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR_V1.md`. Wave 3 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_V1.md`.
 
 Target flow:
 
@@ -187,7 +199,7 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 5. FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE = OWNER_ACCEPTED
 6. OWNER_VISUAL_ACCEPTANCE           = FIRST_LOT_CLOSED
 6a. IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
-7. SCOPED_UI_IMPLEMENTATION          = WAVE_2_OWNER_ACCEPTED
+7. SCOPED_UI_IMPLEMENTATION          = WAVE_3_OWNER_ACCEPTED
 8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = NOT_STARTED
 9. FIRST_REAL_LETTERS_JOB            = NOT_STARTED
 10. PLANNED_VS_ACTUAL_OWNER_SIGN_OFF = NOT_STARTED
@@ -207,11 +219,11 @@ Step 1 established the living canons and governance pointers. Step 2 recovered t
 
 `FIRST_HF_LOT_SCREEN_DESIGN` is `OWNER_ACCEPTED`. The first lot is drawn in Figma on pages 12–21, in direction A, with Lucide plus WorkOS custom icons and a same-page E2E prototype. Job detail and quote inspection are in the lot. Their URL and money contracts are `OWNER_ACCEPTED` in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`: `/jobs/:jobId`, `/quotes/:quoteSnapshotId`, `MONEY_POLICY = ALT_B_SCOPED`. Execution detail lives in `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md`. This file does not authorize React/CSS, Mobbin, or a production component library.
 
-Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 is `OWNER_ACCEPTED` with advisories. It does not complete the first lot or authorize Wave 3 or steps 8–10. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
+Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 is `OWNER_ACCEPTED` with advisories. Wave 3 is `OWNER_ACCEPTED` with advisories and does not complete the first lot or authorize Wave 4 or steps 8–10. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
 
 Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
 
-Do not start Wave 3 or steps 8–10 from this document. The next named step is `FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_OWNER_GO`.
+Do not start Wave 4 or steps 8–10 from this document. The next named step is `FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_OWNER_GO`.
 
 ## Real Cloud recovery
 

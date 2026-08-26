@@ -200,6 +200,7 @@ export type ExecutionPlanView = {
   statusLabel: string;
   sourceKind: ExecutionSourceKind;
   sourceKindLabel: string;
+  jobHref: string | null;
   tasks: readonly ExecutionTaskView[];
   actualInternalCost: ActualInternalCostProjection;
 };
@@ -388,9 +389,18 @@ export function projectExecutionPlanView(
     statusLabel: executionProgressStatusLabel(progress.status),
     sourceKind,
     sourceKindLabel: executionSourceKindLabel(sourceKind),
+    jobHref: executionJobHref(snapshot),
     tasks,
     actualInternalCost: projectActualInternalCost(record, snapshot),
   };
+}
+
+function executionJobHref(snapshot: AcceptedProductionSnapshot | null): string | null {
+  const orderSnapshotId = snapshot?.sourceOrderSnapshotId?.trim();
+  if (!orderSnapshotId) {
+    return null;
+  }
+  return `/jobs/${encodeURIComponent(orderSnapshotId)}`;
 }
 
 function executionSourceKind(

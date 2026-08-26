@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { CANONICAL_PRODUCT_CODE, MCH_CNC_4020_ID } from "@workos-final/domain";
+import { CANONICAL_PRODUCT_CODE, collectFinancialKeys, MCH_CNC_4020_ID } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import {
@@ -125,6 +125,10 @@ describe("GET /api/operator-task-inbox", () => {
     ).map((item) => item.inscription);
     expect(florinReady.sort()).toEqual(["INBOX-A", "INBOX-B"]);
     expect((florinInbox.operator as JsonObject).displayName).toBe("Florin CNC");
+    const inboxKeys = collectFinancialKeys(florinInbox);
+    expect(inboxKeys.has("eicTotal")).toBe(false);
+    expect(inboxKeys.has("grossPrice")).toBe(false);
+    expect(inboxKeys.has("actualInternalCost")).toBe(false);
 
     const calinCookie = await sessionCookieViaHttp(app, calin.personId, "135791");
     const calinInbox = await readBody(

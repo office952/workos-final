@@ -1,3 +1,5 @@
+import { notifyCloudUnauthorized } from "./sessionExpiryBridge";
+
 export class FetchAccessError extends Error {
   readonly status: number;
 
@@ -9,7 +11,11 @@ export class FetchAccessError extends Error {
 }
 
 export function throwIfListFailed(response: Response, fallback: string): void {
-  if (response.status === 401 || response.status === 403) {
+  if (response.status === 401) {
+    notifyCloudUnauthorized();
+    throw new FetchAccessError(response.status, "forbidden");
+  }
+  if (response.status === 403) {
     throw new FetchAccessError(response.status, "forbidden");
   }
   if (!response.ok) {

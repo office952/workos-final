@@ -1,6 +1,9 @@
 import { PLEXIGLAS_3MM_OPAL_ID } from "@workos-final/domain";
+import { Hono } from "hono";
 import { afterEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
+import type { ApiEnv } from "../src/cloud/context.js";
+import { registerCloudRoutes } from "../src/cloud/routes.js";
 import { resetCloudLoginAttemptGuard } from "../src/cloud/controlPlane.js";
 import {
   addOrganization,
@@ -18,6 +21,23 @@ afterEach(() => {
 });
 
 describe("Cloud auth and authorization", () => {
+  it("reports Cloud auth as unconfigured when the control plane is missing", async () => {
+    const app = new Hono<ApiEnv>();
+    app.use("/api/*", async (c, next) => {
+      c.set("accessMode", "cloud");
+      await next();
+    });
+    registerCloudRoutes(app);
+    const session = await app.request("/api/cloud/session");
+    expect(session.status).toBe(200);
+    await expect(session.json()).resolves.toMatchObject({
+      mode: "cloud",
+      authConfigured: false,
+      user: null,
+      organization: null,
+    });
+  });
+
   it("keeps single-plane session public and login disabled", async () => {
     const app = createApp();
     const session = await app.request("/api/cloud/session");

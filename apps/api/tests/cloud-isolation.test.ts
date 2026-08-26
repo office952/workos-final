@@ -473,4 +473,38 @@ describe("Cloud two-organization hostile isolation", () => {
       world.fixture.close();
     }
   });
+
+  it("clears OperatorSession on Cloud logout", async () => {
+    const world = await provisionHostileIsolationWorld();
+    try {
+      const { fixture, alpha, cookies } = world;
+      const identify = await fixture.app.request("/api/operator-session", {
+        method: "POST",
+        headers: cookieHeader(cookies.userCAlpha),
+        body: JSON.stringify({ personId: alpha.personId, pin: ALPHA_PIN }),
+      });
+      expect(identify.status).toBe(200);
+      const operatorLine = identify.headers
+        .getSetCookie()
+        .find((item) => item.startsWith(`${OPERATOR_SESSION_COOKIE}=`));
+      const operatorCookie = operatorLine?.split(";", 1)[0] ?? "";
+      const loggedOut = await fixture.app.request("/api/cloud/logout", {
+        method: "POST",
+        headers: { cookie: `${cookies.userCAlpha}; ${operatorCookie}` },
+      });
+      expect(loggedOut.status).toBe(200);
+      const replay = await fixture.app.request("/api/operator-session", {
+        headers: { cookie: operatorCookie },
+      });
+      expect(replay.status).toBe(401);
+      const replayBody = (await replay.json()) as {
+        operator?: { personId: string } | null;
+        error?: string;
+      };
+      expect(replayBody.operator ?? null).toBeNull();
+      expect(replayBody.error).toBe("invalid_session");
+    } finally {
+      world.fixture.close();
+    }
+  });
 });

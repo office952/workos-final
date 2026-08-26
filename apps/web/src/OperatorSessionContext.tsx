@@ -21,6 +21,7 @@ type OperatorSessionState = {
   ready: boolean;
   operator: OperatorSessionOperator | null;
   session: OperatorSessionInfo | null;
+  expired: boolean;
   identify: (
     personId: string,
     pin: string,
@@ -43,14 +44,39 @@ export function OperatorSessionProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [operator, setOperator] = useState<OperatorSessionOperator | null>(null);
   const [session, setSession] = useState<OperatorSessionInfo | null>(null);
+  const [expired, setExpired] = useState(false);
+  const hadOperator = useRef(false);
   const devAutoAttempted = useRef(false);
+
+  const applyOperator = useCallback(
+    (
+      current: {
+        operator: OperatorSessionOperator | null;
+        session: OperatorSessionInfo | null;
+      },
+    ) => {
+      const expiredSession =
+        current.session !== null && Date.parse(current.session.expiresAt) <= Date.now();
+      if (expiredSession) {
+        setExpired(true);
+        setOperator(null);
+        setSession(null);
+        hadOperator.current = false;
+        return;
+      }
+      setExpired(false);
+      setOperator(current.operator);
+      setSession(current.session);
+      hadOperator.current = Boolean(current.operator);
+    },
+    [],
+  );
 
   const refresh = useCallback(async () => {
     const current = await fetchOperatorSession();
-    setOperator(current.operator);
-    setSession(current.session);
+    applyOperator(current);
     setReady(true);
-  }, []);
+  }, [applyOperator]);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,8 +87,7 @@ export function OperatorSessionProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (current.operator) {
-          setOperator(current.operator);
-          setSession(current.session);
+          applyOperator(current);
           setReady(true);
           return;
         }
@@ -106,12 +131,34 @@ export function OperatorSessionProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [applyOperator]);
+
+  useEffect(() => {
+    if (!session?.expiresAt) {
+      return;
+    }
+    const remainingMs = Date.parse(session.expiresAt) - Date.now();
+    if (!Number.isFinite(remainingMs)) {
+      return;
+    }
+    if (remainingMs <= 0) {
+      applyOperator({ operator, session });
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      applyOperator({ operator: null, session });
+    }, remainingMs);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [applyOperator, operator, session]);
 
   useEffect(() => {
     if (!organizationId) {
       return;
     }
+    hadOperator.current = false;
+    setExpired(false);
     setOperator(null);
     setSession(null);
     void refresh();
@@ -122,20 +169,24 @@ export function OperatorSessionProvider({ children }: { children: ReactNode }) {
     if (!result.ok) {
       return result;
     }
+    setExpired(false);
     setOperator(result.operator);
     setSession(result.session);
+    hadOperator.current = true;
     return { ok: true as const };
   }, []);
 
   const logout = useCallback(async () => {
     await logoutOperator();
+    hadOperator.current = false;
+    setExpired(false);
     setOperator(null);
     setSession(null);
   }, []);
 
   return (
     <OperatorSessionContext.Provider
-      value={{ ready, operator, session, identify, logout, refresh }}
+      value={{ ready, operator, session, expired, identify, logout, refresh }}
     >
       {children}
     </OperatorSessionContext.Provider>

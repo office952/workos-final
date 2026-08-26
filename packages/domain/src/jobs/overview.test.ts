@@ -178,6 +178,7 @@ function planView(
     statusLabel: status === "COMPLETED" ? "Finalizat" : status === "IN_PROGRESS" ? "În lucru" : "Planificat",
     sourceKind: "ORDER",
     sourceKindLabel: "Eliberată din comandă",
+    jobHref: "/jobs/ord%3AWORKOS",
     actualInternalCost: {
       status: "UNAVAILABLE",
       statusLabel: "Indisponibil",

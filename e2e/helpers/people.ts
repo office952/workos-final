@@ -107,6 +107,16 @@ export async function identifyTestExecutorOnPage(
   if (await page.getByRole("button", { name: "Ieși" }).isVisible()) {
     return;
   }
+  const pagePin = page.locator("form.operator-identify-form").getByLabel("PIN");
+  if (await pagePin.count()) {
+    await page.locator("form.operator-identify-form").getByLabel("Persoană").selectOption({
+      label: displayName,
+    });
+    await pagePin.fill(pin);
+    await page.locator("form.operator-identify-form").getByRole("button", { name: "Confirmă" }).click();
+    await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
+    return;
+  }
   await page.getByRole("button", { name: "Identifică-te" }).click();
   await page.getByLabel("Persoană").selectOption({ label: displayName });
   await page.getByRole("textbox", { name: "PIN" }).fill(pin);

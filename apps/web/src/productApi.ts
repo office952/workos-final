@@ -15,7 +15,9 @@ import type {
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
+import { fetchCloudSession } from "./cloudSessionApi";
 import { throwIfListFailed } from "./fetchAccess";
+import { notifyCloudUnauthorized } from "./sessionExpiryBridge";
 
 export type TemplateProjection = {
   template: ProductTemplate;
@@ -30,6 +32,17 @@ export function quoteDocumentUrl(productCode: string, quoteSnapshotId: string): 
 
 async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
+}
+
+async function expireCloudSessionIfGone(): Promise<void> {
+  try {
+    const session = await fetchCloudSession();
+    if (session.mode === "cloud" && !session.user) {
+      notifyCloudUnauthorized();
+    }
+  } catch {
+    // Keep the current surface if the session probe fails.
+  }
 }
 
 export async function fetchProductCatalog(): Promise<CatalogTreeNode[]> {
@@ -490,6 +503,10 @@ export async function readExecutionPlanById(
   const response = await fetch(`${baseUrl}/api/execution-plans/${planId}`, {
     credentials: "include",
   });
+  if (response.status === 401) {
+    notifyCloudUnauthorized();
+    throw new Error("execution_plan_unavailable");
+  }
   if (response.status === 404) {
     return null;
   }
@@ -596,6 +613,9 @@ async function postTaskMutation(
     error?: string;
     startedBy?: { personId: string; displayName: string };
   }>(response);
+  if (response.status === 401) {
+    await expireCloudSessionIfGone();
+  }
   if (!response.ok || !payload.executionPlan) {
     return {
       ok: false,

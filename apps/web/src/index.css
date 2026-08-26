@@ -88,13 +88,20 @@ body {
   top: 0.75rem;
   z-index: 60;
   transform: translateY(-220%);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
   padding: 0.65rem 0.9rem;
   background: var(--action-primary);
   color: var(--action-on-primary);
   border-radius: var(--radius-m);
 }
 
-.skip-link:focus {
+.skip-link:focus,
+.skip-link:focus-visible {
   transform: none;
 }
 
@@ -491,6 +498,23 @@ body {
   display: grid;
   place-items: center;
   padding: 1.5rem;
+  background: var(--surface-canvas);
+}
+
+.login-page {
+  align-content: start;
+  justify-items: center;
+  gap: 1rem;
+}
+
+.login-utilities {
+  width: min(24rem, 100%);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.login-main {
+  width: min(24rem, 100%);
 }
 
 .login-card {
@@ -506,6 +530,11 @@ body {
 .login-card h1 {
   margin: 0;
   font-size: 1.25rem;
+}
+
+.login-card button[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 :focus-visible {
@@ -924,6 +953,17 @@ button:disabled {
   border-color: var(--border);
 }
 
+a.button-quiet {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.45rem 0.8rem;
+  text-decoration: none;
+}
+
 a.button-link {
   display: inline-flex;
   align-items: center;
@@ -951,6 +991,16 @@ a.button-link.button-secondary {
 
 .execution-workspace-nav {
   margin: 0 0 0.75rem;
+}
+
+.execution-workspace-nav a,
+.execution-lane a {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.25rem 0.35rem;
 }
 
 .execution-lane {
@@ -2402,6 +2452,70 @@ a.jobs-customer {
   gap: 0.35rem;
   justify-content: flex-end;
   align-items: center;
+}
+
+.atelier-task-actions .button-link,
+.atelier-task-actions .button-quiet,
+.atelier-task-actions button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.operator-identify-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.operator-identify-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.operator-identify-actions button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.pva-panel {
+  margin: 1.5rem 0 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pva-table-wrap {
+  overflow-x: auto;
+}
+
+.pva-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 36rem;
+}
+
+.pva-table th,
+.pva-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.pva-table th[scope="col"] {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.pva-op {
+  display: block;
+  font-weight: 650;
+}
+
+.pva-op-meta {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 400;
 }
 
 .atelier-block-reason {
