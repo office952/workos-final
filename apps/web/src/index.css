@@ -1007,7 +1007,7 @@ a.button-link.button-secondary {
   margin: 1rem 0 0;
 }
 
-.execution-lane h4 {
+.execution-lane h3 {
   margin: 0 0 0.45rem;
   font-size: 1rem;
 }
@@ -1532,7 +1532,7 @@ a.button-link.button-secondary {
   margin-top: 0.85rem;
 }
 
-.owner-catalog-section h4 {
+.owner-catalog-section-title {
   margin: 0 0 0.4rem;
   font-size: 0.95rem;
 }
@@ -1564,7 +1564,8 @@ a.button-link.button-secondary {
 }
 
 .owner-catalog-detail details summary,
-.people-list details summary {
+.people-list details summary,
+.people-admin details summary {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -1677,7 +1678,7 @@ details summary {
   gap: 0.45rem 0.85rem;
 }
 
-.execution-plan-head h3 {
+.execution-plan-head h2 {
   margin: 0;
 }
 
@@ -1693,7 +1694,14 @@ details summary {
   font-weight: 500;
 }
 
+.execution-plan-meta-wrap summary,
+.task-details summary,
 .execution-actual-cost-wrap summary {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
   cursor: pointer;
 }
 

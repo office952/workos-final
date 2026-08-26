@@ -221,16 +221,36 @@ function CatalogDetail({
                   <SectionBody section={section} />
                 </details>
               ) : (
-                <div key={section.id} className="owner-catalog-section">
-                  <h4>{section.title}</h4>
-                  <SectionBody section={section} />
-                </div>
+                <CatalogSection
+                  key={section.id}
+                  title={section.title}
+                  headingLevel={hideChrome ? "h3" : "h4"}
+                  section={section}
+                />
               ),
             )}
           </div>
         );
       })}
     </article>
+  );
+}
+
+function CatalogSection({
+  title,
+  headingLevel,
+  section,
+}: {
+  title: string;
+  headingLevel: "h3" | "h4";
+  section: CatalogItem["groups"][number]["sections"][number];
+}) {
+  const Heading = headingLevel;
+  return (
+    <div className="owner-catalog-section">
+      <Heading className="owner-catalog-section-title">{title}</Heading>
+      <SectionBody section={section} />
+    </div>
   );
 }
 

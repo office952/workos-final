@@ -75,6 +75,7 @@ describe("OwnerCatalogView", () => {
     await user.click(screen.getByRole("button", { name: "Resurse" }));
     expect(screen.getByRole("heading", { name: "Foaie", level: 2 })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Foaie", level: 3 })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Notă", level: 3 })).toBeInTheDocument();
     expect(screen.getByText("doar test")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Față" })).not.toBeInTheDocument();
   });

@@ -62,7 +62,7 @@ export function ExecutionPlanPanel({
   return (
     <div className="execution-plan">
       <header className="execution-plan-head">
-        <h3>{reused ? "Plan de execuție deja creat" : "Plan de execuție"}</h3>
+        <h2>{reused ? "Plan de execuție deja creat" : "Plan de execuție"}</h2>
         <p className="execution-plan-product">{view.plan.inscription}</p>
         <p className={`task-status status-chip ${statusTone(view.statusLabel)}`}>
           Stare: {view.statusLabel}
@@ -98,7 +98,7 @@ export function ExecutionPlanPanel({
             className={`execution-lane${lane.id === "gap" ? " is-quiet" : ""}`}
             aria-labelledby={`execution-lane-${lane.id}`}
           >
-            <h4 id={`execution-lane-${lane.id}`}>{lane.label}</h4>
+            <h3 id={`execution-lane-${lane.id}`}>{lane.label}</h3>
             <ol className="production-ops">
               {lane.tasks.map((task) => (
                 <ExecutionTaskCard

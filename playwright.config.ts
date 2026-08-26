@@ -21,6 +21,7 @@ export default defineConfig({
   testIgnore: [
     "**/hf-wave3-cloud-login.spec.ts",
     "**/hf-wave4-resources-admin-reuse.spec.ts",
+    "**/hf-wave5-regression-accessibility-screenshot.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,

@@ -125,7 +125,9 @@ export function PersonAdminPage() {
   return (
     <section className="people-admin">
       <p>
-        <Link to="/admin/people">← Oameni</Link>
+        <Link className="button-quiet" to="/admin/people">
+          ← Oameni
+        </Link>
       </p>
       <AdminDomainLinks current="people" />
       <PeopleAdminNav />
