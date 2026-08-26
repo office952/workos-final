@@ -22,6 +22,7 @@ export default defineConfig({
     "**/hf-wave3-cloud-login.spec.ts",
     "**/hf-wave4-resources-admin-reuse.spec.ts",
     "**/hf-wave5-regression-accessibility-screenshot.spec.ts",
+    "**/architecture-c-wave1-resources.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,

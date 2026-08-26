@@ -25,6 +25,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(
     page.getByRole("heading", { name: "Resurse și cost intern" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: /Familie\s+Plexiglas/ }).click();
   await expect(page.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeVisible();
   await expect(
     page.getByText(
@@ -46,7 +47,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(page.getByText("Confirmat de owner").first()).toBeVisible();
   await expect(page.getByText("Folosit de")).toBeVisible();
   await expect(page.getByText(/Față \/ Plexiglas/)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Editează" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Confirmă tarif" })).toHaveCount(0);
   await expect(page.getByText("plexiglas_3mm_opal")).not.toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-home.png",
@@ -127,6 +128,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(page.getByText("9,00 EUR / m²")).toBeVisible();
 
   await page.getByRole("button", { name: "Servicii" }).click();
+  await page.getByRole("button", { name: /Formare profil aluminiu/ }).click();
   await expect(
     page.getByRole("heading", { name: "Formare profil aluminiu" }).first(),
   ).toBeVisible();
@@ -183,6 +185,7 @@ test("resources admin inspects material family specification and cost", async ({
   });
 
   await page.getByRole("button", { name: "Manoperă" }).click();
+  await page.getByRole("button", { name: /Aplicare folie față/ }).click();
   await expect(page.getByRole("heading", { name: "Aplicare folie față" }).first()).toBeVisible();
   await expect(page.getByText("Rețetă manoperă").first()).toBeVisible();
   await expect(page.getByText("Default de dezvoltare").first()).toBeVisible();
@@ -209,10 +212,10 @@ test("resources admin inspects material family specification and cost", async ({
   });
 
   await page.getByRole("button", { name: "Dovezi de cost" }).click();
+  await page.getByRole("button", { name: /Plexiglas 3 mm opal/ }).click();
   await expect(page.getByText("Dovadă de cost intern").first()).toBeVisible();
   await expect(page.getByText("3,00 EUR / m · adâncime 60 mm").first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Editează" })).toBeVisible();
-  await page.getByRole("button", { name: /Plexiglas 3 mm opal/ }).click();
+  await expect(page.getByRole("button", { name: "Confirmă tarif" })).toBeVisible();
   await expect(page.getByText("16,00 EUR / m²").first()).toBeVisible();
   await expect(page.getByText("Achiziție confirmată de owner").first()).toBeVisible();
   await expect(page.getByText("Confirmat de owner").first()).toBeVisible();
@@ -226,11 +229,12 @@ test("resources admin inspects material family specification and cost", async ({
   });
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/admin/resources");
+  await page.goto("/admin/resources?selected=family:PLEXIGLAS");
   await expect(
     page.getByRole("heading", { name: "Resurse și cost intern" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Materiale" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Secțiuni" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Alege elementul" })).toBeVisible();
   await expect(page.getByText("16,00 EUR / m²")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-narrow.png",

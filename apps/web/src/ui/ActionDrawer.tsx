@@ -86,8 +86,13 @@ export function ActionDrawer({
       >
         <header className="action-drawer-header">
           <h2 id={titleId}>{title}</h2>
-          <button type="button" className="button-quiet" onClick={onClose}>
-            Închide
+          <button
+            type="button"
+            className="button-quiet action-drawer-close"
+            aria-label="Închide"
+            onClick={onClose}
+          >
+            <span aria-hidden="true">×</span>
           </button>
         </header>
         <div className="action-drawer-body">{children}</div>

@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { setTheme } from "./helpers/account";
 import { createCommercialOrder, createCommercialPlan, releaseCommercialOrder, uniqueJobInscription } from "./helpers/jobs";
 import { createCommercialQuote, uniqueQuoteInscription } from "./helpers/quotes";
 
@@ -57,20 +58,21 @@ test("stable job and quote routes refresh, theme and responsive shell", async ({
   await page.setViewportSize({ width: 768, height: 1024 });
   await expect(page.getByRole("group", { name: "Utilitare" })).toBeVisible();
   await expect(page.getByLabel("Cont", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Administrare" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Navigare principală" })).toBeHidden();
   await page.screenshot({ path: shot("job-768-light"), fullPage: true });
 
-  await page.getByRole("button", { name: "Întunecată" }).click();
+  await setTheme(page, "Întunecată");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.screenshot({ path: shot("job-1440-dark"), fullPage: true });
 
   await page.goto(`/quotes/${encodeURIComponent(quote.quoteSnapshotId)}`);
   await page.screenshot({ path: shot("quote-1440-dark"), fullPage: true });
-  await page.getByRole("button", { name: "Deschisă" }).click();
+  await setTheme(page, "Deschisă");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.screenshot({ path: shot("quote-1440-light"), fullPage: true });
-  await page.getByRole("button", { name: "Sistem" }).click();
+  await setTheme(page, "Sistem");
   await expect(page.locator("html")).toHaveAttribute("data-theme-choice", "system");
 
   await page.getByRole("link", { name: "WorkOS Final" }).focus();

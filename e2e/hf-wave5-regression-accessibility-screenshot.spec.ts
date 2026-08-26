@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { logoutCloudFromMenu, openAccountMenu, setTheme as setAccountTheme } from "./helpers/account";
 
 const authPath = resolve(process.cwd(), ".tmp/hf-wave3-review/cloud/owner-auth.txt");
 const evidenceDir = resolve(process.cwd(), ".tmp/hf-wave5-owner-review-evidence");
@@ -65,17 +66,9 @@ function shot(name: string): string {
 
 async function redactSecrets(page: Page): Promise<void> {
   await page.evaluate(() => {
-    const chip = document.querySelector('[aria-label="Organizație curentă"]');
-    if (chip) {
-      const account = [...chip.querySelectorAll(".utility-truncate")].find((node) =>
-        (node.textContent ?? "").includes("Cont:"),
-      );
-      if (account) {
-        account.setAttribute("title", "Cont: [redactat]");
-        const strong = account.querySelector("strong");
-        if (strong) {
-          strong.textContent = "[redactat]";
-        }
+    for (const strong of document.querySelectorAll(".identity-menu-name strong")) {
+      if ((strong.textContent ?? "").includes("@")) {
+        strong.textContent = "[redactat]";
       }
     }
     for (const input of document.querySelectorAll("input")) {
@@ -111,7 +104,7 @@ async function loginOwner(page: Page, path = "/admin/resources"): Promise<void> 
 }
 
 async function setTheme(page: Page, choice: "Deschisă" | "Întunecată" | "Sistem"): Promise<void> {
-  await page.getByRole("button", { name: choice }).click();
+  await setAccountTheme(page, choice);
   const resolved =
     choice === "Deschisă" ? "light" : choice === "Întunecată" ? "dark" : undefined;
   if (resolved) {
@@ -371,7 +364,7 @@ test.describe("Wave 5 first HF lot regression accessibility screenshots", () => 
     await page.reload();
     await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Ieși din cont" }).click();
+    await logoutCloudFromMenu(page);
     await expect(page.getByRole("heading", { name: "Autentificare" })).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/resources/);
 
@@ -405,7 +398,9 @@ test.describe("Wave 5 first HF lot regression accessibility screenshots", () => 
     await setTheme(page, "Deschisă");
     await expect(page.getByRole("link", { name: "WorkOS Final" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Navigare principală" })).toBeVisible();
-    await expect(page.getByLabel("Organizație curentă")).toBeVisible();
+    await openAccountMenu(page);
+    await expect(page.getByRole("dialog", { name: "Datele contului" })).toBeVisible();
+    await page.keyboard.press("Escape");
     await expect(page.getByRole("button", { name: "Identifică-te" })).toBeVisible();
     await record("02-shell-authenticated-light-1440.png");
     await expectAccessible(page);
@@ -477,7 +472,7 @@ test.describe("Wave 5 first HF lot regression accessibility screenshots", () => 
     await page.goto("/system");
     await expect(page.getByRole("heading").first()).toBeVisible();
 
-    await page.goto("/admin/resources", { waitUntil: "domcontentloaded" });
+    await page.goto("/admin/resources?selected=family:PLEXIGLAS", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: /Resurse/ })).toBeVisible({
       timeout: 20_000,
     });

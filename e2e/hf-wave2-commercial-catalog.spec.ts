@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { setTheme } from "./helpers/account";
 import { createCommercialOrder, uniqueJobInscription } from "./helpers/jobs";
 import { createCommercialQuote, uniqueQuoteInscription } from "./helpers/quotes";
 import {
@@ -122,7 +123,7 @@ test("commercial catalog configurator reaches a stable job", async ({ page, requ
   await page.screenshot({ path: shot("768-configurator"), fullPage: true });
 
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.getByRole("button", { name: "Întunecată" }).click();
+  await setTheme(page, "Întunecată");
   await page.goto("/quotes");
   await expect(page.getByRole("heading", { name: "Oferte" })).toBeVisible();
   await page.screenshot({ path: shot("dark-commercial"), fullPage: true });
@@ -132,9 +133,9 @@ test("commercial catalog configurator reaches a stable job", async ({ page, requ
   await page.goto(`/products/${CANONICAL_LETTERS_PRODUCT_CODE}`);
   await expect(page.getByRole("heading", { name: "Rezumat" })).toBeVisible();
   await page.screenshot({ path: shot("dark-configurator"), fullPage: true });
-  await page.getByRole("button", { name: "Deschisă" }).click();
+  await setTheme(page, "Deschisă");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("button", { name: "Sistem" }).click();
+  await setTheme(page, "Sistem");
   await expect(page.locator("html")).toHaveAttribute("data-theme-choice", "system");
 
   const leaked = await page.evaluate((keys) => {

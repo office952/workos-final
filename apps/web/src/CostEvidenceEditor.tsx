@@ -104,7 +104,7 @@ export function CostEvidenceEditor({ evidence, onSaved }: CostEvidenceEditorProp
           {error ? <p className="status-bad">{error}</p> : null}
           <div className="action-row">
             <button type="button" onClick={() => void save()} disabled={saving}>
-              Salvează
+              Confirmă tarif
             </button>
             <button
               type="button"
@@ -138,7 +138,7 @@ export function CostEvidenceEditor({ evidence, onSaved }: CostEvidenceEditorProp
           {error ? <p className="status-bad">{error}</p> : null}
           <div className="action-row">
             <button type="button" onClick={startEdit}>
-              Editează
+              Confirmă tarif
             </button>
           </div>
         </>

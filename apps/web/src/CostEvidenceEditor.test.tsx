@@ -43,11 +43,11 @@ describe("CostEvidenceEditor", () => {
     render(<CostEvidenceEditor evidence={evidence} onSaved={onSaved} />);
     expect(screen.getByText("m²")).toBeInTheDocument();
     expect(screen.getByText("EUR")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Editează" }));
+    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
     const amount = screen.getByLabelText("Tarif");
     await user.clear(amount);
     await user.type(amount, "18");
-    await user.click(screen.getByRole("button", { name: "Salvează" }));
+    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(onSaved).toHaveBeenCalledWith({ writeState: "READY" });
     expect(fetch).toHaveBeenCalledWith(
@@ -68,10 +68,10 @@ describe("CostEvidenceEditor", () => {
     render(
       <CostEvidenceEditor evidence={evidence} onSaved={vi.fn()} />,
     );
-    await user.click(screen.getByRole("button", { name: "Editează" }));
+    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
     await user.clear(screen.getByLabelText("Tarif"));
     await user.type(screen.getByLabelText("Tarif"), "18");
-    await user.click(screen.getByRole("button", { name: "Salvează" }));
+    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
     expect(
       screen.getByText("Tariful a fost schimbat între timp. Reîncarcă și încearcă din nou."),
     ).toBeInTheDocument();
@@ -94,14 +94,14 @@ describe("CostEvidenceEditor", () => {
       }),
     );
     render(<CostEvidenceEditor evidence={evidence} onSaved={onSaved} />);
-    await user.click(screen.getByRole("button", { name: "Editează" }));
+    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
     await user.clear(screen.getByLabelText("Tarif"));
     await user.type(screen.getByLabelText("Tarif"), "18");
-    await user.click(screen.getByRole("button", { name: "Salvează" }));
+    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
     expect(onSaved).toHaveBeenCalledWith({ writeState: "READY" });
     expect(
       screen.queryByText("Salvarea a eșuat. Tariful curent nu a fost schimbat."),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Editează" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Confirmă tarif" })).toBeInTheDocument();
   });
 });

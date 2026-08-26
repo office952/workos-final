@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectAccountOrganization, logoutCloudFromMenu } from "./helpers/account";
 
 const shot = (name: string) => `docs/worklog/screenshots/hf-wave3-${name}.png`;
 
@@ -64,7 +65,7 @@ test.describe("Wave 3 Cloud login gate", () => {
     await page.getByRole("button", { name: "Intră" }).click();
     await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
     await expect(page).toHaveURL(/\/atelier(?:#.*)?$/);
-    await expect(page.getByLabel("Organizație curentă")).toBeVisible();
+    await expectAccountOrganization(page, "Atelier Sintetic");
     await page.goto("/atelier");
     await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
     await page.keyboard.press("Tab");
@@ -76,7 +77,7 @@ test.describe("Wave 3 Cloud login gate", () => {
     await expect(page).toHaveURL(/\/atelier/);
     await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Ieși din cont" }).click();
+    await logoutCloudFromMenu(page);
     await expect(page.getByRole("heading", { name: "Autentificare" })).toBeVisible();
   });
 });

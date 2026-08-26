@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { expectAccountOrganization, switchOrganization } from "./helpers/account";
 
 function requiredEnv(name: string): string | undefined {
   const value = process.env[name];
@@ -31,7 +32,7 @@ test.describe("Cloud two-organization isolation", () => {
     await page.getByLabel("Email").fill(userA ?? "");
     await page.getByLabel("Parolă").fill(password ?? "");
     await page.getByRole("button", { name: "Intră" }).click();
-    await expect(page.getByLabel("Organizație curentă")).toContainText(orgA);
+    await expectAccountOrganization(page, orgA);
     await expect(page.getByLabel("Schimbă organizația")).toHaveCount(0);
     await page.getByRole("link", { name: "Comercial" }).click();
     await page.getByRole("link", { name: "Clienți" }).click();
@@ -48,7 +49,7 @@ test.describe("Cloud two-organization isolation", () => {
     await page.getByLabel("Email").fill(userB ?? "");
     await page.getByLabel("Parolă").fill(password ?? "");
     await page.getByRole("button", { name: "Intră" }).click();
-    await expect(page.getByLabel("Organizație curentă")).toContainText(orgB);
+    await expectAccountOrganization(page, orgB);
     await expect(page.getByLabel("Schimbă organizația")).toHaveCount(0);
     await page.getByRole("link", { name: "Comercial" }).click();
     await page.getByRole("link", { name: "Clienți" }).click();
@@ -73,7 +74,7 @@ test.describe("Cloud two-organization isolation", () => {
     await expect(page.getByLabel("Organizație")).toBeVisible();
     await page.getByLabel("Organizație").selectOption({ label: orgA });
     await page.getByRole("button", { name: "Intră" }).click();
-    await expect(page.getByLabel("Organizație curentă")).toContainText(orgA);
+    await expectAccountOrganization(page, orgA);
     await page.getByRole("link", { name: "Comercial" }).click();
     await page.getByRole("link", { name: "Clienți" }).click();
     await expect(page.getByText("Client Alpha")).toBeVisible();
@@ -82,8 +83,8 @@ test.describe("Cloud two-organization isolation", () => {
       fullPage: true,
     });
 
-    await page.getByLabel("Schimbă organizația").selectOption({ label: orgB });
-    await expect(page.getByLabel("Organizație curentă")).toContainText(orgB);
+    await switchOrganization(page, orgB);
+    await expectAccountOrganization(page, orgB);
     await expect(page.getByRole("button", { name: "Identifică-te" })).toBeVisible();
     await expect(page.getByText("Client Alpha")).toHaveCount(0);
     await expect(page.getByText("Client Test")).toBeVisible();

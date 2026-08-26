@@ -46,9 +46,32 @@ Related living authority:
 - `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md` — evidence citations for the previous direction revision
 - `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md` — Owner IA acceptance record
 - `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md` — accepted first HF lot
-- `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md` — accepted route, access, mapping, and wave contracts
+- `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md` — accepted first-lot route, access, mapping, and wave contracts
+- `docs/plans/WORKOS_ARCHITECTURE_C_UI_IMPLEMENTATION_WAVE_1_PLAN.md` — Architecture C `/admin/resources` Wave 1 plan; implementation is local in review
+- `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md` — Wave 1 implementation record
+- `docs/worklog/WORKOS_ARCHITECTURE_C_FINAL_SIMULATION_ACCEPTED_WAVE_1_PLAN_V1.md` — Owner accept of the Architecture C simulation
 
 Do not create a second UI/UX direction canon.
+
+## Architecture C track (next UI lot)
+
+Recorded 2026-08-26. This is a later Owner-accepted shell and floorplan track. It does not reopen the first HF lot and does not change `FINAL_VISUAL_DIRECTION = A_INDUSTRIAL_CLARITY` for that closed lot.
+
+```text
+ARCHITECTURE_C_DIRECTION                         = OWNER_ACCEPTED
+ARCHITECTURE_C_FIGMA_FILE_KEY                    = Q8zfu4MZhsxLjJMGLHUHZh
+ARCHITECTURE_C_FINAL_SIMULATION                  = OWNER_ACCEPTED_WITH_ADVISORIES
+FIGMA_LIBRARY_PUBLISHED                          = NO
+ARCHITECTURE_C_UI_WAVE_1_PLANNING                = COMPLETE
+ARCHITECTURE_C_UI_WAVE_1                         = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED                                   = NO
+ARCHITECTURE_C_UI_WAVE_2                         = NOT_STARTED
+ARCHITECTURE_C_FIRST_ROUTE                       = /admin/resources
+```
+
+The first HF lot (Industrial Clarity, pages 12–21 in the earlier Figma file) stays Owner-accepted and implemented. Architecture C Wave 1 is implemented locally on the UI branch for the global shell and `/admin/resources`. Owner has not accepted that implementation. Do not publish the Architecture C library from this document. Do not create a second implementation-readiness contract file for this track.
+
+Accepted advisories that the product must keep: IdentityMenu wraps the legal name without a fixed 59px width; SkipLink stays compact and is fully visible only on focus.
 
 ## ACCEPTED OWNER IA DECISION
 

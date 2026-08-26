@@ -580,6 +580,11 @@ h1 {
   margin: 0;
 }
 
+.page-status-retry {
+  margin-top: var(--space-2);
+  min-width: 44px;
+}
+
 .page-summary {
   margin: var(--space-2) 0 0;
   color: var(--text-muted);
@@ -904,8 +909,8 @@ h1 {
   max-width: 24rem;
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--line);
-  background: #fff;
-  color: var(--ink);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
   font: inherit;
 }
 
@@ -1227,7 +1232,7 @@ a.button-link.button-secondary {
   position: absolute;
   top: 0;
   right: 0;
-  width: min(28rem, 100%);
+  width: min(28rem, calc(100% - 2.75rem));
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -1437,6 +1442,170 @@ a.button-link.button-secondary {
   padding: 0.25rem 0.45rem;
 }
 
+.app-meniu-trigger {
+  display: none;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.identity-menu {
+  position: relative;
+}
+
+.identity-menu-trigger {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.75rem;
+}
+
+.identity-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 50;
+  box-sizing: border-box;
+  min-width: 16rem;
+  max-width: min(28rem, calc(100vw - 1.25rem));
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-m);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.identity-menu-name {
+  margin: 0;
+  display: grid;
+  gap: 0.2rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.identity-menu-switch {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+}
+
+.identity-menu-switch select {
+  min-height: 44px;
+  width: 100%;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  font: inherit;
+}
+
+.identity-menu-panel .theme-switcher-label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: nowrap;
+}
+
+.identity-menu-panel .theme-switcher button {
+  padding: 0 0.65rem;
+  gap: 0.35rem;
+}
+
+.app-meniu-drawer {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.app-meniu-drawer a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-primary);
+}
+
+.admin-breadcrumb {
+  margin: 0 0 0.65rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+}
+
+.admin-breadcrumb a {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  color: inherit;
+}
+
+.admin-floorplan {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.admin-sidebar,
+.master-selector {
+  padding: 0.9rem 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+}
+
+.admin-sidebar {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.admin-sidebar a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.45rem;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.admin-sidebar a[aria-current="page"] {
+  background: var(--surface-selected);
+  font-weight: 650;
+}
+
+.admin-compact-triggers {
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.admin-compact-triggers button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.admin-master-detail {
+  display: grid;
+  grid-template-columns: 18rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.action-drawer-close {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.operator-chip-passive {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
 .owner-catalog-nav {
   padding: 0.9rem 0.85rem 1rem;
   border: 1px solid var(--line);
@@ -1625,7 +1794,7 @@ details summary {
   margin: 0.85rem 0 1.1rem;
   padding: 0.9rem 1rem 1rem;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface-elevated);
 }
 
 .display-label-current {
@@ -2314,45 +2483,46 @@ a.jobs-customer {
 
 @media (max-width: 48rem) {
   .app-header-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.45rem 0.75rem;
   }
 
-  .app-brand {
-    grid-column: 1;
-    grid-row: 1;
+  .app-nav {
+    display: none;
   }
 
-  .app-nav {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    width: 100%;
-    flex-wrap: wrap;
+  .app-meniu-trigger {
+    display: inline-flex;
   }
 
   .app-utilities {
-    display: contents;
-  }
-
-  .theme-switcher {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    justify-self: start;
+    display: flex;
+    margin-left: auto;
   }
 
   .account-chip,
   .organization-chip {
-    grid-column: 2;
-    grid-row: 1;
     justify-self: end;
   }
 
   .operator-chip {
-    grid-column: 2;
-    grid-row: 3;
     justify-self: end;
+  }
+
+  .admin-floorplan,
+  .admin-master-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-floorplan-sidebar,
+  .admin-master-detail-selector {
+    display: none;
+  }
+
+  .admin-compact-triggers {
+    display: flex;
   }
 
   .app-subnav {
@@ -2396,10 +2566,6 @@ a.jobs-customer {
 
   .configurator-summary {
     position: static;
-  }
-
-  .action-drawer-panel {
-    width: 100%;
   }
 
   .task-row-main {

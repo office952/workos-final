@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { setTheme } from "./helpers/account";
 import {
   createCommercialOrder,
   createCommercialPlan,
@@ -165,8 +166,8 @@ test("atelier execution and planned versus actual stay workshop-safe", async ({
   await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
   await page.setViewportSize({ width: 768, height: 1024 });
   await page.screenshot({ path: shot("768-atelier"), fullPage: true });
-  await page.getByRole("button", { name: "Întunecată" }).click();
+  await setTheme(page, "Întunecată");
   await page.screenshot({ path: shot("dark-atelier"), fullPage: true });
-  await page.getByRole("button", { name: "Deschisă" }).click();
+  await setTheme(page, "Deschisă");
   await page.screenshot({ path: shot("light-atelier"), fullPage: true });
 });

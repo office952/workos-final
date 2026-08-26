@@ -20,6 +20,11 @@ vi.mock("./cloudSessionApi", () => ({
   switchCloudOrganization: vi.fn(),
 }));
 
+vi.mock("./sellerApi", () => ({
+  fetchSellerProfile: vi.fn(async () => null),
+  updateSellerProfile: vi.fn(),
+}));
+
 vi.mock("./operatorSessionApi", () => ({
   fetchOperatorSession: vi.fn(async () => ({ operator: null, session: null })),
   fetchOperatorCandidates: vi.fn(async () => []),
@@ -202,8 +207,9 @@ describe("AppShell", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByLabelText("Organizație curentă")).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole("button", { name: "Cont" }));
     expect(screen.getByText("Atelier Alpha")).toBeInTheDocument();
+    expect(screen.queryByText(/^Organizație:/)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ieși din cont" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Schimbă organizația")).not.toBeInTheDocument();
   });
@@ -251,6 +257,7 @@ describe("AppShell", () => {
       </MemoryRouter>,
     );
 
+    await userEvent.click(await screen.findByRole("button", { name: "Cont" }));
     expect(await screen.findByLabelText("Schimbă organizația")).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Atelier Alpha" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "TEST COMPANY" })).toBeInTheDocument();
@@ -276,6 +283,7 @@ describe("AppShell", () => {
     expect(skip).toHaveFocus();
     await user.click(skip);
     expect(document.getElementById("continut-principal")).toHaveFocus();
+    await user.click(screen.getByRole("button", { name: "Cont" }));
     expect(screen.getByRole("group", { name: "Temă" })).toBeInTheDocument();
     expect(screen.getByLabelText("Cont")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Lucrări" })).toHaveAttribute(
@@ -283,5 +291,20 @@ describe("AppShell", () => {
       "page",
     );
     expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
+  });
+
+  it("hides Identifică-te on admin routes and keeps skip link off-screen until focus", async () => {
+    renderShell(
+      <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+        <p>conținut</p>
+      </AppShell>,
+      ["/admin/resources"],
+    );
+    expect(screen.queryByRole("button", { name: "Identifică-te" })).not.toBeInTheDocument();
+    const skip = screen.getByRole("link", { name: "Sari la conținut" });
+    expect(skip.className).toContain("skip-link");
+    const user = userEvent.setup();
+    await user.tab();
+    expect(skip).toHaveFocus();
   });
 });

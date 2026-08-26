@@ -147,4 +147,17 @@ Do not add empty Documents / Notes / Timeline tabs.
 
 ## Future migration
 
-New pages prefer these primitives. Existing pages migrate one surface at a time. Next candidate after this build: Product System admin.
+New pages prefer these primitives. Existing pages migrate one surface at a time.
+
+This file remains the **currently implemented** presentation law for the first HF lot. On `feat/architecture-c-ui-wave1-shell-resources-v1`, Architecture C Wave 1 is **implemented locally in review** for the global shell plus `/admin/resources` only. Sibling admin catalogs still use the first-HF `OwnerCatalogView` / `AdminDomainLinks` presentation. Owner has not accepted Wave 1. Wave 2 is not started.
+
+Implemented Wave 1 facts, not a direction rewrite:
+
+- Brand text is **WorkOS Final**. Level 1 stays Lucrări / Atelier / Comercial / Catalog / Administrare. At `max-width: 48rem`, Level 1 moves into **Meniu**; Cont stays in the header.
+- Cont is a 44×44 trigger. The open menu shows short organization name, optional legal name (wrap, no 59px clip), authenticated account, theme, and logout when Cloud logout exists.
+- `/admin/resources` uses Admin L2 (`Secțiuni administrative`) separate from MasterSelector. Selection authority is `?selected=<stable-catalog-item-id>`. Missing selected shows **Alege un element**. Invalid selected shows **Element inexistent**.
+- At 768, **Secțiuni** and **Alege elementul** are mutually exclusive drawers. Overlay, Escape, × (`Închide`), focus return, and scroll lock apply.
+- SkipLink stays **Sari la conținut** → `#continut-principal`, hidden until focus. Login wall stays **Sari la autentificare** → `#autentificare`.
+- Amounts stay live Resources/Cost projections. Figma `4,25 EUR/m` is not product truth.
+
+A Product System admin rewrite stays unauthorized. It is not the next accepted UI lot.

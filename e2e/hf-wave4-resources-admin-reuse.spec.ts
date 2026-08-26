@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { logoutCloudFromMenu, openAccountMenu, setTheme } from "./helpers/account";
 
 const authPath = resolve(process.cwd(), ".tmp/hf-wave3-review/cloud/owner-auth.txt");
 const evidenceDir = resolve(process.cwd(), ".tmp/hf-wave4-owner-review-evidence");
@@ -106,7 +107,7 @@ test.describe("Wave 4 resources and admin reuse", () => {
     await page.reload();
     await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
 
-    await page.getByRole("button", { name: "Ieși din cont" }).click();
+    await logoutCloudFromMenu(page);
     await expect(page.getByRole("heading", { name: "Autentificare" })).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/resources/);
 
@@ -122,9 +123,9 @@ test.describe("Wave 4 resources and admin reuse", () => {
     test.setTimeout(90_000);
     await loginOwner(page);
     await expect(page.getByText("nu este preț client", { exact: false })).toBeVisible();
-    const domains = page.getByRole("navigation", { name: "Domenii administrative" });
+    const domains = page.getByRole("navigation", { name: "Secțiuni administrative" });
     await expect(domains).toBeVisible();
-    await expect(domains.getByRole("link", { name: "Administrare" })).toBeVisible();
+    await expect(domains.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
     await expect(page.getByLabel("Caută")).toBeVisible();
     await expect(page.getByLabel("Preț client")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Preț client" })).toHaveCount(0);
@@ -132,7 +133,7 @@ test.describe("Wave 4 resources and admin reuse", () => {
     await expect(page.getByLabel("PIN")).toHaveCount(0);
     await page.screenshot({ path: shot("resources-populated"), fullPage: true });
 
-    await page.getByRole("button", { name: "Deschisă" }).click();
+    await setTheme(page, "Deschisă");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
     await page.screenshot({ path: shot("resources-light"), fullPage: true });
     const light = await measurePage(page);
@@ -191,18 +192,18 @@ test.describe("Wave 4 resources and admin reuse", () => {
     await page.screenshot({ path: shot("operator-ineligible"), fullPage: true });
 
     await page.getByRole("link", { name: "Resurse" }).click();
-    await page.getByRole("button", { name: "Întunecată" }).click();
+    await setTheme(page, "Întunecată");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await page.screenshot({ path: shot("resources-dark"), fullPage: true });
     const dark = await measurePage(page);
     expect(dark.under44, JSON.stringify(dark.under44)).toEqual([]);
     expect(dark.overflow).toBeFalsy();
 
-    await page.getByRole("button", { name: "Sistem" }).click();
+    await setTheme(page, "Sistem");
     await expect(page.locator("html")).toHaveAttribute("data-theme-choice", "system");
 
     await page.setViewportSize({ width: 768, height: 1024 });
-    await page.getByRole("button", { name: "Deschisă" }).click();
+    await setTheme(page, "Deschisă");
     await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
     await page.screenshot({ path: shot("resources-768"), fullPage: true });
     const narrow = await measurePage(page);
@@ -222,6 +223,7 @@ test.describe("Wave 4 resources and admin reuse", () => {
     const pin = page.getByRole("textbox", { name: "PIN" });
     await expect(pin).toHaveAttribute("type", "password");
     await expect(pin).toHaveValue("");
+    await openAccountMenu(page);
     await expect(page.getByRole("button", { name: "Ieși din cont" })).toBeVisible();
   });
 

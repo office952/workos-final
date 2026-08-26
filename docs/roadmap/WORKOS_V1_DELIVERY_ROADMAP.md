@@ -48,6 +48,9 @@ Related living authority:
 - `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md` — accepted first-lot route, access, mapping, and wave contracts
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain and administration map
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation law
+- `docs/plans/WORKOS_ARCHITECTURE_C_UI_IMPLEMENTATION_WAVE_1_PLAN.md` — Architecture C UI Wave 1 plan
+- `docs/worklog/WORKOS_ARCHITECTURE_C_FINAL_SIMULATION_ACCEPTED_WAVE_1_PLAN_V1.md` — Owner accept of the Architecture C simulation with advisories
+- `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md` — Architecture C UI Wave 1 local implementation record
 
 ## Principles
 
@@ -124,6 +127,13 @@ WAVE_3                               = OWNER_ACCEPTED
 WAVE_4                               = OWNER_ACCEPTED
 WAVE_5                               = OWNER_ACCEPTED
 PRODUCT_SYSTEM_UI                    = RECORD_ONLY
+ARCHITECTURE_C_DIRECTION             = OWNER_ACCEPTED
+ARCHITECTURE_C_FINAL_SIMULATION      = OWNER_ACCEPTED_WITH_ADVISORIES
+ARCHITECTURE_C_UI_WAVE_1_PLANNING    = COMPLETE
+ARCHITECTURE_C_UI_WAVE_1             = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED                       = NO
+ARCHITECTURE_C_UI_WAVE_2             = NOT_STARTED
+FIGMA_LIBRARY_PUBLISHED              = NO
 ```
 
 `OWNER_GATE = COMPLETE` means the Cloud initial-Owner product law is closed: fail-closed activation, exactly one initial Owner, explicit resume. It does not mean later operational Owner GOs are already granted.
@@ -181,9 +191,18 @@ FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4 = OWNER_ACCEPTED
 OWNER_FIRST_HF_IMPLEMENTATION_WAVE_4_REVIEW = PASS
 FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_5 = OWNER_ACCEPTED
 OWNER_FIRST_HF_IMPLEMENTATION_WAVE_5_REVIEW = PASS
+ARCHITECTURE_C_DIRECTION = OWNER_ACCEPTED
+ARCHITECTURE_C_FINAL_SIMULATION = OWNER_ACCEPTED_WITH_ADVISORIES
+ARCHITECTURE_C_UI_WAVE_1_PLANNING = COMPLETE
+ARCHITECTURE_C_UI_WAVE_1 = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED = NO
+ARCHITECTURE_C_UI_WAVE_2 = NOT_STARTED
+FIGMA_LIBRARY_PUBLISHED = NO
 ```
 
 `HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. The next sequence step is `HUB_MEDIA_ORGANIZATION_CONFIGURATION`. It is not started.
+
+Architecture C is a **parallel UI track**, not a second target milestone and not a replacement for step 8. The Architecture C final simulation is `OWNER_ACCEPTED_WITH_ADVISORIES`. Wave 1 is `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/architecture-c-ui-wave1-shell-resources-v1`. Owner has not accepted it. Wave 2 is not started. The Figma library stays unpublished. Do not flip first-HF `WAVE_*` or `UI_IMPLEMENTATION_COMPLETE` flags for this track. Do not import the unaccepted HUB MEDIA organization-configuration commit into this branch.
 
 Implementation reports fill:
 
@@ -252,6 +271,8 @@ Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 i
 Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
 
 Do not start steps 8–10 from this document. The next named step is `HUB_MEDIA_ORGANIZATION_CONFIGURATION`.
+
+Architecture C UI Wave 1 is `IMPLEMENTED_LOCAL_IN_REVIEW` on this parallel branch. It does not replace step 8 and does not authorize Wave 2, Figma publish, Owner accept, or the first real LETTERS job. Execution detail lives in `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md`.
 
 ## Real Cloud recovery
 
