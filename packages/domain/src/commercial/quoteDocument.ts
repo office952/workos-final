@@ -123,6 +123,13 @@ export function formatCustomerMoney(value: number): string {
   return `${grouped},${fraction}`;
 }
 
+export function formatCustomerMoneyAmount(
+  value: number,
+  currency: string = "EUR",
+): string {
+  return `${formatCustomerMoney(value)} ${currency}`;
+}
+
 export function sanitizeDocumentText(value: string): string {
   return [...value]
     .filter((character) => {

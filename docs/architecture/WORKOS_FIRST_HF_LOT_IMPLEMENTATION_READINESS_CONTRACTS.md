@@ -13,9 +13,9 @@ HIGH_FIDELITY_DESIGN                           = FIRST_LOT_OWNER_ACCEPTED
 IMPLEMENTATION_READINESS_CONTRACTS             = OWNER_ACCEPTED
 IMPLEMENTATION_READINESS_GATE                  = CLOSED
 IMPLEMENTATION_READY                           = YES
-VISIBLE_RUNTIME                                = CURRENT_FOUNDATION_NOT_YET_UPDATED
-UI_IMPLEMENTATION                              = NOT_STARTED
-UI_IMPLEMENTATION_AUTHORIZED                   = NO
+VISIBLE_RUNTIME                                = WAVE_1_FOUNDATION_ROUTES_ACCESS
+UI_IMPLEMENTATION                              = IN_REVIEW
+UI_IMPLEMENTATION_AUTHORIZED                   = WAVE_1_ONLY
 FIGMA_WRITE                                    = NO
 PRODUCT_CODE_CHANGE                            = FORBIDDEN_BY_THIS_DOCUMENT
 STABLE_JOB_ROUTE                               = /jobs/:jobId
@@ -35,7 +35,7 @@ API_ENFORCEMENT_REQUIRED                       = YES
 
 `IMPLEMENTATION_READY = YES` means the contracts are closed and later UI work has a single truth to implement against. It is not permission to start React, CSS, routes, or APIs.
 
-This file is the accepted route, access, mapping, foundation, and wave contract. It does not implement React, CSS, routes, APIs, migrations, or Figma writes. A later Owner GO is required before any implementation wave.
+This file remains the accepted route, access, mapping, foundation, and wave contract. Wave 1 is `IN_REVIEW` under a later Owner GO. See `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Remaining waves stay unauthorized.
 
 Related living authority:
 
@@ -52,14 +52,14 @@ Do not create a second implementation-readiness contract file.
 ```text
 ACCEPTED_DESIGN          = first HF lot in Figma, direction A, pages 12–21
 CONTRACTS                = this file, OWNER_ACCEPTED
-VISIBLE_RUNTIME          = current foundation shell, routes, and tokens
-UI_IMPLEMENTATION        = NOT_STARTED
-UI_IMPLEMENTATION_AUTHORIZED = NO
+VISIBLE_RUNTIME          = WAVE_1_FOUNDATION_ROUTES_ACCESS
+UI_IMPLEMENTATION        = IN_REVIEW
+UI_IMPLEMENTATION_AUTHORIZED = WAVE_1_ONLY
 ```
 
 The accepted lot is the visual baseline for the pilot. Later refinement after real implementation remains allowed.
 
-The foundation canon still records today’s shell: Level 1 label `Produse`, light-only tokens, current routes. Do not edit that canon as if the accepted Catalog label or the new shell already exist in runtime.
+The foundation canon now records Wave 1 shell facts: Level 1 `Catalog`, LIGHT / DARK / SYSTEM tokens, and stable `/jobs/:jobId` plus `/quotes/:quoteSnapshotId`. Full first-lot visual implementation is not complete.
 
 ## Sources and honest absences
 
@@ -586,12 +586,12 @@ OWNER_GATE                = visual comparison review; still not Cloud root
 ```
 
 ```text
-IMPLEMENTATION_WAVES              = DEFINED_NOT_AUTHORIZED
+IMPLEMENTATION_WAVES              = WAVE_1_IN_REVIEW
 IMPLEMENTATION_READY              = YES
-UI_IMPLEMENTATION_AUTHORIZED      = NO
+UI_IMPLEMENTATION_AUTHORIZED      = WAVE_1_ONLY
 ```
 
-Waves remain a plan. `IMPLEMENTATION_READY = YES` does not start them.
+Wave 1 is `IN_REVIEW`. Waves 2–6 remain a plan. `IMPLEMENTATION_READY = YES` does not start them.
 
 ## 7. Owner decisions
 

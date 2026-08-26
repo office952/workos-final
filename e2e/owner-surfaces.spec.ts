@@ -4,8 +4,8 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Produse" }).click();
-  await expect(page.getByRole("heading", { name: "Produse" })).toBeVisible();
+  await page.getByRole("link", { name: "Catalog" }).click();
+  await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-products-operator.png",
     fullPage: true,
@@ -312,7 +312,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.setViewportSize({ width: 1280, height: 900 });
 
-  await page.getByRole("link", { name: "Produse" }).click();
+  await page.getByRole("link", { name: "Catalog" }).click();
   await page
     .getByRole("link", {
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",

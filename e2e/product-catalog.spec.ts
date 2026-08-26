@@ -5,9 +5,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Produse" }).click();
+  await page.getByRole("link", { name: "Catalog" }).click();
 
-  await expect(page.getByRole("heading", { name: "Produse" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
+  await expect(page.getByText("Produsele din catalog. Alegeți un produs.")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Litere și semne volumetrice luminoase" }),
   ).toBeVisible();

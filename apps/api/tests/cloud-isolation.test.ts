@@ -54,6 +54,16 @@ const READ_ATTACKS: Attack[] = [
     path: (id) => `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${id.quoteId}`,
   },
   {
+    name: "QUOTE_STABLE",
+    method: "GET",
+    path: (id) => `/api/quotes/${id.quoteId}`,
+  },
+  {
+    name: "JOB_STABLE",
+    method: "GET",
+    path: (id) => `/api/jobs/${id.orderId}`,
+  },
+  {
     name: "QUOTE_PDF",
     method: "GET",
     path: (id) => `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${id.quoteId}/document`,

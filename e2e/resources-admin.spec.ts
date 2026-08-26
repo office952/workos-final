@@ -28,7 +28,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(page.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeVisible();
   await expect(
     page.getByText(
-      "Tariful salvat este confirmat de owner pentru calcule noi. Ofertele și lucrările înghețate nu se schimbă.",
+      /Valorile implicite de platformă nu sunt cost confirmat/,
     ),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Materiale" })).toHaveAttribute(

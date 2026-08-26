@@ -42,7 +42,7 @@ const detail: RequestDetailProjection = {
       stageLabel: "Creată",
       nextAction: "ACCEPT_QUOTE",
       nextActionLabel: "Marchează acceptată",
-      href: "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1",
+      href: "/quotes/qts%3A1",
       needsAttention: true,
       attentionLabel: "Urmează acceptarea",
       acceptanceId: null,
@@ -111,7 +111,7 @@ describe("RequestDetailPage", () => {
     expect(screen.getByRole("heading", { name: "Oferte legate" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "OF-ABCDEF01" })).toHaveAttribute(
       "href",
-      "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1",
+      "/quotes/qts%3A1",
     );
     expect(screen.getByRole("link", { name: "Configurează" })).toHaveAttribute(
       "href",

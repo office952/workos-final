@@ -98,7 +98,7 @@ export function JobsOverviewPage() {
           title="Nu există încă lucrări comerciale."
           action={
             <p>
-              <Link to="/products">Deschide produsele</Link> pentru a crea o comandă.
+              <Link to="/products">Deschide catalogul</Link> pentru a crea o comandă.
             </p>
           }
         />

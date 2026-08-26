@@ -4,8 +4,8 @@ import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Produse" }).click();
-  await expect(page.getByRole("heading", { name: "Produse" })).toBeVisible();
+  await page.getByRole("link", { name: "Catalog" }).click();
+  await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await expect(
     page.getByRole("link", {
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",

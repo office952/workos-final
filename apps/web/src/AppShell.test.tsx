@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
 import { CloudSessionProvider } from "./CloudSessionContext";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
+import { ThemeProvider } from "./theme/ThemeProvider";
 
 vi.mock("./cloudSessionApi", () => ({
   fetchCloudSession: vi.fn(async () => ({
@@ -28,7 +29,9 @@ vi.mock("./operatorSessionApi", () => ({
 function renderShell(ui: ReactElement, initialEntries: string[] = ["/"]) {
   return render(
     <MemoryRouter initialEntries={initialEntries}>
-      <OperatorSessionProvider>{ui}</OperatorSessionProvider>
+      <ThemeProvider>
+        <OperatorSessionProvider>{ui}</OperatorSessionProvider>
+      </ThemeProvider>
     </MemoryRouter>,
   );
 }
@@ -165,13 +168,15 @@ describe("AppShell", () => {
 
     render(
       <MemoryRouter>
-        <CloudSessionProvider>
-          <OperatorSessionProvider>
-            <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
-              <p>conținut</p>
-            </AppShell>
-          </OperatorSessionProvider>
-        </CloudSessionProvider>
+        <ThemeProvider>
+          <CloudSessionProvider>
+            <OperatorSessionProvider>
+              <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+                <p>conținut</p>
+              </AppShell>
+            </OperatorSessionProvider>
+          </CloudSessionProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     );
 
@@ -212,18 +217,46 @@ describe("AppShell", () => {
 
     render(
       <MemoryRouter>
-        <CloudSessionProvider>
-          <OperatorSessionProvider>
-            <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
-              <p>conținut</p>
-            </AppShell>
-          </OperatorSessionProvider>
-        </CloudSessionProvider>
+        <ThemeProvider>
+          <CloudSessionProvider>
+            <OperatorSessionProvider>
+              <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+                <p>conținut</p>
+              </AppShell>
+            </OperatorSessionProvider>
+          </CloudSessionProvider>
+        </ThemeProvider>
       </MemoryRouter>,
     );
 
     expect(await screen.findByLabelText("Schimbă organizația")).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Atelier Alpha" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "TEST COMPANY" })).toBeInTheDocument();
+  });
+
+  it("keeps skip link, theme and Cont utilities available", async () => {
+    renderShell(
+      <AppShell
+        navItems={[
+          { to: "/", label: "Lucrări", matchPrefixes: ["/jobs"] },
+          { to: "/admin", label: "Administrare" },
+        ]}
+      >
+        <h1>Conținut</h1>
+      </AppShell>,
+      ["/jobs/ord:1"],
+    );
+
+    expect(screen.getByRole("link", { name: "Sari la conținut" })).toHaveAttribute(
+      "href",
+      "#continut-principal",
+    );
+    expect(screen.getByRole("group", { name: "Temă" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Cont")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Lucrări" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
   });
 });

@@ -26,7 +26,7 @@ import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { DEFAULT_COMMERCIAL_POLICY, type CommercialPolicy } from "./policy.js";
 import { projectCommercialPrice } from "./price.js";
-import { projectQuoteDocument } from "./quoteDocument.js";
+import { formatCustomerMoneyAmount, projectQuoteDocument } from "./quoteDocument.js";
 import { freezeQuoteSnapshot, type QuoteSnapshot } from "./quoteSnapshot.js";
 
 const lettersValues: DraftValues = {
@@ -264,6 +264,11 @@ describe("quote document projection", () => {
       expect(text).not.toMatch(/PRD-LETTERS|PRD-ACM|resourceId|recipe|ExecutionPlan|provider/i);
       expect(text).not.toMatch(/DEFAULT_COMMERCIAL_POLICY|policyId|policyVersion/);
     }
+  });
+
+  it("prints Romanian amounts with a visible EUR unit", () => {
+    expect(formatCustomerMoneyAmount(624.82)).toBe("624,82 EUR");
+    expect(formatCustomerMoneyAmount(382.5)).toBe("382,50 EUR");
   });
 
   it("does not branch on product codes in the projection source", () => {

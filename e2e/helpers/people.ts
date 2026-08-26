@@ -75,6 +75,18 @@ export async function assignExecutorIfNeeded(card: Locator, personName = TEST_EX
   await expect(card.getByText(`Executant: ${personName}`)).toBeVisible();
 }
 
+export async function identifyTestExecutorViaApi(
+  request: APIRequestContext,
+  personId: string,
+  pin = TEST_OPERATOR_PIN,
+) {
+  await configureTestExecutorPin(request, personId, pin);
+  const identified = await request.post("/api/operator-session", {
+    data: { personId, pin },
+  });
+  expect(identified.ok()).toBeTruthy();
+}
+
 export async function configureTestExecutorPin(
   request: APIRequestContext,
   personId: string,

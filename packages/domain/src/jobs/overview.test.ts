@@ -215,13 +215,13 @@ describe("job overview projection", () => {
       orderSnapshotId: "ord:WORKOS",
       planId: null,
       nextAction: "RELEASE_TO_PRODUCTION",
-    })).toBe("/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?order=ord%3AWORKOS");
+    })).toBe("/jobs/ord%3AWORKOS");
     expect(jobHref({
       productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
       orderSnapshotId: "ord:WORKOS",
       planId: "exp:test",
       nextAction: "CONTINUE_EXECUTION",
-    })).toBe("/execution/exp:test");
+    })).toBe("/jobs/ord%3AWORKOS");
   });
 
   it("treats all required tasks completed as the only completed job", () => {

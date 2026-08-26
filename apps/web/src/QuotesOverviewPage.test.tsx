@@ -23,7 +23,7 @@ const overview: QuoteOverviewProjection = {
       stageLabel: "Creată",
       nextAction: "ACCEPT_QUOTE",
       nextActionLabel: "Marchează acceptată",
-      href: "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1",
+      href: "/quotes/qts%3A1",
       needsAttention: true,
       attentionLabel: "Urmează acceptarea",
       acceptanceId: null,

@@ -125,7 +125,7 @@ test("admin display-label write persists and propagates", async ({
     await page.getByRole("button", { name: "Salvează" }).click();
     await expect(page.getByRole("heading", { name: RENAMED.type })).toBeVisible();
 
-    await page.getByRole("link", { name: "Produse" }).click();
+    await page.getByRole("link", { name: "Catalog" }).click();
     await expect(page.getByRole("link", { name: RENAMED.product })).toBeVisible();
     await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
     await page.screenshot({

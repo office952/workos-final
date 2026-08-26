@@ -112,7 +112,7 @@ describe("quote overview projection", () => {
         orderSnapshotId: null,
         nextAction: "ACCEPT_QUOTE",
       }),
-    ).toBe("/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts%3AWORKOS");
+    ).toBe("/quotes/qts%3AWORKOS");
     expect(
       quoteOverviewHref({
         productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
@@ -120,7 +120,7 @@ describe("quote overview projection", () => {
         orderSnapshotId: "ord:WORKOS",
         nextAction: "OPEN_ORDER",
       }),
-    ).toBe("/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?order=ord%3AWORKOS");
+    ).toBe("/quotes/qts%3AWORKOS");
   });
 
   it("projects operator labels from frozen quote facts", () => {
@@ -144,7 +144,7 @@ describe("quote overview projection", () => {
       needsAttention: true,
       attentionLabel: "Urmează acceptarea",
     });
-    expect(created.href).toContain("?quote=");
+    expect(created.href).toBe("/quotes/qts%3AWORKOS");
   });
 
   it("keeps ordered quotes out of the needs-action filter", () => {

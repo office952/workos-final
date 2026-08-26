@@ -2,7 +2,13 @@ import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
+import {
+  assignExecutorIfNeeded,
+  assignProviderIfNeeded,
+  configureTestExecutorPin,
+  ensureTestExecutor,
+  identifyTestExecutorOnPage,
+} from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
   await page.goto("/products");
@@ -51,12 +57,14 @@ test("records planned vs actual resource consumption on LETTERS tasks", async ({
   page,
   request,
 }) => {
-  await ensureTestExecutor(request);
+  const person = await ensureTestExecutor(request);
+  await configureTestExecutorPin(request, person.personId);
   await confirmLetters(page, "CONSUM");
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await expect(page.getByRole("heading", { name: "Acceptat pentru producție" })).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);
+  await identifyTestExecutorOnPage(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
@@ -122,7 +130,7 @@ test("records planned vs actual resource consumption on LETTERS tasks", async ({
 
   await expect(inspect.getByText("Nu necesită utilaj dedicat")).toBeVisible();
   await expect(inspect.getByText("Consum real")).toHaveCount(0);
-  await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
+  await expect(page.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(faceCnc.getByText("Debitare CNC față: 12,7 m")).toBeVisible();

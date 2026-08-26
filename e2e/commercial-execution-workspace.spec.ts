@@ -7,7 +7,9 @@ import { openExecutionWorkspace } from "./helpers/execution";
 import {
   assignExecutorIfNeeded,
   assignProviderIfNeeded,
+  configureTestExecutorPin,
   ensureTestExecutor,
+  identifyTestExecutorOnPage,
 } from "./helpers/people";
 
 function uniqueInscription(prefix: string) {
@@ -70,7 +72,8 @@ test("opens a dedicated commercial execution workspace and persists a real task"
   page,
   request,
 }) => {
-  await ensureTestExecutor(request);
+  const person = await ensureTestExecutor(request);
+  await configureTestExecutorPin(request, person.personId);
   await createReleasedPlan(page, uniqueInscription("WS"));
   await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
@@ -83,6 +86,7 @@ test("opens a dedicated commercial execution workspace and persists a real task"
   });
 
   await openExecutionWorkspace(page);
+  await identifyTestExecutorOnPage(page);
   const plan = page.locator(".execution-plan");
   await expect(page.locator(".page-lead")).toContainText("Eliberată din comandă");
   await expect(plan.getByText(/\/ 12 finalizate/)).toBeVisible();
@@ -98,7 +102,7 @@ test("opens a dedicated commercial execution workspace and persists a real task"
 
   const faceCnc = taskCard(page, "Debitare foaie CNC", "Față");
   const inspect = taskCard(page, "Control calitate final", "Produs");
-  await expect(faceCnc.getByText("Executant nealocat")).toBeVisible();
+  await expect(faceCnc.getByText("Executant: Nealocat")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-workspace-blocked.png",
     fullPage: true,

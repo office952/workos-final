@@ -4,6 +4,7 @@ import type { OperatorCandidate } from "@workos-final/domain";
 import { useCloudSessionOptional } from "./CloudSessionContext";
 import { useOperatorSession, isDevOperatorUiEnabled } from "./OperatorSessionContext";
 import { fetchOperatorCandidates } from "./operatorSessionApi";
+import { ThemeSwitcher } from "./theme/ThemeSwitcher";
 import { Field } from "./ui/Field";
 
 export type AppNavItem = {
@@ -32,6 +33,10 @@ export function AppShell({ children, navItems }: AppShellProps) {
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.getElementById("continut-principal")?.focus();
+  }, [pathname]);
 
   useEffect(() => {
     if (!open) {
@@ -80,6 +85,9 @@ export function AppShell({ children, navItems }: AppShellProps) {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#continut-principal">
+        Sari la conținut
+      </a>
       <header className="app-header">
         <div className="app-header-inner">
           <div className="app-header-row">
@@ -92,12 +100,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
                   <Link
                     key={item.to}
                     to={item.to}
-                    aria-current={
-                      isPrefixActive(pathname, item.matchPrefixes) ||
-                      isProductCommercialPath(pathname, search)
-                        ? "page"
-                        : undefined
-                    }
+                    aria-current={isNavItemCurrent(item, pathname, search) ? "page" : undefined}
                   >
                     {item.label}
                   </Link>
@@ -108,81 +111,94 @@ export function AppShell({ children, navItems }: AppShellProps) {
                 ),
               )}
             </nav>
-            {cloud?.mode === "cloud" && cloud.organization ? (
-              <div className="organization-chip" aria-label="Organizație curentă">
-                <span>
-                  Organizație: <strong>{cloud.organization.displayName}</strong>
-                </span>
-                {cloud.memberships.length > 1 ? (
-                  <select
-                    aria-label="Schimbă organizația"
-                    value={cloud.organization.organizationId}
-                    onChange={(event) => {
-                      void cloud.switchOrganization(event.target.value);
-                    }}
+            <div className="app-utilities" role="group" aria-label="Utilitare">
+              <ThemeSwitcher />
+              {cloud?.mode === "cloud" && cloud.organization ? (
+                <div className="organization-chip" aria-label="Organizație curentă">
+                  <span
+                    className="utility-truncate"
+                    title={cloud.user?.email ?? cloud.organization.displayName}
                   >
-                    {cloud.memberships.map((item) => (
-                      <option key={item.organizationId} value={item.organizationId}>
-                        {item.displayName}
-                      </option>
-                    ))}
-                  </select>
-                ) : null}
-                <button
-                  type="button"
-                  className="button-quiet"
-                  onClick={() => {
-                    void cloud.logout();
-                  }}
-                >
-                  Ieși din cont
-                </button>
-              </div>
-            ) : null}
-            <div className="operator-chip" aria-label="Operator curent">
-              {!ready ? (
-                <span className="operator-chip-muted">Se verifică operatorul…</span>
-              ) : operator ? (
-                <>
-                  <span>
-                    {isDevOperatorUiEnabled() ? (
-                      <span className="operator-dev-badge">DEV · </span>
-                    ) : null}
-                    Operator: <strong>{operator.displayName}</strong>
+                    Cont: <strong>{cloud.user?.email ?? cloud.organization.displayName}</strong>
                   </span>
+                  <span className="utility-truncate" title={cloud.organization.displayName}>
+                    Organizație: <strong>{cloud.organization.displayName}</strong>
+                  </span>
+                  {cloud.memberships.length > 1 ? (
+                    <select
+                      aria-label="Schimbă organizația"
+                      value={cloud.organization.organizationId}
+                      onChange={(event) => {
+                        void cloud.switchOrganization(event.target.value);
+                      }}
+                    >
+                      {cloud.memberships.map((item) => (
+                        <option key={item.organizationId} value={item.organizationId}>
+                          {item.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
                   <button
                     type="button"
                     className="button-quiet"
+                    onClick={() => {
+                      void cloud.logout();
+                    }}
+                  >
+                    Ieși din cont
+                  </button>
+                </div>
+              ) : (
+                <p className="account-chip" aria-label="Cont" title="Cont: atelier local">
+                  Cont: atelier local
+                </p>
+              )}
+              <div className="operator-chip" aria-label="Operator curent">
+                {!ready ? (
+                  <span className="operator-chip-muted">Se verifică operatorul…</span>
+                ) : operator ? (
+                  <>
+                    <span>
+                      {isDevOperatorUiEnabled() ? (
+                        <span className="operator-dev-badge">DEV · </span>
+                      ) : null}
+                      Operator: <strong>{operator.displayName}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      className="button-quiet"
+                      onClick={() => {
+                        setOpen(true);
+                        setError(null);
+                        setPin("");
+                      }}
+                    >
+                      Schimbă
+                    </button>
+                    <button
+                      type="button"
+                      className="button-quiet"
+                      onClick={() => {
+                        void logout();
+                      }}
+                    >
+                      Ieși
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
                     onClick={() => {
                       setOpen(true);
                       setError(null);
                       setPin("");
                     }}
                   >
-                    Schimbă
+                    Identifică-te
                   </button>
-                  <button
-                    type="button"
-                    className="button-quiet"
-                    onClick={() => {
-                      void logout();
-                    }}
-                  >
-                    Ieși
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(true);
-                    setError(null);
-                    setPin("");
-                  }}
-                >
-                  Identifică-te
-                </button>
-              )}
+                )}
+              </div>
             </div>
           </div>
           {commercial ? (
@@ -194,7 +210,9 @@ export function AppShell({ children, navItems }: AppShellProps) {
           ) : null}
         </div>
       </header>
-      <main className="app-content">{children}</main>
+      <main id="continut-principal" className="app-content" tabIndex={-1}>
+        {children}
+      </main>
       {open ? (
         <dialog
           className="operator-modal"
@@ -290,4 +308,17 @@ function isProductCommercialPath(pathname: string, search: string): boolean {
   }
   const params = new URLSearchParams(search);
   return params.has("request") || params.has("quote") || params.has("order");
+}
+
+function isNavItemCurrent(item: AppNavItem, pathname: string, search: string): boolean {
+  if (item.to === "/" && pathname === "/") {
+    return true;
+  }
+  if (item.matchPrefixes && isPrefixActive(pathname, item.matchPrefixes)) {
+    return true;
+  }
+  if (item.matchPrefixes && isProductCommercialPath(pathname, search)) {
+    return item.matchPrefixes.some((prefix) => COMMERCIAL_PREFIXES.includes(prefix as (typeof COMMERCIAL_PREFIXES)[number]));
+  }
+  return false;
 }

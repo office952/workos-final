@@ -7,7 +7,9 @@ import { ExecutionWorkspacePage } from "./ExecutionWorkspacePage";
 import { GovernancePage } from "./GovernancePage";
 import { ClientsOverviewPage } from "./ClientsOverviewPage";
 import { ClientWorkspacePage } from "./ClientWorkspacePage";
+import { JobDetailPage } from "./JobDetailPage";
 import { JobsOverviewPage } from "./JobsOverviewPage";
+import { QuoteInspectionPage } from "./QuoteInspectionPage";
 import { QuotesOverviewPage } from "./QuotesOverviewPage";
 import { RequestDetailPage } from "./RequestDetailPage";
 import { RequestsOverviewPage } from "./RequestsOverviewPage";
@@ -29,14 +31,14 @@ import { LoginPage } from "./LoginPage";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Lucrări" },
+  { to: "/", label: "Lucrări", matchPrefixes: ["/jobs"] },
   { to: "/atelier", label: "Atelier" },
   {
     to: "/requests",
     label: "Comercial",
     matchPrefixes: ["/requests", "/quotes", "/clients"],
   },
-  { to: "/products", label: "Produse" },
+  { to: "/products", label: "Catalog" },
   { to: "/admin", label: "Administrare" },
 ];
 
@@ -64,10 +66,12 @@ function AppGate() {
       <AppShell navItems={NAV_ITEMS}>
         <Routes key={organization?.organizationId ?? "single-plane"}>
           <Route path="/" element={<JobsOverviewPage />} />
+          <Route path="/jobs/:jobId" element={<JobDetailPage />} />
           <Route path="/atelier" element={<AtelierPage />} />
           <Route path="/requests" element={<RequestsOverviewPage />} />
           <Route path="/requests/:requestId" element={<RequestDetailPage />} />
           <Route path="/quotes" element={<QuotesOverviewPage />} />
+          <Route path="/quotes/:quoteSnapshotId" element={<QuoteInspectionPage />} />
           <Route path="/clients" element={<ClientsOverviewPage />} />
           <Route path="/clients/:customerId" element={<ClientWorkspacePage />} />
           <Route path="/system" element={<SystemStatusPage />} />

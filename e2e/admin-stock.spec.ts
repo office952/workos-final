@@ -2,7 +2,13 @@ import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
+import {
+  assignExecutorIfNeeded,
+  assignProviderIfNeeded,
+  configureTestExecutorPin,
+  ensureTestExecutor,
+  identifyTestExecutorOnPage,
+} from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
   await page.goto("/products");
@@ -56,7 +62,8 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
   request,
 }) => {
   test.setTimeout(90_000);
-  await ensureTestExecutor(request);
+  const person = await ensureTestExecutor(request);
+  await configureTestExecutorPin(request, person.personId);
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
@@ -131,6 +138,7 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);
+  await identifyTestExecutorOnPage(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
@@ -148,7 +156,7 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
     await placeLed.getByRole("button", { name: "Finalizează" }).click();
   }
   await expect(placeLed.getByText("Modul LED 12V: 127 buc")).toBeVisible();
-  await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
+  await expect(page.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
   const expectedLedBalance = startedLed
     ? ledBeforeBody.item.balance - 127
     : ledBeforeBody.item.balance;

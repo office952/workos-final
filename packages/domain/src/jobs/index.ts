@@ -9,6 +9,8 @@ export {
   matchesJobSearch,
   jobFilterLabel,
   jobHref,
+  jobConfiguratorHref,
+  jobExecutionHref,
   jobNextActionLabel,
   jobStageLabel,
   projectJobOverview,

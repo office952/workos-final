@@ -114,7 +114,9 @@ describe("quote overview API", () => {
       grossDisplay: "624,82",
       currency: "EUR",
     });
-    expect(String(byInscription.QTA.href)).toContain("?quote=");
+    expect(String(byInscription.QTA.href)).toBe(
+      `/quotes/${encodeURIComponent(String(byInscription.QTA.quoteSnapshotId))}`,
+    );
     expect(String(byInscription.QTA.reference)).toMatch(/^OF-/);
     expect(byInscription.QTB).toMatchObject({
       stage: "QUOTE_ACCEPTED",
@@ -126,7 +128,9 @@ describe("quote overview API", () => {
       needsAttention: false,
       orderSnapshotId: orderSnapshot.orderSnapshotId,
     });
-    expect(String(byInscription.QTC.href)).toContain("?order=");
+    expect(String(byInscription.QTC.href)).toBe(
+      `/quotes/${encodeURIComponent(String(byInscription.QTC.quoteSnapshotId))}`,
+    );
     expect(byInscription.QTD).toMatchObject({
       productCode: ACM_CASSETTE_NONE_PRODUCT_CODE,
       stage: "QUOTE_CREATED",
@@ -140,5 +144,20 @@ describe("quote overview API", () => {
     });
     expect(created.quoteSnapshotId).toBe(byInscription.QTA.quoteSnapshotId);
     expect(acm.quoteSnapshotId).toBe(byInscription.QTD.quoteSnapshotId);
+
+    const missing = await app.request("/api/quotes/qts:missing");
+    expect(missing.status).toBe(404);
+    const detail = await app.request(
+      `/api/quotes/${encodeURIComponent(String(created.quoteSnapshotId))}`,
+    );
+    expect(detail.status).toBe(200);
+    const detailBody = await readBody(detail);
+    expect(detailBody.quote).toMatchObject({
+      quoteSnapshotId: created.quoteSnapshotId,
+      inscription: "QTA",
+    });
+    expect((detailBody.quoteSnapshot as JsonObject).quoteSnapshotId).toBe(
+      created.quoteSnapshotId,
+    );
   });
 });

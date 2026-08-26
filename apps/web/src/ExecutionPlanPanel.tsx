@@ -76,11 +76,13 @@ export function ExecutionPlanPanel({
         </p>
       </header>
       {!canAdminister && hasOwnerAssign ? <OwnerWriteHint /> : null}
-      <p className="execution-plan-cost">
-        Cost intern planificat: {formatMoney(view.plan.eicTotal)} {view.plan.eicCurrency}
-        {formatCostCompleteness(view.plan.eicCompleteness)}
-      </p>
-      {view.actualInternalCost.status !== "UNAVAILABLE" ? (
+      {"eicTotal" in view.plan && view.plan.eicTotal !== undefined ? (
+        <p className="execution-plan-cost">
+          Cost intern planificat: {formatMoney(view.plan.eicTotal)} {view.plan.eicCurrency}
+          {formatCostCompleteness(view.plan.eicCompleteness)}
+        </p>
+      ) : null}
+      {view.actualInternalCost && view.actualInternalCost.status !== "UNAVAILABLE" ? (
         <section className="execution-internal-cost" aria-label="Rezumat cost intern">
           <p className="execution-plan-cost">
             Cost intern real: {actualCostSummary(view.actualInternalCost)}

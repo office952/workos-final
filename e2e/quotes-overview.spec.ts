@@ -51,16 +51,11 @@ test("operator can find frozen quotes and continue the commercial path", async (
   await quoteRow(page, created.inscription)
     .getByRole("link", { name: "Marchează acceptată" })
     .click();
-  await expect(page).toHaveURL(new RegExp(`/products/${created.productCode}\\?quote=`));
-  await expect(
-    page.getByText(
-      `${created.inscription} · Client ${created.inscription} — continuare ofertă.`,
-    ),
-  ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Ofertă creată" })).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`/quotes/${encodeURIComponent(created.quoteSnapshotId)}`));
+  await expect(page.getByRole("heading", { name: created.inscription })).toBeVisible();
   await expect(page.getByRole("button", { name: "Marchează acceptată" })).toBeVisible();
   await page.getByRole("button", { name: "Marchează acceptată" }).click();
-  await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
+  await expect(page.getByText("Acceptată", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Creează comanda" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-quotes-continue.png",
@@ -74,9 +69,11 @@ test("operator can find frozen quotes and continue the commercial path", async (
   await quoteRow(page, ordered.inscription)
     .getByRole("link", { name: "Deschide comanda" })
     .click();
-  await expect(page).toHaveURL(new RegExp(`/products/${ordered.productCode}\\?order=`));
-  await expect(page.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
+  await expect(page).toHaveURL(/\/quotes\//);
+  await page.getByRole("link", { name: "Deschide lucrarea" }).click();
+  await expect(page).toHaveURL(/\/jobs\//);
 
+  await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Comercial" }).click();
   await page.getByRole("navigation", { name: "Navigare comercială" }).getByRole("link", { name: "Oferte" }).click();
   await page.getByRole("button", { name: "Cu comandă" }).click();
   await expect(quoteRow(page, ordered.inscription)).toBeVisible();

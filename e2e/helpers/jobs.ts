@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { APIRequestContext } from "@playwright/test";
+import { identifyTestExecutorViaApi } from "./people";
 
 export const CANONICAL_PRODUCT_CODE = "PRD-LETTERS-FRONTLIT-PLEXI-AL06";
 
@@ -120,6 +121,7 @@ export async function completeCanonicalLettersPlan(
   if (!job.releaseSnapshotId) {
     throw new Error("release_required");
   }
+  await identifyTestExecutorViaApi(request, personId);
   for (const [label, scope, providerId] of MACHINE_STEPS) {
     await executeNamedTask(request, job, personId, label, scope, providerId);
   }
@@ -153,7 +155,11 @@ async function executeNamedTask(
     data: { personId },
   });
   const started = await request.post(`/api/execution-tasks/${task.taskId}/start`);
-  const startedPlan = (await readJson(started)).executionPlan as { tasks: Array<JsonObject> };
+  const startedBody = await readJson(started);
+  const startedPlan = startedBody.executionPlan as { tasks?: Array<JsonObject> } | undefined;
+  if (!started.ok() || !startedPlan?.tasks) {
+    throw new Error(`start_failed:${label}:${scope}:${JSON.stringify(startedBody)}`);
+  }
   const current = startedPlan.tasks.find((item) => item.taskId === task.taskId);
   const measurable = current?.measurableQuantity as JsonObject | undefined;
   await request.post(`/api/execution-tasks/${task.taskId}/complete`, {
@@ -169,6 +175,7 @@ export async function startFirstExecutableTask(
   if (!job.releaseSnapshotId) {
     throw new Error("release_required");
   }
+  await identifyTestExecutorViaApi(request, personId);
   const read = await request.get(
     `/api/products/${job.productCode}/accepted-production-snapshots/${job.releaseSnapshotId}/execution-plan`,
   );

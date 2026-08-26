@@ -21,8 +21,18 @@ Comercial     →  /requests   (active on /requests, /quotes, /clients)
   Cereri      →  /requests
   Oferte      →  /quotes
   Clienți     →  /clients
-Produse       →  /products
+Catalog       →  /products
 Administrare  →  /admin
+```
+
+Stable detail routes:
+
+```text
+/jobs/:jobId                 jobId = orderSnapshotId; no Job entity
+/quotes/:quoteSnapshotId     OF-… is display only
+/products/:code?order=       legacy configurator continue
+/products/:code?quote=       legacy configurator continue
+/execution/:planId           execution workspace, not job detail
 ```
 
 `/` is the operational job overview. It is a read-only projection of commercial Orders and their Release / ExecutionPlan lineage. It does not own job status.

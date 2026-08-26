@@ -19,18 +19,18 @@ FINAL_VISUAL_DIRECTION            = A_INDUSTRIAL_CLARITY
 IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
 IMPLEMENTATION_READINESS_GATE     = CLOSED
 IMPLEMENTATION_READY              = YES
-VISIBLE_RUNTIME                   = CURRENT_FOUNDATION_NOT_YET_UPDATED
-UI_IMPLEMENTATION                 = NOT_STARTED
-UI_IMPLEMENTATION_AUTHORIZED      = NO
-UI_IMPLEMENTATION_AUTHORIZATION   = FORBIDDEN_UNTIL_OWNER_GO_FOR_SCOPED_UI_IMPLEMENTATION
+VISIBLE_RUNTIME                   = WAVE_1_FOUNDATION_ROUTES_ACCESS
+UI_IMPLEMENTATION                 = IN_REVIEW
+UI_IMPLEMENTATION_AUTHORIZED      = WAVE_1_ONLY
+UI_IMPLEMENTATION_AUTHORIZATION   = OWNER_GO_WAVE_1_FOUNDATION_ROUTES_ACCESS
 FIGMA_ACCESS_GATE                 = COMPLETE
 INFORMATION_ARCHITECTURE          = OWNER_ACCEPTED
 OWNER_IA_GATE                     = CLOSED
 HIGH_FIDELITY                     = FIRST_LOT_OWNER_ACCEPTED
 GLOBAL_NAV_STRUCTURE              = TOP_NAV
 CATALOG_LABEL                     = ACCEPTED
-THEME_TOKENS_IMPLEMENTED          = NO
-THEME_TOKEN_IMPLEMENTATION        = FORBIDDEN_UNTIL_OWNER_SCOPED_UI_GO
+THEME_TOKENS_IMPLEMENTED          = WAVE_1_FOUNDATION
+THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 ```
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
@@ -79,7 +79,7 @@ Still unselected:
 - full responsive implementation
 - mobile rewrite
 
-The implemented shell still shows today’s `Produse` label until a later scoped UI GO changes runtime presentation. See `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
+Wave 1 of first-lot UI implementation now shows Level 1 `Catalog` and stable `/jobs/:jobId` plus `/quotes/:quoteSnapshotId` routes. Full first-lot visual implementation is not complete. See `docs/architecture/UI_UX_FOUNDATION_CANON.md` and `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`.
 
 ## Classification
 
@@ -365,7 +365,7 @@ Do not copy the old structure, menus, CSS, or visual hierarchy by default.
 
 This document does not authorize UI implementation, plugin installation, or a restructure prompt.
 
-The Figma access gate, Owner IA selection, visual-direction gate, and first-lot visual gate are closed. High-fidelity **design** for the first lot is `FIRST_LOT_OWNER_ACCEPTED`. Visible runtime is still the current foundation. UI implementation is `NOT_STARTED`.
+The Figma access gate, Owner IA selection, visual-direction gate, and first-lot visual gate are closed. High-fidelity **design** for the first lot is `FIRST_LOT_OWNER_ACCEPTED`. Visible runtime for Wave 1 is `WAVE_1_FOUNDATION_ROUTES_ACCESS`. Full first-lot UI implementation is not complete. Wave 1 is `IN_REVIEW`.
 
 `OWNER_VISUAL_ACCEPTANCE` for the first lot is closed as `HF_LOT_GATE`. That closed visual gate is not a scoped UI implementation GO. Do not treat accepted Figma screens as if they already exist in the product.
 
@@ -492,8 +492,8 @@ CATALOG_LABEL              = ACCEPTED
 HIGH_FIDELITY_DESIGN       = FIRST_LOT_OWNER_ACCEPTED
 OWNER_VISUAL_ACCEPTANCE    = FIRST_LOT_CLOSED
 HIGH_FIDELITY              = FIRST_LOT_OWNER_ACCEPTED
-VISIBLE_RUNTIME            = CURRENT_FOUNDATION_NOT_YET_UPDATED
-UI_IMPLEMENTATION          = NOT_STARTED
+VISIBLE_RUNTIME            = WAVE_1_FOUNDATION_ROUTES_ACCESS
+UI_IMPLEMENTATION          = IN_REVIEW
 ```
 
 `OWNER_VISUAL_ACCEPTANCE` for the first lot is closed. It is not the closed IA gate and it is not a scoped UI implementation GO.
@@ -510,15 +510,15 @@ Recorded process, without rewriting earlier steps as if Mobbin had run:
 3. THREE_INFORMATION_ARCHITECTURE_CANDIDATES = COMPLETE
 4. OWNER_IA_SELECTION                        = ACCEPTED_WITH_AMENDMENTS
 5. PILOT_HIGH_FIDELITY_SCOPE_DEFINITION      = OWNER_ACCEPTED
-6. DESIGN_TOKEN_FOUNDATION                   = ACCEPTED_IN_FIGMA_NOT_IMPLEMENTED
+6. DESIGN_TOKEN_FOUNDATION                   = WAVE_1_FOUNDATION
 7. COMPONENT_LIBRARY                         = FIGMA_ONLY_NOT_IMPLEMENTED
 8. PILOT_SCREEN_SET                          = FIRST_LOT_OWNER_ACCEPTED
 9. OWNER_VISUAL_ACCEPTANCE                   = FIRST_LOT_CLOSED
 10. IMPLEMENTATION_READINESS_CONTRACTS       = OWNER_ACCEPTED
-11. SCOPED_UI_IMPLEMENTATION                 = NOT_STARTED
+11. SCOPED_UI_IMPLEMENTATION                 = WAVE_1_IN_REVIEW
 ```
 
-The first lot lives in the lot worklog and in Figma pages 12–21. Route, money, and wave contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. They are not implemented.
+The first lot lives in the lot worklog and in Figma pages 12–21. Route, money, and wave contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 implements foundation routes and access. Remaining lot screens are not implemented.
 
 This file does not start scoped UI implementation.
 
@@ -548,7 +548,7 @@ Historical Machine Strict pixels are reference-only. They are not captures of th
 
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items with the implemented `Produse` label, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens. The accepted Level 1 label is `Catalog`; do not edit the foundation canon to pretend that label is already in the shell.
 
-Accepted Figma screens are design truth. They are not visible runtime. `VISIBLE_RUNTIME = CURRENT_FOUNDATION_NOT_YET_UPDATED`.
+Accepted Figma screens are design truth. They are not the remaining first-lot runtime. `VISIBLE_RUNTIME = WAVE_1_FOUNDATION_ROUTES_ACCESS`.
 
 This canon records where later authorized UI work must go. Do not edit the foundation canon to pretend the target shell already exists.
 

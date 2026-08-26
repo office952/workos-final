@@ -164,24 +164,23 @@ export function deriveJobNextAction(stage: JobStage): JobNextAction {
 }
 
 export function jobHref(item: {
+  orderSnapshotId: string;
+  productCode?: string;
+  planId?: string | null;
+  nextAction?: JobNextAction;
+}): string {
+  return `/jobs/${encodeURIComponent(item.orderSnapshotId)}`;
+}
+
+export function jobConfiguratorHref(item: {
   productCode: string;
   orderSnapshotId: string;
-  planId: string | null;
-  nextAction: JobNextAction;
 }): string {
-  switch (item.nextAction) {
-    case "OPEN_EXECUTION":
-    case "CONTINUE_EXECUTION":
-    case "VIEW_COMPLETED":
-      return item.planId ? `/execution/${item.planId}` : `/products/${item.productCode}`;
-    case "RELEASE_TO_PRODUCTION":
-    case "CREATE_EXECUTION_PLAN":
-      return `/products/${item.productCode}?order=${encodeURIComponent(item.orderSnapshotId)}`;
-    default: {
-      const _exhaustive: never = item.nextAction;
-      return _exhaustive;
-    }
-  }
+  return `/products/${item.productCode}?order=${encodeURIComponent(item.orderSnapshotId)}`;
+}
+
+export function jobExecutionHref(planId: string | null): string | null {
+  return planId ? `/execution/${planId}` : null;
 }
 
 export function deriveJobAttention(input: {

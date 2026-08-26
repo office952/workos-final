@@ -2,7 +2,13 @@ import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { assignExecutorIfNeeded, assignProviderIfNeeded, ensureTestExecutor } from "./helpers/people";
+import {
+  assignExecutorIfNeeded,
+  assignProviderIfNeeded,
+  configureTestExecutorPin,
+  ensureTestExecutor,
+  identifyTestExecutorOnPage,
+} from "./helpers/people";
 
 async function confirmLetters(page: Page, inscription: string) {
   await page.goto("/products");
@@ -47,21 +53,22 @@ async function assignAndStart(card: Locator, providerLabel: string) {
   return true;
 }
 
-test("projects partial actual internal cost from LED consumption and frozen rates", async ({
+test("records LED actuals on execution without projecting workshop money", async ({
   page,
   request,
 }) => {
   test.setTimeout(90_000);
-  await ensureTestExecutor(request);
+  const person = await ensureTestExecutor(request);
+  await configureTestExecutorPin(request, person.personId);
   await confirmLetters(page, `AC${Date.now().toString().slice(-4)}`);
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);
+  await identifyTestExecutorOnPage(page);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
-  await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
-  await expect(page.getByText("Cost intern real: indisponibil")).toHaveCount(0);
+  await expect(page.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
   await expect(page.getByText("Editează cost")).toHaveCount(0);
   await expect(page.getByText("ActualCostProjection")).toHaveCount(0);
 
@@ -78,16 +85,8 @@ test("projects partial actual internal cost from LED consumption and frozen rate
     await placeLed.getByRole("button", { name: "Finalizează" }).click();
   }
   await expect(placeLed.getByText("Modul LED 12V: 127 buc")).toBeVisible();
-  await expect(page.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
-  await expect(page.getByText("Cost intern real: 63,50 EUR (parțial)")).toBeVisible();
-  await expect(page.getByText("Diferență pe costurile disponibile: +1,00 EUR")).toBeVisible();
-  await page.getByText("Detalii cost real").click();
-  await expect(page.getByText("Modul LED 12V: Cost calculabil")).toBeVisible();
-  await expect(page.getByText("Cost indisponibil").first()).toBeVisible();
-  await expect(page.getByText("Fără consum înregistrat").first()).toBeVisible();
-  await expect(
-    page.getByLabel("Rezumat cost intern").getByRole("heading", { name: "Manoperă" }),
-  ).toBeVisible();
+  await expect(page.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
+  await expect(page.getByText("Detalii cost real")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actual-cost-summary.png",
     fullPage: true,
@@ -116,7 +115,7 @@ test("projects partial actual internal cost from LED consumption and frozen rate
   ).toBe(true);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByText("Cost intern real: 63,50 EUR (parțial)")).toBeVisible();
+  await expect(page.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-actual-cost-narrow.png",
     fullPage: true,

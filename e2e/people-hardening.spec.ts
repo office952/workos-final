@@ -6,6 +6,8 @@ import { openExecutionWorkspace } from "./helpers/execution";
 import {
   assignLettersExecutionSkills,
   assignProviderIfNeeded,
+  configureTestExecutorPin,
+  identifyTestExecutorOnPage,
   openPeopleAdmin,
 } from "./helpers/people";
 import { uniqueRequestToken } from "./helpers/requests";
@@ -25,6 +27,7 @@ test("removed skill stays removed and planned start revalidates availability", a
   page,
   request,
 }) => {
+  test.setTimeout(90_000);
   const removedName = `Mihai Hardening ${uniqueRequestToken("HR")}`;
   const startName = `Mihai Start ${uniqueRequestToken("ST")}`;
 
@@ -59,6 +62,7 @@ test("removed skill stays removed and planned start revalidates availability", a
   expect(startPerson).toBeTruthy();
   if (startPerson) {
     await assignLettersExecutionSkills(request, startPerson.personId);
+    await configureTestExecutorPin(request, startPerson.personId);
   }
 
   await page.goto("/products");
@@ -80,19 +84,27 @@ test("removed skill stays removed and planned start revalidates availability", a
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);
+  await identifyTestExecutorOnPage(page, startName);
   const executionUrl = page.url();
 
   const backCnc = taskCard(page, "Debitare foaie CNC", "Spate");
+  await expect(backCnc.getByRole("button", { name: "Alocă utilaj", exact: true })).toBeVisible();
   await assignProviderIfNeeded(backCnc, "CNC 4020");
   await expect(backCnc.getByText("Alocat: CNC 4020")).toBeVisible();
-  await backCnc.getByRole("combobox", { name: "Executant" }).selectOption({ label: startName });
-  await backCnc.getByRole("button", { name: "Alocă executant" }).click();
-  await expect(backCnc.getByText(`Executant: ${startName}`)).toBeVisible();
   const planId = new URL(executionUrl).pathname.split("/").pop();
   expect(planId).toBeTruthy();
   if (!startPerson || !planId) {
     return;
   }
+  const backTask = await readBackCnc(request, planId);
+  expect(backTask?.taskId).toBeTruthy();
+  const assigned = await request.post(
+    `/api/execution-tasks/${backTask?.taskId}/executor`,
+    { data: { personId: startPerson.personId } },
+  );
+  expect(assigned.ok()).toBeTruthy();
+  await page.reload();
+  await expect(backCnc.getByText(`Executant: ${startName}`)).toBeVisible();
   await identifyOperator(request, startPerson.personId);
 
   await page.goto(`/admin/people/${encodeURIComponent(startPerson.personId)}`);
@@ -134,6 +146,7 @@ test("removed skill stays removed and planned start revalidates availability", a
     .poll(async () => (await readBackCnc(request, planId))?.canStart ?? false)
     .toBe(true);
   await page.goto(executionUrl);
+  await identifyTestExecutorOnPage(page, startName);
   await expect(backCnc.getByRole("button", { name: "Pornește" })).toBeVisible();
 });
 

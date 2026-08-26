@@ -222,7 +222,9 @@ describe("job overview API", () => {
       needsAttention: true,
       customerDisplayName: "Client JOBA",
     });
-    expect(String(byInscription.JOBA.href)).toContain("?order=");
+    expect(String(byInscription.JOBA.href)).toBe(
+      `/jobs/${encodeURIComponent(String(byInscription.JOBA.jobId))}`,
+    );
     expect(byInscription.JOBB).toMatchObject({
       stage: "RELEASED",
       nextActionLabel: "Creează planul de execuție",
@@ -250,5 +252,27 @@ describe("job overview API", () => {
     });
     expect(orderOnly.orderSnapshotId).toBe(byInscription.JOBA.jobId);
     expect(released.snapshotId).toBe(byInscription.JOBB.releaseSnapshotId);
+
+    const missing = await app.request("/api/jobs/ord:missing");
+    expect(missing.status).toBe(404);
+
+    const detail = await app.request(`/api/jobs/${encodeURIComponent(String(orderOnly.orderSnapshotId))}`);
+    expect(detail.status).toBe(200);
+    const detailBody = await readBody(detail);
+    expect(detailBody.job).toMatchObject({
+      jobId: orderOnly.orderSnapshotId,
+      stage: "ORDER_CREATED",
+    });
+    expect(detailBody.execution).toBeNull();
+    expect((detailBody.order as JsonObject).orderSnapshotId).toBe(orderOnly.orderSnapshotId);
+
+    const plannedDetail = await app.request(
+      `/api/jobs/${encodeURIComponent(String(plannedOrder.orderSnapshotId))}`,
+    );
+    const plannedBody = await readBody(plannedDetail);
+    expect((plannedBody.execution as JsonObject).planId).toBe(byInscription.JOBC.planId);
+    expect((plannedBody.execution as JsonObject).href).toBe(
+      `/execution/${String(byInscription.JOBC.planId)}`,
+    );
   });
 });

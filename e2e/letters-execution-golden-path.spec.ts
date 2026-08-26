@@ -165,7 +165,7 @@ test("executes the reachable LETTERS DAG and leaves a truthful manual path", asy
   await expect(plan.getByText("În lucru: 0")).toBeVisible();
   await expect(plan.getByText("Fără furnizor: 0")).toBeVisible();
   await expect(plan.getByText("Stare: Planificat").first()).toBeVisible();
-  await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
+  await expect(plan.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Necesită configurare atelier" })).toHaveCount(0);
 
   for (const card of [uniformity, inspect, pack]) {

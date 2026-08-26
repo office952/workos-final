@@ -71,7 +71,7 @@ describe("request overview projection", () => {
     expect(item.nextAction).toBe("OPEN_QUOTE");
     expect(item.nextActionLabel).toBe("Deschide oferta");
     expect(item.href).toBe("/requests/crq%3A11111111-2222-3333-4444-555555555555");
-    expect(item.nextActionHref).toContain("/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=");
+    expect(item.nextActionHref).toContain("/quotes/");
     expect(item.nextActionHref).not.toContain("/requests/");
     expect(JSON.stringify(item)).not.toMatch(/contentHash|schemaVersion|SENT|draft|Intake/);
   });

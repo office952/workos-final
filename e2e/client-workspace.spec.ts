@@ -124,10 +124,12 @@ test("office can open one client and see requests, offers and works", async ({
   expect(download.suggestedFilename()).toMatch(/oferta|pdf/i);
 
   await page.getByRole("link", { name: "Marchează acceptată" }).click();
+  await expect(page).toHaveURL(/\/quotes\//);
   await page.getByRole("button", { name: "Marchează acceptată" }).click();
-  await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Creează comanda" })).toBeVisible();
   await page.getByRole("button", { name: "Creează comanda" }).click();
-  await expect(page.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
+  await expect(page).toHaveURL(/\/jobs\//);
+  await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
 
   await page.goto(`${workspaceUrl}?section=lucrari`);
   await expect(page.getByRole("link", { name: inscription })).toBeVisible();

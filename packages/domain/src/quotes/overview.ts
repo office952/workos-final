@@ -144,24 +144,19 @@ export function deriveQuoteOverviewNextAction(
 }
 
 export function quoteOverviewHref(item: {
+  quoteSnapshotId: string;
+  productCode?: string;
+  orderSnapshotId?: string | null;
+  nextAction?: QuoteOverviewNextAction;
+}): string {
+  return `/quotes/${encodeURIComponent(item.quoteSnapshotId)}`;
+}
+
+export function quoteConfiguratorHref(item: {
   productCode: string;
   quoteSnapshotId: string;
-  orderSnapshotId: string | null;
-  nextAction: QuoteOverviewNextAction;
 }): string {
-  switch (item.nextAction) {
-    case "OPEN_ORDER":
-      return item.orderSnapshotId
-        ? `/products/${item.productCode}?order=${encodeURIComponent(item.orderSnapshotId)}`
-        : `/products/${item.productCode}?quote=${encodeURIComponent(item.quoteSnapshotId)}`;
-    case "ACCEPT_QUOTE":
-    case "CREATE_ORDER":
-      return `/products/${item.productCode}?quote=${encodeURIComponent(item.quoteSnapshotId)}`;
-    default: {
-      const _exhaustive: never = item.nextAction;
-      return _exhaustive;
-    }
-  }
+  return `/products/${item.productCode}?quote=${encodeURIComponent(item.quoteSnapshotId)}`;
 }
 
 export function deriveQuoteOverviewAttention(stage: QuoteOverviewStage): {

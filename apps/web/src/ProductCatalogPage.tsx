@@ -38,8 +38,8 @@ export function ProductCatalogPage() {
 
   return (
     <section>
-      <h1>Produse</h1>
-      <p className="page-lead">Alegeți un produs din catalog.</p>
+      <h1>Catalog</h1>
+      <p className="page-lead">Produsele din catalog. Alegeți un produs.</p>
       <CatalogTree nodes={page.tree} />
     </section>
   );

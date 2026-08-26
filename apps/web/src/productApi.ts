@@ -77,7 +77,7 @@ export async function confirmReviewedConfiguration(
       ok: true;
       truth: ProductTruth;
       aggregate: ProductAggregate;
-      eic: EicResult;
+      eic?: EicResult;
       commercialPrice: CommercialPriceProjection;
       executionPlanPreview: ExecutionPlanPreview;
     }
@@ -111,7 +111,6 @@ export async function confirmReviewedConfiguration(
     !response.ok ||
     !body.truth ||
     !body.aggregate ||
-    !body.eic ||
     !body.commercialPrice ||
     !body.executionPlanPreview
   ) {

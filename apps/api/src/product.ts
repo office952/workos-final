@@ -7,6 +7,13 @@ import {
   freezeQuoteSnapshot,
   projectQuoteDocument,
   projectCommercialPrice,
+  omitForbiddenFinancialFields,
+  scopeCommercialPrice,
+  scopeEic,
+  scopeExecutionPlanPreview,
+  scopeExecutionPlanView,
+  scopeOrderSnapshot,
+  scopeQuoteSnapshot,
   recordQuoteAcceptance,
   composeProductProcesses,
   composeProductProcessesFromTruth,
@@ -30,7 +37,8 @@ import {
 import type { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import type { ProductSystemRuntime } from "./productSystem/runtime.js";
-import { getProductSystem, type ApiEnv } from "./cloud/context.js";
+import { getProductSystem, type ApiContext, type ApiEnv } from "./cloud/context.js";
+import { financialAccess } from "./financial/access.js";
 import { requireOwnerRole } from "./cloud/middleware.js";
 import { OPERATOR_SESSION_COOKIE } from "./operator/store.js";
 import { renderQuoteDocumentPdf } from "./quoteDocument/renderQuoteDocumentPdf.js";
@@ -133,9 +141,12 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       ...(volumeFinish ? { "volume.finish": volumeFinish } : {}),
     };
     return c.json({
-      composition: composeProductProcesses(template, values, {
-        costEvidenceRows: runtime.listActiveCostEvidence(),
-      }),
+      composition: omitForbiddenFinancialFields(
+        composeProductProcesses(template, values, {
+          costEvidenceRows: runtime.listActiveCostEvidence(),
+        }),
+        financialAccess(c, "commercial"),
+      ),
       inspections: lettersProcessCompositionInspections(template),
     });
   });
@@ -168,16 +179,21 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!compiled.ok) {
       return c.json(compiled.body, compiled.status);
     }
+    const access = financialAccess(c, "commercial");
+    const commercialPrice = projectCommercialPrice(compiled.eic);
     return c.json({
       truth: compiled.truth,
       aggregate: compiled.aggregate,
-      eic: compiled.eic,
-      commercialPrice: projectCommercialPrice(compiled.eic),
-      executionPlanPreview: compileExecutionPlanPreview(
-        compiled.truth,
-        compiled.aggregate,
-        compiled.template,
-        compiled.eic,
+      eic: scopeEic(compiled.eic, access),
+      commercialPrice: scopeCommercialPrice(commercialPrice, access),
+      executionPlanPreview: scopeExecutionPlanPreview(
+        compileExecutionPlanPreview(
+          compiled.truth,
+          compiled.aggregate,
+          compiled.template,
+          compiled.eic,
+        ),
+        access,
       ),
     });
   });
@@ -202,7 +218,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     const stored = runtime.acceptProductionSnapshot(frozen);
     return c.json({
       created: stored.created,
-      snapshot: stored.snapshot,
+      snapshot: omitForbiddenFinancialFields(
+        stored.snapshot,
+        financialAccess(c, "commercial"),
+      ),
     });
   });
 
@@ -304,21 +323,21 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!requestId) {
       return c.json({
         created: stored.created,
-        quoteSnapshot: stored.snapshot,
+        quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, financialAccess(c, "commercial")),
       });
     }
     const linked = runtime.linkRequestQuote(requestId, stored.snapshot.quoteSnapshotId);
     if (!linked.ok) {
       return c.json({
         created: stored.created,
-        quoteSnapshot: stored.snapshot,
+        quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, financialAccess(c, "commercial")),
         requestLinkError: linked.error,
         reasons: ["Oferta a fost creată, dar nu s-a legat de cerere."],
       });
     }
     return c.json({
       created: stored.created,
-      quoteSnapshot: stored.snapshot,
+      quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, financialAccess(c, "commercial")),
       requestLink: linked.link,
     });
   });
@@ -329,7 +348,9 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
       return c.json({ error: "not_found" }, 404);
     }
-    return c.json({ quoteSnapshot: snapshot });
+    return c.json({
+      quoteSnapshot: scopeQuoteSnapshot(snapshot, financialAccess(c, "commercial")),
+    });
   });
 
   app.get(
@@ -368,7 +389,7 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       return c.json({
         created: stored.created,
         acceptanceDecision: stored.decision,
-        quoteSnapshot: snapshot,
+        quoteSnapshot: scopeQuoteSnapshot(snapshot, financialAccess(c, "commercial")),
       });
     },
   );
@@ -387,7 +408,7 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       }
       return c.json({
         acceptanceDecision: decision,
-        quoteSnapshot: snapshot,
+        quoteSnapshot: scopeQuoteSnapshot(snapshot, financialAccess(c, "commercial")),
       });
     },
   );
@@ -420,8 +441,8 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       const stored = runtime.persistOrderSnapshot(frozen.snapshot);
       return c.json({
         created: stored.created,
-        orderSnapshot: stored.snapshot,
-        quoteSnapshot: snapshot,
+        orderSnapshot: scopeOrderSnapshot(stored.snapshot, financialAccess(c, "commercial")),
+        quoteSnapshot: scopeQuoteSnapshot(snapshot, financialAccess(c, "commercial")),
         acceptanceDecision: acceptance,
       });
     },
@@ -440,8 +461,8 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
         return c.json({ error: "not_found" }, 404);
       }
       return c.json({
-        orderSnapshot,
-        quoteSnapshot: snapshot,
+        orderSnapshot: scopeOrderSnapshot(orderSnapshot, financialAccess(c, "commercial")),
+        quoteSnapshot: scopeQuoteSnapshot(snapshot, financialAccess(c, "commercial")),
         acceptanceDecision: runtime.readQuoteAcceptance(snapshot.quoteSnapshotId),
       });
     },
@@ -453,7 +474,9 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!orderSnapshot || orderSnapshot.productCode !== c.req.param("productCode")) {
       return c.json({ error: "not_found" }, 404);
     }
-    return c.json({ orderSnapshot });
+    return c.json({
+      orderSnapshot: scopeOrderSnapshot(orderSnapshot, financialAccess(c, "commercial")),
+    });
   });
 
   app.post(
@@ -472,10 +495,11 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
         );
       }
       const stored = runtime.acceptProductionSnapshot(frozen.snapshot);
+      const access = financialAccess(c, "commercial");
       return c.json({
         created: stored.created,
-        snapshot: stored.snapshot,
-        orderSnapshot,
+        snapshot: omitForbiddenFinancialFields(stored.snapshot, access),
+        orderSnapshot: scopeOrderSnapshot(orderSnapshot, access),
       });
     },
   );
@@ -492,9 +516,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       if (!snapshot) {
         return c.json({ error: "not_found" }, 404);
       }
+      const access = financialAccess(c, "commercial");
       return c.json({
-        snapshot,
-        orderSnapshot,
+        snapshot: omitForbiddenFinancialFields(snapshot, access),
+        orderSnapshot: scopeOrderSnapshot(orderSnapshot, access),
       });
     },
   );
@@ -507,7 +532,9 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
       }
-      return c.json({ snapshot });
+      return c.json({
+        snapshot: omitForbiddenFinancialFields(snapshot, financialAccess(c, "commercial")),
+      });
     },
   );
 
@@ -534,7 +561,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       );
       return c.json({
         created: stored.created,
-        executionPlan: projectPlanView(runtime, stored.record),
+        executionPlan: scopeExecutionPlanView(
+          projectPlanView(runtime, stored.record),
+          financialAccess(c, "workshop"),
+        ),
       });
     },
   );
@@ -552,7 +582,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
         return c.json({ error: "not_found" }, 404);
       }
       return c.json({
-        executionPlan: projectPlanView(runtime, record),
+        executionPlan: scopeExecutionPlanView(
+          projectPlanView(runtime, record),
+          financialAccess(c, "workshop"),
+        ),
       });
     },
   );
@@ -565,10 +598,13 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     }
     const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
     return c.json({
-      executionPlan: projectPlanView(
-        runtime,
-        record,
-        session.ok ? session.person.personId : null,
+      executionPlan: scopeExecutionPlanView(
+        projectPlanView(
+          runtime,
+          record,
+          session.ok ? session.person.personId : null,
+        ),
+        financialAccess(c, "workshop"),
       ),
     });
   });
@@ -844,7 +880,7 @@ function projectPlanView(
 }
 
 function respondTaskMutation(
-  c: { json: (body: unknown, status?: 200 | 404 | 409 | 422) => Response },
+  c: ApiContext,
   runtime: ProductSystemRuntime,
   result: TaskMutationResult,
   options: { taskId?: string; operatorId?: string | null } = {},
@@ -869,7 +905,10 @@ function respondTaskMutation(
   }
   return c.json({
     alreadyApplied: result.alreadyApplied,
-    executionPlan: projectPlanView(runtime, result.record, operatorId),
+    executionPlan: scopeExecutionPlanView(
+      projectPlanView(runtime, result.record, operatorId),
+      financialAccess(c, "workshop"),
+    ),
   });
 }
 

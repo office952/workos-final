@@ -1,3 +1,4 @@
+import { omitForbiddenFinancialFields } from "@workos-final/domain";
 import type { Context, Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { getProductSystem, type ApiEnv } from "../cloud/context.js";
@@ -118,7 +119,7 @@ export function registerOperatorRoutes(app: Hono<ApiEnv>): void {
         displayName: inbox.operator.displayName,
         availability: inbox.operator.availability,
       },
-      inbox,
+      inbox: omitForbiddenFinancialFields(inbox, "workshop"),
     });
   });
 

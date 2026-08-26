@@ -656,7 +656,7 @@ describe("product configuration API", () => {
     expect(view.plan.sourceSnapshotId).toBe(snapshotId);
     expect(view.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(view.tasks).toHaveLength(12);
-    expect(view.plan.eicTotal).toBe(382.5);
+    expect(view.plan.eicTotal).toBeUndefined();
     expect(view.tasks.every((task) => task.status === "PLANNED")).toBe(true);
     expect(view.tasks.every((task) => task.startedAt == null)).toBe(true);
     const readBack = await app.request(planPath);
@@ -724,7 +724,7 @@ describe("product configuration API", () => {
     expect(view.plan.sourceSnapshotId).toBe(snapshotId);
     expect(view.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(view.tasks).toHaveLength(12);
-    expect(view.plan.eicTotal).toBe(382.5);
+    expect(view.plan.eicTotal).toBeUndefined();
     expect((snapshot.operations as unknown[]).length).toBe(12);
   });
 
@@ -880,7 +880,7 @@ describe("product configuration API", () => {
     expect(firstBody.created).toBe(true);
     expect(view.plan.status).toBe("PLANNED");
     expect(view.plan.sourceSnapshotId).toBe(snapshot.snapshotId);
-    expect(view.plan.eicTotal).toBe(382.5);
+    expect(view.plan.eicTotal).toBeUndefined();
     expect(view.tasks).toHaveLength(12);
     expect(view.tasks.every((item) => item.assignedProvider === null)).toBe(true);
     expect(view.tasks.every((item) => item.assignedExecutor === null)).toBe(true);
@@ -1040,7 +1040,7 @@ describe("product configuration API", () => {
     expect(typeof startedTask.startedAt).toBe("string");
     expect(Date.parse(startedTask.startedAt as string)).toBeGreaterThanOrEqual(beforeStart - 1000);
     expect(startedView.progressStatus).toBe("IN_PROGRESS");
-    expect(startedView.plan.eicTotal).toBe(382.5);
+    expect(startedView.plan.eicTotal).toBeUndefined();
     expect(startedView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
 
     const reassignAfterStart = await app.request(
@@ -1196,7 +1196,7 @@ describe("product configuration API", () => {
     expect(started.status).toBe(200);
     expect((startedTask.assignedExecutor as JsonObject).id).toBe(secondId);
     expect((startedTask.assignedExecutor as JsonObject).label).toBe("Executor doi");
-    expect(startedView.plan.eicTotal).toBe(382.5);
+    expect(startedView.plan.eicTotal).toBeUndefined();
 
     const locked = await assignExecutor(app, backCnc.taskId, firstId);
     expect(locked.status).toBe(409);
@@ -1314,7 +1314,7 @@ describe("product configuration API", () => {
       varianceCount: 0,
       status: "IN_PROGRESS",
     });
-    expect(finalView.plan.eicTotal).toBe(382.5);
+    expect(finalView.plan.eicTotal).toBeUndefined();
     expect(finalView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
     expect(
       finalView.tasks.filter(
@@ -1415,7 +1415,7 @@ describe("product configuration API", () => {
     expect((ledDone.quantities as Array<JsonObject>)[0]?.value).toBe(125);
     expect(ledView.progress.varianceCount).toBe(1);
     expect(ledView.progress.status).toBe("IN_PROGRESS");
-    expect(ledView.plan.eicTotal).toBe(382.5);
+    expect(ledView.plan.eicTotal).toBeUndefined();
     expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
 
     const rewrite = await completeTaskAs(app, String(lighting.taskId), cookie, {
@@ -1533,25 +1533,9 @@ describe("product configuration API", () => {
         (item) => item.resourceId === "MAT-LED-MODULE",
       )?.quantity,
     ).toBe(125);
-    expect(ledView.plan.eicTotal).toBe(382.5);
+    expect(ledView.plan.eicTotal).toBeUndefined();
     expect(ledView.plan.sourceSnapshotHash).toBe(snapshot.contentHash);
-    expect(ledView.actualInternalCost.status).toBe("PARTIAL");
-    expect(ledView.actualInternalCost.calculableTotal).toBe(63.5);
-    expect(
-      (ledView.actualInternalCost.lines as Array<JsonObject>).find(
-        (item) => item.resourceId === "MAT-LED-MODULE",
-      ),
-    ).toMatchObject({
-      actualQuantity: 127,
-      rate: 0.5,
-      actualCost: 63.5,
-      status: "CALCULABLE",
-    });
-    expect(
-      (ledView.actualInternalCost.lines as Array<JsonObject>).some(
-        (item) => item.kind === "LABOR" && item.status === "UNAVAILABLE" && item.actualCost === null,
-      ),
-    ).toBe(true);
+    expect(ledView.actualInternalCost).toBeUndefined();
     expect(JSON.stringify(ledView)).not.toMatch(
       /costEngine|quoteOrchestrator|inventoryEngine|warehouse|FIFO|margin|VAT/,
     );

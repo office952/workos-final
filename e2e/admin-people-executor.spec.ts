@@ -2,7 +2,13 @@ import { type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { assignLettersExecutionSkills, openPeopleAdmin } from "./helpers/people";
+import {
+  assignLettersExecutionSkills,
+  assignProviderIfNeeded,
+  configureTestExecutorPin,
+  identifyTestExecutorOnPage,
+  openPeopleAdmin,
+} from "./helpers/people";
 
 const ACTIVE_NAME = "Executor PEOPLE E2E";
 const RETIRED_NAME = "Executor retras PEOPLE E2E";
@@ -69,6 +75,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   expect(activePerson).toBeTruthy();
   if (activePerson) {
     await assignLettersExecutionSkills(request, activePerson.personId);
+    await configureTestExecutorPin(request, activePerson.personId);
   }
   await expect(page.getByText(ACTIVE_NAME).first()).toBeVisible();
   await page.screenshot({
@@ -83,10 +90,12 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   const retiredRow = page.locator(".people-list li").filter({ hasText: RETIRED_NAME }).first();
   if (!(await retiredRow.getByText("Retras", { exact: true }).isVisible())) {
     await retiredRow.getByRole("link", { name: "Deschide" }).click();
+    await expect(page.getByRole("heading", { name: RETIRED_NAME })).toBeVisible();
     const retire = page.getByRole("button", { name: "Retrage persoana" });
     if (await retire.isVisible()) {
       await retire.click();
     }
+    await expect(page.getByText("Retras", { exact: true })).toBeVisible();
     await page.getByRole("link", { name: "← Oameni" }).click();
   }
   await expect(
@@ -109,6 +118,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   ).toBeVisible();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);
+  await identifyTestExecutorOnPage(page, ACTIVE_NAME);
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();
@@ -116,30 +126,14 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   const backCnc = taskCard(page, "Debitare foaie CNC", "Spate");
   const inspect = taskCard(page, "Control calitate final", "Produs");
 
-  if (await backCnc.getByText("Alocare: Nealocat").isVisible()) {
-    await backCnc.getByRole("button", { name: "Alocă utilaj", exact: true }).click();
-  }
+  await assignProviderIfNeeded(backCnc, "CNC 4020");
   await expect(backCnc.getByText("Alocat: CNC 4020")).toBeVisible();
-  if (await backCnc.getByText("Executant: Nealocat").isVisible()) {
-    await expect(backCnc.getByRole("button", { name: "Pornește" })).toHaveCount(0);
-    await page.screenshot({
-      path: "docs/worklog/screenshots/letters-people-executor-missing.png",
-      fullPage: true,
-    });
-    await expect(backCnc.getByRole("combobox", { name: "Executant" })).toContainText(ACTIVE_NAME);
-    await expect(backCnc.getByRole("combobox", { name: "Executant" })).not.toContainText(
-      RETIRED_NAME,
-    );
-    await page.screenshot({
-      path: "docs/worklog/screenshots/letters-people-executor-selector.png",
-      fullPage: true,
-    });
-    await backCnc.getByRole("combobox", { name: "Executant" }).selectOption({
-      label: ACTIVE_NAME,
-    });
-    await backCnc.getByRole("button", { name: "Alocă executant" }).click();
-  }
-  await expect(backCnc.getByText(`Executant: ${ACTIVE_NAME}`)).toBeVisible();
+  await expect(backCnc.getByRole("combobox", { name: "Executant" })).toHaveCount(0);
+  await expect(page.getByText(RETIRED_NAME)).toHaveCount(0);
+  await page.screenshot({
+    path: "docs/worklog/screenshots/letters-people-executor-selector.png",
+    fullPage: true,
+  });
   if (await backCnc.getByText("Stare: Planificat").isVisible()) {
     await expect(backCnc.getByRole("button", { name: "Pornește" })).toBeVisible();
     await page.screenshot({
@@ -149,6 +143,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     await backCnc.getByRole("button", { name: "Pornește" }).click();
     await expect(backCnc.getByText("Stare: În lucru")).toBeVisible();
   }
+  await expect(backCnc.getByText(`Executant: ${ACTIVE_NAME}`)).toBeVisible();
   if (await backCnc.getByRole("button", { name: "Finalizează" }).isVisible()) {
     await expect(backCnc.getByText("Stare: În lucru")).toBeVisible();
     await expect(backCnc.getByText(`Executant: ${ACTIVE_NAME}`)).toBeVisible();

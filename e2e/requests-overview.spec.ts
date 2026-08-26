@@ -117,17 +117,23 @@ test("office can record a request, configure a product, and find the linked quot
   });
 
   await page.getByRole("link", { name: "Marchează acceptată" }).click();
-  await expect(page.getByRole("heading", { name: "Ofertă creată" })).toBeVisible();
+  await expect(page).toHaveURL(/\/quotes\//);
+  await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
+  await expect(page.getByText("Creată", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "Marchează acceptată" }).click();
-  await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
+  await expect(page.getByText("Acceptată", { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Creează comanda" })).toBeVisible();
 
   await page.goto(requestUrl);
   await expect(page.getByText("Ofertă acceptată")).toBeVisible();
 
   await page.getByRole("link", { name: "Creează comanda" }).click();
-  await expect(page.getByRole("heading", { name: "Ofertă acceptată" })).toBeVisible();
+  await expect(page).toHaveURL(/\/quotes\//);
+  await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
   await page.getByRole("button", { name: "Creează comanda" }).click();
-  await expect(page.getByRole("heading", { name: "Comandă creată" })).toBeVisible();
+  await expect(page).toHaveURL(/\/jobs\//);
+  await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
+  await expect(page.getByText("Comandă creată")).toBeVisible();
 
   await page.goto(requestUrl);
   await expect(page.getByText("Comandă creată")).toBeVisible();
@@ -149,7 +155,7 @@ test("office can record a request, configure a product, and find the linked quot
   );
   await expect(
     requestRow(page, title).getByRole("link", { name: "Deschide oferta" }),
-  ).toHaveAttribute("href", /\/products\//);
+  ).toHaveAttribute("href", /\/quotes\//);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/requests");

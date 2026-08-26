@@ -26,7 +26,7 @@ const readyOverview: JobOverviewProjection = {
       stageLabel: "În lucru",
       nextAction: "CONTINUE_EXECUTION",
       nextActionLabel: "Continuă execuția",
-      href: "/execution/exp:active",
+      href: "/jobs/ord%3Aactive",
       needsAttention: false,
       attentionLabel: null,
       completedCount: 3,
@@ -49,7 +49,7 @@ const readyOverview: JobOverviewProjection = {
       stageLabel: "Plan creat",
       nextAction: "OPEN_EXECUTION",
       nextActionLabel: "Deschide execuția",
-      href: "/execution/exp:gap",
+      href: "/jobs/ord%3Agap",
       needsAttention: true,
       attentionLabel: "Lipsă utilaj dedicat",
       completedCount: 0,
@@ -72,7 +72,7 @@ const readyOverview: JobOverviewProjection = {
       stageLabel: "Finalizată",
       nextAction: "VIEW_COMPLETED",
       nextActionLabel: "Lucrare finalizată",
-      href: "/execution/exp:done",
+      href: "/jobs/ord%3Adone",
       needsAttention: false,
       attentionLabel: null,
       completedCount: 12,
@@ -100,7 +100,7 @@ describe("JobsOverviewPage", () => {
     );
     expect(await screen.findByRole("heading", { name: "Lucrări" })).toBeInTheDocument();
     expect(screen.getByText("Nu există încă lucrări comerciale.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Deschide produsele" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Deschide catalogul" })).toHaveAttribute(
       "href",
       "/products",
     );
@@ -123,7 +123,7 @@ describe("JobsOverviewPage", () => {
     expect(screen.getByText("3 / 12 finalizate · 1 în lucru")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Continuă execuția" })).toHaveAttribute(
       "href",
-      "/execution/exp:active",
+      "/jobs/ord%3Aactive",
     );
     expect(screen.getByText("Lipsă utilaj dedicat")).toBeInTheDocument();
     expect(screen.getByText("GATA")).toBeInTheDocument();

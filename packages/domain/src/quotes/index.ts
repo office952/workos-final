@@ -11,6 +11,7 @@ export {
   projectQuoteOverviewItem,
   quoteOverviewFilterLabel,
   quoteOverviewHref,
+  quoteConfiguratorHref,
   quoteOverviewNextActionLabel,
   quoteOverviewStageLabel,
   type QuoteOverviewFilter,

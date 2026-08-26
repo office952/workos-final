@@ -110,7 +110,7 @@ export function ProductConfigurationPage() {
   const [confirmed, setConfirmed] = useState<{
     truth: ProductTruth;
     aggregate: ProductAggregate;
-    eic: EicResult;
+    eic?: EicResult;
     commercialPrice: CommercialPriceProjection;
     executionPlanPreview: ExecutionPlanPreview;
     definition: ProductDefinition;
@@ -717,11 +717,9 @@ export function ProductConfigurationPage() {
             <div className="action-row">
               <Link
                 className="button-link"
-                to={`/products/${productCode}?order=${encodeURIComponent(
-                  restoredQuote.offer.order.orderSnapshotId,
-                )}`}
+                to={`/jobs/${encodeURIComponent(restoredQuote.offer.order.orderSnapshotId)}`}
               >
-                Continuă lucrarea
+                Deschide lucrarea
               </Link>
             </div>
           </>
@@ -762,6 +760,14 @@ export function ProductConfigurationPage() {
           busy={busy}
           onRelease={restoredJob.job.release ? undefined : () => void handleRestoreRelease()}
         />
+        <p>
+          <Link
+            className="button-link"
+            to={`/jobs/${encodeURIComponent(restoredJob.job.order.orderSnapshotId)}`}
+          >
+            Deschide lucrarea
+          </Link>
+        </p>
         {restoredJob.job.release ? (
           <AcceptedSnapshotSection
             snapshot={restoredJob.job.release}
@@ -922,7 +928,7 @@ export function ProductConfigurationPage() {
 type ConfirmedProduct = {
   truth: ProductTruth;
   aggregate: ProductAggregate;
-  eic: EicResult;
+  eic?: EicResult;
   commercialPrice: CommercialPriceProjection;
   executionPlanPreview: ExecutionPlanPreview;
   quoteSnapshot?: QuoteSnapshot;
@@ -972,7 +978,7 @@ function ConfirmedCommercialWorkspace({
       : undefined;
   const experience = projectCommercialExperience({
     commercialCompleteness: confirmed.commercialPrice.completeness,
-    internalCostCompleteness: confirmed.eic.completeness,
+    internalCostCompleteness: confirmed.eic?.completeness,
     quote: confirmed.quoteSnapshot,
     acceptance: confirmed.quoteAcceptance,
     order: confirmed.orderSnapshot,
@@ -1017,12 +1023,22 @@ function ConfirmedCommercialWorkspace({
       />
 
       {confirmed.orderSnapshot ? (
-        <OrderSnapshotSection
-          snapshot={confirmed.orderSnapshot}
-          release={commercialRelease}
-          busy={busy}
-          onRelease={commercialRelease ? undefined : onRelease}
-        />
+        <>
+          <OrderSnapshotSection
+            snapshot={confirmed.orderSnapshot}
+            release={commercialRelease}
+            busy={busy}
+            onRelease={commercialRelease ? undefined : onRelease}
+          />
+          <p>
+            <Link
+              className="button-link"
+              to={`/jobs/${encodeURIComponent(confirmed.orderSnapshot.orderSnapshotId)}`}
+            >
+              Deschide lucrarea
+            </Link>
+          </p>
+        </>
       ) : null}
 
       {commercialRelease ? (
@@ -1058,7 +1074,9 @@ function ConfirmedCommercialWorkspace({
 
       <details className="secondary-details">
         <summary>Detalii interne</summary>
-        <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
+        {confirmed.eic ? (
+          <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
+        ) : null}
         {confirmed.executionPlan ? null : (
           <ProductionPreviewSection
             preview={confirmed.executionPlanPreview}

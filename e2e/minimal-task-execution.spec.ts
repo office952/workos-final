@@ -172,7 +172,7 @@ test("assigns a provider and starts/completes a LETTERS production task", async 
     fullPage: true,
   });
 
-  await expect(plan.getByText("Cost intern planificat: 382,50 EUR (complet)")).toBeVisible();
+  await expect(plan.getByText(/Cost intern (planificat|real)/)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
   await expect(page.getByText("Pontaj")).toHaveCount(0);
   await expect(page.getByText("Angajat")).toHaveCount(0);

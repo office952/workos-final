@@ -661,11 +661,14 @@ export function ProductionPreviewSection({
         <li>Pregătite: {preview.summary.readyCount}</li>
         <li>Incomplete: {preview.summary.incompleteCount}</li>
         <li>Fără furnizor: {preview.summary.noProviderCount}</li>
-        <li>
-          Cost intern curent: {formatMoney(preview.summary.internalCostTotal)}{" "}
-          {preview.summary.internalCostCurrency}
-          {formatCostCompleteness(preview.summary.internalCostCompleteness)}
-        </li>
+        {"internalCostTotal" in preview.summary &&
+        preview.summary.internalCostTotal !== undefined ? (
+          <li>
+            Cost intern curent: {formatMoney(preview.summary.internalCostTotal)}{" "}
+            {preview.summary.internalCostCurrency}
+            {formatCostCompleteness(preview.summary.internalCostCompleteness)}
+          </li>
+        ) : null}
       </ul>
       {preview.summary.analyzerNote ? (
         <p className="page-lead">{preview.summary.analyzerNote}</p>
@@ -755,10 +758,12 @@ export function AcceptedSnapshotSection({
       )}
       <ul className="metric-row">
         <li>Operații: {snapshot.operations.length}</li>
-        <li>
-          Cost intern curent: {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
-          {formatCostCompleteness(snapshot.eic.completeness)}
-        </li>
+        {snapshot.eic ? (
+          <li>
+            Cost intern curent: {formatMoney(snapshot.eic.total)} {snapshot.eic.currency}
+            {formatCostCompleteness(snapshot.eic.completeness)}
+          </li>
+        ) : null}
         <li>Înghețat la: {new Date(snapshot.createdAt).toLocaleString("ro-RO")}</li>
         <li>Stare: Acceptat / înghețat</li>
       </ul>
