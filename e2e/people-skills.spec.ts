@@ -14,15 +14,16 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Skill-uri" }).click();
-  await expect(page.getByRole("heading", { name: "Skill-uri" })).toBeVisible();
+  await page.getByRole("link", { name: "Calificări" }).click();
+  await expect(page.getByRole("heading", { name: "Calificări" })).toBeVisible();
+  await page.getByText("Detalii").first().click();
   await expect(page.getByText("SK_CNC_OPERATOR")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/skill-catalog.png",
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Angajați" }).click();
+  await page.getByRole("link", { name: "Listă" }).click();
   await page.locator(".people-create").getByLabel("Nume").fill(name);
   await page.getByRole("button", { name: "Adaugă persoană" }).click();
   const row = page.locator(".people-list li").filter({ hasText: name }).first();
@@ -37,7 +38,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Skill-uri" }).click();
+  await page.getByRole("link", { name: "Calificări" }).click();
   await page.getByLabel("Capabilitate cerută").selectOption("CNC_ROUTING");
   await page.getByRole("button", { name: "Arată eligibilii" }).click();
   const eligible = page.locator(".people-skill-list");
@@ -50,7 +51,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Angajați" }).click();
+  await page.getByRole("link", { name: "Listă" }).click();
   await page.locator(".people-list li").filter({ hasText: name }).getByRole("link", { name: "Deschide" }).click();
   await page.getByLabel("Motiv").fill("Concediu");
   await page.getByRole("button", { name: "Marchează indisponibil temporar" }).click();
@@ -60,7 +61,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Skill-uri" }).click();
+  await page.getByRole("link", { name: "Calificări" }).click();
   await page.getByLabel("Capabilitate cerută").selectOption("CNC_ROUTING");
   await page.getByRole("button", { name: "Arată eligibilii" }).click();
   await expect(page.locator(".people-skill-list").getByText(name)).toHaveCount(0);
@@ -70,12 +71,12 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Angajați" }).click();
+  await page.getByRole("link", { name: "Listă" }).click();
   await page.locator(".people-list li").filter({ hasText: name }).getByRole("link", { name: "Deschide" }).click();
   await page.getByRole("button", { name: "Revino disponibil" }).click();
   await expect(page.getByText("Disponibil").first()).toBeVisible();
 
-  await page.getByRole("link", { name: "Skill-uri" }).click();
+  await page.getByRole("link", { name: "Calificări" }).click();
   await page.getByRole("button", { name: "Arată eligibilii" }).click();
   await expect(page.locator(".people-skill-list").getByText(name)).toBeVisible();
   await page.screenshot({
@@ -83,7 +84,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Angajați" }).click();
+  await page.getByRole("link", { name: "Listă" }).click();
   await expect(page.getByText(name)).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByText("Florin CNC")).toBeVisible();

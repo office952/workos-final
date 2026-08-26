@@ -1090,6 +1090,13 @@ a.button-link.button-secondary {
   font: inherit;
 }
 
+.field input,
+.field select,
+.display-label-editor input {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 .status-chip {
   display: inline-block;
   margin: 0;
@@ -1414,10 +1421,30 @@ a.button-link.button-secondary {
   align-items: start;
 }
 
+.admin-domain-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  margin: 0 0 0.85rem;
+}
+
+.admin-domain-links a {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.25rem 0.45rem;
+}
+
 .owner-catalog-nav {
   padding: 0.9rem 0.85rem 1rem;
   border: 1px solid var(--line);
   background: var(--surface);
+}
+
+.owner-catalog-search {
+  margin: 0 0 0.75rem;
 }
 
 .owner-catalog-nav nav {
@@ -1431,8 +1458,12 @@ a.button-link.button-secondary {
 
 .owner-catalog-category,
 .owner-catalog-item {
+  box-sizing: border-box;
   width: 100%;
   display: grid;
+  align-content: center;
+  min-height: 44px;
+  min-width: 44px;
   gap: 0.1rem;
   text-align: left;
   background: transparent;
@@ -1441,6 +1472,18 @@ a.button-link.button-secondary {
   border-left: 2px solid transparent;
   padding: 0.4rem 0.55rem;
   overflow-wrap: anywhere;
+}
+
+.owner-catalog-item-label {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.owner-catalog-item-kind {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 .owner-catalog-item-hint {
@@ -1518,6 +1561,15 @@ a.button-link.button-secondary {
 .owner-catalog-setting-value {
   margin: 0.2rem 0 0;
   font-weight: 650;
+}
+
+.owner-catalog-detail details summary,
+.people-list details summary {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .authority-list {

@@ -32,7 +32,7 @@ describe("SkillsAdminPage", () => {
         <SkillsAdminPage />
       </MemoryRouter>,
     );
-    expect(await screen.findByRole("heading", { name: "Skill-uri" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Calificări" })).toBeInTheDocument();
     expect(screen.getByText("CNC")).toBeInTheDocument();
     expect(screen.getByText("SK_CNC_OPERATOR")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Eligibilitate curentă" })).toBeInTheDocument();

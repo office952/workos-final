@@ -24,9 +24,9 @@ const GROUPS = [
     items: [
       {
         to: "/admin/people",
-        label: "Persoane",
+        label: "Oameni",
         description:
-          "Catalog operațional: oameni, skill-uri și disponibilitate. Fără HR, pontaj sau salariu.",
+          "Catalog operațional: oameni, calificări și disponibilitate. Fără HR, pontaj sau salariu.",
       },
     ],
   },

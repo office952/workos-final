@@ -78,4 +78,25 @@ describe("OwnerCatalogView", () => {
     expect(screen.getByText("doar test")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Față" })).not.toBeInTheDocument();
   });
+
+  it("filters items by search without stacking every category", async () => {
+    const user = userEvent.setup();
+    render(
+      <OwnerCatalogView catalog={catalog} title="Module și componente" lead="Proiecție." />,
+    );
+    await user.type(screen.getByLabelText("Caută"), "foaie");
+    expect(screen.getByRole("heading", { name: "Foaie", level: 2 })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Față" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Componente de produs" })).not.toBeInTheDocument();
+  });
+
+  it("shows a search-empty state instead of a missing-catalog claim", async () => {
+    const user = userEvent.setup();
+    render(
+      <OwnerCatalogView catalog={catalog} title="Module și componente" lead="Proiecție." />,
+    );
+    await user.type(screen.getByLabelText("Caută"), "zzzz-fara-potrivire");
+    expect(screen.getByText("Nicio potrivire pentru căutare.")).toBeInTheDocument();
+    expect(screen.queryByText("Nu există încă categorii cu date reale.")).not.toBeInTheDocument();
+  });
 });

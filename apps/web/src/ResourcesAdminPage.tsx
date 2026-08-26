@@ -10,6 +10,7 @@ import {
 } from "./resourcesCatalog";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
 import { OwnerWriteHint } from "./OwnerWriteHint";
+import { AdminDomainLinks } from "./AdminDomainLinks";
 import { fetchResourcesAdministration } from "./systemApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
@@ -48,6 +49,7 @@ export function ResourcesAdminPage() {
           title="Resurse și cost intern"
           lead="Ce materiale, servicii și manoperă folosim acum la costul intern. Nu este stoc și nu este preț client."
         />
+        <AdminDomainLinks current="resources" />
         <p>Se încarcă catalogul de resurse…</p>
       </section>
     );
@@ -59,6 +61,7 @@ export function ResourcesAdminPage() {
           title="Resurse și cost intern"
           lead="Ce materiale, servicii și manoperă folosim acum la costul intern. Nu este stoc și nu este preț client."
         />
+        <AdminDomainLinks current="resources" />
         <p>Nu s-a putut încărca catalogul de resurse.</p>
       </section>
     );
@@ -72,7 +75,12 @@ export function ResourcesAdminPage() {
       catalog={buildResourcesCatalog(page.admin)}
       title="Resurse și cost intern"
       lead="Ce materiale, servicii și manoperă folosim acum la costul intern. Nu este stoc și nu este preț client."
-      summary={<p className="page-summary">{formatResourcesAdminSummary(summary)}</p>}
+      summary={
+        <>
+          <AdminDomainLinks current="resources" />
+          <p className="page-summary">{formatResourcesAdminSummary(summary)}</p>
+        </>
+      }
       notice={
         <Notice compact>
           {!canAdminister ? (

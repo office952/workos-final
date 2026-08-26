@@ -83,7 +83,7 @@ describe("PersonAdminPage", () => {
     expect(screen.getByRole("heading", { name: "PIN operator" })).toBeInTheDocument();
     expect(screen.getByText("Neconfigurat")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Disponibilitate operațională" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Skill-uri" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Calificări" })).toBeInTheDocument();
     expect(screen.getByText("CNC")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Marchează indisponibil temporar" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retrage persoana" })).toBeInTheDocument();

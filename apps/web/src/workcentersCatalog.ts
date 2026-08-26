@@ -116,6 +116,7 @@ function workcenterItem(
   const stationKind =
     machines.length === 0 ? "Zonă / post de lucru" : "Zonă / stație";
   const covered = workcenter.capabilityIds.length > 0;
+  const manual = isManualArea(workcenter.id);
   return {
     id: `workcenter:${workcenter.id}`,
     label: workcenter.label,
@@ -126,13 +127,21 @@ function workcenterItem(
       : machines.length === 0
         ? "Fără utilaj"
         : `${machines.length} utilaje`,
-    chips: covered ? [{ label: "Acoperită", tone: "ok" }] : undefined,
+    chips: [
+      { label: "Zonă", tone: "neutral" },
+      ...(manual ? [{ label: "Zonă manuală", tone: "progress" as const }] : []),
+      ...(covered ? [{ label: "Acoperită", tone: "ok" as const }] : []),
+    ],
     groups: [
       {
         id: workcenter.id,
         kindLabel: stationKind,
         title: workcenter.label,
-        chips: covered ? [{ label: "Acoperită", tone: "ok" }] : undefined,
+        chips: [
+          { label: "Zonă", tone: "neutral" },
+          ...(manual ? [{ label: "Zonă manuală", tone: "progress" as const }] : []),
+          ...(covered ? [{ label: "Acoperită", tone: "ok" as const }] : []),
+        ],
         sections: workcenterSections(workcenter, machines, stationKind),
       },
     ],
@@ -174,10 +183,12 @@ function workcenterSections(
       ],
       lines: [
         "Zona spune unde se lucrează. Utilajul spune cu ce. Capabilitatea spune ce poate furniza.",
-        "Procesele rămân în Procese operaționale. Costul rămâne în Resurse.",
-        machines.length > 1
-          ? "Utilajele din aceeași zonă nu sunt interschimbabile dacă au capabilități diferite."
-          : "Programarea și starea ocupat / liber nu sunt aici.",
+        "Procesele rămân în Procese operaționale. Costul intern rămâne în Resurse. Oamenii rămân în Oameni.",
+        isManualArea(workcenter.id)
+          ? "Zona manuală nu este poartă de start. Lipsa mesei sau a postului nu blochează un task manual eligibil."
+          : machines.length > 1
+            ? "Utilajele din aceeași zonă nu sunt interschimbabile dacă au capabilități diferite."
+            : "Programarea și starea ocupat / liber nu sunt aici.",
       ],
     },
     {
@@ -209,19 +220,28 @@ function workcenterSections(
 }
 
 function machineItem(machine: MachineRecord): CatalogItem {
+  const required = isMachineRequired(machine.capabilityIds);
   return {
     id: `machine:${machine.id}`,
     label: machine.label,
     kindLabel: "Utilaj",
     summary: machine.description,
     listHint: machine.workcenterLabel ?? "Acoperită",
-    chips: [{ label: "Acoperită", tone: "ok" }],
+    chips: [
+      { label: "Utilaj", tone: "neutral" },
+      ...(required ? [{ label: "Obligatoriu la start", tone: "warn" as const }] : []),
+      { label: "Acoperită", tone: "ok" },
+    ],
     groups: [
       {
         id: machine.id,
         kindLabel: "Utilaj",
         title: machine.label,
-        chips: [{ label: "Acoperită", tone: "ok" }],
+        chips: [
+          { label: "Utilaj", tone: "neutral" },
+          ...(required ? [{ label: "Obligatoriu la start", tone: "warn" as const }] : []),
+          { label: "Acoperită", tone: "ok" },
+        ],
         sections: machineSections(machine),
       },
     ],
@@ -253,7 +273,10 @@ function machineSections(machine: MachineRecord): CatalogDetailSection[] {
       ],
       lines: [
         "Utilajul furnizează capabilitatea. Procesul nu alege utilajul din produs.",
-        "Programarea și starea ocupat / liber nu sunt aici.",
+        "Fața și spatele sunt roluri de componentă, nu utilaje separate.",
+        isMachineRequired(machine.capabilityIds)
+          ? "Debitarea CNC și formarea cer un utilaj eligibil. Fără el, taskul rămâne blocat."
+          : "Programarea și starea ocupat / liber nu sunt aici.",
       ],
     },
     {
@@ -354,6 +377,18 @@ function gapItem(capability: CapabilityRecord): CatalogItem {
       },
     ],
   };
+}
+
+function isManualArea(workcenterId: string): boolean {
+  return (
+    workcenterId === "WC_ASSEMBLY_01" ||
+    workcenterId === "WC_ASSEMBLY_02" ||
+    workcenterId === "WC_LED_ASSEMBLY"
+  );
+}
+
+function isMachineRequired(capabilityIds: readonly string[]): boolean {
+  return capabilityIds.some((id) => id === "CNC_ROUTING" || id === "PROFILE_FORMING");
 }
 
 function coverageChips(

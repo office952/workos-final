@@ -7,6 +7,7 @@ import {
   formatWorkcentersAdminSummary,
   workcentersAdminSummary,
 } from "./workcentersCatalog";
+import { AdminDomainLinks } from "./AdminDomainLinks";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
 
@@ -43,6 +44,7 @@ export function WorkcentersAdminPage() {
           title="Utilaje și zone"
           lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
         />
+        <AdminDomainLinks current="workcenters" />
         <p>Se încarcă utilajele și zonele…</p>
       </section>
     );
@@ -54,6 +56,7 @@ export function WorkcentersAdminPage() {
           title="Utilaje și zone"
           lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
         />
+        <AdminDomainLinks current="workcenters" />
         <p>Nu s-au putut încărca utilajele și zonele.</p>
       </section>
     );
@@ -66,12 +69,21 @@ export function WorkcentersAdminPage() {
       catalog={buildWorkcentersCatalog(page.admin)}
       title="Utilaje și zone"
       lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
-      summary={<p className="page-summary">{formatWorkcentersAdminSummary(summary)}</p>}
+      summary={
+        <>
+          <AdminDomainLinks current="workcenters" />
+          <p className="page-summary">{formatWorkcentersAdminSummary(summary)}</p>
+        </>
+      }
       notice={
         <Notice compact>
           <p>
             Această pagină descrie zonele și utilajele disponibile. Programarea și
             capacitatea nu sunt implementate aici.
+          </p>
+          <p>
+            Utilajul obligatoriu blochează startul. Zona manuală nu. Oamenii și
+            calificările se administrează separat.
           </p>
         </Notice>
       }

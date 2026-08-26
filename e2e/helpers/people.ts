@@ -140,6 +140,6 @@ export async function assignProviderIfNeeded(card: Locator, providerLabel?: stri
 
 export async function openPeopleAdmin(page: Page) {
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Persoane" }).click();
+  await page.getByRole("link", { name: "Oameni" }).click();
   await expect(page.getByRole("heading", { name: "Oameni" })).toBeVisible();
 }

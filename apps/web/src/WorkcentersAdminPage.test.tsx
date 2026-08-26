@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { projectWorkcentersAdministration } from "@workos-final/domain";
 import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
@@ -11,7 +12,11 @@ vi.mock("./systemApi", () => ({
 describe("WorkcentersAdminPage", () => {
   it("shows zone hierarchy workcenter-only providers and honest gaps without writes", async () => {
     const user = userEvent.setup();
-    render(<WorkcentersAdminPage />);
+    render(
+      <MemoryRouter>
+        <WorkcentersAdminPage />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByRole("button", { name: /^CNC$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Utilaje și zone" })).toBeInTheDocument();
@@ -36,13 +41,19 @@ describe("WorkcentersAdminPage", () => {
 
     await user.click(screen.getByRole("button", { name: /CNC 4020/ }));
     expect(screen.getByRole("heading", { name: "CNC 4020" })).toBeInTheDocument();
+    expect(screen.getAllByText("Utilaj").length).toBeGreaterThan(0);
+    expect(screen.getByText("Obligatoriu la start")).toBeInTheDocument();
     expect(screen.getAllByText("Debitare CNC").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Debitare foaie CNC").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: /^Asamblare$/ }));
     expect(screen.getByRole("heading", { name: "Masă asamblare 1" })).toBeInTheDocument();
     expect(screen.getAllByText("Zonă / post de lucru").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Zonă manuală").length).toBeGreaterThan(0);
     expect(screen.getAllByText("niciun utilaj").length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/Zona manuală nu este poartă de start/),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /^Electric$/ }));
     expect(screen.getByRole("heading", { name: "Montaj LED / electric" })).toBeInTheDocument();

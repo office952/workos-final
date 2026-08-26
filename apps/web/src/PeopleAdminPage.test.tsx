@@ -29,7 +29,7 @@ describe("PeopleAdminPage", () => {
     expect(screen.getByText("Nu există persoane active configurate.")).toBeInTheDocument();
     expect(screen.getByText("Adaugă prima persoană.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Adaugă persoană" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Skill-uri" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Calificări" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Salariu")).not.toBeInTheDocument();
     expect(screen.queryByText("person_id")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Șterge" })).not.toBeInTheDocument();

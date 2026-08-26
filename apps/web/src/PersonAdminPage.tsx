@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { PersonRegistryItem, Skill } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { AdminDomainLinks } from "./AdminDomainLinks";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import {
@@ -14,6 +15,7 @@ import {
 } from "./peopleApi";
 import { setOperatorPin } from "./operatorSessionApi";
 import { Field } from "./ui/Field";
+import { PageHeader } from "./ui/PageHeader";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
@@ -73,13 +75,31 @@ export function PersonAdminPage() {
   }, [personId]);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă persoana…</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
+        <AdminDomainLinks current="people" />
+        <p>Se încarcă omul…</p>
+      </section>
+    );
   }
   if (page.kind === "missing") {
-    return <p>Persoana cerută nu este disponibilă.</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
+        <AdminDomainLinks current="people" />
+        <p>Persoana cerută nu este disponibilă.</p>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Persoana nu a putut fi încărcată.</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
+        <AdminDomainLinks current="people" />
+        <p>Persoana nu a putut fi încărcată.</p>
+      </section>
+    );
   }
 
   const { item, skills, operatorPinConfigured } = page;
@@ -107,6 +127,7 @@ export function PersonAdminPage() {
       <p>
         <Link to="/admin/people">← Oameni</Link>
       </p>
+      <AdminDomainLinks current="people" />
       <PeopleAdminNav />
       <header className="client-workspace-header">
         <div>
@@ -206,7 +227,7 @@ export function PersonAdminPage() {
       <article className="client-current-card">
         <h2>Disponibilitate operațională</h2>
         <p className="client-current-hint">
-          Indisponibilitatea temporară scoate persoana din eligibilitatea curentă. Skill-urile rămân.
+          Indisponibilitatea temporară scoate persoana din eligibilitatea curentă. Calificările rămân.
           Nu este concediu HR.
         </p>
         {canAdminister && item.status === "ACTIVE" ? (
@@ -262,16 +283,19 @@ export function PersonAdminPage() {
       </article>
 
       <article className="client-current-card">
-        <h2>Skill-uri</h2>
+        <h2>Calificări</h2>
         {item.skills.length === 0 ? (
-          <p>Niciun skill curent.</p>
+          <p>Nicio calificare curentă.</p>
         ) : (
           <ul className="people-skill-list">
             {item.skills.map((skill) => (
               <li key={skill.skillId}>
                 <span>
                   {skill.displayLabel}
-                  <small> {skill.code}</small>
+                  <details>
+                    <summary>Detalii</summary>
+                    <p>{skill.code}</p>
+                  </details>
                 </span>
                 {canAdminister && item.status === "ACTIVE" ? (
                   <button

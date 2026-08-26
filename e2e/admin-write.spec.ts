@@ -38,7 +38,7 @@ test("admin display-label write persists and propagates", async ({
     await expect(
       page.getByRole("link", { name: "Utilaje și zone" }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Persoane" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Oameni" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Clienți" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Operațiuni" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Comercial" })).toBeVisible();

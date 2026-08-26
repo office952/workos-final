@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   PLEXIGLAS_3MM_OPAL_ID,
@@ -55,10 +56,18 @@ describe("ResourcesAdminPage", () => {
 
   it("shows owner hierarchy materials services labor and provenance without writes", async () => {
     const user = userEvent.setup();
-    render(<ResourcesAdminPage />);
+    render(
+      <MemoryRouter>
+        <ResourcesAdminPage />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByRole("button", { name: "Materiale" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Resurse și cost intern" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Domenii administrative" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Utilaje și zone" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Atelier — execuție" })).toBeInTheDocument();
     expect(screen.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -92,7 +101,7 @@ describe("ResourcesAdminPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Servicii" }));
     expect(screen.getByRole("heading", { name: "Formare profil aluminiu" })).toBeInTheDocument();
-    expect(screen.getByText("Rețetă serviciu")).toBeInTheDocument();
+    expect(screen.getAllByText("Rețetă serviciu").length).toBeGreaterThan(0);
     expect(screen.getAllByText("5,00 EUR / m").length).toBeGreaterThan(0);
     expect(screen.getByText("Perimetru volum (m)")).toBeInTheDocument();
     expect(screen.getByText("RCP_PROFILE_FORMING").closest("details")).toBeTruthy();
@@ -103,7 +112,7 @@ describe("ResourcesAdminPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Manoperă" }));
     expect(screen.getByRole("heading", { name: "Aplicare folie față" })).toBeInTheDocument();
-    expect(screen.getByText("Rețetă manoperă")).toBeInTheDocument();
+    expect(screen.getAllByText("Rețetă manoperă").length).toBeGreaterThan(0);
     expect(screen.getAllByText("5,00 EUR / m²").length).toBeGreaterThan(0);
     expect(screen.getByText("Default de dezvoltare")).toBeInTheDocument();
 
@@ -122,7 +131,11 @@ describe("ResourcesAdminPage", () => {
   it("offers owner write on persisted cost evidence", async () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
     const user = userEvent.setup();
-    render(<ResourcesAdminPage />);
+    render(
+      <MemoryRouter>
+        <ResourcesAdminPage />
+      </MemoryRouter>,
+    );
     expect(
       await screen.findByText(
         /Valorile implicite de platformă nu sunt cost confirmat/,
@@ -149,7 +162,11 @@ describe("ResourcesAdminPage", () => {
     );
     vi.mocked(patchCostEvidence).mockResolvedValue(savedAdmin);
     const user = userEvent.setup();
-    render(<ResourcesAdminPage />);
+    render(
+      <MemoryRouter>
+        <ResourcesAdminPage />
+      </MemoryRouter>,
+    );
     await user.click(await screen.findByRole("button", { name: "Dovezi de cost" }));
     await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
     expect(
@@ -192,9 +209,11 @@ describe("ResourcesAdminPage", () => {
     );
     const user = userEvent.setup();
     render(
-      <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
-        <ResourcesAdminPage />
-      </CloudSessionTestProvider>,
+      <MemoryRouter>
+        <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
+          <ResourcesAdminPage />
+        </CloudSessionTestProvider>
+      </MemoryRouter>,
     );
     expect(
       await screen.findByText(/Valorile implicite de platformă nu sunt cost confirmat/),
@@ -209,18 +228,22 @@ describe("ResourcesAdminPage", () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
     const user = userEvent.setup();
     const ownerView = render(
-      <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
-        <ResourcesAdminPage />
-      </CloudSessionTestProvider>,
+      <MemoryRouter>
+        <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
+          <ResourcesAdminPage />
+        </CloudSessionTestProvider>
+      </MemoryRouter>,
     );
     await user.click(await screen.findByRole("button", { name: "Dovezi de cost" }));
     expect(screen.getByRole("button", { name: "Editează" })).toBeInTheDocument();
     ownerView.unmount();
 
     render(
-      <CloudSessionTestProvider snapshot={cloudSnapshot("member")}>
-        <ResourcesAdminPage />
-      </CloudSessionTestProvider>,
+      <MemoryRouter>
+        <CloudSessionTestProvider snapshot={cloudSnapshot("member")}>
+          <ResourcesAdminPage />
+        </CloudSessionTestProvider>
+      </MemoryRouter>,
     );
     expect(await screen.findByText(OWNER_WRITE_HINT)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Editează" })).not.toBeInTheDocument();

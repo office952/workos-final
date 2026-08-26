@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { productionCapabilityClasses, type Skill } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { AdminDomainLinks } from "./AdminDomainLinks";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createSkill, fetchEligibility, fetchSkills, retireSkill } from "./peopleApi";
@@ -32,18 +33,37 @@ export function SkillsAdminPage() {
   }, []);
 
   if (error) {
-    return <p>Skill-urile nu au putut fi încărcate.</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader
+          title="Calificări"
+          lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
+        />
+        <AdminDomainLinks current="people" />
+        <p>Calificările nu au putut fi încărcate.</p>
+      </section>
+    );
   }
   if (!skills) {
-    return <p>Se încarcă skill-urile…</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader
+          title="Calificări"
+          lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
+        />
+        <AdminDomainLinks current="people" />
+        <p>Se încarcă calificările…</p>
+      </section>
+    );
   }
 
   return (
     <section className="people-admin">
       <PageHeader
-        title="Skill-uri"
+        title="Calificări"
         lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
       />
+      <AdminDomainLinks current="people" />
       <PeopleAdminNav />
       {!canAdminister ? <OwnerWriteHint /> : null}
       {canAdminister ? (
@@ -59,7 +79,7 @@ export function SkillsAdminPage() {
               setCode("");
               setLabel("");
             })
-            .catch(() => setNotice("Skill-ul nu a putut fi creat."))
+            .catch(() => setNotice("Calificarea nu a putut fi creată."))
             .finally(() => setBusy(false));
         }}
       >
@@ -70,20 +90,23 @@ export function SkillsAdminPage() {
           <input value={label} onChange={(event) => setLabel(event.target.value)} disabled={busy} />
         </Field>
         <button type="submit" disabled={busy || code.trim().length === 0 || label.trim().length === 0}>
-          Adaugă skill
+          Adaugă calificare
         </button>
       </form>
       ) : null}
       {notice ? <p className="status-bad">{notice}</p> : null}
       {skills.length === 0 ? (
-        <EmptyState title="Nu există skill-uri." />
+        <EmptyState title="Nu există calificări." />
       ) : (
         <ul className="people-list">
           {skills.map((skill) => (
             <li key={skill.skillId}>
               <div className="jobs-identity">
                 <p>{skill.displayLabel}</p>
-                <span>{skill.code}</span>
+                <details>
+                  <summary>Detalii</summary>
+                  <p>{skill.code}</p>
+                </details>
               </div>
               <StatusChip
                 label={skill.status === "ACTIVE" ? "Activ" : "Retras"}
@@ -97,10 +120,10 @@ export function SkillsAdminPage() {
                   onClick={() =>
                     void retireSkill(skill.skillId)
                       .then(setSkills)
-                      .catch(() => setNotice("Skill-ul nu a putut fi retras."))
+                      .catch(() => setNotice("Calificarea nu a putut fi retrasă."))
                   }
                 >
-                  Retrage skill
+                  Retrage calificarea
                 </button>
               ) : null}
             </li>

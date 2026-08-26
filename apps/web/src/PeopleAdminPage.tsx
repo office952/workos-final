@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { PeopleRegistryProjection } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { AdminDomainLinks } from "./AdminDomainLinks";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createPerson, fetchPeopleRegistry } from "./peopleApi";
@@ -41,10 +42,28 @@ export function PeopleAdminPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă persoanele…</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader
+          title="Oameni"
+          lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
+        />
+        <AdminDomainLinks current="people" />
+        <p>Se încarcă oamenii…</p>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca persoanele.</p>;
+    return (
+      <section className="people-admin">
+        <PageHeader
+          title="Oameni"
+          lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
+        />
+        <AdminDomainLinks current="people" />
+        <p>Nu s-au putut încărca oamenii.</p>
+      </section>
+    );
   }
 
   const { registry } = page;
@@ -66,6 +85,7 @@ export function PeopleAdminPage() {
           </p>
         }
       />
+      <AdminDomainLinks current="people" />
       <PeopleAdminNav />
       {!canAdminister ? <OwnerWriteHint /> : null}
       {canAdminister ? (
@@ -112,7 +132,7 @@ export function PeopleAdminPage() {
                   {person.roleLabel ?? "Fără rol descriptiv"}
                   {person.skills.length > 0
                     ? ` · ${person.skills.map((skill) => skill.displayLabel).join(", ")}`
-                    : " · Fără skill-uri"}
+                    : " · Fără calificări"}
                 </span>
               </div>
               <div className="jobs-status">

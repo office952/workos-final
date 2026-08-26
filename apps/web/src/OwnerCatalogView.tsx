@@ -6,6 +6,7 @@ import type {
   OwnerCatalog,
 } from "./ownerCatalog";
 import { EmptyState } from "./ui/EmptyState";
+import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
 import { StatusChip } from "./ui/StatusChip";
 import { StatePill } from "./StatePill";
@@ -27,10 +28,17 @@ export function OwnerCatalogView({
   summary,
   renderItemActions,
 }: OwnerCatalogViewProps) {
-  const firstCategory = catalog.categories[0];
+  const [query, setQuery] = useState("");
+  const visibleCategories = catalog.categories
+    .map((category) => ({
+      ...category,
+      items: category.items.filter((item) => itemMatchesQuery(item, query)),
+    }))
+    .filter((category) => category.items.length > 0);
+  const firstCategory = visibleCategories[0];
   const [categoryId, setCategoryId] = useState(firstCategory?.id ?? "");
   const selectedCategory =
-    catalog.categories.find((item) => item.id === categoryId) ?? firstCategory;
+    visibleCategories.find((item) => item.id === categoryId) ?? firstCategory;
   const [itemId, setItemId] = useState(selectedCategory?.items[0]?.id ?? "");
 
   useEffect(() => {
@@ -46,7 +54,13 @@ export function OwnerCatalogView({
     return (
       <section>
         <PageHeader title={title} lead={lead} meta={headerMeta(summary, notice)} />
-        <EmptyState title="Nu există încă categorii cu date reale." />
+        <EmptyState
+          title={
+            query.trim()
+              ? "Nicio potrivire pentru căutare."
+              : "Nu există încă categorii cu date reale."
+          }
+        />
       </section>
     );
   }
@@ -60,9 +74,19 @@ export function OwnerCatalogView({
       <PageHeader title={title} lead={lead} meta={headerMeta(summary, notice)} />
       <div className="owner-catalog">
         <aside className="owner-catalog-nav">
+          <div className="owner-catalog-search">
+            <Field label="Caută">
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Nume, tip sau stare"
+              />
+            </Field>
+          </div>
           <p className="catalog-kind">Categorii</p>
           <nav aria-label="Categorii catalog">
-            {catalog.categories.map((category) => (
+            {visibleCategories.map((category) => (
               <CategoryButton
                 key={category.id}
                 category={category}
@@ -88,7 +112,10 @@ export function OwnerCatalogView({
                 aria-current={item.id === selectedItem?.id ? "true" : undefined}
                 onClick={() => setItemId(item.id)}
               >
-                <span>{item.label}</span>
+                <span className="owner-catalog-item-label">
+                  <span className="owner-catalog-item-kind">{item.kindLabel}</span>
+                  <span>{item.label}</span>
+                </span>
                 {item.listHint ? (
                   <span className="owner-catalog-item-hint">{item.listHint}</span>
                 ) : null}
@@ -107,6 +134,23 @@ export function OwnerCatalogView({
       </div>
     </section>
   );
+}
+
+function itemMatchesQuery(item: CatalogItem, query: string): boolean {
+  const needle = query.trim().toLowerCase();
+  if (!needle) {
+    return true;
+  }
+  const haystack = [
+    item.label,
+    item.kindLabel,
+    item.summary ?? "",
+    item.listHint ?? "",
+    ...(item.chips ?? []).map((chip) => chip.label),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(needle);
 }
 
 function headerMeta(summary?: ReactNode, notice?: ReactNode): ReactNode {

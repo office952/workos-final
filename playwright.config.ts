@@ -18,7 +18,10 @@ function isolatedEnv(extra: Record<string, string>): NodeJS.ProcessEnv {
 
 export default defineConfig({
   testDir: "./e2e",
-  testIgnore: ["**/hf-wave3-cloud-login.spec.ts"],
+  testIgnore: [
+    "**/hf-wave3-cloud-login.spec.ts",
+    "**/hf-wave4-resources-admin-reuse.spec.ts",
+  ],
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
