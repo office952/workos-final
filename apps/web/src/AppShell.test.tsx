@@ -119,6 +119,27 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "Clienți" })).toBeInTheDocument();
   });
 
+  it("keeps Catalog as level 1 when configuring without a frozen quote", () => {
+    renderShell(
+      <AppShell
+        navItems={[
+          {
+            to: "/requests",
+            label: "Comercial",
+            matchPrefixes: ["/requests", "/quotes", "/clients"],
+          },
+          { to: "/products", label: "Catalog" },
+        ]}
+      >
+        <p>configurator</p>
+      </AppShell>,
+      ["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=crq:1"],
+    );
+
+    expect(screen.queryByRole("navigation", { name: "Navigare comercială" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Catalog" })).toHaveAttribute("aria-current", "page");
+  });
+
   it("keeps commercial secondary navigation on a product continuation", () => {
     renderShell(
       <AppShell

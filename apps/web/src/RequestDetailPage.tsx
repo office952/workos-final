@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   COMMERCIAL_REQUEST_STATUSES,
   commercialRequestStatusLabel,
-  type CatalogTreeNode,
+  jobHref,
   type CommercialRequestStatus,
   type RequestDetailProjection,
 } from "@workos-final/domain";
@@ -15,15 +15,19 @@ import {
   updateCommercialRequest,
   uploadRequestAttachment,
 } from "./requestsApi";
+import { flattenCatalogProducts } from "./catalogProducts";
+import { pageErrorKind } from "./fetchAccess";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "forbidden" }
   | { kind: "missing" }
   | { kind: "ready"; detail: RequestDetailProjection };
 
@@ -55,12 +59,15 @@ export function RequestDetailPage() {
         setTitle(detail.request.title);
         setDescription(detail.request.description);
         setStatus(detail.request.status);
-        setProducts(catalogProducts(catalog));
+        setProducts(flattenCatalogProducts(catalog).map((item) => ({
+          code: item.code,
+          label: item.label,
+        })));
         setPage({ kind: "ready", detail });
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setPage({ kind: "error" });
+          setPage({ kind: pageErrorKind(error) });
         }
       });
     return () => {
@@ -113,28 +120,54 @@ export function RequestDetailPage() {
   }
 
   if (page.kind === "loading") {
-    return <p>Se încarcă cererea…</p>;
+    return <PageStatus kind="loading">Se încarcă cererea…</PageStatus>;
   }
   if (page.kind === "missing") {
-    return <p>Cererea cerută nu este disponibilă.</p>;
+    return <PageStatus kind="missing">Cererea cerută nu este disponibilă.</PageStatus>;
+  }
+  if (page.kind === "forbidden") {
+    return <PageStatus kind="forbidden">Nu ai acces la această cerere.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Cererea nu a putut fi încărcată.</p>;
+    return <PageStatus kind="error">Cererea nu a putut fi încărcată.</PageStatus>;
   }
 
   const { detail } = page;
   const { request } = detail;
 
+  const firstProduct = products[0];
+  const linkedQuote = detail.linkedOffers[0];
+  const linkedJobs = detail.linkedOffers.flatMap((offer) =>
+    offer.orderSnapshotId
+      ? [{ ...offer, orderSnapshotId: offer.orderSnapshotId }]
+      : [],
+  );
+  const catalogHref = `/products?request=${encodeURIComponent(request.requestId)}`;
+
   return (
-    <section className="jobs-overview">
+    <section className="jobs-overview decision-workspace">
       <PageHeader
         title={request.title}
         lead={`${request.reference}${
           detail.customerDisplayName ? ` · ${detail.customerDisplayName}` : ""
         }`}
+        actions={
+          <>
+            <Link className="button-link" to={catalogHref}>
+              Deschide catalogul
+            </Link>
+            {linkedQuote ? (
+              <Link className="button-quiet" to={linkedQuote.href}>
+                Deschide oferta
+              </Link>
+            ) : null}
+          </>
+        }
         meta={
           <p className="page-summary">
-            Creată {formatRequestDate(request.createdAt)}
+            Client {detail.customerDisplayName ?? "—"}
+            {firstProduct ? ` · Produs ${firstProduct.label}` : ""}
+            {` · stare ${detail.statusLabel}`}
             {detail.commercialProgressLabel
               ? ` · ${detail.commercialProgressLabel}`
               : ""}
@@ -285,10 +318,41 @@ export function RequestDetailPage() {
         </section>
       ) : null}
 
+      {linkedJobs.length > 0 ? (
+        <section className="result-section">
+          <h3>Lucrări legate</h3>
+          <ul className="jobs-list">
+            {linkedJobs.map((offer) => (
+              <li key={offer.orderSnapshotId}>
+                <div className="jobs-identity">
+                  <Link
+                    to={jobHref({ orderSnapshotId: offer.orderSnapshotId })}
+                  >
+                    {offer.inscription}
+                  </Link>
+                  <span>{offer.productLabel}</span>
+                </div>
+                <Link
+                  className="button-link"
+                  to={jobHref({ orderSnapshotId: offer.orderSnapshotId })}
+                >
+                  Deschide lucrarea
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {request.status !== "CANCELLED" ? (
         <section className="result-section">
           <h3>Alege produs</h3>
-          <p>Deschide configurația existentă cu clientul acestei cereri.</p>
+          <p>Deschide catalogul, apoi configurează pentru această cerere.</p>
+          <p>
+            <Link className="button-quiet" to={catalogHref}>
+              Deschide catalogul
+            </Link>
+          </p>
           <ul className="jobs-list">
             {products.map((product) => (
               <li key={product.code}>
@@ -310,24 +374,6 @@ export function RequestDetailPage() {
       ) : null}
     </section>
   );
-}
-
-function catalogProducts(
-  nodes: readonly CatalogTreeNode[],
-): Array<{ code: string; label: string }> {
-  return nodes.flatMap((node) => {
-    switch (node.kind) {
-      case "product":
-        return [{ code: node.code, label: node.label }];
-      case "family":
-      case "category":
-        return catalogProducts(node.children);
-      default: {
-        const _exhaustive: never = node;
-        return _exhaustive;
-      }
-    }
-  });
 }
 
 function formatRequestDate(value: string): string {

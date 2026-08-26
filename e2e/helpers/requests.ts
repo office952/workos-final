@@ -27,10 +27,10 @@ export async function confirmCanonicalLettersOnPage(
   inscription: string,
 ) {
   await page.getByLabel("Textul literelor").fill(inscription);
-  await page.getByLabel("Finisaj față").selectOption("none");
+  await page.locator('select[name="face.finish"]').selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await page.locator('select[name="volume.depthMm"]').selectOption("60");
+  await page.locator('select[name="volume.finish"]').selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

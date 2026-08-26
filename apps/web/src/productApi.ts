@@ -15,6 +15,7 @@ import type {
   QuoteAcceptanceDecision,
   QuoteSnapshot,
 } from "@workos-final/domain";
+import { throwIfListFailed } from "./fetchAccess";
 
 export type TemplateProjection = {
   template: ProductTemplate;
@@ -33,9 +34,7 @@ async function readJson<T>(response: Response): Promise<T> {
 
 export async function fetchProductCatalog(): Promise<CatalogTreeNode[]> {
   const response = await fetch(`${baseUrl}/api/product-catalog`);
-  if (!response.ok) {
-    throw new Error("catalog_unavailable");
-  }
+  throwIfListFailed(response, "catalog_unavailable");
   const body = await readJson<{ tree: CatalogTreeNode[] }>(response);
   return body.tree;
 }

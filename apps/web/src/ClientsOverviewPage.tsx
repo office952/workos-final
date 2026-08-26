@@ -14,18 +14,22 @@ import {
   type CustomerProfileFormValue,
 } from "./CustomerProfileFields";
 import { createCustomer, fetchCustomerRegistry } from "./customerApi";
+import { pageErrorKind } from "./fetchAccess";
 import {
   RegistrySearchField,
   registrySearchResultSummary,
 } from "./RegistrySearchField";
+import { ActionDrawer } from "./ui/ActionDrawer";
 import { EmptyState } from "./ui/EmptyState";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "forbidden" }
   | { kind: "ready"; registry: CustomerRegistryProjection };
 
 export function ClientsOverviewPage() {
@@ -34,6 +38,7 @@ export function ClientsOverviewPage() {
   const [filter, setFilter] = useState<CustomerRegistryFilter>("ALL");
   const [query, setQuery] = useRegistrySearchQuery();
   const [notice, setNotice] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,9 +48,9 @@ export function ClientsOverviewPage() {
           setPage({ kind: "ready", registry });
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setPage({ kind: "error" });
+          setPage({ kind: pageErrorKind(error) });
         }
       });
     return () => {
@@ -74,6 +79,7 @@ export function ClientsOverviewPage() {
         value.displayName,
         customerProfilePatchFromForm(value),
       );
+      setDrawerOpen(false);
       navigate(
         created.customer.customerId
           ? `/clients/${encodeURIComponent(created.customer.customerId)}`
@@ -85,10 +91,13 @@ export function ClientsOverviewPage() {
   }
 
   if (page.kind === "loading") {
-    return <p>Se încarcă clienții…</p>;
+    return <PageStatus kind="loading">Se încarcă clienții…</PageStatus>;
+  }
+  if (page.kind === "forbidden") {
+    return <PageStatus kind="forbidden">Nu ai acces la lista de clienți.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca clienții.</p>;
+    return <PageStatus kind="error">Nu s-au putut încărca clienții.</PageStatus>;
   }
 
   const { registry } = page;
@@ -100,6 +109,11 @@ export function ClientsOverviewPage() {
       <PageHeader
         title="Clienți"
         lead="Cine sunt clienții, ce activitate comercială au și ce trebuie deschis acum."
+        actions={
+          <button type="button" onClick={() => setDrawerOpen(true)}>
+            Client nou
+          </button>
+        }
         meta={
           empty ? null : (
             <p className="page-summary">
@@ -115,7 +129,16 @@ export function ClientsOverviewPage() {
 
       {notice ? <p>{notice}</p> : null}
 
-      <ClientCreateForm onCreate={handleCreate} />
+      <ActionDrawer
+        title="Client nou"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <ClientCreateForm
+          onCreate={handleCreate}
+          onCancel={() => setDrawerOpen(false)}
+        />
+      </ActionDrawer>
 
       {empty ? (
         <EmptyState title="Nu există încă clienți." />
@@ -198,31 +221,42 @@ export function ClientsOverviewPage() {
 
 function ClientCreateForm({
   onCreate,
+  onCancel,
 }: {
   onCreate: (value: CustomerProfileFormValue) => Promise<void>;
+  onCancel: () => void;
 }) {
   const [value, setValue] = useState(emptyCustomerProfileForm());
   const [busy, setBusy] = useState(false);
+  const [validation, setValidation] = useState<string | null>(null);
 
   return (
-    <details className="client-create">
-      <summary>Client nou</summary>
-      <form
-        className="people-create"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (value.displayName.trim().length === 0) {
-            return;
-          }
-          setBusy(true);
-          void onCreate(value).finally(() => setBusy(false));
-        }}
-      >
-        <CustomerProfileFields value={value} onChange={setValue} disabled={busy} />
-        <button type="submit" disabled={busy || value.displayName.trim().length === 0}>
-          Creează clientul
+    <form
+      className="people-create"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (value.displayName.trim().length === 0) {
+          setValidation("Introdu numele afișat.");
+          return;
+        }
+        setValidation(null);
+        setBusy(true);
+        void onCreate(value).finally(() => setBusy(false));
+      }}
+    >
+      <p className="field-hint">
+        Introdu numele care apare pe cereri și oferte.
+      </p>
+      <CustomerProfileFields value={value} onChange={setValue} disabled={busy} />
+      {validation ? <p className="status-bad">{validation}</p> : null}
+      <div className="action-drawer-actions">
+        <button type="button" className="button-quiet" disabled={busy} onClick={onCancel}>
+          Anulează
         </button>
-      </form>
-    </details>
+        <button type="submit" disabled={busy || value.displayName.trim().length === 0}>
+          Salvează clientul
+        </button>
+      </div>
+    </form>
   );
 }

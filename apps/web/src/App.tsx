@@ -68,6 +68,7 @@ function AppGate() {
           <Route path="/" element={<JobsOverviewPage />} />
           <Route path="/jobs/:jobId" element={<JobDetailPage />} />
           <Route path="/atelier" element={<AtelierPage />} />
+          <Route path="/commercial" element={<Navigate to="/requests" replace />} />
           <Route path="/requests" element={<RequestsOverviewPage />} />
           <Route path="/requests/:requestId" element={<RequestDetailPage />} />
           <Route path="/quotes" element={<QuotesOverviewPage />} />

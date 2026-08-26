@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import {
   commercialCompletenessLabel,
   commercialPrimaryActionLabel,
@@ -81,14 +82,57 @@ export function ConstructionFacts({ facts }: { facts: readonly ProductIdentityFa
     return null;
   }
   return (
-    <dl className="construction-facts">
-      <dt>Construcție</dt>
-      {facts.map((fact) => (
-        <dd key={fact.id}>
-          {fact.label}: {fact.value}
-        </dd>
-      ))}
-    </dl>
+    <section className="form-section construction-facts-card">
+      <h2>Fapte fixe</h2>
+      <dl className="construction-facts">
+        <dt>Construcție</dt>
+        {facts.map((fact) => (
+          <dd key={fact.id}>
+            {fact.label}: {fact.value}
+          </dd>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+export function ConfiguratorSummary({
+  statusLabel,
+  requestLabel,
+  facts,
+  priceLabel,
+  catalogHref,
+  children,
+}: {
+  statusLabel: string;
+  requestLabel?: string | null;
+  facts: readonly string[];
+  priceLabel?: string | null;
+  catalogHref: string;
+  children?: ReactNode;
+}) {
+  return (
+    <aside className="configurator-summary" aria-label="Rezumat">
+      <h2>Rezumat</h2>
+      <p className="configurator-summary-status">{statusLabel}</p>
+      {requestLabel ? <p>{requestLabel}</p> : null}
+      {facts.length > 0 ? (
+        <ul>
+          {facts.map((fact) => (
+            <li key={fact}>{fact}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>Completează câmpurile din stânga. Prețul apare după confirmare.</p>
+      )}
+      {priceLabel ? <p className="commercial-gross">{priceLabel}</p> : (
+        <p>Preț client neconfirmat.</p>
+      )}
+      {children ? <div className="configurator-summary-actions">{children}</div> : null}
+      <Link className="button-quiet" to={catalogHref}>
+        Înapoi la Catalog
+      </Link>
+    </aside>
   );
 }
 
@@ -536,6 +580,12 @@ export function QuoteSnapshotSection({
         </p>
         <p className="page-lead">Oferta a fost salvată. Modificările ulterioare nu schimbă această ofertă.</p>
         <div className="action-row">
+          <Link
+            className="button-link"
+            to={`/quotes/${encodeURIComponent(snapshot.quoteSnapshotId)}`}
+          >
+            Inspectează oferta
+          </Link>
           <QuoteDocumentDownloadLink snapshot={snapshot} />
           <button type="button" className="button-secondary" onClick={onAccept} disabled={busy}>
             {commercialPrimaryActionLabel("ACCEPT_QUOTE")}

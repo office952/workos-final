@@ -307,7 +307,7 @@ function isProductCommercialPath(pathname: string, search: string): boolean {
     return false;
   }
   const params = new URLSearchParams(search);
-  return params.has("request") || params.has("quote") || params.has("order");
+  return params.has("quote") || params.has("order");
 }
 
 function isNavItemCurrent(item: AppNavItem, pathname: string, search: string): boolean {

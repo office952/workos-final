@@ -113,6 +113,10 @@ describe("RequestDetailPage", () => {
       "href",
       "/quotes/qts%3A1",
     );
+    expect(screen.getAllByRole("link", { name: "Deschide catalogul" })[0]).toHaveAttribute(
+      "href",
+      "/products?request=crq%3A11111111-2222-3333-4444-555555555555",
+    );
     expect(screen.getByRole("link", { name: "Configurează" })).toHaveAttribute(
       "href",
       "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=crq%3A11111111-2222-3333-4444-555555555555",

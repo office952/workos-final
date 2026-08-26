@@ -117,10 +117,10 @@ describe("ClientsOverviewPage", () => {
       </MemoryRouter>,
     );
     await screen.findByRole("heading", { name: "Clienți" });
-    await userEvent.click(screen.getByText("Client nou"));
+    await userEvent.click(screen.getByRole("button", { name: "Client nou" }));
     await userEvent.type(screen.getByLabelText("Nume"), "Client Nou");
     await userEvent.type(screen.getByLabelText("CUI"), "RO1");
-    await userEvent.click(screen.getByRole("button", { name: "Creează clientul" }));
+    await userEvent.click(screen.getByRole("button", { name: "Salvează clientul" }));
     expect(createCustomer).toHaveBeenCalledWith(
       "Client Nou",
       expect.objectContaining({ cui: "RO1" }),

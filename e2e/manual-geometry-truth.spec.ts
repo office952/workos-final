@@ -17,7 +17,7 @@ test("accepts confirmed manual geometry and shows owner-confirmed 60 mm EIC", as
   await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await expect(page.getByText("Suprafață confirmată (mm²): 250000")).toBeVisible();
+  await expect(page.getByText("Suprafață confirmată (mm²): 250000").first()).toBeVisible();
   await expect(page.getByText("Perimetru confirmat (mm): 12500")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-manual-geometry-review.png",

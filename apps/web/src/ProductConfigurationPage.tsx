@@ -9,6 +9,7 @@ import {
   type EicResult,
   type ExecutionPlanPreview,
   type ExecutionPlanView,
+  type FormSchema,
   type ProductAggregate,
   type ProductDefinition,
   type ProductTruth,
@@ -23,6 +24,7 @@ import { FormRenderer } from "./FormRenderer";
 import {
   AcceptedSnapshotSection,
   CommercialProgress,
+  ConfiguratorSummary,
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
@@ -53,6 +55,7 @@ import {
 import { readRequestDetail } from "./requestsApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -282,13 +285,13 @@ export function ProductConfigurationPage() {
   }, [orderId, page.kind, quoteId, requestId]);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă produsul…</p>;
+    return <PageStatus kind="loading">Se încarcă produsul…</PageStatus>;
   }
   if (page.kind === "missing") {
-    return <p>Produsul cerut nu este disponibil.</p>;
+    return <PageStatus kind="missing">Produsul cerut nu este disponibil.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-a putut încărca produsul.</p>;
+    return <PageStatus kind="error">Nu s-a putut încărca produsul.</PageStatus>;
   }
 
   const { template, formSchema } = page.projection;
@@ -812,8 +815,24 @@ export function ProductConfigurationPage() {
   const requestContext =
     restoredRequest.kind === "ready" ? restoredRequest.detail : null;
 
+  const summaryFacts = selectedConfigurationFacts(formSchema, values);
+  const summaryStatus = confirmed
+    ? "Completă"
+    : reviewing
+      ? "Pregătită pentru confirmare"
+      : definition?.readiness === "blocked"
+        ? "Blocat"
+        : "Neconfirmată";
+  const priceLabel =
+    confirmed && confirmed.commercialPrice.completeness === "COMPLETE"
+      ? `Preț client ${formatCommercialGross(confirmed.commercialPrice)}`
+      : null;
+  const catalogHref = requestContext
+    ? `/products?request=${encodeURIComponent(requestContext.request.requestId)}`
+    : "/products";
+
   return (
-    <section className="product-page">
+    <section className="product-page configurator-workspace">
       <PageHeader
         title={template.label}
         lead={
@@ -823,8 +842,9 @@ export function ProductConfigurationPage() {
               ? "Configurația este pregătită pentru confirmare."
               : "Completează configurația, apoi verifică."
         }
-        meta={<ConstructionFacts facts={template.identityFacts} />}
       />
+      <div className="configurator-layout">
+        <div className="configurator-main">
       {requestContext ? (
         <Notice tone="ok" compact>
           <div className="request-return-context">
@@ -836,7 +856,7 @@ export function ProductConfigurationPage() {
                 displayName={requestContext.customerDisplayName}
                 prefix="Client "
               />
-              .
+              . Client preluat din cerere.
             </p>
             <Link
               className="button-link"
@@ -847,6 +867,8 @@ export function ProductConfigurationPage() {
           </div>
         </Notice>
       ) : null}
+
+      <ConstructionFacts facts={template.identityFacts} />
 
       {editing ? (
         <>
@@ -921,6 +943,19 @@ export function ProductConfigurationPage() {
           onCreatePlan={() => void handleCreateExecutionPlan()}
         />
       ) : null}
+        </div>
+        <ConfiguratorSummary
+          statusLabel={summaryStatus}
+          requestLabel={
+            requestContext
+              ? `Cerere ${requestContext.request.reference}`
+              : null
+          }
+          facts={summaryFacts}
+          priceLabel={priceLabel}
+          catalogHref={catalogHref}
+        />
+      </div>
     </section>
   );
 }
@@ -1110,6 +1145,35 @@ function ConfirmedCommercialWorkspace({
       )}
     </div>
   );
+}
+
+function selectedConfigurationFacts(
+  schema: FormSchema,
+  values: DraftValues,
+): string[] {
+  return schema.sections.flatMap((section) =>
+    section.fields.flatMap((field) => {
+      const raw = values[field.id];
+      if (raw === undefined || raw === null || raw === "") {
+        return [];
+      }
+      if (field.type === "boolean") {
+        return raw === true ? [field.label] : [];
+      }
+      const option = field.options?.find((item) => item.value === String(raw));
+      return [`${field.label}: ${option?.label ?? String(raw)}`];
+    }),
+  );
+}
+
+function formatCommercialGross(price: CommercialPriceProjection): string {
+  if (typeof price.grossPrice !== "number") {
+    return "";
+  }
+  return `${price.grossPrice.toLocaleString("ro-RO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ${price.currency}`;
 }
 
 async function loadCommercialExecution(

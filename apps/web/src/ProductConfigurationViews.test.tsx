@@ -345,6 +345,10 @@ describe("Product configuration views", () => {
       "/api/products/PRD-TEST/quote-snapshots/qts%3Ahidden/document",
     );
     expect(screen.getByText("Preț final: 624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Inspectează oferta" })).toHaveAttribute(
+      "href",
+      "/quotes/qts%3Ahidden",
+    );
     expect(screen.getByRole("button", { name: "Marchează acceptată" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Creează oferta" })).not.toBeInTheDocument();
     expect(screen.queryByText("382,50 EUR")).not.toBeInTheDocument();

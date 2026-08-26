@@ -98,6 +98,7 @@ describe("RequestsOverviewPage", () => {
       "href",
       "/requests/crq:11111111-2222-3333-4444-555555555555",
     );
+    await userEvent.click(screen.getByRole("button", { name: "Cerere nouă" }));
     expect(screen.getByRole("button", { name: "Creează cererea" })).toBeInTheDocument();
     expect(screen.queryByText("contentHash")).not.toBeInTheDocument();
     expect(screen.queryByText("Intake")).not.toBeInTheDocument();

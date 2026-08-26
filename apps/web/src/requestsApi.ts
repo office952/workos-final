@@ -4,6 +4,7 @@ import type {
   RequestDetailProjection,
   RequestOverviewProjection,
 } from "@workos-final/domain";
+import { throwIfListFailed } from "./fetchAccess";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -13,8 +14,9 @@ async function readJson<T>(response: Response): Promise<T> {
 
 export async function fetchRequestOverview(): Promise<RequestOverviewProjection> {
   const response = await fetch(`${baseUrl}/api/requests`);
+  throwIfListFailed(response, "requests_unavailable");
   const body = await readJson<{ overview?: RequestOverviewProjection }>(response);
-  if (!response.ok || !body.overview) {
+  if (!body.overview) {
     throw new Error("requests_unavailable");
   }
   return body.overview;
@@ -29,8 +31,9 @@ export async function readRequestDetail(
   if (response.status === 404) {
     return null;
   }
+  throwIfListFailed(response, "request_unavailable");
   const body = await readJson<{ detail?: RequestDetailProjection }>(response);
-  if (!response.ok || !body.detail) {
+  if (!body.detail) {
     throw new Error("request_unavailable");
   }
   return body.detail;

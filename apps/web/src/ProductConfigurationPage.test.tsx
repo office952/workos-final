@@ -282,7 +282,7 @@ describe("ProductConfigurationPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText(/Cerere CER-11111111/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Cerere CER-11111111/)).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Înapoi la cerere" })).toHaveAttribute(
       "href",
       "/requests/crq%3A11111111-2222-3333-4444-555555555555",

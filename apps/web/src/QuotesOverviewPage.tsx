@@ -15,15 +15,18 @@ import {
   RegistrySearchField,
   registrySearchResultSummary,
 } from "./RegistrySearchField";
+import { pageErrorKind } from "./fetchAccess";
 import { fetchQuoteOverview } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
 import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "forbidden" }
   | { kind: "ready"; overview: QuoteOverviewProjection };
 
 export function QuotesOverviewPage() {
@@ -39,9 +42,9 @@ export function QuotesOverviewPage() {
           setPage({ kind: "ready", overview });
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setPage({ kind: "error" });
+          setPage({ kind: pageErrorKind(error) });
         }
       });
     return () => {
@@ -64,10 +67,13 @@ export function QuotesOverviewPage() {
   }, [filter, page, query]);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă ofertele…</p>;
+    return <PageStatus kind="loading">Se încarcă ofertele…</PageStatus>;
+  }
+  if (page.kind === "forbidden") {
+    return <PageStatus kind="forbidden">Nu ai acces la lista de oferte.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca ofertele.</p>;
+    return <PageStatus kind="error">Nu s-au putut încărca ofertele.</PageStatus>;
   }
 
   const { overview } = page;
@@ -99,7 +105,7 @@ export function QuotesOverviewPage() {
           title="Nu există încă oferte."
           action={
             <p>
-              <Link to="/products">Deschide produsele</Link> pentru a crea o ofertă.
+              <Link to="/products">Deschide catalogul</Link> pentru a crea o ofertă.
             </p>
           }
         />
@@ -142,14 +148,15 @@ export function QuotesOverviewPage() {
               {visible.map((quote) => (
                 <li key={quote.quoteSnapshotId}>
                   <div className="jobs-identity">
-                    <Link to={quote.href}>{quote.inscription}</Link>
+                    <Link to={quote.href}>{quote.reference}</Link>
+                    <span>{quote.inscription}</span>
                     <span>{quote.productLabel}</span>
                     <ClientLink
                       customerId={quote.customerId}
                       displayName={quote.customerDisplayName}
                     />
-                    <span>
-                      {quote.reference} · {quote.grossDisplay} {quote.currency}
+                    <span className="commercial-gross">
+                      {quote.grossDisplay} {quote.currency}
                     </span>
                     {quote.requestId && quote.requestReference ? (
                       <Link

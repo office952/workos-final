@@ -1,4 +1,5 @@
 import type { QuoteOverviewItem, QuoteOverviewProjection } from "@workos-final/domain";
+import { throwIfListFailed } from "./fetchAccess";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -12,9 +13,7 @@ export type QuoteInspectionResponse = {
 
 export async function fetchQuoteOverview(): Promise<QuoteOverviewProjection> {
   const response = await fetch(`${baseUrl}/api/quotes`, { credentials: "include" });
-  if (!response.ok) {
-    throw new Error("quotes_unavailable");
-  }
+  throwIfListFailed(response, "quotes_unavailable");
   const body = (await response.json()) as { overview?: QuoteOverviewProjection };
   if (!body.overview) {
     throw new Error("quotes_unavailable");

@@ -4,6 +4,7 @@ import type {
   CustomerRegistryProjection,
   CustomerWorkspaceProjection,
 } from "@workos-final/domain";
+import { throwIfListFailed } from "./fetchAccess";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -22,9 +23,7 @@ export async function fetchCustomers(): Promise<Customer[]> {
 
 export async function fetchCustomerRegistry(): Promise<CustomerRegistryProjection> {
   const response = await fetch(`${baseUrl}/api/customers`);
-  if (!response.ok) {
-    throw new Error("customers_unavailable");
-  }
+  throwIfListFailed(response, "customers_unavailable");
   const body = await readJson<{ registry?: CustomerRegistryProjection }>(response);
   if (!body.registry) {
     throw new Error("customers_unavailable");
@@ -41,9 +40,7 @@ export async function fetchCustomerWorkspace(
   if (response.status === 404) {
     return null;
   }
-  if (!response.ok) {
-    throw new Error("customer_workspace_unavailable");
-  }
+  throwIfListFailed(response, "customer_workspace_unavailable");
   const body = await readJson<{ workspace?: CustomerWorkspaceProjection }>(response);
   return body.workspace ?? null;
 }

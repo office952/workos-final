@@ -90,7 +90,7 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" })).toBeVisible();
   await expect(page.getByText("Revizuiți configurația.")).toBeVisible();
-  await expect(page.getByText("Suprafață confirmată (mm²): 250000")).toBeVisible();
+  await expect(page.getByText("Suprafață confirmată (mm²): 250000").first()).toBeVisible();
   await expect(page.getByLabel("Textul literelor")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Modifică configurația" })).toBeVisible();
   await page.screenshot({

@@ -18,8 +18,10 @@ import {
   type CustomerProfileFormValue,
 } from "./CustomerProfileFields";
 import { fetchCustomerWorkspace, updateCustomer } from "./customerApi";
+import { pageErrorKind } from "./fetchAccess";
 import { quoteDocumentUrl } from "./productApi";
 import { EmptyState } from "./ui/EmptyState";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 const SECTION_QUERY: Record<string, CustomerWorkspaceSection> = {
@@ -39,6 +41,7 @@ const SECTION_PATH: Record<CustomerWorkspaceSection, string> = {
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "forbidden" }
   | { kind: "missing" }
   | { kind: "ready"; workspace: CustomerWorkspaceProjection };
 
@@ -67,9 +70,9 @@ export function ClientWorkspacePage() {
         setDraft(formFromCustomer(workspace.customer));
         setPage({ kind: "ready", workspace });
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setPage({ kind: "error" });
+          setPage({ kind: pageErrorKind(error) });
         }
       });
     return () => {
@@ -78,13 +81,16 @@ export function ClientWorkspacePage() {
   }, [customerId]);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă clientul…</p>;
+    return <PageStatus kind="loading">Se încarcă clientul…</PageStatus>;
   }
   if (page.kind === "missing") {
-    return <p>Clientul cerut nu este disponibil.</p>;
+    return <PageStatus kind="missing">Clientul cerut nu este disponibil.</PageStatus>;
+  }
+  if (page.kind === "forbidden") {
+    return <PageStatus kind="forbidden">Nu ai acces la acest client.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Clientul nu a putut fi încărcat.</p>;
+    return <PageStatus kind="error">Clientul nu a putut fi încărcat.</PageStatus>;
   }
 
   const { workspace } = page;
@@ -119,6 +125,9 @@ export function ClientWorkspacePage() {
         <div>
           <p className="client-kicker">Client</p>
           <h1>{customer.displayName}</h1>
+          <p className="client-header-meta">
+            Cereri, oferte și lucrări ale acestui client.
+          </p>
           <p className="client-header-meta">{headerSummary(customer)}</p>
         </div>
         <div className="client-header-side">
@@ -282,6 +291,12 @@ function OverviewPane({
         />
       </div>
 
+      <RelatedWorkspace
+        requests={workspace.requests}
+        quotes={workspace.quotes}
+        jobs={workspace.jobs}
+      />
+
       {workspace.recentActivity.length > 0 ? (
         <article className="client-activity-card">
           <h2>Activitate recentă</h2>
@@ -295,6 +310,27 @@ function OverviewPane({
           </ol>
         </article>
       ) : null}
+    </div>
+  );
+}
+
+function RelatedWorkspace({
+  requests,
+  quotes,
+  jobs,
+}: {
+  requests: readonly RequestOverviewItem[];
+  quotes: readonly QuoteOverviewItem[];
+  jobs: readonly JobOverviewItem[];
+}) {
+  if (requests.length === 0 && quotes.length === 0 && jobs.length === 0) {
+    return <EmptyState title="Acest client nu are încă cereri, oferte sau lucrări." />;
+  }
+  return (
+    <div className="client-related">
+      {requests.length > 0 ? <RequestsPane requests={requests} /> : null}
+      {quotes.length > 0 ? <QuotesPane quotes={quotes} /> : null}
+      {jobs.length > 0 ? <JobsPane jobs={jobs} /> : null}
     </div>
   );
 }

@@ -16,15 +16,19 @@ import {
   registrySearchResultSummary,
 } from "./RegistrySearchField";
 import { createCommercialRequest, fetchRequestOverview } from "./requestsApi";
+import { pageErrorKind } from "./fetchAccess";
+import { ActionDrawer } from "./ui/ActionDrawer";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
 import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "forbidden" }
   | { kind: "ready"; overview: RequestOverviewProjection };
 
 export function RequestsOverviewPage() {
@@ -36,6 +40,7 @@ export function RequestsOverviewPage() {
   const [query, setQuery] = useRegistrySearchQuery();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(Boolean(presetCustomerId));
 
   useEffect(() => {
     let cancelled = false;
@@ -46,9 +51,9 @@ export function RequestsOverviewPage() {
           setCustomers(listed);
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setPage({ kind: "error" });
+          setPage({ kind: pageErrorKind(error) });
         }
       });
     return () => {
@@ -91,10 +96,13 @@ export function RequestsOverviewPage() {
   }
 
   if (page.kind === "loading") {
-    return <p>Se încarcă cererile…</p>;
+    return <PageStatus kind="loading">Se încarcă cererile…</PageStatus>;
+  }
+  if (page.kind === "forbidden") {
+    return <PageStatus kind="forbidden">Nu ai acces la lista de cereri.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca cererile.</p>;
+    return <PageStatus kind="error">Nu s-au putut încărca cererile.</PageStatus>;
   }
 
   const { overview } = page;
@@ -106,6 +114,11 @@ export function RequestsOverviewPage() {
       <PageHeader
         title="Cereri de ofertă"
         lead="Ce a cerut clientul, starea de birou și ce trebuie făcut acum."
+        actions={
+          <button type="button" onClick={() => setDrawerOpen(true)}>
+            Cerere nouă
+          </button>
+        }
         meta={
           empty ? null : (
             <p className="page-summary">
@@ -123,12 +136,19 @@ export function RequestsOverviewPage() {
 
       {notice ? <p>{notice}</p> : null}
 
-      <RequestCreateForm
-        customers={customers}
-        initialCustomerId={presetCustomerId}
-        onCreate={handleCreate}
-        onCreateCustomer={handleCreateCustomer}
-      />
+      <ActionDrawer
+        title="Cerere nouă"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <RequestCreateForm
+          customers={customers}
+          initialCustomerId={presetCustomerId}
+          onCreate={handleCreate}
+          onCreateCustomer={handleCreateCustomer}
+          onCancel={() => setDrawerOpen(false)}
+        />
+      </ActionDrawer>
 
       {empty ? (
         <EmptyState title="Nu există încă cereri de ofertă." />
@@ -211,6 +231,7 @@ function RequestCreateForm({
   initialCustomerId,
   onCreate,
   onCreateCustomer,
+  onCancel,
 }: {
   customers: readonly Customer[];
   initialCustomerId: string;
@@ -220,6 +241,7 @@ function RequestCreateForm({
     description: string;
   }) => Promise<void>;
   onCreateCustomer: (displayName: string) => Promise<string>;
+  onCancel: () => void;
 }) {
   const [customerId, setCustomerId] = useState(initialCustomerId);
   const [title, setTitle] = useState("");
@@ -231,6 +253,7 @@ function RequestCreateForm({
   const [description, setDescription] = useState("");
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [validation, setValidation] = useState<string | null>(null);
   const active = customers.filter((customer) => customer.status === "ACTIVE");
 
   return (
@@ -239,8 +262,10 @@ function RequestCreateForm({
       onSubmit={(event) => {
         event.preventDefault();
         if (!customerId || title.trim().length === 0 || description.trim().length === 0) {
+          setValidation("Alege clientul și completează titlul și descrierea.");
           return;
         }
+        setValidation(null);
         setBusy(true);
         void onCreate({
           customerId,
@@ -249,7 +274,6 @@ function RequestCreateForm({
         }).finally(() => setBusy(false));
       }}
     >
-      <h3>Cerere nouă</h3>
       <Field label="Client">
         <select
           value={customerId}
@@ -304,17 +328,23 @@ function RequestCreateForm({
           onChange={(event) => setDescription(event.target.value)}
         />
       </Field>
-      <button
-        type="submit"
-        disabled={
-          busy ||
-          !customerId ||
-          title.trim().length === 0 ||
-          description.trim().length === 0
-        }
-      >
-        Creează cererea
-      </button>
+      {validation ? <p className="status-bad">{validation}</p> : null}
+      <div className="action-drawer-actions">
+        <button type="button" className="button-quiet" disabled={busy} onClick={onCancel}>
+          Anulează
+        </button>
+        <button
+          type="submit"
+          disabled={
+            busy ||
+            !customerId ||
+            title.trim().length === 0 ||
+            description.trim().length === 0
+          }
+        >
+          Creează cererea
+        </button>
+      </div>
     </form>
   );
 }

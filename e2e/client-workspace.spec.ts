@@ -45,7 +45,7 @@ test("office can open one client and see requests, offers and works", async ({
     path: "docs/worklog/screenshots/commercial-navigation.png",
   });
 
-  await page.getByText("Client nou").click();
+  await page.getByRole("button", { name: "Client nou" }).click();
   const createForm = page.locator("form.people-create");
   await createForm.getByLabel("Nume").fill(customerName);
   await createForm.getByLabel("CUI").fill("RO12345678");
@@ -54,7 +54,7 @@ test("office can open one client and see requests, offers and works", async ({
   await createForm.getByLabel("Email").fill("ana@hub.ro");
   await createForm.getByLabel("Adresă").fill("Str. Exemplu 1");
   await createForm.getByLabel("Oraș").fill("București");
-  await createForm.getByRole("button", { name: "Creează clientul" }).click();
+  await createForm.getByRole("button", { name: "Salvează clientul" }).click();
 
   await expect(page.getByRole("heading", { name: customerName })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Date curente" })).toBeVisible();
@@ -89,7 +89,7 @@ test("office can open one client and see requests, offers and works", async ({
 
   await page.goto(workspaceUrl);
   await page.getByRole("navigation", { name: "Secțiuni client" }).getByRole("link", { name: "Cereri" }).click();
-  await expect(page.getByText(/CER-[0-9A-F]{8}/)).toBeVisible();
+  await expect(page.getByText(/CER-[0-9A-F]{8}/).first()).toBeVisible();
   await expect(page.getByText(title)).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/client-workspace-requests.png",

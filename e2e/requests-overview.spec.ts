@@ -43,6 +43,7 @@ test("office can record a request, configure a product, and find the linked quot
   await page.goto("/requests");
   await expect(page.getByRole("heading", { name: "Cereri de ofertă" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Cereri" })).toBeVisible();
+  await page.getByRole("button", { name: "Cerere nouă" }).click();
   const createForm = page.locator("form.people-create");
   await createForm.getByRole("textbox", { name: "Nume client" }).fill(customerName);
   await createForm.getByRole("button", { name: "Adaugă client" }).click();
@@ -89,7 +90,7 @@ test("office can record a request, configure a product, and find the linked quot
     .locator(`a.button-link[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"][href*="request="]`)
     .click();
   await expect(page).toHaveURL(new RegExp(`/products/${CANONICAL_LETTERS_PRODUCT_CODE}\\?request=`));
-  await expect(page.getByText(/Cerere CER-[0-9A-F]{8}/)).toBeVisible();
+  await expect(page.getByText(/Cerere CER-[0-9A-F]{8}/).first()).toBeVisible();
   await expect(page.getByText(`Client ${customerName}`)).toBeVisible();
   await expect(page.getByRole("button", { name: "Verifică configurația" })).toBeVisible();
   await page.screenshot({

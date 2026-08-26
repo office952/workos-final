@@ -57,6 +57,7 @@ function FieldControl({
         <select
           id={id}
           name={field.id}
+          className="choice-select-native"
           value={typeof value === "string" ? value : ""}
           onChange={(event) => onChange(event.target.value || null)}
         >
@@ -105,12 +106,21 @@ export function FormRenderer({
 
         return (
           <fieldset key={section.id} className="form-section">
-            <legend>{section.title}</legend>
+            <legend>
+              {section.title}
+              {visibleFields.some((field) => field.required) ? " – obligatoriu" : ""}
+            </legend>
             <div className="form-section-fields">
               {visibleFields.map((field) => (
                 <div
                   key={field.id}
-                  className={field.type === "boolean" ? "field-span field-inline" : undefined}
+                  className={
+                    field.type === "boolean"
+                      ? "field-span field-inline"
+                      : field.type === "select"
+                        ? "field-span"
+                        : undefined
+                  }
                 >
                   <Field label={field.label} hint={field.hint}>
                     <FieldControl
@@ -119,6 +129,25 @@ export function FormRenderer({
                       onChange={(value) => onChange(field.id, value)}
                     />
                   </Field>
+                  {field.type === "select" && field.options && field.options.length > 0 ? (
+                    <div className="choice-chips" aria-hidden="true">
+                      {field.options.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={
+                            values[field.id] === option.value
+                              ? "choice-chip is-selected"
+                              : "choice-chip"
+                          }
+                          aria-pressed={values[field.id] === option.value}
+                          onClick={() => onChange(field.id, option.value)}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
