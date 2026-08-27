@@ -15,7 +15,7 @@ OWNER_ACCEPTED_FINAL_CONFIGURATION = NO
 ARCHITECTURE_C_UI_WAVE_2 = NOT_AUTHORIZED
 ```
 
-This closes Step 8 on the recovered HUB MEDIA Cloud organization. It does not accept the configuration for the Owner and does not start the first real LETTERS job.
+The configuration write closed Step 8 without accepting it. Owner later accepted the same configuration. The accepted roster size is 8 people. This record does not start the first real LETTERS job.
 
 ## Sources used
 
@@ -66,11 +66,12 @@ Costs and providers were already correct from the first Step 8 write and were le
 ## Readiness
 
 ```text
-HUB_MEDIA_ORGANIZATION_CONFIGURATION = COMPLETE
+HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
 FIRST_REAL_LETTERS_JOB               = READY_FOR_REAL_CLIENT_ENTRY
 LETTERS_12_TASK_COVERAGE             = COMPLETE
 CLAIM_ON_START_READINESS             = READY
 CUSTOMER_OPERABLE_WITHOUT_CURSOR     = YES
+PEOPLE_COUNT                         = 8
 ```
 
 No client, quote, order, job, plan, task, inventory movement, or operator session was created.
@@ -114,6 +115,17 @@ INVENTORY_MUTATIONS          = 0
 ARCHITECTURE_C_UI_WAVE_1     = CLOSED_INTEGRATED_ON_MAIN
 ARCHITECTURE_C_UI_WAVE_2     = NOT_STARTED
 PUSH                         = NO
+```
+
+## Owner accept
+
+```text
+OWNER_DECISION                       = ACCEPTED
+HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
+PEOPLE_COUNT                         = 8
+PEOPLE_COUNT_CONFIRMED_BY_OWNER      = YES
+FIRST_REAL_LETTERS_JOB               = NOT_STARTED
+CLIENT                               = DEFERRED_NOT_INVENTED
 ```
 
 ## Next step

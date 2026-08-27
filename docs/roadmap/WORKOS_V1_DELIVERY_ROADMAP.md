@@ -66,7 +66,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = 0dc7702c4b3ad98604b3eb74564a254091c36830
+ORIGIN_MAIN                          = b46218927477efdc954932111ce59e5da90f0bfd
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -77,7 +77,9 @@ FIRST_REAL_CLOUD_OWNER               = CREATED
 REAL_CLOUD_OWNER_RECOVERY_V1         = COMPLETE
 OWNER_LOGIN                          = VERIFIED
 REAL_HUB_MEDIA_OPERATION             = NOT_PROVEN
-BUSINESS_DATA_CONFIGURATION          = NOT_STARTED
+BUSINESS_DATA_CONFIGURATION          = OWNER_ACCEPTED
+HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
+FIRST_REAL_LETTERS_JOB               = READY_FOR_REAL_CLIENT_ENTRY
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
 UI_UX_CANON_UPDATE_FROM_EVIDENCE     = COMPLETE
@@ -130,8 +132,7 @@ PRODUCT_SYSTEM_UI                    = RECORD_ONLY
 ARCHITECTURE_C_DIRECTION             = OWNER_ACCEPTED
 ARCHITECTURE_C_FINAL_SIMULATION      = OWNER_ACCEPTED_WITH_ADVISORIES
 ARCHITECTURE_C_UI_WAVE_1_PLANNING    = COMPLETE
-ARCHITECTURE_C_UI_WAVE_1             = IMPLEMENTED_LOCAL_IN_REVIEW
-OWNER_ACCEPTED                       = NO
+ARCHITECTURE_C_UI_WAVE_1             = OWNER_ACCEPTED_WITH_ADVISORIES
 ARCHITECTURE_C_UI_WAVE_2             = NOT_STARTED
 FIGMA_LIBRARY_PUBLISHED              = NO
 ```
@@ -143,7 +144,7 @@ Meaning, without reopening closed builds:
 - The product spine already runs in single-plane DEV: LETTERS none/none 60 mm through Quote, Acceptance, Order, Release, 12-operation ExecutionPlan, Claim/Start/Complete, actuals, stock movements, and actual cost.
 - Cloud Foundation plus atomic resume are merged. Synthetic isolation is verified. That is not a real HUB MEDIA operation.
 - A separate Owner GO recovered the existing HUB MEDIA Cloud organization and created the first real Cloud Owner. Login is verified. This file did not authorize that write. Execution detail lives in `docs/worklog/WORKOS_REAL_CLOUD_OWNER_RECOVERY_V1.md`.
-- The recovered organization is ACTIVE. People, workcenters, machines, provider configuration, seller, customers, requests, quotes, orders, execution plans, and inventory movements are still empty. Real HUB MEDIA operation is not proven.
+- The recovered organization is ACTIVE and Owner-accepted configured: seller complete, 8 operational people with PINs, two LETTERS machines, and confirmed 60 mm / none / none cost rows. Customers, quotes, orders, execution plans, and inventory movements remain empty. Real HUB MEDIA operation is not proven until the first real LETTERS job.
 - Product System UI inspects and records current typed truth, including persisted display labels. It is not a full product-administration product.
 
 Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem paths in this file.
@@ -153,8 +154,8 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 ```text
 TARGET_MILESTONE  = HUB_MEDIA_CLEAN_PILOT
 CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP      = HUB_MEDIA_ORGANIZATION_CONFIGURATION
-NEXT_STEP         = HUB_MEDIA_ORGANIZATION_CONFIGURATION
+CURRENT_STEP      = FIRST_REAL_LETTERS_JOB
+NEXT_STEP         = FIRST_REAL_LETTERS_JOB
 HIGH_FIDELITY     = FIRST_LOT_OWNER_ACCEPTED
 FIRST_HF_LOT_SCREEN_DESIGN = OWNER_ACCEPTED
 OWNER_FIRST_HF_LOT_REVIEW = COMPLETE
@@ -194,15 +195,16 @@ OWNER_FIRST_HF_IMPLEMENTATION_WAVE_5_REVIEW = PASS
 ARCHITECTURE_C_DIRECTION = OWNER_ACCEPTED
 ARCHITECTURE_C_FINAL_SIMULATION = OWNER_ACCEPTED_WITH_ADVISORIES
 ARCHITECTURE_C_UI_WAVE_1_PLANNING = COMPLETE
-ARCHITECTURE_C_UI_WAVE_1 = IMPLEMENTED_LOCAL_IN_REVIEW
-OWNER_ACCEPTED = NO
+ARCHITECTURE_C_UI_WAVE_1 = OWNER_ACCEPTED_WITH_ADVISORIES
 ARCHITECTURE_C_UI_WAVE_2 = NOT_STARTED
 FIGMA_LIBRARY_PUBLISHED = NO
+HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
+FIRST_REAL_LETTERS_JOB = READY_FOR_REAL_CLIENT_ENTRY
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. The next sequence step is `HUB_MEDIA_ORGANIZATION_CONFIGURATION`. It is not started.
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`. This file does not authorize that job.
 
-Architecture C is a **parallel UI track**, not a second target milestone and not a replacement for step 8. The Architecture C final simulation is `OWNER_ACCEPTED_WITH_ADVISORIES`. Wave 1 is `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/architecture-c-ui-wave1-shell-resources-v1`. Owner has not accepted it. Wave 2 is not started. The Figma library stays unpublished. Do not flip first-HF `WAVE_*` or `UI_IMPLEMENTATION_COMPLETE` flags for this track. Do not import the unaccepted HUB MEDIA organization-configuration commit into this branch.
+Architecture C is a **parallel UI track**, not a second target milestone and not a replacement for the HUB sequence. The Architecture C final simulation is `OWNER_ACCEPTED_WITH_ADVISORIES`. Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. Wave 2 is not started. The Figma library stays unpublished. Do not flip first-HF `WAVE_*` or `UI_IMPLEMENTATION_COMPLETE` flags for this track.
 
 Implementation reports fill:
 
@@ -211,7 +213,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_STEP         = <current next sequence step>
 ```
 
-`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner acceptance of Wave 5, that value is `HUB_MEDIA_ORGANIZATION_CONFIGURATION`. This file does not authorize that step. Contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Wave 2 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR_V1.md`. Wave 3 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_V1.md`. Wave 4 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_V1.md`. Wave 5 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_5_REGRESSION_ACCESSIBILITY_SCREENSHOT_V1.md`.
+`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner acceptance of Step 8, that value is `FIRST_REAL_LETTERS_JOB`. This file does not authorize that job. Contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Wave 2 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR_V1.md`. Wave 3 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_V1.md`. Wave 4 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_V1.md`. Wave 5 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_5_REGRESSION_ACCESSIBILITY_SCREENSHOT_V1.md`. Step 8 record: `docs/worklog/WORKOS_HUB_MEDIA_ORGANIZATION_CONFIGURATION_STEP8.md`.
 
 Target flow:
 
@@ -247,7 +249,7 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 6. OWNER_VISUAL_ACCEPTANCE           = FIRST_LOT_CLOSED
 6a. IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
 7. SCOPED_UI_IMPLEMENTATION          = OWNER_ACCEPTED
-8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = NOT_STARTED
+8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
 9. FIRST_REAL_LETTERS_JOB            = NOT_STARTED
 10. PLANNED_VS_ACTUAL_OWNER_SIGN_OFF = NOT_STARTED
 ```
@@ -266,13 +268,13 @@ Step 1 established the living canons and governance pointers. Step 2 recovered t
 
 `FIRST_HF_LOT_SCREEN_DESIGN` is `OWNER_ACCEPTED`. The first lot is drawn in Figma on pages 12–21, in direction A, with Lucide plus WorkOS custom icons and a same-page E2E prototype. Job detail and quote inspection are in the lot. Their URL and money contracts are `OWNER_ACCEPTED` in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`: `/jobs/:jobId`, `/quotes/:quoteSnapshotId`, `MONEY_POLICY = ALT_B_SCOPED`. Execution detail lives in `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md`. This file does not authorize React/CSS, Mobbin, or a production component library.
 
-Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 is `OWNER_ACCEPTED` with advisories. Wave 3 is `OWNER_ACCEPTED` with advisories. Wave 4 is `OWNER_ACCEPTED` with advisories. Wave 5 is `OWNER_ACCEPTED` with advisories and completes the first HF lot UI. Steps 8–10 remain not started and are not authorized by this accept. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
+Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 is `OWNER_ACCEPTED` with advisories. Wave 3 is `OWNER_ACCEPTED` with advisories. Wave 4 is `OWNER_ACCEPTED` with advisories. Wave 5 is `OWNER_ACCEPTED` with advisories and completes the first HF lot UI. Step 8 is `OWNER_ACCEPTED`. Steps 9–10 remain not started and are not authorized by this accept. Do not invent a Product System admin rewrite from the historical foundation “next candidate” line.
 
-Step 8 configures the recovered HUB MEDIA organization with the existing explicit provider/CLI path. It is not universal Machine Admin.
+Step 8 configured the recovered HUB MEDIA organization with the existing seller, people, PIN, cost-confirm, and explicit provider/CLI path. It is not universal Machine Admin. Execution detail lives in `docs/worklog/WORKOS_HUB_MEDIA_ORGANIZATION_CONFIGURATION_STEP8.md`.
 
-Do not start steps 8–10 from this document. The next named step is `HUB_MEDIA_ORGANIZATION_CONFIGURATION`.
+Do not start steps 9–10 from this document. The next named step is `FIRST_REAL_LETTERS_JOB`.
 
-Architecture C UI Wave 1 is `IMPLEMENTED_LOCAL_IN_REVIEW` on this parallel branch. It does not replace step 8 and does not authorize Wave 2, Figma publish, Owner accept, or the first real LETTERS job. Execution detail lives in `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md`.
+Architecture C UI Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. It does not replace the HUB sequence and does not authorize Wave 2, Figma publish, or the first real LETTERS job. Execution detail lives in `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md`.
 
 ## Real Cloud recovery
 
@@ -296,11 +298,11 @@ State only. No identities, emails, or machine paths.
 HUB_MEDIA_ORGANIZATION        = ACTIVE
 CLOUD_OWNER                   = EXISTS
 OWNER_LOGIN                   = PROVEN
-PEOPLE                        = 0
-WORKCENTERS                   = 0
-MACHINES                      = 0
-PROVIDER_CONFIGURATION        = 0
-SELLER_PROFILE                = 0
+PEOPLE                        = 8
+WORKCENTERS                   = 2
+MACHINES                      = 2
+PROVIDER_CONFIGURATION        = APPLIED
+SELLER_PROFILE                = COMPLETE
 CUSTOMERS                     = 0
 REQUESTS                      = 0
 QUOTES                        = 0
