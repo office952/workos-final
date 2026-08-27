@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { uniqueRequestToken } from "./helpers/requests";
 import { openPeopleAdmin } from "./helpers/people";
@@ -16,8 +17,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
 
   await page.getByRole("link", { name: "Calificări" }).click();
   await expect(page.getByRole("heading", { name: "Calificări" })).toBeVisible();
-  await page.getByText("Detalii").first().click();
-  await expect(page.getByText("SK_CNC_OPERATOR")).toBeVisible();
+  await expect(page.locator(".people-list").getByText("CNC", { exact: true })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/skill-catalog.png",
     fullPage: true,
@@ -32,7 +32,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
   await expect(page.getByRole("heading", { name })).toBeVisible();
   await page.getByLabel("Adaugă skill").selectOption({ label: "CNC (SK_CNC_OPERATOR)" });
   await page.getByRole("button", { name: "Adaugă skill" }).click();
-  await expect(page.locator(".people-skill-list").getByText("CNC")).toBeVisible();
+  await expect(assignedOperatorSkill(page, "CNC")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/person-skills.png",
     fullPage: true,
@@ -93,3 +93,16 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
     fullPage: true,
   });
 });
+
+function assignedOperatorSkill(page: Page, label: string) {
+  return page
+    .locator("article.client-current-card")
+    .filter({ has: page.getByRole("heading", { name: "Calificări", exact: true }) })
+    .locator("ul.people-skill-list > li")
+    .filter({
+      has: page.getByRole("button", { name: "Elimină din eligibilitatea curentă" }),
+    })
+    .filter({
+      has: page.locator(`xpath=./span[normalize-space(text())=${JSON.stringify(label)}]`),
+    });
+}

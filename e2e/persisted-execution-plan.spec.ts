@@ -105,10 +105,11 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   await plan.locator("details.execution-plan-meta-wrap", { hasText: "Detalii plan" }).evaluate((el) => {
     (el as HTMLDetailsElement).open = true;
   });
-  const reference = await plan.getByText("Referință: exp:").textContent();
+  const provenance = plan.locator(".execution-plan-meta").getByText("Proveniență:");
+  await expect(provenance).toBeVisible();
   await expect(page.getByRole("button", { name: "Creează planul de execuție" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ })).toBeVisible();
-  await expect(page.getByText(reference ?? "Referință: exp:")).toBeVisible();
+  await expect(provenance).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/letters-execution-plan-idempotent.png",
     fullPage: true,

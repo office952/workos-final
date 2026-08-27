@@ -39,9 +39,9 @@ test("removed skill stays removed and planned start revalidates availability", a
   await removedRow.getByRole("link", { name: "Deschide" }).click();
   await page.getByLabel("Adaugă skill").selectOption({ label: "CNC (SK_CNC_OPERATOR)" });
   await page.getByRole("button", { name: "Adaugă skill" }).click();
-  await expect(page.locator(".people-skill-list").getByText("CNC")).toBeVisible();
+  await expect(assignedOperatorSkill(page, "CNC")).toBeVisible();
   await page.getByRole("button", { name: "Elimină din eligibilitatea curentă" }).click();
-  await expect(page.locator(".people-skill-list").getByText("CNC")).toHaveCount(0);
+  await expect(assignedOperatorSkill(page, "CNC")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/people-skill-removal-before-restart.png",
     fullPage: true,
@@ -167,6 +167,19 @@ async function readBackCnc(request: APIRequestContext, planId: string) {
       (item) => item.processLabel === "Debitare foaie CNC" && item.scopeLabel === "Spate",
     ) ?? null
   );
+}
+
+function assignedOperatorSkill(page: Page, label: string) {
+  return page
+    .locator("article.client-current-card")
+    .filter({ has: page.getByRole("heading", { name: "Calificări", exact: true }) })
+    .locator("ul.people-skill-list > li")
+    .filter({
+      has: page.getByRole("button", { name: "Elimină din eligibilitatea curentă" }),
+    })
+    .filter({
+      has: page.locator(`xpath=./span[normalize-space(text())=${JSON.stringify(label)}]`),
+    });
 }
 
 async function identifyOperator(request: APIRequestContext, personId: string) {

@@ -48,7 +48,10 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
 
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await revealSecondaryProductSurfaces(page);
-  await expect(page.getByText("Sistem de prindere: Cornier oțel")).toBeVisible();
+  const confirmed = page.locator("section.result-section").filter({
+    has: page.getByRole("heading", { name: "Configurație confirmată" }),
+  });
+  await expect(confirmed.getByText("Sistem de prindere: Cornier oțel")).toBeVisible();
   await expect(page.getByText("Lățime exterioară: 1000 mm (introdus de operator)")).toBeVisible();
   await expect(page.getByText("Suprafață față: 0,5 m²")).toBeVisible();
   await expect(page.getByText("Lățime exterioară cadru: 0,99 m")).toBeVisible();

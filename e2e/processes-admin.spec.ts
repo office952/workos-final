@@ -250,6 +250,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await expect(
     page.getByRole("heading", { name: "Resurse și cost intern" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: /Familie\s+Plexiglas/ }).click();
   await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toBeVisible();
 
   await page.goto("/components");

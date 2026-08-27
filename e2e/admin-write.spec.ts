@@ -59,7 +59,7 @@ test("admin display-label write persists and propagates", async ({
       "aria-current",
       "true",
     );
-    await expect(page.getByRole("heading", { name: ORIGINAL.family })).toBeVisible();
+    await selectCatalogItem(page, ORIGINAL.family);
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-families-write.png",
       fullPage: true,
@@ -75,14 +75,14 @@ test("admin display-label write persists and propagates", async ({
     });
     await page.getByLabel("Etichetă afișată").fill(RENAMED.family);
     await page.getByRole("button", { name: "Salvează" }).click();
-    await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
+    await expectSelectedCatalogLabel(page, RENAMED.family);
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-family-saved.png",
       fullPage: true,
     });
 
     await page.reload();
-    await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
+    await selectCatalogItem(page, RENAMED.family);
     const afterReload = (await (await request.get("/api/product-system-admin")).json()) as {
       families: Array<{ id: string; label: string }>;
     };
@@ -91,7 +91,7 @@ test("admin display-label write persists and propagates", async ({
     );
 
     await page.getByRole("button", { name: "Categorii" }).click();
-    await page.getByRole("button", { name: ORIGINAL.category }).click();
+    await selectCatalogItem(page, ORIGINAL.category);
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-categories-write.png",
       fullPage: true,
@@ -99,6 +99,7 @@ test("admin display-label write persists and propagates", async ({
     await renameCurrent(page, RENAMED.category);
 
     await page.getByRole("button", { name: "Produse", exact: true }).click();
+    await selectCatalogItem(page, ORIGINAL.product);
     await page.getByRole("button", { name: "Editează" }).click();
     await expect(
       page.locator(".display-label-editor").getByText(PRODUCT_CODE),
@@ -109,10 +110,10 @@ test("admin display-label write persists and propagates", async ({
     });
     await page.getByLabel("Etichetă afișată").fill(RENAMED.product);
     await page.getByRole("button", { name: "Salvează" }).click();
-    await expect(page.getByRole("heading", { name: RENAMED.product })).toBeVisible();
+    await expectSelectedCatalogLabel(page, RENAMED.product);
 
     await page.getByRole("button", { name: "Tipuri constructive" }).click();
-    await page.getByRole("button", { name: ORIGINAL.type, exact: true }).click();
+    await selectCatalogItem(page, ORIGINAL.type);
     await page.getByRole("button", { name: "Editează" }).click();
     await expect(
       page.locator(".display-label-editor").getByText(TYPE_ID),
@@ -123,7 +124,7 @@ test("admin display-label write persists and propagates", async ({
     });
     await page.getByLabel("Etichetă afișată").fill(RENAMED.type);
     await page.getByRole("button", { name: "Salvează" }).click();
-    await expect(page.getByRole("heading", { name: RENAMED.type })).toBeVisible();
+    await expectSelectedCatalogLabel(page, RENAMED.type);
 
     await page.getByRole("link", { name: "Catalog" }).click();
     await expect(page.getByRole("link", { name: RENAMED.product })).toBeVisible();
@@ -135,9 +136,14 @@ test("admin display-label write persists and propagates", async ({
 
     await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Administrare" }).click();
     await page.getByRole("link", { name: "Module și componente" }).click();
-    await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Module și componente" })).toBeVisible();
+    await page.getByRole("button", { name: "Familii" }).click();
+    await selectCatalogItem(page, RENAMED.family);
     await page.getByRole("button", { name: "Componente de produs" }).click();
-    await expect(page.getByRole("heading", { name: RENAMED.type })).toBeVisible();
+    await selectCatalogItem(page, "Față");
+    await expect(
+      catalogDetail(page).getByRole("heading", { name: RENAMED.type, exact: true }),
+    ).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/admin-components-propagated.png",
       fullPage: true,
@@ -184,11 +190,34 @@ test("admin display-label write persists and propagates", async ({
   });
 });
 
+function catalogDetail(page: Page) {
+  return page.locator("article.owner-catalog-detail");
+}
+
+async function expectSelectedCatalogLabel(page: Page, label: string): Promise<void> {
+  await expect(
+    catalogDetail(page).getByRole("heading", { name: label, exact: true }),
+  ).toBeVisible();
+}
+
+async function selectCatalogItem(page: Page, label: string): Promise<void> {
+  await page
+    .getByRole("navigation", { name: "Elemente catalog" })
+    .locator("button.owner-catalog-item")
+    .filter({
+      has: page
+        .locator("span.owner-catalog-item-label > span:not(.owner-catalog-item-kind)")
+        .getByText(label, { exact: true }),
+    })
+    .click();
+  await expectSelectedCatalogLabel(page, label);
+}
+
 async function renameCurrent(page: Page, label: string): Promise<void> {
   await page.getByRole("button", { name: "Editează" }).click();
   await page.getByLabel("Etichetă afișată").fill(label);
   await page.getByRole("button", { name: "Salvează" }).click();
-  await expect(page.getByRole("heading", { name: label })).toBeVisible();
+  await expectSelectedCatalogLabel(page, label);
 }
 
 async function restoreOriginalLabels(request: APIRequestContext): Promise<void> {
