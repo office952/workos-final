@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { setTheme } from "./helpers/account";
 import {
@@ -102,8 +103,12 @@ test("atelier execution and planned versus actual stay workshop-safe", async ({
   await expect(page.getByRole("heading", { name: "Pot porni acum" })).toBeVisible();
   const laneHeadings = await page.locator(".atelier-lane h2").allTextContents();
   expect(laneHeadings[0]).toBe("Blocate");
-  await expect(page.getByText("Necesită utilaj dedicat înainte de pornire.").first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Pornește" }).first()).toBeVisible();
+  const blockedJob = atelierJobTask(page, "Blocate", inscription);
+  const startableJob = atelierJobTask(page, "Pot porni acum", inscription);
+  await expect(blockedJob).toHaveCount(2);
+  await expect(blockedJob.getByText("Necesită utilaj dedicat înainte de pornire.")).toHaveCount(2);
+  await expect(startableJob).toHaveCount(1);
+  await expect(startableJob.getByRole("button", { name: "Pornește" })).toBeVisible();
   await page.screenshot({ path: shot("atelier-populated"), fullPage: true });
   await page.screenshot({ path: shot("task-startable"), fullPage: true });
   await page.screenshot({ path: shot("machine-blocked"), fullPage: true });
@@ -118,17 +123,13 @@ test("atelier execution and planned versus actual stay workshop-safe", async ({
   await page.getByRole("button", { name: "Ieși" }).click();
   await expect(page.locator("form.operator-identify-form").getByLabel("PIN")).toBeVisible();
   await identifyTestExecutorOnPage(page);
-  await expect(page.getByRole("button", { name: "Pornește" }).first()).toBeVisible();
+  await expect(atelierJobTask(page, "Pot porni acum", inscription).getByRole("button", { name: "Pornește" })).toBeVisible();
 
-  const startButton = page.getByRole("button", { name: "Pornește" }).first();
-  await startButton.click();
-  await expect(page.getByRole("link", { name: "Continuă" })).toBeVisible();
-
-  await page
-    .getByRole("listitem")
-    .filter({ hasText: inscription })
-    .getByRole("link", { name: "Continuă" })
-    .click();
+  await startableJob.getByRole("button", { name: "Pornește" }).click();
+  const inProgressJob = atelierJobTask(page, "În lucru", inscription);
+  await expect(inProgressJob).toHaveCount(1);
+  await expect(inProgressJob.getByRole("link", { name: "Continuă" })).toBeVisible();
+  await inProgressJob.getByRole("link", { name: "Continuă" }).click();
   await expect(page).toHaveURL(/\/execution\//);
   await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
   await expect(page.getByRole("link", { name: "Înapoi la lucrare" })).toBeVisible();
@@ -171,3 +172,10 @@ test("atelier execution and planned versus actual stay workshop-safe", async ({
   await setTheme(page, "Deschisă");
   await page.screenshot({ path: shot("light-atelier"), fullPage: true });
 });
+
+function atelierJobTask(page: Page, lane: string, inscription: string) {
+  return page
+    .getByRole("region", { name: lane, exact: true })
+    .locator("li.atelier-task-row")
+    .filter({ hasText: inscription });
+}
