@@ -1167,8 +1167,13 @@ describe("Cloud provision leftover fixtures and concurrency", () => {
         password: OWNER_PASSWORD,
       }),
     ]);
+    // Different-email resume: overlapping workers lose claimProvisionOwnerEmail
+    // (email_mismatch). A late arriver that starts after the winner activated
+    // the leftover org is refused as already_active — the same refusal as
+    // "refuses resume of a complete organization with a different email".
+    // Neither path writes a second owner.
     const resumeDomain = assertTwoProcessDomainOutcome([first, second], {
-      loserCodes: ["email_mismatch"],
+      loserCodes: ["email_mismatch", "already_active"],
     });
     expect(controlPlaneCounts(resumeRoot)).toMatchObject({
       organizations: 1,
