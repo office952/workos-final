@@ -251,13 +251,7 @@ export function scopeExecutionPlanPreview(
   if (access === "owner") {
     return { ...preview };
   }
-  const {
-    internalCostTotal: _cost,
-    internalCostCurrency: _currency,
-    internalCostCompleteness: _complete,
-    ...summary
-  } = preview.summary;
-  return omitForbiddenFinancialFields({ ...preview, summary }, access) as Record<string, unknown>;
+  return omitForbiddenFinancialFields(preview, access) as Record<string, unknown>;
 }
 
 export function scopeExecutionPlanView(

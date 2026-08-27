@@ -92,7 +92,7 @@ describe("customer workspace API", () => {
     const requestA = await createRequest(app, alpha.customerId as string, "Cerere A");
     await createRequest(app, alpha.customerId as string, "Cerere B");
     const quoteA = await freezeQuote(app, "ALPH", alpha.customerId as string, requestA.requestId as string);
-    const quoteB = await freezeQuote(app, "ALPQ", alpha.customerId as string);
+    await freezeQuote(app, "ALPQ", alpha.customerId as string);
     await freezeQuote(app, "BETA", beta.customerId as string);
     await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteA.quoteSnapshotId}/acceptance`,

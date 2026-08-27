@@ -8,7 +8,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve, sep } from "node:path";
+import { join, resolve, sep } from "node:path";
 import { generateAttachmentStorageKey } from "@workos-final/domain";
 import { resolveWorkosDataDir } from "../persistence/sqlite.js";
 

@@ -153,7 +153,7 @@ function classifyInboxTask(input: {
   planCreatedAt: string;
   providerRegistry: WorkcenterRegistry;
 }): OperatorInboxTaskItem | null {
-  const { task, view, byId, currentOperatorId, people, eligibility } = input;
+  const { task, byId, currentOperatorId, people, eligibility } = input;
 
   if (task.status === "IN_PROGRESS" && task.assignedExecutor?.id === currentOperatorId) {
     return toInboxItem(input, "in_progress_mine");

@@ -1,7 +1,6 @@
 import {
   createCustomer,
   customerFromRow,
-  renameCustomer,
   retireCustomer,
   updateCustomer,
   type Customer,
