@@ -380,6 +380,7 @@ test.describe("Architecture C UI Wave 1", () => {
       "Resurse și cost intern",
       "Utilaje și zone",
       "Oameni",
+      "Servicii operaționale",
       "Procese",
       "Guvernanță",
     ]);
@@ -393,6 +394,7 @@ test.describe("Architecture C UI Wave 1", () => {
       "Resurse și cost intern",
       "Utilaje și zone",
       "Oameni",
+      "Servicii operaționale",
       "Procese",
       "Guvernanță",
     ]);

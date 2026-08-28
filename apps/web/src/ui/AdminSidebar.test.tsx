@@ -17,6 +17,7 @@ describe("AdminSidebar", () => {
     );
     expect(screen.getByRole("link", { name: "Utilaje și zone" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Oameni" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Servicii operaționale" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Procese" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Guvernanță" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Stoc" })).not.toBeInTheDocument();
@@ -26,6 +27,7 @@ describe("AdminSidebar", () => {
       "Resurse și cost intern",
       "Utilaje și zone",
       "Oameni",
+      "Servicii operaționale",
       "Procese",
       "Guvernanță",
     ]);

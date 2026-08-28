@@ -163,6 +163,7 @@ describe("ResourcesAdminPage", () => {
     expect(await screen.findByRole("link", { name: "Resurse și cost intern" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Utilaje și zone" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Oameni" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Servicii operaționale" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Procese" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Guvernanță" })).toBeInTheDocument();
   });

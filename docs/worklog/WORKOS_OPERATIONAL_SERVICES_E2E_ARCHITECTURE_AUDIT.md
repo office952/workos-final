@@ -891,7 +891,7 @@ Owner GO: `APROB OS-S1`. Design and implement only this slice.
 
 ```text
 SLICE                         = OS-S1_ORG_CAPABILITY_AND_REQUEST_MODE
-STATUS                        = IMPLEMENTED_CURRENT / BASIC
+STATUS                        = IMPLEMENTED_LOCAL_IN_REVIEW
 PRODUCT_CODE_RATES            = UNCHANGED
 INSTALLATION_EIC              = STILL_PARTIAL
 QUOTE_LINES                   = STILL_PRODUCT_ONLY
@@ -914,4 +914,25 @@ Runtime:
 - `TRANSPORT_UNCONFIRMED` removed from install reasons
 - organization offer change does not rewrite a persisted Request mode; incompatible mode stays visible and fail-closed
 - Cloud isolation timeout classified as suite-contention against the default 5s budget; that one test now has a 15s budget so `pnpm test` (CI) stays honest
+
+---
+
+## 19. OS-S1 UI hierarchy and status correction — 2026-08-28
+
+Owner hold after commit 1: domain and CI were accepted; merge was `NO` because `/admin/operational-services` left the Admin L2 floorplan, and docs promoted `IMPLEMENTED_CURRENT / BASIC` before main integration.
+
+```text
+CORRECTION                    = UX_S1_AND_DOC_BLOCKER
+STATUS                        = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED                = NO
+ADMIN_L2                      = AdminSidebar + admin-floorplan
+THIRD_MENU                    = NO
+MASTER_SELECTOR               = NO
+UNCONFIGURED_VS_DISABLED      = DISTINGUISHED
+SAVE_NOTICE                   = VISIBLE
+OS_S2                         = NOT_AUTHORIZED
+MAIN_INTEGRATION              = NOT_DONE
+```
+
+The page now uses the established Administrare hierarchy: global L1, one Admin L2, and the service form as page content. Documentation status stays `IMPLEMENTED_LOCAL_IN_REVIEW` until integration on main.
 

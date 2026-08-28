@@ -148,6 +148,7 @@ export const ADMIN_L2_WAVE1_SECTION_IDS: readonly AdminSectionId[] = [
   "resources",
   "workcenters",
   "people",
+  "operational-services",
   "processes",
   "governance",
 ];
