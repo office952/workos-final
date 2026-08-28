@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { emptyCustomerProfile, type Customer } from "../customers/identity.js";
-import { SITE_INSTALLATION_SCOPE_ID } from "../installation/scope.js";
+import {
+  SITE_INSTALLATION_FREEZE_REASON,
+  SITE_INSTALLATION_SCOPE_ID,
+} from "../installation/scope.js";
 import {
   canChangeCommercialRequestStatus,
   commercialRequestReference,
@@ -183,6 +186,56 @@ describe("commercial request identity", () => {
       }),
     ).toEqual({ ok: false, error: "customer_mismatch" });
     expect(created.request.status).toBe("NEW");
+  });
+
+  it("refuses a new quote link when selected installation is not COMPLETE", () => {
+    const created = createCommercialRequest({
+      customer: customer(),
+      title: "Titlu",
+      description: "Descriere",
+    });
+    if (!created.ok) {
+      throw new Error("expected create");
+    }
+    const selected = updateCommercialRequest(
+      created.request,
+      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
+      { hasLinkedQuotes: false },
+    );
+    if (!selected.ok) {
+      throw new Error("expected select");
+    }
+    expect(
+      linkCommercialRequestQuote({
+        request: selected.request,
+        quoteSnapshotId: "qts:letters:orphan",
+        quoteCustomerId: "cus:active",
+        existingLink: null,
+      }),
+    ).toEqual({
+      ok: false,
+      error: "incomplete_offer",
+      reasons: [SITE_INSTALLATION_FREEZE_REASON],
+    });
+    const alreadyLinked = linkCommercialRequestQuote({
+      request: selected.request,
+      quoteSnapshotId: "qts:letters:existing",
+      quoteCustomerId: "cus:active",
+      existingLink: {
+        requestId: selected.request.requestId,
+        quoteSnapshotId: "qts:letters:existing",
+        linkedAt: "2026-08-17T11:00:00.000Z",
+      },
+    });
+    expect(alreadyLinked).toMatchObject({ ok: true, alreadyApplied: true });
+    expect(
+      linkCommercialRequestQuote({
+        request: { ...selected.request, status: "CANCELLED" },
+        quoteSnapshotId: "qts:letters:orphan",
+        quoteCustomerId: "cus:active",
+        existingLink: null,
+      }),
+    ).toEqual({ ok: false, error: "request_cancelled" });
   });
 
   it("selects optional scopes idempotently and refuses unknown ids", () => {

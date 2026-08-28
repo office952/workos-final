@@ -2,6 +2,8 @@ import type { Customer } from "../customers/identity.js";
 import {
   normalizeOptionalScopeIds,
   sameOptionalScopeIds,
+  siteInstallationFreezeRefusal,
+  type IncompleteOfferRefusal,
 } from "../installation/scope.js";
 
 export const COMMERCIAL_REQUEST_STATUSES = [
@@ -63,7 +65,8 @@ export type CommercialRequestLinkError = (typeof COMMERCIAL_REQUEST_LINK_ERRORS)
 
 export type CommercialRequestLinkResult =
   | { ok: true; link: CommercialRequestQuoteLink; alreadyApplied: boolean }
-  | { ok: false; error: CommercialRequestLinkError };
+  | { ok: false; error: CommercialRequestLinkError }
+  | ({ ok: false } & IncompleteOfferRefusal);
 
 export function generateCommercialRequestId(): string {
   return `crq:${crypto.randomUUID()}`;
@@ -247,6 +250,10 @@ export function linkCommercialRequestQuote(input: {
       return { ok: true, link: input.existingLink, alreadyApplied: true };
     }
     return { ok: false, error: "quote_already_linked" };
+  }
+  const readinessRefusal = siteInstallationFreezeRefusal(input.request.optionalScopeIds);
+  if (readinessRefusal) {
+    return { ok: false, ...readinessRefusal };
   }
   return {
     ok: true,

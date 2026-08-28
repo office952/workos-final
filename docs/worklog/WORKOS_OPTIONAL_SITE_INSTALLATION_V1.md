@@ -21,12 +21,15 @@ Owner decision 2026-08-28:
 INSTALLATION_MODES             = INTERNAL + SUBCONTRACTED
 TRANSPORT_MODEL                = SEPARATE_OPTIONAL_QUOTE_LINE
 MONTAJ_200_EUR_PLUS_VAT        = CUSTOMER_COMMERCIAL_PRICE
-ORPHAN_LINK_BYPASS             = LATER_GO_BEFORE_MAIN_MERGE
+ORPHAN_LINK_BYPASS             = CLOSED
+OLD_VS_NEW_AUDIT_GATE          = CLOSED_WITH_ADVISORIES
 ```
 
 `200 EUR + TVA` cannot complete installation EIC. Phase 2 still needs internal crew cost, subcontractor cost, consumables/fixings, access equipment, and site electrical evidence. Transport has its own EIC and price and may exist without montaj.
 
-Old-versus-new Cerere and Configurator audit remains required before Owner accept and merge. Read-only. Does not reopen Phase 1.
+Orphan product-only Quote create remains allowed. Linking that Quote to a Request with selected and incomplete `SITE_INSTALLATION` is refused by `linkCommercialRequestQuote` with the same `incomplete_offer` contract as freeze. The Quote snapshot is not rewritten.
+
+Old-versus-new Cerere and Configurator audit is closed with deferred UI advisories. Does not reopen Phase 1.
 
 Later phases remain not started. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
 

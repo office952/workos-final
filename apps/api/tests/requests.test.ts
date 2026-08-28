@@ -339,4 +339,130 @@ describe("commercial request API", () => {
     expect(cleared.status).toBe(200);
     expect(((await readBody(cleared)).request as JsonObject).optionalScopeIds).toEqual([]);
   });
+
+  it("refuses linking an orphan product quote to a request with incomplete installation", async () => {
+    const app = createApp();
+    const customer = await createCustomer(app, "Client Orphan Link");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere cu montaj"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+
+    const quotesBeforeCreate = (
+      (await readBody(await app.request("/api/quotes"))).overview as {
+        quotes: Array<JsonObject>;
+      }
+    ).quotes.length;
+    const detailBefore = (await readBody(await app.request(`/api/requests/${requestId}`)))
+      .detail as { linkedOffers: Array<JsonObject> };
+    expect(detailBefore.linkedOffers).toHaveLength(0);
+
+    const orphan = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "ORPH1",
+      customer.customerId as string,
+    );
+    expect(orphan.status).toBe(200);
+    const orphanBody = await readBody(orphan);
+    const quoteSnapshot = orphanBody.quoteSnapshot as JsonObject;
+    const quoteSnapshotId = quoteSnapshot.quoteSnapshotId as string;
+    const contentHash = quoteSnapshot.contentHash;
+    expect(orphanBody.requestLink).toBeUndefined();
+
+    const quotesAfterCreate = (
+      (await readBody(await app.request("/api/quotes"))).overview as {
+        quotes: Array<JsonObject>;
+      }
+    ).quotes;
+    expect(quotesAfterCreate).toHaveLength(quotesBeforeCreate + 1);
+
+    const linked = await app.request(`/api/requests/${requestId}/quotes`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quoteSnapshotId }),
+    });
+    expect(linked.status).toBe(422);
+    const linkedBody = await readBody(linked);
+    expect(linkedBody.error).toBe("incomplete_offer");
+    expect(linkedBody.reasons).toEqual([SITE_INSTALLATION_FREEZE_REASON]);
+    expect(linkedBody.link).toBeUndefined();
+
+    const detailAfter = (await readBody(await app.request(`/api/requests/${requestId}`)))
+      .detail as { linkedOffers: Array<JsonObject> };
+    expect(detailAfter.linkedOffers).toHaveLength(0);
+    const quotesAfterLink = (
+      (await readBody(await app.request("/api/quotes"))).overview as {
+        quotes: Array<JsonObject>;
+      }
+    ).quotes;
+    expect(quotesAfterLink).toHaveLength(quotesAfterCreate.length);
+    const reread = await readBody(
+      await app.request(
+        `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteSnapshotId}`,
+      ),
+    );
+    expect((reread.quoteSnapshot as JsonObject).contentHash).toBe(contentHash);
+  });
+
+  it("links a product-only quote to a request without optional scopes", async () => {
+    const app = createApp();
+    const customer = await createCustomer(app, "Client Product Only");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere fără montaj"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    expect((created.request as JsonObject).optionalScopeIds).toEqual([]);
+
+    const orphan = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "ORPH2",
+      customer.customerId as string,
+    );
+    expect(orphan.status).toBe(200);
+    const quoteSnapshot = (await readBody(orphan)).quoteSnapshot as JsonObject;
+    const quoteSnapshotId = quoteSnapshot.quoteSnapshotId as string;
+    const contentHash = quoteSnapshot.contentHash;
+
+    const linked = await app.request(`/api/requests/${requestId}/quotes`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quoteSnapshotId }),
+    });
+    expect(linked.status).toBe(200);
+    const linkedBody = await readBody(linked);
+    expect(linkedBody.alreadyApplied).toBe(false);
+    expect((linkedBody.link as JsonObject).quoteSnapshotId).toBe(quoteSnapshotId);
+
+    const unknown = await app.request(`/api/requests/${requestId}/quotes`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quoteSnapshotId: "qts:missing" }),
+    });
+    expect(unknown.status).toBe(404);
+    expect((await readBody(unknown)).error).toBe("quote_unavailable");
+
+    const again = await app.request(`/api/requests/${requestId}/quotes`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quoteSnapshotId }),
+    });
+    expect(again.status).toBe(200);
+    expect((await readBody(again)).alreadyApplied).toBe(true);
+
+    const reread = await readBody(
+      await app.request(
+        `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${quoteSnapshotId}`,
+      ),
+    );
+    expect((reread.quoteSnapshot as JsonObject).contentHash).toBe(contentHash);
+  });
 });

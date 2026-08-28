@@ -167,10 +167,14 @@ export function siteInstallationBlocksQuoteFreeze(
   return projection !== null && projection.eic.completeness !== "COMPLETE";
 }
 
-export function siteInstallationFreezeRefusal(optionalScopeIds: readonly string[]): {
+export type IncompleteOfferRefusal = {
   error: "incomplete_offer";
   reasons: readonly string[];
-} | null {
+};
+
+export function siteInstallationFreezeRefusal(
+  optionalScopeIds: readonly string[],
+): IncompleteOfferRefusal | null {
   if (!siteInstallationBlocksQuoteFreeze(optionalScopeIds)) {
     return null;
   }

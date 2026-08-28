@@ -26,8 +26,8 @@ MAIN_MERGE                 = NO
 INSTALLATION_MODES         = INTERNAL + SUBCONTRACTED
 TRANSPORT_MODEL            = SEPARATE_OPTIONAL_QUOTE_LINE
 MONTAJ_200_EUR_PLUS_VAT    = CUSTOMER_COMMERCIAL_PRICE
-ORPHAN_LINK_BYPASS         = LATER_GO_BEFORE_MAIN_MERGE
-OLD_VS_NEW_CERERE_CONFIGURATOR_AUDIT = REQUIRED_BEFORE_OWNER_ACCEPT_AND_MERGE
+ORPHAN_LINK_BYPASS         = CLOSED
+OLD_VS_NEW_CERERE_CONFIGURATOR_AUDIT = CLOSED_WITH_ADVISORIES
 AUDIT_MODE                 = READ_ONLY
 AUDIT_REOPENS_PHASE_1      = NO
 ```
@@ -70,6 +70,7 @@ Selected:
 - operator view does not present 0 EUR as cost or price
 - **Creează oferta** stays visible and disabled, with reason `Montajul nu are încă un cost complet.`
 - quote-snapshot POST refuses `incomplete_offer` before `freezeQuoteSnapshot`, `persistQuoteSnapshot`, and `linkRequestQuote`
+- `linkCommercialRequestQuote` reuses the same readiness refusal before inserting `commercial_request_quote_links`. A product-only orphan Quote may still be created. Linking it to a Request whose selected installation scope is not COMPLETE is refused. The Quote is not rewritten. When installation EIC becomes COMPLETE, the same check allows the link.
 
 Persistence: additive `commercial_request_optional_scopes (request_id, scope_id, selected_at)`, primary key `(request_id, scope_id)`. Existing requests read `optionalScopeIds = []`. No seed. No backfill.
 
@@ -236,4 +237,4 @@ HIDDEN_CREATE_QUOTE                = REJECTED
 LIVE_REQUEST_PATCH_WITHOUT_GO      = REJECTED
 ```
 
-The orphan-quote + request-link bypass stays open until a later Owner GO, required before main merge. The old-versus-new Cerere and Configurator audit stays mandatory before Owner accept and merge. It is read-only and does not reopen Phase 1.
+The orphan-quote + request-link bypass is closed in `linkCommercialRequestQuote`. The old-versus-new Cerere and Configurator audit is closed with deferred UI advisories. Neither reopens Phase 1.

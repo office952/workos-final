@@ -620,6 +620,7 @@ export {
   siteInstallationFreezeRefusal,
   siteInstallationIncompleteReasonLabel,
   siteInstallationIncompleteReasons,
+  type IncompleteOfferRefusal,
   type OptionalCommercialScopeId,
   type SiteInstallationIncompleteReason,
   type SiteInstallationIncompleteReasonId,

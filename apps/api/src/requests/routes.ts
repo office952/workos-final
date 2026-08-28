@@ -71,6 +71,12 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
     }
     const result = runtime.linkRequestQuote(c.req.param("requestId"), quoteSnapshotId);
     if (!result.ok) {
+      if (result.error === "incomplete_offer") {
+        return c.json(
+          { error: result.error, reasons: result.reasons },
+          422,
+        );
+      }
       return c.json({ error: result.error }, requestLinkStatus(result.error));
     }
     return c.json({
