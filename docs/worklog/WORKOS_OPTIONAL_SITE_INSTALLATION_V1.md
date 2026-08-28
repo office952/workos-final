@@ -1,17 +1,24 @@
 # Optional site installation V1
 
 ```text
-STATUS                         = STOPPED_ON_BRANCH
-CI                             = VERIFIED_SUCCESS
+STATUS                         = INTEGRATED_ON_MAIN
+PHASE_1                        = INTEGRATED_ON_MAIN
+MAIN_SHA                       = 2596cd076af631b1679c4530df90dcf22de46bbb
+MAIN_CI_RUN                    = 33187511745
+MAIN_CI_STATUS                 = SUCCESS
 OWNER_DECISION                 = OPTION_2
 PHASE                          = OPTIONAL_INSTALLATION_PARTIAL_FOUNDATION
+PHASE_2                        = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_WRITE                  = NO
+TRANSPORT_IMPLEMENTATION       = NOT_STARTED / NOT_AUTHORIZED
 QUOTE_CREATE                   = NO
 REAL_CLOUD_WRITE               = NO
 LIVE_REQUEST_PATCH             = NO
-MAIN_MERGE                     = NO
-BRANCH                         = feat/optional-site-installation-v1
+AUDIT_GATE                     = CLOSED_WITH_ADVISORIES
+ORPHAN_LINK_GATE               = CLOSED
 ```
+
+Historical branch state before integration: `STOPPED_ON_BRANCH` on `feat/optional-site-installation-v1`.
 
 Phase 1 adds selectable `SITE_INSTALLATION` on CommercialRequest. Unselected stays silent. Selected projects a separate PARTIAL EIC and PARTIAL commercial view, keeps LETTERS totals unchanged, and refuses quote freeze before any persist.
 

@@ -14,23 +14,29 @@ NO_CLIENT_CODE_FORK    = YES
 
 ## Owner decision 2026-08-28
 
-Recorded. Does not authorize Phase 2 write, live Cerere PATCH, quote create, or main merge.
+Recorded. Does not authorize Phase 2 write, live Cerere PATCH, or quote create.
 
 ```text
-PHASE_1                    = STOPPED_ON_BRANCH
-CI                         = VERIFIED_SUCCESS
+PHASE_1                    = INTEGRATED_ON_MAIN
+MAIN_SHA                   = 2596cd076af631b1679c4530df90dcf22de46bbb
+MAIN_CI_RUN                = 33187511745
+MAIN_CI_STATUS             = SUCCESS
+PHASE_2                    = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_WRITE              = NO
+TRANSPORT_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
 LIVE_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
-MAIN_MERGE                 = NO
 INSTALLATION_MODES         = INTERNAL + SUBCONTRACTED
 TRANSPORT_MODEL            = SEPARATE_OPTIONAL_QUOTE_LINE
 MONTAJ_200_EUR_PLUS_VAT    = CUSTOMER_COMMERCIAL_PRICE
-ORPHAN_LINK_BYPASS         = CLOSED
+ORPHAN_LINK_GATE           = CLOSED
 OLD_VS_NEW_CERERE_CONFIGURATOR_AUDIT = CLOSED_WITH_ADVISORIES
+AUDIT_GATE                 = CLOSED_WITH_ADVISORIES
 AUDIT_MODE                 = READ_ONLY
 AUDIT_REOPENS_PHASE_1      = NO
 ```
+
+Historical branch state before integration: `STOPPED_ON_BRANCH` on `feat/optional-site-installation-v1`.
 
 `200 EUR + TVA` is a customer selling price for montaj. It is not internal cost, not subcontract cost, and it cannot make `INSTALLATION_EIC` COMPLETE.
 
@@ -57,8 +63,10 @@ Do not parse the Request description. Selection is an explicit office fact.
 
 ```text
 PHASE_1 = OPTIONAL_INSTALLATION_PARTIAL_FOUNDATION
-STATUS  = STOPPED_ON_BRANCH
-CI      = VERIFIED_SUCCESS
+STATUS  = INTEGRATED_ON_MAIN
+MAIN_SHA = 2596cd076af631b1679c4530df90dcf22de46bbb
+MAIN_CI_RUN = 33187511745
+MAIN_CI_STATUS = SUCCESS
 ```
 
 Unselected: no install EIC, no install commercial projection, no install UI section on the confirmed product, no extra freeze rule.
