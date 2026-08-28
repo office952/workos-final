@@ -90,6 +90,8 @@ HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
 REAL HUB MEDIA CLOUD PILOT = ORGANIZATION_CONFIGURED
 FIRST_REAL_LETTERS_JOB = BLOCKED_BEFORE_QUOTE
 OPTIONAL_SITE_INSTALLATION_V1 = INTEGRATED_ON_MAIN
+OPERATIONAL_SERVICES_ARCHITECTURE = OWNER_ACCEPTED
+OS_S1 = READY_FOR_SEPARATE_OWNER_GO
 SELF-SERVICE ONBOARDING = NOT_IMPLEMENTED
 ADMIN OPERATIONAL PROCESSES UX = IMPLEMENTED_CURRENT / BASIC
 ADMIN WORKCENTERS UX = IMPLEMENTED_CURRENT / BASIC
@@ -125,6 +127,13 @@ Do not implement full ACM, illuminated ACM, Analyzer runtime, or the next produc
 - Runtime is required. Do not claim PASS from mocks, screenshots, or hardcoded UI states.
 - Keep a persistent worklog under `docs/worklog/`.
 - Default: one implementation owner. No parallel implementation agents or speculative architecture.
+- Operational services that span Request → Quote → Order → Execution follow `docs/architecture/OPERATIONAL_SERVICES_CANON.md`. Installation-specific law is `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
+- Do not implement installation as a LETTERS module or ProductDefinition field.
+- Product cost-plus must not price operational services. Service commercial is a separate future channel.
+- Transport remains a separate capability. Do not nest it under montaj.
+- Do not create operational-service tasks before a frozen Order / Production Release.
+- OS-S1 requires a separate Owner GO. This file does not authorize it.
+- Every future Owner-facing page requires an old-versus-new UI/UX/code audit before implementation.
 
 ## Bootstrap proof
 

@@ -13,11 +13,13 @@ EIC / INTERNAL COST
 ≠ ORDER
 ```
 
-Resources / EIC answers: what should this product cost us internally?
+Resources / EIC answers: what should this product or service cost us internally?
 Commercial answers: what price do we offer the customer?
 
-Commercial consumes planned EIC `{ total, currency, completeness }`.
+Product commercial consumes planned product EIC `{ total, currency, completeness }`.
 It does not inspect FACE / VOLUME / BACK / LIGHTING, quantities, resource identity, or rates.
+
+Operational-service commercial is a **separate future channel**. See below. Do not claim the current projector implements it.
 
 ## Owner
 
@@ -54,7 +56,7 @@ The first product UI does not expose editable discount or adjustment.
 
 ## Formula
 
-Cost-plus markup. Not target margin.
+Product cost-plus markup. Not target margin. Not the service commercial strategy.
 
 ```text
 markupAmount = round(internalCost × markupPercent / 100)
@@ -70,6 +72,8 @@ Rounding is 0.01 EUR, centralized in domain.
 
 ## Completeness gate
 
+Product path (CURRENT_RUNTIME):
+
 ```text
 EIC COMPLETE + EUR → Commercial COMPLETE
 EIC PARTIAL → Commercial PARTIAL
@@ -77,10 +81,34 @@ currency mismatch or invalid policy/cost → Commercial UNAVAILABLE
 ```
 
 PARTIAL may keep preview amounts in the projection. The operator UI must not present them as a final customer price.
-A COMPLETE product commercial projection is not a COMPLETE job when a selected optional scope such as `SITE_INSTALLATION` is PARTIAL. `projectCommercialPrice` remains the only commercial projector. Do not present `0 EUR` as an installation cost or price. A customer selling price such as `200 EUR + TVA` is not internal cost and cannot complete installation EIC. Transport is a separate optional commercial line with its own EIC and price. Quote freeze stays blocked until every selected commercial scope is COMPLETE. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
+A COMPLETE product commercial projection is not a COMPLETE job when a selected optional scope such as `SITE_INSTALLATION` is PARTIAL. Do not present `0 EUR` as an installation cost or price. Quote freeze stays blocked until every selected commercial scope is COMPLETE under its own strategy. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md` and `docs/architecture/OPERATIONAL_SERVICES_CANON.md`.
 
 Canonical 60 mm none/none is COMPLETE.
 30 / 80 / 100 mm, vinyl, and RAL stay PARTIAL while internal-cost evidence is unconfirmed.
+
+## Service commercial channel — OWNER_ACCEPTED_TARGET, not implemented
+
+```text
+SERVICE_COMMERCIAL_STRATEGY = MANUAL_FIXED_PER_REQUEST
+PRODUCT_STRATEGY            = COST_PLUS
+CURRENT_PROJECTOR           = projectCommercialPrice  (product cost-plus only)
+```
+
+Accepted future law:
+
+- product cost-plus remains unchanged;
+- a service fixed price is a distinct commercial strategy;
+- that fixed price may be frozen only after the required readiness gates (service facts + service EIC COMPLETE + later multi-line Quote);
+- `200 EUR + TVA` belongs to the first real installation Request/offer;
+- it is not a universal list price and not an organization default;
+- it does not complete EIC;
+- it must be frozen into the future Quote service line;
+- later policy or rate changes never rewrite frozen Quotes;
+- completing service EIC must not activate product cost-plus on that service.
+
+`CURRENT_RUNTIME`: `projectCommercialPrice` remains the only projector. Selected installation therefore still gets a PARTIAL cost-plus projection from a 0 EIC total. The operator view must not treat that as a sold price.
+
+Do not implement `MANUAL_FIXED_PER_REQUEST` from this document.
 
 ## Planned vs actual
 
@@ -107,5 +135,8 @@ LEGACY_CPP = REJECTED
 LEGACY_INTAKE_PRICE_BRIDGES = REJECTED
 FRONTEND_PRICING_AUTHORITY = REJECTED
 PER_UNIT_COMMERCIAL_PRICE_ENGINE = REJECTED
+SERVICE_COST_PLUS = REJECTED
+ORG_WIDE_200_EUR_LIST_PRICE = REJECTED
+CUSTOMER_PRICE_AS_EIC = REJECTED
 FX = NOT_IMPLEMENTED
 ```

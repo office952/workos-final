@@ -1,11 +1,13 @@
 # Optional site installation canon
 
-Canonical current law for site installation as an associated commercial and operational scope.
+Installation-specific law for the first Operational Services capability.
+Application-wide spine: `docs/architecture/OPERATIONAL_SERVICES_CANON.md`.
 Runtime wins if this document disagrees.
 
 ```text
 CAPABILITY_NAME        = OPTIONAL_SITE_INSTALLATION
 STABLE_SCOPE_ID        = SITE_INSTALLATION
+INSTALLATION_ROLE      = FIRST_REAL_CAPABILITY
 DEFAULT_REQUEST_STATE  = UNSELECTED
 CONFIGURATION_SURFACE  = Cerere → Montaj la locație
 PRODUCT_RELATION       = associated scope, never a LETTERS component or module
@@ -14,7 +16,7 @@ NO_CLIENT_CODE_FORK    = YES
 
 ## Owner decision 2026-08-28
 
-Recorded. Does not authorize Phase 2 write, live Cerere PATCH, or quote create.
+Phase 1 integration recorded earlier the same day. Architecture closure below does not authorize implementation.
 
 ```text
 PHASE_1                    = INTEGRATED_ON_MAIN
@@ -23,26 +25,51 @@ MAIN_CI_RUN                = 33187511745
 MAIN_CI_STATUS             = SUCCESS
 PHASE_2                    = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_WRITE              = NO
+OS_S1                      = READY_FOR_SEPARATE_OWNER_GO
+OS_S1_IMPLEMENTATION       = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
 LIVE_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
 INSTALLATION_MODES         = INTERNAL + SUBCONTRACTED
-TRANSPORT_MODEL            = SEPARATE_OPTIONAL_QUOTE_LINE
-MONTAJ_200_EUR_PLUS_VAT    = CUSTOMER_COMMERCIAL_PRICE
+TRANSPORT_MODEL            = SEPARATE_OPTIONAL_CAPABILITY
+MONTAJ_200_EUR_PLUS_VAT    = MANUAL_FIXED_PER_REQUEST / FIRST_REAL_JOB_ONLY
 ORPHAN_LINK_GATE           = CLOSED
 OLD_VS_NEW_CERERE_CONFIGURATOR_AUDIT = CLOSED_WITH_ADVISORIES
 AUDIT_GATE                 = CLOSED_WITH_ADVISORIES
 AUDIT_MODE                 = READ_ONLY
 AUDIT_REOPENS_PHASE_1      = NO
+ARCHITECTURE_DIRECTION     = OWNER_ACCEPTED_WITH_AMENDMENTS
 ```
 
 Historical branch state before integration: `STOPPED_ON_BRANCH` on `feat/optional-site-installation-v1`.
 
-`200 EUR + TVA` is a customer selling price for montaj. It is not internal cost, not subcontract cost, and it cannot make `INSTALLATION_EIC` COMPLETE.
+Approved installation laws (target; not runtime unless marked CURRENT_RUNTIME):
 
-Transport has its own EIC and commercial price. It may exist with or without montaj. It is not an installation subcomponent.
+```text
+Q_ORG_DEFAULT              = SERVICE_DISABLED
+Q_LOCK_AFTER_QUOTE         = LOCK_SELECTION_AND_MODE_AFTER_FIRST_LINKED_QUOTE
+Q_FACT_VS_SERVICE          = MEASUREMENT_ACCESS_SITE_ELECTRICAL_ARE_TYPED_INSTALLATION_FACTS
+Q_INSTALL_COMMERCIAL       = MANUAL_FIXED_PER_REQUEST
+FIRST_REAL_JOB_PRICE       = 200 EUR + TVA
+NOT_ORG_UNIVERSAL_DEFAULT  = YES
+NOT_EIC                    = YES
+NOT_COST_PLUS              = YES
+Q_INTERNAL_UNIT            = EUR_PER_PERSON_HOUR
+INTERNAL_LABOR_EIC         = crew_size × planned_duration_hours × internal_site_labor_rate_per_person_hour
+INTERNAL_LABOR_RATE        ≠ EMPLOYEE_SALARY
+INTERNAL_LABOR_RATE        ≠ CUSTOMER_PRICE
+PONTAJ_ACTUALS             ≠ COMMERCIAL_FORMULA
+Q_SUBCONTRACT_VALIDITY     = COST_PER_JOB_WITH_VALIDITY_WINDOW
+Q_ACCESS_TRIGGER           = OFFICE_EXPLICITLY_SELECTS_ACCESS_METHOD_AND_EQUIPMENT_REQUIREMENT
+FIXINGS_CONSUMABLES        = typed resource lines; package-per-job allowed; Inventory optional
+SITE_ELECTRICAL            = INCLUDED | EXCLUDED_CUSTOMER_RESPONSIBILITY | SUBCONTRACTED | NOT_APPLICABLE
+```
 
-Phase 2 still needs Owner-confirmed internal evidence for: internal crew cost; subcontractor cost; consumables and fixings; access equipment; site electrical connection.
+`200 EUR + TVA` is the first real installation Request/offer selling price. It is not an organization-wide list price, not internal cost, not subcontract cost, and it cannot make `INSTALLATION_EIC` COMPLETE. Completing install EIC must not activate product cost-plus on that service.
+
+Transport is a separate Operational Services capability with its own EIC and commercial price. It may exist with or without montaj. It is not an installation subcomponent and must not remain an installation incomplete reason after OS-S1.
+
+Owner-confirmed internal evidence is still required before any later EIC write: internal person-hour labor; subcontract cost per job with validity; consumables and fixings; access equipment when the office selects it; site electrical when included or subcontracted.
 
 ## Permanent separation
 
@@ -74,7 +101,7 @@ Unselected: no install EIC, no install commercial projection, no install UI sect
 Selected:
 
 - separate PARTIAL EIC with empty lines and typed missing-evidence reasons
-- separate PARTIAL commercial projection via `projectCommercialPrice` only
+- separate PARTIAL commercial projection via the current product projector `projectCommercialPrice` only. That is CURRENT_RUNTIME, not the accepted service strategy
 - operator view does not present 0 EUR as cost or price
 - **Creează oferta** stays visible and disabled, with reason `Montajul nu are încă un cost complet.`
 - quote-snapshot POST refuses `incomplete_offer` before `freezeQuoteSnapshot`, `persistQuoteSnapshot`, and `linkRequestQuote`
@@ -82,13 +109,15 @@ Selected:
 
 Persistence: additive `commercial_request_optional_scopes (request_id, scope_id, selected_at)`, primary key `(request_id, scope_id)`. Existing requests read `optionalScopeIds = []`. No seed. No backfill.
 
-Owner-decided modes, not implemented now:
+Owner-accepted modes, not implemented now:
 
 ```text
 NOT_SELECTED
-INTERNAL_INSTALLATION
-SUBCONTRACTED_INSTALLATION
+INTERNAL
+SUBCONTRACTED
 ```
+
+`CURRENT_RUNTIME` still allows `optionalScopeIds` PATCH after a Quote is linked. The accepted V1 rule locks selection and mode after the first linked Quote. That lock is OS-S1, not current code.
 
 ## Phase 2 — completeness contract (not implemented)
 
@@ -98,17 +127,17 @@ Montajul is a reusable service for more than one product and company. Completene
 | --- | --- |
 | Execution site address, distinct from customer address | Selected install |
 | Site measurements | Internal or subcontracted install that prices from geometry |
-| Height and access method | Work above reachable height or when access equipment is required |
+| Height and access method | When the office explicitly selects the access method and whether access equipment is required |
 | Support / facade | Always when install is selected |
 | Fixing system | Always when install is selected |
-| Transport | Separate optional commercial scope; own EIC and price; may exist with or without montaj |
+| Transport | Separate capability; not an installation completeness fact. `CURRENT_RUNTIME` still lists `TRANSPORT_UNCONFIRMED` inside install reasons — OS-S1 must stop that |
 | Distance / travel | Only if Owner policy requires it |
 | Unload and handling | When site access is not workshop-equivalent |
-| Site electrical connection | When the installed product needs site power |
+| Site electrical connection | When the office contract is `INCLUDED` or `SUBCONTRACTED`. `EXCLUDED_CUSTOMER_RESPONSIBILITY` and `NOT_APPLICABLE` need no electrical cost row |
 | Crew size | Internal install |
 | Estimated internal duration | Internal install |
-| Access equipment | When height/access method requires it |
-| Install consumables | When the fixing system consumes stockable materials |
+| Access equipment | When the office explicitly marks access equipment required |
+| Install consumables | When the chosen fixing system has typed resource lines. A package-per-job is allowed. Inventory is optional |
 | Internal vs subcontractor provider | When mode is chosen |
 | Valid cost evidence | Always before INSTALLATION_EIC can be COMPLETE |
 | Exclusions and customer responsibilities | Always on a COMPLETE commercial install offer |
@@ -117,11 +146,14 @@ Economic rules:
 
 - installation has its own EIC
 - internal cost is not customer price
-- employee cost does not become hours × salary on the customer offer
+- internal labor rate is not employee salary and not the customer price
+- pontaj actuals are not the commercial formula
+- internal labor EIC, when implemented, is crew × planned hours × Owner-confirmed person-hour rate
 - machines and capacity do not become automatic commercial rates
-- subcontracting consumes valid cost evidence
+- subcontracting consumes valid cost-per-job evidence with a validity window
 - a customer selling price does not complete installation EIC
-- `200 EUR + TVA` is customer commercial price only
+- `200 EUR + TVA` is a manual fixed price for the first real installation Request/offer, not an org-wide default
+- completing install EIC must not activate product cost-plus on the service
 - missing rates stay PARTIAL
 - no zero fallback
 
@@ -131,16 +163,16 @@ Do not invent EUR amounts. Confirm these values before Phase 2 write.
 
 | COST_ELEMENT | UNIT | WHEN_APPLICABLE | REQUIRED_OWNER_VALUE | EXISTING_EVIDENCE | MISSING_EVIDENCE | RECOMMENDED_CONFIGURATION_SURFACE |
 | --- | --- | --- | --- | --- | --- | --- |
-| Internal install labor | EUR / hour or EUR / job | INTERNAL_INSTALLATION | Owner-confirmed install labor evidence, not workshop forming/CNC rates | Workshop LETTERS labor/service recipes exist; they are manufacture, not site install | Site-install labor evidence | Resources / Cost — new install resource, not a LETTERS recipe |
-| Subcontracted install | EUR / job or EUR / documented unit | SUBCONTRACTED_INSTALLATION | Valid supplier cost evidence and validity window | None | All | Resources / Cost — supplier evidence, not a commercial markup |
-| Fixing / consumables | EUR / documented unit | When the chosen fixing system consumes stock | Resource identity + amount + classification | None for facade fixings | All | Resources / Cost |
-| Access equipment | EUR / documented unit | Height/access method requires it | Hire or owned-equipment cost evidence | Shop-floor machines are workshop CNC/weld/forming | Site-access equipment | Resources / Cost or later provider catalog |
-| Transport | EUR / trip or EUR / km | Separate optional quote line; with or without montaj | Transport cost evidence for TRANSPORT_EIC, then own commercial price | None | All | Own scope / Resources / Cost — not inside installation EIC |
+| Internal install labor | EUR / person-hour | INTERNAL | Owner-confirmed site labor rate. EIC = crew × planned hours × rate. Not workshop forming/CNC. Not salary | Workshop LETTERS labor/service recipes exist; they are manufacture, not site install | Site-install labor evidence and person-hour unit | Resources / Cost — new install resource, not a LETTERS recipe |
+| Subcontracted install | EUR / job + validity window | SUBCONTRACTED | Valid supplier cost evidence and validity window | None | All | Resources / Cost — supplier evidence, not a commercial markup |
+| Fixing / consumables | EUR / documented unit | When the chosen fixing has typed lines | Resource identity + amount + classification. Package-per-job allowed. Inventory optional | None for facade fixings | All | Resources / Cost |
+| Access equipment | EUR / documented unit | Office explicitly requires access equipment | Hire or owned-equipment cost evidence | Shop-floor machines are workshop CNC/weld/forming | Site-access equipment | Resources / Cost or later provider catalog — not a workshop machine |
+| Transport | EUR / trip or EUR / km | Separate capability; with or without montaj | Transport cost evidence for TRANSPORT_EIC, then own commercial price | None | All | Own capability / Resources / Cost — not inside installation EIC |
 | Travel / distance | EUR / km or included | Only if Owner policy requires it | Policy + rate | None | All | Commercial / install policy, not Product System settings |
-| Site electrical attendance | EUR / job | When site power work is included | Cost evidence or explicit exclusion | LETTERS electrical finish is workshop close-out | Site electrical | Resources / Cost or exclusion text |
+| Site electrical attendance | EUR / job | When contract is INCLUDED or SUBCONTRACTED | Cost evidence for those modes. EXCLUDED_CUSTOMER_RESPONSIBILITY and NOT_APPLICABLE need no cost row | LETTERS electrical finish is workshop close-out | Site electrical | Resources / Cost or exclusion text |
 | LED mount service | do not reuse | Never as site install | — | `LED installation service` is workshop module mounting | Must not be copied | Keep on LETTERS LIGHTING only |
 
-`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate. Transport completeness is a separate `TRANSPORT_EIC` gate. Until then Phase 2 write stays closed.
+`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. Phase 2 / OS-S2–OS-S3 write stays closed until a later Owner GO. OS-S1 remains `READY_FOR_SEPARATE_OWNER_GO` only.
 
 ## Phase 3 — one Quote, separate lines (not implemented)
 
@@ -164,7 +196,7 @@ Target lines:
 | Transport | own | own | logistics |
 | Height access, if later separate | own | own | resource/service |
 
-`TRANSPORT_MODEL = SEPARATE_OPTIONAL_QUOTE_LINE`. Transport is not nested under montaj. Height access stays inside installation until a later Owner decision. Current law has no transport commercial engine yet. Do not invent both a line and a hidden subcomponent for the same cost.
+`TRANSPORT_MODEL = SEPARATE_OPTIONAL_CAPABILITY`. Transport is not nested under montaj. Height access stays an installation fact until a later Owner decision. Current law has no transport commercial engine yet. Do not invent both a line and a hidden subcomponent for the same cost. The old-app SKU “Montaj + transport” is rejected.
 
 Frozen line facts: identity, commercial label, quantity and commercial unit, planned EIC used, commercial policy, net / VAT / gross per line, grand total, relevant technical configuration, version and provenance.
 
@@ -216,16 +248,17 @@ Phase 1 UI stays Industrial Clarity on the current shell. Dangerous actions stay
 ## Smart modularity
 
 ```text
-AVAILABLE_MODES                    = NOT_SELECTED now; INTERNAL + SUBCONTRACTED Owner-decided, not implemented
-DEFAULT_MODE                       = NOT_SELECTED
+AVAILABLE_MODES                    = NOT_SELECTED in CURRENT_RUNTIME; INTERNAL + SUBCONTRACTED accepted, not implemented
+ORG_DEFAULT                        = SERVICE_DISABLED (target; not in runtime)
+DEFAULT_REQUEST_STATE              = UNSELECTED
 DISABLED_BEHAVIOR                  = silent
-INTERNAL_MODE_BEHAVIOR             = own PARTIAL/COMPLETE EIC + own commercial; workshop tasks stay LETTERS
-SUBCONTRACTED_MODE_BEHAVIOR        = consumes supplier cost evidence; still not a LETTERS module
-DEPENDENCIES                       = Request selection; later site facts and cost evidence
+INTERNAL_MODE_BEHAVIOR             = own PARTIAL/COMPLETE EIC + manual-fixed commercial; workshop tasks stay LETTERS
+SUBCONTRACTED_MODE_BEHAVIOR        = consumes supplier cost-per-job evidence with validity; still not a LETTERS module
+DEPENDENCIES                       = org offer; Request selection; later site facts and cost evidence
 SAFE_FALLBACK                      = unselected / PARTIAL / freeze refused
 DATA_RETENTION                     = selection rows only in Phase 1; later snapshots freeze lines
 SNAPSHOT_IMPACT                    = Phase 1 creates no Quote; later quotes freeze selected scopes
-PERMISSION_MODEL                   = existing Request PATCH / commercial freeze gates
+PERMISSION_MODEL                   = existing Request PATCH / commercial freeze gates; lock after first linked Quote is target OS-S1
 ADMIN_TOOLING_DEBT                 = YES — no org-level on/off control
 NO_CLIENT_CODE_FORK                = YES
 CUSTOMER_OPERABLE_WITHOUT_CURSOR   = YES for Phase 1 select/deselect after deploy
@@ -241,6 +274,11 @@ DESCRIPTION_PARSING                = REJECTED
 INVENTED_RATES                     = REJECTED
 ZERO_AS_PRICE                      = REJECTED
 CUSTOMER_PRICE_AS_EIC              = REJECTED
+SERVICE_COST_PLUS                  = REJECTED
+ORG_WIDE_200_EUR_LIST_PRICE        = REJECTED
+INTERNAL_JOB_RATE_AS_SELECTED_LABOR = REJECTED
+EMPLOYEE_SALARY_AS_LABOR_RATE      = REJECTED
+OLD_MONTAJ_PLUS_TRANSPORT_SKU      = REJECTED
 HIDDEN_CREATE_QUOTE                = REJECTED
 LIVE_REQUEST_PATCH_WITHOUT_GO      = REJECTED
 ```

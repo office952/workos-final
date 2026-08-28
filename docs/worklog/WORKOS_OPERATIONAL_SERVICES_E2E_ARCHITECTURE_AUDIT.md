@@ -781,3 +781,69 @@ CANON_OR_ROADMAP_EDIT      = NO
 FIGMA_WRITE                = NO
 REAL_CLOUD_WRITE           = NO
 ```
+
+---
+
+## 16. Owner review — 2026-08-28
+
+Audit evidence above is preserved. Runtime did not change. Target law now lives in the canons, not in this section.
+
+```text
+OWNER_REVIEW              = APPROVED_WITH_AMENDMENTS
+OWNER_DECISION_DATE       = 2026-08-28
+SEVEN_DECISION_PACKAGE    = APPROVED
+ARCHITECTURE_DIRECTION    = OWNER_ACCEPTED_WITH_AMENDMENTS
+FIRST_IMPLEMENTABLE_SLICE = OS-S1
+OS_S1_GO                  = NOT_YET_GRANTED
+```
+
+Approved decisions:
+
+```text
+Q_ORG_DEFAULT =
+  SERVICE_DISABLED
+Q_LOCK_AFTER_QUOTE =
+  LOCK_SELECTION_AND_MODE_AFTER_FIRST_LINKED_QUOTE
+Q_FACT_VS_SERVICE =
+  MEASUREMENT_ACCESS_SITE_ELECTRICAL_ARE_TYPED_INSTALLATION_FACTS
+  TRANSPORT_REMAINS_SEPARATE_CAPABILITY
+Q_INSTALL_COMMERCIAL =
+  MANUAL_FIXED_PER_REQUEST
+  FIRST_REAL_JOB_PRICE = 200 EUR + TVA
+  NOT_ORG_UNIVERSAL_DEFAULT
+  NOT_EIC
+  NOT_COST_PLUS
+Q_INTERNAL_UNIT =
+  EUR_PER_PERSON_HOUR
+  INTERNAL_LABOR_EIC =
+    crew_size × planned_duration_hours × internal_site_labor_rate_per_person_hour
+Q_SUBCONTRACT_VALIDITY =
+  COST_PER_JOB_WITH_VALIDITY_WINDOW
+Q_ACCESS_TRIGGER =
+  OFFICE_EXPLICITLY_SELECTS_ACCESS_METHOD_AND_EQUIPMENT_REQUIREMENT
+```
+
+Additional accepted laws:
+
+```text
+INTERNAL_LABOR_RATE ≠ EMPLOYEE_SALARY
+INTERNAL_LABOR_RATE ≠ CUSTOMER_PRICE
+PONTAJ_ACTUALS      ≠ COMMERCIAL_FORMULA
+FIXINGS_CONSUMABLES =
+  typed resource lines;
+  package-per-job allowed;
+  Inventory optional
+SITE_ELECTRICAL =
+  INCLUDED |
+  EXCLUDED_CUSTOMER_RESPONSIBILITY |
+  SUBCONTRACTED |
+  NOT_APPLICABLE
+```
+
+Amendments versus the audit recommendations:
+
+- internal labor is person-hour, not EUR/job;
+- `200 EUR + TVA` is manual fixed per Request for the first real job, not an org-wide default and not automatic after EIC COMPLETE;
+- lock after first linked Quote is the V1 rule; a later revision workflow is allowed in principle and is not implemented now.
+
+These decisions are now recorded in `docs/architecture/OPERATIONAL_SERVICES_CANON.md`, the installation and commercial canons, the V1 roadmap, and `AGENTS.md`. This worklog remains evidence history. Runtime is unchanged. OS-S1 is not implemented and is not authorized by that documentation closure.
