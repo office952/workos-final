@@ -847,3 +847,38 @@ Amendments versus the audit recommendations:
 - lock after first linked Quote is the V1 rule; a later revision workflow is allowed in principle and is not implemented now.
 
 These decisions are now recorded in `docs/architecture/OPERATIONAL_SERVICES_CANON.md`, the installation and commercial canons, the V1 roadmap, and `AGENTS.md`. This worklog remains evidence history. Runtime is unchanged. OS-S1 is not implemented and is not authorized by that documentation closure.
+
+---
+
+## 17. Migration-safety documentation closure — 2026-08-28
+
+Owner hold before main integration. One documentation fix only. Runtime unchanged.
+
+```text
+VERDICT_BEFORE_FIX        = HOLD_FOR_ONE_DOCUMENTATION_FIX
+MIGRATION_SAFETY_LAW      = OWNER_ACCEPTED_TARGET
+OS_S1_IMPLEMENTATION      = NOT_AUTHORIZED
+SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_DECISION_REQUIRED_BEFORE_OS_S4
+```
+
+Transition law now recorded in `OPERATIONAL_SERVICES_CANON.md`:
+
+```text
+NEW_ORG_WITHOUT_CONFIG
+  = SERVICE_DISABLED
+EXISTING_ORG_WITHOUT_CONFIG_AND_NO_SELECTED_REQUESTS
+  = SERVICE_DISABLED
+EXISTING_PERSISTED_SERVICE_SELECTION
+  = PRESERVED
+  = VISIBLE_ON_REQUEST_DETAIL
+  = READINESS_GATE_REMAINS_ACTIVE
+  = MODE_NOT_INFERRED
+  = FAIL_CLOSED_UNTIL_OWNER_CONFIGURATION
+ORG_DISABLE
+  = PROSPECTIVE_FOR_NEW_SELECTIONS
+  = DOES_NOT_DELETE_OR_HIDE_EXISTING_SELECTIONS
+  = DOES_NOT_REMOVE_FREEZE_OR_LINK_GATES
+  = DOES_NOT_REWRITE_QUOTES_OR_ORDERS
+```
+
+OS-S1 must not treat a missing org-config row as a blanket disable that hides Phase 1 `SITE_INSTALLATION` selections or drops `incomplete_offer` freeze/link protection. `ALT_B_SCOPED` remains visibility-only; who may write the manual service price is deferred until OS-S4.

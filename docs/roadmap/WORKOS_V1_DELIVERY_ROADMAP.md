@@ -308,9 +308,9 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is ready for a separate Owner GO. This file does not authorize it. OS-S1 must not invent rates, complete install EIC, add Quote lines, or create teren tasks.
+OS-S1 is ready for a separate Owner GO. This file does not authorize it. OS-S1 must not invent rates, complete install EIC, add Quote lines, or create teren tasks. Missing org configuration must not hide a persisted service selection or remove its freeze/link gates.
 
-Gates: org default `SERVICE_DISABLED`; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
+Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 
 See `docs/architecture/OPERATIONAL_SERVICES_CANON.md` and `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
 

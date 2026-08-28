@@ -98,12 +98,43 @@ CONFIGURATION_SURFACE      = Administrare → Operațiuni, domain-owned; not a S
 OWNER_WRITE                = YES
 ```
 
-Disabled: silent — no checkbox, no service EIC, no extra freeze rule.
+Disabled applies to **new selections** only. Silent means: no new checkbox, no new service EIC, no new freeze rule for Requests that never selected the service.
+
 INTERNAL / SUBCONTRACTED: org offers that path.
 BOTH: org allows both; the Cerere chooses one mode per job.
-Later enablement is allowed. Live disable does not rewrite frozen Quotes or Orders.
+Later enablement is allowed.
 
-`FUTURE_SLICE`: OS-S1 persists org configuration. OS-S11 completes multi-company admin.
+Missing org configuration must not be treated as a blanket `SERVICE_DISABLED` that hides already persisted selections. See Migration safety.
+
+`FUTURE_SLICE`: OS-S1 persists org configuration and must implement the transition law below. OS-S11 completes multi-company admin.
+
+### Migration safety — OWNER_ACCEPTED_TARGET, not implemented
+
+`CURRENT_RUNTIME`: no org service row exists. Phase 1 selections of `SITE_INSTALLATION` already persist and already block quote freeze/link.
+
+OS-S1 must not interpret a missing configuration row as “disable and suppress everything.”
+
+```text
+NEW_ORG_WITHOUT_CONFIG
+  = SERVICE_DISABLED
+EXISTING_ORG_WITHOUT_CONFIG_AND_NO_SELECTED_REQUESTS
+  = SERVICE_DISABLED
+EXISTING_PERSISTED_SERVICE_SELECTION
+  = PRESERVED
+  = VISIBLE_ON_REQUEST_DETAIL
+  = READINESS_GATE_REMAINS_ACTIVE
+  = MODE_NOT_INFERRED
+  = FAIL_CLOSED_UNTIL_OWNER_CONFIGURATION
+ORG_DISABLE
+  = PROSPECTIVE_FOR_NEW_SELECTIONS
+  = DOES_NOT_DELETE_OR_HIDE_EXISTING_SELECTIONS
+  = DOES_NOT_REMOVE_FREEZE_OR_LINK_GATES
+  = DOES_NOT_REWRITE_QUOTES_OR_ORDERS
+```
+
+A persisted selection stays visible on Cerere detail. Freeze and link continue to refuse `incomplete_offer` while that selection is present and the service EIC is not COMPLETE. Mode is not inferred from the org default. Until the Owner configures the organization, those Requests stay fail-closed: selected, PARTIAL, not offerable.
+
+An Owner who later sets `SERVICE_DISABLED` stops **new** selections. Existing rows are not deleted, not hidden, and do not lose their readiness gates. Quotes and Orders are never rewritten.
 
 ---
 
@@ -119,9 +150,9 @@ Q_LOCK_AFTER_QUOTE = LOCK_SELECTION_AND_MODE_AFTER_FIRST_LINKED_QUOTE
 
 Unselected remains silent. Selected services stay office facts until freeze. After the first linked Quote, selection and mode lock. A later explicit Request/Quote revision workflow may allow controlled changes without rewriting historical snapshots. That workflow is **NOT_IMPLEMENTED** and is not OS-S1.
 
-Org must offer the capability; otherwise the control is silent.
+Org must offer the capability before a **new** selection. An already persisted selection is not hidden when the org has no config or is later disabled.
 
-`FUTURE_SLICE`: OS-S1 implements the lock and org gate.
+`FUTURE_SLICE`: OS-S1 implements the lock, org gate, and migration-safety law.
 
 ---
 
@@ -213,9 +244,12 @@ SERVICE_COST_PLUS           = REJECTED
 FIRST_REAL_JOB_PRICE        = 200 EUR + TVA
 NOT_ORG_UNIVERSAL_DEFAULT   = YES
 NOT_EIC                     = YES
+SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_DECISION_REQUIRED_BEFORE_OS_S4
 ```
 
 The first real installation offer uses `200 EUR + TVA` as a **manual fixed customer price on that Request/offer**. It is not a company list price, not install EIC, and not markup on install EIC. It may be frozen only after required readiness gates (selected service facts and install EIC COMPLETE, plus the later multi-line Quote). Later policy or rate changes never rewrite frozen Quotes.
+
+`ALT_B_SCOPED` decides who may **see** money. It does not decide who may **write** a service fixed price. That write authority is deferred and does not block OS-S1.
 
 See `docs/architecture/COMMERCIAL_PRICE_RULES_CANON.md`.
 
@@ -288,7 +322,7 @@ ADMIN_TOOLING_DEBT           = YES until OS-S1 / OS-S11
 
 | Action | CURRENT_RUNTIME | OWNER_ACCEPTED_TARGET |
 | --- | --- | --- |
-| Select a service on Cerere | Any member, always visible | Any member, only if org offers it |
+| Select a service on Cerere | Any member, always visible | Any member, only if org offers it for **new** selections. Persisted selections stay visible |
 | Change selection after first linked Quote | Allowed | Locked (OS-S1) |
 | Write cost evidence | Owner | Owner |
 | Configure org services | Absent | Owner |
@@ -328,7 +362,7 @@ None of these slices is authorized by this document.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
-| OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons | `READY_FOR_SEPARATE_OWNER_GO` |
+| OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `READY_FOR_SEPARATE_OWNER_GO` |
 | OS-S2 | Typed install facts | `NOT_STARTED` |
 | OS-S3 | Evidence and service EIC | `NOT_STARTED` |
 | OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
@@ -340,7 +374,7 @@ None of these slices is authorized by this document.
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is the next candidate slice in the living V1 roadmap. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks.
+OS-S1 is the next candidate slice in the living V1 roadmap. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. It must preserve persisted selections and their freeze/link gates when org config is missing or later disabled.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 
@@ -350,7 +384,7 @@ Every future Owner-facing page for this program requires an old-versus-new UI/UX
 
 | Gap | CURRENT_RUNTIME | Closes in |
 | --- | --- | --- |
-| No org service configuration | Checkbox always shown | OS-S1 |
+| No org service configuration | Checkbox always shown | OS-S1 — missing config must not hide persisted selections |
 | Selection mutable after linked Quote | `optionalScopeIds` still PATCH-able | OS-S1 |
 | Transport reason inside install | `TRANSPORT_UNCONFIRMED` | OS-S1 / OS-S6 |
 | No mode | Boolean selection only | OS-S1 |

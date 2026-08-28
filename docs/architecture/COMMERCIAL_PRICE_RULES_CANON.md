@@ -106,6 +106,12 @@ Accepted future law:
 - later policy or rate changes never rewrite frozen Quotes;
 - completing service EIC must not activate product cost-plus on that service.
 
+```text
+SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_DECISION_REQUIRED_BEFORE_OS_S4
+```
+
+`ALT_B_SCOPED` decides who may see money. It does not decide who may write a service fixed price. That write authority is deferred and does not block OS-S1.
+
 `CURRENT_RUNTIME`: `projectCommercialPrice` remains the only projector. Selected installation therefore still gets a PARTIAL cost-plus projection from a 0 EIC total. The operator view must not treat that as a sold price.
 
 Do not implement `MANUAL_FIXED_PER_REQUEST` from this document.

@@ -71,6 +71,8 @@ Transport is a separate Operational Services capability with its own EIC and com
 
 Owner-confirmed internal evidence is still required before any later EIC write: internal person-hour labor; subcontract cost per job with validity; consumables and fixings; access equipment when the office selects it; site electrical when included or subcontracted.
 
+Migration safety for OS-S1 lives in `docs/architecture/OPERATIONAL_SERVICES_CANON.md`. A persisted `SITE_INSTALLATION` selection must stay visible and keep its freeze/link gate if the organization has no new config or is later disabled. Missing config is `SERVICE_DISABLED` only for new organizations and for existing organizations that have no selected Requests. Mode is not inferred.
+
 ## Permanent separation
 
 ```text
@@ -251,7 +253,7 @@ Phase 1 UI stays Industrial Clarity on the current shell. Dangerous actions stay
 AVAILABLE_MODES                    = NOT_SELECTED in CURRENT_RUNTIME; INTERNAL + SUBCONTRACTED accepted, not implemented
 ORG_DEFAULT                        = SERVICE_DISABLED (target; not in runtime)
 DEFAULT_REQUEST_STATE              = UNSELECTED
-DISABLED_BEHAVIOR                  = silent
+DISABLED_BEHAVIOR                  = silent for new selections only; persisted selections stay visible and keep freeze/link gates
 INTERNAL_MODE_BEHAVIOR             = own PARTIAL/COMPLETE EIC + manual-fixed commercial; workshop tasks stay LETTERS
 SUBCONTRACTED_MODE_BEHAVIOR        = consumes supplier cost-per-job evidence with validity; still not a LETTERS module
 DEPENDENCIES                       = org offer; Request selection; later site facts and cost evidence
