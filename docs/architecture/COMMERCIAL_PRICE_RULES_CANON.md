@@ -77,7 +77,7 @@ currency mismatch or invalid policy/cost → Commercial UNAVAILABLE
 ```
 
 PARTIAL may keep preview amounts in the projection. The operator UI must not present them as a final customer price.
-A COMPLETE product commercial projection is not a COMPLETE job when a selected optional scope such as `SITE_INSTALLATION` is PARTIAL. `projectCommercialPrice` remains the only commercial projector. Do not present `0 EUR` as an installation cost or price. Quote freeze stays blocked until every selected commercial scope is COMPLETE. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
+A COMPLETE product commercial projection is not a COMPLETE job when a selected optional scope such as `SITE_INSTALLATION` is PARTIAL. `projectCommercialPrice` remains the only commercial projector. Do not present `0 EUR` as an installation cost or price. A customer selling price such as `200 EUR + TVA` is not internal cost and cannot complete installation EIC. Transport is a separate optional commercial line with its own EIC and price. Quote freeze stays blocked until every selected commercial scope is COMPLETE. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
 
 Canonical 60 mm none/none is COMPLETE.
 30 / 80 / 100 mm, vinyl, and RAL stay PARTIAL while internal-cost evidence is unconfirmed.
