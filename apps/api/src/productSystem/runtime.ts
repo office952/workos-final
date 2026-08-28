@@ -58,6 +58,9 @@ import {
   type RequestAttachmentProjection,
   type RequestDetailProjection,
   type RequestOverviewProjection,
+  type OperationalServiceProviderMode,
+  type OperationalServicesAdminProjection,
+  type OrganizationServiceOfferMutationResult,
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
@@ -164,6 +167,11 @@ import {
   persistCreatedCommercialRequest,
   persistUpdatedCommercialRequest,
 } from "../requests/store.js";
+import {
+  persistOrganizationServiceOffer,
+  readOperationalServicesAdmin,
+  readOrganizationServiceOffer,
+} from "../operationalServices/store.js";
 import {
   readRequestAttachmentBytes,
   removeRequestAttachmentFile,
@@ -314,6 +322,11 @@ export type ProductSystemRuntime = {
   providerRegistry: WorkcenterRegistry;
   providerRegistryKind: ProviderRegistryKind;
   updateSellerProfile(input: SellerProfileInput): SellerMutationResult;
+  readOperationalServicesAdmin(): OperationalServicesAdminProjection;
+  updateOrganizationServiceOffer(
+    capabilityId: string,
+    offerMode: string,
+  ): OrganizationServiceOfferMutationResult;
   listJobOverview(): JobOverviewProjection;
   listQuoteOverview(): QuoteOverviewProjection;
   listRequestOverview(): RequestOverviewProjection;
@@ -353,6 +366,7 @@ export type ProductSystemRuntime = {
       status?: CommercialRequestStatus;
       customerId?: string;
       optionalScopeIds?: readonly string[];
+      siteInstallationMode?: OperationalServiceProviderMode | null;
     },
   ): CommercialRequestMutationResult;
   linkRequestQuote(
@@ -679,6 +693,12 @@ export function createProductSystemRuntimeFromOpenDb(
     updateSellerProfile(input) {
       return persistUpdatedSeller(db, input);
     },
+    readOperationalServicesAdmin() {
+      return readOperationalServicesAdmin(db);
+    },
+    updateOrganizationServiceOffer(capabilityId, offerMode) {
+      return persistOrganizationServiceOffer(db, capabilityId, offerMode);
+    },
     listJobOverview() {
       return projectJobOverview(jobOverviewItems(db, currentProviderRegistry(), currentEligibility()));
     },
@@ -731,6 +751,7 @@ export function createProductSystemRuntimeFromOpenDb(
         customerDisplayName: getCustomer(db, request.customerId)?.displayName ?? null,
         quotes: linkedQuoteOverviewItems(db, request.requestId),
         attachments: listCommercialRequestAttachments(db, request.requestId),
+        serviceOffer: readOrganizationServiceOffer(db),
       });
     },
     listRequestAttachments(requestId) {

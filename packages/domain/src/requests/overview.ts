@@ -14,6 +14,12 @@ import {
   type SiteInstallationOperatorView,
 } from "../installation/scope.js";
 import {
+  UNCONFIGURED_SITE_INSTALLATION_OFFER,
+  projectSiteInstallationRequestOffer,
+  type OrganizationServiceOffer,
+  type SiteInstallationRequestOfferView,
+} from "../operationalServices.js";
+import {
   commercialRequestStatusLabel,
   type CommercialRequest,
   type CommercialRequestStatus,
@@ -91,6 +97,7 @@ export type RequestDetailProjection = {
   linkedOffers: readonly QuoteOverviewItem[];
   attachments: readonly RequestAttachmentProjection[];
   installationScope: SiteInstallationOperatorView | null;
+  installationOffer: SiteInstallationRequestOfferView;
 };
 
 export function requestOverviewFilterLabel(filter: RequestOverviewFilter): string {
@@ -350,9 +357,11 @@ export function projectRequestDetail(input: {
   customerDisplayName: string | null;
   quotes: readonly QuoteOverviewItem[];
   attachments?: readonly CommercialRequestAttachment[];
+  serviceOffer?: OrganizationServiceOffer;
 }): RequestDetailProjection {
   const commercialProgress = deriveRequestCommercialProgress(input.quotes);
   const attachments = (input.attachments ?? []).map(projectRequestAttachment);
+  const selected = input.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID);
   return {
     request: input.request,
     customerDisplayName: input.customerDisplayName,
@@ -368,8 +377,14 @@ export function projectRequestDetail(input: {
     attachments,
     installationScope: presentSiteInstallationScope(
       projectSiteInstallationScope({
-        selected: input.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+        selected,
       }),
     ),
+    installationOffer: projectSiteInstallationRequestOffer({
+      selected,
+      mode: input.request.siteInstallationMode,
+      offer: input.serviceOffer ?? UNCONFIGURED_SITE_INSTALLATION_OFFER,
+      hasLinkedQuotes: input.quotes.length > 0,
+    }),
   };
 }

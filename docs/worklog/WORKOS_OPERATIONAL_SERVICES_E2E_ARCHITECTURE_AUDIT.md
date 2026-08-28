@@ -882,3 +882,36 @@ ORG_DISABLE
 ```
 
 OS-S1 must not treat a missing org-config row as a blanket disable that hides Phase 1 `SITE_INSTALLATION` selections or drops `incomplete_offer` freeze/link protection. `ALT_B_SCOPED` remains visibility-only; who may write the manual service price is deferred until OS-S4.
+
+---
+
+## 18. OS-S1 implementation — 2026-08-28
+
+Owner GO: `APROB OS-S1`. Design and implement only this slice.
+
+```text
+SLICE                         = OS-S1_ORG_CAPABILITY_AND_REQUEST_MODE
+STATUS                        = IMPLEMENTED_CURRENT / BASIC
+PRODUCT_CODE_RATES            = UNCHANGED
+INSTALLATION_EIC              = STILL_PARTIAL
+QUOTE_LINES                   = STILL_PRODUCT_ONLY
+FIELD_TASKS                   = NOT_CREATED
+LIVE_REQUEST_PATCH            = NO
+QUOTE_CREATE                  = NO
+OS_S2_TO_OS_S11               = NOT_STARTED
+```
+
+Old-versus-new UI/UX note for the Owner page: the old app used `delivery_type` and the SKU “Montaj + transport”. The new page is org offer mode only. It does not sell a bundled SKU, does not write a price, and does not nest transport under montaj.
+
+Runtime:
+
+- catalog: `SITE_INSTALLATION` offered, `TRANSPORT` reserved
+- org offer persisted additively with version history
+- missing config and later disable stay prospective for new selections
+- persisted selections remain visible and keep `incomplete_offer`
+- mode is not inferred from missing config
+- selection and mode lock after the first linked Quote
+- `TRANSPORT_UNCONFIRMED` removed from install reasons
+- organization offer change does not rewrite a persisted Request mode; incompatible mode stays visible and fail-closed
+- Cloud isolation timeout classified as suite-contention against the default 5s budget; that one test now has a 15s budget so `pnpm test` (CI) stays honest
+

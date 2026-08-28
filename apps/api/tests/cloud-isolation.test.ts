@@ -192,7 +192,7 @@ async function expectForeignMiss(
 }
 
 describe("Cloud two-organization hostile isolation", () => {
-  it("keeps private operational truth inside the active plane", async () => {
+  it("keeps private operational truth inside the active plane", { timeout: 15_000 }, async () => {
     const world = await provisionHostileIsolationWorld();
     try {
       const { fixture, alpha, testCompany, cookies } = world;

@@ -17,7 +17,6 @@ export const SITE_INSTALLATION_INCOMPLETE_REASON_IDS = [
   "MISSING_COST_EVIDENCE",
   "SITE_MEASUREMENTS_UNCONFIRMED",
   "HEIGHT_ACCESS_UNCONFIRMED",
-  "TRANSPORT_UNCONFIRMED",
   "SITE_ELECTRICAL_UNCONFIRMED",
 ] as const;
 export type SiteInstallationIncompleteReasonId =
@@ -87,8 +86,6 @@ export function siteInstallationIncompleteReasonLabel(
       return "Măsurătorile la locație nu sunt confirmate.";
     case "HEIGHT_ACCESS_UNCONFIRMED":
       return "Accesul și înălțimea de lucru nu sunt confirmate.";
-    case "TRANSPORT_UNCONFIRMED":
-      return "Transportul nu este confirmat.";
     case "SITE_ELECTRICAL_UNCONFIRMED":
       return "Racordul electric de șantier nu este confirmat.";
     default: {

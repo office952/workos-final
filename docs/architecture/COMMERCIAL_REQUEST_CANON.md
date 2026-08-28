@@ -29,6 +29,7 @@ Mutable office facts about an incoming request:
 - office status
 - createdAt / updatedAt
 - optional associated commercial scopes (`optionalScopeIds`, default empty)
+- optional site-installation provider mode (`siteInstallationMode`, default null)
 - optional client-file attachments (`CommercialRequestAttachment`) — evidence received with the request
 
 `SITE_INSTALLATION` is an associated office selection, not Product Truth and not a Quote line in Phase 1. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
@@ -87,6 +88,7 @@ Request references Customer by stable `customerId`. Never by displayName.
 Create requires an ACTIVE Customer. Historical Requests stay visible if the Customer is later RETIRED.
 The live display name is a projection. Request is not a frozen commercial document.
 Customer may be corrected only before the first linked Quote.
+Optional service selection and provider mode lock after the first linked Quote.
 Quote continues to freeze Customer separately.
 
 ## Request ↔ Quote

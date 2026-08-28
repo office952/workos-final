@@ -2,9 +2,11 @@ import {
   isCommercialRequestStatus,
   MAX_REQUEST_ATTACHMENT_HTTP_BODY_BYTES,
   safeAttachmentDownloadAsciiName,
+  isOperationalServiceProviderMode,
   type CommercialRequestLinkError,
   type CommercialRequestMutationError,
   type CommercialRequestStatus,
+  type OperationalServiceProviderMode,
   type RequestAttachmentError,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
@@ -188,7 +190,8 @@ function readUpdateInput(body: unknown): {
   description?: string;
   status?: CommercialRequestStatus;
   customerId?: string;
-  optionalScopeIds?: readonly string[];
+    optionalScopeIds?: readonly string[];
+    siteInstallationMode?: OperationalServiceProviderMode | null;
 } | null {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return null;
@@ -199,6 +202,7 @@ function readUpdateInput(body: unknown): {
     status?: unknown;
     customerId?: unknown;
     optionalScopeIds?: unknown;
+    siteInstallationMode?: unknown;
   };
   const patch: {
     title?: string;
@@ -206,6 +210,7 @@ function readUpdateInput(body: unknown): {
     status?: CommercialRequestStatus;
     customerId?: string;
     optionalScopeIds?: readonly string[];
+    siteInstallationMode?: OperationalServiceProviderMode | null;
   } = {};
   if (payload.title !== undefined) {
     if (typeof payload.title !== "string") {
@@ -244,12 +249,25 @@ function readUpdateInput(body: unknown): {
     }
     patch.optionalScopeIds = optionalScopeIds;
   }
+  if (payload.siteInstallationMode !== undefined) {
+    if (payload.siteInstallationMode === null) {
+      patch.siteInstallationMode = null;
+    } else if (
+      typeof payload.siteInstallationMode !== "string" ||
+      !isOperationalServiceProviderMode(payload.siteInstallationMode)
+    ) {
+      return null;
+    } else {
+      patch.siteInstallationMode = payload.siteInstallationMode;
+    }
+  }
   if (
     patch.title === undefined &&
     patch.description === undefined &&
     patch.status === undefined &&
     patch.customerId === undefined &&
-    patch.optionalScopeIds === undefined
+    patch.optionalScopeIds === undefined &&
+    patch.siteInstallationMode === undefined
   ) {
     return null;
   }
@@ -272,10 +290,15 @@ function requestMutationStatus(error: CommercialRequestMutationError): 400 | 404
     case "customer_unavailable":
     case "reference_unavailable":
     case "unknown_optional_scope":
+    case "service_not_offered":
+    case "service_mode_required":
+    case "service_mode_unavailable":
+    case "invalid_service_mode":
       return 400;
     case "not_found":
       return 404;
     case "customer_locked":
+    case "service_selection_locked":
       return 409;
     default: {
       const _exhaustive: never = error;

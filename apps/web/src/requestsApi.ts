@@ -68,6 +68,7 @@ export async function updateCommercialRequest(
     status?: CommercialRequestStatus;
     customerId?: string;
     optionalScopeIds?: readonly string[];
+    siteInstallationMode?: "INTERNAL" | "SUBCONTRACTED" | null;
   },
 ): Promise<RequestDetailProjection> {
   const response = await fetch(
@@ -129,5 +130,24 @@ export function requestAttachmentErrorMessage(error: string): string {
       return "Fișierul nu a putut fi salvat.";
     default:
       return "Fișierul nu a putut fi încărcat.";
+  }
+}
+
+export function requestServiceErrorMessage(error: string): string {
+  switch (error) {
+    case "service_not_offered":
+      return "Organizația nu oferă montaj pentru selecții noi.";
+    case "service_selection_locked":
+      return "Selecția și modul sunt blocate după prima ofertă legată.";
+    case "service_mode_required":
+      return "Alege modul de montaj: echipă internă sau subcontractat.";
+    case "service_mode_unavailable":
+      return "Modul nu poate fi setat până ownerul configurează serviciul.";
+    case "invalid_service_mode":
+      return "Modul de montaj nu este permis pentru această organizație.";
+    case "unknown_optional_scope":
+      return "Serviciul selectat nu este recunoscut.";
+    default:
+      return "Cererea nu a putut fi actualizată.";
   }
 }

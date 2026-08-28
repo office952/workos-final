@@ -20,9 +20,12 @@ import {
   materializeExecutionPlanFromSnapshot,
   MCH_CNC_4020_ID,
   PLACE_LED_MODULES_ID,
+  SITE_INSTALLATION_SCOPE_ID,
   seedDisplayLabelRecords,
+  siteInstallationFreezeRefusal,
 } from "@workos-final/domain";
 import { persistCreatedCustomer } from "../src/customers/store.js";
+import { persistOrganizationServiceOffer } from "../src/operationalServices/store.js";
 import { applyMigrations, listOperationalMigrationFiles, openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import {
@@ -928,31 +931,45 @@ describe("product system persistence", () => {
         ),
     ).toThrow(/UNIQUE constraint failed/);
     expect(first.request.optionalScopeIds).toEqual([]);
+    expect(first.request.siteInstallationMode).toBeNull();
+    expect(
+      persistUpdatedCommercialRequest(
+        db,
+        first.request.requestId,
+        { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
+        { hasLinkedQuotes: false },
+      ),
+    ).toEqual({ ok: false, error: "service_not_offered" });
+    expect(
+      persistOrganizationServiceOffer(db, SITE_INSTALLATION_SCOPE_ID, "INTERNAL").ok,
+    ).toBe(true);
     const selected = persistUpdatedCommercialRequest(
       db,
       first.request.requestId,
-      { optionalScopeIds: ["SITE_INSTALLATION"] },
+      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
       { hasLinkedQuotes: false },
     );
     expect(selected.ok).toBe(true);
     if (selected.ok) {
-      expect(selected.request.optionalScopeIds).toEqual(["SITE_INSTALLATION"]);
+      expect(selected.request.optionalScopeIds).toEqual([SITE_INSTALLATION_SCOPE_ID]);
+      expect(selected.request.siteInstallationMode).toBe("INTERNAL");
     }
     const rows = db
       .prepare(
-        "SELECT request_id, scope_id FROM commercial_request_optional_scopes",
+        "SELECT request_id, scope_id, provider_mode FROM commercial_request_optional_scopes",
       )
-      .all() as Array<{ request_id: string; scope_id: string }>;
+      .all() as Array<{ request_id: string; scope_id: string; provider_mode: string | null }>;
     expect(rows).toEqual([
       {
         request_id: first.request.requestId,
-        scope_id: "SITE_INSTALLATION",
+        scope_id: SITE_INSTALLATION_SCOPE_ID,
+        provider_mode: "INTERNAL",
       },
     ]);
     const again = persistUpdatedCommercialRequest(
       db,
       first.request.requestId,
-      { optionalScopeIds: ["SITE_INSTALLATION"] },
+      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
       { hasLinkedQuotes: false },
     );
     expect(again).toMatchObject({ ok: true, alreadyApplied: true });
@@ -971,6 +988,151 @@ describe("product system persistence", () => {
         .prepare("SELECT COUNT(*) AS count FROM commercial_request_optional_scopes")
         .get() as { count: number },
     ).toEqual({ count: 0 });
+    db.close();
+  });
+
+  it("keeps a persisted installation selection visible without inferring mode", () => {
+    const sqlitePath = tempSqlitePath();
+    const db = openSqliteDatabase(sqlitePath);
+    const createdCustomer = persistCreatedCustomer(db, "Client păstrat");
+    expect(createdCustomer.ok).toBe(true);
+    if (!createdCustomer.ok) {
+      return;
+    }
+    const created = persistCreatedCommercialRequest(
+      db,
+      createdCustomer.customer,
+      "Cerere existentă",
+      "Selecție Phase 1 fără config org.",
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    db.prepare(
+      `
+      INSERT INTO commercial_request_optional_scopes (
+        request_id, scope_id, selected_at, provider_mode
+      ) VALUES (?, ?, ?, ?)
+    `,
+    ).run(
+      created.request.requestId,
+      SITE_INSTALLATION_SCOPE_ID,
+      "2026-08-20T10:00:00.000Z",
+      null,
+    );
+    const stored = persistUpdatedCommercialRequest(
+      db,
+      created.request.requestId,
+      { title: "Cerere existentă" },
+      { hasLinkedQuotes: false },
+    );
+    expect(stored.ok).toBe(true);
+    if (!stored.ok) {
+      return;
+    }
+    expect(stored.alreadyApplied).toBe(true);
+    expect(stored.request.optionalScopeIds).toEqual([SITE_INSTALLATION_SCOPE_ID]);
+    expect(stored.request.siteInstallationMode).toBeNull();
+    expect(siteInstallationFreezeRefusal(stored.request.optionalScopeIds)).not.toBeNull();
+    expect(
+      persistUpdatedCommercialRequest(
+        db,
+        created.request.requestId,
+        {
+          optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+          siteInstallationMode: "INTERNAL",
+        },
+        { hasLinkedQuotes: false },
+      ),
+    ).toEqual({ ok: false, error: "service_mode_unavailable" });
+    db.close();
+  });
+
+  it("adds operational service schema without seeding and keeps locked writes atomic", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = openSqliteDatabase(sqlitePath);
+    const migrationIds = first
+      .prepare("SELECT id FROM schema_migrations ORDER BY id")
+      .all() as Array<{ id: string }>;
+    expect(migrationIds.map((item) => item.id)).toContain(
+      "026_operational_service_organization_and_mode.sql",
+    );
+    const columns = first
+      .prepare("PRAGMA table_info(commercial_request_optional_scopes)")
+      .all() as Array<{ name: string }>;
+    expect(columns.map((item) => item.name)).toContain("provider_mode");
+    expect(
+      (
+        first
+          .prepare("SELECT COUNT(*) AS count FROM organization_operational_service_capabilities")
+          .get() as { count: number }
+      ).count,
+    ).toBe(0);
+    first.close();
+    const again = openSqliteDatabase(sqlitePath);
+    expect(
+      (
+        again
+          .prepare("SELECT COUNT(*) AS count FROM schema_migrations WHERE id = ?")
+          .get("026_operational_service_organization_and_mode.sql") as { count: number }
+      ).count,
+    ).toBe(1);
+    again.close();
+
+    const db = openSqliteDatabase(tempSqlitePath());
+    const createdCustomer = persistCreatedCustomer(db, "Client atomic");
+    expect(createdCustomer.ok).toBe(true);
+    if (!createdCustomer.ok) {
+      return;
+    }
+    const created = persistCreatedCommercialRequest(
+      db,
+      createdCustomer.customer,
+      "Cerere blocată",
+      "Selecție existentă cu ofertă legată.",
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    expect(persistOrganizationServiceOffer(db, SITE_INSTALLATION_SCOPE_ID, "BOTH").ok).toBe(true);
+    const selected = persistUpdatedCommercialRequest(
+      db,
+      created.request.requestId,
+      {
+        optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+        siteInstallationMode: "INTERNAL",
+      },
+      { hasLinkedQuotes: false },
+    );
+    expect(selected.ok).toBe(true);
+    const before = db
+      .prepare(
+        "SELECT request_id, scope_id, provider_mode FROM commercial_request_optional_scopes",
+      )
+      .all() as Array<{ request_id: string; scope_id: string; provider_mode: string | null }>;
+    expect(
+      persistUpdatedCommercialRequest(
+        db,
+        created.request.requestId,
+        { siteInstallationMode: "SUBCONTRACTED" },
+        { hasLinkedQuotes: true },
+      ),
+    ).toEqual({ ok: false, error: "service_selection_locked" });
+    const after = db
+      .prepare(
+        "SELECT request_id, scope_id, provider_mode FROM commercial_request_optional_scopes",
+      )
+      .all() as Array<{ request_id: string; scope_id: string; provider_mode: string | null }>;
+    expect(after).toEqual(before);
+    expect(after).toEqual([
+      {
+        request_id: created.request.requestId,
+        scope_id: SITE_INSTALLATION_SCOPE_ID,
+        provider_mode: "INTERNAL",
+      },
+    ]);
     db.close();
   });
 });

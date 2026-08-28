@@ -14,8 +14,8 @@ ARCHITECTURE_DIRECTION     = OWNER_ACCEPTED_WITH_AMENDMENTS
 OPERATIONAL_SERVICES_SPINE = OWNER_ACCEPTED
 INSTALLATION_ROLE          = FIRST_REAL_CAPABILITY
 OWNER_DECISION_DATE        = 2026-08-28
-OS_S1                      = READY_FOR_SEPARATE_OWNER_GO
-OS_S1_IMPLEMENTATION       = NOT_AUTHORIZED
+OS_S1                      = IMPLEMENTED_CURRENT / BASIC
+OS_S1_IMPLEMENTATION       = AUTHORIZED_AND_IMPLEMENTED
 OS_S2_TO_OS_S11            = NOT_STARTED
 PHASE_2_IMPLEMENTATION     = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_AUTHORIZED
@@ -75,17 +75,17 @@ CLIENT_CODE_FORK
 
 ## Capability catalog
 
-`CURRENT_RUNTIME`: one optional scope id, `SITE_INSTALLATION`. Registry is `OPTIONAL_COMMERCIAL_SCOPE_IDS`. Transport is not a selectable scope. The install projection still emits `TRANSPORT_UNCONFIRMED` as an installation incomplete reason. That is a runtime honesty label, not a transport engine.
+`CURRENT_RUNTIME`: thin catalog `OPERATIONAL_SERVICE_CAPABILITY_IDS`. V1 offered: `SITE_INSTALLATION`. V1 reserved, not selectable: `TRANSPORT`. Selectable scopes remain `OPTIONAL_COMMERCIAL_SCOPE_IDS`. Install incomplete reasons no longer include `TRANSPORT_UNCONFIRMED`. Measurement, access equipment, and site electrical stay typed facts for later slices.
 
-`OWNER_ACCEPTED_TARGET`: a thin platform catalog of operational-service capabilities. V1 offered capability: `SITE_INSTALLATION`. V1 reserved capability, not selectable until its slice: `TRANSPORT`. Measurement, access equipment, and site electrical are **typed installation facts**, not sold capabilities.
+`OWNER_ACCEPTED_TARGET`: same catalog. OS-S6 offers `TRANSPORT`.
 
-`FUTURE_SLICE`: OS-S1 introduces the catalog and stops treating transport as an installation EIC reason. OS-S6 offers `TRANSPORT`.
+`FUTURE_SLICE`: OS-S6 offers `TRANSPORT`.
 
 ---
 
 ## Organization service configuration
 
-`CURRENT_RUNTIME`: no org-level on/off. Every organization sees the Cerere montaj checkbox. New Cerere defaults to unselected.
+`CURRENT_RUNTIME`: plane-local org offer `SERVICE_DISABLED | INTERNAL | SUBCONTRACTED | BOTH`. Missing row is unconfigured: new selections disabled; persisted selections stay visible and fail-closed; mode is not inferred. Owner writes under Administrare → Operațiuni → Servicii operaționale. New Cerere defaults to unselected.
 
 `OWNER_ACCEPTED_TARGET`:
 
@@ -106,13 +106,11 @@ Later enablement is allowed.
 
 Missing org configuration must not be treated as a blanket `SERVICE_DISABLED` that hides already persisted selections. See Migration safety.
 
-`FUTURE_SLICE`: OS-S1 persists org configuration and must implement the transition law below. OS-S11 completes multi-company admin.
+`FUTURE_SLICE`: OS-S11 completes multi-company admin.
 
-### Migration safety — OWNER_ACCEPTED_TARGET, not implemented
+### Migration safety — CURRENT_RUNTIME
 
-`CURRENT_RUNTIME`: no org service row exists. Phase 1 selections of `SITE_INSTALLATION` already persist and already block quote freeze/link.
-
-OS-S1 must not interpret a missing configuration row as “disable and suppress everything.”
+Missing configuration is not a blanket hide. Phase 1 selections of `SITE_INSTALLATION` stay visible and keep quote freeze/link gates.
 
 ```text
 NEW_ORG_WITHOUT_CONFIG
@@ -140,7 +138,7 @@ An Owner who later sets `SERVICE_DISABLED` stops **new** selections. Existing ro
 
 ## Request service selection
 
-`CURRENT_RUNTIME`: `optionalScopeIds` on CommercialRequest, persisted in `commercial_request_optional_scopes`. Any Cloud member may PATCH selection. After a Quote is linked, `customerId` is locked; **selection remains mutable**.
+`CURRENT_RUNTIME`: `optionalScopeIds` and `siteInstallationMode` on CommercialRequest. New selection requires an org offer. After the first linked Quote, selection and mode lock. `customerId` remains locked after a linked Quote. Persisted selections stay visible if the org is unconfigured or later disabled.
 
 `OWNER_ACCEPTED_TARGET`:
 
@@ -152,13 +150,13 @@ Unselected remains silent. Selected services stay office facts until freeze. Aft
 
 Org must offer the capability before a **new** selection. An already persisted selection is not hidden when the org has no config or is later disabled.
 
-`FUTURE_SLICE`: OS-S1 implements the lock, org gate, and migration-safety law.
+`FUTURE_SLICE`: a later Request/Quote revision workflow may allow controlled changes. That workflow is **NOT_IMPLEMENTED**.
 
 ---
 
 ## Per-request service configuration
 
-`CURRENT_RUNTIME`: no typed site facts. Selected install always shows five static incomplete reasons.
+`CURRENT_RUNTIME`: no typed site facts. Selected install shows four static incomplete reasons. Transport is not one of them.
 
 `OWNER_ACCEPTED_TARGET`: typed facts on `(requestId, capabilityId)`. Not Product Truth. Not a generic JSON bag.
 
@@ -178,7 +176,7 @@ Transport facts belong to `TRANSPORT`, never inside installation EIC.
 
 ## Provider mode
 
-`CURRENT_RUNTIME`: not modeled. Selection is boolean only.
+`CURRENT_RUNTIME`: `NOT_SELECTED | INTERNAL | SUBCONTRACTED`. Mode is required when the service is selected and the org is not `SERVICE_DISABLED`. A single offered path is applied, not inferred from missing config. BOTH shows a mode control. Missing config leaves persisted mode unset.
 
 `OWNER_ACCEPTED_TARGET`:
 
@@ -190,7 +188,7 @@ SUBCONTRACTED
 
 Mode is required once the service is selected and the org is not `SERVICE_DISABLED`. Constrained by org allowed modes. Hidden when the org offers only one path. Frozen onto the later Quote line.
 
-`FUTURE_SLICE`: OS-S1 persists mode. Completeness rows that depend on mode land in OS-S2 / OS-S3.
+`FUTURE_SLICE`: completeness rows that depend on mode land in OS-S2 / OS-S3.
 
 ---
 
@@ -310,10 +308,10 @@ See `docs/architecture/COMMERCIAL_PRICE_RULES_CANON.md`.
 ## Multi-company behavior
 
 ```text
-CURRENT_RUNTIME              = one codebase; plane isolation; no org service flag
-OWNER_ACCEPTED_TARGET        = plane-local org service config; HUB MEDIA enables INTERNAL later; a company without teren stays DISABLED
+CURRENT_RUNTIME              = one codebase; plane isolation; plane-local org service config
+OWNER_ACCEPTED_TARGET        = HUB MEDIA enables INTERNAL later; a company without teren stays DISABLED
 CUSTOMER_OPERABLE_WITHOUT_CURSOR = required after the matching slices deploy
-ADMIN_TOOLING_DEBT           = YES until OS-S1 / OS-S11
+ADMIN_TOOLING_DEBT           = YES until OS-S11 completes multi-company admin
 ```
 
 ---
@@ -322,10 +320,10 @@ ADMIN_TOOLING_DEBT           = YES until OS-S1 / OS-S11
 
 | Action | CURRENT_RUNTIME | OWNER_ACCEPTED_TARGET |
 | --- | --- | --- |
-| Select a service on Cerere | Any member, always visible | Any member, only if org offers it for **new** selections. Persisted selections stay visible |
-| Change selection after first linked Quote | Allowed | Locked (OS-S1) |
+| Select a service on Cerere | Any member, only if org offers it for **new** selections. Persisted selections stay visible | Same |
+| Change selection after first linked Quote | Locked | Locked |
 | Write cost evidence | Owner | Owner |
-| Configure org services | Absent | Owner |
+| Configure org services | Owner | Owner |
 | Freeze Quote | Product COMPLETE; install selected → refused | All selected service lines COMPLETE under their own commercial rule |
 | Create field tasks | Absent | Only from frozen Order / Release |
 | See money | ALT_B_SCOPED | Unchanged |
@@ -358,11 +356,11 @@ Immutable boundaries begin at Quote freeze. Request stays mutable office truth e
 
 ## Implementation program
 
-None of these slices is authorized by this document.
+OS-S1 is implemented. Later slices still need a separate Owner GO.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
-| OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `READY_FOR_SEPARATE_OWNER_GO` |
+| OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_CURRENT / BASIC` |
 | OS-S2 | Typed install facts | `NOT_STARTED` |
 | OS-S3 | Evidence and service EIC | `NOT_STARTED` |
 | OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
@@ -374,7 +372,7 @@ None of these slices is authorized by this document.
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is the next candidate slice in the living V1 roadmap. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. It must preserve persisted selections and their freeze/link gates when org config is missing or later disabled.
+OS-S1 is implemented. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 and later still need a separate Owner GO.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 
@@ -384,10 +382,10 @@ Every future Owner-facing page for this program requires an old-versus-new UI/UX
 
 | Gap | CURRENT_RUNTIME | Closes in |
 | --- | --- | --- |
-| No org service configuration | Checkbox always shown | OS-S1 — missing config must not hide persisted selections |
-| Selection mutable after linked Quote | `optionalScopeIds` still PATCH-able | OS-S1 |
-| Transport reason inside install | `TRANSPORT_UNCONFIRMED` | OS-S1 / OS-S6 |
-| No mode | Boolean selection only | OS-S1 |
+| No org service configuration | Closed in OS-S1 — missing config does not hide persisted selections | — |
+| Selection mutable after linked Quote | Closed in OS-S1 | — |
+| Transport reason inside install | Closed in OS-S1 | OS-S6 offers TRANSPORT |
+| No mode | Closed in OS-S1 | — |
 | No site facts | Static reasons | OS-S2 |
 | No person-hour labor evidence | Workshop units only | OS-S3 |
 | No supplier validity | Supersede only | OS-S3 |

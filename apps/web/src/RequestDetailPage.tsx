@@ -5,7 +5,9 @@ import {
   SITE_INSTALLATION_SCOPE_ID,
   commercialRequestStatusLabel,
   jobHref,
+  operationalServiceProviderModeLabel,
   type CommercialRequestStatus,
+  type OperationalServiceProviderMode,
   type RequestDetailProjection,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
@@ -13,6 +15,7 @@ import { fetchProductCatalog } from "./productApi";
 import {
   readRequestDetail,
   requestAttachmentErrorMessage,
+  requestServiceErrorMessage,
   updateCommercialRequest,
   uploadRequestAttachment,
 } from "./requestsApi";
@@ -42,6 +45,8 @@ export function RequestDetailPage() {
   const [busy, setBusy] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [installationSelected, setInstallationSelected] = useState(false);
+  const [installationMode, setInstallationMode] =
+    useState<OperationalServiceProviderMode | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -61,9 +66,8 @@ export function RequestDetailPage() {
         setTitle(detail.request.title);
         setDescription(detail.request.description);
         setStatus(detail.request.status);
-        setInstallationSelected(
-          detail.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
-        );
+        setInstallationSelected(detail.installationOffer.selected);
+        setInstallationMode(detail.installationOffer.mode);
         setProducts(flattenCatalogProducts(catalog).map((item) => ({
           code: item.code,
           label: item.label,
@@ -107,6 +111,11 @@ export function RequestDetailPage() {
     if (page.kind !== "ready") {
       return;
     }
+    const offer = page.detail.installationOffer;
+    if (selected && offer.availableModes.length > 1 && !installationMode) {
+      setNotice(requestServiceErrorMessage("service_mode_required"));
+      return;
+    }
     const previous = installationSelected;
     setInstallationSelected(selected);
     setBusy(true);
@@ -114,14 +123,43 @@ export function RequestDetailPage() {
     try {
       const detail = await updateCommercialRequest(page.detail.request.requestId, {
         optionalScopeIds: selected ? [SITE_INSTALLATION_SCOPE_ID] : [],
+        ...(selected && offer.availableModes.length > 1
+          ? { siteInstallationMode: installationMode }
+          : {}),
       });
       setPage({ kind: "ready", detail });
-      setInstallationSelected(
-        detail.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
-      );
-    } catch {
+      setInstallationSelected(detail.installationOffer.selected);
+      setInstallationMode(detail.installationOffer.mode);
+    } catch (error) {
       setInstallationSelected(previous);
-      setNotice("Cererea nu a putut fi actualizată.");
+      const code = error instanceof Error ? error.message : "request_unavailable";
+      setNotice(requestServiceErrorMessage(code));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleInstallationMode(mode: OperationalServiceProviderMode) {
+    if (page.kind !== "ready") {
+      return;
+    }
+    setInstallationMode(mode);
+    if (!page.detail.installationOffer.selected) {
+      return;
+    }
+    setBusy(true);
+    setNotice(null);
+    try {
+      const detail = await updateCommercialRequest(page.detail.request.requestId, {
+        siteInstallationMode: mode,
+      });
+      setPage({ kind: "ready", detail });
+      setInstallationSelected(detail.installationOffer.selected);
+      setInstallationMode(detail.installationOffer.mode);
+    } catch (error) {
+      setInstallationMode(page.detail.installationOffer.mode);
+      const code = error instanceof Error ? error.message : "request_unavailable";
+      setNotice(requestServiceErrorMessage(code));
     } finally {
       setBusy(false);
     }
@@ -259,19 +297,58 @@ export function RequestDetailPage() {
         ) : (
           <p>Stare: {detail.statusLabel}</p>
         )}
-        <Field
-          label="Montaj la locație"
-          hint="Dacă este selectat, montajul rămâne separat și blochează oferta până există un cost complet."
-        >
-          <input
-            type="checkbox"
-            checked={installationSelected}
-            disabled={busy}
-            onChange={(event) => {
-              void handleInstallationToggle(event.target.checked);
-            }}
-          />
-        </Field>
+        {detail.installationOffer.selected || detail.installationOffer.canSelectNew ? (
+          <Field
+            label="Montaj la locație"
+            hint={installationHint(detail)}
+          >
+            <input
+              type="checkbox"
+              checked={installationSelected}
+              disabled={busy || !detail.installationOffer.canChangeSelection}
+              onChange={(event) => {
+                void handleInstallationToggle(event.target.checked);
+              }}
+            />
+          </Field>
+        ) : null}
+        {detail.installationOffer.selected && detail.installationOffer.mode ? (
+          <p>
+            Mod salvat: {operationalServiceProviderModeLabel(detail.installationOffer.mode)}
+            {detail.installationOffer.persistedModeIncompatible
+              ? " — nu mai este oferit de organizație."
+              : ""}
+          </p>
+        ) : null}
+        {detail.installationOffer.showModeControl ? (
+          <Field label="Mod montaj" hint="Obligatoriu când organizația oferă ambele căi.">
+            <select
+              value={
+                installationMode &&
+                detail.installationOffer.availableModes.includes(installationMode)
+                  ? installationMode
+                  : ""
+              }
+              disabled={
+                busy ||
+                (detail.installationOffer.selected && !detail.installationOffer.canChangeMode)
+              }
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value === "INTERNAL" || value === "SUBCONTRACTED") {
+                  void handleInstallationMode(value);
+                }
+              }}
+            >
+              <option value="">Alege modul</option>
+              {detail.installationOffer.availableModes.map((mode) => (
+                <option key={mode} value={mode}>
+                  {operationalServiceProviderModeLabel(mode)}
+                </option>
+              ))}
+            </select>
+          </Field>
+        ) : null}
         <button type="submit" disabled={busy}>
           Salvează
         </button>
@@ -416,6 +493,19 @@ export function RequestDetailPage() {
       ) : null}
     </section>
   );
+}
+
+function installationHint(detail: RequestDetailProjection): string {
+  if (detail.installationOffer.selectionLocked) {
+    return "Selecția și modul sunt blocate după prima ofertă legată.";
+  }
+  if (detail.installationOffer.persistedModeIncompatible) {
+    return "Modul salvat rămâne pe cerere. Organizația nu îl mai oferă; oferta rămâne incompletă.";
+  }
+  if (detail.installationOffer.persistedSelectionPreserved) {
+    return "Montajul rămâne selectat pe această cerere. Nu poate fi adăugat pe cereri noi până ownerul configurează serviciul.";
+  }
+  return "Dacă este selectat, montajul rămâne separat și blochează oferta până există un cost complet.";
 }
 
 function formatRequestDate(value: string): string {

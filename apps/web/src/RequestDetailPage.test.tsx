@@ -2,7 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import type { RequestDetailProjection } from "@workos-final/domain";
+import {
+  UNCONFIGURED_SITE_INSTALLATION_OFFER,
+  projectSiteInstallationRequestOffer,
+  type RequestDetailProjection,
+} from "@workos-final/domain";
 import { RequestDetailPage } from "./RequestDetailPage";
 import { fetchProductCatalog } from "./productApi";
 import { readRequestDetail, updateCommercialRequest } from "./requestsApi";
@@ -16,6 +20,7 @@ const detail: RequestDetailProjection = {
     description: "Pe fațadă, text HUB MEDIA.",
     status: "IN_REVIEW",
     optionalScopeIds: [],
+    siteInstallationMode: null,
     createdAt: "2026-08-17T10:00:00.000Z",
     updatedAt: "2026-08-17T10:00:00.000Z",
   },
@@ -28,6 +33,12 @@ const detail: RequestDetailProjection = {
   canUploadAttachments: true,
   attachments: [],
   installationScope: null,
+  installationOffer: projectSiteInstallationRequestOffer({
+    selected: false,
+    mode: null,
+    offer: UNCONFIGURED_SITE_INSTALLATION_OFFER,
+    hasLinkedQuotes: true,
+  }),
   linkedOffers: [
     {
       quoteSnapshotId: "qts:1",
@@ -60,6 +71,7 @@ vi.mock("./requestsApi", () => ({
   updateCommercialRequest: vi.fn(),
   uploadRequestAttachment: vi.fn(),
   requestAttachmentErrorMessage: (error: string) => error,
+  requestServiceErrorMessage: (error: string) => error,
 }));
 
 vi.mock("./productApi", () => ({
@@ -123,6 +135,7 @@ describe("RequestDetailPage", () => {
       "href",
       "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=crq%3A11111111-2222-3333-4444-555555555555",
     );
+    expect(screen.queryByRole("checkbox", { name: /Montaj la locație/ })).not.toBeInTheDocument();
     expect(screen.queryByText("contentHash")).not.toBeInTheDocument();
 
     await userEvent.selectOptions(screen.getByLabelText("Stare"), "READY_FOR_QUOTE");
@@ -134,10 +147,45 @@ describe("RequestDetailPage", () => {
   });
 
   it("persists Montaj la locație as an optional request scope", async () => {
-    vi.mocked(readRequestDetail).mockResolvedValue(detail);
+    const selectable = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: false,
+        mode: null,
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "INTERNAL",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(selectable);
     vi.mocked(updateCommercialRequest).mockResolvedValue({
       ...detail,
-      request: { ...detail.request, optionalScopeIds: ["SITE_INSTALLATION"] },
+      request: {
+        ...selectable.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "INTERNAL",
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "INTERNAL",
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "INTERNAL",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
     });
     vi.mocked(fetchProductCatalog).mockResolvedValue([]);
 
@@ -156,5 +204,46 @@ describe("RequestDetailPage", () => {
       "crq:11111111-2222-3333-4444-555555555555",
       { optionalScopeIds: ["SITE_INSTALLATION"] },
     );
+  });
+
+  it("keeps an incompatible persisted mode visible", async () => {
+    const incompatible = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      request: {
+        ...detail.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "INTERNAL" as const,
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "INTERNAL",
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "SUBCONTRACTED",
+          version: 2,
+          updatedAt: "2026-08-28T21:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(incompatible);
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
+    expect(screen.getByText(/Mod salvat: Echipă internă/)).toBeInTheDocument();
+    expect(screen.getByText(/nu mai este oferit de organizație/)).toBeInTheDocument();
   });
 });

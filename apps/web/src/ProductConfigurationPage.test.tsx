@@ -257,6 +257,7 @@ describe("ProductConfigurationPage", () => {
         description: "Pe fațadă.",
         status: "READY_FOR_QUOTE",
         optionalScopeIds: [],
+        siteInstallationMode: null,
         createdAt: "2026-08-17T10:00:00.000Z",
         updatedAt: "2026-08-17T10:00:00.000Z",
       },
@@ -270,6 +271,22 @@ describe("ProductConfigurationPage", () => {
       attachments: [],
       linkedOffers: [],
       installationScope: null,
+      installationOffer: {
+        capabilityId: "SITE_INSTALLATION",
+        label: "Montaj la locație",
+        selected: false,
+        mode: null,
+        orgConfigured: false,
+        orgOfferMode: null,
+        canSelectNew: false,
+        canChangeSelection: false,
+        canChangeMode: false,
+        selectionLocked: false,
+        showModeControl: false,
+        availableModes: [],
+        persistedSelectionPreserved: false,
+        persistedModeIncompatible: false,
+      },
     });
 
     render(

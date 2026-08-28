@@ -4,6 +4,15 @@ import {
   SITE_INSTALLATION_FREEZE_REASON,
   SITE_INSTALLATION_SCOPE_ID,
 } from "../installation/scope.js";
+import type { OrganizationServiceOffer } from "../operationalServices.js";
+
+const internalOffer: OrganizationServiceOffer = {
+  capabilityId: SITE_INSTALLATION_SCOPE_ID,
+  configured: true,
+  offerMode: "INTERNAL",
+  version: 1,
+  updatedAt: "2026-08-28T20:00:00.000Z",
+};
 import {
   canChangeCommercialRequestStatus,
   commercialRequestReference,
@@ -53,6 +62,7 @@ describe("commercial request identity", () => {
         title: "Litere exterior sediu",
         status: "NEW",
         optionalScopeIds: [],
+        siteInstallationMode: null,
       },
     });
     expect(createCommercialRequest({
@@ -200,7 +210,7 @@ describe("commercial request identity", () => {
     const selected = updateCommercialRequest(
       created.request,
       { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
-      { hasLinkedQuotes: false },
+      { hasLinkedQuotes: false, serviceOffer: internalOffer },
     );
     if (!selected.ok) {
       throw new Error("expected select");
@@ -251,24 +261,25 @@ describe("commercial request identity", () => {
     const selected = updateCommercialRequest(
       created.request,
       { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID, SITE_INSTALLATION_SCOPE_ID] },
-      { hasLinkedQuotes: false },
+      { hasLinkedQuotes: false, serviceOffer: internalOffer },
     );
     expect(selected.ok).toBe(true);
     if (!selected.ok) {
       throw new Error("expected select");
     }
     expect(selected.request.optionalScopeIds).toEqual([SITE_INSTALLATION_SCOPE_ID]);
+    expect(selected.request.siteInstallationMode).toBe("INTERNAL");
     expect(
       updateCommercialRequest(
         selected.request,
         { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
-        { hasLinkedQuotes: false },
+        { hasLinkedQuotes: false, serviceOffer: internalOffer },
       ),
     ).toMatchObject({ ok: true, alreadyApplied: true });
     const cleared = updateCommercialRequest(
       selected.request,
       { optionalScopeIds: [] },
-      { hasLinkedQuotes: false },
+      { hasLinkedQuotes: false, serviceOffer: internalOffer },
     );
     expect(cleared.ok).toBe(true);
     if (cleared.ok) {
@@ -278,8 +289,22 @@ describe("commercial request identity", () => {
       updateCommercialRequest(
         created.request,
         { optionalScopeIds: ["NOT_A_SCOPE"] },
-        { hasLinkedQuotes: false },
+        { hasLinkedQuotes: false, serviceOffer: internalOffer },
       ),
     ).toEqual({ ok: false, error: "unknown_optional_scope" });
+    expect(
+      updateCommercialRequest(
+        created.request,
+        { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
+        { hasLinkedQuotes: false },
+      ),
+    ).toEqual({ ok: false, error: "service_not_offered" });
+    expect(
+      updateCommercialRequest(
+        created.request,
+        { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
+        { hasLinkedQuotes: true, serviceOffer: internalOffer },
+      ),
+    ).toEqual({ ok: false, error: "service_selection_locked" });
   });
 });

@@ -55,6 +55,7 @@ describe("optional site installation scope", () => {
     }
     const ids = projected.incompleteReasons.map((reason) => reason.id);
     expect(ids).toEqual([...SITE_INSTALLATION_INCOMPLETE_REASON_IDS]);
+    expect(ids).not.toContain("TRANSPORT_UNCONFIRMED");
     expect(new Set(ids).size).toBe(ids.length);
     expect(projected.incompleteReasons.map((reason) => reason.label).join(" ")).not.toMatch(
       /inspectat|verificat la fața locului|măsurat efectiv/i,

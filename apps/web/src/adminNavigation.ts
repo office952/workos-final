@@ -2,6 +2,7 @@ export type AdminSectionId =
   | "seller"
   | "customers"
   | "people"
+  | "operational-services"
   | "resources"
   | "stock"
   | "processes"
@@ -57,6 +58,14 @@ export const ADMIN_GROUPS: readonly AdminGroup[] = [
         groupTitle: "Operațiuni",
         description:
           "Catalog operațional: oameni, calificări și disponibilitate. Fără HR, pontaj sau salariu.",
+      },
+      {
+        id: "operational-services",
+        to: "/admin/operational-services",
+        label: "Servicii operaționale",
+        groupTitle: "Operațiuni",
+        description:
+          "Ce poate oferi organizația pe o cerere: montaj la locație. Dezactivarea oprește doar selecțiile noi.",
       },
     ],
   },

@@ -1,5 +1,7 @@
 import {
+  SITE_INSTALLATION_SCOPE_ID,
   createCommercialRequest,
+  isOperationalServiceProviderMode,
   linkCommercialRequestQuote,
   updateCommercialRequest,
   type CommercialRequest,
@@ -9,8 +11,16 @@ import {
   type CommercialRequestQuoteLink,
   type CommercialRequestStatus,
   type Customer,
+  type OperationalServiceProviderMode,
+  type OrganizationServiceOffer,
 } from "@workos-final/domain";
+import { readOrganizationServiceOffer } from "../operationalServices/store.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
+
+type OptionalServiceSelection = {
+  scopeId: string;
+  mode: OperationalServiceProviderMode | null;
+};
 
 type RequestRow = {
   request_id: string;
@@ -29,10 +39,17 @@ type LinkRow = {
   linked_at: string;
 };
 
+function modeFromRow(value: string | null): OperationalServiceProviderMode | null {
+  return value && isOperationalServiceProviderMode(value) ? value : null;
+}
+
 function requestFromRow(
   row: RequestRow,
-  optionalScopeIds: readonly string[] = [],
+  selections: readonly OptionalServiceSelection[] = [],
 ): CommercialRequest {
+  const installation = selections.find(
+    (item) => item.scopeId === SITE_INSTALLATION_SCOPE_ID,
+  );
   return {
     requestId: row.request_id,
     reference: row.reference,
@@ -40,34 +57,38 @@ function requestFromRow(
     title: row.title,
     description: row.description,
     status: row.status as CommercialRequestStatus,
-    optionalScopeIds,
+    optionalScopeIds: selections.map((item) => item.scopeId),
+    siteInstallationMode: installation?.mode ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-function listOptionalScopeIds(
+function listOptionalServiceSelections(
   db: SqliteDatabase,
   requestId: string,
-): string[] {
+): OptionalServiceSelection[] {
   const rows = db
     .prepare(
       `
-      SELECT scope_id
+      SELECT scope_id, provider_mode
       FROM commercial_request_optional_scopes
       WHERE request_id = ?
       ORDER BY selected_at ASC, scope_id ASC
     `,
     )
-    .all(requestId) as Array<{ scope_id: string }>;
-  return rows.map((row) => row.scope_id);
+    .all(requestId) as Array<{ scope_id: string; provider_mode: string | null }>;
+  return rows.map((row) => ({
+    scopeId: row.scope_id,
+    mode: modeFromRow(row.provider_mode),
+  }));
 }
 
-function optionalScopeIdsByRequest(
+function optionalServiceSelectionsByRequest(
   db: SqliteDatabase,
   requestIds: readonly string[],
-): Map<string, string[]> {
-  const map = new Map<string, string[]>();
+): Map<string, OptionalServiceSelection[]> {
+  const map = new Map<string, OptionalServiceSelection[]>();
   for (const requestId of requestIds) {
     map.set(requestId, []);
   }
@@ -78,28 +99,38 @@ function optionalScopeIdsByRequest(
   const rows = db
     .prepare(
       `
-      SELECT request_id, scope_id
+      SELECT request_id, scope_id, provider_mode
       FROM commercial_request_optional_scopes
       WHERE request_id IN (${placeholders})
       ORDER BY selected_at ASC, scope_id ASC
     `,
     )
-    .all(...requestIds) as Array<{ request_id: string; scope_id: string }>;
+    .all(...requestIds) as Array<{
+    request_id: string;
+    scope_id: string;
+    provider_mode: string | null;
+  }>;
   for (const row of rows) {
     const current = map.get(row.request_id) ?? [];
-    current.push(row.scope_id);
+    current.push({
+      scopeId: row.scope_id,
+      mode: modeFromRow(row.provider_mode),
+    });
     map.set(row.request_id, current);
   }
   return map;
 }
 
-function replaceOptionalScopeIds(
+function replaceOptionalServiceSelections(
   db: SqliteDatabase,
   requestId: string,
   scopeIds: readonly string[],
+  siteInstallationMode: OperationalServiceProviderMode | null,
   selectedAt: string,
 ): void {
-  const current = new Set(listOptionalScopeIds(db, requestId));
+  const current = new Set(
+    listOptionalServiceSelections(db, requestId).map((item) => item.scopeId),
+  );
   const next = new Set(scopeIds);
   for (const scopeId of current) {
     if (!next.has(scopeId)) {
@@ -112,13 +143,25 @@ function replaceOptionalScopeIds(
     }
   }
   for (const scopeId of next) {
+    const providerMode =
+      scopeId === SITE_INSTALLATION_SCOPE_ID ? siteInstallationMode : null;
     if (!current.has(scopeId)) {
       db.prepare(
         `
-        INSERT INTO commercial_request_optional_scopes (request_id, scope_id, selected_at)
-        VALUES (?, ?, ?)
+        INSERT INTO commercial_request_optional_scopes (
+          request_id, scope_id, selected_at, provider_mode
+        )
+        VALUES (?, ?, ?, ?)
       `,
-      ).run(requestId, scopeId, selectedAt);
+      ).run(requestId, scopeId, selectedAt, providerMode);
+    } else {
+      db.prepare(
+        `
+        UPDATE commercial_request_optional_scopes
+        SET provider_mode = ?
+        WHERE request_id = ? AND scope_id = ?
+      `,
+      ).run(providerMode, requestId, scopeId);
     }
   }
 }
@@ -141,11 +184,11 @@ export function listCommercialRequests(db: SqliteDatabase): CommercialRequest[] 
     `,
     )
     .all() as RequestRow[];
-  const scopes = optionalScopeIdsByRequest(
+  const selections = optionalServiceSelectionsByRequest(
     db,
     rows.map((row) => row.request_id),
   );
-  return rows.map((row) => requestFromRow(row, scopes.get(row.request_id) ?? []));
+  return rows.map((row) => requestFromRow(row, selections.get(row.request_id) ?? []));
 }
 
 export function getCommercialRequest(
@@ -161,7 +204,7 @@ export function getCommercialRequest(
     `,
     )
     .get(requestId) as RequestRow | undefined;
-  return row ? requestFromRow(row, listOptionalScopeIds(db, requestId)) : null;
+  return row ? requestFromRow(row, listOptionalServiceSelections(db, requestId)) : null;
 }
 
 const REQUEST_CREATE_ATTEMPTS = 8;
@@ -235,17 +278,22 @@ export function persistUpdatedCommercialRequest(
     status?: CommercialRequestStatus;
     customerId?: string;
     optionalScopeIds?: readonly string[];
+    siteInstallationMode?: OperationalServiceProviderMode | null;
   },
   context: {
     hasLinkedQuotes: boolean;
     nextCustomer?: Customer | null;
+    serviceOffer?: OrganizationServiceOffer;
   },
 ): CommercialRequestMutationResult {
   const current = getCommercialRequest(db, requestId);
   if (!current) {
     return { ok: false, error: "not_found" };
   }
-  const updated = updateCommercialRequest(current, patch, context);
+  const updated = updateCommercialRequest(current, patch, {
+    ...context,
+    serviceOffer: context.serviceOffer ?? readOrganizationServiceOffer(db),
+  });
   if (!updated.ok || updated.alreadyApplied) {
     return updated;
   }
@@ -264,10 +312,11 @@ export function persistUpdatedCommercialRequest(
       updated.request.updatedAt,
       requestId,
     );
-    replaceOptionalScopeIds(
+    replaceOptionalServiceSelections(
       db,
       requestId,
       updated.request.optionalScopeIds,
+      updated.request.siteInstallationMode,
       updated.request.updatedAt,
     );
   });

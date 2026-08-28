@@ -49,6 +49,18 @@ async function compileReady(
   };
 }
 
+async function enableSiteInstallation(
+  app: ReturnType<typeof createApp>,
+  offerMode = "INTERNAL",
+) {
+  const response = await app.request("/api/operational-services/SITE_INSTALLATION", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ offerMode }),
+  });
+  expect(response.status).toBe(200);
+}
+
 async function createCustomer(app: ReturnType<typeof createApp>, displayName: string) {
   const created = await app.request("/api/customers", {
     method: "POST",
@@ -259,6 +271,7 @@ describe("commercial request API", () => {
 
   it("persists optional site installation without creating a quote", async () => {
     const app = createApp();
+    await enableSiteInstallation(app);
     const customer = await createCustomer(app, "Client Montaj");
     const created = await readBody(
       await createRequest(app, customer.customerId as string, "Litere cu montaj"),
@@ -278,6 +291,7 @@ describe("commercial request API", () => {
     expect((selectedBody.request as JsonObject).optionalScopeIds).toEqual([
       SITE_INSTALLATION_SCOPE_ID,
     ]);
+    expect((selectedBody.request as JsonObject).siteInstallationMode).toBe("INTERNAL");
     expect((selectedBody.detail as JsonObject).installationScope).toMatchObject({
       scopeId: SITE_INSTALLATION_SCOPE_ID,
       eicCompleteness: "PARTIAL",
@@ -342,6 +356,7 @@ describe("commercial request API", () => {
 
   it("refuses linking an orphan product quote to a request with incomplete installation", async () => {
     const app = createApp();
+    await enableSiteInstallation(app);
     const customer = await createCustomer(app, "Client Orphan Link");
     const created = await readBody(
       await createRequest(app, customer.customerId as string, "Litere cu montaj"),
@@ -464,5 +479,306 @@ describe("commercial request API", () => {
       ),
     );
     expect((reread.quoteSnapshot as JsonObject).contentHash).toBe(contentHash);
+  });
+
+  it("refuses a new installation selection until the organization offers the service", async () => {
+    const app = createApp();
+    const customer = await createCustomer(app, "Client Fără Ofertă");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere fără ofertă org"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    const detail = created.detail as JsonObject;
+    expect((detail.installationOffer as JsonObject).canSelectNew).toBe(false);
+    expect((detail.installationOffer as JsonObject).selected).toBe(false);
+
+    const refused = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(refused.status).toBe(400);
+    expect((await readBody(refused)).error).toBe("service_not_offered");
+  });
+
+  it("locks selection after the first linked quote and keeps disable prospective", async () => {
+    const app = createApp();
+    await enableSiteInstallation(app);
+    const customer = await createCustomer(app, "Client Lock Montaj");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere lock montaj"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    const orphan = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "LOCK1",
+      customer.customerId as string,
+    );
+    expect(orphan.status).toBe(200);
+    const quoteSnapshotId = ((await readBody(orphan)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    const linked = await app.request(`/api/requests/${requestId}/quotes`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ quoteSnapshotId }),
+    });
+    expect(linked.status).toBe(200);
+
+    const locked = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(locked.status).toBe(409);
+    expect((await readBody(locked)).error).toBe("service_selection_locked");
+
+    const selected = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere cu montaj existent"),
+    );
+    const selectedId = (selected.request as JsonObject).requestId as string;
+    const select = await app.request(`/api/requests/${selectedId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(select.status).toBe(200);
+    const disabled = await app.request("/api/operational-services/SITE_INSTALLATION", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ offerMode: "SERVICE_DISABLED" }),
+    });
+    expect(disabled.status).toBe(200);
+    const preserved = await readBody(await app.request(`/api/requests/${selectedId}`));
+    const preservedDetail = preserved.detail as JsonObject;
+    expect((preservedDetail.installationScope as JsonObject).scopeId).toBe(
+      SITE_INSTALLATION_SCOPE_ID,
+    );
+    expect((preservedDetail.installationOffer as JsonObject).persistedSelectionPreserved).toBe(
+      true,
+    );
+    expect((preservedDetail.installationOffer as JsonObject).mode).toBe("INTERNAL");
+    const freeze = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "LOCK2",
+      customer.customerId as string,
+      selectedId,
+    );
+    expect(freeze.status).toBe(422);
+    expect((await readBody(freeze)).error).toBe("incomplete_offer");
+    const newRequest = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere după disable"),
+    );
+    const newRefused = await app.request(
+      `/api/requests/${(newRequest.request as JsonObject).requestId}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+      },
+    );
+    expect(newRefused.status).toBe(400);
+    expect((await readBody(newRefused)).error).toBe("service_not_offered");
+  });
+
+  it("applies subcontracted and both modes and refuses an invalid mode", async () => {
+    const app = createApp();
+    await enableSiteInstallation(app, "SUBCONTRACTED");
+    const customer = await createCustomer(app, "Client Subcontractat");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere subcontractate"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    const selected = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(selected.status).toBe(200);
+    expect(((await readBody(selected)).request as JsonObject).siteInstallationMode).toBe(
+      "SUBCONTRACTED",
+    );
+    const wrongPath = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ siteInstallationMode: "INTERNAL" }),
+    });
+    expect(wrongPath.status).toBe(400);
+    expect((await readBody(wrongPath)).error).toBe("invalid_service_mode");
+    expect(
+      (
+        (await readBody(await app.request(`/api/requests/${requestId}`))).detail as {
+          request: JsonObject;
+        }
+      ).request.siteInstallationMode,
+    ).toBe("SUBCONTRACTED");
+
+    await enableSiteInstallation(app, "BOTH");
+    const bothCreated = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere ambele căi"),
+    );
+    const bothId = (bothCreated.request as JsonObject).requestId as string;
+    const missingMode = await app.request(`/api/requests/${bothId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(missingMode.status).toBe(400);
+    expect((await readBody(missingMode)).error).toBe("service_mode_required");
+    const bothSelected = await app.request(`/api/requests/${bothId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+        siteInstallationMode: "INTERNAL",
+      }),
+    });
+    expect(bothSelected.status).toBe(200);
+    expect(((await readBody(bothSelected)).request as JsonObject).siteInstallationMode).toBe(
+      "INTERNAL",
+    );
+    const invalid = await app.request(`/api/requests/${bothId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ siteInstallationMode: "SERVICE_DISABLED" }),
+    });
+    expect(invalid.status).toBe(400);
+    expect((await readBody(invalid)).error).toBe("invalid_payload");
+  });
+
+  it("does not rewrite a persisted mode when the organization offer changes", async () => {
+    const app = createApp();
+    await enableSiteInstallation(app, "INTERNAL");
+    const customer = await createCustomer(app, "Client Mod Org");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere mod org"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    const selected = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(selected.status).toBe(200);
+    expect(((await readBody(selected)).request as JsonObject).siteInstallationMode).toBe(
+      "INTERNAL",
+    );
+    await enableSiteInstallation(app, "SUBCONTRACTED");
+    const titleOnly = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "Litere mod org păstrat" }),
+    });
+    expect(titleOnly.status).toBe(200);
+    const afterTitle = await readBody(titleOnly);
+    expect((afterTitle.request as JsonObject).siteInstallationMode).toBe("INTERNAL");
+    expect((afterTitle.request as JsonObject).optionalScopeIds).toEqual([
+      SITE_INSTALLATION_SCOPE_ID,
+    ]);
+    const sameSelection = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(sameSelection.status).toBe(200);
+    const afterSame = await readBody(sameSelection);
+    expect((afterSame.request as JsonObject).siteInstallationMode).toBe("INTERNAL");
+    expect((afterSame.detail as JsonObject).installationOffer).toMatchObject({
+      selected: true,
+      mode: "INTERNAL",
+      persistedModeIncompatible: true,
+    });
+    const freeze = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "MODE1",
+      customer.customerId as string,
+      requestId,
+    );
+    expect(freeze.status).toBe(422);
+    expect((await readBody(freeze)).error).toBe("incomplete_offer");
+  });
+
+  it("locks mode after the first linked quote and leaves zero rows changed", async () => {
+    const app = createApp();
+    await enableSiteInstallation(app, "BOTH");
+    const customer = await createCustomer(app, "Client Lock Mod");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere lock mod"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    const orphan = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "LOCKM",
+      customer.customerId as string,
+    );
+    expect(orphan.status).toBe(200);
+    const quoteSnapshotId = ((await readBody(orphan)).quoteSnapshot as JsonObject)
+      .quoteSnapshotId as string;
+    expect(
+      (
+        await app.request(`/api/requests/${requestId}/quotes`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ quoteSnapshotId }),
+        })
+      ).status,
+    ).toBe(200);
+    const before = (
+      (await readBody(await app.request(`/api/requests/${requestId}`))).detail as {
+        request: JsonObject;
+      }
+    ).request;
+    const lockedMode = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ siteInstallationMode: "INTERNAL" }),
+    });
+    expect(lockedMode.status).toBe(409);
+    expect((await readBody(lockedMode)).error).toBe("service_selection_locked");
+    const after = (
+      (await readBody(await app.request(`/api/requests/${requestId}`))).detail as {
+        request: JsonObject;
+      }
+    ).request;
+    expect(after.optionalScopeIds).toEqual(before.optionalScopeIds);
+    expect(after.siteInstallationMode).toBe(before.siteInstallationMode);
+    expect(after.updatedAt).toBe(before.updatedAt);
+  });
+
+  it("refuses transport selection and keeps LETTERS product-only commercial truth", async () => {
+    const app = createApp();
+    await enableSiteInstallation(app);
+    const customer = await createCustomer(app, "Client Transport");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere fără transport"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    const transport = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: ["TRANSPORT"] }),
+    });
+    expect(transport.status).toBe(400);
+    expect((await readBody(transport)).error).toBe("unknown_optional_scope");
+    const productOnly = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "LETT1",
+      customer.customerId as string,
+      requestId,
+    );
+    expect(productOnly.status).toBe(200);
+    const quote = (await readBody(productOnly)).quoteSnapshot as JsonObject;
+    expect((quote.eic as JsonObject).total).toBe(382.5);
+    expect((quote.commercial as JsonObject).grossPrice).toBe(624.82);
+    expect(JSON.stringify(quote)).not.toMatch(/SITE_INSTALLATION|TRANSPORT/);
   });
 });

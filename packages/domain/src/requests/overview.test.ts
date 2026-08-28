@@ -18,6 +18,7 @@ function request(overrides: Partial<CommercialRequest> = {}): CommercialRequest 
     description: "Pe fațadă, text HUB MEDIA.",
     status: "NEW",
     optionalScopeIds: [],
+    siteInstallationMode: null,
     createdAt: "2026-08-17T10:00:00.000Z",
     updatedAt: "2026-08-17T10:00:00.000Z",
     ...overrides,
@@ -133,6 +134,8 @@ describe("request overview projection", () => {
     expect(detail.request.description).toContain("fațadă");
     expect(detail.request).not.toHaveProperty("eic");
     expect(detail.installationScope).toBeNull();
+    expect(detail.installationOffer.canSelectNew).toBe(false);
+    expect(detail.installationOffer.selected).toBe(false);
   });
 
   it("projects selected site installation without folding it into the request", () => {
@@ -141,6 +144,9 @@ describe("request overview projection", () => {
       customerDisplayName: "HUB MEDIA",
       quotes: [],
     });
+    expect(detail.installationOffer.selected).toBe(true);
+    expect(detail.installationOffer.persistedSelectionPreserved).toBe(true);
+    expect(detail.installationOffer.mode).toBeNull();
     expect(detail.installationScope?.scopeId).toBe("SITE_INSTALLATION");
     expect(detail.installationScope?.eicCompleteness).toBe("PARTIAL");
     expect(detail.installationScope?.commercialCompleteness).toBe("PARTIAL");

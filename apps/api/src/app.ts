@@ -17,6 +17,7 @@ import { registerJobRoutes } from "./jobs/routes.js";
 import { registerQuoteRoutes } from "./quotes/routes.js";
 import { registerRequestRoutes } from "./requests/routes.js";
 import { registerCustomerRoutes } from "./customers/routes.js";
+import { registerOperationalServiceRoutes } from "./operationalServices/routes.js";
 import { registerSellerRoutes } from "./seller/routes.js";
 import { registerPeopleRoutes } from "./people/routes.js";
 import { assertDevOperatorConfigSafe } from "./operator/devMode.js";
@@ -99,6 +100,7 @@ export function createApp(options: CreateAppOptions = {}): Hono<ApiEnv> {
   registerOperatorRoutes(app);
   registerCustomerRoutes(app);
   registerSellerRoutes(app);
+  registerOperationalServiceRoutes(app);
   registerInventoryRoutes(app);
   registerSystemProjectionRoutes(app);
   registerProductSystemAdminRoutes(app);

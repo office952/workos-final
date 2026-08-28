@@ -433,7 +433,8 @@ Administrare
 │   ├── Date firmă
 │   └── Clienți
 ├── Operațiuni
-│   └── Persoane
+│   ├── Persoane
+│   └── Servicii operaționale
 ├── Atelier
 │   ├── Resurse și cost intern
 │   ├── Stoc

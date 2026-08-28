@@ -25,8 +25,8 @@ MAIN_CI_RUN                = 33187511745
 MAIN_CI_STATUS             = SUCCESS
 PHASE_2                    = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_WRITE              = NO
-OS_S1                      = READY_FOR_SEPARATE_OWNER_GO
-OS_S1_IMPLEMENTATION       = NOT_AUTHORIZED
+OS_S1                      = IMPLEMENTED_CURRENT / BASIC
+OS_S1_IMPLEMENTATION       = AUTHORIZED_AND_IMPLEMENTED
 TRANSPORT_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
 LIVE_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
@@ -71,7 +71,7 @@ Transport is a separate Operational Services capability with its own EIC and com
 
 Owner-confirmed internal evidence is still required before any later EIC write: internal person-hour labor; subcontract cost per job with validity; consumables and fixings; access equipment when the office selects it; site electrical when included or subcontracted.
 
-Migration safety for OS-S1 lives in `docs/architecture/OPERATIONAL_SERVICES_CANON.md`. A persisted `SITE_INSTALLATION` selection must stay visible and keep its freeze/link gate if the organization has no new config or is later disabled. Missing config is `SERVICE_DISABLED` only for new organizations and for existing organizations that have no selected Requests. Mode is not inferred.
+Migration safety lives in `docs/architecture/OPERATIONAL_SERVICES_CANON.md`. A persisted `SITE_INSTALLATION` selection stays visible and keeps its freeze/link gate if the organization has no config or is later disabled. Missing config is `SERVICE_DISABLED` only for new selections. Mode is not inferred.
 
 ## Permanent separation
 
@@ -119,7 +119,7 @@ INTERNAL
 SUBCONTRACTED
 ```
 
-`CURRENT_RUNTIME` still allows `optionalScopeIds` PATCH after a Quote is linked. The accepted V1 rule locks selection and mode after the first linked Quote. That lock is OS-S1, not current code.
+`CURRENT_RUNTIME` locks selection and mode after the first linked Quote. A later revision workflow is **NOT_IMPLEMENTED**.
 
 ## Phase 2 — completeness contract (not implemented)
 
@@ -132,7 +132,7 @@ Montajul is a reusable service for more than one product and company. Completene
 | Height and access method | When the office explicitly selects the access method and whether access equipment is required |
 | Support / facade | Always when install is selected |
 | Fixing system | Always when install is selected |
-| Transport | Separate capability; not an installation completeness fact. `CURRENT_RUNTIME` still lists `TRANSPORT_UNCONFIRMED` inside install reasons — OS-S1 must stop that |
+| Transport | Separate capability; not an installation completeness fact. `CURRENT_RUNTIME` no longer lists `TRANSPORT_UNCONFIRMED` inside install reasons |
 | Distance / travel | Only if Owner policy requires it |
 | Unload and handling | When site access is not workshop-equivalent |
 | Site electrical connection | When the office contract is `INCLUDED` or `SUBCONTRACTED`. `EXCLUDED_CUSTOMER_RESPONSIBILITY` and `NOT_APPLICABLE` need no electrical cost row |
@@ -174,7 +174,7 @@ Do not invent EUR amounts. Confirm these values before Phase 2 write.
 | Site electrical attendance | EUR / job | When contract is INCLUDED or SUBCONTRACTED | Cost evidence for those modes. EXCLUDED_CUSTOMER_RESPONSIBILITY and NOT_APPLICABLE need no cost row | LETTERS electrical finish is workshop close-out | Site electrical | Resources / Cost or exclusion text |
 | LED mount service | do not reuse | Never as site install | — | `LED installation service` is workshop module mounting | Must not be copied | Keep on LETTERS LIGHTING only |
 
-`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. Phase 2 / OS-S2–OS-S3 write stays closed until a later Owner GO. OS-S1 remains `READY_FOR_SEPARATE_OWNER_GO` only.
+`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. Phase 2 / OS-S2–OS-S3 write stays closed until a later Owner GO.
 
 ## Phase 3 — one Quote, separate lines (not implemented)
 
@@ -250,18 +250,18 @@ Phase 1 UI stays Industrial Clarity on the current shell. Dangerous actions stay
 ## Smart modularity
 
 ```text
-AVAILABLE_MODES                    = NOT_SELECTED in CURRENT_RUNTIME; INTERNAL + SUBCONTRACTED accepted, not implemented
-ORG_DEFAULT                        = SERVICE_DISABLED (target; not in runtime)
+AVAILABLE_MODES                    = NOT_SELECTED | INTERNAL | SUBCONTRACTED in CURRENT_RUNTIME
+ORG_DEFAULT                        = SERVICE_DISABLED for new selections when unconfigured
 DEFAULT_REQUEST_STATE              = UNSELECTED
 DISABLED_BEHAVIOR                  = silent for new selections only; persisted selections stay visible and keep freeze/link gates
-INTERNAL_MODE_BEHAVIOR             = own PARTIAL/COMPLETE EIC + manual-fixed commercial; workshop tasks stay LETTERS
-SUBCONTRACTED_MODE_BEHAVIOR        = consumes supplier cost-per-job evidence with validity; still not a LETTERS module
+INTERNAL_MODE_BEHAVIOR             = own PARTIAL EIC; workshop tasks stay LETTERS
+SUBCONTRACTED_MODE_BEHAVIOR        = recorded mode only; supplier evidence is later
 DEPENDENCIES                       = org offer; Request selection; later site facts and cost evidence
 SAFE_FALLBACK                      = unselected / PARTIAL / freeze refused
-DATA_RETENTION                     = selection rows only in Phase 1; later snapshots freeze lines
+DATA_RETENTION                     = selection and mode rows; later snapshots freeze lines
 SNAPSHOT_IMPACT                    = Phase 1 creates no Quote; later quotes freeze selected scopes
-PERMISSION_MODEL                   = existing Request PATCH / commercial freeze gates; lock after first linked Quote is target OS-S1
-ADMIN_TOOLING_DEBT                 = YES — no org-level on/off control
+PERMISSION_MODEL                   = existing Request PATCH / commercial freeze gates; selection and mode lock after first linked Quote
+ADMIN_TOOLING_DEBT                 = reduced — Owner org offer exists; OS-S11 still open
 NO_CLIENT_CODE_FORK                = YES
 CUSTOMER_OPERABLE_WITHOUT_CURSOR   = YES for Phase 1 select/deselect after deploy
 ```

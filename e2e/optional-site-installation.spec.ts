@@ -10,6 +10,10 @@ test("optional site installation is silent until selected and then blocks quote 
   request,
 }) => {
   const token = uniqueRequestToken("MON");
+  const enable = await request.patch("/api/operational-services/SITE_INSTALLATION", {
+    data: { offerMode: "INTERNAL" },
+  });
+  expect(enable.ok()).toBeTruthy();
   const customer = await request.post("/api/customers", {
     data: { displayName: `Client ${token}` },
   });
@@ -141,6 +145,10 @@ test("orphan product quote cannot link to a request with incomplete site install
   request,
 }) => {
   const token = uniqueRequestToken("ORL");
+  const enable = await request.patch("/api/operational-services/SITE_INSTALLATION", {
+    data: { offerMode: "INTERNAL" },
+  });
+  expect(enable.ok()).toBeTruthy();
   const customer = await request.post("/api/customers", {
     data: { displayName: `Client ${token}` },
   });

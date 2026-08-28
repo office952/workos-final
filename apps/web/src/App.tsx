@@ -15,6 +15,7 @@ import { RequestDetailPage } from "./RequestDetailPage";
 import { RequestsOverviewPage } from "./RequestsOverviewPage";
 import { CustomerAdminPage } from "./CustomerAdminPage";
 import { SellerAdminPage } from "./SellerAdminPage";
+import { OperationalServicesAdminPage } from "./OperationalServicesAdminPage";
 import { PeopleAdminPage } from "./PeopleAdminPage";
 import { PersonAdminPage } from "./PersonAdminPage";
 import { SkillsAdminPage } from "./SkillsAdminPage";
@@ -104,6 +105,7 @@ function AppGate() {
           <Route path="/admin/people/:personId" element={<PersonAdminPage />} />
           <Route path="/admin/customers" element={<CustomerAdminPage />} />
           <Route path="/admin/seller" element={<SellerAdminPage />} />
+          <Route path="/admin/operational-services" element={<OperationalServicesAdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

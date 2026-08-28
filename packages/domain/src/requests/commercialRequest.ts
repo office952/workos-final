@@ -1,10 +1,16 @@
 import type { Customer } from "../customers/identity.js";
 import {
-  normalizeOptionalScopeIds,
   sameOptionalScopeIds,
   siteInstallationFreezeRefusal,
   type IncompleteOfferRefusal,
 } from "../installation/scope.js";
+import {
+  UNCONFIGURED_SITE_INSTALLATION_OFFER,
+  applyRequestServiceSelection,
+  sameServiceMode,
+  type OperationalServiceProviderMode,
+  type OrganizationServiceOffer,
+} from "../operationalServices.js";
 
 export const COMMERCIAL_REQUEST_STATUSES = [
   "NEW",
@@ -27,6 +33,7 @@ export type CommercialRequest = {
   description: string;
   status: CommercialRequestStatus;
   optionalScopeIds: readonly string[];
+  siteInstallationMode: OperationalServiceProviderMode | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -46,6 +53,11 @@ export const COMMERCIAL_REQUEST_MUTATION_ERRORS = [
   "not_found",
   "reference_unavailable",
   "unknown_optional_scope",
+  "service_not_offered",
+  "service_selection_locked",
+  "service_mode_required",
+  "service_mode_unavailable",
+  "invalid_service_mode",
 ] as const;
 export type CommercialRequestMutationError =
   (typeof COMMERCIAL_REQUEST_MUTATION_ERRORS)[number];
@@ -148,6 +160,7 @@ export function createCommercialRequest(input: {
       description,
       status: "NEW",
       optionalScopeIds: [],
+      siteInstallationMode: null,
       createdAt,
       updatedAt: createdAt,
     },
@@ -162,10 +175,12 @@ export function updateCommercialRequest(
     status?: CommercialRequestStatus;
     customerId?: string;
     optionalScopeIds?: readonly string[];
+    siteInstallationMode?: OperationalServiceProviderMode | null;
   },
   context: {
     hasLinkedQuotes: boolean;
     nextCustomer?: Customer | null;
+    serviceOffer?: OrganizationServiceOffer;
   },
   updatedAt = new Date().toISOString(),
 ): CommercialRequestMutationResult {
@@ -204,12 +219,26 @@ export function updateCommercialRequest(
     next = { ...next, customerId: context.nextCustomer.customerId };
   }
 
-  if (patch.optionalScopeIds !== undefined) {
-    const normalized = normalizeOptionalScopeIds(patch.optionalScopeIds);
-    if (!normalized.ok) {
-      return { ok: false, error: "unknown_optional_scope" };
+  if (
+    patch.optionalScopeIds !== undefined ||
+    patch.siteInstallationMode !== undefined
+  ) {
+    const applied = applyRequestServiceSelection({
+      currentScopeIds: current.optionalScopeIds,
+      currentMode: current.siteInstallationMode,
+      nextScopeIds: patch.optionalScopeIds ?? current.optionalScopeIds,
+      requestedMode: patch.siteInstallationMode,
+      offer: context.serviceOffer ?? UNCONFIGURED_SITE_INSTALLATION_OFFER,
+      hasLinkedQuotes: context.hasLinkedQuotes,
+    });
+    if (!applied.ok) {
+      return { ok: false, error: applied.error };
     }
-    next = { ...next, optionalScopeIds: normalized.ids };
+    next = {
+      ...next,
+      optionalScopeIds: applied.optionalScopeIds,
+      siteInstallationMode: applied.siteInstallationMode,
+    };
   }
 
   if (
@@ -217,7 +246,8 @@ export function updateCommercialRequest(
     next.description === current.description &&
     next.status === current.status &&
     next.customerId === current.customerId &&
-    sameOptionalScopeIds(next.optionalScopeIds, current.optionalScopeIds)
+    sameOptionalScopeIds(next.optionalScopeIds, current.optionalScopeIds) &&
+    sameServiceMode(next.siteInstallationMode, current.siteInstallationMode)
   ) {
     return { ok: true, request: current, alreadyApplied: true };
   }
