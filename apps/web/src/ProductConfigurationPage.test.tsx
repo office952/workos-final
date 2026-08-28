@@ -256,6 +256,7 @@ describe("ProductConfigurationPage", () => {
         title: "Litere exterior",
         description: "Pe fațadă.",
         status: "READY_FOR_QUOTE",
+        optionalScopeIds: [],
         createdAt: "2026-08-17T10:00:00.000Z",
         updatedAt: "2026-08-17T10:00:00.000Z",
       },
@@ -268,6 +269,7 @@ describe("ProductConfigurationPage", () => {
       canUploadAttachments: true,
       attachments: [],
       linkedOffers: [],
+      installationScope: null,
     });
 
     render(

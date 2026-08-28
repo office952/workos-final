@@ -1,4 +1,8 @@
 import type { Customer } from "../customers/identity.js";
+import {
+  normalizeOptionalScopeIds,
+  sameOptionalScopeIds,
+} from "../installation/scope.js";
 
 export const COMMERCIAL_REQUEST_STATUSES = [
   "NEW",
@@ -20,6 +24,7 @@ export type CommercialRequest = {
   title: string;
   description: string;
   status: CommercialRequestStatus;
+  optionalScopeIds: readonly string[];
   createdAt: string;
   updatedAt: string;
 };
@@ -38,6 +43,7 @@ export const COMMERCIAL_REQUEST_MUTATION_ERRORS = [
   "invalid_status",
   "not_found",
   "reference_unavailable",
+  "unknown_optional_scope",
 ] as const;
 export type CommercialRequestMutationError =
   (typeof COMMERCIAL_REQUEST_MUTATION_ERRORS)[number];
@@ -138,6 +144,7 @@ export function createCommercialRequest(input: {
       title,
       description,
       status: "NEW",
+      optionalScopeIds: [],
       createdAt,
       updatedAt: createdAt,
     },
@@ -151,6 +158,7 @@ export function updateCommercialRequest(
     description?: string;
     status?: CommercialRequestStatus;
     customerId?: string;
+    optionalScopeIds?: readonly string[];
   },
   context: {
     hasLinkedQuotes: boolean;
@@ -193,11 +201,20 @@ export function updateCommercialRequest(
     next = { ...next, customerId: context.nextCustomer.customerId };
   }
 
+  if (patch.optionalScopeIds !== undefined) {
+    const normalized = normalizeOptionalScopeIds(patch.optionalScopeIds);
+    if (!normalized.ok) {
+      return { ok: false, error: "unknown_optional_scope" };
+    }
+    next = { ...next, optionalScopeIds: normalized.ids };
+  }
+
   if (
     next.title === current.title &&
     next.description === current.description &&
     next.status === current.status &&
-    next.customerId === current.customerId
+    next.customerId === current.customerId &&
+    sameOptionalScopeIds(next.optionalScopeIds, current.optionalScopeIds)
   ) {
     return { ok: true, request: current, alreadyApplied: true };
   }

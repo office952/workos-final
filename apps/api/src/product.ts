@@ -23,6 +23,10 @@ import {
   freezeProductionReleaseFromOrder,
   lettersProcessCompositionInspections,
   materializeExecutionPlanFromSnapshot,
+  presentSiteInstallationScope,
+  projectSiteInstallationScope,
+  SITE_INSTALLATION_SCOPE_ID,
+  siteInstallationFreezeRefusal,
   projectExecutionPlanView,
   type ActualConsumptionLineInput,
   type ExecutionPlanRecord,
@@ -81,6 +85,25 @@ function readRequestId(body: unknown): string | null {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function readInstallationScope(
+  runtime: { readCommercialRequest(requestId: string): { optionalScopeIds: readonly string[] } | null },
+  body: unknown,
+) {
+  const requestId = readRequestId(body);
+  if (!requestId) {
+    return null;
+  }
+  const request = runtime.readCommercialRequest(requestId);
+  if (!request) {
+    return null;
+  }
+  return presentSiteInstallationScope(
+    projectSiteInstallationScope({
+      selected: request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+    }),
+  );
 }
 
 function readCustomerId(body: unknown): string | null {
@@ -171,10 +194,11 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
 
   app.post("/api/products/:productCode/confirm", async (c) => {
     const runtime = getProductSystem(c);
+    const body = await c.req.json().catch(() => null);
     const compiled = compileAcceptedProduct(
       runtime,
       c.req.param("productCode"),
-      await c.req.json(),
+      body,
     );
     if (!compiled.ok) {
       return c.json(compiled.body, compiled.status);
@@ -186,6 +210,7 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       aggregate: compiled.aggregate,
       eic: scopeEic(compiled.eic, access),
       commercialPrice: scopeCommercialPrice(commercialPrice, access),
+      installationScope: readInstallationScope(runtime, body),
       executionPlanPreview: scopeExecutionPlanPreview(
         compileExecutionPlanPreview(
           compiled.truth,
@@ -285,6 +310,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
           },
           422,
         );
+      }
+      const installationRefusal = siteInstallationFreezeRefusal(request.optionalScopeIds);
+      if (installationRefusal) {
+        return c.json(installationRefusal, 422);
       }
     }
     const commercialPrice = projectCommercialPrice(compiled.eic);

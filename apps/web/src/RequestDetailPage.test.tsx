@@ -15,6 +15,7 @@ const detail: RequestDetailProjection = {
     title: "Litere exterior",
     description: "Pe fațadă, text HUB MEDIA.",
     status: "IN_REVIEW",
+    optionalScopeIds: [],
     createdAt: "2026-08-17T10:00:00.000Z",
     updatedAt: "2026-08-17T10:00:00.000Z",
   },
@@ -26,6 +27,7 @@ const detail: RequestDetailProjection = {
   canUpdateStatus: true,
   canUploadAttachments: true,
   attachments: [],
+  installationScope: null,
   linkedOffers: [
     {
       quoteSnapshotId: "qts:1",
@@ -128,6 +130,31 @@ describe("RequestDetailPage", () => {
     expect(updateCommercialRequest).toHaveBeenCalledWith(
       "crq:11111111-2222-3333-4444-555555555555",
       expect.objectContaining({ status: "READY_FOR_QUOTE" }),
+    );
+  });
+
+  it("persists Montaj la locație as an optional request scope", async () => {
+    vi.mocked(readRequestDetail).mockResolvedValue(detail);
+    vi.mocked(updateCommercialRequest).mockResolvedValue({
+      ...detail,
+      request: { ...detail.request, optionalScopeIds: ["SITE_INSTALLATION"] },
+    });
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const checkbox = await screen.findByRole("checkbox", { name: /Montaj la locație/ });
+    expect(checkbox).not.toBeChecked();
+    await userEvent.click(checkbox);
+    expect(updateCommercialRequest).toHaveBeenCalledWith(
+      "crq:11111111-2222-3333-4444-555555555555",
+      { optionalScopeIds: ["SITE_INSTALLATION"] },
     );
   });
 });

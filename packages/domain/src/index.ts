@@ -605,6 +605,28 @@ export {
   type RequestOverviewSummary,
 } from "./requests/index.js";
 export {
+  OPTIONAL_COMMERCIAL_SCOPE_IDS,
+  SITE_INSTALLATION_FREEZE_REASON,
+  SITE_INSTALLATION_INCOMPLETE_REASON_IDS,
+  SITE_INSTALLATION_LABEL,
+  SITE_INSTALLATION_SCOPE_ID,
+  commercialRequestHasOptionalScope,
+  isKnownOptionalScopeId,
+  normalizeOptionalScopeIds,
+  presentSiteInstallationScope,
+  projectSiteInstallationScope,
+  sameOptionalScopeIds,
+  siteInstallationBlocksQuoteFreeze,
+  siteInstallationFreezeRefusal,
+  siteInstallationIncompleteReasonLabel,
+  siteInstallationIncompleteReasons,
+  type OptionalCommercialScopeId,
+  type SiteInstallationIncompleteReason,
+  type SiteInstallationIncompleteReasonId,
+  type SiteInstallationOperatorView,
+  type SiteInstallationScopeProjection,
+} from "./installation/index.js";
+export {
   ACCEPTED_PRODUCTION_SNAPSHOT_SCHEMA_VERSION,
   FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION,
   PRODUCTION_RELEASE_SOURCES,

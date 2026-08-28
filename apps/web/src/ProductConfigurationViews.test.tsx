@@ -22,6 +22,7 @@ import {
   QuoteSnapshotSection,
   ConstructionFacts,
   EicSection,
+  InstallationScopeSection,
   ReadinessNotice,
   ReviewPanel,
 } from "./ProductConfigurationViews";
@@ -300,6 +301,76 @@ describe("Product configuration views", () => {
     );
     expect(screen.queryByRole("button", { name: "Creează oferta" })).not.toBeInTheDocument();
     expect(screen.getByText("Prețul clientului nu poate fi calculat.")).toBeInTheDocument();
+  });
+
+  it("keeps Creează oferta visible but disabled when installation is PARTIAL", () => {
+    const complete: CommercialPriceProjection = {
+      internalCost: 407.7,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 142.7,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 550.4,
+      vatPercent: 21,
+      vatAmount: 115.58,
+      grossPrice: 665.98,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    render(
+      <QuoteSnapshotSection
+        price={complete}
+        reused={false}
+        busy={false}
+        selectedCustomerId="cus:1"
+        onFreeze={() => undefined}
+        onAccept={() => undefined}
+        onCreateOrder={() => undefined}
+        installationScope={{
+          scopeId: "SITE_INSTALLATION",
+          label: "Montaj la locație",
+          eicCompleteness: "PARTIAL",
+          commercialCompleteness: "PARTIAL",
+          incompleteReasons: [
+            { id: "MISSING_COST_EVIDENCE", label: "Evidența de cost pentru montaj lipsește." },
+          ],
+        }}
+      />,
+    );
+    const freeze = screen.getByRole("button", { name: "Creează oferta" });
+    expect(freeze).toBeDisabled();
+    expect(screen.getByText("Montajul nu are încă un cost complet.")).toBeInTheDocument();
+    expect(screen.getByText("Preț final client: 665,98 EUR")).toBeInTheDocument();
+  });
+
+  it("renders installation PARTIAL reasons without a 0 EUR price", () => {
+    render(
+      <InstallationScopeSection
+        scope={{
+          scopeId: "SITE_INSTALLATION",
+          label: "Montaj la locație",
+          eicCompleteness: "PARTIAL",
+          commercialCompleteness: "PARTIAL",
+          incompleteReasons: [
+            { id: "MISSING_COST_EVIDENCE", label: "Evidența de cost pentru montaj lipsește." },
+            {
+              id: "SITE_MEASUREMENTS_UNCONFIRMED",
+              label: "Măsurătorile la locație nu sunt confirmate.",
+            },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByRole("heading", { name: "Montaj la locație" })).toBeInTheDocument();
+    expect(screen.getByText("Parțial")).toBeInTheDocument();
+    expect(screen.getByText("Evidența de cost pentru montaj lipsește.")).toBeInTheDocument();
+    expect(screen.queryByText(/0(?:[.,]00)? EUR/)).not.toBeInTheDocument();
   });
 
   it("renders frozen quote values from the snapshot only", () => {

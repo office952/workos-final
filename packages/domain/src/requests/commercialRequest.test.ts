@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { emptyCustomerProfile, type Customer } from "../customers/identity.js";
+import { SITE_INSTALLATION_SCOPE_ID } from "../installation/scope.js";
 import {
   canChangeCommercialRequestStatus,
   commercialRequestReference,
@@ -48,6 +49,7 @@ describe("commercial request identity", () => {
         customerId: "cus:active",
         title: "Litere exterior sediu",
         status: "NEW",
+        optionalScopeIds: [],
       },
     });
     expect(createCommercialRequest({
@@ -181,5 +183,50 @@ describe("commercial request identity", () => {
       }),
     ).toEqual({ ok: false, error: "customer_mismatch" });
     expect(created.request.status).toBe("NEW");
+  });
+
+  it("selects optional scopes idempotently and refuses unknown ids", () => {
+    const created = createCommercialRequest({
+      customer: customer(),
+      title: "Titlu",
+      description: "Descriere",
+    });
+    if (!created.ok) {
+      throw new Error("expected create");
+    }
+    expect(created.request.optionalScopeIds).toEqual([]);
+    const selected = updateCommercialRequest(
+      created.request,
+      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID, SITE_INSTALLATION_SCOPE_ID] },
+      { hasLinkedQuotes: false },
+    );
+    expect(selected.ok).toBe(true);
+    if (!selected.ok) {
+      throw new Error("expected select");
+    }
+    expect(selected.request.optionalScopeIds).toEqual([SITE_INSTALLATION_SCOPE_ID]);
+    expect(
+      updateCommercialRequest(
+        selected.request,
+        { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
+        { hasLinkedQuotes: false },
+      ),
+    ).toMatchObject({ ok: true, alreadyApplied: true });
+    const cleared = updateCommercialRequest(
+      selected.request,
+      { optionalScopeIds: [] },
+      { hasLinkedQuotes: false },
+    );
+    expect(cleared.ok).toBe(true);
+    if (cleared.ok) {
+      expect(cleared.request.optionalScopeIds).toEqual([]);
+    }
+    expect(
+      updateCommercialRequest(
+        created.request,
+        { optionalScopeIds: ["NOT_A_SCOPE"] },
+        { hasLinkedQuotes: false },
+      ),
+    ).toEqual({ ok: false, error: "unknown_optional_scope" });
   });
 });

@@ -8,6 +8,12 @@ import {
   type RequestAttachmentProjection,
 } from "./attachment.js";
 import {
+  SITE_INSTALLATION_SCOPE_ID,
+  presentSiteInstallationScope,
+  projectSiteInstallationScope,
+  type SiteInstallationOperatorView,
+} from "../installation/scope.js";
+import {
   commercialRequestStatusLabel,
   type CommercialRequest,
   type CommercialRequestStatus,
@@ -84,6 +90,7 @@ export type RequestDetailProjection = {
   canUploadAttachments: boolean;
   linkedOffers: readonly QuoteOverviewItem[];
   attachments: readonly RequestAttachmentProjection[];
+  installationScope: SiteInstallationOperatorView | null;
 };
 
 export function requestOverviewFilterLabel(filter: RequestOverviewFilter): string {
@@ -359,5 +366,10 @@ export function projectRequestDetail(input: {
     canUploadAttachments: canUploadRequestAttachment(input.request.status),
     linkedOffers: input.quotes,
     attachments,
+    installationScope: presentSiteInstallationScope(
+      projectSiteInstallationScope({
+        selected: input.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+      }),
+    ),
   };
 }

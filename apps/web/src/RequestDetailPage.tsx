@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   COMMERCIAL_REQUEST_STATUSES,
+  SITE_INSTALLATION_SCOPE_ID,
   commercialRequestStatusLabel,
   jobHref,
   type CommercialRequestStatus,
@@ -40,6 +41,7 @@ export function RequestDetailPage() {
   const [status, setStatus] = useState<CommercialRequestStatus>("NEW");
   const [busy, setBusy] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [installationSelected, setInstallationSelected] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -59,6 +61,9 @@ export function RequestDetailPage() {
         setTitle(detail.request.title);
         setDescription(detail.request.description);
         setStatus(detail.request.status);
+        setInstallationSelected(
+          detail.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+        );
         setProducts(flattenCatalogProducts(catalog).map((item) => ({
           code: item.code,
           label: item.label,
@@ -92,6 +97,30 @@ export function RequestDetailPage() {
       setDescription(detail.request.description);
       setStatus(detail.request.status);
     } catch {
+      setNotice("Cererea nu a putut fi actualizată.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleInstallationToggle(selected: boolean) {
+    if (page.kind !== "ready") {
+      return;
+    }
+    const previous = installationSelected;
+    setInstallationSelected(selected);
+    setBusy(true);
+    setNotice(null);
+    try {
+      const detail = await updateCommercialRequest(page.detail.request.requestId, {
+        optionalScopeIds: selected ? [SITE_INSTALLATION_SCOPE_ID] : [],
+      });
+      setPage({ kind: "ready", detail });
+      setInstallationSelected(
+        detail.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+      );
+    } catch {
+      setInstallationSelected(previous);
       setNotice("Cererea nu a putut fi actualizată.");
     } finally {
       setBusy(false);
@@ -230,6 +259,19 @@ export function RequestDetailPage() {
         ) : (
           <p>Stare: {detail.statusLabel}</p>
         )}
+        <Field
+          label="Montaj la locație"
+          hint="Dacă este selectat, montajul rămâne separat și blochează oferta până există un cost complet."
+        >
+          <input
+            type="checkbox"
+            checked={installationSelected}
+            disabled={busy}
+            onChange={(event) => {
+              void handleInstallationToggle(event.target.checked);
+            }}
+          />
+        </Field>
         <button type="submit" disabled={busy}>
           Salvează
         </button>

@@ -17,6 +17,7 @@ function request(overrides: Partial<CommercialRequest> = {}): CommercialRequest 
     title: "Litere exterior",
     description: "Pe fațadă, text HUB MEDIA.",
     status: "NEW",
+    optionalScopeIds: [],
     createdAt: "2026-08-17T10:00:00.000Z",
     updatedAt: "2026-08-17T10:00:00.000Z",
     ...overrides,
@@ -131,6 +132,20 @@ describe("request overview projection", () => {
     expect(detail.linkedOffers).toHaveLength(1);
     expect(detail.request.description).toContain("fațadă");
     expect(detail.request).not.toHaveProperty("eic");
+    expect(detail.installationScope).toBeNull();
+  });
+
+  it("projects selected site installation without folding it into the request", () => {
+    const detail = projectRequestDetail({
+      request: request({ optionalScopeIds: ["SITE_INSTALLATION"] }),
+      customerDisplayName: "HUB MEDIA",
+      quotes: [],
+    });
+    expect(detail.installationScope?.scopeId).toBe("SITE_INSTALLATION");
+    expect(detail.installationScope?.eicCompleteness).toBe("PARTIAL");
+    expect(detail.installationScope?.commercialCompleteness).toBe("PARTIAL");
+    expect(detail.request).not.toHaveProperty("eic");
+    expect(JSON.stringify(detail.installationScope)).not.toMatch(/0(?:[.,]0+)? EUR|"total"/);
   });
 
   it("blocks uploads on cancelled requests while keeping attachment projection", () => {

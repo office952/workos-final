@@ -79,7 +79,9 @@ OWNER_LOGIN                          = VERIFIED
 REAL_HUB_MEDIA_OPERATION             = NOT_PROVEN
 BUSINESS_DATA_CONFIGURATION          = OWNER_ACCEPTED
 HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
-FIRST_REAL_LETTERS_JOB               = READY_FOR_REAL_CLIENT_ENTRY
+FIRST_REAL_LETTERS_JOB               = BLOCKED_BEFORE_QUOTE
+BLOCK_REASON                         = installation cost/process evidence incomplete
+OPTIONAL_SITE_INSTALLATION_V1        = IMPLEMENTED_LOCAL_IN_REVIEW
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
 UI_UX_CANON_UPDATE_FROM_EVIDENCE     = COMPLETE
@@ -199,10 +201,12 @@ ARCHITECTURE_C_UI_WAVE_1 = OWNER_ACCEPTED_WITH_ADVISORIES
 ARCHITECTURE_C_UI_WAVE_2 = NOT_STARTED
 FIGMA_LIBRARY_PUBLISHED = NO
 HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
-FIRST_REAL_LETTERS_JOB = READY_FOR_REAL_CLIENT_ENTRY
+FIRST_REAL_LETTERS_JOB = BLOCKED_BEFORE_QUOTE
+BLOCK_REASON = installation cost/process evidence incomplete
+OPTIONAL_SITE_INSTALLATION_V1 = IMPLEMENTED_LOCAL_IN_REVIEW
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`. This file does not authorize that job.
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because installation cost/process evidence is incomplete. This file does not authorize that job.
 
 Architecture C is a **parallel UI track**, not a second target milestone and not a replacement for the HUB sequence. The Architecture C final simulation is `OWNER_ACCEPTED_WITH_ADVISORIES`. Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. Wave 2 is not started. The Figma library stays unpublished. Do not flip first-HF `WAVE_*` or `UI_IMPLEMENTATION_COMPLETE` flags for this track.
 
@@ -250,7 +254,7 @@ A synthetic or DEV walkthrough of the same spine does not close this milestone.
 6a. IMPLEMENTATION_READINESS_CONTRACTS = OWNER_ACCEPTED
 7. SCOPED_UI_IMPLEMENTATION          = OWNER_ACCEPTED
 8. HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
-9. FIRST_REAL_LETTERS_JOB            = NOT_STARTED
+9. FIRST_REAL_LETTERS_JOB            = BLOCKED_BEFORE_QUOTE
 10. PLANNED_VS_ACTUAL_OWNER_SIGN_OFF = NOT_STARTED
 ```
 
@@ -272,7 +276,26 @@ Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 i
 
 Step 8 configured the recovered HUB MEDIA organization with the existing seller, people, PIN, cost-confirm, and explicit provider/CLI path. It is not universal Machine Admin. Execution detail lives in `docs/worklog/WORKOS_HUB_MEDIA_ORGANIZATION_CONFIGURATION_STEP8.md`.
 
-Do not start steps 9–10 from this document. The next named step is `FIRST_REAL_LETTERS_JOB`.
+Step 9 is `BLOCKED_BEFORE_QUOTE` because optional site installation is selected as a required associated scope for the first real LETTERS job, and installation cost/process evidence is incomplete. Phase 1 of that capability is `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/optional-site-installation-v1`. It does not authorize a live quote, a live Cerere PATCH, Phase 2 cost write, multi-line Quote, or Architecture C UI Wave 2.
+
+Do not start steps 9–10 from this document. The next named step remains `FIRST_REAL_LETTERS_JOB`, now blocked before quote.
+
+## Optional site installation program
+
+Direction only. Later phases are not implemented and are not Owner-accepted.
+
+```text
+PHASE_1 = OPTIONAL_INSTALLATION_PARTIAL_FOUNDATION = IMPLEMENTED_LOCAL_IN_REVIEW
+PHASE_2 = INSTALLATION_BUSINESS_AND_COST_COMPLETENESS = NOT_STARTED
+PHASE_3 = MULTI_LINE_QUOTE_AND_PDF = NOT_STARTED
+PHASE_4 = FIRST_REAL_LETTERS_JOB_RESUME = NOT_STARTED
+PHASE_5 = PLANNED_VS_ACTUAL_OWNER_SIGN_OFF = NOT_STARTED
+PHASE_6 = ARCHITECTURE_C_UI_WAVE_2 = NOT_STARTED
+```
+
+Gates: Owner cost evidence before Phase 2 write; multi-line Quote before Phase 3; explicit QUOTE_CREATE GO before Phase 4; frozen Order/Release before Phase 5 tasks; separate Owner GO before Phase 6 / Figma.
+
+See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
 
 Architecture C UI Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. It does not replace the HUB sequence and does not authorize Wave 2, Figma publish, or the first real LETTERS job. Execution detail lives in `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md`.
 

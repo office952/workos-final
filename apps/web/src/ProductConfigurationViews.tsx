@@ -23,6 +23,8 @@ import {
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
+  SITE_INSTALLATION_FREEZE_REASON,
+  type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import {
   formatCostCompleteness,
@@ -517,6 +519,7 @@ export function QuoteSnapshotSection({
   onFreeze,
   onAccept,
   onCreateOrder,
+  installationScope = null,
 }: {
   price?: CommercialPriceProjection;
   snapshot?: QuoteSnapshot;
@@ -531,6 +534,7 @@ export function QuoteSnapshotSection({
   onFreeze: () => void;
   onAccept: () => void;
   onCreateOrder: () => void;
+  installationScope?: SiteInstallationOperatorView | null;
 }) {
   if (snapshot && acceptance) {
     return (
@@ -625,10 +629,44 @@ export function QuoteSnapshotSection({
       ) : null}
       {!selectedCustomerId ? <p className="page-lead">Selectează clientul.</p> : null}
       <div className="action-row">
-        <button type="button" onClick={onFreeze} disabled={busy || !selectedCustomerId}>
+        <button
+          type="button"
+          onClick={onFreeze}
+          disabled={
+            busy ||
+            !selectedCustomerId ||
+            Boolean(installationScope)
+          }
+        >
           {commercialPrimaryActionLabel("CREATE_QUOTE")}
         </button>
+        {installationScope ? (
+          <p className="page-lead">{SITE_INSTALLATION_FREEZE_REASON}</p>
+        ) : null}
       </div>
+    </section>
+  );
+}
+
+export function InstallationScopeSection({
+  scope,
+}: {
+  scope: SiteInstallationOperatorView;
+}) {
+  return (
+    <section className="result-section installation-scope-section">
+      <div className="commercial-summary">
+        <h3>{scope.label}</h3>
+        <StatusChip
+          label={commercialCompletenessLabel(scope.commercialCompleteness)}
+          tone="warn"
+        />
+      </div>
+      <ul>
+        {scope.incompleteReasons.map((reason) => (
+          <li key={reason.id}>{reason.label}</li>
+        ))}
+      </ul>
     </section>
   );
 }

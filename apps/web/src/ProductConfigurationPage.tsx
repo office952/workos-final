@@ -17,6 +17,7 @@ import {
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
   type RequestDetailProjection,
+  type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { createCustomer, fetchCustomers } from "./customerApi";
@@ -28,6 +29,7 @@ import {
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
+  InstallationScopeSection,
   OrderSnapshotSection,
   ProductionPreviewSection,
   QuoteSnapshotSection,
@@ -941,6 +943,7 @@ export function ProductConfigurationPage() {
           onRelease={() => void handleReleaseProduction()}
           onAcceptProduction={() => void handleAcceptProduction()}
           onCreatePlan={() => void handleCreateExecutionPlan()}
+          installationScope={requestContext?.installationScope ?? null}
         />
       ) : null}
         </div>
@@ -990,6 +993,7 @@ function ConfirmedCommercialWorkspace({
   onRelease,
   onAcceptProduction,
   onCreatePlan,
+  installationScope = null,
 }: {
   confirmed: ConfirmedProduct;
   busy: boolean;
@@ -1004,6 +1008,7 @@ function ConfirmedCommercialWorkspace({
   onRelease: () => void;
   onAcceptProduction: () => void;
   onCreatePlan: () => void;
+  installationScope?: SiteInstallationOperatorView | null;
 }) {
   const commercialRelease =
     confirmed.snapshot &&
@@ -1055,7 +1060,9 @@ function ConfirmedCommercialWorkspace({
         onFreeze={onFreeze}
         onAccept={onAccept}
         onCreateOrder={onCreateOrder}
+        installationScope={installationScope}
       />
+      {installationScope ? <InstallationScopeSection scope={installationScope} /> : null}
 
       {confirmed.orderSnapshot ? (
         <>

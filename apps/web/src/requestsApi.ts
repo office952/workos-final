@@ -67,6 +67,7 @@ export async function updateCommercialRequest(
     description?: string;
     status?: CommercialRequestStatus;
     customerId?: string;
+    optionalScopeIds?: readonly string[];
   },
 ): Promise<RequestDetailProjection> {
   const response = await fetch(

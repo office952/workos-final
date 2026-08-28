@@ -29,7 +29,10 @@ type LinkRow = {
   linked_at: string;
 };
 
-function requestFromRow(row: RequestRow): CommercialRequest {
+function requestFromRow(
+  row: RequestRow,
+  optionalScopeIds: readonly string[] = [],
+): CommercialRequest {
   return {
     requestId: row.request_id,
     reference: row.reference,
@@ -37,9 +40,87 @@ function requestFromRow(row: RequestRow): CommercialRequest {
     title: row.title,
     description: row.description,
     status: row.status as CommercialRequestStatus,
+    optionalScopeIds,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function listOptionalScopeIds(
+  db: SqliteDatabase,
+  requestId: string,
+): string[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT scope_id
+      FROM commercial_request_optional_scopes
+      WHERE request_id = ?
+      ORDER BY selected_at ASC, scope_id ASC
+    `,
+    )
+    .all(requestId) as Array<{ scope_id: string }>;
+  return rows.map((row) => row.scope_id);
+}
+
+function optionalScopeIdsByRequest(
+  db: SqliteDatabase,
+  requestIds: readonly string[],
+): Map<string, string[]> {
+  const map = new Map<string, string[]>();
+  for (const requestId of requestIds) {
+    map.set(requestId, []);
+  }
+  if (requestIds.length === 0) {
+    return map;
+  }
+  const placeholders = requestIds.map(() => "?").join(", ");
+  const rows = db
+    .prepare(
+      `
+      SELECT request_id, scope_id
+      FROM commercial_request_optional_scopes
+      WHERE request_id IN (${placeholders})
+      ORDER BY selected_at ASC, scope_id ASC
+    `,
+    )
+    .all(...requestIds) as Array<{ request_id: string; scope_id: string }>;
+  for (const row of rows) {
+    const current = map.get(row.request_id) ?? [];
+    current.push(row.scope_id);
+    map.set(row.request_id, current);
+  }
+  return map;
+}
+
+function replaceOptionalScopeIds(
+  db: SqliteDatabase,
+  requestId: string,
+  scopeIds: readonly string[],
+  selectedAt: string,
+): void {
+  const current = new Set(listOptionalScopeIds(db, requestId));
+  const next = new Set(scopeIds);
+  for (const scopeId of current) {
+    if (!next.has(scopeId)) {
+      db.prepare(
+        `
+        DELETE FROM commercial_request_optional_scopes
+        WHERE request_id = ? AND scope_id = ?
+      `,
+      ).run(requestId, scopeId);
+    }
+  }
+  for (const scopeId of next) {
+    if (!current.has(scopeId)) {
+      db.prepare(
+        `
+        INSERT INTO commercial_request_optional_scopes (request_id, scope_id, selected_at)
+        VALUES (?, ?, ?)
+      `,
+      ).run(requestId, scopeId, selectedAt);
+    }
+  }
 }
 
 function linkFromRow(row: LinkRow): CommercialRequestQuoteLink {
@@ -60,7 +141,11 @@ export function listCommercialRequests(db: SqliteDatabase): CommercialRequest[] 
     `,
     )
     .all() as RequestRow[];
-  return rows.map(requestFromRow);
+  const scopes = optionalScopeIdsByRequest(
+    db,
+    rows.map((row) => row.request_id),
+  );
+  return rows.map((row) => requestFromRow(row, scopes.get(row.request_id) ?? []));
 }
 
 export function getCommercialRequest(
@@ -76,7 +161,7 @@ export function getCommercialRequest(
     `,
     )
     .get(requestId) as RequestRow | undefined;
-  return row ? requestFromRow(row) : null;
+  return row ? requestFromRow(row, listOptionalScopeIds(db, requestId)) : null;
 }
 
 const REQUEST_CREATE_ATTEMPTS = 8;
@@ -149,6 +234,7 @@ export function persistUpdatedCommercialRequest(
     description?: string;
     status?: CommercialRequestStatus;
     customerId?: string;
+    optionalScopeIds?: readonly string[];
   },
   context: {
     hasLinkedQuotes: boolean;
@@ -163,20 +249,29 @@ export function persistUpdatedCommercialRequest(
   if (!updated.ok || updated.alreadyApplied) {
     return updated;
   }
-  db.prepare(
-    `
-    UPDATE commercial_requests
-    SET customer_id = ?, title = ?, description = ?, status = ?, updated_at = ?
-    WHERE request_id = ?
-  `,
-  ).run(
-    updated.request.customerId,
-    updated.request.title,
-    updated.request.description,
-    updated.request.status,
-    updated.request.updatedAt,
-    requestId,
-  );
+  const persist = db.transaction(() => {
+    db.prepare(
+      `
+      UPDATE commercial_requests
+      SET customer_id = ?, title = ?, description = ?, status = ?, updated_at = ?
+      WHERE request_id = ?
+    `,
+    ).run(
+      updated.request.customerId,
+      updated.request.title,
+      updated.request.description,
+      updated.request.status,
+      updated.request.updatedAt,
+      requestId,
+    );
+    replaceOptionalScopeIds(
+      db,
+      requestId,
+      updated.request.optionalScopeIds,
+      updated.request.updatedAt,
+    );
+  });
+  persist();
   return updated;
 }
 

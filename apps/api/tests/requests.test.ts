@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ACM_CASSETTE_NONE_PRODUCT_CODE, CANONICAL_PRODUCT_CODE } from "@workos-final/domain";
+import {
+  ACM_CASSETTE_NONE_PRODUCT_CODE,
+  CANONICAL_PRODUCT_CODE,
+  SITE_INSTALLATION_FREEZE_REASON,
+  SITE_INSTALLATION_SCOPE_ID,
+} from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 
 type JsonObject = Record<string, unknown>;
@@ -250,5 +255,88 @@ describe("commercial request API", () => {
     });
     expect(again.status).toBe(200);
     expect((await readBody(again)).alreadyApplied).toBe(true);
+  });
+
+  it("persists optional site installation without creating a quote", async () => {
+    const app = createApp();
+    const customer = await createCustomer(app, "Client Montaj");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Litere cu montaj"),
+    );
+    const request = created.request as JsonObject;
+    const requestId = request.requestId as string;
+    expect(request.optionalScopeIds).toEqual([]);
+    expect((created.detail as JsonObject).installationScope).toBeNull();
+
+    const selected = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(selected.status).toBe(200);
+    const selectedBody = await readBody(selected);
+    expect((selectedBody.request as JsonObject).optionalScopeIds).toEqual([
+      SITE_INSTALLATION_SCOPE_ID,
+    ]);
+    expect((selectedBody.detail as JsonObject).installationScope).toMatchObject({
+      scopeId: SITE_INSTALLATION_SCOPE_ID,
+      eicCompleteness: "PARTIAL",
+      commercialCompleteness: "PARTIAL",
+    });
+    expect(JSON.stringify(selectedBody.detail)).not.toMatch(/0(?:[.,]0+)? EUR|"total"/);
+
+    const again = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    expect(again.status).toBe(200);
+    expect((await readBody(again)).alreadyApplied).toBe(true);
+
+    const unknown = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: ["NOT_A_SCOPE"] }),
+    });
+    expect(unknown.status).toBe(400);
+    expect((await readBody(unknown)).error).toBe("unknown_optional_scope");
+
+    const quotesBefore = (
+      (await readBody(await app.request("/api/quotes"))).overview as {
+        quotes: Array<JsonObject>;
+      }
+    ).quotes.length;
+    const detailBefore = (await readBody(await app.request(`/api/requests/${requestId}`)))
+      .detail as { linkedOffers: Array<JsonObject> };
+    const freeze = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      lettersValues,
+      "INST1",
+      customer.customerId as string,
+      requestId,
+    );
+    expect(freeze.status).toBe(422);
+    const freezeBody = await readBody(freeze);
+    expect(freezeBody.error).toBe("incomplete_offer");
+    expect(freezeBody.reasons).toEqual([SITE_INSTALLATION_FREEZE_REASON]);
+    expect(freezeBody.quoteSnapshot).toBeUndefined();
+    const quotesAfter = (
+      (await readBody(await app.request("/api/quotes"))).overview as {
+        quotes: Array<JsonObject>;
+      }
+    ).quotes.length;
+    expect(quotesAfter).toBe(quotesBefore);
+    const detailAfter = (await readBody(await app.request(`/api/requests/${requestId}`)))
+      .detail as { linkedOffers: Array<JsonObject> };
+    expect(detailAfter.linkedOffers).toHaveLength(detailBefore.linkedOffers.length);
+
+    const cleared = await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [] }),
+    });
+    expect(cleared.status).toBe(200);
+    expect(((await readBody(cleared)).request as JsonObject).optionalScopeIds).toEqual([]);
   });
 });

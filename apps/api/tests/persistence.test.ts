@@ -25,7 +25,10 @@ import {
 import { persistCreatedCustomer } from "../src/customers/store.js";
 import { applyMigrations, listOperationalMigrationFiles, openSqliteDatabase } from "../src/persistence/sqlite.js";
 import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
-import { persistCreatedCommercialRequest } from "../src/requests/store.js";
+import {
+  persistCreatedCommercialRequest,
+  persistUpdatedCommercialRequest,
+} from "../src/requests/store.js";
 
 const temps: string[] = [];
 
@@ -924,6 +927,50 @@ describe("product system persistence", () => {
           "2026-08-17T12:00:00.000Z",
         ),
     ).toThrow(/UNIQUE constraint failed/);
+    expect(first.request.optionalScopeIds).toEqual([]);
+    const selected = persistUpdatedCommercialRequest(
+      db,
+      first.request.requestId,
+      { optionalScopeIds: ["SITE_INSTALLATION"] },
+      { hasLinkedQuotes: false },
+    );
+    expect(selected.ok).toBe(true);
+    if (selected.ok) {
+      expect(selected.request.optionalScopeIds).toEqual(["SITE_INSTALLATION"]);
+    }
+    const rows = db
+      .prepare(
+        "SELECT request_id, scope_id FROM commercial_request_optional_scopes",
+      )
+      .all() as Array<{ request_id: string; scope_id: string }>;
+    expect(rows).toEqual([
+      {
+        request_id: first.request.requestId,
+        scope_id: "SITE_INSTALLATION",
+      },
+    ]);
+    const again = persistUpdatedCommercialRequest(
+      db,
+      first.request.requestId,
+      { optionalScopeIds: ["SITE_INSTALLATION"] },
+      { hasLinkedQuotes: false },
+    );
+    expect(again).toMatchObject({ ok: true, alreadyApplied: true });
+    const cleared = persistUpdatedCommercialRequest(
+      db,
+      first.request.requestId,
+      { optionalScopeIds: [] },
+      { hasLinkedQuotes: false },
+    );
+    expect(cleared.ok).toBe(true);
+    if (cleared.ok) {
+      expect(cleared.request.optionalScopeIds).toEqual([]);
+    }
+    expect(
+      db
+        .prepare("SELECT COUNT(*) AS count FROM commercial_request_optional_scopes")
+        .get() as { count: number },
+    ).toEqual({ count: 0 });
     db.close();
   });
 });

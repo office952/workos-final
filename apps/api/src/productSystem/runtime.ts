@@ -352,6 +352,7 @@ export type ProductSystemRuntime = {
       description?: string;
       status?: CommercialRequestStatus;
       customerId?: string;
+      optionalScopeIds?: readonly string[];
     },
   ): CommercialRequestMutationResult;
   linkRequestQuote(

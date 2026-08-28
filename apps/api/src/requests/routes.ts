@@ -182,6 +182,7 @@ function readUpdateInput(body: unknown): {
   description?: string;
   status?: CommercialRequestStatus;
   customerId?: string;
+  optionalScopeIds?: readonly string[];
 } | null {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return null;
@@ -191,12 +192,14 @@ function readUpdateInput(body: unknown): {
     description?: unknown;
     status?: unknown;
     customerId?: unknown;
+    optionalScopeIds?: unknown;
   };
   const patch: {
     title?: string;
     description?: string;
     status?: CommercialRequestStatus;
     customerId?: string;
+    optionalScopeIds?: readonly string[];
   } = {};
   if (payload.title !== undefined) {
     if (typeof payload.title !== "string") {
@@ -222,11 +225,25 @@ function readUpdateInput(body: unknown): {
     }
     patch.customerId = payload.customerId.trim();
   }
+  if (payload.optionalScopeIds !== undefined) {
+    if (!Array.isArray(payload.optionalScopeIds)) {
+      return null;
+    }
+    const optionalScopeIds: string[] = [];
+    for (const value of payload.optionalScopeIds) {
+      if (typeof value !== "string" || value.trim().length === 0) {
+        return null;
+      }
+      optionalScopeIds.push(value.trim());
+    }
+    patch.optionalScopeIds = optionalScopeIds;
+  }
   if (
     patch.title === undefined &&
     patch.description === undefined &&
     patch.status === undefined &&
-    patch.customerId === undefined
+    patch.customerId === undefined &&
+    patch.optionalScopeIds === undefined
   ) {
     return null;
   }
@@ -248,6 +265,7 @@ function requestMutationStatus(error: CommercialRequestMutationError): 400 | 404
     case "invalid_status":
     case "customer_unavailable":
     case "reference_unavailable":
+    case "unknown_optional_scope":
       return 400;
     case "not_found":
       return 404;

@@ -28,7 +28,10 @@ Mutable office facts about an incoming request:
 - title, description
 - office status
 - createdAt / updatedAt
+- optional associated commercial scopes (`optionalScopeIds`, default empty)
 - optional client-file attachments (`CommercialRequestAttachment`) — evidence received with the request
+
+`SITE_INSTALLATION` is an associated office selection, not Product Truth and not a Quote line in Phase 1. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
 
 A Request may point into a Product workspace and may later relate to one or more Quote Snapshots.
 
@@ -141,7 +144,7 @@ Client Workspace projects requests by `customerId`. It does not own Request trut
 
 ## Persistence
 
-Additive tables `commercial_requests`, `commercial_request_quote_links`, and `commercial_request_attachments`.
+Additive tables `commercial_requests`, `commercial_request_quote_links`, `commercial_request_attachments`, and `commercial_request_optional_scopes`.
 Normalized mutable columns. Attachment bytes are filesystem objects under the WorkOS data root, not SQLite BLOBs. No seed. No legacy import.
 
 See `docs/architecture/QUOTE_SNAPSHOT_CANON.md` and `docs/architecture/CUSTOMER_IDENTITY_CANON.md`.
