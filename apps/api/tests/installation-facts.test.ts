@@ -74,6 +74,10 @@ function completeFacts() {
   };
 }
 
+function factsPayload(patch: Record<string, unknown>, expectedVersion: number) {
+  return JSON.stringify({ ...patch, expectedVersion });
+}
+
 describe("commercial request installation facts API", () => {
   it("keeps existing requests at facts null and selected requests typed-incomplete", async () => {
     const app = createApp();
@@ -127,7 +131,7 @@ describe("commercial request installation facts API", () => {
     const saved = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(completeFacts()),
+      body: factsPayload(completeFacts(), 0),
     });
     expect(saved.status).toBe(200);
     const savedBody = await readBody(saved);
@@ -150,12 +154,125 @@ describe("commercial request installation facts API", () => {
     const patched = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ accessNotes: "Curte" }),
+      body: factsPayload({ accessNotes: "Curte" }, 1),
     });
     expect(patched.status).toBe(200);
     const patchedFacts = ((await readBody(patched)).facts as JsonObject);
     expect(patchedFacts.street).toBe("Strada Fabricii 10");
     expect(patchedFacts.accessNotes).toBe("Curte");
+    expect(patchedFacts.version).toBe(2);
+    expect(
+      ((await readBody(await app.request("/api/quotes"))).overview as { quotes: unknown[] }).quotes
+        .length,
+    ).toBe(quotesBefore);
+  });
+
+  it("binds every facts write to expectedVersion and keeps a stale row unchanged", async () => {
+    const app = createApp();
+    await enableSiteInstallation(app);
+    const quotesBefore = ((await readBody(await app.request("/api/quotes"))).overview as {
+      quotes: unknown[];
+    }).quotes.length;
+    const customer = await createCustomer(app, "Client Version Law");
+    const created = await readBody(
+      await createRequest(app, customer.customerId as string, "Cerere versiune"),
+    );
+    const requestId = (created.request as JsonObject).requestId as string;
+    await app.request(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    const missingOnCreate = await app.request(`/api/requests/${requestId}/installation-facts`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(completeFacts()),
+    });
+    expect(missingOnCreate.status).toBe(400);
+    expect((await readBody(missingOnCreate)).error).toBe("expected_version_required");
+    const createdFacts = await app.request(`/api/requests/${requestId}/installation-facts`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: factsPayload(completeFacts(), 0),
+    });
+    expect(createdFacts.status).toBe(200);
+    expect(((await readBody(createdFacts)).facts as JsonObject).version).toBe(1);
+    const missingOnUpdate = await app.request(`/api/requests/${requestId}/installation-facts`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ accessNotes: "Fără versiune" }),
+    });
+    expect(missingOnUpdate.status).toBe(400);
+    expect((await readBody(missingOnUpdate)).error).toBe("expected_version_required");
+    const afterMissing = (
+      (await readBody(await app.request(`/api/requests/${requestId}`))).detail as {
+        installationFacts: JsonObject;
+      }
+    ).installationFacts;
+    expect(afterMissing.version).toBe(1);
+    expect(afterMissing.street).toBe("Strada Fabricii 10");
+    expect(afterMissing.accessNotes).toBeNull();
+    const updated = await app.request(`/api/requests/${requestId}/installation-facts`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: factsPayload({ accessNotes: "Curte A" }, 1),
+    });
+    expect(updated.status).toBe(200);
+    expect(((await readBody(updated)).facts as JsonObject).version).toBe(2);
+    const stale = await app.request(`/api/requests/${requestId}/installation-facts`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: factsPayload({ accessNotes: "Stale" }, 1),
+    });
+    expect(stale.status).toBe(409);
+    expect((await readBody(stale)).error).toBe("version_conflict");
+    const afterStale = (
+      (await readBody(await app.request(`/api/requests/${requestId}`))).detail as {
+        installationFacts: JsonObject;
+      }
+    ).installationFacts;
+    expect(afterStale.version).toBe(2);
+    expect(afterStale.accessNotes).toBe("Curte A");
+    expect(afterStale.street).toBe("Strada Fabricii 10");
+    const identical = await app.request(`/api/requests/${requestId}/installation-facts`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: factsPayload({ accessNotes: "Curte A" }, 2),
+    });
+    expect(identical.status).toBe(200);
+    const identicalBody = await readBody(identical);
+    expect(identicalBody.alreadyApplied).toBe(true);
+    expect((identicalBody.facts as JsonObject).version).toBe(2);
+    const concurrent = await Promise.all([
+      app.request(`/api/requests/${requestId}/installation-facts`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: factsPayload({ accessNotes: "Concurent A" }, 2),
+      }),
+      app.request(`/api/requests/${requestId}/installation-facts`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: factsPayload({ accessNotes: "Concurent B" }, 2),
+      }),
+    ]);
+    const statuses = concurrent.map((response) => response.status).sort((left, right) => left - right);
+    expect(statuses).toEqual([200, 409]);
+    const winner = concurrent.find((response) => response.status === 200);
+    const loser = concurrent.find((response) => response.status === 409);
+    expect(winner).toBeDefined();
+    expect(loser).toBeDefined();
+    expect((await readBody(loser as Response)).error).toBe("version_conflict");
+    const winnerFacts = (await readBody(winner as Response)).facts as JsonObject;
+    expect(winnerFacts.version).toBe(3);
+    expect(["Concurent A", "Concurent B"]).toContain(winnerFacts.accessNotes);
+    const afterConcurrent = (
+      (await readBody(await app.request(`/api/requests/${requestId}`))).detail as {
+        installationFacts: JsonObject;
+      }
+    ).installationFacts;
+    expect(afterConcurrent.version).toBe(3);
+    expect(afterConcurrent.accessNotes).toBe(winnerFacts.accessNotes);
+    expect(afterConcurrent.street).toBe("Strada Fabricii 10");
     expect(
       ((await readBody(await app.request("/api/quotes"))).overview as { quotes: unknown[] }).quotes
         .length,
@@ -173,7 +290,7 @@ describe("commercial request installation facts API", () => {
     const unselected = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ city: "Cluj" }),
+      body: factsPayload({ city: "Cluj" }, 0),
     });
     expect(unselected.status).toBe(400);
     expect((await readBody(unselected)).error).toBe("installation_not_selected");
@@ -185,28 +302,28 @@ describe("commercial request installation facts API", () => {
     const invalidEnum = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ facadeType: "PLASTIC" }),
+      body: factsPayload({ facadeType: "PLASTIC" }, 0),
     });
     expect(invalidEnum.status).toBe(400);
     expect((await readBody(invalidEnum)).error).toBe("invalid_facade_type");
     const invalidDim = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ mountingSurfaceWidthMm: -2 }),
+      body: factsPayload({ mountingSurfaceWidthMm: -2 }, 0),
     });
     expect(invalidDim.status).toBe(400);
     expect((await readBody(invalidDim)).error).toBe("invalid_dimensions");
     const invalidElevation = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ installationElevationMm: 0 }),
+      body: factsPayload({ installationElevationMm: 0 }, 0),
     });
     expect(invalidElevation.status).toBe(400);
     expect((await readBody(invalidElevation)).error).toBe("invalid_elevation");
     const other = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ facadeType: "OTHER" }),
+      body: factsPayload({ facadeType: "OTHER" }, 0),
     });
     expect(other.status).toBe(400);
     expect((await readBody(other)).error).toBe("other_note_required");
@@ -228,7 +345,7 @@ describe("commercial request installation facts API", () => {
     await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(completeFacts()),
+      body: factsPayload(completeFacts(), 0),
     });
     const refused = await app.request(`/api/requests/${requestId}`, {
       method: "PATCH",
@@ -286,7 +403,7 @@ describe("commercial request installation facts API", () => {
     await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(completeFacts()),
+      body: factsPayload(completeFacts(), 0),
     });
     const compile = await app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/compile`, {
       method: "POST",
@@ -338,7 +455,7 @@ describe("commercial request installation facts API", () => {
     const locked = await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ accessNotes: "Nu" }),
+      body: factsPayload({ accessNotes: "Nu" }, 1),
     });
     expect(locked.status).toBe(409);
     expect((await readBody(locked)).error).toBe("installation_facts_locked");
@@ -361,7 +478,7 @@ describe("commercial request installation facts API", () => {
     await app.request(`/api/requests/${requestId}/installation-facts`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(completeFacts()),
+      body: factsPayload(completeFacts(), 0),
     });
     await enableSiteInstallation(app, "SERVICE_DISABLED");
     const detail = (

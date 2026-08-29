@@ -379,7 +379,7 @@ export type ProductSystemRuntime = {
   updateInstallationFacts(
     requestId: string,
     patch: SiteInstallationFactsPatch,
-    expectedVersion?: number,
+    expectedVersion: number,
   ): SiteInstallationFactsMutationResult;
   linkRequestQuote(
     requestId: string,

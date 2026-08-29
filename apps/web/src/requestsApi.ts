@@ -94,7 +94,7 @@ export async function updateCommercialRequest(
 export async function updateInstallationFacts(
   requestId: string,
   patch: SiteInstallationFactsPatch,
-  expectedVersion?: number,
+  expectedVersion: number,
 ): Promise<RequestDetailProjection> {
   const response = await fetch(
     `${baseUrl}/api/requests/${encodeURIComponent(requestId)}/installation-facts`,
@@ -180,6 +180,10 @@ export function requestServiceErrorMessage(error: string): string {
       return "Datele de montaj sunt blocate după prima ofertă legată.";
     case "other_note_required":
       return "Pentru „Altul” este nevoie de o explicație.";
+    case "expected_version_required":
+      return "Salvarea datelor de montaj trebuie legată de versiunea curentă.";
+    case "version_conflict":
+      return "Datele de montaj au fost schimbate între timp. Reîncarcă și salvează din nou.";
     case "invalid_facade_type":
     case "invalid_fixing_method":
     case "invalid_measurement_status":

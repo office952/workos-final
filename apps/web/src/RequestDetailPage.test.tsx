@@ -263,6 +263,63 @@ describe("RequestDetailPage", () => {
     expect(screen.getByRole("button", { name: "Salvează datele de montaj" })).toBeInTheDocument();
   });
 
+  it("sends expectedVersion 0 when installation facts do not exist yet", async () => {
+    const offer = {
+      capabilityId: "SITE_INSTALLATION" as const,
+      configured: true,
+      offerMode: "INTERNAL" as const,
+      version: 1,
+      updatedAt: "2026-08-28T20:00:00.000Z",
+    };
+    const selected = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      canWriteInstallationFacts: true,
+      request: {
+        ...detail.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "INTERNAL" as const,
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "INTERNAL",
+        offer,
+        hasLinkedQuotes: false,
+      }),
+      installationFacts: null,
+      installationScope: {
+        scopeId: "SITE_INSTALLATION" as const,
+        label: "Montaj la locație" as const,
+        eicCompleteness: "PARTIAL" as const,
+        commercialCompleteness: "PARTIAL" as const,
+        incompleteReasons: [
+          { id: "MISSING_COST_EVIDENCE" as const, label: "Evidența de cost pentru montaj lipsește." },
+        ],
+      },
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(selected);
+    vi.mocked(updateInstallationFacts).mockResolvedValue(selected);
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(await screen.findByRole("button", { name: "Salvează datele de montaj" }));
+    expect(updateInstallationFacts).toHaveBeenCalledWith(
+      "crq:11111111-2222-3333-4444-555555555555",
+      expect.any(Object),
+      0,
+    );
+  });
+
   it("saves typed installation facts and asks before deselect when facts exist", async () => {
     const offer = {
       capabilityId: "SITE_INSTALLATION" as const,
@@ -347,7 +404,15 @@ describe("RequestDetailPage", () => {
     await userEvent.clear(screen.getByLabelText("Note de acces"));
     await userEvent.type(screen.getByLabelText("Note de acces"), "Curte");
     await userEvent.click(screen.getByRole("button", { name: "Salvează datele de montaj" }));
-    expect(updateInstallationFacts).toHaveBeenCalled();
+    expect(updateInstallationFacts).toHaveBeenCalledWith(
+      "crq:11111111-2222-3333-4444-555555555555",
+      expect.objectContaining({
+        street: "Strada Fabricii 10",
+        city: "București",
+        accessNotes: "Curte",
+      }),
+      1,
+    );
 
     await userEvent.click(screen.getByRole("checkbox", { name: /Montaj la locație/ }));
     expect(screen.getByRole("dialog", { name: "Renunți la montaj?" })).toBeInTheDocument();

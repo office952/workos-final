@@ -69,6 +69,7 @@ export const SITE_INSTALLATION_FACTS_MUTATION_ERRORS = [
   "invalid_access_notes",
   "invalid_measurement_notes",
   "other_note_required",
+  "expected_version_required",
   "version_conflict",
 ] as const;
 export type SiteInstallationFactsMutationError =
@@ -311,7 +312,7 @@ export function applySiteInstallationFactsPatch(input: {
   hasLinkedQuotes: boolean;
   current: SiteInstallationFacts | null;
   patch: SiteInstallationFactsPatch;
-  expectedVersion?: number;
+  expectedVersion: number;
   requestId: string;
   updatedAt?: string;
 }): SiteInstallationFactsMutationResult {
@@ -321,14 +322,14 @@ export function applySiteInstallationFactsPatch(input: {
   if (input.hasLinkedQuotes) {
     return { ok: false, error: "installation_facts_locked" };
   }
+  if (!Number.isInteger(input.expectedVersion) || input.expectedVersion < 0) {
+    return { ok: false, error: "expected_version_required" };
+  }
   const now = input.updatedAt ?? new Date().toISOString();
   const current =
     input.current ??
     blankSiteInstallationFacts({ requestId: input.requestId, createdAt: now });
-  if (
-    input.expectedVersion !== undefined &&
-    input.expectedVersion !== current.version
-  ) {
+  if (input.expectedVersion !== current.version) {
     return { ok: false, error: "version_conflict" };
   }
 

@@ -203,7 +203,7 @@ export function RequestDetailPage() {
       const detail = await updateInstallationFacts(
         page.detail.request.requestId,
         patch,
-        page.detail.installationFacts?.version,
+        page.detail.installationFacts?.version ?? 0,
       );
       setPage({ kind: "ready", detail });
       setInstallationSelected(detail.installationOffer.selected);

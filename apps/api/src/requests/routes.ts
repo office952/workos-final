@@ -70,8 +70,8 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
     const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
     const parsed = readInstallationFactsInput(body);
-    if (!parsed) {
-      return c.json({ error: "invalid_payload" }, 400);
+    if (!parsed.ok) {
+      return c.json({ error: parsed.error }, 400);
     }
     const result = runtime.updateInstallationFacts(
       c.req.param("requestId"),
@@ -328,159 +328,162 @@ function readOptionalMillimetres(value: unknown): number | null | undefined | fa
   return typeof value === "number" && Number.isFinite(value) ? value : false;
 }
 
-function readInstallationFactsInput(body: unknown): {
-  patch: SiteInstallationFactsPatch;
-  expectedVersion?: number;
-} | null {
+function readInstallationFactsInput(body: unknown):
+  | { ok: true; patch: SiteInstallationFactsPatch; expectedVersion: number }
+  | { ok: false; error: "invalid_payload" | "expected_version_required" } {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   const payload = body as Record<string, unknown>;
+  if (payload.expectedVersion === undefined) {
+    return { ok: false, error: "expected_version_required" };
+  }
+  const expectedVersion = payload.expectedVersion;
+  if (
+    typeof expectedVersion !== "number" ||
+    !Number.isInteger(expectedVersion) ||
+    expectedVersion < 0
+  ) {
+    return { ok: false, error: "invalid_payload" };
+  }
   const patch: SiteInstallationFactsPatch = {};
   const siteName = readOptionalString(payload.siteName);
   if (siteName === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (siteName !== undefined) {
     patch.siteName = siteName;
   }
   if (payload.street !== undefined) {
     if (typeof payload.street !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.street = payload.street;
   }
   if (payload.city !== undefined) {
     if (typeof payload.city !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.city = payload.city;
   }
   const county = readOptionalString(payload.county);
   if (county === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (county !== undefined) {
     patch.county = county;
   }
   const postalCode = readOptionalString(payload.postalCode);
   if (postalCode === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (postalCode !== undefined) {
     patch.postalCode = postalCode;
   }
   if (payload.countryCode !== undefined) {
     if (typeof payload.countryCode !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.countryCode = payload.countryCode;
   }
   const contactName = readOptionalString(payload.contactName);
   if (contactName === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (contactName !== undefined) {
     patch.contactName = contactName;
   }
   const contactPhone = readOptionalString(payload.contactPhone);
   if (contactPhone === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (contactPhone !== undefined) {
     patch.contactPhone = contactPhone;
   }
   const accessNotes = readOptionalString(payload.accessNotes);
   if (accessNotes === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (accessNotes !== undefined) {
     patch.accessNotes = accessNotes;
   }
   if (payload.measurementStatus !== undefined) {
     if (typeof payload.measurementStatus !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.measurementStatus = payload.measurementStatus;
   }
   const width = readOptionalMillimetres(payload.mountingSurfaceWidthMm);
   if (width === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (width !== undefined) {
     patch.mountingSurfaceWidthMm = width;
   }
   const height = readOptionalMillimetres(payload.mountingSurfaceHeightMm);
   if (height === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (height !== undefined) {
     patch.mountingSurfaceHeightMm = height;
   }
   const elevation = readOptionalMillimetres(payload.installationElevationMm);
   if (elevation === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (elevation !== undefined) {
     patch.installationElevationMm = elevation;
   }
   const measuredAt = readOptionalString(payload.measuredAt);
   if (measuredAt === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (measuredAt !== undefined) {
     patch.measuredAt = measuredAt;
   }
   const measurementNotes = readOptionalString(payload.measurementNotes);
   if (measurementNotes === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (measurementNotes !== undefined) {
     patch.measurementNotes = measurementNotes;
   }
   if (payload.facadeType !== undefined) {
     if (typeof payload.facadeType !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.facadeType = payload.facadeType;
   }
   const facadeOtherNote = readOptionalString(payload.facadeOtherNote);
   if (facadeOtherNote === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (facadeOtherNote !== undefined) {
     patch.facadeOtherNote = facadeOtherNote;
   }
   if (payload.fixingMethod !== undefined) {
     if (typeof payload.fixingMethod !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.fixingMethod = payload.fixingMethod;
   }
   const fixingOtherNote = readOptionalString(payload.fixingOtherNote);
   if (fixingOtherNote === false) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
   if (fixingOtherNote !== undefined) {
     patch.fixingOtherNote = fixingOtherNote;
   }
   if (payload.siteElectrical !== undefined) {
     if (typeof payload.siteElectrical !== "string") {
-      return null;
+      return { ok: false, error: "invalid_payload" };
     }
     patch.siteElectrical = payload.siteElectrical;
   }
-  let expectedVersion: number | undefined;
-  if (payload.expectedVersion !== undefined) {
-    if (typeof payload.expectedVersion !== "number" || !Number.isInteger(payload.expectedVersion)) {
-      return null;
-    }
-    expectedVersion = payload.expectedVersion;
-  }
   if (Object.keys(patch).length === 0) {
-    return null;
+    return { ok: false, error: "invalid_payload" };
   }
-  return { patch, expectedVersion };
+  return { ok: true, patch, expectedVersion };
 }
 
 function readQuoteSnapshotId(body: unknown): string | null {
@@ -538,6 +541,7 @@ function factsMutationStatus(error: SiteInstallationFactsMutationError): 400 | 4
     case "invalid_access_notes":
     case "invalid_measurement_notes":
     case "other_note_required":
+    case "expected_version_required":
       return 400;
     case "not_found":
       return 404;

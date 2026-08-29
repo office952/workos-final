@@ -48,6 +48,7 @@ describe("site installation facts", () => {
       hasLinkedQuotes: false,
       current: null,
       requestId,
+      expectedVersion: 0,
       patch: completeFactsPatch(),
       updatedAt: "2026-08-29T10:00:00.000Z",
     });
@@ -66,9 +67,13 @@ describe("site installation facts", () => {
       hasLinkedQuotes: false,
       current: saved.facts,
       requestId,
+      expectedVersion: saved.facts.version,
       patch: completeFactsPatch(),
     });
     expect(again).toMatchObject({ ok: true, alreadyApplied: true });
+    if (again.ok) {
+      expect(again.facts.version).toBe(1);
+    }
   });
 
   it("preserves omitted fields on a partial patch", () => {
@@ -77,6 +82,7 @@ describe("site installation facts", () => {
       hasLinkedQuotes: false,
       current: null,
       requestId,
+      expectedVersion: 0,
       patch: completeFactsPatch(),
       updatedAt: "2026-08-29T10:00:00.000Z",
     });
@@ -88,6 +94,7 @@ describe("site installation facts", () => {
       hasLinkedQuotes: false,
       current: first.facts,
       requestId,
+      expectedVersion: first.facts.version,
       patch: { accessNotes: "Curte interioară" },
       updatedAt: "2026-08-29T11:00:00.000Z",
     });
@@ -111,6 +118,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: false,
         current,
         requestId,
+        expectedVersion: 0,
         patch: { facadeType: "PLASTIC" },
       }),
     ).toEqual({ ok: false, error: "invalid_facade_type" });
@@ -120,6 +128,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: false,
         current,
         requestId,
+        expectedVersion: 0,
         patch: { mountingSurfaceWidthMm: -10 },
       }),
     ).toEqual({ ok: false, error: "invalid_dimensions" });
@@ -129,6 +138,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: false,
         current,
         requestId,
+        expectedVersion: 0,
         patch: { installationElevationMm: 0 },
       }),
     ).toEqual({ ok: false, error: "invalid_elevation" });
@@ -138,6 +148,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: false,
         current,
         requestId,
+        expectedVersion: 0,
         patch: { facadeType: "OTHER" },
       }),
     ).toEqual({ ok: false, error: "other_note_required" });
@@ -147,6 +158,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: false,
         current,
         requestId,
+        expectedVersion: 0,
         patch: { siteElectrical: "maybe" },
       }),
     ).toEqual({ ok: false, error: "invalid_site_electrical" });
@@ -159,6 +171,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: false,
         current: null,
         requestId,
+        expectedVersion: 0,
         patch: { city: "Cluj" },
       }),
     ).toEqual({ ok: false, error: "installation_not_selected" });
@@ -168,6 +181,7 @@ describe("site installation facts", () => {
         hasLinkedQuotes: true,
         current: null,
         requestId,
+        expectedVersion: 0,
         patch: { city: "Cluj" },
       }),
     ).toEqual({ ok: false, error: "installation_facts_locked" });
@@ -178,5 +192,90 @@ describe("site installation facts", () => {
     expect(blank.siteElectrical).toBe("UNCONFIRMED");
     expect(blank.countryCode).toBe("RO");
     expect(JSON.stringify(blank)).not.toMatch(/productWidth|productHeight|confirmedAreaMm2|TRANSPORT/);
+  });
+
+  it("requires expectedVersion 0 to create and refuses missing or stale versions", () => {
+    expect(
+      applySiteInstallationFactsPatch({
+        selected: true,
+        hasLinkedQuotes: false,
+        current: null,
+        requestId,
+        expectedVersion: Number.NaN,
+        patch: completeFactsPatch(),
+      }),
+    ).toEqual({ ok: false, error: "expected_version_required" });
+    expect(
+      applySiteInstallationFactsPatch({
+        selected: true,
+        hasLinkedQuotes: false,
+        current: null,
+        requestId,
+        expectedVersion: 1,
+        patch: completeFactsPatch(),
+      }),
+    ).toEqual({ ok: false, error: "version_conflict" });
+    const created = applySiteInstallationFactsPatch({
+      selected: true,
+      hasLinkedQuotes: false,
+      current: null,
+      requestId,
+      expectedVersion: 0,
+      patch: completeFactsPatch(),
+      updatedAt: "2026-08-29T10:00:00.000Z",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      throw new Error("expected create");
+    }
+    expect(created.facts.version).toBe(1);
+    expect(
+      applySiteInstallationFactsPatch({
+        selected: true,
+        hasLinkedQuotes: false,
+        current: created.facts,
+        requestId,
+        expectedVersion: 0,
+        patch: { accessNotes: "Nu" },
+      }),
+    ).toEqual({ ok: false, error: "version_conflict" });
+    const updated = applySiteInstallationFactsPatch({
+      selected: true,
+      hasLinkedQuotes: false,
+      current: created.facts,
+      requestId,
+      expectedVersion: 1,
+      patch: { accessNotes: "Curte" },
+      updatedAt: "2026-08-29T11:00:00.000Z",
+    });
+    expect(updated.ok).toBe(true);
+    if (!updated.ok) {
+      throw new Error("expected update");
+    }
+    expect(updated.facts.version).toBe(2);
+    expect(updated.facts.street).toBe("Strada Fabricii 10");
+    expect(updated.facts.accessNotes).toBe("Curte");
+    const stale = applySiteInstallationFactsPatch({
+      selected: true,
+      hasLinkedQuotes: false,
+      current: updated.facts,
+      requestId,
+      expectedVersion: 1,
+      patch: { accessNotes: "Altceva" },
+    });
+    expect(stale).toEqual({ ok: false, error: "version_conflict" });
+    const identical = applySiteInstallationFactsPatch({
+      selected: true,
+      hasLinkedQuotes: false,
+      current: updated.facts,
+      requestId,
+      expectedVersion: 2,
+      patch: { accessNotes: "Curte" },
+    });
+    expect(identical).toMatchObject({ ok: true, alreadyApplied: true });
+    if (identical.ok) {
+      expect(identical.facts.version).toBe(2);
+      expect(identical.facts.accessNotes).toBe("Curte");
+    }
   });
 });

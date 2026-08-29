@@ -104,46 +104,8 @@ export function deleteInstallationFacts(db: SqliteDatabase, requestId: string): 
   ).run(requestId);
 }
 
-export function persistInstallationFacts(
-  db: SqliteDatabase,
-  facts: SiteInstallationFacts,
-): void {
-  db.prepare(
-    `
-    INSERT INTO commercial_request_installation_facts (
-      request_id, version, site_name, street, city, county, postal_code,
-      country_code, contact_name, contact_phone, access_notes,
-      measurement_status, mounting_surface_width_mm, mounting_surface_height_mm,
-      installation_elevation_mm, measured_at, measurement_notes,
-      facade_type, facade_other_note, fixing_method, fixing_other_note,
-      site_electrical, created_at, updated_at
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(request_id) DO UPDATE SET
-      version = excluded.version,
-      site_name = excluded.site_name,
-      street = excluded.street,
-      city = excluded.city,
-      county = excluded.county,
-      postal_code = excluded.postal_code,
-      country_code = excluded.country_code,
-      contact_name = excluded.contact_name,
-      contact_phone = excluded.contact_phone,
-      access_notes = excluded.access_notes,
-      measurement_status = excluded.measurement_status,
-      mounting_surface_width_mm = excluded.mounting_surface_width_mm,
-      mounting_surface_height_mm = excluded.mounting_surface_height_mm,
-      installation_elevation_mm = excluded.installation_elevation_mm,
-      measured_at = excluded.measured_at,
-      measurement_notes = excluded.measurement_notes,
-      facade_type = excluded.facade_type,
-      facade_other_note = excluded.facade_other_note,
-      fixing_method = excluded.fixing_method,
-      fixing_other_note = excluded.fixing_other_note,
-      site_electrical = excluded.site_electrical,
-      updated_at = excluded.updated_at
-  `,
-  ).run(
+function factsBindValues(facts: SiteInstallationFacts): unknown[] {
+  return [
     facts.requestId,
     facts.version,
     facts.siteName,
@@ -168,7 +130,110 @@ export function persistInstallationFacts(
     facts.siteElectrical,
     facts.createdAt,
     facts.updatedAt,
+  ];
+}
+
+function isFactsUniqueConflict(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+  const code = "code" in error ? String(error.code) : "";
+  const message = "message" in error ? String(error.message) : "";
+  return (
+    code.includes("CONSTRAINT") ||
+    message.includes("UNIQUE constraint failed") ||
+    message.includes("commercial_request_installation_facts")
   );
+}
+
+function insertInstallationFactsIfAbsent(
+  db: SqliteDatabase,
+  facts: SiteInstallationFacts,
+): boolean {
+  try {
+    db.prepare(
+      `
+      INSERT INTO commercial_request_installation_facts (
+        request_id, version, site_name, street, city, county, postal_code,
+        country_code, contact_name, contact_phone, access_notes,
+        measurement_status, mounting_surface_width_mm, mounting_surface_height_mm,
+        installation_elevation_mm, measured_at, measurement_notes,
+        facade_type, facade_other_note, fixing_method, fixing_other_note,
+        site_electrical, created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    ).run(...factsBindValues(facts));
+    return true;
+  } catch (error) {
+    if (isFactsUniqueConflict(error)) {
+      return false;
+    }
+    throw error;
+  }
+}
+
+function updateInstallationFactsIfVersion(
+  db: SqliteDatabase,
+  facts: SiteInstallationFacts,
+  expectedVersion: number,
+): boolean {
+  const result = db
+    .prepare(
+      `
+      UPDATE commercial_request_installation_facts
+      SET version = ?,
+          site_name = ?,
+          street = ?,
+          city = ?,
+          county = ?,
+          postal_code = ?,
+          country_code = ?,
+          contact_name = ?,
+          contact_phone = ?,
+          access_notes = ?,
+          measurement_status = ?,
+          mounting_surface_width_mm = ?,
+          mounting_surface_height_mm = ?,
+          installation_elevation_mm = ?,
+          measured_at = ?,
+          measurement_notes = ?,
+          facade_type = ?,
+          facade_other_note = ?,
+          fixing_method = ?,
+          fixing_other_note = ?,
+          site_electrical = ?,
+          updated_at = ?
+      WHERE request_id = ? AND version = ?
+    `,
+    )
+    .run(
+      facts.version,
+      facts.siteName,
+      facts.street,
+      facts.city,
+      facts.county,
+      facts.postalCode,
+      facts.countryCode,
+      facts.contactName,
+      facts.contactPhone,
+      facts.accessNotes,
+      facts.measurementStatus,
+      facts.mountingSurfaceWidthMm,
+      facts.mountingSurfaceHeightMm,
+      facts.installationElevationMm,
+      facts.measuredAt,
+      facts.measurementNotes,
+      facts.facadeType,
+      facts.facadeOtherNote,
+      facts.fixingMethod,
+      facts.fixingOtherNote,
+      facts.siteElectrical,
+      facts.updatedAt,
+      facts.requestId,
+      expectedVersion,
+    );
+  return result.changes === 1;
 }
 
 export function persistUpdatedInstallationFacts(
@@ -178,21 +243,29 @@ export function persistUpdatedInstallationFacts(
   context: {
     selected: boolean;
     hasLinkedQuotes: boolean;
-    expectedVersion?: number;
+    expectedVersion: number;
   },
 ): SiteInstallationFactsMutationResult {
-  const current = getInstallationFacts(db, requestId);
-  const updated = applySiteInstallationFactsPatch({
-    selected: context.selected,
-    hasLinkedQuotes: context.hasLinkedQuotes,
-    current,
-    patch,
-    expectedVersion: context.expectedVersion,
-    requestId,
-  });
-  if (!updated.ok || updated.alreadyApplied) {
+  return db.transaction((): SiteInstallationFactsMutationResult => {
+    const current = getInstallationFacts(db, requestId);
+    const updated = applySiteInstallationFactsPatch({
+      selected: context.selected,
+      hasLinkedQuotes: context.hasLinkedQuotes,
+      current,
+      patch,
+      expectedVersion: context.expectedVersion,
+      requestId,
+    });
+    if (!updated.ok || updated.alreadyApplied) {
+      return updated;
+    }
+    const wrote =
+      current === null
+        ? insertInstallationFactsIfAbsent(db, updated.facts)
+        : updateInstallationFactsIfVersion(db, updated.facts, context.expectedVersion);
+    if (!wrote) {
+      return { ok: false, error: "version_conflict" };
+    }
     return updated;
-  }
-  persistInstallationFacts(db, updated.facts);
-  return updated;
+  }).immediate();
 }
