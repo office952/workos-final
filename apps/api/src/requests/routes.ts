@@ -8,6 +8,8 @@ import {
   type CommercialRequestStatus,
   type OperationalServiceProviderMode,
   type RequestAttachmentError,
+  type SiteInstallationFactsMutationError,
+  type SiteInstallationFactsPatch,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
@@ -61,6 +63,28 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
       alreadyApplied: result.alreadyApplied,
       request: result.request,
       detail: runtime.readRequestDetail(result.request.requestId),
+    });
+  });
+
+  app.patch("/api/requests/:requestId/installation-facts", async (c) => {
+    const runtime = getProductSystem(c);
+    const body = await c.req.json().catch(() => null);
+    const parsed = readInstallationFactsInput(body);
+    if (!parsed) {
+      return c.json({ error: "invalid_payload" }, 400);
+    }
+    const result = runtime.updateInstallationFacts(
+      c.req.param("requestId"),
+      parsed.patch,
+      parsed.expectedVersion,
+    );
+    if (!result.ok) {
+      return c.json({ error: result.error }, factsMutationStatus(result.error));
+    }
+    return c.json({
+      alreadyApplied: result.alreadyApplied,
+      facts: result.facts,
+      detail: runtime.readRequestDetail(c.req.param("requestId")),
     });
   });
 
@@ -192,6 +216,7 @@ function readUpdateInput(body: unknown): {
   customerId?: string;
     optionalScopeIds?: readonly string[];
     siteInstallationMode?: OperationalServiceProviderMode | null;
+    confirmDeleteInstallationFacts?: boolean;
 } | null {
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return null;
@@ -203,6 +228,7 @@ function readUpdateInput(body: unknown): {
     customerId?: unknown;
     optionalScopeIds?: unknown;
     siteInstallationMode?: unknown;
+    confirmDeleteInstallationFacts?: unknown;
   };
   const patch: {
     title?: string;
@@ -211,6 +237,7 @@ function readUpdateInput(body: unknown): {
     customerId?: string;
     optionalScopeIds?: readonly string[];
     siteInstallationMode?: OperationalServiceProviderMode | null;
+    confirmDeleteInstallationFacts?: boolean;
   } = {};
   if (payload.title !== undefined) {
     if (typeof payload.title !== "string") {
@@ -261,17 +288,199 @@ function readUpdateInput(body: unknown): {
       patch.siteInstallationMode = payload.siteInstallationMode;
     }
   }
+  if (payload.confirmDeleteInstallationFacts !== undefined) {
+    if (typeof payload.confirmDeleteInstallationFacts !== "boolean") {
+      return null;
+    }
+    patch.confirmDeleteInstallationFacts = payload.confirmDeleteInstallationFacts;
+  }
   if (
     patch.title === undefined &&
     patch.description === undefined &&
     patch.status === undefined &&
     patch.customerId === undefined &&
     patch.optionalScopeIds === undefined &&
-    patch.siteInstallationMode === undefined
+    patch.siteInstallationMode === undefined &&
+    patch.confirmDeleteInstallationFacts === undefined
   ) {
     return null;
   }
   return patch;
+}
+
+function readOptionalString(value: unknown): string | null | undefined | false {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  return typeof value === "string" ? value : false;
+}
+
+function readOptionalMillimetres(value: unknown): number | null | undefined | false {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  return typeof value === "number" && Number.isFinite(value) ? value : false;
+}
+
+function readInstallationFactsInput(body: unknown): {
+  patch: SiteInstallationFactsPatch;
+  expectedVersion?: number;
+} | null {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return null;
+  }
+  const payload = body as Record<string, unknown>;
+  const patch: SiteInstallationFactsPatch = {};
+  const siteName = readOptionalString(payload.siteName);
+  if (siteName === false) {
+    return null;
+  }
+  if (siteName !== undefined) {
+    patch.siteName = siteName;
+  }
+  if (payload.street !== undefined) {
+    if (typeof payload.street !== "string") {
+      return null;
+    }
+    patch.street = payload.street;
+  }
+  if (payload.city !== undefined) {
+    if (typeof payload.city !== "string") {
+      return null;
+    }
+    patch.city = payload.city;
+  }
+  const county = readOptionalString(payload.county);
+  if (county === false) {
+    return null;
+  }
+  if (county !== undefined) {
+    patch.county = county;
+  }
+  const postalCode = readOptionalString(payload.postalCode);
+  if (postalCode === false) {
+    return null;
+  }
+  if (postalCode !== undefined) {
+    patch.postalCode = postalCode;
+  }
+  if (payload.countryCode !== undefined) {
+    if (typeof payload.countryCode !== "string") {
+      return null;
+    }
+    patch.countryCode = payload.countryCode;
+  }
+  const contactName = readOptionalString(payload.contactName);
+  if (contactName === false) {
+    return null;
+  }
+  if (contactName !== undefined) {
+    patch.contactName = contactName;
+  }
+  const contactPhone = readOptionalString(payload.contactPhone);
+  if (contactPhone === false) {
+    return null;
+  }
+  if (contactPhone !== undefined) {
+    patch.contactPhone = contactPhone;
+  }
+  const accessNotes = readOptionalString(payload.accessNotes);
+  if (accessNotes === false) {
+    return null;
+  }
+  if (accessNotes !== undefined) {
+    patch.accessNotes = accessNotes;
+  }
+  if (payload.measurementStatus !== undefined) {
+    if (typeof payload.measurementStatus !== "string") {
+      return null;
+    }
+    patch.measurementStatus = payload.measurementStatus;
+  }
+  const width = readOptionalMillimetres(payload.mountingSurfaceWidthMm);
+  if (width === false) {
+    return null;
+  }
+  if (width !== undefined) {
+    patch.mountingSurfaceWidthMm = width;
+  }
+  const height = readOptionalMillimetres(payload.mountingSurfaceHeightMm);
+  if (height === false) {
+    return null;
+  }
+  if (height !== undefined) {
+    patch.mountingSurfaceHeightMm = height;
+  }
+  const elevation = readOptionalMillimetres(payload.installationElevationMm);
+  if (elevation === false) {
+    return null;
+  }
+  if (elevation !== undefined) {
+    patch.installationElevationMm = elevation;
+  }
+  const measuredAt = readOptionalString(payload.measuredAt);
+  if (measuredAt === false) {
+    return null;
+  }
+  if (measuredAt !== undefined) {
+    patch.measuredAt = measuredAt;
+  }
+  const measurementNotes = readOptionalString(payload.measurementNotes);
+  if (measurementNotes === false) {
+    return null;
+  }
+  if (measurementNotes !== undefined) {
+    patch.measurementNotes = measurementNotes;
+  }
+  if (payload.facadeType !== undefined) {
+    if (typeof payload.facadeType !== "string") {
+      return null;
+    }
+    patch.facadeType = payload.facadeType;
+  }
+  const facadeOtherNote = readOptionalString(payload.facadeOtherNote);
+  if (facadeOtherNote === false) {
+    return null;
+  }
+  if (facadeOtherNote !== undefined) {
+    patch.facadeOtherNote = facadeOtherNote;
+  }
+  if (payload.fixingMethod !== undefined) {
+    if (typeof payload.fixingMethod !== "string") {
+      return null;
+    }
+    patch.fixingMethod = payload.fixingMethod;
+  }
+  const fixingOtherNote = readOptionalString(payload.fixingOtherNote);
+  if (fixingOtherNote === false) {
+    return null;
+  }
+  if (fixingOtherNote !== undefined) {
+    patch.fixingOtherNote = fixingOtherNote;
+  }
+  if (payload.siteElectrical !== undefined) {
+    if (typeof payload.siteElectrical !== "string") {
+      return null;
+    }
+    patch.siteElectrical = payload.siteElectrical;
+  }
+  let expectedVersion: number | undefined;
+  if (payload.expectedVersion !== undefined) {
+    if (typeof payload.expectedVersion !== "number" || !Number.isInteger(payload.expectedVersion)) {
+      return null;
+    }
+    expectedVersion = payload.expectedVersion;
+  }
+  if (Object.keys(patch).length === 0) {
+    return null;
+  }
+  return { patch, expectedVersion };
 }
 
 function readQuoteSnapshotId(body: unknown): string | null {
@@ -299,6 +508,41 @@ function requestMutationStatus(error: CommercialRequestMutationError): 400 | 404
       return 404;
     case "customer_locked":
     case "service_selection_locked":
+    case "installation_facts_delete_confirmation_required":
+      return 409;
+    default: {
+      const _exhaustive: never = error;
+      return _exhaustive;
+    }
+  }
+}
+
+function factsMutationStatus(error: SiteInstallationFactsMutationError): 400 | 404 | 409 {
+  switch (error) {
+    case "installation_not_selected":
+    case "invalid_facade_type":
+    case "invalid_fixing_method":
+    case "invalid_measurement_status":
+    case "invalid_site_electrical":
+    case "invalid_dimensions":
+    case "invalid_elevation":
+    case "invalid_country_code":
+    case "invalid_measured_at":
+    case "invalid_site_name":
+    case "invalid_street":
+    case "invalid_city":
+    case "invalid_county":
+    case "invalid_postal_code":
+    case "invalid_contact_name":
+    case "invalid_contact_phone":
+    case "invalid_access_notes":
+    case "invalid_measurement_notes":
+    case "other_note_required":
+      return 400;
+    case "not_found":
+      return 404;
+    case "installation_facts_locked":
+    case "version_conflict":
       return 409;
     default: {
       const _exhaustive: never = error;

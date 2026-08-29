@@ -1,5 +1,6 @@
 import type { Customer } from "../customers/identity.js";
 import {
+  SITE_INSTALLATION_SCOPE_ID,
   sameOptionalScopeIds,
   siteInstallationFreezeRefusal,
   type IncompleteOfferRefusal,
@@ -58,6 +59,7 @@ export const COMMERCIAL_REQUEST_MUTATION_ERRORS = [
   "service_mode_required",
   "service_mode_unavailable",
   "invalid_service_mode",
+  "installation_facts_delete_confirmation_required",
 ] as const;
 export type CommercialRequestMutationError =
   (typeof COMMERCIAL_REQUEST_MUTATION_ERRORS)[number];
@@ -176,9 +178,11 @@ export function updateCommercialRequest(
     customerId?: string;
     optionalScopeIds?: readonly string[];
     siteInstallationMode?: OperationalServiceProviderMode | null;
+    confirmDeleteInstallationFacts?: boolean;
   },
   context: {
     hasLinkedQuotes: boolean;
+    hasInstallationFacts?: boolean;
     nextCustomer?: Customer | null;
     serviceOffer?: OrganizationServiceOffer;
   },
@@ -233,6 +237,16 @@ export function updateCommercialRequest(
     });
     if (!applied.ok) {
       return { ok: false, error: applied.error };
+    }
+    const deselectedInstallation =
+      current.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID) &&
+      !applied.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID);
+    if (
+      deselectedInstallation &&
+      context.hasInstallationFacts &&
+      !patch.confirmDeleteInstallationFacts
+    ) {
+      return { ok: false, error: "installation_facts_delete_confirmation_required" };
     }
     next = {
       ...next,

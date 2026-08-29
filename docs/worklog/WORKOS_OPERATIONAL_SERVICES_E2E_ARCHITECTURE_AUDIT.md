@@ -938,3 +938,57 @@ MAIN_INTEGRATION              = INTEGRATED_ON_MAIN
 
 The page uses the established Administrare hierarchy: global L1, one Admin L2, and the service form as page content. OS-S1 is implemented on main.
 
+---
+
+## 20. OS-S2 typed installation facts — 2026-08-29
+
+Owner GO: implement OS-S2 typed installation facts only. No HUB MEDIA enable, no Cloud write, no live Cerere, no money, no Quote.
+
+```text
+SLICE                         = OS_S2_TYPED_INSTALLATION_FACTS
+STATUS                        = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED                = NO
+MAIN_INTEGRATION              = NO
+INSTALLATION_EIC              = STILL_PARTIAL
+MISSING_COST_EVIDENCE         = REMAINS
+QUOTE_LINES                   = STILL_PRODUCT_ONLY
+LIVE_REQUEST_PATCH            = NO
+REAL_CLOUD_WRITE              = NO
+OS_S3_TO_OS_S11               = NOT_AUTHORIZED
+```
+
+### Old-versus-new Cerere audit
+
+Old app (`C:\Users\offic\workos_app_vs`, read-only):
+
+- Livrare + Montaj was `delivery_type = delivery_install`, labeled “Livrare + Montaj”. It mixed transport/delivery with site install.
+- A second switch lived in product Intake V6: `finish_setup.mounting_scope` / `site_installation_included`.
+- Site facts lived in `site_audit_json` (one free-text `mounting_address`, enums for photos/power/access, notes). Totem UI fields (surface, foundation) were not persisted.
+- Customer address stayed on the Client. Product width/height/area lived in `product_spec_json` / `dimensions` and were sometimes shown inside the terrain section.
+- Demo SKU `SERV-MONTAJ-STD` bundled “Montaj + transport”.
+
+New Cerere (`/requests` list + `/requests/:id` detail):
+
+- List stays silent. No montaj fields, no site address, no backend identifiers.
+- Detail already has OS-S1 selection + mode. OS-S2 adds one facts section only when selected.
+- Configurator is not edited. Product compile still projects install scope without facts, so it keeps only `MISSING_COST_EVIDENCE`. Typed address/facade/fixing/electrical reasons stay on Cerere.
+
+Keep: site address distinct from Client; explicit selection; electrical as a typed site fact; operator confirmation instead of inference.
+
+Do not copy: `delivery_type` as the install switch; `mounting_scope` inside LETTERS; JSON `site_audit_json`; product geometry as site measurements; bundled Montaj + transport SKU; field tasks from Cerere.
+
+Why the new section is clearer: one optional capability, one typed row, Romanian missing reasons, no transport, no product mm², no price. Unselected is silent. Deselect with saved facts asks first and deletes atomically.
+
+### Follow-up contract gap
+
+Access method / access equipment, crew, duration, and consumables stay out of runtime. They are not invented in OS-S2.
+
+```text
+OS_S2_FOLLOWUP_CONTRACT_GAP =
+  ACCESS_METHOD_AND_EQUIPMENT
+  | CREW_SIZE
+  | PLANNED_DURATION
+  | FIXINGS_CONSUMABLES
+  | SITE_PHOTOS
+```
+

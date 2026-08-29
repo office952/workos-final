@@ -271,6 +271,8 @@ describe("ProductConfigurationPage", () => {
       attachments: [],
       linkedOffers: [],
       installationScope: null,
+      installationFacts: null,
+      canWriteInstallationFacts: false,
       installationOffer: {
         capabilityId: "SITE_INSTALLATION",
         label: "Montaj la locație",

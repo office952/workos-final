@@ -13,6 +13,7 @@ import {
   projectSiteInstallationScope,
   type SiteInstallationOperatorView,
 } from "../installation/scope.js";
+import type { SiteInstallationFacts } from "../installation/facts.js";
 import {
   UNCONFIGURED_SITE_INSTALLATION_OFFER,
   projectSiteInstallationRequestOffer,
@@ -98,6 +99,8 @@ export type RequestDetailProjection = {
   attachments: readonly RequestAttachmentProjection[];
   installationScope: SiteInstallationOperatorView | null;
   installationOffer: SiteInstallationRequestOfferView;
+  installationFacts: SiteInstallationFacts | null;
+  canWriteInstallationFacts: boolean;
 };
 
 export function requestOverviewFilterLabel(filter: RequestOverviewFilter): string {
@@ -358,10 +361,13 @@ export function projectRequestDetail(input: {
   quotes: readonly QuoteOverviewItem[];
   attachments?: readonly CommercialRequestAttachment[];
   serviceOffer?: OrganizationServiceOffer;
+  installationFacts?: SiteInstallationFacts | null;
 }): RequestDetailProjection {
   const commercialProgress = deriveRequestCommercialProgress(input.quotes);
   const attachments = (input.attachments ?? []).map(projectRequestAttachment);
   const selected = input.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID);
+  const installationFacts = selected ? (input.installationFacts ?? null) : null;
+  const hasLinkedQuotes = input.quotes.length > 0;
   return {
     request: input.request,
     customerDisplayName: input.customerDisplayName,
@@ -370,7 +376,7 @@ export function projectRequestDetail(input: {
     commercialProgressLabel: commercialProgress
       ? requestCommercialProgressLabel(commercialProgress)
       : null,
-    canChangeCustomer: input.quotes.length === 0,
+    canChangeCustomer: !hasLinkedQuotes,
     canUpdateStatus: input.request.status !== "CANCELLED",
     canUploadAttachments: canUploadRequestAttachment(input.request.status),
     linkedOffers: input.quotes,
@@ -378,13 +384,16 @@ export function projectRequestDetail(input: {
     installationScope: presentSiteInstallationScope(
       projectSiteInstallationScope({
         selected,
+        facts: installationFacts,
       }),
     ),
     installationOffer: projectSiteInstallationRequestOffer({
       selected,
       mode: input.request.siteInstallationMode,
       offer: input.serviceOffer ?? UNCONFIGURED_SITE_INSTALLATION_OFFER,
-      hasLinkedQuotes: input.quotes.length > 0,
+      hasLinkedQuotes,
     }),
+    installationFacts,
+    canWriteInstallationFacts: selected && !hasLinkedQuotes,
   };
 }

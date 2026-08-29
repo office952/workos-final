@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   UNCONFIGURED_SITE_INSTALLATION_OFFER,
   projectSiteInstallationRequestOffer,
@@ -9,7 +9,11 @@ import {
 } from "@workos-final/domain";
 import { RequestDetailPage } from "./RequestDetailPage";
 import { fetchProductCatalog } from "./productApi";
-import { readRequestDetail, updateCommercialRequest } from "./requestsApi";
+import {
+  readRequestDetail,
+  updateCommercialRequest,
+  updateInstallationFacts,
+} from "./requestsApi";
 
 const detail: RequestDetailProjection = {
   request: {
@@ -33,6 +37,8 @@ const detail: RequestDetailProjection = {
   canUploadAttachments: true,
   attachments: [],
   installationScope: null,
+  installationFacts: null,
+  canWriteInstallationFacts: false,
   installationOffer: projectSiteInstallationRequestOffer({
     selected: false,
     mode: null,
@@ -69,6 +75,7 @@ const detail: RequestDetailProjection = {
 vi.mock("./requestsApi", () => ({
   readRequestDetail: vi.fn(),
   updateCommercialRequest: vi.fn(),
+  updateInstallationFacts: vi.fn(),
   uploadRequestAttachment: vi.fn(),
   requestAttachmentErrorMessage: (error: string) => error,
   requestServiceErrorMessage: (error: string) => error,
@@ -79,6 +86,13 @@ vi.mock("./productApi", () => ({
 }));
 
 describe("RequestDetailPage", () => {
+  beforeEach(() => {
+    vi.mocked(readRequestDetail).mockReset();
+    vi.mocked(updateCommercialRequest).mockReset();
+    vi.mocked(updateInstallationFacts).mockReset();
+    vi.mocked(fetchProductCatalog).mockReset();
+  });
+
   it("shows request truth, linked offer and catalog product action", async () => {
     vi.mocked(readRequestDetail).mockResolvedValue(detail);
     vi.mocked(updateCommercialRequest).mockResolvedValue({
@@ -211,6 +225,7 @@ describe("RequestDetailPage", () => {
       ...detail,
       linkedOffers: [],
       canChangeCustomer: true,
+      canWriteInstallationFacts: true,
       commercialProgress: null,
       commercialProgressLabel: null,
       request: {
@@ -245,5 +260,119 @@ describe("RequestDetailPage", () => {
     expect(await screen.findByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
     expect(screen.getByText(/Mod salvat: Echipă internă/)).toBeInTheDocument();
     expect(screen.getByText(/nu mai este oferit de organizație/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvează datele de montaj" })).toBeInTheDocument();
+  });
+
+  it("saves typed installation facts and asks before deselect when facts exist", async () => {
+    const offer = {
+      capabilityId: "SITE_INSTALLATION" as const,
+      configured: true,
+      offerMode: "INTERNAL" as const,
+      version: 1,
+      updatedAt: "2026-08-28T20:00:00.000Z",
+    };
+    const selected = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      canWriteInstallationFacts: true,
+      request: {
+        ...detail.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "INTERNAL" as const,
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "INTERNAL",
+        offer,
+        hasLinkedQuotes: false,
+      }),
+      installationFacts: {
+        requestId: detail.request.requestId,
+        version: 1,
+        siteName: null,
+        street: "Strada Fabricii 10",
+        city: "București",
+        county: null,
+        postalCode: null,
+        countryCode: "RO",
+        contactName: null,
+        contactPhone: null,
+        accessNotes: null,
+        measurementStatus: "OFFICE_MEASURED" as const,
+        mountingSurfaceWidthMm: 2400,
+        mountingSurfaceHeightMm: 800,
+        installationElevationMm: null,
+        measuredAt: null,
+        measurementNotes: null,
+        facadeType: "CONCRETE" as const,
+        facadeOtherNote: null,
+        fixingMethod: "MECHANICAL_ANCHOR" as const,
+        fixingOtherNote: null,
+        siteElectrical: "NOT_APPLICABLE" as const,
+        createdAt: "2026-08-29T10:00:00.000Z",
+        updatedAt: "2026-08-29T10:00:00.000Z",
+      },
+      installationScope: {
+        scopeId: "SITE_INSTALLATION" as const,
+        label: "Montaj la locație" as const,
+        eicCompleteness: "PARTIAL" as const,
+        commercialCompleteness: "PARTIAL" as const,
+        incompleteReasons: [
+          { id: "MISSING_COST_EVIDENCE" as const, label: "Evidența de cost pentru montaj lipsește." },
+        ],
+      },
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(selected);
+    vi.mocked(updateInstallationFacts).mockResolvedValue({
+      ...selected,
+      installationFacts: selected.installationFacts
+        ? { ...selected.installationFacts, accessNotes: "Curte" }
+        : null,
+    });
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByLabelText("Stradă")).toHaveValue("Strada Fabricii 10");
+    expect(screen.getByText("Evidența de cost pentru montaj lipsește.")).toBeInTheDocument();
+    await userEvent.clear(screen.getByLabelText("Note de acces"));
+    await userEvent.type(screen.getByLabelText("Note de acces"), "Curte");
+    await userEvent.click(screen.getByRole("button", { name: "Salvează datele de montaj" }));
+    expect(updateInstallationFacts).toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("checkbox", { name: /Montaj la locație/ }));
+    expect(screen.getByRole("dialog", { name: "Renunți la montaj?" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Anulează" }));
+    expect(updateCommercialRequest).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("checkbox", { name: /Montaj la locație/ }));
+    vi.mocked(updateCommercialRequest).mockResolvedValue({
+      ...detail,
+      linkedOffers: [],
+      installationFacts: null,
+      canWriteInstallationFacts: false,
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: false,
+        mode: null,
+        offer,
+        hasLinkedQuotes: false,
+      }),
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Șterge datele de montaj" }));
+    expect(updateCommercialRequest).toHaveBeenCalledWith(
+      "crq:11111111-2222-3333-4444-555555555555",
+      expect.objectContaining({
+        optionalScopeIds: [],
+        confirmDeleteInstallationFacts: true,
+      }),
+    );
   });
 });

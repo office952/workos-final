@@ -4,6 +4,7 @@ import {
   type CommercialPriceProjection,
 } from "../commercial/price.js";
 import type { EicResult } from "../resources/eic.js";
+import type { SiteInstallationFacts } from "./facts.js";
 
 export const SITE_INSTALLATION_SCOPE_ID = "SITE_INSTALLATION";
 export const SITE_INSTALLATION_LABEL = "Montaj la locație";
@@ -15,8 +16,10 @@ export type OptionalCommercialScopeId = (typeof OPTIONAL_COMMERCIAL_SCOPE_IDS)[n
 
 export const SITE_INSTALLATION_INCOMPLETE_REASON_IDS = [
   "MISSING_COST_EVIDENCE",
+  "SITE_ADDRESS_INCOMPLETE",
   "SITE_MEASUREMENTS_UNCONFIRMED",
-  "HEIGHT_ACCESS_UNCONFIRMED",
+  "FACADE_UNCONFIRMED",
+  "FIXING_UNCONFIRMED",
   "SITE_ELECTRICAL_UNCONFIRMED",
 ] as const;
 export type SiteInstallationIncompleteReasonId =
@@ -82,10 +85,14 @@ export function siteInstallationIncompleteReasonLabel(
   switch (id) {
     case "MISSING_COST_EVIDENCE":
       return "Evidența de cost pentru montaj lipsește.";
+    case "SITE_ADDRESS_INCOMPLETE":
+      return "Adresa locului de execuție este incompletă.";
     case "SITE_MEASUREMENTS_UNCONFIRMED":
       return "Măsurătorile la locație nu sunt confirmate.";
-    case "HEIGHT_ACCESS_UNCONFIRMED":
-      return "Accesul și înălțimea de lucru nu sunt confirmate.";
+    case "FACADE_UNCONFIRMED":
+      return "Tipul de fațadă nu este confirmat.";
+    case "FIXING_UNCONFIRMED":
+      return "Sistemul de prindere nu este confirmat.";
     case "SITE_ELECTRICAL_UNCONFIRMED":
       return "Racordul electric de șantier nu este confirmat.";
     default: {
@@ -95,26 +102,50 @@ export function siteInstallationIncompleteReasonLabel(
   }
 }
 
-export function siteInstallationIncompleteReasons(): readonly SiteInstallationIncompleteReason[] {
-  const seen = new Set<SiteInstallationIncompleteReasonId>();
-  const reasons: SiteInstallationIncompleteReason[] = [];
-  for (const id of SITE_INSTALLATION_INCOMPLETE_REASON_IDS) {
-    if (seen.has(id)) {
-      continue;
-    }
-    seen.add(id);
-    reasons.push({ id, label: siteInstallationIncompleteReasonLabel(id) });
+export function siteInstallationIncompleteReasonIds(
+  facts?: SiteInstallationFacts | null,
+): readonly SiteInstallationIncompleteReasonId[] {
+  if (facts === undefined) {
+    return ["MISSING_COST_EVIDENCE"];
   }
-  return reasons;
+  const ids: SiteInstallationIncompleteReasonId[] = ["MISSING_COST_EVIDENCE"];
+  const street = facts?.street.trim() ?? "";
+  const city = facts?.city.trim() ?? "";
+  if (!street || !city) {
+    ids.push("SITE_ADDRESS_INCOMPLETE");
+  }
+  if (!facts || facts.measurementStatus === "UNCONFIRMED") {
+    ids.push("SITE_MEASUREMENTS_UNCONFIRMED");
+  }
+  if (!facts || facts.facadeType === "UNCONFIRMED") {
+    ids.push("FACADE_UNCONFIRMED");
+  }
+  if (!facts || facts.fixingMethod === "UNCONFIRMED") {
+    ids.push("FIXING_UNCONFIRMED");
+  }
+  if (!facts || facts.siteElectrical === "UNCONFIRMED") {
+    ids.push("SITE_ELECTRICAL_UNCONFIRMED");
+  }
+  return ids;
+}
+
+export function siteInstallationIncompleteReasons(
+  facts?: SiteInstallationFacts | null,
+): readonly SiteInstallationIncompleteReason[] {
+  return siteInstallationIncompleteReasonIds(facts).map((id) => ({
+    id,
+    label: siteInstallationIncompleteReasonLabel(id),
+  }));
 }
 
 export function projectSiteInstallationScope(input: {
   selected: boolean;
+  facts?: SiteInstallationFacts | null;
 }): SiteInstallationScopeProjection | null {
   if (!input.selected) {
     return null;
   }
-  const incompleteReasons = siteInstallationIncompleteReasons();
+  const incompleteReasons = siteInstallationIncompleteReasons(input.facts);
   const eic: EicResult = {
     completeness: "PARTIAL",
     completenessReasons: incompleteReasons.map((reason) => reason.label),

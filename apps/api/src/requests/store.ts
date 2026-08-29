@@ -16,6 +16,7 @@ import {
 } from "@workos-final/domain";
 import { readOrganizationServiceOffer } from "../operationalServices/store.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
+import { deleteInstallationFacts, getInstallationFacts } from "./installationFacts.js";
 
 type OptionalServiceSelection = {
   scopeId: string;
@@ -279,6 +280,7 @@ export function persistUpdatedCommercialRequest(
     customerId?: string;
     optionalScopeIds?: readonly string[];
     siteInstallationMode?: OperationalServiceProviderMode | null;
+    confirmDeleteInstallationFacts?: boolean;
   },
   context: {
     hasLinkedQuotes: boolean;
@@ -292,6 +294,7 @@ export function persistUpdatedCommercialRequest(
   }
   const updated = updateCommercialRequest(current, patch, {
     ...context,
+    hasInstallationFacts: getInstallationFacts(db, requestId) !== null,
     serviceOffer: context.serviceOffer ?? readOrganizationServiceOffer(db),
   });
   if (!updated.ok || updated.alreadyApplied) {
@@ -319,6 +322,9 @@ export function persistUpdatedCommercialRequest(
       updated.request.siteInstallationMode,
       updated.request.updatedAt,
     );
+    if (!updated.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID)) {
+      deleteInstallationFacts(db, requestId);
+    }
   });
   persist();
   return updated;

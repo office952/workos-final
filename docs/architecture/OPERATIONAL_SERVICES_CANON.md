@@ -17,7 +17,7 @@ OWNER_DECISION_DATE        = 2026-08-28
 OS_S1                      = IMPLEMENTED_CURRENT / BASIC
 OS_S1_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 OS_S2_DESIGN               = OWNER_ACCEPTED
-OS_S2_IMPLEMENTATION       = NOT_AUTHORIZED
+OS_S2_IMPLEMENTATION       = IMPLEMENTED_LOCAL_IN_REVIEW
 OS_S3_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_IMPLEMENTATION     = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_AUTHORIZED
@@ -158,13 +158,13 @@ Org must offer the capability before a **new** selection. An already persisted s
 
 ## Per-request service configuration
 
-`CURRENT_RUNTIME`: no typed site facts. Selected install shows four static incomplete reasons. Transport is not one of them.
+`CURRENT_RUNTIME`: typed site facts on `commercial_request_installation_facts`, one row per Request. Selected install projects typed missing reasons from those facts. `MISSING_COST_EVIDENCE` remains. Transport is not one of them. Unselected stays silent and has no row.
 
 `OWNER_ACCEPTED_TARGET`: typed facts on `(requestId, SITE_INSTALLATION)`. Not Product Truth. Not a generic JSON bag. Not a reusable Location entity in V1. Field law lives in the installation canon.
 
 ```text
 OS_S2_DESIGN          = OWNER_ACCEPTED
-OS_S2_IMPLEMENTATION  = NOT_AUTHORIZED
+OS_S2_IMPLEMENTATION  = IMPLEMENTED_LOCAL_IN_REVIEW
 DECISIONS_1_TO_5      = CLOSED
 Q_FACT_VS_SERVICE     =
   MEASUREMENT_ACCESS_SITE_ELECTRICAL_ARE_TYPED_INSTALLATION_FACTS
@@ -182,7 +182,7 @@ LOCKED_WHEN           = first linked Quote
 
 Transport facts belong to `TRANSPORT`, never inside installation EIC. `MISSING_COST_EVIDENCE` stays. Completing it is OS-S3. OS-S2 cannot make `INSTALLATION_EIC` COMPLETE.
 
-`FUTURE_SLICE`: OS-S2 implementation still needs a separate Owner GO.
+`FUTURE_SLICE`: OS-S2 is implemented locally in review. Completing `MISSING_COST_EVIDENCE` remains OS-S3.
 
 ---
 
@@ -368,12 +368,12 @@ Immutable boundaries begin at Quote freeze. Request stays mutable office truth e
 
 ## Implementation program
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementation and later slices still need a separate Owner GO.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementation is local in review. OS-S3 and later slices still need a separate Owner GO.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
 | OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_CURRENT / BASIC` |
-| OS-S2 | Typed install facts | `DESIGN_OWNER_ACCEPTED / IMPLEMENTATION_NOT_AUTHORIZED` |
+| OS-S2 | Typed install facts | `IMPLEMENTED_LOCAL_IN_REVIEW` |
 | OS-S3 | Evidence and service EIC | `NOT_STARTED` |
 | OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
 | OS-S5 | Multi-line Quote | `NOT_STARTED` |
@@ -384,7 +384,7 @@ OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementati
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 design is Owner-accepted. OS-S2 implementation and later slices still need a separate Owner GO.
+OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented locally in review. OS-S3 and later slices still need a separate Owner GO.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 
@@ -398,7 +398,7 @@ Every future Owner-facing page for this program requires an old-versus-new UI/UX
 | Selection mutable after linked Quote | Closed in OS-S1 | — |
 | Transport reason inside install | Closed in OS-S1 | OS-S6 offers TRANSPORT |
 | No mode | Closed in OS-S1 | — |
-| No site facts | Static reasons | OS-S2 |
+| No site facts | Closed in OS-S2 — typed Cerere facts; EIC still PARTIAL | OS-S3 |
 | No person-hour labor evidence | Workshop units only | OS-S3 |
 | No supplier validity | Supersede only | OS-S3 |
 | Cost-plus is the only projector | `projectCommercialPrice` | OS-S4 |

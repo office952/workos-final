@@ -1135,4 +1135,68 @@ describe("product system persistence", () => {
     ]);
     db.close();
   });
+
+  it("adds installation facts schema additively without seed or backfill", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = openSqliteDatabase(sqlitePath);
+    const createdCustomer = persistCreatedCustomer(first, "Client facts");
+    expect(createdCustomer.ok).toBe(true);
+    if (!createdCustomer.ok) {
+      return;
+    }
+    const created = persistCreatedCommercialRequest(
+      first,
+      createdCustomer.customer,
+      "Cerere existentă",
+      "Fără fapte de montaj.",
+    );
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    expect(
+      (
+        first
+          .prepare("SELECT COUNT(*) AS count FROM commercial_request_installation_facts")
+          .get() as { count: number }
+      ).count,
+    ).toBe(0);
+    expect(
+      first
+        .prepare("SELECT id FROM schema_migrations ORDER BY id")
+        .all()
+        .map((item) => (item as { id: string }).id),
+    ).toContain("027_commercial_request_installation_facts.sql");
+    expect(() =>
+      first
+        .prepare(
+          `
+          INSERT INTO commercial_request_installation_facts (
+            request_id, version, street, city, country_code, measurement_status,
+            facade_type, fixing_method, site_electrical, created_at, updated_at
+          ) VALUES ('crq:missing', 1, 'Strada', 'Oraș', 'RO', 'UNCONFIRMED',
+            'UNCONFIRMED', 'UNCONFIRMED', 'UNCONFIRMED', '2026-08-29T10:00:00.000Z',
+            '2026-08-29T10:00:00.000Z')
+        `,
+        )
+        .run(),
+    ).toThrow(/FOREIGN KEY/i);
+    first.close();
+    const again = openSqliteDatabase(sqlitePath);
+    expect(
+      (
+        again
+          .prepare("SELECT COUNT(*) AS count FROM schema_migrations WHERE id = ?")
+          .get("027_commercial_request_installation_facts.sql") as { count: number }
+      ).count,
+    ).toBe(1);
+    expect(
+      (
+        again
+          .prepare("SELECT COUNT(*) AS count FROM commercial_request_installation_facts")
+          .get() as { count: number }
+      ).count,
+    ).toBe(0);
+    again.close();
+  });
 });

@@ -94,7 +94,7 @@ OPERATIONAL_SERVICES_ARCHITECTURE = OWNER_ACCEPTED
 OS_S1 = IMPLEMENTED_CURRENT / BASIC
 OS_S1_INTEGRATION = INTEGRATED_ON_MAIN
 OS_S2_DESIGN = OWNER_ACCEPTED
-OS_S2_IMPLEMENTATION = NOT_AUTHORIZED
+OS_S2_IMPLEMENTATION = IMPLEMENTED_LOCAL_IN_REVIEW
 SELF-SERVICE ONBOARDING = NOT_IMPLEMENTED
 ADMIN OPERATIONAL PROCESSES UX = IMPLEMENTED_CURRENT / BASIC
 ADMIN WORKCENTERS UX = IMPLEMENTED_CURRENT / BASIC
@@ -135,7 +135,7 @@ Do not implement full ACM, illuminated ACM, Analyzer runtime, or the next produc
 - Product cost-plus must not price operational services. Service commercial is a separate future channel.
 - Transport remains a separate capability. Do not nest it under montaj.
 - Do not create operational-service tasks before a frozen Order / Production Release.
-- OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementation and later slices require a separate Owner GO. This file does not authorize them.
+- OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementation is local in review on `feat/os-s2-typed-installation-facts`. OS-S3 and later slices require a separate Owner GO. This file does not authorize them.
 - Every future Owner-facing page requires an old-versus-new UI/UX/code audit before implementation.
 
 ## Bootstrap proof

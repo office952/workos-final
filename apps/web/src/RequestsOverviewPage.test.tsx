@@ -102,6 +102,8 @@ describe("RequestsOverviewPage", () => {
     expect(screen.getByRole("button", { name: "Creează cererea" })).toBeInTheDocument();
     expect(screen.queryByText("contentHash")).not.toBeInTheDocument();
     expect(screen.queryByText("Intake")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Salvează datele de montaj" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Stradă")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Noi" }));
     expect(screen.getByText("Litere exterior")).toBeInTheDocument();
   });

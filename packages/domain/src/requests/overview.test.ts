@@ -134,6 +134,8 @@ describe("request overview projection", () => {
     expect(detail.request.description).toContain("fațadă");
     expect(detail.request).not.toHaveProperty("eic");
     expect(detail.installationScope).toBeNull();
+    expect(detail.installationFacts).toBeNull();
+    expect(detail.canWriteInstallationFacts).toBe(false);
     expect(detail.installationOffer.canSelectNew).toBe(false);
     expect(detail.installationOffer.selected).toBe(false);
   });
@@ -150,8 +152,14 @@ describe("request overview projection", () => {
     expect(detail.installationScope?.scopeId).toBe("SITE_INSTALLATION");
     expect(detail.installationScope?.eicCompleteness).toBe("PARTIAL");
     expect(detail.installationScope?.commercialCompleteness).toBe("PARTIAL");
+    expect(detail.installationFacts).toBeNull();
+    expect(detail.canWriteInstallationFacts).toBe(true);
+    expect(detail.installationScope?.incompleteReasons.map((reason) => reason.id)).toContain(
+      "MISSING_COST_EVIDENCE",
+    );
     expect(detail.request).not.toHaveProperty("eic");
     expect(JSON.stringify(detail.installationScope)).not.toMatch(/0(?:[.,]0+)? EUR|"total"/);
+    expect(JSON.stringify(detail)).not.toMatch(/productWidth|TRANSPORT|confirmedAreaMm2/);
   });
 
   it("blocks uploads on cancelled requests while keeping attachment projection", () => {

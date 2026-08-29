@@ -58,6 +58,8 @@ import {
   type RequestAttachmentProjection,
   type RequestDetailProjection,
   type RequestOverviewProjection,
+  type SiteInstallationFactsMutationResult,
+  type SiteInstallationFactsPatch,
   type OperationalServiceProviderMode,
   type OperationalServicesAdminProjection,
   type OrganizationServiceOfferMutationResult,
@@ -167,6 +169,10 @@ import {
   persistCreatedCommercialRequest,
   persistUpdatedCommercialRequest,
 } from "../requests/store.js";
+import {
+  getInstallationFacts,
+  persistUpdatedInstallationFacts,
+} from "../requests/installationFacts.js";
 import {
   persistOrganizationServiceOffer,
   readOperationalServicesAdmin,
@@ -367,8 +373,14 @@ export type ProductSystemRuntime = {
       customerId?: string;
       optionalScopeIds?: readonly string[];
       siteInstallationMode?: OperationalServiceProviderMode | null;
+      confirmDeleteInstallationFacts?: boolean;
     },
   ): CommercialRequestMutationResult;
+  updateInstallationFacts(
+    requestId: string,
+    patch: SiteInstallationFactsPatch,
+    expectedVersion?: number,
+  ): SiteInstallationFactsMutationResult;
   linkRequestQuote(
     requestId: string,
     quoteSnapshotId: string,
@@ -752,6 +764,7 @@ export function createProductSystemRuntimeFromOpenDb(
         quotes: linkedQuoteOverviewItems(db, request.requestId),
         attachments: listCommercialRequestAttachments(db, request.requestId),
         serviceOffer: readOrganizationServiceOffer(db),
+        installationFacts: getInstallationFacts(db, request.requestId),
       });
     },
     listRequestAttachments(requestId) {
@@ -835,6 +848,17 @@ export function createProductSystemRuntimeFromOpenDb(
       return persistUpdatedCommercialRequest(db, requestId, patch, {
         hasLinkedQuotes: listCommercialRequestQuoteLinks(db, requestId).length > 0,
         nextCustomer: patch.customerId ? getCustomer(db, patch.customerId) : undefined,
+      });
+    },
+    updateInstallationFacts(requestId, patch, expectedVersion) {
+      const request = getCommercialRequest(db, requestId);
+      if (!request) {
+        return { ok: false, error: "not_found" };
+      }
+      return persistUpdatedInstallationFacts(db, requestId, patch, {
+        selected: request.optionalScopeIds.includes("SITE_INSTALLATION"),
+        hasLinkedQuotes: listCommercialRequestQuoteLinks(db, requestId).length > 0,
+        expectedVersion,
       });
     },
     linkRequestQuote(requestId, quoteSnapshotId) {

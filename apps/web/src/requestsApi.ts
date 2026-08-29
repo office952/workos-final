@@ -3,6 +3,7 @@ import type {
   CommercialRequestStatus,
   RequestDetailProjection,
   RequestOverviewProjection,
+  SiteInstallationFactsPatch,
 } from "@workos-final/domain";
 import { throwIfListFailed } from "./fetchAccess";
 
@@ -69,6 +70,7 @@ export async function updateCommercialRequest(
     customerId?: string;
     optionalScopeIds?: readonly string[];
     siteInstallationMode?: "INTERNAL" | "SUBCONTRACTED" | null;
+    confirmDeleteInstallationFacts?: boolean;
   },
 ): Promise<RequestDetailProjection> {
   const response = await fetch(
@@ -77,6 +79,29 @@ export async function updateCommercialRequest(
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(patch),
+    },
+  );
+  const body = await readJson<{
+    detail?: RequestDetailProjection;
+    error?: string;
+  }>(response);
+  if (!response.ok || !body.detail) {
+    throw new Error(body.error ?? "request_unavailable");
+  }
+  return body.detail;
+}
+
+export async function updateInstallationFacts(
+  requestId: string,
+  patch: SiteInstallationFactsPatch,
+  expectedVersion?: number,
+): Promise<RequestDetailProjection> {
+  const response = await fetch(
+    `${baseUrl}/api/requests/${encodeURIComponent(requestId)}/installation-facts`,
+    {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...patch, expectedVersion }),
     },
   );
   const body = await readJson<{
@@ -147,6 +172,22 @@ export function requestServiceErrorMessage(error: string): string {
       return "Modul de montaj nu este permis pentru această organizație.";
     case "unknown_optional_scope":
       return "Serviciul selectat nu este recunoscut.";
+    case "installation_facts_delete_confirmation_required":
+      return "Confirmă ștergerea datelor de montaj înainte de a renunța la selecție.";
+    case "installation_not_selected":
+      return "Datele de montaj se salvează doar dacă montajul este selectat.";
+    case "installation_facts_locked":
+      return "Datele de montaj sunt blocate după prima ofertă legată.";
+    case "other_note_required":
+      return "Pentru „Altul” este nevoie de o explicație.";
+    case "invalid_facade_type":
+    case "invalid_fixing_method":
+    case "invalid_measurement_status":
+    case "invalid_site_electrical":
+      return "O valoare aleasă nu este recunoscută.";
+    case "invalid_dimensions":
+    case "invalid_elevation":
+      return "Dimensiunile de șantier trebuie să fie numere pozitive.";
     default:
       return "Cererea nu a putut fi actualizată.";
   }

@@ -54,8 +54,15 @@ describe("optional site installation scope", () => {
       throw new Error("expected selected projection");
     }
     const ids = projected.incompleteReasons.map((reason) => reason.id);
-    expect(ids).toEqual([...SITE_INSTALLATION_INCOMPLETE_REASON_IDS]);
+    expect(ids).toEqual(["MISSING_COST_EVIDENCE"]);
+    expect(
+      projectSiteInstallationScope({ selected: true, facts: null })?.incompleteReasons.map(
+        (reason) => reason.id,
+      ),
+    ).toEqual([...SITE_INSTALLATION_INCOMPLETE_REASON_IDS]);
+    expect(ids).toContain("MISSING_COST_EVIDENCE");
     expect(ids).not.toContain("TRANSPORT_UNCONFIRMED");
+    expect(ids).not.toContain("HEIGHT_ACCESS_UNCONFIRMED");
     expect(new Set(ids).size).toBe(ids.length);
     expect(projected.incompleteReasons.map((reason) => reason.label).join(" ")).not.toMatch(
       /inspectat|verificat la fața locului|măsurat efectiv/i,

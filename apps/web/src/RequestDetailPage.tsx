@@ -9,6 +9,7 @@ import {
   type CommercialRequestStatus,
   type OperationalServiceProviderMode,
   type RequestDetailProjection,
+  type SiteInstallationFactsPatch,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { fetchProductCatalog } from "./productApi";
@@ -17,8 +18,11 @@ import {
   requestAttachmentErrorMessage,
   requestServiceErrorMessage,
   updateCommercialRequest,
+  updateInstallationFacts,
   uploadRequestAttachment,
 } from "./requestsApi";
+import { RequestInstallationFactsForm } from "./RequestInstallationFactsForm";
+import { ActionDrawer } from "./ui/ActionDrawer";
 import { flattenCatalogProducts } from "./catalogProducts";
 import { pageErrorKind } from "./fetchAccess";
 import { EmptyState } from "./ui/EmptyState";
@@ -48,6 +52,10 @@ export function RequestDetailPage() {
   const [installationMode, setInstallationMode] =
     useState<OperationalServiceProviderMode | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [factsNotice, setFactsNotice] = useState<{ tone: "ok" | "warn"; text: string } | null>(
+    null,
+  );
+  const [confirmDeselect, setConfirmDeselect] = useState(false);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -116,6 +124,21 @@ export function RequestDetailPage() {
       setNotice(requestServiceErrorMessage("service_mode_required"));
       return;
     }
+    if (!selected && page.detail.installationFacts) {
+      setConfirmDeselect(true);
+      return;
+    }
+    await persistInstallationSelection(selected);
+  }
+
+  async function persistInstallationSelection(
+    selected: boolean,
+    confirmDeleteInstallationFacts = false,
+  ) {
+    if (page.kind !== "ready") {
+      return;
+    }
+    const offer = page.detail.installationOffer;
     const previous = installationSelected;
     setInstallationSelected(selected);
     setBusy(true);
@@ -126,10 +149,15 @@ export function RequestDetailPage() {
         ...(selected && offer.availableModes.length > 1
           ? { siteInstallationMode: installationMode }
           : {}),
+        ...(confirmDeleteInstallationFacts
+          ? { confirmDeleteInstallationFacts: true }
+          : {}),
       });
       setPage({ kind: "ready", detail });
       setInstallationSelected(detail.installationOffer.selected);
       setInstallationMode(detail.installationOffer.mode);
+      setConfirmDeselect(false);
+      setFactsNotice(null);
     } catch (error) {
       setInstallationSelected(previous);
       const code = error instanceof Error ? error.message : "request_unavailable";
@@ -160,6 +188,30 @@ export function RequestDetailPage() {
       setInstallationMode(page.detail.installationOffer.mode);
       const code = error instanceof Error ? error.message : "request_unavailable";
       setNotice(requestServiceErrorMessage(code));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSaveFacts(patch: SiteInstallationFactsPatch) {
+    if (page.kind !== "ready") {
+      return;
+    }
+    setBusy(true);
+    setFactsNotice(null);
+    try {
+      const detail = await updateInstallationFacts(
+        page.detail.request.requestId,
+        patch,
+        page.detail.installationFacts?.version,
+      );
+      setPage({ kind: "ready", detail });
+      setInstallationSelected(detail.installationOffer.selected);
+      setInstallationMode(detail.installationOffer.mode);
+      setFactsNotice({ tone: "ok", text: "Datele de montaj au fost salvate." });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "request_unavailable";
+      setFactsNotice({ tone: "warn", text: requestServiceErrorMessage(code) });
     } finally {
       setBusy(false);
     }
@@ -353,6 +405,44 @@ export function RequestDetailPage() {
           Salvează
         </button>
       </form>
+
+      {detail.installationOffer.selected ? (
+        <RequestInstallationFactsForm
+          facts={detail.installationFacts}
+          reasons={detail.installationScope?.incompleteReasons ?? []}
+          locked={!detail.canWriteInstallationFacts}
+          busy={busy}
+          notice={factsNotice}
+          onSave={(patch) => {
+            void handleSaveFacts(patch);
+          }}
+        />
+      ) : null}
+
+      <ActionDrawer
+        title="Renunți la montaj?"
+        open={confirmDeselect}
+        onClose={() => setConfirmDeselect(false)}
+      >
+        <p>
+          Datele de montaj salvate vor fi șterse. Anularea păstrează selecția și
+          datele.
+        </p>
+        <p className="action-row">
+          <button type="button" className="button-quiet" onClick={() => setConfirmDeselect(false)}>
+            Anulează
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              void persistInstallationSelection(false, true);
+            }}
+          >
+            Șterge datele de montaj
+          </button>
+        </p>
+      </ActionDrawer>
 
       <section className="result-section request-attachments">
         <h3>Fișiere client</h3>

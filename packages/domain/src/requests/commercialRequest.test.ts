@@ -287,6 +287,30 @@ describe("commercial request identity", () => {
     }
     expect(
       updateCommercialRequest(
+        selected.request,
+        { optionalScopeIds: [] },
+        {
+          hasLinkedQuotes: false,
+          hasInstallationFacts: true,
+          serviceOffer: internalOffer,
+        },
+      ),
+    ).toEqual({ ok: false, error: "installation_facts_delete_confirmation_required" });
+    const confirmed = updateCommercialRequest(
+      selected.request,
+      { optionalScopeIds: [], confirmDeleteInstallationFacts: true },
+      {
+        hasLinkedQuotes: false,
+        hasInstallationFacts: true,
+        serviceOffer: internalOffer,
+      },
+    );
+    expect(confirmed.ok).toBe(true);
+    if (confirmed.ok) {
+      expect(confirmed.request.optionalScopeIds).toEqual([]);
+    }
+    expect(
+      updateCommercialRequest(
         created.request,
         { optionalScopeIds: ["NOT_A_SCOPE"] },
         { hasLinkedQuotes: false, serviceOffer: internalOffer },

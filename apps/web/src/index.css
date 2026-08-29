@@ -1085,6 +1085,7 @@ a.button-link.button-secondary {
 
 .field input,
 .field select,
+.field textarea,
 .task-actions input,
 .task-actions select {
   padding: 0.4rem 0.5rem;
@@ -1097,9 +1098,48 @@ a.button-link.button-secondary {
 
 .field input,
 .field select,
+.field textarea,
 .display-label-editor input {
   min-height: 44px;
   min-width: 44px;
+}
+
+.field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--status-warning);
+}
+
+.field-invalid input,
+.field-invalid select,
+.field-invalid textarea {
+  border-color: var(--status-warning);
+}
+
+.request-installation-facts {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.request-installation-facts-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.request-installation-facts-reasons {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+@media (max-width: 768px) {
+  .request-installation-facts-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .status-chip {
