@@ -83,7 +83,8 @@ FIRST_REAL_LETTERS_JOB               = BLOCKED_BEFORE_QUOTE
 BLOCK_REASON                         = installation cost/process evidence incomplete
 OPTIONAL_SITE_INSTALLATION_V1        = INTEGRATED_ON_MAIN
 OPERATIONAL_SERVICES_ARCHITECTURE    = OWNER_ACCEPTED
-OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE = IMPLEMENTED_CURRENT / BASIC
+OS_S1_INTEGRATION                    = INTEGRATED_ON_MAIN
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
 UI_UX_CANON_UPDATE_FROM_EVIDENCE     = COMPLETE
@@ -207,7 +208,8 @@ FIRST_REAL_LETTERS_JOB = BLOCKED_BEFORE_QUOTE
 BLOCK_REASON = installation cost/process evidence incomplete
 OPTIONAL_SITE_INSTALLATION_V1 = INTEGRATED_ON_MAIN
 OPERATIONAL_SERVICES_ARCHITECTURE = OWNER_ACCEPTED
-OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE = IMPLEMENTED_CURRENT / BASIC
+OS_S1_INTEGRATION = INTEGRATED_ON_MAIN
 ```
 
 `HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because installation cost/process evidence is incomplete. This file does not authorize that job.
@@ -282,7 +284,7 @@ Step 8 configured the recovered HUB MEDIA organization with the existing seller,
 
 Step 9 is `BLOCKED_BEFORE_QUOTE` because optional site installation is selected as a required associated scope for the first real LETTERS job, and installation evidence, facts, and service commercial are incomplete. Phase 1 of that capability is `INTEGRATED_ON_MAIN`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. It does not authorize a live quote, a live Cerere PATCH, later service slices, multi-line Quote, or Architecture C UI Wave 2. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
 
-Do not start steps 9–10 from this document. The next named HUB step remains `FIRST_REAL_LETTERS_JOB`, now blocked before quote. OS-S1 is implemented locally and in review; it is not integrated on main. The next candidate slice is OS-S2 and still needs a separate Owner GO.
+Do not start steps 9–10 from this document. The next named HUB step remains `FIRST_REAL_LETTERS_JOB`, now blocked before quote. OS-S1 is implemented on main. The next candidate slice is OS-S2 and still needs a separate Owner GO.
 
 ## Operational Services program
 
@@ -291,8 +293,9 @@ Owner-accepted application-wide spine. Installation is the first real capability
 ```text
 OPERATIONAL_SERVICES_ARCHITECTURE        = OWNER_ACCEPTED
 PHASE_1                                  = INTEGRATED_ON_MAIN
-OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE    = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S2_INSTALL_FACTS                      = NOT_STARTED
+OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE    = IMPLEMENTED_CURRENT / BASIC
+OS_S1_INTEGRATION                        = INTEGRATED_ON_MAIN
+OS_S2_INSTALL_FACTS                      = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_EVIDENCE_AND_EIC                   = NOT_STARTED
 OS_S4_SERVICE_COMMERCIAL                 = NOT_STARTED
 OS_S5_MULTI_LINE_QUOTE                   = NOT_STARTED
@@ -308,7 +311,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented locally and in review; it is not integrated on main. Later slices still need a separate Owner GO. OS-S1 does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. Later slices still need a separate Owner GO. OS-S1 does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 

@@ -14,9 +14,9 @@ ARCHITECTURE_DIRECTION     = OWNER_ACCEPTED_WITH_AMENDMENTS
 OPERATIONAL_SERVICES_SPINE = OWNER_ACCEPTED
 INSTALLATION_ROLE          = FIRST_REAL_CAPABILITY
 OWNER_DECISION_DATE        = 2026-08-28
-OS_S1                      = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S1_IMPLEMENTATION       = AUTHORIZED_LOCAL_IN_REVIEW
-OS_S2_TO_OS_S11            = NOT_STARTED
+OS_S1                      = IMPLEMENTED_CURRENT / BASIC
+OS_S1_IMPLEMENTATION       = INTEGRATED_ON_MAIN
+OS_S2_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_IMPLEMENTATION     = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_AUTHORIZED
 NO_CLIENT_CODE_FORK        = YES
@@ -356,11 +356,11 @@ Immutable boundaries begin at Quote freeze. Request stays mutable office truth e
 
 ## Implementation program
 
-OS-S1 is implemented locally and in review; it is not integrated on main. Later slices still need a separate Owner GO.
+OS-S1 is implemented on main. Later slices still need a separate Owner GO.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
-| OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_LOCAL_IN_REVIEW` |
+| OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_CURRENT / BASIC` |
 | OS-S2 | Typed install facts | `NOT_STARTED` |
 | OS-S3 | Evidence and service EIC | `NOT_STARTED` |
 | OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
@@ -372,7 +372,7 @@ OS-S1 is implemented locally and in review; it is not integrated on main. Later 
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is implemented locally and in review; it is not integrated on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 and later still need a separate Owner GO.
+OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 and later still need a separate Owner GO.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 

@@ -891,7 +891,7 @@ Owner GO: `APROB OS-S1`. Design and implement only this slice.
 
 ```text
 SLICE                         = OS-S1_ORG_CAPABILITY_AND_REQUEST_MODE
-STATUS                        = IMPLEMENTED_LOCAL_IN_REVIEW
+STATUS                        = IMPLEMENTED_CURRENT / BASIC
 PRODUCT_CODE_RATES            = UNCHANGED
 INSTALLATION_EIC              = STILL_PARTIAL
 QUOTE_LINES                   = STILL_PRODUCT_ONLY
@@ -923,16 +923,16 @@ Owner hold after commit 1: domain and CI were accepted; merge was `NO` because `
 
 ```text
 CORRECTION                    = UX_S1_AND_DOC_BLOCKER
-STATUS                        = IMPLEMENTED_LOCAL_IN_REVIEW
+STATUS                        = IMPLEMENTED_CURRENT / BASIC
 OWNER_ACCEPTED                = NO
 ADMIN_L2                      = AdminSidebar + admin-floorplan
 THIRD_MENU                    = NO
 MASTER_SELECTOR               = NO
 UNCONFIGURED_VS_DISABLED      = DISTINGUISHED
 SAVE_NOTICE                   = VISIBLE
-OS_S2                         = NOT_AUTHORIZED
-MAIN_INTEGRATION              = NOT_DONE
+OS_S2                         = NOT_STARTED / NOT_AUTHORIZED
+MAIN_INTEGRATION              = INTEGRATED_ON_MAIN
 ```
 
-The page now uses the established Administrare hierarchy: global L1, one Admin L2, and the service form as page content. Documentation status stays `IMPLEMENTED_LOCAL_IN_REVIEW` until integration on main.
+The page uses the established Administrare hierarchy: global L1, one Admin L2, and the service form as page content. OS-S1 is implemented on main.
 
