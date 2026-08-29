@@ -16,7 +16,9 @@ INSTALLATION_ROLE          = FIRST_REAL_CAPABILITY
 OWNER_DECISION_DATE        = 2026-08-28
 OS_S1                      = IMPLEMENTED_CURRENT / BASIC
 OS_S1_IMPLEMENTATION       = INTEGRATED_ON_MAIN
-OS_S2_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
+OS_S2_DESIGN               = OWNER_ACCEPTED
+OS_S2_IMPLEMENTATION       = NOT_AUTHORIZED
+OS_S3_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_IMPLEMENTATION     = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_AUTHORIZED
 NO_CLIENT_CODE_FORK        = YES
@@ -158,19 +160,29 @@ Org must offer the capability before a **new** selection. An already persisted s
 
 `CURRENT_RUNTIME`: no typed site facts. Selected install shows four static incomplete reasons. Transport is not one of them.
 
-`OWNER_ACCEPTED_TARGET`: typed facts on `(requestId, capabilityId)`. Not Product Truth. Not a generic JSON bag.
-
-Installation facts — see the installation canon. In this spine:
+`OWNER_ACCEPTED_TARGET`: typed facts on `(requestId, SITE_INSTALLATION)`. Not Product Truth. Not a generic JSON bag. Not a reusable Location entity in V1. Field law lives in the installation canon.
 
 ```text
-Q_FACT_VS_SERVICE =
+OS_S2_DESIGN          = OWNER_ACCEPTED
+OS_S2_IMPLEMENTATION  = NOT_AUTHORIZED
+DECISIONS_1_TO_5      = CLOSED
+Q_FACT_VS_SERVICE     =
   MEASUREMENT_ACCESS_SITE_ELECTRICAL_ARE_TYPED_INSTALLATION_FACTS
   TRANSPORT_REMAINS_SEPARATE_CAPABILITY
+MODEL                 = ONE_TYPED_ROW_PER_REQUEST_AND_CAPABILITY
+TABLE                 = commercial_request_installation_facts
+JSON                  = NO
+SEED                  = NO
+BACKFILL              = NO
+MIGRATION             = ADDITIVE
+UNSELECTED            = no fact row
+DESELECT              = DELETE fact row; confirm in UI if facts exist
+LOCKED_WHEN           = first linked Quote
 ```
 
-Transport facts belong to `TRANSPORT`, never inside installation EIC.
+Transport facts belong to `TRANSPORT`, never inside installation EIC. `MISSING_COST_EVIDENCE` stays. Completing it is OS-S3. OS-S2 cannot make `INSTALLATION_EIC` COMPLETE.
 
-`FUTURE_SLICE`: OS-S2.
+`FUTURE_SLICE`: OS-S2 implementation still needs a separate Owner GO.
 
 ---
 
@@ -356,12 +368,12 @@ Immutable boundaries begin at Quote freeze. Request stays mutable office truth e
 
 ## Implementation program
 
-OS-S1 is implemented on main. Later slices still need a separate Owner GO.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementation and later slices still need a separate Owner GO.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
 | OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_CURRENT / BASIC` |
-| OS-S2 | Typed install facts | `NOT_STARTED` |
+| OS-S2 | Typed install facts | `DESIGN_OWNER_ACCEPTED / IMPLEMENTATION_NOT_AUTHORIZED` |
 | OS-S3 | Evidence and service EIC | `NOT_STARTED` |
 | OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
 | OS-S5 | Multi-line Quote | `NOT_STARTED` |
@@ -372,7 +384,7 @@ OS-S1 is implemented on main. Later slices still need a separate Owner GO.
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 and later still need a separate Owner GO.
+OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 design is Owner-accepted. OS-S2 implementation and later slices still need a separate Owner GO.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 

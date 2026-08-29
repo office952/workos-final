@@ -23,10 +23,12 @@ PHASE_1                    = INTEGRATED_ON_MAIN
 MAIN_SHA                   = 2596cd076af631b1679c4530df90dcf22de46bbb
 MAIN_CI_RUN                = 33187511745
 MAIN_CI_STATUS             = SUCCESS
-PHASE_2                    = NOT_STARTED / NOT_AUTHORIZED
+PHASE_2                    = DESIGN_OWNER_ACCEPTED / WRITE_NOT_AUTHORIZED
 PHASE_2_WRITE              = NO
 OS_S1                      = IMPLEMENTED_CURRENT / BASIC
 OS_S1_IMPLEMENTATION       = INTEGRATED_ON_MAIN
+OS_S2_DESIGN               = OWNER_ACCEPTED
+OS_S2_IMPLEMENTATION       = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
 LIVE_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
@@ -62,7 +64,7 @@ PONTAJ_ACTUALS             ≠ COMMERCIAL_FORMULA
 Q_SUBCONTRACT_VALIDITY     = COST_PER_JOB_WITH_VALIDITY_WINDOW
 Q_ACCESS_TRIGGER           = OFFICE_EXPLICITLY_SELECTS_ACCESS_METHOD_AND_EQUIPMENT_REQUIREMENT
 FIXINGS_CONSUMABLES        = typed resource lines; package-per-job allowed; Inventory optional
-SITE_ELECTRICAL            = INCLUDED | EXCLUDED_CUSTOMER_RESPONSIBILITY | SUBCONTRACTED | NOT_APPLICABLE
+SITE_ELECTRICAL            = UNCONFIRMED | INCLUDED | SUBCONTRACTED | EXCLUDED_CUSTOMER_RESPONSIBILITY | NOT_APPLICABLE
 ```
 
 `200 EUR + TVA` is the first real installation Request/offer selling price. It is not an organization-wide list price, not internal cost, not subcontract cost, and it cannot make `INSTALLATION_EIC` COMPLETE. Completing install EIC must not activate product cost-plus on that service.
@@ -121,9 +123,61 @@ SUBCONTRACTED
 
 `CURRENT_RUNTIME` locks selection and mode after the first linked Quote. A later revision workflow is **NOT_IMPLEMENTED**.
 
-## Phase 2 — completeness contract (not implemented)
+## Phase 2 — completeness contract (design accepted; write not authorized)
 
 Montajul is a reusable service for more than one product and company. Completeness facts are typed. They are not all mandatory. A fact becomes required only when the selected mode or site condition needs it.
+
+OS-S2 typed shape — Owner-accepted, not runtime:
+
+```text
+ADDRESS_MODEL = STRUCTURED_REQUEST_OWNED
+REUSABLE_LOCATION_ENTITY = NO_IN_V1
+siteName?
+street
+city
+county?
+postalCode?
+countryCode = RO
+contactName?
+contactPhone?
+accessNotes?
+
+measurementStatus = UNCONFIRMED | CUSTOMER_PROVIDED | OFFICE_MEASURED
+mountingSurfaceWidthMm?
+mountingSurfaceHeightMm?
+installationElevationMm?
+measuredAt?
+measurementNotes?
+PRODUCT_WIDTH = NO
+PRODUCT_HEIGHT = NO
+PRODUCT_AREA = NO
+PRODUCT_PERIMETER = NO
+confirmedAreaMm2 = NO
+
+facadeType =
+  UNCONFIRMED | CONCRETE | BRICK | METAL | ACM | THERMAL_INSULATION |
+  DRYWALL | GLASS | WOOD | OTHER
+fixingMethod =
+  UNCONFIRMED | MECHANICAL_ANCHOR | CHEMICAL_ANCHOR | SCREW | RIVET |
+  ADHESIVE | SUBSTRUCTURE | OTHER
+OTHER_REQUIRES_NOTE = YES
+ADMIN_FACADE_FIXING_CATALOG = NO
+
+siteElectrical =
+  UNCONFIRMED | INCLUDED | SUBCONTRACTED |
+  EXCLUDED_CUSTOMER_RESPONSIBILITY | NOT_APPLICABLE
+NOT_APPLICABLE = explicit selection, not fallback
+
+MODEL = ONE_TYPED_ROW_PER_REQUEST_AND_CAPABILITY
+TABLE = commercial_request_installation_facts
+JSON = NO
+SEED = NO
+BACKFILL = NO
+MIGRATION = ADDITIVE
+DESELECT = DELETE fact row; UI confirmation if facts exist
+```
+
+The address is distinct from the Customer address. The structure may later accept a reusable location registry. Do not build that registry in OS-S2.
 
 | Fact | When applicable |
 | --- | --- |
@@ -174,7 +228,7 @@ Do not invent EUR amounts. Confirm these values before Phase 2 write.
 | Site electrical attendance | EUR / job | When contract is INCLUDED or SUBCONTRACTED | Cost evidence for those modes. EXCLUDED_CUSTOMER_RESPONSIBILITY and NOT_APPLICABLE need no cost row | LETTERS electrical finish is workshop close-out | Site electrical | Resources / Cost or exclusion text |
 | LED mount service | do not reuse | Never as site install | — | `LED installation service` is workshop module mounting | Must not be copied | Keep on LETTERS LIGHTING only |
 
-`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. Phase 2 / OS-S2–OS-S3 write stays closed until a later Owner GO.
+`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. OS-S2 design decisions 1–5 are closed. OS-S2 write and OS-S3 remain closed until a later Owner GO.
 
 ## Phase 3 — one Quote, separate lines (not implemented)
 

@@ -930,7 +930,9 @@ THIRD_MENU                    = NO
 MASTER_SELECTOR               = NO
 UNCONFIGURED_VS_DISABLED      = DISTINGUISHED
 SAVE_NOTICE                   = VISIBLE
-OS_S2                         = NOT_STARTED / NOT_AUTHORIZED
+OS_S2_DESIGN                  = OWNER_ACCEPTED
+OS_S2_IMPLEMENTATION          = NOT_AUTHORIZED
+DECISIONS_1_TO_5              = CLOSED
 MAIN_INTEGRATION              = INTEGRATED_ON_MAIN
 ```
 
