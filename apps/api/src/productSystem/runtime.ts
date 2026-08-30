@@ -845,29 +845,13 @@ export function createProductSystemRuntimeFromOpenDb(
       return persistCreatedCommercialRequest(db, customer, title, description);
     },
     updateCommercialRequest(requestId, patch) {
-      return persistUpdatedCommercialRequest(db, requestId, patch, {
-        hasLinkedQuotes: listCommercialRequestQuoteLinks(db, requestId).length > 0,
-        nextCustomer: patch.customerId ? getCustomer(db, patch.customerId) : undefined,
-      });
+      return persistUpdatedCommercialRequest(db, requestId, patch);
     },
     updateInstallationFacts(requestId, patch, expectedVersion) {
       return persistUpdatedInstallationFacts(db, requestId, patch, expectedVersion);
     },
     linkRequestQuote(requestId, quoteSnapshotId) {
-      const request = getCommercialRequest(db, requestId);
-      if (!request) {
-        return { ok: false, error: "not_found" };
-      }
-      const quote = getQuoteSnapshot(db, quoteSnapshotId);
-      if (!quote) {
-        return { ok: false, error: "quote_unavailable" };
-      }
-      return persistCommercialRequestQuoteLink(
-        db,
-        request,
-        quoteSnapshotId,
-        quote.customer?.customerId,
-      );
+      return persistCommercialRequestQuoteLink(db, requestId, quoteSnapshotId);
     },
     createPerson(displayName, options) {
       return persistCreatedPerson(db, displayName, options);

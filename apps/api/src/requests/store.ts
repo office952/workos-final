@@ -12,8 +12,9 @@ import {
   type CommercialRequestStatus,
   type Customer,
   type OperationalServiceProviderMode,
-  type OrganizationServiceOffer,
 } from "@workos-final/domain";
+import { getQuoteSnapshot } from "../commercial/store.js";
+import { getCustomer } from "../customers/store.js";
 import { readOrganizationServiceOffer } from "../operationalServices/store.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
 import { deleteInstallationFacts, getInstallationFacts } from "./installationFacts.js";
@@ -270,6 +271,19 @@ function isRequestIdentityCollision(error: unknown): boolean {
   );
 }
 
+function requestHasLinkedQuotes(db: SqliteDatabase, requestId: string): boolean {
+  const row = db
+    .prepare(
+      `
+      SELECT 1 AS present
+      FROM commercial_request_quote_links
+      WHERE request_id = ?
+    `,
+    )
+    .get(requestId) as { present: number } | undefined;
+  return row !== undefined;
+}
+
 export function persistUpdatedCommercialRequest(
   db: SqliteDatabase,
   requestId: string,
@@ -282,25 +296,24 @@ export function persistUpdatedCommercialRequest(
     siteInstallationMode?: OperationalServiceProviderMode | null;
     confirmDeleteInstallationFacts?: boolean;
   },
-  context: {
-    hasLinkedQuotes: boolean;
-    nextCustomer?: Customer | null;
-    serviceOffer?: OrganizationServiceOffer;
-  },
 ): CommercialRequestMutationResult {
-  const current = getCommercialRequest(db, requestId);
-  if (!current) {
-    return { ok: false, error: "not_found" };
-  }
-  const updated = updateCommercialRequest(current, patch, {
-    ...context,
-    hasInstallationFacts: getInstallationFacts(db, requestId) !== null,
-    serviceOffer: context.serviceOffer ?? readOrganizationServiceOffer(db),
-  });
-  if (!updated.ok || updated.alreadyApplied) {
-    return updated;
-  }
-  db.transaction(() => {
+  return db.transaction((): CommercialRequestMutationResult => {
+    const current = getCommercialRequest(db, requestId);
+    if (!current) {
+      return { ok: false, error: "not_found" };
+    }
+    const updated = updateCommercialRequest(current, patch, {
+      hasLinkedQuotes: requestHasLinkedQuotes(db, requestId),
+      hasInstallationFacts: getInstallationFacts(db, requestId) !== null,
+      serviceOffer: readOrganizationServiceOffer(db),
+      nextCustomer:
+        patch.customerId !== undefined && patch.customerId !== current.customerId
+          ? getCustomer(db, patch.customerId)
+          : undefined,
+    });
+    if (!updated.ok || updated.alreadyApplied) {
+      return updated;
+    }
     db.prepare(
       `
       UPDATE commercial_requests
@@ -325,8 +338,8 @@ export function persistUpdatedCommercialRequest(
     if (!updated.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID)) {
       deleteInstallationFacts(db, requestId);
     }
+    return updated;
   }).immediate();
-  return updated;
 }
 
 export function listCommercialRequestQuoteLinks(
@@ -364,27 +377,35 @@ export function getCommercialRequestQuoteLinkByQuote(
 
 export function persistCommercialRequestQuoteLink(
   db: SqliteDatabase,
-  request: CommercialRequest,
+  requestId: string,
   quoteSnapshotId: string,
-  quoteCustomerId: string | null | undefined,
 ): CommercialRequestLinkResult {
-  const existing = getCommercialRequestQuoteLinkByQuote(db, quoteSnapshotId);
-  const linked = linkCommercialRequestQuote({
-    request,
-    quoteSnapshotId,
-    quoteCustomerId,
-    existingLink: existing,
-  });
-  if (!linked.ok || linked.alreadyApplied) {
+  return db.transaction((): CommercialRequestLinkResult => {
+    const request = getCommercialRequest(db, requestId);
+    if (!request) {
+      return { ok: false, error: "not_found" };
+    }
+    const quote = getQuoteSnapshot(db, quoteSnapshotId);
+    if (!quote) {
+      return { ok: false, error: "quote_unavailable" };
+    }
+    const linked = linkCommercialRequestQuote({
+      request,
+      quoteSnapshotId,
+      quoteCustomerId: quote.customer?.customerId,
+      existingLink: getCommercialRequestQuoteLinkByQuote(db, quoteSnapshotId),
+    });
+    if (!linked.ok || linked.alreadyApplied) {
+      return linked;
+    }
+    db.prepare(
+      `
+      INSERT INTO commercial_request_quote_links (request_id, quote_snapshot_id, linked_at)
+      VALUES (?, ?, ?)
+    `,
+    ).run(linked.link.requestId, linked.link.quoteSnapshotId, linked.link.linkedAt);
     return linked;
-  }
-  db.prepare(
-    `
-    INSERT INTO commercial_request_quote_links (request_id, quote_snapshot_id, linked_at)
-    VALUES (?, ?, ?)
-  `,
-  ).run(linked.link.requestId, linked.link.quoteSnapshotId, linked.link.linkedAt);
-  return linked;
+  }).immediate();
 }
 
 type AttachmentRow = {

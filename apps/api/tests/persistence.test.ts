@@ -933,22 +933,16 @@ describe("product system persistence", () => {
     expect(first.request.optionalScopeIds).toEqual([]);
     expect(first.request.siteInstallationMode).toBeNull();
     expect(
-      persistUpdatedCommercialRequest(
-        db,
-        first.request.requestId,
-        { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
-        { hasLinkedQuotes: false },
-      ),
+      persistUpdatedCommercialRequest(db, first.request.requestId, {
+        optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+      }),
     ).toEqual({ ok: false, error: "service_not_offered" });
     expect(
       persistOrganizationServiceOffer(db, SITE_INSTALLATION_SCOPE_ID, "INTERNAL").ok,
     ).toBe(true);
-    const selected = persistUpdatedCommercialRequest(
-      db,
-      first.request.requestId,
-      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
-      { hasLinkedQuotes: false },
-    );
+    const selected = persistUpdatedCommercialRequest(db, first.request.requestId, {
+      optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+    });
     expect(selected.ok).toBe(true);
     if (selected.ok) {
       expect(selected.request.optionalScopeIds).toEqual([SITE_INSTALLATION_SCOPE_ID]);
@@ -966,19 +960,13 @@ describe("product system persistence", () => {
         provider_mode: "INTERNAL",
       },
     ]);
-    const again = persistUpdatedCommercialRequest(
-      db,
-      first.request.requestId,
-      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
-      { hasLinkedQuotes: false },
-    );
+    const again = persistUpdatedCommercialRequest(db, first.request.requestId, {
+      optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+    });
     expect(again).toMatchObject({ ok: true, alreadyApplied: true });
-    const cleared = persistUpdatedCommercialRequest(
-      db,
-      first.request.requestId,
-      { optionalScopeIds: [] },
-      { hasLinkedQuotes: false },
-    );
+    const cleared = persistUpdatedCommercialRequest(db, first.request.requestId, {
+      optionalScopeIds: [],
+    });
     expect(cleared.ok).toBe(true);
     if (cleared.ok) {
       expect(cleared.request.optionalScopeIds).toEqual([]);
@@ -1021,12 +1009,9 @@ describe("product system persistence", () => {
       "2026-08-20T10:00:00.000Z",
       null,
     );
-    const stored = persistUpdatedCommercialRequest(
-      db,
-      created.request.requestId,
-      { title: "Cerere existentă" },
-      { hasLinkedQuotes: false },
-    );
+    const stored = persistUpdatedCommercialRequest(db, created.request.requestId, {
+      title: "Cerere existentă",
+    });
     expect(stored.ok).toBe(true);
     if (!stored.ok) {
       return;
@@ -1036,15 +1021,10 @@ describe("product system persistence", () => {
     expect(stored.request.siteInstallationMode).toBeNull();
     expect(siteInstallationFreezeRefusal(stored.request.optionalScopeIds)).not.toBeNull();
     expect(
-      persistUpdatedCommercialRequest(
-        db,
-        created.request.requestId,
-        {
-          optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
-          siteInstallationMode: "INTERNAL",
-        },
-        { hasLinkedQuotes: false },
-      ),
+      persistUpdatedCommercialRequest(db, created.request.requestId, {
+        optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+        siteInstallationMode: "INTERNAL",
+      }),
     ).toEqual({ ok: false, error: "service_mode_unavailable" });
     db.close();
   });
@@ -1097,28 +1077,46 @@ describe("product system persistence", () => {
       return;
     }
     expect(persistOrganizationServiceOffer(db, SITE_INSTALLATION_SCOPE_ID, "BOTH").ok).toBe(true);
-    const selected = persistUpdatedCommercialRequest(
-      db,
-      created.request.requestId,
-      {
-        optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
-        siteInstallationMode: "INTERNAL",
-      },
-      { hasLinkedQuotes: false },
-    );
+    const selected = persistUpdatedCommercialRequest(db, created.request.requestId, {
+      optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID],
+      siteInstallationMode: "INTERNAL",
+    });
     expect(selected.ok).toBe(true);
+    db.prepare(
+      `
+      INSERT INTO quote_snapshots (
+        quote_snapshot_id, product_code, source_review_id, content_hash,
+        schema_version, created_at, payload
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    ).run(
+      "qts:locked-selection",
+      CANONICAL_PRODUCT_CODE,
+      "rev:locked-selection",
+      "hash-locked-selection",
+      1,
+      "2026-08-30T00:00:00.000Z",
+      "{}",
+    );
+    db.prepare(
+      `
+      INSERT INTO commercial_request_quote_links (request_id, quote_snapshot_id, linked_at)
+      VALUES (?, ?, ?)
+    `,
+    ).run(
+      created.request.requestId,
+      "qts:locked-selection",
+      "2026-08-30T00:00:00.000Z",
+    );
     const before = db
       .prepare(
         "SELECT request_id, scope_id, provider_mode FROM commercial_request_optional_scopes",
       )
       .all() as Array<{ request_id: string; scope_id: string; provider_mode: string | null }>;
     expect(
-      persistUpdatedCommercialRequest(
-        db,
-        created.request.requestId,
-        { siteInstallationMode: "SUBCONTRACTED" },
-        { hasLinkedQuotes: true },
-      ),
+      persistUpdatedCommercialRequest(db, created.request.requestId, {
+        siteInstallationMode: "SUBCONTRACTED",
+      }),
     ).toEqual({ ok: false, error: "service_selection_locked" });
     const after = db
       .prepare(

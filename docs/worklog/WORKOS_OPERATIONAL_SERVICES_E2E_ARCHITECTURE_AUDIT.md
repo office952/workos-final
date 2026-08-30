@@ -1000,3 +1000,7 @@ Every installation-facts write is version-bound. Create uses `expectedVersion = 
 
 Facts persist re-reads Request existence, SITE_INSTALLATION selection, and Quote links inside the same IMMEDIATE transaction as the version check and CAS write. Runtime no longer passes stale `selected` / `hasLinkedQuotes` booleans. OS-S3 remains unauthorized.
 
+### Commercial request serialization closure — 2026-08-30
+
+Request update and Quote link now open IMMEDIATE first, then re-read Request, facts existence, Quote links, organization service offer, next Customer, and Quote snapshot inside that transaction before domain evaluation or write. Runtime passes only `requestId` plus patch or `quoteSnapshotId`. Deselect cannot delete a concurrent facts save without confirmation. Add-installation versus Quote link serializes to either selected with zero links or unselected with one link. OS-S3 remains unauthorized.
+
