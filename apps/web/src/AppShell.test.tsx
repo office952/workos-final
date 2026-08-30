@@ -1,10 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
 import { CloudSessionProvider } from "./CloudSessionContext";
+import { SIDEBAR_COLLAPSED_STORAGE_KEY } from "./navigation/navigationRegistry";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
 import { ThemeProvider } from "./theme/ThemeProvider";
 
@@ -42,27 +43,30 @@ function renderShell(ui: ReactElement, initialEntries: string[] = ["/"]) {
   );
 }
 
+function primaryNav() {
+  return screen.getByRole("navigation", { name: "Navigare principală" });
+}
+
 describe("AppShell", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.removeItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
   });
 
-  it("shows the Romanian shell chrome without internal capability names", async () => {
+  it("shows the Romanian sidebar without internal capability names or top-nav L2", async () => {
     renderShell(
-      <AppShell
-        navItems={[
-          { to: "/products", label: "Produse" },
-          { to: "/admin", label: "Administrare" },
-        ]}
-      >
+      <AppShell>
         <p>conținut</p>
       </AppShell>,
     );
 
     expect(screen.getByText("WorkOS Final")).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Navigare principală" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Produse" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
+    expect(primaryNav()).toBeInTheDocument();
+    expect(within(primaryNav()).getByRole("link", { name: "Lucrări" })).toBeInTheDocument();
+    expect(within(primaryNav()).getByRole("link", { name: "Catalog" })).toBeInTheDocument();
+    expect(within(primaryNav()).queryByRole("link", { name: /^Comercial$/ })).not.toBeInTheDocument();
+    expect(within(primaryNav()).queryByRole("link", { name: /^Administrare$/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Navigare comercială" })).not.toBeInTheDocument();
     expect(screen.getByText("conținut")).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: "Identifică-te" })).toBeInTheDocument();
     expect(screen.queryByText("PRODUCT")).not.toBeInTheDocument();
@@ -70,105 +74,151 @@ describe("AppShell", () => {
     expect(screen.queryByText("RESOURCES_COST")).not.toBeInTheDocument();
   });
 
-  it("marks the active section in primary navigation", () => {
+  it("treats categories as labels, not links, and gives pages Lucide icons", () => {
     renderShell(
-      <AppShell
-        navItems={[
-          { to: "/products", label: "Produse" },
-          { to: "/admin", label: "Administrare" },
-        ]}
-      >
+      <AppShell>
         <p>conținut</p>
       </AppShell>,
-      ["/admin"],
     );
+    const nav = primaryNav();
+    for (const category of ["Comercial", "Producție", "Resurse", "Oameni", "Administrare"]) {
+      const label = within(nav).getByText(category);
+      expect(label.tagName).toBe("P");
+      expect(label.closest("a")).toBeNull();
+      expect(label.querySelector("svg")).toBeNull();
+    }
+    const lucrari = within(nav).getByRole("link", { name: "Lucrări" });
+    expect(lucrari.querySelector("svg")).not.toBeNull();
+    expect(
+      within(nav).queryByRole("link", { name: "Acasă" }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(nav).queryByRole("link", { name: "Plăți și avansuri" }),
+    ).not.toBeInTheDocument();
+    expect(within(nav).getByRole("link", { name: "Guvernanță" })).toBeInTheDocument();
+  });
 
-    expect(screen.getByRole("link", { name: "Administrare" })).toHaveAttribute(
+  it("marks Lucrări current on / and /jobs object routes", () => {
+    renderShell(
+      <AppShell>
+        <p>lucrare</p>
+      </AppShell>,
+      ["/jobs/ord:1"],
+    );
+    expect(within(primaryNav()).getByRole("link", { name: "Lucrări" })).toHaveAttribute(
       "aria-current",
       "page",
     );
-    expect(screen.getByRole("link", { name: "Produse" })).not.toHaveAttribute(
+    expect(within(primaryNav()).getByRole("link", { name: "Catalog" })).not.toHaveAttribute(
       "aria-current",
       "page",
     );
   });
 
-  it("keeps Comercial active across commercial routes and shows secondary links", () => {
+  it("activates Oferte on quote routes without a Comercial L2", () => {
     renderShell(
-      <AppShell
-        navItems={[
-          { to: "/", label: "Lucrări" },
-          { to: "/atelier", label: "Atelier" },
-          {
-            to: "/requests",
-            label: "Comercial",
-            matchPrefixes: ["/requests", "/quotes", "/clients"],
-          },
-          { to: "/products", label: "Produse" },
-        ]}
-      >
+      <AppShell>
         <p>oferte</p>
       </AppShell>,
       ["/quotes"],
     );
-
-    expect(screen.getByRole("link", { name: "Comercial" })).toHaveAttribute(
+    expect(within(primaryNav()).getByRole("link", { name: "Oferte" })).toHaveAttribute(
       "aria-current",
       "page",
     );
-    expect(screen.getByRole("link", { name: "Atelier" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Navigare comercială" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Oferte" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-    expect(screen.getByRole("link", { name: "Clienți" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Navigare comercială" })).not.toBeInTheDocument();
   });
 
-  it("keeps Catalog as level 1 when configuring without a frozen quote", () => {
+  it("keeps Catalog current when configuring without a commercial continuation", () => {
     renderShell(
-      <AppShell
-        navItems={[
-          {
-            to: "/requests",
-            label: "Comercial",
-            matchPrefixes: ["/requests", "/quotes", "/clients"],
-          },
-          { to: "/products", label: "Catalog" },
-        ]}
-      >
+      <AppShell>
         <p>configurator</p>
+      </AppShell>,
+      ["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06"],
+    );
+    expect(within(primaryNav()).getByRole("link", { name: "Catalog" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(primaryNav()).getByRole("link", { name: "Cereri" })).not.toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("activates Cereri for a request continuation and Oferte for a quote continuation", () => {
+    const request = renderShell(
+      <AppShell>
+        <p>cerere</p>
       </AppShell>,
       ["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=crq:1"],
     );
-
-    expect(screen.queryByRole("navigation", { name: "Navigare comercială" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Catalog" })).toHaveAttribute("aria-current", "page");
-  });
-
-  it("keeps commercial secondary navigation on a product continuation", () => {
-    renderShell(
-      <AppShell
-        navItems={[
-          { to: "/", label: "Lucrări" },
-          {
-            to: "/requests",
-            label: "Comercial",
-            matchPrefixes: ["/requests", "/quotes", "/clients"],
-          },
-        ]}
-      >
-        <p>produs</p>
-      </AppShell>,
-      ["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1"],
-    );
-
-    expect(screen.getByRole("navigation", { name: "Navigare comercială" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Oferte" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Comercial" })).toHaveAttribute(
+    expect(within(primaryNav()).getByRole("link", { name: "Cereri" })).toHaveAttribute(
       "aria-current",
       "page",
     );
+    request.unmount();
+    renderShell(
+      <AppShell>
+        <p>ofertă</p>
+      </AppShell>,
+      ["/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts:1"],
+    );
+    expect(within(primaryNav()).getByRole("link", { name: "Oferte" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("has no dead links among visible destinations", () => {
+    renderShell(
+      <AppShell>
+        <p>conținut</p>
+      </AppShell>,
+    );
+    const hrefs = within(primaryNav())
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    expect(hrefs).toEqual([
+      "/clients",
+      "/requests",
+      "/quotes",
+      "/products",
+      "/jobs",
+      "/atelier",
+      "/admin/resources",
+      "/admin/stock",
+      "/admin/workcenters",
+      "/admin/people",
+      "/admin/seller",
+      "/admin/operational-services",
+      "/admin/product-system",
+      "/governance",
+    ]);
+    expect(hrefs.every((href) => href && href.startsWith("/") && !href.includes("undefined"))).toBe(
+      true,
+    );
+  });
+
+  it("persists collapsed sidebar preference", async () => {
+    const user = userEvent.setup();
+    const first = renderShell(
+      <AppShell>
+        <p>conținut</p>
+      </AppShell>,
+    );
+    expect(document.querySelector(".app-shell")).not.toHaveClass("is-sidebar-collapsed");
+    await user.click(screen.getByRole("button", { name: "Restrânge meniul" }));
+    expect(document.querySelector(".app-shell")).toHaveClass("is-sidebar-collapsed");
+    expect(window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY)).toBe("1");
+    first.unmount();
+    renderShell(
+      <AppShell>
+        <p>conținut</p>
+      </AppShell>,
+    );
+    expect(document.querySelector(".app-shell")).toHaveClass("is-sidebar-collapsed");
+    expect(within(primaryNav()).getByRole("link", { name: /Guvernanță/ })).toBeInTheDocument();
   });
 
   it("shows the organization name only in Cloud mode", async () => {
@@ -198,7 +248,7 @@ describe("AppShell", () => {
         <ThemeProvider>
           <CloudSessionProvider>
             <OperatorSessionProvider>
-              <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+              <AppShell>
                 <p>conținut</p>
               </AppShell>
             </OperatorSessionProvider>
@@ -248,7 +298,7 @@ describe("AppShell", () => {
         <ThemeProvider>
           <CloudSessionProvider>
             <OperatorSessionProvider>
-              <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+              <AppShell>
                 <p>conținut</p>
               </AppShell>
             </OperatorSessionProvider>
@@ -265,12 +315,7 @@ describe("AppShell", () => {
 
   it("keeps skip link, theme and Cont utilities available", async () => {
     renderShell(
-      <AppShell
-        navItems={[
-          { to: "/", label: "Lucrări", matchPrefixes: ["/jobs"] },
-          { to: "/admin", label: "Administrare" },
-        ]}
-      >
+      <AppShell>
         <h1>Conținut</h1>
       </AppShell>,
       ["/jobs/ord:1"],
@@ -286,16 +331,15 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Cont" }));
     expect(screen.getByRole("group", { name: "Temă" })).toBeInTheDocument();
     expect(screen.getByLabelText("Cont")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Lucrări" })).toHaveAttribute(
+    expect(within(primaryNav()).getByRole("link", { name: "Lucrări" })).toHaveAttribute(
       "aria-current",
       "page",
     );
-    expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
   });
 
   it("hides Identifică-te on admin routes and keeps skip link off-screen until focus", async () => {
     renderShell(
-      <AppShell navItems={[{ to: "/admin", label: "Administrare" }]}>
+      <AppShell>
         <p>conținut</p>
       </AppShell>,
       ["/admin/resources"],
@@ -306,5 +350,9 @@ describe("AppShell", () => {
     const user = userEvent.setup();
     await user.tab();
     expect(skip).toHaveFocus();
+    expect(within(primaryNav()).getByRole("link", { name: "Resurse și costuri" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 });

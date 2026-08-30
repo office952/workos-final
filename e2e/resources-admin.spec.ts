@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("resources admin inspects material family specification and cost", async ({
@@ -6,11 +7,9 @@ test("resources admin inspects material family specification and cost", async ({
 }) => {
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sistem produs" })).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: "Resurse și cost intern" }),
-  ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Oameni" })).toBeVisible();
+  await expect(adminHomeLink(page, "Sistem produs")).toBeVisible();
+  await expect(adminHomeLink(page, "Resurse și cost intern")).toBeVisible();
+  await expect(adminHomeLink(page, "Oameni")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/resources-admin-home.png",
     fullPage: true,
@@ -21,7 +20,7 @@ test("resources admin inspects material family specification and cost", async ({
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Resurse și cost intern" }).click();
+  await adminHomeLink(page, "Resurse și cost intern").click();
   await expect(
     page.getByRole("heading", { name: "Resurse și cost intern" }),
   ).toBeVisible();
@@ -233,7 +232,7 @@ test("resources admin inspects material family specification and cost", async ({
   await expect(
     page.getByRole("heading", { name: "Resurse și cost intern" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Secțiuni" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Alege elementul" })).toBeVisible();
   await expect(page.getByText("16,00 EUR / m²")).toBeVisible();
   await page.screenshot({

@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("workcenters admin shows the real shop-floor map without inventing capacity", async ({
@@ -6,7 +7,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
 }) => {
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Utilaje și zone" })).toBeVisible();
+  await expect(adminHomeLink(page, "Utilaje și zone")).toBeVisible();
   await expect(page.getByRole("link", { name: "Utilaje și capacitate" })).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/workcenters-admin-home.png",
@@ -17,7 +18,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Utilaje și zone" }).click();
+  await adminHomeLink(page, "Utilaje și zone").click();
   await expect(page.getByRole("heading", { name: "Utilaje și zone", level: 1 })).toBeVisible();
   await expect(
     page.getByText(/Zone \d+ · Utilaje \d+ · Capabilități acoperite \d+ · Fără furnizor \d+/),

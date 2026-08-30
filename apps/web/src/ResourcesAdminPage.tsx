@@ -13,7 +13,6 @@ import {
 } from "./resourcesCatalog";
 import { fetchResourcesAdministration } from "./systemApi";
 import { ActionDrawer } from "./ui/ActionDrawer";
-import { AdminSidebar } from "./ui/AdminSidebar";
 import { CatalogItemDetail } from "./ui/CatalogItemDetail";
 import { EmptyState } from "./ui/EmptyState";
 import { MasterSelector } from "./ui/MasterSelector";
@@ -26,7 +25,7 @@ type PageState =
   | { kind: "error" }
   | { kind: "ready"; admin: ResourcesAdminProjection };
 
-type DrawerId = "sections" | "picker";
+type DrawerId = "picker";
 
 export function ResourcesAdminPage() {
   const canAdminister = useCanAdministerOrganization();
@@ -96,30 +95,20 @@ export function ResourcesAdminPage() {
 
   if (page.kind === "loading") {
     return (
-      <section className="admin-floorplan">
-        <aside className="admin-floorplan-sidebar">
-          <AdminSidebar current="resources" />
-        </aside>
-        <div className="admin-floorplan-main">
-          {chrome}
-          <PageStatus kind="loading">Se încarcă catalogul de resurse…</PageStatus>
-        </div>
+      <section>
+        {chrome}
+        <PageStatus kind="loading">Se încarcă catalogul de resurse…</PageStatus>
       </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <section className="admin-floorplan">
-        <aside className="admin-floorplan-sidebar">
-          <AdminSidebar current="resources" />
-        </aside>
-        <div className="admin-floorplan-main">
-          {chrome}
-          <PageStatus kind="error">Nu s-a putut încărca catalogul de resurse.</PageStatus>
-          <button type="button" className="page-status-retry" onClick={retryLoad}>
-            Reîncearcă
-          </button>
-        </div>
+      <section>
+        {chrome}
+        <PageStatus kind="error">Nu s-a putut încărca catalogul de resurse.</PageStatus>
+        <button type="button" className="page-status-retry" onClick={retryLoad}>
+          Reîncearcă
+        </button>
       </section>
     );
   }
@@ -130,72 +119,57 @@ export function ResourcesAdminPage() {
   const selectedItem = selected ? findCatalogItem(catalog, selected) : undefined;
 
   return (
-    <section className="admin-floorplan">
-      <aside className="admin-floorplan-sidebar">
-        <AdminSidebar current="resources" />
-      </aside>
-      <div className="admin-floorplan-main">
-        {chrome}
-        <p className="page-summary">{formatResourcesAdminSummary(summary)}</p>
-        <Notice compact>
-          {!canAdminister ? (
-            <OwnerWriteHint />
-          ) : writable ? (
-            <p>
-              Valorile implicite de platformă nu sunt cost confirmat. Salvezi un
-              tarif = confirmat de owner pentru calcule noi. Ofertele și lucrările
-              înghețate nu se schimbă.
-            </p>
-          ) : (
-            <p>
-              Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este
-              disponibilă în această etapă.
-            </p>
-          )}
-        </Notice>
-        <div className="admin-compact-triggers">
-          <button type="button" onClick={() => openDrawer("sections")}>
-            Secțiuni
-          </button>
-          <button type="button" onClick={() => openDrawer("picker")}>
-            Alege elementul
-          </button>
+    <section>
+      {chrome}
+      <p className="page-summary">{formatResourcesAdminSummary(summary)}</p>
+      <Notice compact>
+        {!canAdminister ? (
+          <OwnerWriteHint />
+        ) : writable ? (
+          <p>
+            Valorile implicite de platformă nu sunt cost confirmat. Salvezi un
+            tarif = confirmat de owner pentru calcule noi. Ofertele și lucrările
+            înghețate nu se schimbă.
+          </p>
+        ) : (
+          <p>
+            Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este
+            disponibilă în această etapă.
+          </p>
+        )}
+      </Notice>
+      <div className="admin-compact-triggers">
+        <button type="button" onClick={() => openDrawer("picker")}>
+          Alege elementul
+        </button>
+      </div>
+      <div className="admin-master-detail">
+        <div className="admin-master-detail-selector">
+          <MasterSelector
+            catalog={catalog}
+            selectedItemId={selected}
+            onSelect={selectItem}
+          />
         </div>
-        <div className="admin-master-detail">
-          <div className="admin-master-detail-selector">
-            <MasterSelector
-              catalog={catalog}
-              selectedItemId={selected}
-              onSelect={selectItem}
+        <div className="admin-master-detail-panel">
+          {!selected ? (
+            <EmptyState title="Alege un element" />
+          ) : !selectedItem ? (
+            <PageStatus kind="missing">Element inexistent</PageStatus>
+          ) : (
+            <CatalogItemDetail
+              item={selectedItem}
+              actions={
+                writable
+                  ? renderCostAction(page.admin, selectedItem.id, (admin) =>
+                      setPage({ kind: "ready", admin }),
+                    )
+                  : null
+              }
             />
-          </div>
-          <div className="admin-master-detail-panel">
-            {!selected ? (
-              <EmptyState title="Alege un element" />
-            ) : !selectedItem ? (
-              <PageStatus kind="missing">Element inexistent</PageStatus>
-            ) : (
-              <CatalogItemDetail
-                item={selectedItem}
-                actions={
-                  writable
-                    ? renderCostAction(page.admin, selectedItem.id, (admin) =>
-                        setPage({ kind: "ready", admin }),
-                      )
-                    : null
-                }
-              />
-            )}
-          </div>
+          )}
         </div>
       </div>
-      <ActionDrawer
-        title="Secțiuni"
-        open={drawer === "sections"}
-        onClose={() => setDrawer(null)}
-      >
-        <AdminSidebar current="resources" onNavigate={() => setDrawer(null)} />
-      </ActionDrawer>
       <ActionDrawer
         title="Alege elementul"
         open={drawer === "picker"}

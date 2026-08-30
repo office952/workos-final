@@ -107,13 +107,14 @@ export async function identifyTestExecutorOnPage(
   if (await page.getByRole("button", { name: "Ieși" }).isVisible()) {
     return;
   }
-  const pagePin = page.locator("form.operator-identify-form").getByLabel("PIN");
+  const pageForm = page.locator("form.operator-identify-form");
+  const pagePin = pageForm.getByRole("textbox", { name: "PIN" });
   if (await pagePin.count()) {
-    await page.locator("form.operator-identify-form").getByLabel("Persoană").selectOption({
+    await pageForm.getByLabel("Persoană").selectOption({
       label: displayName,
     });
     await pagePin.fill(pin);
-    await page.locator("form.operator-identify-form").getByRole("button", { name: "Confirmă" }).click();
+    await pageForm.getByRole("button", { name: "Confirmă" }).click();
     await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
     return;
   }
@@ -126,20 +127,20 @@ export async function identifyTestExecutorOnPage(
 
 export async function assignProviderIfNeeded(card: Locator, providerLabel?: string) {
   const assign = card.getByRole("button", { name: "Alocă utilaj", exact: true });
-  if (!(await assign.isVisible())) {
+  if ((await assign.count()) === 0) {
     return;
   }
+  await expect(assign).toBeVisible();
   if (providerLabel) {
     await card.getByRole("combobox", { name: "Utilaj dedicat" }).selectOption({
       label: providerLabel,
     });
   }
   await assign.click();
-  await expect(card.getByText(/Alocat:/)).toBeVisible();
+  await expect(card.getByText(providerLabel ? `Alocat: ${providerLabel}` : /Alocat:/)).toBeVisible();
 }
 
 export async function openPeopleAdmin(page: Page) {
-  await page.goto("/admin");
-  await page.getByRole("link", { name: "Oameni" }).click();
+  await page.goto("/admin/people");
   await expect(page.getByRole("heading", { name: "Oameni" })).toBeVisible();
 }

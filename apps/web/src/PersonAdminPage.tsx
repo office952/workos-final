@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import type { PersonRegistryItem, Skill } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
-import { AdminDomainLinks } from "./AdminDomainLinks";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import {
@@ -31,7 +31,7 @@ type PageState =
 
 export function PersonAdminPage() {
   const canAdminister = useCanAdministerOrganization();
-  const { personId = "" } = useParams();
+  const personId = usePathIdAfter("/admin/people/");
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [name, setName] = useState("");
   const [reason, setReason] = useState("");
@@ -78,7 +78,6 @@ export function PersonAdminPage() {
     return (
       <section className="people-admin">
         <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
-        <AdminDomainLinks current="people" />
         <p>Se încarcă omul…</p>
       </section>
     );
@@ -87,7 +86,6 @@ export function PersonAdminPage() {
     return (
       <section className="people-admin">
         <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
-        <AdminDomainLinks current="people" />
         <p>Persoana cerută nu este disponibilă.</p>
       </section>
     );
@@ -96,7 +94,6 @@ export function PersonAdminPage() {
     return (
       <section className="people-admin">
         <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
-        <AdminDomainLinks current="people" />
         <p>Persoana nu a putut fi încărcată.</p>
       </section>
     );
@@ -129,7 +126,6 @@ export function PersonAdminPage() {
           ← Oameni
         </Link>
       </p>
-      <AdminDomainLinks current="people" />
       <PeopleAdminNav />
       <header className="client-workspace-header">
         <div>

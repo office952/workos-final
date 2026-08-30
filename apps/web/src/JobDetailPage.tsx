@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { appLocation } from "./navigation/routePath";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import { formatCustomerMoneyAmount, jobConfiguratorHref } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { fetchJobDetail, type JobDetailResponse } from "./jobsApi";
@@ -38,7 +40,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export function JobDetailPage() {
-  const { jobId = "" } = useParams();
+  const jobId = usePathIdAfter("/jobs/");
   const location = useLocation();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
 
@@ -167,7 +169,7 @@ export function JobDetailPage() {
               {depthMm ? <Field label="Adâncime">{depthMm} mm</Field> : null}
             </dl>
             <p className="decision-links">
-              <Link to={configuratorHref}>Deschide configuratorul</Link>
+              <Link to={appLocation(configuratorHref)}>Deschide configuratorul</Link>
             </p>
           </section>
           <section className="decision-card" aria-labelledby="job-progress">
@@ -205,12 +207,12 @@ export function JobDetailPage() {
             <h2 id="job-links">Legături</h2>
             <div className="decision-links">
               {request ? (
-                <Link to={request.href}>
+                <Link to={appLocation(request.href)}>
                   Cerere{request.reference ? ` ${request.reference}` : ""}
                 </Link>
               ) : null}
-              <Link to={quote.href}>Ofertă{quote.reference ? ` ${quote.reference}` : ""}</Link>
-              {execution?.href ? <Link to={execution.href}>Plan de execuție</Link> : null}
+              <Link to={appLocation(quote.href)}>Ofertă{quote.reference ? ` ${quote.reference}` : ""}</Link>
+              {execution?.href ? <Link to={appLocation(execution.href)}>Plan de execuție</Link> : null}
             </div>
           </section>
         </div>
@@ -273,11 +275,11 @@ export function JobDetailPage() {
       </section>
       <p className="decision-actions">
         {openExecution ? (
-          <Link className="button-link" to={openExecution.to}>
+          <Link className="button-link" to={appLocation(openExecution.to)}>
             {openExecution.label}
           </Link>
         ) : continueConfigurator ? (
-          <Link className="button-link" to={continueConfigurator.to}>
+          <Link className="button-link" to={appLocation(continueConfigurator.to)}>
             {continueConfigurator.label}
           </Link>
         ) : null}

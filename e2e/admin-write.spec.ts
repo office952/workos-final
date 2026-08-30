@@ -1,5 +1,6 @@
 import { type APIRequestContext, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { adminHomeLink, primaryNavLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const FAMILY_ID = "LIGHTED_VOLUMETRIC_SIGNS";
@@ -28,18 +29,12 @@ test("admin display-label write persists and propagates", async ({
   try {
     await page.goto("/admin");
     await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sistem produs" })).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Resurse și cost intern" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Procese operaționale" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Utilaje și zone" }),
-    ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Oameni" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Clienți" })).toBeVisible();
+    await expect(adminHomeLink(page, "Sistem produs")).toBeVisible();
+    await expect(adminHomeLink(page, "Resurse și cost intern")).toBeVisible();
+    await expect(adminHomeLink(page, "Procese operaționale")).toBeVisible();
+    await expect(adminHomeLink(page, "Utilaje și zone")).toBeVisible();
+    await expect(adminHomeLink(page, "Oameni")).toBeVisible();
+    await expect(adminHomeLink(page, "Clienți")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Operațiuni" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Comercial" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
@@ -53,7 +48,7 @@ test("admin display-label write persists and propagates", async ({
       fullPage: true,
     });
 
-    await page.getByRole("link", { name: "Sistem produs" }).click();
+    await adminHomeLink(page, "Sistem produs").click();
     await expect(page.getByRole("heading", { name: "Sistem produs" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Familii" })).toHaveAttribute(
       "aria-current",
@@ -126,7 +121,7 @@ test("admin display-label write persists and propagates", async ({
     await page.getByRole("button", { name: "Salvează" }).click();
     await expectSelectedCatalogLabel(page, RENAMED.type);
 
-    await page.getByRole("link", { name: "Catalog" }).click();
+    await primaryNavLink(page, "Catalog").click();
     await expect(page.getByRole("link", { name: RENAMED.product })).toBeVisible();
     await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
     await page.screenshot({
@@ -134,8 +129,7 @@ test("admin display-label write persists and propagates", async ({
       fullPage: true,
     });
 
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Administrare" }).click();
-    await page.getByRole("link", { name: "Module și componente" }).click();
+    await page.goto("/components");
     await expect(page.getByRole("heading", { name: "Module și componente" })).toBeVisible();
     await page.getByRole("button", { name: "Familii" }).click();
     await selectCatalogItem(page, RENAMED.family);

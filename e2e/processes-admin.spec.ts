@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("processes admin inspects capability-bound operational processes", async ({
@@ -6,11 +7,11 @@ test("processes admin inspects capability-bound operational processes", async ({
 }) => {
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sistem produs" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Procese operaționale" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Oameni" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Utilaje și zone" })).toBeVisible();
+  await expect(adminHomeLink(page, "Sistem produs")).toBeVisible();
+  await expect(adminHomeLink(page, "Resurse și cost intern")).toBeVisible();
+  await expect(adminHomeLink(page, "Procese operaționale")).toBeVisible();
+  await expect(adminHomeLink(page, "Oameni")).toBeVisible();
+  await expect(adminHomeLink(page, "Utilaje și zone")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/processes-admin-home.png",
     fullPage: true,
@@ -21,7 +22,7 @@ test("processes admin inspects capability-bound operational processes", async ({
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Procese operaționale" }).click();
+  await adminHomeLink(page, "Procese operaționale").click();
   await expect(
     page.getByRole("heading", { name: "Procese operaționale" }),
   ).toBeVisible();

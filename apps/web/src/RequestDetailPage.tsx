@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import {
   COMMERCIAL_REQUEST_STATUSES,
   SITE_INSTALLATION_SCOPE_ID,
@@ -40,7 +41,7 @@ type PageState =
   | { kind: "ready"; detail: RequestDetailProjection };
 
 export function RequestDetailPage() {
-  const { requestId = "" } = useParams();
+  const requestId = usePathIdAfter("/requests/");
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [products, setProducts] = useState<Array<{ code: string; label: string }>>([]);
   const [title, setTitle] = useState("");

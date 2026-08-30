@@ -31,18 +31,6 @@ import { CloudSessionProvider, useCloudSession } from "./CloudSessionContext";
 import { LoginPage } from "./LoginPage";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
 
-const NAV_ITEMS = [
-  { to: "/", label: "Lucrări", matchPrefixes: ["/jobs"] },
-  { to: "/atelier", label: "Atelier" },
-  {
-    to: "/requests",
-    label: "Comercial",
-    matchPrefixes: ["/requests", "/quotes", "/clients"],
-  },
-  { to: "/products", label: "Catalog" },
-  { to: "/admin", label: "Administrare" },
-];
-
 export function App() {
   return (
     <CloudSessionProvider>
@@ -75,22 +63,23 @@ function AppGate() {
   }
   return (
     <OperatorSessionProvider key={organization?.organizationId ?? "single-plane"}>
-      <AppShell navItems={NAV_ITEMS}>
+      <AppShell>
         <Routes key={organization?.organizationId ?? "single-plane"}>
           <Route path="/" element={<JobsOverviewPage />} />
-          <Route path="/jobs/:jobId" element={<JobDetailPage />} />
+          <Route path="/jobs" element={<JobsOverviewPage />} />
+          <Route path="/jobs/*" element={<JobDetailPage />} />
           <Route path="/atelier" element={<AtelierPage />} />
           <Route path="/commercial" element={<Navigate to="/requests" replace />} />
           <Route path="/requests" element={<RequestsOverviewPage />} />
-          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+          <Route path="/requests/*" element={<RequestDetailPage />} />
           <Route path="/quotes" element={<QuotesOverviewPage />} />
-          <Route path="/quotes/:quoteSnapshotId" element={<QuoteInspectionPage />} />
+          <Route path="/quotes/*" element={<QuoteInspectionPage />} />
           <Route path="/clients" element={<ClientsOverviewPage />} />
-          <Route path="/clients/:customerId" element={<ClientWorkspacePage />} />
+          <Route path="/clients/*" element={<ClientWorkspacePage />} />
           <Route path="/system" element={<SystemStatusPage />} />
           <Route path="/products" element={<ProductCatalogPage />} />
           <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
-          <Route path="/execution/:planId" element={<ExecutionWorkspacePage />} />
+          <Route path="/execution/*" element={<ExecutionWorkspacePage />} />
           <Route path="/components" element={<ComponentsPage />} />
           <Route path="/governance" element={<GovernancePage />} />
           <Route path="/admin" element={<AdminHomePage />} />
@@ -102,7 +91,7 @@ function AppGate() {
           <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
           <Route path="/admin/people" element={<PeopleAdminPage />} />
           <Route path="/admin/people/skills" element={<SkillsAdminPage />} />
-          <Route path="/admin/people/:personId" element={<PersonAdminPage />} />
+          <Route path="/admin/people/*" element={<PersonAdminPage />} />
           <Route path="/admin/customers" element={<CustomerAdminPage />} />
           <Route path="/admin/seller" element={<SellerAdminPage />} />
           <Route path="/admin/operational-services" element={<OperationalServicesAdminPage />} />

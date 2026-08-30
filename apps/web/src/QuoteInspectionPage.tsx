@@ -1,7 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { formatCustomerMoneyAmount, type QuoteOverviewStage } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
+import { appPathname } from "./navigation/routePath";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import { acceptQuoteSnapshot, createOrderSnapshot } from "./productApi";
 import { fetchQuoteInspection, type QuoteInspectionResponse } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
@@ -54,7 +56,7 @@ function quoteConsequence(stage: QuoteOverviewStage): string {
 }
 
 export function QuoteInspectionPage() {
-  const { quoteSnapshotId = "" } = useParams();
+  const quoteSnapshotId = usePathIdAfter("/quotes/");
   const location = useLocation();
   const navigate = useNavigate();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
@@ -153,7 +155,7 @@ export function QuoteInspectionPage() {
       setActionError(result.message ?? "Comanda nu a putut fi creată.");
       return;
     }
-    navigate(`/jobs/${encodeURIComponent(result.orderSnapshot.orderSnapshotId)}`);
+    navigate(appPathname(`/jobs/${encodeURIComponent(result.orderSnapshot.orderSnapshotId)}`));
   }
 
   const primary =

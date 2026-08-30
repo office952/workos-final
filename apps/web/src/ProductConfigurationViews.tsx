@@ -586,7 +586,7 @@ export function QuoteSnapshotSection({
         <div className="action-row">
           <Link
             className="button-link"
-            to={`/quotes/${encodeURIComponent(snapshot.quoteSnapshotId)}`}
+            to={{ pathname: `/quotes/${encodeURIComponent(snapshot.quoteSnapshotId)}` }}
           >
             Inspectează oferta
           </Link>

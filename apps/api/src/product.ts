@@ -44,6 +44,7 @@ import type { ProductSystemRuntime } from "./productSystem/runtime.js";
 import { getProductSystem, type ApiContext, type ApiEnv } from "./cloud/context.js";
 import { financialAccess } from "./financial/access.js";
 import { requireOwnerRole } from "./cloud/middleware.js";
+import { httpPathIdentity } from "./httpPathIdentity.js";
 import { OPERATOR_SESSION_COOKIE } from "./operator/store.js";
 import { renderQuoteDocumentPdf } from "./quoteDocument/renderQuoteDocumentPdf.js";
 
@@ -621,7 +622,9 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
 
   app.get("/api/execution-plans/:planId", (c) => {
     const runtime = getProductSystem(c);
-    const record = runtime.readExecutionPlan(c.req.param("planId"));
+    const record = runtime.readExecutionPlan(
+      httpPathIdentity(c.req.path, "/api/execution-plans/"),
+    );
     if (!record) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -645,12 +648,13 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       return c.json({ error: "invalid_payload" }, 400);
     }
     const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
+    const taskId = httpPathIdentity(c.req.path, "/api/execution-tasks/", "/provider");
     return respondTaskMutation(
       c,
       runtime,
-      runtime.assignExecutionTaskProvider(c.req.param("taskId"), providerId),
+      runtime.assignExecutionTaskProvider(taskId, providerId),
       {
-        taskId: c.req.param("taskId"),
+        taskId,
         operatorId: session.ok ? session.person.personId : null,
       },
     );
@@ -663,12 +667,13 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       return c.json({ error: "invalid_payload" }, 400);
     }
     const session = runtime.resolveOperatorSession(getCookie(c, OPERATOR_SESSION_COOKIE));
+    const taskId = httpPathIdentity(c.req.path, "/api/execution-tasks/", "/executor");
     return respondTaskMutation(
       c,
       runtime,
-      runtime.assignExecutionTaskExecutor(c.req.param("taskId"), personId),
+      runtime.assignExecutionTaskExecutor(taskId, personId),
       {
-        taskId: c.req.param("taskId"),
+        taskId,
         operatorId: session.ok ? session.person.personId : null,
       },
     );
@@ -680,7 +685,7 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!session.ok) {
       return c.json({ error: "invalid_session" }, 401);
     }
-    const taskId = c.req.param("taskId");
+    const taskId = httpPathIdentity(c.req.path, "/api/execution-tasks/", "/start");
     return respondTaskMutation(
       c,
       runtime,
@@ -699,7 +704,7 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!input) {
       return c.json({ error: "invalid_payload" }, 400);
     }
-    const taskId = c.req.param("taskId");
+    const taskId = httpPathIdentity(c.req.path, "/api/execution-tasks/", "/complete");
     return respondTaskMutation(
       c,
       runtime,

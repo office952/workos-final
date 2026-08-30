@@ -75,7 +75,7 @@ describe("PersonAdminPage", () => {
     render(
       <MemoryRouter initialEntries={["/admin/people/per:test"]}>
         <Routes>
-          <Route path="/admin/people/:personId" element={<PersonAdminPage />} />
+          <Route path="/admin/people/*" element={<PersonAdminPage />} />
         </Routes>
       </MemoryRouter>,
     );

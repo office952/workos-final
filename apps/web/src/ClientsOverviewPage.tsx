@@ -82,7 +82,7 @@ export function ClientsOverviewPage() {
       setDrawerOpen(false);
       navigate(
         created.customer.customerId
-          ? `/clients/${encodeURIComponent(created.customer.customerId)}`
+          ? { pathname: `/clients/${encodeURIComponent(created.customer.customerId)}` }
           : "/clients",
       );
     } catch {

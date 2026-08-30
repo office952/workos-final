@@ -119,6 +119,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);
   await identifyTestExecutorOnPage(page, ACTIVE_NAME);
+  await expect(page.locator(".execution-plan")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: /Plan de execuție( deja creat)?/ }),
   ).toBeVisible();

@@ -83,7 +83,7 @@ export function RequestsOverviewPage() {
     setNotice(null);
     try {
       const detail = await createCommercialRequest(input);
-      navigate(`/requests/${encodeURIComponent(detail.request.requestId)}`);
+      navigate({ pathname: `/requests/${encodeURIComponent(detail.request.requestId)}` });
     } catch {
       setNotice("Cererea nu a putut fi creată.");
     }

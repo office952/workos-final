@@ -1,7 +1,8 @@
-import { copyFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { createCustomer, selectOrCreateCustomer } from "./helpers/customers";
+import { copyDownload } from "./helpers/copyDownload";
+import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { uniqueJobInscription } from "./helpers/jobs";
 
@@ -26,7 +27,7 @@ async function confirmLetters(page: Page, inscription: string) {
 
 test("admin can create a customer without building CRM", async ({ page }) => {
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Clienți" }).click();
+  await adminHomeLink(page, "Clienți").click();
   await expect(page.getByRole("heading", { name: "Clienți" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/customers-catalog.png",
@@ -63,7 +64,7 @@ test("LETTERS quote freezes customer into PDF, order and Lucrări", async ({ pag
     page.waitForEvent("download"),
     quote.getByRole("link", { name: "Descarcă oferta PDF" }).click(),
   ]);
-  copyFileSync(await download.path(), "docs/worklog/screenshots/letters-quote-customer.pdf");
+  await copyDownload(page, await download.path(), "docs/worklog/screenshots/letters-quote-customer.pdf");
   if ((await quote.getByRole("button", { name: "Marchează acceptată" }).count()) > 0) {
     await quote.getByRole("button", { name: "Marchează acceptată" }).click();
   }
@@ -101,7 +102,7 @@ test("ACM quote freezes a different customer", async ({ page }) => {
     page.waitForEvent("download"),
     quote.getByRole("link", { name: "Descarcă oferta PDF" }).click(),
   ]);
-  copyFileSync(await download.path(), "docs/worklog/screenshots/acm-quote-customer.pdf");
+  await copyDownload(page, await download.path(), "docs/worklog/screenshots/acm-quote-customer.pdf");
   await quote.screenshot({
     path: "docs/worklog/screenshots/acm-quote-customer-frozen.png",
   });

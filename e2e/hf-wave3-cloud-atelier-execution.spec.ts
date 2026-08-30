@@ -86,7 +86,7 @@ test("atelier execution and planned versus actual stay workshop-safe", async ({
   await page.goto("/atelier");
   await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
   await page.screenshot({ path: shot("atelier-unidentified"), fullPage: true });
-  const pinField = page.locator("form.operator-identify-form").getByLabel("PIN");
+  const pinField = page.locator("form.operator-identify-form").getByRole("textbox", { name: "PIN" });
   await expect(pinField).toHaveAttribute("type", "password");
   await page.locator("form.operator-identify-form").getByLabel("Persoană").selectOption({
     label: TEST_EXECUTOR_NAME,
@@ -116,12 +116,12 @@ test("atelier execution and planned versus actual stay workshop-safe", async ({
   await page.getByRole("button", { name: "Schimbă" }).click();
   const drawer = page.getByRole("dialog", { name: "Identifică operatorul" });
   await drawer.getByLabel("Persoană").selectOption({ label: `Operator neeligibil ${inscription}` });
-  await drawer.getByLabel("PIN").fill("246810");
+  await drawer.getByRole("textbox", { name: "PIN" }).fill("246810");
   await drawer.getByRole("button", { name: "Confirmă" }).click();
   await expect(page.getByRole("button", { name: "Pornește" })).toHaveCount(0);
   await page.screenshot({ path: shot("operator-ineligible"), fullPage: true });
   await page.getByRole("button", { name: "Ieși" }).click();
-  await expect(page.locator("form.operator-identify-form").getByLabel("PIN")).toBeVisible();
+  await expect(page.locator("form.operator-identify-form").getByRole("textbox", { name: "PIN" })).toBeVisible();
   await identifyTestExecutorOnPage(page);
   await expect(atelierJobTask(page, "Pot porni acum", inscription).getByRole("button", { name: "Pornește" })).toBeVisible();
 

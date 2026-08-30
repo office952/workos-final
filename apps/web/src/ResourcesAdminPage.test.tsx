@@ -68,13 +68,9 @@ describe("ResourcesAdminPage", () => {
 
     expect(await screen.findByRole("button", { name: "Materiale" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Resurse și cost intern" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Secțiuni administrative" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Resurse și cost intern" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-    expect(screen.getByRole("link", { name: "Utilaje și zone" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Guvernanță" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Context" })).toHaveTextContent("Administrare");
+    expect(screen.queryByRole("navigation", { name: "Secțiuni administrative" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Utilaje și zone" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Atelier — execuție" })).not.toBeInTheDocument();
     expect(screen.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeInTheDocument();
     expect(
@@ -144,28 +140,23 @@ describe("ResourcesAdminPage", () => {
     expect(await screen.findByText("Element inexistent")).toBeInTheDocument();
   });
 
-  it("opens only one contextual drawer at a time", async () => {
+  it("opens the catalog picker without a second administrative menu", async () => {
     const user = userEvent.setup();
     renderResources("/admin/resources");
-    expect(await screen.findByRole("button", { name: "Secțiuni" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Secțiuni" }));
-    expect(screen.getByRole("dialog", { name: "Secțiuni" })).toBeInTheDocument();
-    expect(screen.queryByRole("dialog", { name: "Alege elementul" })).not.toBeInTheDocument();
-    await user.keyboard("{Escape}");
-    expect(screen.queryByRole("dialog", { name: "Secțiuni" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Alege elementul" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Secțiuni" })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Alege elementul" }));
     expect(screen.getByRole("dialog", { name: "Alege elementul" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Secțiuni" })).not.toBeInTheDocument();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "Alege elementul" })).not.toBeInTheDocument();
   });
 
-  it("ignores nav=basic and keeps the canonical Admin L2", async () => {
+  it("ignores nav=basic and keeps the resources catalog", async () => {
     renderResources("/admin/resources?nav=basic");
-    expect(await screen.findByRole("link", { name: "Resurse și cost intern" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Utilaje și zone" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Oameni" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Servicii operaționale" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Procese" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Guvernanță" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Resurse și cost intern" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Secțiuni administrative" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Materiale" })).toBeInTheDocument();
   });
 
   it("announces loading with a polite live status", async () => {

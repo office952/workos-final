@@ -1,5 +1,6 @@
 import { type Locator, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
 import {
@@ -67,25 +68,25 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Stoc" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Procese operaționale" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Utilaje și zone" })).toBeVisible();
+  await expect(adminHomeLink(page, "Resurse și cost intern")).toBeVisible();
+  await expect(adminHomeLink(page, "Stoc")).toBeVisible();
+  await expect(adminHomeLink(page, "Procese operaționale")).toBeVisible();
+  await expect(adminHomeLink(page, "Utilaje și zone")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/stock-admin-nav.png",
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Resurse și cost intern" }).click();
+  await adminHomeLink(page, "Resurse și cost intern").click();
   await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Procese operaționale" }).click();
+  await adminHomeLink(page, "Procese operaționale").click();
   await expect(page.getByRole("heading", { name: "Procese operaționale" })).toBeVisible();
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Utilaje și zone" }).click();
+  await adminHomeLink(page, "Utilaje și zone").click();
   await expect(page.getByRole("heading", { name: "Utilaje și zone" })).toBeVisible();
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Stoc" }).click();
+  await adminHomeLink(page, "Stoc").click();
   await expect(page.getByRole("heading", { name: "Stoc" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Materiale în stoc" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Modul LED 12V" })).toBeVisible();

@@ -123,9 +123,9 @@ test.describe("Wave 4 resources and admin reuse", () => {
     test.setTimeout(90_000);
     await loginOwner(page);
     await expect(page.getByText("nu este preț client", { exact: false })).toBeVisible();
-    const domains = page.getByRole("navigation", { name: "Secțiuni administrative" });
+    const domains = page.getByRole("navigation", { name: "Navigare principală" });
     await expect(domains).toBeVisible();
-    await expect(domains.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
+    await expect(domains.getByRole("link", { name: "Resurse și costuri" })).toBeVisible();
     await expect(page.getByLabel("Caută")).toBeVisible();
     await expect(page.getByLabel("Preț client")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Preț client" })).toHaveCount(0);
@@ -150,11 +150,11 @@ test.describe("Wave 4 resources and admin reuse", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.screenshot({ path: shot("resources-1440"), fullPage: true });
 
-    await page.getByRole("link", { name: "Utilaje și zone" }).click();
+    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Utilaje" }).click();
     await expect(page.getByRole("heading", { name: "Utilaje și zone" })).toBeVisible();
     await expect(
-      page.getByRole("navigation", { name: "Domenii administrative" }).getByRole("link", { name: "Administrare" }),
-    ).toBeVisible();
+      page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Utilaje" }),
+    ).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("Utilajul obligatoriu blochează startul.")).toBeVisible();
     await expect(page.getByText("Zona manuală nu.")).toBeVisible();
     await page.screenshot({ path: shot("manual-area-flexibility"), fullPage: true });

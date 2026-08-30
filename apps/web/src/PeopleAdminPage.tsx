@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { appLocation } from "./navigation/routePath";
 import type { PeopleRegistryProjection } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
-import { AdminDomainLinks } from "./AdminDomainLinks";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createPerson, fetchPeopleRegistry } from "./peopleApi";
@@ -48,7 +48,6 @@ export function PeopleAdminPage() {
           title="Oameni"
           lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
         />
-        <AdminDomainLinks current="people" />
         <p>Se încarcă oamenii…</p>
       </section>
     );
@@ -60,7 +59,6 @@ export function PeopleAdminPage() {
           title="Oameni"
           lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
         />
-        <AdminDomainLinks current="people" />
         <p>Nu s-au putut încărca oamenii.</p>
       </section>
     );
@@ -85,7 +83,6 @@ export function PeopleAdminPage() {
           </p>
         }
       />
-      <AdminDomainLinks current="people" />
       <PeopleAdminNav />
       {!canAdminister ? <OwnerWriteHint /> : null}
       {canAdminister ? (
@@ -127,7 +124,7 @@ export function PeopleAdminPage() {
           {registry.people.map((person) => (
             <li key={person.personId}>
               <div className="jobs-identity">
-                <Link to={person.href}>{person.displayName}</Link>
+                <Link to={appLocation(person.href)}>{person.displayName}</Link>
                 <span>
                   {person.roleLabel ?? "Fără rol descriptiv"}
                   {person.skills.length > 0
@@ -145,7 +142,7 @@ export function PeopleAdminPage() {
                   tone={person.availability === "AVAILABLE" ? "progress" : "neutral"}
                 />
               </div>
-              <Link className="button-link" to={person.href}>
+              <Link className="button-link" to={appLocation(person.href)}>
                 Deschide
               </Link>
             </li>

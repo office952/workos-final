@@ -7,6 +7,7 @@ import {
 } from "@workos-final/domain";
 import { getProductSystem, type ApiEnv } from "../cloud/context.js";
 import { financialAccess } from "../financial/access.js";
+import { httpPathIdentity } from "../httpPathIdentity.js";
 
 export function registerJobRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/jobs", (c) => {
@@ -16,7 +17,7 @@ export function registerJobRoutes(app: Hono<ApiEnv>): void {
 
   app.get("/api/jobs/:jobId", (c) => {
     const runtime = getProductSystem(c);
-    const jobId = c.req.param("jobId");
+    const jobId = httpPathIdentity(c.req.path, "/api/jobs/");
     const order = runtime.readOrderSnapshot(jobId);
     if (!order) {
       return c.json({ error: "not_found" }, 404);

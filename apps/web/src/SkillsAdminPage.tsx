@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { productionCapabilityClasses, type Skill } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
-import { AdminDomainLinks } from "./AdminDomainLinks";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createSkill, fetchEligibility, fetchSkills, retireSkill } from "./peopleApi";
@@ -39,7 +38,6 @@ export function SkillsAdminPage() {
           title="Calificări"
           lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
         />
-        <AdminDomainLinks current="people" />
         <p>Calificările nu au putut fi încărcate.</p>
       </section>
     );
@@ -51,7 +49,6 @@ export function SkillsAdminPage() {
           title="Calificări"
           lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
         />
-        <AdminDomainLinks current="people" />
         <p>Se încarcă calificările…</p>
       </section>
     );
@@ -63,7 +60,6 @@ export function SkillsAdminPage() {
         title="Calificări"
         lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
       />
-      <AdminDomainLinks current="people" />
       <PeopleAdminNav />
       {!canAdminister ? <OwnerWriteHint /> : null}
       {canAdminister ? (

@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { primaryNavLink } from "./helpers/navigation";
 import { ensureTestExecutor } from "./helpers/people";
 import {
   completeCanonicalLettersPlan,
@@ -93,7 +94,7 @@ test("operator can scan commercial jobs and open the correct workspace", async (
   await expect(page.getByRole("button", { name: "Eliberează pentru producție" })).toBeVisible();
   await page.getByRole("button", { name: "Eliberează pentru producție" }).click();
   await expect(page.getByRole("heading", { name: /eliberată pentru producție/i })).toBeVisible();
-  await page.getByRole("link", { name: "Lucrări" }).click();
+  await primaryNavLink(page, "Lucrări").click();
   await expect(jobRow(page, orderOnly.inscription)).toContainText("Eliberată pentru producție");
   await expect(jobRow(page, orderOnly.inscription)).toContainText("Creează planul de execuție");
 
@@ -102,7 +103,7 @@ test("operator can scan commercial jobs and open the correct workspace", async (
   await page.locator(".decision-actions").getByRole("link", { name: "Deschide execuția" }).click();
   await expect(page).toHaveURL(/\/execution\/exp:/);
   await expect(page.getByRole("heading", { name: "Plan de execuție" })).toBeVisible();
-  await page.getByRole("link", { name: "Lucrări" }).click();
+  await primaryNavLink(page, "Lucrări").click();
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(jobRow(page, planned.inscription)).toContainText("0 / 12 finalizate");
 

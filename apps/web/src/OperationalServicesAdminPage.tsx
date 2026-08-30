@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ORGANIZATION_SERVICE_OFFER_MODES,
@@ -15,8 +15,6 @@ import {
   fetchOperationalServices,
   updateOperationalServiceOffer,
 } from "./operationalServicesApi";
-import { ActionDrawer } from "./ui/ActionDrawer";
-import { AdminSidebar } from "./ui/AdminSidebar";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
@@ -41,7 +39,6 @@ export function OperationalServicesAdminPage() {
   const [draftMode, setDraftMode] = useState<DraftMode>("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<NoticeState>(null);
-  const [sectionsOpen, setSectionsOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,34 +71,23 @@ export function OperationalServicesAdminPage() {
         title="Servicii operaționale"
         lead="Ce poate oferi organizația pe o cerere: montaj la locație, separat de produs. Nu este preț și nu este Settings general."
       />
-      <div className="admin-compact-triggers">
-        <button type="button" onClick={() => setSectionsOpen(true)}>
-          Secțiuni
-        </button>
-      </div>
     </>
   );
 
   if (page.kind === "loading") {
     return (
-      <AdminFloorplan
-        sectionsOpen={sectionsOpen}
-        onCloseSections={() => setSectionsOpen(false)}
-      >
+      <section>
         {chrome}
         <PageStatus kind="loading">Se încarcă serviciile operaționale…</PageStatus>
-      </AdminFloorplan>
+      </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <AdminFloorplan
-        sectionsOpen={sectionsOpen}
-        onCloseSections={() => setSectionsOpen(false)}
-      >
+      <section>
         {chrome}
         <PageStatus kind="error">Serviciile operaționale nu au putut fi încărcate.</PageStatus>
-      </AdminFloorplan>
+      </section>
     );
   }
 
@@ -114,10 +100,7 @@ export function OperationalServicesAdminPage() {
     canAdminister && !busy && isOrganizationServiceOfferMode(draftMode);
 
   return (
-    <AdminFloorplan
-      sectionsOpen={sectionsOpen}
-      onCloseSections={() => setSectionsOpen(false)}
-    >
+    <section>
       {chrome}
       <p className="page-summary">
         <StatusChip label={state.label} tone={state.tone} /> {state.detail}
@@ -196,28 +179,6 @@ export function OperationalServicesAdminPage() {
           {item.label}: rezervat. Nu poate fi activat în această etapă.
         </p>
       ))}
-    </AdminFloorplan>
-  );
-}
-
-function AdminFloorplan({
-  children,
-  sectionsOpen,
-  onCloseSections,
-}: {
-  children: ReactNode;
-  sectionsOpen: boolean;
-  onCloseSections: () => void;
-}) {
-  return (
-    <section className="admin-floorplan">
-      <aside className="admin-floorplan-sidebar">
-        <AdminSidebar current="operational-services" />
-      </aside>
-      <div className="admin-floorplan-main">{children}</div>
-      <ActionDrawer title="Secțiuni" open={sectionsOpen} onClose={onCloseSections}>
-        <AdminSidebar current="operational-services" onNavigate={onCloseSections} />
-      </ActionDrawer>
     </section>
   );
 }

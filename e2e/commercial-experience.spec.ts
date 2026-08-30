@@ -1,7 +1,7 @@
-import { copyFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { copyDownload } from "./helpers/copyDownload";
 import { uniqueJobInscription } from "./helpers/jobs";
 
 const lettersName =
@@ -48,7 +48,7 @@ test("LETTERS commercial flow shows one next action through production handoff",
     page.waitForEvent("download"),
     quote.getByRole("link", { name: "Descarcă oferta PDF" }).click(),
   ]);
-  copyFileSync(await download.path(), "docs/worklog/screenshots/letters-quote-customer.pdf");
+  await copyDownload(page, await download.path(), "docs/worklog/screenshots/letters-quote-customer.pdf");
   if ((await quote.getByRole("button", { name: "Marchează acceptată" }).count()) > 0) {
     await quote.getByRole("button", { name: "Marchează acceptată" }).click();
   }
@@ -108,7 +108,7 @@ test("ACM uses the same commercial section at 118,66 EUR", async ({ page }) => {
     page.waitForEvent("download"),
     quote.getByRole("link", { name: "Descarcă oferta PDF" }).click(),
   ]);
-  copyFileSync(await download.path(), "docs/worklog/screenshots/acm-quote-customer.pdf");
+  await copyDownload(page, await download.path(), "docs/worklog/screenshots/acm-quote-customer.pdf");
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-commercial-state.png",
     fullPage: true,
@@ -120,7 +120,7 @@ test("seller admin is distinct from customers and historical quotes stay frozen"
   request,
 }) => {
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Date firmă" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Date firmă", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Date firmă" })).toBeVisible();
   await expect(page.getByLabel("Denumire legală")).toHaveValue("HUB MEDIA PRODUCTION S.R.L.");
   await page.screenshot({

@@ -1,7 +1,7 @@
-import { copyFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { copyDownload } from "./helpers/copyDownload";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const lettersName =
@@ -51,9 +51,7 @@ async function freezeAndDownload(page: Page, evidenceName: string, customerName:
     page.waitForEvent("download"),
     downloadLink.click(),
   ]);
-  const downloaded = await download.path();
-  expect(downloaded).toBeTruthy();
-  copyFileSync(downloaded!, `docs/worklog/screenshots/${evidenceName}-quote-document.pdf`);
+  await copyDownload(page, await download.path(), `docs/worklog/screenshots/${evidenceName}-quote-document.pdf`);
   expect(download.suggestedFilename()).toMatch(/^Oferta-OF-[0-9A-F]{8}\.pdf$/);
 }
 

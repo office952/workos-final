@@ -24,13 +24,13 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
   await expect(page.getByRole("navigation", { name: "Context" })).toContainText(
     "Administrare",
   );
-  const sidebar = page.getByRole("navigation", { name: "Secțiuni administrative" });
+  const sidebar = page.getByRole("navigation", { name: "Navigare principală" });
   await expect(sidebar.getByRole("link", { name: "Servicii operaționale" })).toHaveAttribute(
     "aria-current",
     "page",
   );
-  await expect(sidebar.getByRole("link", { name: "Oameni" })).toBeVisible();
-  await expect(sidebar.getByRole("link", { name: "Resurse și cost intern" })).toBeVisible();
+  await expect(sidebar.getByRole("link", { name: "Angajați" })).toBeVisible();
+  await expect(sidebar.getByRole("link", { name: "Resurse și costuri" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Alege elementul" })).toHaveCount(0);
   await expect(page.getByLabel("Caută")).toHaveCount(0);
 
@@ -81,9 +81,9 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
 
   await page.setViewportSize({ width: 768, height: 900 });
   await expect(page.getByRole("heading", { name: "Servicii operaționale" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Secțiuni" })).toBeVisible();
-  await page.getByRole("button", { name: "Secțiuni" }).click();
-  const drawer = page.getByRole("dialog", { name: "Secțiuni" });
+  await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
+  await page.getByRole("button", { name: "Meniu" }).click();
+  const drawer = page.getByRole("dialog", { name: "Meniu" });
   await expect(drawer).toBeVisible();
   await expect(
     drawer.getByRole("link", { name: "Servicii operaționale" }),
@@ -93,7 +93,7 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
     fullPage: true,
   });
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog", { name: "Secțiuni" })).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "Meniu" })).toHaveCount(0);
 });
 
 async function readInstallation(request: APIRequestContext): Promise<CapabilityView> {

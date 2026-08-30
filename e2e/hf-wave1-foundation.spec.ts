@@ -75,8 +75,13 @@ test("stable job and quote routes refresh, theme and responsive shell", async ({
   await setTheme(page, "Sistem");
   await expect(page.locator("html")).toHaveAttribute("data-theme-choice", "system");
 
-  await page.getByRole("link", { name: "WorkOS Final" }).focus();
-  await page.keyboard.press("Shift+Tab");
+  await page.locator("body").evaluate((node) => {
+    if (node instanceof HTMLElement) {
+      node.setAttribute("tabindex", "-1");
+      node.focus();
+    }
+  });
+  await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Sari la conținut" })).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#continut-principal")).toBeFocused();

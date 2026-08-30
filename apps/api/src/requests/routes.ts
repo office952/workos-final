@@ -14,6 +14,7 @@ import {
 import type { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { httpPathIdentity } from "../httpPathIdentity.js";
 
 export function registerRequestRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/requests", (c) => {
@@ -41,7 +42,7 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
 
   app.get("/api/requests/:requestId", (c) => {
     const runtime = getProductSystem(c);
-    const detail = runtime.readRequestDetail(c.req.param("requestId"));
+    const detail = runtime.readRequestDetail(httpPathIdentity(c.req.path, "/api/requests/"));
     if (!detail) {
       return c.json({ error: "not_found" }, 404);
     }

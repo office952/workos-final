@@ -1,11 +1,12 @@
 import { expect, test } from "./fixtures";
+import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("letters critical processes complete vinyl paint and electrical routes", async ({
   page,
 }) => {
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Procese operaționale" }).click();
+  await adminHomeLink(page, "Procese operaționale").click();
   await expect(
     page.getByRole("heading", { name: "Procese operaționale" }),
   ).toBeVisible();

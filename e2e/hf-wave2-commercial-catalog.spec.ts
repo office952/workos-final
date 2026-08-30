@@ -111,7 +111,7 @@ test("commercial catalog configurator reaches a stable job", async ({ page, requ
   await page.screenshot({ path: shot("1280-quotes"), fullPage: true });
   await page.setViewportSize({ width: 768, height: 1024 });
   await page.goto("/requests");
-  await expect(page.getByRole("navigation", { name: "Navigare comercială" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Cereri de ofertă" })).toBeVisible();
   await page.screenshot({ path: shot("768-commercial"), fullPage: true });
   await page.goto("/products");

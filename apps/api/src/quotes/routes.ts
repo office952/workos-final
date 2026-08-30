@@ -2,6 +2,7 @@ import type { Hono } from "hono";
 import { scopeQuoteSnapshot } from "@workos-final/domain";
 import { getProductSystem, type ApiEnv } from "../cloud/context.js";
 import { financialAccess } from "../financial/access.js";
+import { httpPathIdentity } from "../httpPathIdentity.js";
 
 export function registerQuoteRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/quotes", (c) => {
@@ -11,7 +12,7 @@ export function registerQuoteRoutes(app: Hono<ApiEnv>): void {
 
   app.get("/api/quotes/:quoteSnapshotId", (c) => {
     const runtime = getProductSystem(c);
-    const quoteSnapshotId = c.req.param("quoteSnapshotId");
+    const quoteSnapshotId = httpPathIdentity(c.req.path, "/api/quotes/");
     const snapshot = runtime.readQuoteSnapshot(quoteSnapshotId);
     if (!snapshot) {
       return c.json({ error: "not_found" }, 404);

@@ -1,10 +1,11 @@
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
+import { primaryNavLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "Catalog" }).click();
+  await primaryNavLink(page, "Catalog").click();
   await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await expect(
     page.getByRole("link", {

@@ -54,6 +54,7 @@ import {
   readQuoteSnapshot,
   type TemplateProjection,
 } from "./productApi";
+import { appPathname } from "./navigation/routePath";
 import { readRequestDetail } from "./requestsApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
@@ -791,7 +792,7 @@ export function ProductConfigurationPage() {
             <div className="action-row">
               <Link
                 className="button-link"
-                to={`/execution/${restoredJob.job.executionPlan.plan.planId}`}
+                to={appPathname(`/execution/${restoredJob.job.executionPlan.plan.planId}`)}
               >
                 Deschide execuția
               </Link>
@@ -1106,7 +1107,7 @@ function ConfirmedCommercialWorkspace({
           <div className="action-row">
             <Link
               className="button-link"
-              to={`/execution/${confirmed.executionPlan.plan.planId}`}
+              to={appPathname(`/execution/${confirmed.executionPlan.plan.planId}`)}
             >
               Deschide execuția
             </Link>

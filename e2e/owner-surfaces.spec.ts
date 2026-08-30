@@ -1,24 +1,27 @@
 import { expect, test } from "./fixtures";
+import { adminHomeLink, primaryNavLink } from "./helpers/navigation";
 
 test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Catalog" }).click();
+  await primaryNavLink(page, "Catalog").click();
   await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-products-operator.png",
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Administrare" }).click();
-  await page.getByRole("link", { name: "Module și componente" }).click();
+  await page.goto("/admin");
+  await adminHomeLink(page, "Module și componente").click();
   await expect(page.getByRole("heading", { name: "Module și componente" })).toBeVisible();
   await expect(
     page.getByText("Proiecție de inspecție a sistemului de produs"),
   ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Categorii catalog" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Administrare" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Sistem produs" }),
+  ).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("button", { name: "Familii" })).toHaveAttribute(
     "aria-current",
     "true",
@@ -247,8 +250,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.setViewportSize({ width: 1280, height: 900 });
 
-  await page.getByRole("link", { name: "Administrare" }).click();
-  await page.getByRole("link", { name: "Guvernanța sistemului" }).click();
+  await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Guvernanță" }).click();
   await expect(page.getByRole("heading", { name: "Guvernanța sistemului" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Autoritate și adevăr" })).toHaveAttribute(
     "aria-current",
@@ -312,7 +314,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.setViewportSize({ width: 1280, height: 900 });
 
-  await page.getByRole("link", { name: "Catalog" }).click();
+  await primaryNavLink(page, "Catalog").click();
   await page
     .getByRole("link", {
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",

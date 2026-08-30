@@ -148,7 +148,7 @@ export function QuotesOverviewPage() {
               {visible.map((quote) => (
                 <li key={quote.quoteSnapshotId}>
                   <div className="jobs-identity">
-                    <Link to={quote.href}>{quote.reference}</Link>
+                    <Link to={{ pathname: quote.href }}>{quote.reference}</Link>
                     <span>{quote.inscription}</span>
                     <span>{quote.productLabel}</span>
                     <ClientLink
@@ -174,7 +174,7 @@ export function QuotesOverviewPage() {
                     ) : null}
                   </div>
                   <p className="jobs-date">{formatQuoteDate(quote.createdAt)}</p>
-                  <Link className="button-link" to={quote.href}>
+                  <Link className="button-link" to={{ pathname: quote.href }}>
                     {quote.nextActionLabel}
                   </Link>
                 </li>

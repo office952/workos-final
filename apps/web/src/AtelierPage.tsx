@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { OperatorInboxTaskItem, OperatorTaskInboxProjection } from "@workos-final/domain";
+import { appLocation } from "./navigation/routePath";
 import { fetchOperatorTaskInbox } from "./atelierApi";
 import { OperatorIdentifyForm } from "./OperatorIdentifyForm";
 import { useOperatorSession } from "./OperatorSessionContext";
@@ -156,7 +157,7 @@ export function AtelierPage() {
           <p className="atelier-block-reason">Necesită utilaj dedicat înainte de pornire.</p>
         )}
         renderActions={(item) => (
-          <Link className="button-quiet" to={item.workspaceHref}>
+          <Link className="button-quiet" to={appLocation(item.workspaceHref)}>
             Deschide lucrarea
           </Link>
         )}
@@ -184,7 +185,7 @@ export function AtelierPage() {
             >
               {busyTaskId === item.taskId ? "Se pornește…" : "Pornește"}
             </button>
-            <Link className="button-quiet" to={item.workspaceHref}>
+            <Link className="button-quiet" to={appLocation(item.workspaceHref)}>
               Deschide lucrarea
             </Link>
           </>
@@ -196,7 +197,7 @@ export function AtelierPage() {
         tone="progress"
         items={inbox.inProgressMine}
         renderActions={(item) => (
-          <Link className="button-link" to={item.workspaceHref}>
+          <Link className="button-link" to={appLocation(item.workspaceHref)}>
             Continuă
           </Link>
         )}
@@ -208,7 +209,7 @@ export function AtelierPage() {
           tone="neutral"
           items={inbox.waitingDependencies}
           renderActions={(item) => (
-            <Link className="button-quiet" to={item.workspaceHref}>
+            <Link className="button-quiet" to={appLocation(item.workspaceHref)}>
               Deschide lucrarea
             </Link>
           )}

@@ -33,10 +33,12 @@ test("office can open one client and see requests, offers and works", async ({
 
   await page.goto("/clients");
   await expect(page.getByRole("heading", { name: "Clienți" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Comercial" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }),
+  ).toBeVisible();
   await expect(
     page.getByRole("navigation", { name: "Navigare comercială" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/clients-overview-desktop.png",
     fullPage: true,

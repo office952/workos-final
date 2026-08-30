@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { appPathname } from "./navigation/routePath";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import type { ExecutionPlanView } from "@workos-final/domain";
 import { ExecutionPlanPanel } from "./ExecutionPlanPanel";
 import { useOperatorSession } from "./OperatorSessionContext";
@@ -23,7 +25,7 @@ type PageState =
   | { kind: "ready"; view: ExecutionPlanView };
 
 export function ExecutionWorkspacePage() {
-  const { planId } = useParams();
+  const planId = usePathIdAfter("/execution/") || undefined;
   const [searchParams] = useSearchParams();
   const focusTaskId = searchParams.get("task");
   const { operator } = useOperatorSession();
@@ -154,7 +156,7 @@ export function ExecutionWorkspacePage() {
       <p className="execution-workspace-nav">
         {view.jobHref ? (
           <>
-            <Link to={view.jobHref}>Înapoi la lucrare</Link>
+            <Link to={appPathname(view.jobHref)}>Înapoi la lucrare</Link>
             {" · "}
           </>
         ) : null}

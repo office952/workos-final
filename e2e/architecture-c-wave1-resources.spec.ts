@@ -172,7 +172,7 @@ test.describe("Architecture C UI Wave 1", () => {
     await expect(page.getByRole("link", { name: "Catalog" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Produse", exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
-    await expect(page.getByRole("navigation", { name: "Secțiuni administrative" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Navigare principală" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Categorii catalog" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Atelier — execuție" })).toHaveCount(0);
     await expectNoForbiddenCopy(page);
@@ -222,7 +222,7 @@ test.describe("Architecture C UI Wave 1", () => {
     await setTheme(page, "Deschisă");
     await expect(page.locator("html")).toHaveAttribute("data-theme-choice", "light");
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-    await expect(page.getByRole("navigation", { name: "Secțiuni administrative" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Navigare principală" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Categorii catalog" })).toBeVisible();
     await page.screenshot({ path: shot("1440-light"), fullPage: true });
     const light = await measurePage(page);
@@ -268,7 +268,6 @@ test.describe("Architecture C UI Wave 1", () => {
     await page.setViewportSize({ width: 768, height: 1024 });
     await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Navigare principală" })).toBeHidden();
-    await expect(page.getByRole("button", { name: "Secțiuni" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Alege elementul" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toBeVisible();
     await page.screenshot({ path: shot("768-light-base"), fullPage: true });
@@ -277,23 +276,27 @@ test.describe("Architecture C UI Wave 1", () => {
     await page.screenshot({ path: shot("768-dark"), fullPage: true });
     await setTheme(page, "Deschisă");
 
-    const sections = page.getByRole("button", { name: "Secțiuni" });
-    await sections.click();
-    await expect(page.getByRole("dialog", { name: "Secțiuni" })).toBeVisible();
+    const menu = page.getByRole("button", { name: "Meniu" });
+    await menu.click();
+    const menuDialog = page.getByRole("dialog", { name: "Meniu" });
+    await expect(menuDialog).toBeVisible();
     await expect(page.getByRole("dialog", { name: "Alege elementul" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
+    await expect(menuDialog.getByRole("link", { name: "Resurse și costuri" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
     await page.screenshot({ path: shot("768-drawer-sections"), fullPage: true });
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog", { name: "Secțiuni" })).toHaveCount(0);
-    await expect(sections).toBeFocused();
+    await expect(page.getByRole("dialog", { name: "Meniu" })).toHaveCount(0);
+    await expect(menu).toBeFocused();
     expect(await page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
 
     const picker = page.getByRole("button", { name: "Alege elementul" });
     await picker.click();
     const pickerDialog = page.getByRole("dialog", { name: "Alege elementul" });
     await expect(pickerDialog).toBeVisible();
-    await expect(page.getByRole("dialog", { name: "Secțiuni" })).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Meniu" })).toHaveCount(0);
     await page.screenshot({ path: shot("768-drawer-picker"), fullPage: true });
     await page.keyboard.press("Tab");
     expect(
@@ -375,27 +378,42 @@ test.describe("Architecture C UI Wave 1", () => {
 
     await page.goto("/admin/resources?nav=basic");
     await expect(
-      page.getByRole("navigation", { name: "Secțiuni administrative" }).getByRole("link"),
+      page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link"),
     ).toHaveText([
-      "Resurse și cost intern",
-      "Utilaje și zone",
-      "Oameni",
+      "Clienți",
+      "Cereri",
+      "Oferte",
+      "Catalog",
+      "Lucrări",
+      "Atelier",
+      "Resurse și costuri",
+      "Stoc",
+      "Utilaje",
+      "Angajați",
+      "Firmă",
       "Servicii operaționale",
-      "Procese",
+      "Sistem produs",
       "Guvernanță",
     ]);
-    await expect(page.getByRole("link", { name: "Stoc" })).toHaveCount(0);
     await page.screenshot({ path: shot("nav-basic"), fullPage: true });
 
     await page.goto("/admin/resources");
     await expect(
-      page.getByRole("navigation", { name: "Secțiuni administrative" }).getByRole("link"),
+      page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link"),
     ).toHaveText([
-      "Resurse și cost intern",
-      "Utilaje și zone",
-      "Oameni",
+      "Clienți",
+      "Cereri",
+      "Oferte",
+      "Catalog",
+      "Lucrări",
+      "Atelier",
+      "Resurse și costuri",
+      "Stoc",
+      "Utilaje",
+      "Angajați",
+      "Firmă",
       "Servicii operaționale",
-      "Procese",
+      "Sistem produs",
       "Guvernanță",
     ]);
     await page.screenshot({ path: shot("nav-default"), fullPage: true });

@@ -40,6 +40,7 @@ export type HealthResponse = {
 const DEV_WEB_ORIGINS = [
   "http://127.0.0.1:5173",
   "http://localhost:5173",
+  "http://127.0.0.1:5178",
   "http://127.0.0.1:5185",
   "http://127.0.0.1:5187",
 ] as const;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import {
   CUSTOMER_WORKSPACE_SECTIONS,
   customerHref,
@@ -46,7 +47,7 @@ type PageState =
   | { kind: "ready"; workspace: CustomerWorkspaceProjection };
 
 export function ClientWorkspacePage() {
-  const { customerId = "" } = useParams();
+  const customerId = usePathIdAfter("/clients/");
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [editing, setEditing] = useState(false);

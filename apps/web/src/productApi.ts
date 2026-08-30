@@ -500,7 +500,7 @@ export async function createOrderSnapshot(
 export async function readExecutionPlanById(
   planId: string,
 ): Promise<ExecutionPlanView | null> {
-  const response = await fetch(`${baseUrl}/api/execution-plans/${planId}`, {
+  const response = await fetch(`${baseUrl}/api/execution-plans/${encodeURIComponent(planId)}`, {
     credentials: "include",
   });
   if (response.status === 401) {
@@ -565,20 +565,20 @@ export async function assignExecutionTaskProvider(
   taskId: string,
   providerId: string,
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
-  return postTaskMutation(`/api/execution-tasks/${taskId}/provider`, { providerId });
+  return postTaskMutation(`/api/execution-tasks/${encodeURIComponent(taskId)}/provider`, { providerId });
 }
 
 export async function assignExecutionTaskExecutor(
   taskId: string,
   personId: string,
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
-  return postTaskMutation(`/api/execution-tasks/${taskId}/executor`, { personId });
+  return postTaskMutation(`/api/execution-tasks/${encodeURIComponent(taskId)}/executor`, { personId });
 }
 
 export async function startExecutionTask(
   taskId: string,
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
-  return postTaskMutation(`/api/execution-tasks/${taskId}/start`);
+  return postTaskMutation(`/api/execution-tasks/${encodeURIComponent(taskId)}/start`);
 }
 
 export async function completeExecutionTask(
@@ -589,7 +589,7 @@ export async function completeExecutionTask(
     actualConsumption?: readonly { resourceId: string; actualQuantity: number; note?: string }[];
   } = {},
 ): Promise<{ ok: true; executionPlan: ExecutionPlanView } | TaskMutationFailure> {
-  return postTaskMutation(`/api/execution-tasks/${taskId}/complete`, input);
+  return postTaskMutation(`/api/execution-tasks/${encodeURIComponent(taskId)}/complete`, input);
 }
 
 async function postTaskMutation(

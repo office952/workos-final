@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -114,23 +114,16 @@ describe("OperationalServicesAdminPage", () => {
     vi.mocked(updateOperationalServiceOffer).mockReset();
   });
 
-  it("sits in the Admin floorplan with one L2 and no catalog selector", async () => {
+  it("sits as an admin page without a duplicated L2 or catalog selector", async () => {
     vi.mocked(fetchOperationalServices).mockResolvedValue(unconfigured);
     renderPage("owner");
     expect(await screen.findByRole("heading", { name: "Servicii operaționale" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Context" })).toHaveTextContent("Administrare");
-    const sidebar = screen.getByRole("navigation", { name: "Secțiuni administrative" });
-    expect(within(sidebar).getByRole("link", { name: "Servicii operaționale" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-    expect(within(sidebar).getByRole("link", { name: "Oameni" })).toBeInTheDocument();
-    expect(within(sidebar).getByRole("link", { name: "Resurse și cost intern" })).toBeInTheDocument();
-    expect(screen.getAllByRole("navigation", { name: "Secțiuni administrative" })).toHaveLength(1);
+    expect(screen.queryByRole("navigation", { name: "Secțiuni administrative" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Alege elementul" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Caută")).not.toBeInTheDocument();
     expect(screen.queryByText("Alege un element")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Secțiuni" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Secțiuni" })).not.toBeInTheDocument();
   });
 
   it("distinguishes unconfigured from an explicitly saved disabled state", async () => {
@@ -185,8 +178,7 @@ describe("OperationalServicesAdminPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("keeps a member read-only and opens the sections drawer from the keyboard", async () => {
-    const user = userEvent.setup();
+  it("keeps a member read-only without a duplicated admin menu", async () => {
     vi.mocked(fetchOperationalServices).mockResolvedValue(internalConfigured);
     renderPage("member");
     expect(await screen.findByText(OWNER_WRITE_HINT)).toBeInTheDocument();
@@ -196,15 +188,6 @@ describe("OperationalServicesAdminPage", () => {
     expect(screen.getByRole("combobox")).toBeDisabled();
     expect(screen.getByText(/Organizația oferă montaj cu echipă internă/)).toBeInTheDocument();
     expect(screen.queryByText(/200 EUR/i)).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Secțiuni" }));
-    const drawer = screen.getByRole("dialog", { name: "Secțiuni" });
-    expect(drawer).toBeInTheDocument();
-    expect(
-      within(drawer).getByRole("link", { name: "Servicii operaționale" }),
-    ).toHaveAttribute("aria-current", "page");
-    await user.keyboard("{Escape}");
-    expect(screen.queryByRole("dialog", { name: "Secțiuni" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Secțiuni" })).toHaveFocus();
+    expect(screen.queryByRole("button", { name: "Secțiuni" })).not.toBeInTheDocument();
   });
 });
