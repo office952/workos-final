@@ -946,15 +946,20 @@ Owner GO: implement OS-S2 typed installation facts only. No HUB MEDIA enable, no
 
 ```text
 SLICE                         = OS_S2_TYPED_INSTALLATION_FACTS
-STATUS                        = IMPLEMENTED_LOCAL_IN_REVIEW
+STATUS                        = IMPLEMENTED_CURRENT / BASIC
 OWNER_ACCEPTED                = NO
-MAIN_INTEGRATION              = NO
+MAIN_INTEGRATION              = INTEGRATED_ON_MAIN
+OS_S2                         = INTEGRATED_ON_MAIN
+OS_S2_TYPED_FACTS             = IMPLEMENTED_CURRENT / BASIC
+OS_S2_TRANSACTION_SAFETY      = CLOSED
 INSTALLATION_EIC              = STILL_PARTIAL
 MISSING_COST_EVIDENCE         = REMAINS
 QUOTE_LINES                   = STILL_PRODUCT_ONLY
 LIVE_REQUEST_PATCH            = NO
 REAL_CLOUD_WRITE              = NO
+OS_S3                         = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_TO_OS_S11               = NOT_AUTHORIZED
+UI_UX_NAVIGATION_RECOVERY     = NEXT_OWNER_PRIORITY
 ```
 
 ### Old-versus-new Cerere audit

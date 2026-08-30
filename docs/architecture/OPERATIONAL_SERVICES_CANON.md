@@ -16,9 +16,14 @@ INSTALLATION_ROLE          = FIRST_REAL_CAPABILITY
 OWNER_DECISION_DATE        = 2026-08-28
 OS_S1                      = IMPLEMENTED_CURRENT / BASIC
 OS_S1_IMPLEMENTATION       = INTEGRATED_ON_MAIN
+OS_S2                      = INTEGRATED_ON_MAIN
 OS_S2_DESIGN               = OWNER_ACCEPTED
-OS_S2_IMPLEMENTATION       = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S2_TYPED_FACTS          = IMPLEMENTED_CURRENT / BASIC
+OS_S2_IMPLEMENTATION       = INTEGRATED_ON_MAIN
+OS_S2_TRANSACTION_SAFETY   = CLOSED
+OS_S3                      = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_RECOVERY  = NEXT_OWNER_PRIORITY
 PHASE_2_IMPLEMENTATION     = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_AUTHORIZED
 NO_CLIENT_CODE_FORK        = YES
@@ -164,7 +169,9 @@ Org must offer the capability before a **new** selection. An already persisted s
 
 ```text
 OS_S2_DESIGN          = OWNER_ACCEPTED
-OS_S2_IMPLEMENTATION  = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S2_TYPED_FACTS     = IMPLEMENTED_CURRENT / BASIC
+OS_S2_IMPLEMENTATION  = INTEGRATED_ON_MAIN
+OS_S2_TRANSACTION_SAFETY = CLOSED
 DECISIONS_1_TO_5      = CLOSED
 Q_FACT_VS_SERVICE     =
   MEASUREMENT_ACCESS_SITE_ELECTRICAL_ARE_TYPED_INSTALLATION_FACTS
@@ -182,7 +189,7 @@ LOCKED_WHEN           = first linked Quote
 
 Transport facts belong to `TRANSPORT`, never inside installation EIC. `MISSING_COST_EVIDENCE` stays. Completing it is OS-S3. OS-S2 cannot make `INSTALLATION_EIC` COMPLETE.
 
-`FUTURE_SLICE`: OS-S2 is implemented locally in review. Completing `MISSING_COST_EVIDENCE` remains OS-S3.
+`FUTURE_SLICE`: OS-S2 is implemented on main. Completing `MISSING_COST_EVIDENCE` remains OS-S3.
 
 ---
 
@@ -368,12 +375,12 @@ Immutable boundaries begin at Quote freeze. Request stays mutable office truth e
 
 ## Implementation program
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementation is local in review. OS-S3 and later slices still need a separate Owner GO.
+OS-S1 is implemented on main. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 and later slices still need a separate Owner GO.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
 | OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_CURRENT / BASIC` |
-| OS-S2 | Typed install facts | `IMPLEMENTED_LOCAL_IN_REVIEW` |
+| OS-S2 | Typed install facts | `IMPLEMENTED_CURRENT / BASIC` |
 | OS-S3 | Evidence and service EIC | `NOT_STARTED` |
 | OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
 | OS-S5 | Multi-line Quote | `NOT_STARTED` |
@@ -384,7 +391,7 @@ OS-S1 is implemented on main. OS-S2 design is Owner-accepted. OS-S2 implementati
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented locally in review. OS-S3 and later slices still need a separate Owner GO.
+OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented on main. OS-S3 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. Next Owner priority is UI/UX navigation recovery.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 
