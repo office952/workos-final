@@ -279,6 +279,20 @@ describe("commercial request installation facts API", () => {
     ).toBe(quotesBefore);
   });
 
+  it("refuses facts write when the request does not exist", async () => {
+    const app = createApp();
+    const missing = await app.request(
+      "/api/requests/crq:00000000-0000-0000-0000-000000000000/installation-facts",
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: factsPayload({ city: "Cluj" }, 0),
+      },
+    );
+    expect(missing.status).toBe(404);
+    expect((await readBody(missing)).error).toBe("not_found");
+  });
+
   it("refuses invalid writes and write while unselected", async () => {
     const app = createApp();
     await enableSiteInstallation(app);

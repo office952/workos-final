@@ -300,7 +300,7 @@ export function persistUpdatedCommercialRequest(
   if (!updated.ok || updated.alreadyApplied) {
     return updated;
   }
-  const persist = db.transaction(() => {
+  db.transaction(() => {
     db.prepare(
       `
       UPDATE commercial_requests
@@ -325,8 +325,7 @@ export function persistUpdatedCommercialRequest(
     if (!updated.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID)) {
       deleteInstallationFacts(db, requestId);
     }
-  });
-  persist();
+  }).immediate();
   return updated;
 }
 

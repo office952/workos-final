@@ -996,3 +996,7 @@ OS_S2_FOLLOWUP_CONTRACT_GAP =
 
 Every installation-facts write is version-bound. Create uses `expectedVersion = 0`. Missing version is refused. Stale version is `version_conflict` and does not change the row. Read, check, patch, and persist run in one SQLite transaction; persist is INSERT-if-absent or `UPDATE ... WHERE version = expected`. The Cerere client always sends `facts?.version ?? 0`. OS-S3 remains unauthorized.
 
+### Request-state transaction boundary — 2026-08-30
+
+Facts persist re-reads Request existence, SITE_INSTALLATION selection, and Quote links inside the same IMMEDIATE transaction as the version check and CAS write. Runtime no longer passes stale `selected` / `hasLinkedQuotes` booleans. OS-S3 remains unauthorized.
+

@@ -1,4 +1,5 @@
 import {
+  SITE_INSTALLATION_SCOPE_ID,
   applySiteInstallationFactsPatch,
   isSiteInstallationElectricalState,
   isSiteInstallationFacadeType,
@@ -236,24 +237,62 @@ function updateInstallationFactsIfVersion(
   return result.changes === 1;
 }
 
+function requestExists(db: SqliteDatabase, requestId: string): boolean {
+  const row = db
+    .prepare(
+      `
+      SELECT 1 AS present
+      FROM commercial_requests
+      WHERE request_id = ?
+    `,
+    )
+    .get(requestId) as { present: number } | undefined;
+  return row !== undefined;
+}
+
+function isSiteInstallationSelected(db: SqliteDatabase, requestId: string): boolean {
+  const row = db
+    .prepare(
+      `
+      SELECT 1 AS present
+      FROM commercial_request_optional_scopes
+      WHERE request_id = ? AND scope_id = ?
+    `,
+    )
+    .get(requestId, SITE_INSTALLATION_SCOPE_ID) as { present: number } | undefined;
+  return row !== undefined;
+}
+
+function requestHasLinkedQuotes(db: SqliteDatabase, requestId: string): boolean {
+  const row = db
+    .prepare(
+      `
+      SELECT 1 AS present
+      FROM commercial_request_quote_links
+      WHERE request_id = ?
+    `,
+    )
+    .get(requestId) as { present: number } | undefined;
+  return row !== undefined;
+}
+
 export function persistUpdatedInstallationFacts(
   db: SqliteDatabase,
   requestId: string,
   patch: SiteInstallationFactsPatch,
-  context: {
-    selected: boolean;
-    hasLinkedQuotes: boolean;
-    expectedVersion: number;
-  },
+  expectedVersion: number,
 ): SiteInstallationFactsMutationResult {
   return db.transaction((): SiteInstallationFactsMutationResult => {
+    if (!requestExists(db, requestId)) {
+      return { ok: false, error: "not_found" };
+    }
     const current = getInstallationFacts(db, requestId);
     const updated = applySiteInstallationFactsPatch({
-      selected: context.selected,
-      hasLinkedQuotes: context.hasLinkedQuotes,
+      selected: isSiteInstallationSelected(db, requestId),
+      hasLinkedQuotes: requestHasLinkedQuotes(db, requestId),
       current,
       patch,
-      expectedVersion: context.expectedVersion,
+      expectedVersion,
       requestId,
     });
     if (!updated.ok || updated.alreadyApplied) {
@@ -262,7 +301,7 @@ export function persistUpdatedInstallationFacts(
     const wrote =
       current === null
         ? insertInstallationFactsIfAbsent(db, updated.facts)
-        : updateInstallationFactsIfVersion(db, updated.facts, context.expectedVersion);
+        : updateInstallationFactsIfVersion(db, updated.facts, expectedVersion);
     if (!wrote) {
       return { ok: false, error: "version_conflict" };
     }

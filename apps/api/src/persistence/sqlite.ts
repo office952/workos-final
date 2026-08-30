@@ -44,6 +44,7 @@ export function configureOperationalSqlite(
   filePath: string,
 ): void {
   db.pragma("foreign_keys = ON");
+  db.pragma("busy_timeout = 5000");
   if (filePath !== ":memory:") {
     db.pragma("journal_mode = WAL");
   }

@@ -851,15 +851,7 @@ export function createProductSystemRuntimeFromOpenDb(
       });
     },
     updateInstallationFacts(requestId, patch, expectedVersion) {
-      const request = getCommercialRequest(db, requestId);
-      if (!request) {
-        return { ok: false, error: "not_found" };
-      }
-      return persistUpdatedInstallationFacts(db, requestId, patch, {
-        selected: request.optionalScopeIds.includes("SITE_INSTALLATION"),
-        hasLinkedQuotes: listCommercialRequestQuoteLinks(db, requestId).length > 0,
-        expectedVersion,
-      });
+      return persistUpdatedInstallationFacts(db, requestId, patch, expectedVersion);
     },
     linkRequestQuote(requestId, quoteSnapshotId) {
       const request = getCommercialRequest(db, requestId);
