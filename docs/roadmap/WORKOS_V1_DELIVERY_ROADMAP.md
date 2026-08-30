@@ -92,7 +92,7 @@ OS_S2_IMPLEMENTATION                 = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY             = CLOSED
 OS_S3                                = NOT_STARTED / NOT_AUTHORIZED
 UI_UX_NAVIGATION_V3_DESIGN           = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION   = IMPLEMENTED_LOCAL_IN_REVIEW
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
 UI_UX_CANON_UPDATE_FROM_EVIDENCE     = COMPLETE
@@ -225,7 +225,7 @@ OS_S2_IMPLEMENTATION = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY = CLOSED
 OS_S3 = NOT_STARTED / NOT_AUTHORIZED
 UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = IMPLEMENTED_LOCAL_IN_REVIEW
 ```
 
 `HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because installation cost/process evidence is incomplete. This file does not authorize that job.
@@ -320,7 +320,7 @@ OS_S2_TRANSACTION_SAFETY                 = CLOSED
 OS_S3                                    = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_EVIDENCE_AND_EIC                   = NOT_STARTED / NOT_AUTHORIZED
 UI_UX_NAVIGATION_V3_DESIGN               = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION       = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION       = IMPLEMENTED_LOCAL_IN_REVIEW
 OS_S4_SERVICE_COMMERCIAL                 = NOT_STARTED
 OS_S5_MULTI_LINE_QUOTE                   = NOT_STARTED
 OS_S6_TRANSPORT                          = NOT_STARTED

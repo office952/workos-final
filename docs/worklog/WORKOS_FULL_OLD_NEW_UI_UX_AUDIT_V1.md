@@ -601,7 +601,7 @@ Owner accepted V3 as living navigation direction: one stable sidebar, six discre
 
 ```text
 UI_UX_NAVIGATION_V3_DESIGN           = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION   = IMPLEMENTED_LOCAL_IN_REVIEW
 PACK_SHA256                          = 8cd54c20144d8d1c25c59551f8c1655e163e358fbcee8af0d1d762206166b70e
 PACK_NAME                            = WORKOS_MAP_V3_COLLAPSIBLE_SIDEBAR_REVIEW_PACK
 OUT_EMP_REQUESTS                     = Oameni / Angajați / /people

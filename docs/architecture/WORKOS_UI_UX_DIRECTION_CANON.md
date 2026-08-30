@@ -29,7 +29,7 @@ OWNER_IA_GATE                     = CLOSED
 HIGH_FIDELITY                     = FIRST_LOT_OWNER_ACCEPTED
 GLOBAL_NAV_STRUCTURE              = STABLE_SIDEBAR
 UI_UX_NAVIGATION_V3_DESIGN        = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = IMPLEMENTED_LOCAL_IN_REVIEW
 CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = WAVE_1_FOUNDATION
 THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
@@ -37,10 +37,10 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
-On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. That accept is design only. It does not authorize changing the implemented shell.
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `IMPLEMENTED_LOCAL_IN_REVIEW` on the feature branch. It is not runtime-accepted and not integrated on main.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s five-item top nav, routes, and primitives). This canon does not replace that record. It governs later Owner decisions and later UI change.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. On this feature branch the implemented shell is the V3 stable sidebar; that implementation is `IMPLEMENTED_LOCAL_IN_REVIEW` and is not accepted on main. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
 
 Related living authority:
 
@@ -112,19 +112,19 @@ Wave 1 of first-lot UI implementation now shows Level 1 `Catalog` and stable `/j
 
 ## ACCEPTED OWNER V3 NAVIGATION
 
-Recorded 2026-08-30. Living navigation direction for the whole application. Design only.
+Recorded 2026-08-30. Living navigation direction for the whole application. Wave 1 shell implementation is local in review.
 
 ```text
 OWNER_DECISION                         = V3_NAVIGATION_DESIGN_ACCEPTED
 GLOBAL_NAVIGATION                      = ONE_STABLE_SIDEBAR
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION     = NOT_STARTED / NOT_AUTHORIZED
-PRODUCT_IMPLEMENTATION                 = NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION     = IMPLEMENTED_LOCAL_IN_REVIEW
+PRODUCT_IMPLEMENTATION                 = WAVE_1_SHELL_IN_REVIEW
 PACK_SHA256                            = 8cd54c20144d8d1c25c59551f8c1655e163e358fbcee8af0d1d762206166b70e
 PACK_NAME                              = WORKOS_MAP_V3_COLLAPSIBLE_SIDEBAR_REVIEW_PACK
 ```
 
-The pack lives outside git under `.tmp`. Do not commit the board, screenshots, or video.
+The design pack lives outside git under `.tmp`. Do not commit the board, reconstructed screenshots, or video.
 
 ### Categories
 
@@ -295,7 +295,7 @@ Do not invent a new category or a third level to place a function.
 
 Permissions and organization configuration may hide optional destinations for a whole session. They must not change the menu because the route changed.
 
-Owner accepted the V3 sidebar map on 2026-08-30. Implementation is not authorized by this file.
+Owner accepted the V3 sidebar map on 2026-08-30. Wave 1 shell implementation is local in review; this file does not authorize missing pages or OS-S3.
 
 ### 4. Large collections use list/detail, not menu trees
 
@@ -618,7 +618,7 @@ OWNER_VISUAL_ACCEPTANCE    = FIRST_LOT_CLOSED
 HIGH_FIDELITY              = FIRST_LOT_OWNER_ACCEPTED
 VISIBLE_RUNTIME            = WAVE_1_FOUNDATION_ROUTES_ACCESS
 UI_IMPLEMENTATION          = IN_REVIEW
-UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = IMPLEMENTED_LOCAL_IN_REVIEW
 ```
 
 `OWNER_VISUAL_ACCEPTANCE` for the first lot is closed. It is not the closed IA gate and it is not a scoped UI implementation GO.
