@@ -93,6 +93,8 @@ REACT_IMPLEMENTATION    = NO
 
 The current five top-nav labels stay in the foundation canon until a later scoped UI GO changes the implemented shell.
 
+Later, on 2026-08-30, Owner accepted V3 as living navigation direction (`UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED`). That later accept does not rewrite this 2026-08 evidence revision. Implementation remains `NOT_STARTED / NOT_AUTHORIZED`. Evidence pack SHA256: `8cd54c20144d8d1c25c59551f8c1655e163e358fbcee8af0d1d762206166b70e`.
+
 ## F. Authorized files
 
 ```text

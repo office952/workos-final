@@ -592,3 +592,19 @@ REAL_BUSINESS_DATA_WRITE = NO
 COMMIT                   = YES
 PUSH                     = NO
 ```
+
+## Z. Later Owner decision — V3 navigation design
+
+Recorded 2026-08-30. This section does not rewrite the 283-PNG audit or its verdict.
+
+Owner accepted V3 as living navigation direction: one stable sidebar, six discrete categories, twenty pages. Implementation is not authorized.
+
+```text
+UI_UX_NAVIGATION_V3_DESIGN           = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
+PACK_SHA256                          = 8cd54c20144d8d1c25c59551f8c1655e163e358fbcee8af0d1d762206166b70e
+PACK_NAME                            = WORKOS_MAP_V3_COLLAPSIBLE_SIDEBAR_REVIEW_PACK
+OUT_EMP_REQUESTS                     = Oameni / Angajați / /people
+```
+
+The pack is local evidence under `.tmp`. It is not part of this git tree. Living law is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. The implemented shell remains the five-item top nav in `docs/architecture/UI_UX_FOUNDATION_CANON.md`.

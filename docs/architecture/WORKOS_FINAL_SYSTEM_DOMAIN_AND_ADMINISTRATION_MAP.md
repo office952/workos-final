@@ -447,7 +447,7 @@ Administrare
     └── Stare sistem
 ```
 
-Do not add an empty Producție page or an Execution top-nav item. Lucrări is the operator landing for real commercial jobs. The job workspace is `/execution/:planId`, reached from Lucrări or the product path via **Deschide execuția**. Pontaj and platform Settings stay off this catalog until they have real truth. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
+Do not add an empty Producție page or an Execution top-nav item. Lucrări is the operator landing for real commercial jobs. The job workspace is `/execution/:planId`, reached from Lucrări or the product path via **Deschide execuția**. V3 places Pontaj on the accepted map under Oameni; it remains not implemented and not authorized. Platform Settings stay off the catalog. Utilaje și zone is present because the capability-provider model exists. Do not invent machines to fill the catalog.
 
 ## Operator vs admin surfaces
 

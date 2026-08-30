@@ -962,6 +962,8 @@ OS_S3_TO_OS_S11               = NOT_AUTHORIZED
 UI_UX_NAVIGATION_RECOVERY     = NEXT_OWNER_PRIORITY
 ```
 
+This audit snapshot recorded navigation recovery as next priority. On 2026-08-30 Owner accepted V3 navigation design. Implementation remains unauthorized. Living flags are in the V1 roadmap and the UI/UX direction canon.
+
 ### Old-versus-new Cerere audit
 
 Old app (`C:\Users\offic\workos_app_vs`, read-only):

@@ -33,7 +33,8 @@ OS_S2_TYPED_FACTS          = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY   = CLOSED
 OS_S3                      = NOT_STARTED / NOT_AUTHORIZED
-UI_UX_NAVIGATION_RECOVERY  = NEXT_OWNER_PRIORITY
+UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
 LIVE_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
@@ -233,7 +234,7 @@ Do not invent EUR amounts. Confirm these values before Phase 2 write.
 | Site electrical attendance | EUR / job | When contract is INCLUDED or SUBCONTRACTED | Cost evidence for those modes. EXCLUDED_CUSTOMER_RESPONSIBILITY and NOT_APPLICABLE need no cost row | LETTERS electrical finish is workshop close-out | Site electrical | Resources / Cost or exclusion text |
 | LED mount service | do not reuse | Never as site install | — | `LED installation service` is workshop module mounting | Must not be copied | Keep on LETTERS LIGHTING only |
 
-`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. OS-S2 design decisions 1–5 are closed. OS-S2 write is implemented on main. Transaction safety is closed. OS-S3 remains closed until a later Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. Next Owner priority is UI/UX navigation recovery.
+`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. OS-S2 design decisions 1–5 are closed. OS-S2 write is implemented on main. Transaction safety is closed. OS-S3 remains closed until a later Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. V3 navigation design is Owner-accepted; implementation is not authorized by this file.
 
 ## Phase 3 — one Quote, separate lines (not implemented)
 

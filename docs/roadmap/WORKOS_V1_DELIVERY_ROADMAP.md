@@ -66,7 +66,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = 2596cd076af631b1679c4530df90dcf22de46bbb
+ORIGIN_MAIN                          = f5eb96d56306db1d02cc0fb731a074e391640067
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -91,7 +91,8 @@ OS_S2_TYPED_FACTS                    = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION                 = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY             = CLOSED
 OS_S3                                = NOT_STARTED / NOT_AUTHORIZED
-UI_UX_NAVIGATION_RECOVERY            = NEXT_OWNER_PRIORITY
+UI_UX_NAVIGATION_V3_DESIGN           = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION   = NOT_STARTED / NOT_AUTHORIZED
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
 UI_UX_CANON_UPDATE_FROM_EVIDENCE     = COMPLETE
@@ -223,7 +224,8 @@ OS_S2_TYPED_FACTS = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY = CLOSED
 OS_S3 = NOT_STARTED / NOT_AUTHORIZED
-UI_UX_NAVIGATION_RECOVERY = NEXT_OWNER_PRIORITY
+UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
 ```
 
 `HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because installation cost/process evidence is incomplete. This file does not authorize that job.
@@ -284,7 +286,7 @@ Step 1 established the living canons and governance pointers. Step 2 recovered t
 
 `UI_UX_CANON_UPDATE_FROM_EVIDENCE` is complete. That revision distinguished invariants, evidence-supported conclusions, Figma candidates, and explicit deferrals. It did not declare a sidebar, a Catalog label, a visual style, or a component library as final. Execution detail lives in `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md`.
 
-`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is Owner-accepted with amendments. Global navigation is top nav. Level 1 is Lucrări | Atelier | Comercial | Catalog | Administrare. `Configurează` is a contextual action. Product System stays in Administrare. Visual direction A and the first HF lot are now accepted; they were unselected at IA time. Execution detail lives in `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md`.
+`FIGMA_ACCESS_AND_INFORMATION_ARCHITECTURE` is Owner-accepted with amendments. That 2026-08-25 IA selected top nav and Level 1 Lucrări | Atelier | Comercial | Catalog | Administrare. On 2026-08-30 Owner accepted V3 as living navigation direction: one stable sidebar, six categories, twenty pages. The earlier IA remains historical. `Configurează` stays a contextual action. Product System stays under Administrare. Visual direction A and the first HF lot remain accepted. Execution detail lives in `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md` and `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
 
 `PILOT_HIGH_FIDELITY_SCOPE_DEFINITION` is Owner-accepted with amendments. The first lot includes job detail, quote decision inspection, and execution so the pilot can be validated through planned-vs-actual. The stable job URL is `/jobs/:jobId` with `jobId = orderSnapshotId`. `/orders/:orderSnapshotId` is rejected as the primary UI route. No Job table. Admin pattern reuse stays domain-aware; universal CRUD is forbidden. Execution detail lives in `docs/worklog/WORKOS_PILOT_HIGH_FIDELITY_SCOPE_DEFINITION_V1.md`.
 
@@ -298,7 +300,7 @@ Step 8 configured the recovered HUB MEDIA organization with the existing seller,
 
 Step 9 is `BLOCKED_BEFORE_QUOTE` because optional site installation is selected as a required associated scope for the first real LETTERS job, and installation evidence, facts, and service commercial are incomplete. Phase 1 of that capability is `INTEGRATED_ON_MAIN`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. It does not authorize a live quote, a live Cerere PATCH, later service slices, multi-line Quote, or Architecture C UI Wave 2. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
 
-Do not start steps 9–10 from this document. The next named HUB step remains `FIRST_REAL_LETTERS_JOB`, now blocked before quote. OS-S1 is implemented on main. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 and later slices still need a separate Owner GO. Next Owner priority is UI/UX navigation recovery.
+Do not start steps 9–10 from this document. The next named HUB step remains `FIRST_REAL_LETTERS_JOB`, now blocked before quote. OS-S1 is implemented on main. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. V3 implementation is not started and is not authorized by this file.
 
 ## Operational Services program
 
@@ -317,7 +319,8 @@ OS_S2_IMPLEMENTATION                     = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY                 = CLOSED
 OS_S3                                    = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_EVIDENCE_AND_EIC                   = NOT_STARTED / NOT_AUTHORIZED
-UI_UX_NAVIGATION_RECOVERY                = NEXT_OWNER_PRIORITY
+UI_UX_NAVIGATION_V3_DESIGN               = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION       = NOT_STARTED / NOT_AUTHORIZED
 OS_S4_SERVICE_COMMERCIAL                 = NOT_STARTED
 OS_S5_MULTI_LINE_QUOTE                   = NOT_STARTED
 OS_S6_TRANSPORT                          = NOT_STARTED
@@ -332,7 +335,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. Next Owner priority is UI/UX navigation recovery. OS-S1 does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. V3 navigation design is Owner-accepted; implementation is not authorized by this file. OS-S1 does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 
@@ -431,6 +434,17 @@ Not in V1. Do not start them to look productive.
 - SVG / DWG / graphics processing inside WorkOS
 
 ACM cassette remains the existing second-product vertical slice. It is not permission to build full ACM or illuminated ACM.
+
+V3 map reconciliation, not a V1 implementation GO:
+
+```text
+PONTAJ / PLĂȚI INTERNE / FURNIZORI / ACHIZIȚII / RAPOARTE
+  BASELINE              = RETAINED_ON_V3_MAP
+  IMPLEMENTATION        = NOT_IMPLEMENTED
+  AUTHORIZATION         = NOT_AUTHORIZED
+```
+
+Those destinations stay on the accepted V3 map. They are not eliminated from the product. They may stay deferred or optional. This file does not authorize building them. Rapoarte stay a shortcut on Acasă, not a new menu page. Internal leave/absence (`OUT-EMP-REQUESTS`) maps to Oameni → Angajați, not Comercial → Cereri.
 
 ## Update policy
 

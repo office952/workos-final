@@ -5,8 +5,8 @@ This document is normative for **how UI may evolve**. It is not a frozen mockup,
 
 ```text
 AUTHORITY                         = ACTIVE_UI_UX_DIRECTION
-SOURCE_OF_THIS_REVISION           = FIRST_HF_LOT_OWNER_ACCEPTED_PLUS_READINESS_CONTRACTS
-PREVIOUS_REVISION_SOURCE          = OWNER_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE
+SOURCE_OF_THIS_REVISION           = OWNER_ACCEPTED_V3_STABLE_NAVIGATION
+PREVIOUS_REVISION_SOURCE          = FIRST_HF_LOT_OWNER_ACCEPTED_PLUS_READINESS_CONTRACTS
 EVIDENCE_PACK                     = docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md
 IA_ACCEPTANCE                     = docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md
 HF_LOT_ACCEPTANCE                 = docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md
@@ -27,7 +27,9 @@ FIGMA_ACCESS_GATE                 = COMPLETE
 INFORMATION_ARCHITECTURE          = OWNER_ACCEPTED
 OWNER_IA_GATE                     = CLOSED
 HIGH_FIDELITY                     = FIRST_LOT_OWNER_ACCEPTED
-GLOBAL_NAV_STRUCTURE              = TOP_NAV
+GLOBAL_NAV_STRUCTURE              = STABLE_SIDEBAR
+UI_UX_NAVIGATION_V3_DESIGN        = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
 CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = WAVE_1_FOUNDATION
 THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
@@ -35,8 +37,10 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. That accept is design only. It does not authorize changing the implemented shell.
+
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s shell, routes, and primitives). This canon does not replace that record. It governs later Owner decisions and later UI change.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law** (today’s five-item top nav, routes, and primitives). This canon does not replace that record. It governs later Owner decisions and later UI change.
 
 Related living authority:
 
@@ -91,6 +95,8 @@ SHORT_ACTION_PATTERN      = DRAWER_OR_DIALOG
 INFORMATION_DENSITY       = INTERMEDIATE
 ```
 
+That 2026-08-25 Level 1 top-nav set remains historical IA. Living navigation direction is the 2026-08-30 V3 accept below. Do not treat `GLOBAL_NAV_STRUCTURE = TOP_NAV` as current direction.
+
 Still unselected:
 
 - final visual style
@@ -103,6 +109,111 @@ Still unselected:
 - mobile rewrite
 
 Wave 1 of first-lot UI implementation now shows Level 1 `Catalog` and stable `/jobs/:jobId` plus `/quotes/:quoteSnapshotId` routes. Full first-lot visual implementation is not complete. See `docs/architecture/UI_UX_FOUNDATION_CANON.md` and `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`.
+
+## ACCEPTED OWNER V3 NAVIGATION
+
+Recorded 2026-08-30. Living navigation direction for the whole application. Design only.
+
+```text
+OWNER_DECISION                         = V3_NAVIGATION_DESIGN_ACCEPTED
+GLOBAL_NAVIGATION                      = ONE_STABLE_SIDEBAR
+UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION     = NOT_STARTED / NOT_AUTHORIZED
+PRODUCT_IMPLEMENTATION                 = NOT_AUTHORIZED
+PACK_SHA256                            = 8cd54c20144d8d1c25c59551f8c1655e163e358fbcee8af0d1d762206166b70e
+PACK_NAME                              = WORKOS_MAP_V3_COLLAPSIBLE_SIDEBAR_REVIEW_PACK
+```
+
+The pack lives outside git under `.tmp`. Do not commit the board, screenshots, or video.
+
+### Categories
+
+Categories are discrete visual labels. They are not links, have no icons, receive no active state, and do not open required landing pages.
+
+Order:
+
+1. PRINCIPAL
+2. COMERCIAL
+3. PRODUCȚIE
+4. RESURSE
+5. OAMENI
+6. ADMINISTRARE
+
+### Pages
+
+Pages are clickable and have Lucide icons. The same twenty destinations stay in this order on every route. A route change updates only the active page.
+
+```text
+PRINCIPAL
+  Acasă
+COMERCIAL
+  Clienți
+  Cereri
+  Oferte
+  Catalog
+PRODUCȚIE
+  Lucrări
+  Atelier
+RESURSE
+  Resurse și costuri
+  Stoc
+  Utilaje
+  Furnizori
+  Achiziții
+OAMENI
+  Angajați
+  Pontaj
+  Plăți și avansuri
+ADMINISTRARE
+  Firmă
+  Politici
+  Servicii operaționale
+  Sistem produs
+  Guvernanță
+```
+
+Sister pages never disappear after navigation. No global horizontal menu. No persistent L2. No third navigation level.
+
+The top bar holds context, organization, account, and later a real search if one exists. It is not a second menu.
+
+Local tabs may exist only inside an object or workspace. They must not become global navigation.
+
+Current runtime routes stay until a later implementation GO. This document does not create pages, paths, or empty shells.
+
+### Dimensions and behavior
+
+```text
+EXPANDED_WIDTH   = 256px
+COLLAPSED_WIDTH  = 72px
+```
+
+Collapsed state is persisted locally. Collapsed keeps the same icons and order. Tooltip and accessible name use `Categorie — Pagină`. The active page is scrolled into view. The sidebar scrolls independently. The collapse control must not cover the last destination.
+
+At 768 px the same tree opens in a drawer:
+
+```text
+DRAWER_WIDTH     = min(88vw, 384px)
+```
+
+The active page is visible on open. Focus goes to the active page or Close. Escape and scrim close the drawer. Focus returns to Menu.
+
+### Roles and capabilities
+
+The menu may differ only by role or organization configuration, and then stays stable for the session. It must not change from route to route.
+
+A disabled capability may hide an optional destination consistently. It must not delete or hide historical data that must be kept.
+
+### OUT-EMP-REQUESTS
+
+```text
+CATEGORY  = Oameni
+PAGE      = Angajați
+ROUTE     = /people
+NEW_PAGE  = NO
+NOT       = Comercial / Cereri
+```
+
+Internal leave or absence belongs on the person. Attendance may receive the effect after approval.
 
 ## Classification
 
@@ -163,40 +274,28 @@ UI may own experience: layout, hierarchy, interaction, local UI state, responsiv
 
 See `docs/architecture/UI_UX_FOUNDATION_CANON.md` and `.cursor/rules/one-truth.mdc`.
 
-### 2. Three navigation layers
+### 2. One global navigation surface
 
 ```text
-LEVEL 1 = global work areas
-LEVEL 2 = local navigation inside the selected area
-LEVEL 3 = page content and object context
+NAVIGATION_SURFACES = ONE
+GLOBAL_SIDEBAR      = STABLE
 ```
 
-- **Level 1** — how the person moves between work areas.
-- **Level 2** — tabs, filters, saved views, subsections, categories, breadcrumbs, contextual search.
-- **Level 3** — the work itself: list, detail, form, decision, result.
-
-Level 2 is not an infinite extension of the global menu.
+The sidebar is the only global menu. Page content holds the work: list, detail, form, decision, result. Local tabs, filters, and breadcrumbs may exist only inside an object or workspace. They are not a second global menu and not a third navigation level.
 
 ### 3. Global navigation stays bounded
 
 Global navigation must stay short and stable.
 
-It contains **work domains**, not catalog categories.
+It contains the accepted V3 categories and twenty pages, not catalog families or resource subcategories.
 
 It must not grow with every product, resource, operation, or subcategory.
 
-Subcategories must not appear as new Level 1 items.
+Do not invent a new category or a third level to place a function.
 
-Permissions may hide inaccessible domains. They must not change the meaning of the remaining routes.
+Permissions and organization configuration may hide optional destinations for a whole session. They must not change the menu because the route changed.
 
-Owner accepted the Level 1 set, order, `Catalog` label, and top navigation. Do not reopen those from documentation alone.
-
-Still unselected from this document:
-
-- the final narrow-width visual chrome
-- the final visual style of the accepted top navigation
-
-Those remain later Figma / visual-acceptance work.
+Owner accepted the V3 sidebar map on 2026-08-30. Implementation is not authorized by this file.
 
 ### 4. Large collections use list/detail, not menu trees
 
@@ -475,9 +574,11 @@ Keyboard, focus, landmarks, dialog modality, and contrast still have gaps. Those
 
 Figma compared three information-architecture variants. That comparison is closed for navigation structure. Keep the candidate history. Do not rewrite the scores after the Owner decision.
 
-1. **A — evolved top navigation** — Owner accepted for the next design stage
-2. **B — compact / collapsible sidebar** — evaluated, not selected
+1. **A — evolved top navigation** — Owner accepted on 2026-08-25 for that IA stage; superseded as living direction on 2026-08-30
+2. **B — compact / collapsible sidebar** — evaluated in 2026-08-25 IA, not selected then
 3. **C — hybrid navigation** — evaluated, not selected
+
+Owner later accepted a stable collapsible sidebar (V3) as living navigation direction. Keep the 2026-08-25 scores as history. Do not rewrite them. Do not treat `A_TOP_NAV` as current direction.
 
 Evidence scores on page 07 were not restated after acceptance:
 
@@ -510,13 +611,14 @@ Still FIGMA_CANDIDATE / unselected:
 - final visual style and palette
 
 ```text
-GLOBAL_NAV_STRUCTURE       = TOP_NAV
+GLOBAL_NAV_STRUCTURE       = STABLE_SIDEBAR
 CATALOG_LABEL              = ACCEPTED
 HIGH_FIDELITY_DESIGN       = FIRST_LOT_OWNER_ACCEPTED
 OWNER_VISUAL_ACCEPTANCE    = FIRST_LOT_CLOSED
 HIGH_FIDELITY              = FIRST_LOT_OWNER_ACCEPTED
 VISIBLE_RUNTIME            = WAVE_1_FOUNDATION_ROUTES_ACCESS
 UI_IMPLEMENTATION          = IN_REVIEW
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
 ```
 
 `OWNER_VISUAL_ACCEPTANCE` for the first lot is closed. It is not the closed IA gate and it is not a scoped UI implementation GO.
@@ -560,7 +662,8 @@ Keep outside this stage and outside high-fidelity / scoped UI implementation:
 - SVG / DWG analysis inside WorkOS
 - Logo
 - Analyzer inside WorkOS
-- HR / pontaj / payroll
+- HR / payroll as commercial price or REVISAL
+- pontaj, internal payments, suppliers, purchasing, and reports as **implementation** — they remain on the accepted V3 map as destinations; they are not eliminated from the product; this file does not authorize building them
 - post-pilot roadmap features
 - shop-floor machine-map UI as a replacement for Atelier inbox
 - command palette as the primary catalog architecture
@@ -569,11 +672,11 @@ Historical Machine Strict pixels are reference-only. They are not captures of th
 
 ## Current implementation versus target
 
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items with the implemented `Produse` label, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens. The accepted Level 1 label is `Catalog`; do not edit the foundation canon to pretend that label is already in the shell.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` records what the app does today: five top-nav items, Comercial sub-rail, Administrare domain cards, category → item rails on several admin catalogs, light-only tokens. That is implemented presentation. It is not the accepted V3 map.
 
-Accepted Figma screens are design truth. They are not the remaining first-lot runtime. `VISIBLE_RUNTIME = WAVE_1_FOUNDATION_ROUTES_ACCESS`.
+The accepted navigation target is the V3 stable sidebar. Do not edit the foundation canon to pretend that sidebar already exists.
 
-This canon records where later authorized UI work must go. Do not edit the foundation canon to pretend the target shell already exists.
+Accepted first-lot Figma screens remain design truth for those pages. They are not a second navigation law. `VISIBLE_RUNTIME` stays the implemented first-lot runtime until a later UI GO.
 
 The foundation line that named Product System admin as the next UI candidate is historical to that foundation build. It is not the active next UI task.
 

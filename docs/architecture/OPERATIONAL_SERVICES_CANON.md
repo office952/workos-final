@@ -23,7 +23,8 @@ OS_S2_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY   = CLOSED
 OS_S3                      = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
-UI_UX_NAVIGATION_RECOVERY  = NEXT_OWNER_PRIORITY
+UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = NOT_STARTED / NOT_AUTHORIZED
 PHASE_2_IMPLEMENTATION     = NOT_AUTHORIZED
 TRANSPORT_IMPLEMENTATION   = NOT_AUTHORIZED
 NO_CLIENT_CODE_FORK        = YES
@@ -391,7 +392,7 @@ OS-S1 is implemented on main. OS-S2 typed facts are implemented on main. Transac
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented on main. OS-S3 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. Next Owner priority is UI/UX navigation recovery.
+OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented on main. OS-S3 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. V3 navigation design is Owner-accepted; implementation is not authorized by this file.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 
