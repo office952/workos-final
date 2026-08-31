@@ -2,6 +2,10 @@ import { test as base, type Locator, type Page } from "@playwright/test";
 import { randomBytes } from "node:crypto";
 import { rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import {
+  isWorklogEvidencePath,
+  shouldWriteWorklogEvidence,
+} from "./helpers/worklogEvidence";
 
 export { expect } from "@playwright/test";
 
@@ -34,6 +38,9 @@ function wrapScreenshot<T extends Page | Locator>(target: T): T {
       return original(options);
     }
     const buffer = await original({ ...options, path: undefined });
+    if (isWorklogEvidencePath(options.path) && !shouldWriteWorklogEvidence(options.path)) {
+      return buffer;
+    }
     await writePngAtomic(options.path, buffer as Buffer);
     return buffer;
   }) as T["screenshot"];

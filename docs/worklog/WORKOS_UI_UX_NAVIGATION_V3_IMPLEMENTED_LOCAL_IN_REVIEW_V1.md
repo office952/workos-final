@@ -55,6 +55,8 @@ React Router `useParams` and string `Link to` truncate `qts:…`, `ord:…`, `cr
 
 Live runtime screenshots: `docs/worklog/screenshots/v3-nav-*.png` (1440 / 1280 / 768, not the reconstructed board).
 
+Historical ACM / HF / configurator / client screenshots and PDFs stay at `BASE_HEAD`. Default e2e writes only `v3-nav-*.png`. Set `WORKOS_WRITE_WORKLOG_SCREENSHOTS=1` only when an Owner GO asks to refresh older evidence. Sibling-page proof is Stoc → Utilaje → Resurse și costuri → Stoc. Unknown-path fallback is a separate catch-all, not a Furnizori navigation.
+
 ```text
 WORKSPACE_TESTS = PASS (domain + api + web)
 LINT            = PASS (0 errors, existing refresh warnings)

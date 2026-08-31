@@ -1,4 +1,5 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "../AppShell";
@@ -60,7 +61,9 @@ function renderShell(initialEntry: string) {
       if (!latestNavigate) {
         throw new Error("navigate was not captured");
       }
-      latestNavigate(to);
+      act(() => {
+        latestNavigate(to);
+      });
     },
   };
 }
@@ -76,6 +79,14 @@ function visibleMenu() {
         href: link.getAttribute("href"),
       })),
   };
+}
+
+function currentPageName() {
+  const nav = screen.getByRole("navigation", { name: "Navigare principală" });
+  return within(nav)
+    .getByRole("link", { current: "page" })
+    .textContent?.replace(/\s+/g, " ")
+    .trim();
 }
 
 function buildRouteSamples(): string[] {
@@ -165,11 +176,33 @@ describe("route menu invariance", () => {
     }
   });
 
-  it("keeps the same menu from Stoc toward Furnizori", () => {
+  it("keeps the same menu from Stoc to Utilaje and Resurse și costuri", async () => {
+    const user = userEvent.setup();
+    renderShell("/admin/stock");
+    const before = visibleMenu();
+    expect(currentPageName()).toBe("Stoc");
+
+    await user.click(within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole("link", { name: "Utilaje" }));
+    expect(visibleMenu()).toEqual(before);
+    expect(currentPageName()).toBe("Utilaje");
+
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole(
+        "link",
+        { name: "Resurse și costuri" },
+      ),
+    );
+    expect(visibleMenu()).toEqual(before);
+    expect(currentPageName()).toBe("Resurse și costuri");
+
+    await user.click(within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole("link", { name: "Stoc" }));
+    expect(visibleMenu()).toEqual(before);
+    expect(currentPageName()).toBe("Stoc");
+  });
+
+  it("keeps the same visible menu on an unknown path", () => {
     const { go } = renderShell("/admin/stock");
     const before = visibleMenu();
-    expect(before.links.some((item) => item.name === "Stoc")).toBe(true);
-    expect(before.links.some((item) => item.name === "Furnizori")).toBe(false);
     go("/suppliers");
     expect(visibleMenu()).toEqual(before);
   });

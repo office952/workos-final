@@ -30,6 +30,20 @@ async function expectStableMenu(page: import("@playwright/test").Page) {
   await expect(page.getByRole("navigation", { name: "Navigare comercială" })).toHaveCount(0);
 }
 
+async function expectActiveVisiblePage(
+  page: import("@playwright/test").Page,
+  label: string,
+  heading: string,
+  headingExact = false,
+) {
+  await expectStableMenu(page);
+  await expect(primaryNavLink(page, label)).toHaveAttribute("aria-current", "page");
+  await expect(primaryNav(page).locator("a[aria-current='page']")).toHaveCount(1);
+  await expect(
+    page.getByRole("heading", { name: heading, exact: headingExact, level: 1 }),
+  ).toBeVisible();
+}
+
 test("v3 stable sidebar projects existing routes without fake pages", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/clients");
@@ -50,12 +64,7 @@ test("v3 stable sidebar projects existing routes without fake pages", async ({ p
   await page.screenshot({ path: shot("1440-jobs-expanded"), fullPage: true });
 
   await primaryNavLink(page, "Stoc").click();
-  await expect(page.getByRole("heading", { name: "Stoc", exact: true })).toBeVisible();
-  const onStock = await primaryNav(page).getByRole("link").allTextContents();
-  await page.goto("/suppliers");
-  await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
-  await expect(primaryNav(page).getByRole("link")).toHaveText(onStock);
-  await primaryNavLink(page, "Stoc").click();
+  await expectActiveVisiblePage(page, "Stoc", "Stoc", true);
   await page.screenshot({ path: shot("1440-stock-expanded"), fullPage: true });
 
   await primaryNavLink(page, "Guvernanță").click();
@@ -136,4 +145,38 @@ test("v3 stable sidebar projects existing routes without fake pages", async ({ p
   await page.mouse.click((scrimBox?.x ?? 0) + (scrimBox?.width ?? 768) - 24, (scrimBox?.y ?? 0) + 80);
   await expect(page.getByRole("dialog", { name: "Meniu" })).toHaveCount(0);
   await page.screenshot({ path: shot("768-governance-closed-after-scrim"), fullPage: true });
+});
+
+test("visible sibling pages keep the same menu from Stoc to Utilaje and Resurse", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/admin/stock");
+  await expectActiveVisiblePage(page, "Stoc", "Stoc", true);
+
+  await primaryNavLink(page, "Utilaje").click();
+  await expect(page).toHaveURL(/\/admin\/workcenters$/);
+  await expectActiveVisiblePage(page, "Utilaje", "Utilaje și zone");
+
+  await primaryNavLink(page, "Resurse și costuri").click();
+  await expect(page).toHaveURL(/\/admin\/resources$/);
+  await expectActiveVisiblePage(page, "Resurse și costuri", "Resurse și cost intern");
+
+  await primaryNavLink(page, "Stoc").click();
+  await expect(page).toHaveURL(/\/admin\/stock$/);
+  await expectActiveVisiblePage(page, "Stoc", "Stoc", true);
+});
+
+test("unknown paths keep the same visible menu and fall back to Lucrări", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/admin/stock");
+  await expectActiveVisiblePage(page, "Stoc", "Stoc", true);
+  const menu = await primaryNav(page).getByRole("link").allTextContents();
+
+  await page.goto("/suppliers");
+  await expect(page.getByRole("heading", { name: "Lucrări", level: 1 })).toBeVisible();
+  await expect(primaryNavLink(page, "Lucrări")).toHaveAttribute("aria-current", "page");
+  await expect(primaryNav(page).locator("a[aria-current='page']")).toHaveCount(1);
+  await expect(primaryNav(page).getByRole("link")).toHaveText(menu);
+  await expect(page.getByRole("navigation", { name: "Navigare comercială" })).toHaveCount(0);
 });
