@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -62,9 +62,7 @@ function renderShell(initialEntry: string) {
       if (!navigate) {
         throw new Error("navigate was not captured");
       }
-      act(() => {
-        navigate(to);
-      });
+      navigate(to);
     },
   };
 }
