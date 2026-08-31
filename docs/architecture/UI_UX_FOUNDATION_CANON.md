@@ -16,10 +16,12 @@ This file records the **implemented** shell. Living navigation direction is the 
 ```text
 IMPLEMENTED_SHELL                      = STABLE_SIDEBAR_V3
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION     = IMPLEMENTED_LOCAL_IN_REVIEW
+UI_UX_NAVIGATION_V3_IMPLEMENTATION     = INTEGRATED_ON_MAIN
+UI_V3_PAGE_CONTENT_TRANSFORMATION      = NOT_STARTED
+NEXT_PROGRAM_PRIORITY                  = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
-Wave 1 on `feat/ui-v3-stable-sidebar-shell` implements this sidebar. It is not accepted on main.
+Wave 1 implements this sidebar on main. Page-content transformation is not started.
 
 Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
 

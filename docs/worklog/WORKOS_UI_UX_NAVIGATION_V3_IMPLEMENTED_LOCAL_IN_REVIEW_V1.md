@@ -5,9 +5,11 @@ DATE                               = 2026-08-31
 BRANCH                             = feat/ui-v3-stable-sidebar-shell
 BASE_HEAD                          = ff046ef9ac994f0e3057817694e2289b5970c988
 UI_UX_NAVIGATION_V3_DESIGN         = OWNER_ACCEPTED
-UI_UX_NAVIGATION_V3_IMPLEMENTATION = IMPLEMENTED_LOCAL_IN_REVIEW
+UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
+UI_V3_PAGE_CONTENT_TRANSFORMATION  = NOT_STARTED
+NEXT_PROGRAM_PRIORITY              = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 RUNTIME_ACCEPTED                   = NO
-INTEGRATED_ON_MAIN                 = NO
+INTEGRATED_ON_MAIN                 = YES
 OS_S3                              = HOLD
 NEXT_WAVE                          = NO
 ```
@@ -67,4 +69,4 @@ E2E_FOLLOW_UP   = PASS hf-wave3 + golden-path; PASS admin-people-executor + v3-n
 INDEPENDENT_VERIFIER = pending live script .tmp/v3-nav-wave1/verify-app-readonly.mjs
 ```
 
-Do not mark runtime accepted or integrated on main.
+Wave 1 shell is `INTEGRATED_ON_MAIN`. Page-content transformation is `NOT_STARTED`. Do not start Wave 2 from this file.
