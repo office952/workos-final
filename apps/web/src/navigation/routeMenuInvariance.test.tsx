@@ -58,11 +58,12 @@ function renderShell(initialEntry: string) {
   return {
     ...view,
     go(to: string) {
-      if (!latestNavigate) {
+      const navigate = latestNavigate;
+      if (!navigate) {
         throw new Error("navigate was not captured");
       }
       act(() => {
-        latestNavigate(to);
+        navigate(to);
       });
     },
   };
