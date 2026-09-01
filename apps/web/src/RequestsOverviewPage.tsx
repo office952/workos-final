@@ -7,6 +7,7 @@ import {
   type CommercialRequestStatus,
   type Customer,
   type RequestOverviewFilter,
+  type RequestOverviewItem,
   type RequestOverviewProjection,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
@@ -20,6 +21,7 @@ import { pageErrorKind } from "./fetchAccess";
 import { ActionDrawer } from "./ui/ActionDrawer";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
@@ -41,6 +43,7 @@ export function RequestsOverviewPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(Boolean(presetCustomerId));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,20 +122,15 @@ export function RequestsOverviewPage() {
             Cerere nouă
           </button>
         }
-        meta={
-          empty ? null : (
-            <p className="page-summary">
-              Cereri {overview.summary.total}
-              {" · "}
-              Necesită atenție {overview.summary.needsAttention}
-              {" · "}
-              Noi {overview.summary.newCount}
-              {" · "}
-              Gata de ofertă {overview.summary.readyForQuote}
-            </p>
-          )
-        }
       />
+      {empty ? null : (
+        <div className="metric-band">
+          <MetricCard label="Cereri" value={overview.summary.total} />
+          <MetricCard label="Necesită atenție" value={overview.summary.needsAttention} />
+          <MetricCard label="Noi" value={overview.summary.newCount} />
+          <MetricCard label="Gata de ofertă" value={overview.summary.readyForQuote} />
+        </div>
+      )}
 
       {notice ? <p>{notice}</p> : null}
 
@@ -189,40 +187,82 @@ export function RequestsOverviewPage() {
               }
             />
           ) : (
-            <ul className="jobs-list">
-              {visible.map((request) => (
-                <li key={request.requestId}>
-                  <div className="jobs-identity">
-                    <Link to={request.href}>{request.title}</Link>
-                    <span>{request.reference}</span>
-                    <ClientLink
-                      customerId={request.customerId}
-                      displayName={request.customerDisplayName}
-                    />
-                  </div>
-                  <div className="jobs-status">
-                    <StatusChip
-                      label={request.statusLabel}
-                      tone={statusTone(request.status)}
-                    />
-                    {request.commercialProgressLabel ? (
-                      <p className="jobs-attention">{request.commercialProgressLabel}</p>
-                    ) : null}
-                    {request.attentionLabel ? (
-                      <p className="jobs-attention">{request.attentionLabel}</p>
-                    ) : null}
-                  </div>
-                  <p className="jobs-date">{formatRequestDate(request.createdAt)}</p>
-                  <Link className="button-link" to={request.nextActionHref}>
-                    {request.nextActionLabel}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="registry-split">
+              <ul className="jobs-list">
+                {visible.map((request) => {
+                  const selected = (selectedId ?? visible[0]?.requestId) === request.requestId;
+                  return (
+                    <li
+                      key={request.requestId}
+                      className={selected ? "is-selected" : undefined}
+                    >
+                      <div className="jobs-identity">
+                        <Link
+                          to={request.href}
+                          onClick={() => setSelectedId(request.requestId)}
+                        >
+                          {request.title}
+                        </Link>
+                        <span>{request.reference}</span>
+                        <ClientLink
+                          customerId={request.customerId}
+                          displayName={request.customerDisplayName}
+                        />
+                      </div>
+                      <div className="jobs-status">
+                        <StatusChip
+                          label={request.statusLabel}
+                          tone={statusTone(request.status)}
+                        />
+                        {request.commercialProgressLabel ? (
+                          <p>{request.commercialProgressLabel}</p>
+                        ) : null}
+                        {request.attentionLabel ? (
+                          <p className="jobs-attention">{request.attentionLabel}</p>
+                        ) : null}
+                      </div>
+                      <p className="jobs-date">{formatRequestDate(request.createdAt)}</p>
+                      <Link
+                        className="button-link"
+                        to={request.nextActionHref}
+                        onClick={() => setSelectedId(request.requestId)}
+                      >
+                        {request.nextActionLabel}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+              <RequestSelectedPanel
+                request={
+                  visible.find((item) => item.requestId === selectedId) ?? visible[0] ?? null
+                }
+              />
+            </div>
           )}
         </>
       )}
     </section>
+  );
+}
+
+function RequestSelectedPanel({ request }: { request: RequestOverviewItem | null }) {
+  if (!request) {
+    return null;
+  }
+  return (
+    <aside className="registry-panel" aria-label="Cerere selectată">
+      <h2>{request.title}</h2>
+      <p className="registry-panel-meta">{request.reference}</p>
+      {request.customerDisplayName ? (
+        <p className="registry-panel-meta">{request.customerDisplayName}</p>
+      ) : null}
+      <p className="registry-panel-meta">{request.statusLabel}</p>
+      {request.attentionLabel ? (
+        <p className="jobs-attention">{request.attentionLabel}</p>
+      ) : null}
+      <p className="registry-panel-meta">{request.nextActionLabel}</p>
+    </aside>
   );
 }
 

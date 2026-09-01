@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 type PageHeaderProps = {
   title: string;
-  lead?: string;
+  lead?: ReactNode;
   meta?: ReactNode;
   actions?: ReactNode;
 };

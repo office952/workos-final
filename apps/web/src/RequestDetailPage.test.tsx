@@ -132,10 +132,12 @@ describe("RequestDetailPage", () => {
       "/clients/cus%3A1",
     );
     expect(screen.getByLabelText("Descriere")).toHaveValue("Pe fațadă, text HUB MEDIA.");
+    await userEvent.click(screen.getByRole("button", { name: "Fișiere" }));
     expect(screen.getByRole("heading", { name: "Fișiere client" })).toBeInTheDocument();
     expect(
       screen.getByText("Nu există încă fișiere atașate acestei cereri."),
     ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Prezentare" }));
     expect(screen.getByRole("heading", { name: "Oferte legate" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "OF-ABCDEF01" })).toHaveAttribute(
       "href",
@@ -211,6 +213,7 @@ describe("RequestDetailPage", () => {
       </MemoryRouter>,
     );
 
+    await userEvent.click(await screen.findByRole("button", { name: "Montaj" }));
     const checkbox = await screen.findByRole("checkbox", { name: /Montaj la locație/ });
     expect(checkbox).not.toBeChecked();
     await userEvent.click(checkbox);
@@ -257,6 +260,7 @@ describe("RequestDetailPage", () => {
       </MemoryRouter>,
     );
 
+    await userEvent.click(await screen.findByRole("button", { name: "Montaj" }));
     expect(await screen.findByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
     expect(screen.getByText(/Mod salvat: Echipă internă/)).toBeInTheDocument();
     expect(screen.getByText(/nu mai este oferit de organizație/)).toBeInTheDocument();
@@ -312,6 +316,7 @@ describe("RequestDetailPage", () => {
       </MemoryRouter>,
     );
 
+    await userEvent.click(await screen.findByRole("button", { name: "Montaj" }));
     await userEvent.click(await screen.findByRole("button", { name: "Salvează datele de montaj" }));
     expect(updateInstallationFacts).toHaveBeenCalledWith(
       "crq:11111111-2222-3333-4444-555555555555",
@@ -399,6 +404,7 @@ describe("RequestDetailPage", () => {
       </MemoryRouter>,
     );
 
+    await userEvent.click(await screen.findByRole("button", { name: "Montaj" }));
     expect(await screen.findByLabelText("Stradă")).toHaveValue("Strada Fabricii 10");
     expect(screen.getByText("Evidența de cost pentru montaj lipsește.")).toBeInTheDocument();
     await userEvent.clear(screen.getByLabelText("Note de acces"));

@@ -2454,14 +2454,19 @@ details summary {
 
 .jobs-list li {
   margin: 0;
-  padding: 0.55rem 0.7rem;
+  padding: 0.45rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
   background: var(--surface-raised);
   display: grid;
   grid-template-columns: minmax(10rem, 1.5fr) minmax(9rem, 1.1fr) minmax(6rem, 0.7fr) auto;
-  gap: 0.45rem 0.85rem;
+  gap: 0.35rem 0.75rem;
   align-items: center;
+}
+
+.jobs-list li.is-selected {
+  background: var(--surface-selected);
+  border-color: var(--border-strong);
 }
 
 .jobs-identity {
@@ -2501,6 +2506,19 @@ details summary {
   font-size: 0.9rem;
 }
 
+.jobs-list li.is-selected .jobs-identity span,
+.jobs-list li.is-selected .jobs-customer,
+.jobs-list li.is-selected .jobs-status p,
+.jobs-list li.is-selected .jobs-date,
+.jobs-list li.is-selected .registry-provenance-link,
+.registry-panel .jobs-identity span,
+.registry-panel .jobs-customer,
+.registry-panel .jobs-status p,
+.registry-panel .jobs-date,
+.registry-panel-meta {
+  color: var(--text-secondary);
+}
+
 .jobs-customer {
   display: block;
 }
@@ -2537,13 +2555,13 @@ a.jobs-customer {
 
 .clients-list li {
   margin: 0;
-  padding: 0.7rem 0.8rem;
+  padding: 0.45rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-s);
   background: var(--surface-raised);
   display: grid;
   grid-template-columns: minmax(12rem, 1.6fr) minmax(10rem, 1.2fr) auto;
-  gap: 0.5rem 0.9rem;
+  gap: 0.35rem 0.75rem;
   align-items: center;
 }
 
@@ -2616,19 +2634,33 @@ a.jobs-customer {
 .client-sections {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: 0.35rem 0.55rem;
 }
 
-.client-sections a {
-  color: var(--ink);
+.client-sections a,
+.object-tabs button {
+  box-sizing: border-box;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.7rem;
+  color: var(--text-secondary);
   text-decoration: none;
-  font-weight: 600;
-  padding-bottom: 0.15rem;
-  border-bottom: 2px solid transparent;
+  font: inherit;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: var(--radius-m);
+  background: transparent;
+  cursor: pointer;
 }
 
-.client-sections a[aria-current="page"] {
-  border-bottom-color: var(--accent);
+.client-sections a[aria-current="page"],
+.object-tabs button[aria-current="page"] {
+  color: var(--text-primary);
+  font-weight: 650;
+  border-bottom: 2px solid var(--accent);
+  border-radius: 0;
 }
 
 .client-overview {
@@ -3038,5 +3070,118 @@ a.jobs-customer {
 
   .atelier-task-actions {
     justify-content: flex-start;
+  }
+}
+
+.metric-band {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+}
+
+.metric-card {
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+}
+
+.metric-card-label,
+.metric-card-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.metric-card-value {
+  margin: 0.1rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.metric-card-hint {
+  margin-top: 0.15rem;
+}
+
+.registry-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.registry-panel {
+  position: sticky;
+  top: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+}
+
+.registry-panel h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.registry-panel-meta {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.object-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 var(--space-3);
+}
+
+.job-lanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.job-lane {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.job-lane h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.job-lane .decision-fields,
+.job-lane .decision-money-fields {
+  margin: 0;
+}
+
+.clients-counters {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .registry-split,
+  .job-lanes,
+  .metric-band {
+    grid-template-columns: 1fr;
+  }
+
+  .registry-panel {
+    position: static;
   }
 }

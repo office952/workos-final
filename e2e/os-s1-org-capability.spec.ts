@@ -29,6 +29,7 @@ test("OS-S1 hides new installation when disabled and locks after a linked quote"
   const hiddenId = ((await hiddenCreated.json()) as { request: { requestId: string } })
     .request.requestId;
   await page.goto(`/requests/${encodeURIComponent(hiddenId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   await expect(page.getByRole("checkbox", { name: /Montaj la locație/ })).toHaveCount(0);
 
   const enabled = await request.patch("/api/operational-services/SITE_INSTALLATION", {
@@ -75,6 +76,7 @@ test("OS-S1 hides new installation when disabled and locks after a linked quote"
   expect(freeze.ok()).toBeTruthy();
 
   await page.goto(`/requests/${encodeURIComponent(lockedId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   const checkbox = page.getByRole("checkbox", { name: /Montaj la locație/ });
   await expect(checkbox).toBeVisible();
   await expect(checkbox).toBeDisabled();

@@ -22,6 +22,8 @@ import { fetchCustomerWorkspace, updateCustomer } from "./customerApi";
 import { pageErrorKind } from "./fetchAccess";
 import { quoteDocumentUrl } from "./productApi";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
+import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
@@ -122,20 +124,10 @@ export function ClientWorkspacePage() {
 
   return (
     <section className="client-workspace">
-      <header className="client-workspace-header">
-        <div>
-          <p className="client-kicker">Client</p>
-          <h1>{customer.displayName}</h1>
-          <p className="client-header-meta">
-            Cereri, oferte și lucrări ale acestui client.
-          </p>
-          <p className="client-header-meta">{headerSummary(customer)}</p>
-        </div>
-        <div className="client-header-side">
-          <StatusChip
-            label={workspace.statusLabel}
-            tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
-          />
+      <PageHeader
+        title={customer.displayName}
+        lead={headerSummary(customer)}
+        actions={
           <div className="client-header-actions">
             <button
               type="button"
@@ -155,14 +147,26 @@ export function ClientWorkspacePage() {
               >
                 Cerere nouă
               </Link>
-            ) : (
-              <p className="client-retired-note">
-                Client retras. Istoricul rămâne vizibil.
-              </p>
-            )}
+            ) : null}
           </div>
-        </div>
-      </header>
+        }
+        meta={
+          <StatusChip
+            label={workspace.statusLabel}
+            tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
+          />
+        }
+      />
+      {workspace.canCreateRequest ? null : (
+        <p className="client-retired-note">
+          Client retras. Istoricul rămâne vizibil.
+        </p>
+      )}
+      <div className="metric-band">
+        <MetricCard label="Cereri" value={workspace.summary.requestCount} />
+        <MetricCard label="Oferte" value={workspace.summary.quoteCount} />
+        <MetricCard label="Lucrări" value={workspace.summary.jobCount} />
+      </div>
 
       {workspace.nextActions.length > 0 ? (
         <div className="client-next">
@@ -223,7 +227,7 @@ function OverviewPane({
   onDraftChange: (next: CustomerProfileFormValue) => void;
   onSave: () => void;
 }) {
-  const { customer, summary } = workspace;
+  const { customer } = workspace;
   return (
     <div className="client-overview">
       <article className="client-current-card">
@@ -256,41 +260,6 @@ function OverviewPane({
           </dl>
         )}
       </article>
-
-      <div className="client-count-grid">
-        <SectionJump
-          href={`${customerHref(customer.customerId)}?section=cereri`}
-          label="Cereri"
-          value={summary.requestCount}
-          detail={
-            summary.requestNeedsAction > 0
-              ? `${summary.requestNeedsAction} necesită acțiune`
-              : summary.openRequestCount > 0
-                ? `${summary.openRequestCount} deschise`
-                : "Nicio cerere deschisă"
-          }
-        />
-        <SectionJump
-          href={`${customerHref(customer.customerId)}?section=oferte`}
-          label="Oferte"
-          value={summary.quoteCount}
-          detail={
-            summary.quoteNeedsAction > 0
-              ? `${summary.quoteNeedsAction} necesită acțiune`
-              : "Nicio ofertă în așteptare"
-          }
-        />
-        <SectionJump
-          href={`${customerHref(customer.customerId)}?section=lucrari`}
-          label="Lucrări"
-          value={summary.jobCount}
-          detail={
-            summary.jobNeedsAction > 0
-              ? `${summary.jobNeedsAction} necesită acțiune`
-              : "Nicio lucrare în așteptare"
-          }
-        />
-      </div>
 
       <RelatedWorkspace
         requests={workspace.requests}
@@ -435,31 +404,11 @@ function JobsPane({ jobs }: { jobs: readonly JobOverviewItem[] }) {
   );
 }
 
-function SectionJump({
-  href,
-  label,
-  value,
-  detail,
-}: {
-  href: string;
-  label: string;
-  value: number;
-  detail: string;
-}) {
-  return (
-    <Link className="client-count-card" to={href}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <span>{detail}</span>
-    </Link>
-  );
-}
-
 function ProfileRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
       <dt>{label}</dt>
-      <dd>{value && value.trim().length > 0 ? value : "—"}</dd>
+      <dd>{value && value.trim().length > 0 ? value : "Nesetat"}</dd>
     </div>
   );
 }
@@ -467,7 +416,7 @@ function ProfileRow({ label, value }: { label: string; value: string | null }) {
 function headerSummary(customer: Customer): string {
   return [customer.cui, customer.contactName, customer.phone, customer.email]
     .filter((value): value is string => Boolean(value))
-    .join(" · ") || "Completează datele curente ale clientului.";
+    .join(" · ") || "Nesetat";
 }
 
 function addressLine(customer: Customer): string | null {

@@ -16,7 +16,9 @@ import {
   registrySearchResultSummary,
 } from "./RegistrySearchField";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
 import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
@@ -63,10 +65,10 @@ export function JobsOverviewPage() {
   }, [filter, page, query]);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă lucrările…</p>;
+    return <PageStatus kind="loading">Se încarcă lucrările…</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca lucrările.</p>;
+    return <PageStatus kind="error">Nu s-au putut încărca lucrările.</PageStatus>;
   }
 
   const { overview } = page;
@@ -78,20 +80,15 @@ export function JobsOverviewPage() {
       <PageHeader
         title="Lucrări"
         lead="Lucrările comerciale curente, starea lor și ce trebuie făcut acum."
-        meta={
-          empty ? null : (
-            <p className="page-summary">
-              Lucrări active {overview.summary.active}
-              {" · "}
-              În execuție {overview.summary.inExecution}
-              {" · "}
-              Necesită atenție {overview.summary.needsAttention}
-              {" · "}
-              Finalizate {overview.summary.completed}
-            </p>
-          )
-        }
       />
+      {empty ? null : (
+        <div className="metric-band">
+          <MetricCard label="Lucrări active" value={overview.summary.active} />
+          <MetricCard label="În execuție" value={overview.summary.inExecution} />
+          <MetricCard label="Necesită atenție" value={overview.summary.needsAttention} />
+          <MetricCard label="Finalizate" value={overview.summary.completed} />
+        </div>
+      )}
 
       {empty ? (
         <EmptyState

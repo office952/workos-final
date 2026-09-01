@@ -21,6 +21,7 @@ import {
 } from "./RegistrySearchField";
 import { ActionDrawer } from "./ui/ActionDrawer";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
@@ -114,18 +115,18 @@ export function ClientsOverviewPage() {
             Client nou
           </button>
         }
-        meta={
-          empty ? null : (
-            <p className="page-summary">
-              Clienți {registry.summary.total}
-              {" · "}
-              Activi {registry.summary.active}
-              {" · "}
-              Necesită atenție {registry.summary.needsAttention}
-            </p>
-          )
-        }
       />
+      {empty ? null : (
+        <div className="metric-band">
+          <MetricCard label="Clienți" value={registry.summary.total} />
+          <MetricCard label="Activi" value={registry.summary.active} />
+          <MetricCard label="Retrasi" value={registry.summary.retired} />
+          <MetricCard
+            label="Necesită atenție"
+            value={registry.summary.needsAttention}
+          />
+        </div>
+      )}
 
       {notice ? <p>{notice}</p> : null}
 
@@ -198,7 +199,7 @@ export function ClientsOverviewPage() {
                       label={customer.statusLabel}
                       tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
                     />
-                    <p>
+                    <p className="clients-counters">
                       Cereri deschise {customer.openRequestCount}
                       {" · "}
                       Oferte {customer.quoteCount}

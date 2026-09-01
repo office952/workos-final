@@ -58,6 +58,7 @@ export function RequestDetailPage() {
   );
   const [confirmDeselect, setConfirmDeselect] = useState(false);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+  const [tab, setTab] = useState<"overview" | "files" | "install">("overview");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -310,6 +311,31 @@ export function RequestDetailPage() {
         </Notice>
       ) : null}
 
+      <nav className="object-tabs" aria-label="Secțiuni cerere">
+        <button
+          type="button"
+          aria-current={tab === "overview" ? "page" : undefined}
+          onClick={() => setTab("overview")}
+        >
+          Prezentare
+        </button>
+        <button
+          type="button"
+          aria-current={tab === "files" ? "page" : undefined}
+          onClick={() => setTab("files")}
+        >
+          Fișiere
+        </button>
+        <button
+          type="button"
+          aria-current={tab === "install" ? "page" : undefined}
+          onClick={() => setTab("install")}
+        >
+          Montaj
+        </button>
+      </nav>
+
+      {tab === "overview" ? (
       <form
         className="people-create"
         onSubmit={(event) => {
@@ -350,6 +376,14 @@ export function RequestDetailPage() {
         ) : (
           <p>Stare: {detail.statusLabel}</p>
         )}
+        <button type="submit" disabled={busy}>
+          Salvează
+        </button>
+      </form>
+      ) : null}
+
+      {tab === "install" ? (
+      <section className="result-section">
         {detail.installationOffer.selected || detail.installationOffer.canSelectNew ? (
           <Field
             label="Montaj la locație"
@@ -364,7 +398,9 @@ export function RequestDetailPage() {
               }}
             />
           </Field>
-        ) : null}
+        ) : (
+          <p>Nesetat</p>
+        )}
         {detail.installationOffer.selected && detail.installationOffer.mode ? (
           <p>
             Mod salvat: {operationalServiceProviderModeLabel(detail.installationOffer.mode)}
@@ -402,22 +438,19 @@ export function RequestDetailPage() {
             </select>
           </Field>
         ) : null}
-        <button type="submit" disabled={busy}>
-          Salvează
-        </button>
-      </form>
-
-      {detail.installationOffer.selected ? (
-        <RequestInstallationFactsForm
-          facts={detail.installationFacts}
-          reasons={detail.installationScope?.incompleteReasons ?? []}
-          locked={!detail.canWriteInstallationFacts}
-          busy={busy}
-          notice={factsNotice}
-          onSave={(patch) => {
-            void handleSaveFacts(patch);
-          }}
-        />
+        {detail.installationOffer.selected ? (
+          <RequestInstallationFactsForm
+            facts={detail.installationFacts}
+            reasons={detail.installationScope?.incompleteReasons ?? []}
+            locked={!detail.canWriteInstallationFacts}
+            busy={busy}
+            notice={factsNotice}
+            onSave={(patch) => {
+              void handleSaveFacts(patch);
+            }}
+          />
+        ) : null}
+      </section>
       ) : null}
 
       <ActionDrawer
@@ -445,6 +478,7 @@ export function RequestDetailPage() {
         </p>
       </ActionDrawer>
 
+      {tab === "files" ? (
       <section className="result-section request-attachments">
         <h3>Fișiere client</h3>
         <p className="request-attachments-lead">
@@ -499,8 +533,9 @@ export function RequestDetailPage() {
           </ul>
         )}
       </section>
+      ) : null}
 
-      {detail.linkedOffers.length > 0 ? (
+      {tab === "overview" && detail.linkedOffers.length > 0 ? (
         <section className="result-section">
           <h3>Oferte legate</h3>
           <ul className="jobs-list">
@@ -528,7 +563,7 @@ export function RequestDetailPage() {
         </section>
       ) : null}
 
-      {linkedJobs.length > 0 ? (
+      {tab === "overview" && linkedJobs.length > 0 ? (
         <section className="result-section">
           <h3>Lucrări legate</h3>
           <ul className="jobs-list">
@@ -554,7 +589,7 @@ export function RequestDetailPage() {
         </section>
       ) : null}
 
-      {request.status !== "CANCELLED" ? (
+      {tab === "overview" && request.status !== "CANCELLED" ? (
         <section className="result-section">
           <h3>Alege produs</h3>
           <p>Deschide catalogul, apoi configurează pentru această cerere.</p>

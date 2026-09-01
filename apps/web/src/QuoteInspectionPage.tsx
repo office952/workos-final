@@ -8,6 +8,7 @@ import { acceptQuoteSnapshot, createOrderSnapshot } from "./productApi";
 import { fetchQuoteInspection, type QuoteInspectionResponse } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Notice } from "./ui/Notice";
+import { PageHeader } from "./ui/PageHeader";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
@@ -167,15 +168,13 @@ export function QuoteInspectionPage() {
 
   return (
     <article className="decision-workspace">
-      <header className="decision-header">
-        <div className="decision-title-row">
-          <h1>{quote.inscription}</h1>
+      <PageHeader
+        title={quote.inscription}
+        lead={`${quote.reference} · Ofertă înghețată. Verifică datele înainte de decizie.`}
+        meta={
           <StatusChip label={quote.stageLabel} tone={accepted ? "ok" : "progress"} />
-        </div>
-        <p className="decision-identity">
-          {quote.reference} · Ofertă înghețată. Verifică datele înainte de decizie.
-        </p>
-      </header>
+        }
+      />
       <div className="decision-grid">
         <section className="decision-card" aria-labelledby="quote-source">
           <h2 id="quote-source">Client și sursă</h2>
@@ -184,7 +183,7 @@ export function QuoteInspectionPage() {
               {quote.customerId && quote.customerDisplayName ? (
                 <ClientLink customerId={quote.customerId} displayName={quote.customerDisplayName} />
               ) : (
-                "—"
+                "Nesetat"
               )}
             </Field>
             <Field label="Cerere sursă">
@@ -193,11 +192,11 @@ export function QuoteInspectionPage() {
                   {page.detail.request.reference ?? "Deschide cererea"}
                 </Link>
               ) : (
-                "—"
+                "Nesetat"
               )}
             </Field>
             <Field label="Produs">{quote.productLabel}</Field>
-            <Field label="Configurație">{configuration ?? "—"}</Field>
+            <Field label="Configurație">{configuration ?? "Nesetat"}</Field>
           </dl>
         </section>
         <section className="decision-card decision-card-finance" aria-labelledby="quote-price">

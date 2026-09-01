@@ -83,17 +83,16 @@ describe("RequestsOverviewPage", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByRole("heading", { name: "Cereri de ofertă" })).toBeInTheDocument();
-    expect(screen.getByText("Litere exterior")).toBeInTheDocument();
-    expect(screen.getByText("CER-11111111")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Client: HUB MEDIA" })).toHaveAttribute(
-      "href",
-      "/clients/cus%3A1",
-    );
-    expect(screen.getByText("Nouă")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Litere exterior" })).toHaveAttribute(
       "href",
       "/requests/crq:11111111-2222-3333-4444-555555555555",
     );
+    expect(screen.getAllByText("CER-11111111").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Client: HUB MEDIA" })).toHaveAttribute(
+      "href",
+      "/clients/cus%3A1",
+    );
+    expect(screen.getAllByText("Nouă").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Deschide" })).toHaveAttribute(
       "href",
       "/requests/crq:11111111-2222-3333-4444-555555555555",
@@ -105,7 +104,7 @@ describe("RequestsOverviewPage", () => {
     expect(screen.queryByRole("button", { name: "Salvează datele de montaj" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Stradă")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Noi" }));
-    expect(screen.getByText("Litere exterior")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Litere exterior" })).toBeInTheDocument();
   });
 
   it("shows an empty state without demo requests", async () => {

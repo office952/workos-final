@@ -36,10 +36,12 @@ test("optional site installation is silent until selected and then blocks quote 
   const requestId = createdBody.request.requestId;
 
   await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   const checkbox = page.getByRole("checkbox", { name: /Montaj la locație/ });
   await expect(checkbox).toBeVisible();
   await expect(checkbox).not.toBeChecked();
 
+  await page.getByRole("button", { name: "Prezentare" }).click();
   await page
     .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
     .filter({ hasText: "Configurează" })
@@ -52,6 +54,7 @@ test("optional site installation is silent until selected and then blocks quote 
   await expect(createQuote).toBeEnabled();
 
   await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   await Promise.all([
     page.waitForResponse(
       (response) =>
@@ -62,8 +65,10 @@ test("optional site installation is silent until selected and then blocks quote 
   ]);
   await expect(page.getByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
   await page.reload();
+  await page.getByRole("button", { name: "Montaj" }).click();
   await expect(page.getByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
 
+  await page.getByRole("button", { name: "Prezentare" }).click();
   await page
     .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
     .filter({ hasText: "Configurează" })
@@ -124,6 +129,7 @@ test("optional site installation is silent until selected and then blocks quote 
   expect(quotesAfterBody.overview.quotes).toHaveLength(quotesBeforeBody.overview.quotes.length);
 
   await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   await Promise.all([
     page.waitForResponse(
       (response) =>
@@ -132,6 +138,7 @@ test("optional site installation is silent until selected and then blocks quote 
     ),
     page.getByRole("checkbox", { name: /Montaj la locație/ }).click(),
   ]);
+  await page.getByRole("button", { name: "Prezentare" }).click();
   await page
     .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
     .filter({ hasText: "Configurează" })

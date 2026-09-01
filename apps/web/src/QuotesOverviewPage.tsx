@@ -18,6 +18,7 @@ import {
 import { pageErrorKind } from "./fetchAccess";
 import { fetchQuoteOverview } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
 import { StatusChip, type StatusTone } from "./ui/StatusChip";
@@ -85,20 +86,15 @@ export function QuotesOverviewPage() {
       <PageHeader
         title="Oferte"
         lead="Ofertele înghețate, starea lor comercială și ce trebuie făcut acum."
-        meta={
-          empty ? null : (
-            <p className="page-summary">
-              Oferte {overview.summary.total}
-              {" · "}
-              Necesită atenție {overview.summary.needsAttention}
-              {" · "}
-              Acceptate {overview.summary.accepted}
-              {" · "}
-              Cu comandă {overview.summary.ordered}
-            </p>
-          )
-        }
       />
+      {empty ? null : (
+        <div className="metric-band">
+          <MetricCard label="Oferte" value={overview.summary.total} />
+          <MetricCard label="Necesită atenție" value={overview.summary.needsAttention} />
+          <MetricCard label="Acceptate" value={overview.summary.accepted} />
+          <MetricCard label="Cu comandă" value={overview.summary.ordered} />
+        </div>
+      )}
 
       {empty ? (
         <EmptyState
