@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Field } from "./ui/Field";
 
 type RegistrySearchFieldProps = {
@@ -6,6 +7,8 @@ type RegistrySearchFieldProps = {
   value: string;
   onChange: (value: string) => void;
   resultSummary?: string | null;
+  hideLabel?: boolean;
+  leadingIcon?: ReactNode;
 };
 
 export function RegistrySearchField({
@@ -14,11 +17,18 @@ export function RegistrySearchField({
   value,
   onChange,
   resultSummary,
+  hideLabel = false,
+  leadingIcon,
 }: RegistrySearchFieldProps) {
   return (
     <div className="registry-search">
-      <Field label={label}>
+      <Field label={label} hideLabel={hideLabel}>
         <div className="registry-search-controls">
+          {leadingIcon ? (
+            <span className="registry-search-icon" aria-hidden="true">
+              {leadingIcon}
+            </span>
+          ) : null}
           <input
             type="search"
             value={value}

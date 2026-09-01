@@ -202,7 +202,8 @@ test("office can open one client and see requests, offers and works", async ({
 
   await page.goto("/clients");
   await expect(clientRow(page, renamed)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Deschide clientul" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: new RegExp(renamed) })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Deschide clientul" })).toHaveCount(0);
 
   expect(fatalErrors).toEqual([]);
 });

@@ -1,5 +1,6 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { WorkosBrandMark } from "../icons/WorkosBrandMark";
 import {
   findActiveDestination,
   type NavigationDestination,
@@ -31,6 +32,12 @@ export function StableSidebar({
         railCollapsed ? "app-sidebar-shell is-collapsed" : "app-sidebar-shell"
       }
     >
+      <p className="app-sidebar-brand">
+        <Link to="/" className="app-sidebar-brand-link">
+          <WorkosBrandMark />
+          {railCollapsed ? <span className="visually-hidden">WorkOS</span> : <span>WorkOS</span>}
+        </Link>
+      </p>
       <nav className="app-sidebar-nav" aria-label="Navigare principală">
         <div className="app-sidebar-rail">
           {groups.map((group) => (

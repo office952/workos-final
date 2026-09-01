@@ -39,6 +39,7 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   await expect(page.getByLabel("Stradă")).toHaveCount(0);
 
   await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   await expect(page.getByRole("checkbox", { name: /Montaj la locație/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "Salvează datele de montaj" })).toHaveCount(0);
 
@@ -70,6 +71,7 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   ]);
   await expect(page.getByText("Datele de montaj au fost salvate.")).toBeVisible();
   await page.reload();
+  await page.getByRole("button", { name: "Montaj" }).click();
   await expect(page.getByLabel("Stradă")).toHaveValue("Strada Fabricii 10");
   await expect(page.getByLabel("Localitate")).toHaveValue("București");
   await expect(page.getByText("Evidența de cost pentru montaj lipsește.")).toBeVisible();
@@ -85,6 +87,7 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   await page.getByLabel("Stradă").focus();
   await expect(page.getByLabel("Stradă")).toBeFocused();
 
+  await page.getByRole("button", { name: "Prezentare" }).click();
   await page
     .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
     .filter({ hasText: "Configurează" })
@@ -96,6 +99,7 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   await expect(page.getByRole("button", { name: "Creează oferta" })).toBeDisabled();
 
   await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   await page.getByRole("checkbox", { name: /Montaj la locație/ }).click();
   await expect(page.getByRole("dialog", { name: "Renunți la montaj?" })).toBeVisible();
   await page.getByRole("button", { name: "Anulează" }).click();
@@ -149,6 +153,7 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   );
   expect(freeze.ok()).toBeTruthy();
   await page.goto(`/requests/${encodeURIComponent(lockedId)}`);
+  await page.getByRole("button", { name: "Montaj" }).click();
   await expect(page.getByRole("checkbox", { name: /Montaj la locație/ })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Salvează datele de montaj" })).toHaveCount(0);
 });

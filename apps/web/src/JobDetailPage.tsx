@@ -7,6 +7,7 @@ import { ClientLink } from "./ClientLink";
 import { fetchJobDetail, type JobDetailResponse } from "./jobsApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Notice } from "./ui/Notice";
+import { PageHeader } from "./ui/PageHeader";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
@@ -139,29 +140,52 @@ export function JobDetailPage() {
 
   return (
     <article className="decision-workspace">
-      <header className="decision-header">
-        <div className="decision-title-row">
-          <h1>{inscription}</h1>
-          <StatusChip
-            label={blocked ? (execution?.attentionLabel ?? job.attentionLabel ?? job.stageLabel) : job.stageLabel}
-            tone={statusTone}
-          />
-        </div>
-        <p className="decision-identity">
-          {job.customerId && job.customerDisplayName ? (
-            <ClientLink customerId={job.customerId} displayName={job.customerDisplayName} />
-          ) : (
-            "Fără client"
-          )}
-          {identityRefs.length > 0 ? ` · ${identityRefs.join(" · ")}` : null}
-        </p>
-        <p className="decision-next">
-          {`Următorul pas: ${job.nextActionLabel}.`}
-        </p>
-      </header>
-      <div className="decision-grid">
-        <div className="decision-stack">
-          <section className="decision-card" aria-labelledby="job-config">
+      <PageHeader
+        title={inscription}
+        lead={
+          <>
+            {job.customerId && job.customerDisplayName ? (
+              <ClientLink customerId={job.customerId} displayName={job.customerDisplayName} />
+            ) : (
+              "Fără client"
+            )}
+            {identityRefs.length > 0 ? ` · ${identityRefs.join(" · ")}` : null}
+          </>
+        }
+        meta={
+          <>
+            <StatusChip
+              label={
+                blocked
+                  ? (execution?.attentionLabel ?? job.attentionLabel ?? job.stageLabel)
+                  : job.stageLabel
+              }
+              tone={statusTone}
+            />
+            <p className="decision-next">{`Următorul pas: ${job.nextActionLabel}.`}</p>
+          </>
+        }
+        actions={
+          <p className="decision-actions">
+            {openExecution ? (
+              <Link className="button-link" to={appLocation(openExecution.to)}>
+                {openExecution.label}
+              </Link>
+            ) : continueConfigurator ? (
+              <Link className="button-link" to={appLocation(continueConfigurator.to)}>
+                {continueConfigurator.label}
+              </Link>
+            ) : null}
+            <Link className="button-link button-secondary" to="/">
+              Înapoi la Lucrări
+            </Link>
+          </p>
+        }
+      />
+      <div className="job-lanes">
+        <section className="job-lane" aria-labelledby="job-commercial">
+          <h2 id="job-commercial">Adevăr comercial înghețat</h2>
+          <section aria-labelledby="job-config">
             <h2 id="job-config">Configurație</h2>
             <dl className="decision-fields">
               <Field label="Produs">{job.productLabel}</Field>
@@ -172,28 +196,102 @@ export function JobDetailPage() {
               <Link to={appLocation(configuratorHref)}>Deschide configuratorul</Link>
             </p>
           </section>
-          <section className="decision-card" aria-labelledby="job-progress">
-            <h2 id="job-progress">Progres operații</h2>
-            {progressValue ? (
-              <p className="decision-progress-value">{progressValue}</p>
+          <section aria-labelledby="job-money">
+            <h2 id="job-money">Preț client</h2>
+            {money(commercial.grossPrice) ? (
+              <dl className="decision-money-fields">
+                {money(commercial.netPrice) ? (
+                  <Field label="Net">{money(commercial.netPrice)}</Field>
+                ) : null}
+                {typeof commercial.vatPercent === "number" ? (
+                  <Field label="TVA">TVA {commercial.vatPercent}%</Field>
+                ) : null}
+                <Field label="Brut">
+                  <span className="commercial-gross">Brut: {money(commercial.grossPrice)}</span>
+                </Field>
+                {typeof commercial.internalCost === "number" ? (
+                  <Field label="Cost intern">Cost intern: {money(commercial.internalCost)}</Field>
+                ) : null}
+                {typeof commercial.markupPercent === "number" ? (
+                  <Field label="Adaos">Adaos: {commercial.markupPercent}%</Field>
+                ) : null}
+                {typeof commercial.marginAmount === "number" ? (
+                  <Field label="Marjă">{money(commercial.marginAmount)}</Field>
+                ) : null}
+              </dl>
             ) : (
-              <p>Nicio operație pornită.</p>
+              <p>Prețul clientului nu este disponibil pe acest ecran.</p>
             )}
-            {job.taskCount !== null ? (
-              <p className="decision-progress-meta">
-                {job.completedCount ?? 0} finalizate · {job.inProgressCount ?? 0} în lucru
-              </p>
-            ) : null}
           </section>
-        </div>
-        <div className="decision-stack">
+          <div className="decision-links">
+            {request ? (
+              <Link to={appLocation(request.href)}>
+                Cerere{request.reference ? ` ${request.reference}` : ""}
+              </Link>
+            ) : null}
+            <Link to={appLocation(quote.href)}>
+              Ofertă{quote.reference ? ` ${quote.reference}` : ""}
+            </Link>
+          </div>
+        </section>
+        <section className="job-lane" aria-labelledby="job-release">
+          <h2 id="job-release">Eliberare producție</h2>
+          {page.detail.release ? (
+            <p>Eliberarea pentru producție există.</p>
+          ) : (
+            <p>Nesetat</p>
+          )}
+        </section>
+        <section className="job-lane" aria-labelledby="job-plan">
+          <h2 id="job-plan">Plan</h2>
+          {execution && job.taskCount !== null ? (
+            <p>
+              {job.taskCount} operații · {job.completedCount ?? 0} finalizate ·{" "}
+              {job.inProgressCount ?? 0} în lucru
+            </p>
+          ) : execution ? (
+            <p>
+              {[execution.statusLabel, job.progressLabel, execution.progressLabel]
+                .filter((part, index, all) => part && all.indexOf(part) === index)
+                .join(" · ")}
+            </p>
+          ) : (
+            <p>Fără plan de execuție încă.</p>
+          )}
+          {planView?.plan && typeof planView.plan.eicTotal === "number" ? (
+            <dl className="decision-fields">
+              <Field label="Planificat versus real">
+                Cost intern planificat: {money(planView.plan.eicTotal)}
+                {planView.actualInternalCost
+                  ? ` · Cost intern real: ${
+                      money(planView.actualInternalCost.calculableTotal) ??
+                      planView.actualInternalCost.statusLabel ??
+                      "Nesetat"
+                    }`
+                  : ""}
+              </Field>
+            </dl>
+          ) : null}
+        </section>
+        <section className="job-lane" aria-labelledby="job-execution">
+          <h2 id="job-execution">Stare execuție</h2>
+          {progressValue ? (
+            <p className="decision-progress-value">{progressValue}</p>
+          ) : (
+            <p>Nicio operație pornită.</p>
+          )}
+          {job.taskCount !== null ? (
+            <p className="decision-progress-meta">
+              {job.completedCount ?? 0} finalizate · {job.inProgressCount ?? 0} în lucru
+            </p>
+          ) : null}
           {blocked ? (
             <section className="decision-card decision-card-blocked" aria-labelledby="job-block">
               <h2 id="job-block">Blocaj</h2>
               <p>{execution?.attentionLabel ?? job.attentionLabel}</p>
             </section>
           ) : recovered ? (
-            <section className="decision-card" aria-labelledby="job-ready">
+            <section aria-labelledby="job-ready">
               <h2 id="job-ready">Stare</h2>
               <p>{job.stageLabel}. Aceeași lucrare, fără blocaj curent.</p>
             </section>
@@ -203,90 +301,13 @@ export function JobDetailPage() {
               <p>{job.attentionLabel}</p>
             </section>
           ) : null}
-          <section className="decision-card" aria-labelledby="job-links">
-            <h2 id="job-links">Legături</h2>
-            <div className="decision-links">
-              {request ? (
-                <Link to={appLocation(request.href)}>
-                  Cerere{request.reference ? ` ${request.reference}` : ""}
-                </Link>
-              ) : null}
-              <Link to={appLocation(quote.href)}>Ofertă{quote.reference ? ` ${quote.reference}` : ""}</Link>
-              {execution?.href ? <Link to={appLocation(execution.href)}>Plan de execuție</Link> : null}
-            </div>
-          </section>
-        </div>
+          {execution?.href ? (
+            <p className="decision-links">
+              <Link to={appLocation(execution.href)}>Plan de execuție</Link>
+            </p>
+          ) : null}
+        </section>
       </div>
-      <section className="decision-card decision-span" aria-labelledby="job-plan">
-        <h2 id="job-plan">Plan</h2>
-        {execution && job.taskCount !== null ? (
-          <p>
-            {job.taskCount} operații · {job.completedCount ?? 0} finalizate ·{" "}
-            {job.inProgressCount ?? 0} în lucru
-          </p>
-        ) : execution ? (
-          <p>
-            {[execution.statusLabel, job.progressLabel, execution.progressLabel]
-              .filter((part, index, all) => part && all.indexOf(part) === index)
-              .join(" · ")}
-          </p>
-        ) : (
-          <p>Fără plan de execuție încă.</p>
-        )}
-        {planView?.plan && typeof planView.plan.eicTotal === "number" ? (
-          <dl className="decision-fields">
-            <Field label="Planificat versus real">
-              Cost intern planificat: {money(planView.plan.eicTotal)}
-              {planView.actualInternalCost
-                ? ` · Cost intern real: ${
-                    money(planView.actualInternalCost.calculableTotal) ??
-                    planView.actualInternalCost.statusLabel ??
-                    "—"
-                  }`
-                : ""}
-            </Field>
-          </dl>
-        ) : null}
-      </section>
-      <section className="decision-card decision-money" aria-labelledby="job-money">
-        <h2 id="job-money">Preț client</h2>
-        {money(commercial.grossPrice) ? (
-          <dl className="decision-money-fields">
-            {money(commercial.netPrice) ? <Field label="Net">{money(commercial.netPrice)}</Field> : null}
-            {typeof commercial.vatPercent === "number" ? (
-              <Field label="TVA">TVA {commercial.vatPercent}%</Field>
-            ) : null}
-            <Field label="Brut">
-              <span className="commercial-gross">Brut: {money(commercial.grossPrice)}</span>
-            </Field>
-            {typeof commercial.internalCost === "number" ? (
-              <Field label="Cost intern">Cost intern: {money(commercial.internalCost)}</Field>
-            ) : null}
-            {typeof commercial.markupPercent === "number" ? (
-              <Field label="Adaos">Adaos: {commercial.markupPercent}%</Field>
-            ) : null}
-            {typeof commercial.marginAmount === "number" ? (
-              <Field label="Marjă">{money(commercial.marginAmount)}</Field>
-            ) : null}
-          </dl>
-        ) : (
-          <p>Prețul clientului nu este disponibil pe acest ecran.</p>
-        )}
-      </section>
-      <p className="decision-actions">
-        {openExecution ? (
-          <Link className="button-link" to={appLocation(openExecution.to)}>
-            {openExecution.label}
-          </Link>
-        ) : continueConfigurator ? (
-          <Link className="button-link" to={appLocation(continueConfigurator.to)}>
-            {continueConfigurator.label}
-          </Link>
-        ) : null}
-        <Link className="button-link button-secondary" to="/">
-          Înapoi la Lucrări
-        </Link>
-      </p>
     </article>
   );
 }
