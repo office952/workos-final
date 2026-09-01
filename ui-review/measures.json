@@ -6,12 +6,15 @@
     "model/clients_1440_light.png",
     "runtime/clients_1440_dark.png",
     "runtime/clients_1440_light.png",
+    "runtime/clients_1536_dark.png",
+    "runtime/clients_1920_dark.png",
+    "runtime/clients_2048_dark.png",
     "runtime/clients_1280_dark.png",
     "runtime/clients_768_dark.png",
-    "runtime/client-hub_1440_dark.png",
-    "runtime/requests_1440_dark.png",
-    "runtime/quotes_1440_dark.png",
-    "runtime/jobs_1440_dark.png",
+    "runtime/client-hub_1920_dark.png",
+    "runtime/requests_1920_dark.png",
+    "runtime/quotes_1920_dark.png",
+    "runtime/jobs_1920_dark.png",
     "comparisons/clients_1440_dark_model_vs_runtime.png",
     "comparisons/clients_1440_light_model_vs_runtime.png"
   ],
@@ -19,50 +22,28 @@
     "dark1440": {
       "viewport": {
         "width": 1440,
-        "height": 980
+        "height": 980,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
       },
       "overflowX": 0,
-      "content": {
-        "width": 1184,
-        "height": 1992,
-        "left": 256,
-        "right": 1440
-      },
       "column": {
         "width": 1184,
-        "height": 2048,
+        "height": 2881,
         "left": 256,
         "right": 1440
       },
-      "row": {
+      "content": {
+        "width": 1184,
+        "height": 2825,
+        "left": 256,
+        "right": 1440
+      },
+      "overview": {
         "width": 1136,
-        "height": 59,
+        "height": 2773,
         "left": 280,
         "right": 1416
-      },
-      "chip": {
-        "width": 44,
-        "height": 20,
-        "left": 1049,
-        "right": 1094
-      },
-      "open": {
-        "width": 44,
-        "height": 44,
-        "left": 1360,
-        "right": 1404
-      },
-      "name": {
-        "width": 453,
-        "height": 20,
-        "left": 292,
-        "right": 745
-      },
-      "meta": {
-        "width": 453,
-        "height": 18,
-        "left": 292,
-        "right": 745
       },
       "band": {
         "width": 1136,
@@ -72,70 +53,47 @@
       },
       "list": {
         "width": 1136,
-        "height": 1712,
+        "height": 2493,
         "left": 280,
         "right": 1416
       },
-      "nameText": "Client Alfa",
-      "metaText": "Fără CUI sau contact",
-      "styles": {
-        "contentMaxWidth": "1440px",
-        "contentMargin": "0px",
-        "chipWidth": "44.4531px",
-        "metaColor": "rgb(195, 202, 211)",
-        "metaBg": "rgb(29, 36, 46)",
-        "selectedBg": "#2a3442",
-        "muted": "#8b94a1",
-        "secondary": "#c3cad3"
-      }
+      "row": {
+        "width": 1136,
+        "height": 87,
+        "left": 280,
+        "right": 1416
+      },
+      "contentMaxWidth": "none",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
     },
     "light1440": {
       "viewport": {
         "width": 1440,
-        "height": 980
+        "height": 980,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
       },
       "overflowX": 0,
-      "content": {
-        "width": 1184,
-        "height": 1992,
-        "left": 256,
-        "right": 1440
-      },
       "column": {
         "width": 1184,
-        "height": 2048,
+        "height": 2881,
         "left": 256,
         "right": 1440
       },
-      "row": {
+      "content": {
+        "width": 1184,
+        "height": 2825,
+        "left": 256,
+        "right": 1440
+      },
+      "overview": {
         "width": 1136,
-        "height": 59,
+        "height": 2773,
         "left": 280,
         "right": 1416
-      },
-      "chip": {
-        "width": 44,
-        "height": 20,
-        "left": 1049,
-        "right": 1094
-      },
-      "open": {
-        "width": 44,
-        "height": 44,
-        "left": 1360,
-        "right": 1404
-      },
-      "name": {
-        "width": 453,
-        "height": 20,
-        "left": 292,
-        "right": 745
-      },
-      "meta": {
-        "width": 453,
-        "height": 18,
-        "left": 292,
-        "right": 745
       },
       "band": {
         "width": 1136,
@@ -145,70 +103,197 @@
       },
       "list": {
         "width": 1136,
-        "height": 1712,
+        "height": 2493,
         "left": 280,
         "right": 1416
       },
-      "nameText": "Client Alfa",
-      "metaText": "Fără CUI sau contact",
-      "styles": {
-        "contentMaxWidth": "1440px",
-        "contentMargin": "0px",
-        "chipWidth": "44.4531px",
-        "metaColor": "rgb(61, 71, 84)",
-        "metaBg": "rgb(255, 255, 255)",
-        "selectedBg": "#e8eef4",
-        "muted": "#66707d",
-        "secondary": "#3d4754"
-      }
+      "row": {
+        "width": 1136,
+        "height": 87,
+        "left": 280,
+        "right": 1416
+      },
+      "contentMaxWidth": "none",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
+    },
+    "dark1536": {
+      "viewport": {
+        "width": 1536,
+        "height": 980,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
+      },
+      "overflowX": 0,
+      "column": {
+        "width": 1280,
+        "height": 2881,
+        "left": 256,
+        "right": 1536
+      },
+      "content": {
+        "width": 1280,
+        "height": 2825,
+        "left": 256,
+        "right": 1536
+      },
+      "overview": {
+        "width": 1232,
+        "height": 2773,
+        "left": 280,
+        "right": 1512
+      },
+      "band": {
+        "width": 1232,
+        "height": 59,
+        "left": 280,
+        "right": 1512
+      },
+      "list": {
+        "width": 1232,
+        "height": 2493,
+        "left": 280,
+        "right": 1512
+      },
+      "row": {
+        "width": 1232,
+        "height": 87,
+        "left": 280,
+        "right": 1512
+      },
+      "contentMaxWidth": "none",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
+    },
+    "dark1920": {
+      "viewport": {
+        "width": 1920,
+        "height": 980,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
+      },
+      "overflowX": 0,
+      "column": {
+        "width": 1664,
+        "height": 2881,
+        "left": 256,
+        "right": 1920
+      },
+      "content": {
+        "width": 1664,
+        "height": 2825,
+        "left": 256,
+        "right": 1920
+      },
+      "overview": {
+        "width": 1616,
+        "height": 2773,
+        "left": 280,
+        "right": 1896
+      },
+      "band": {
+        "width": 1616,
+        "height": 59,
+        "left": 280,
+        "right": 1896
+      },
+      "list": {
+        "width": 1616,
+        "height": 2493,
+        "left": 280,
+        "right": 1896
+      },
+      "row": {
+        "width": 1616,
+        "height": 87,
+        "left": 280,
+        "right": 1896
+      },
+      "contentMaxWidth": "none",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
+    },
+    "dark2048": {
+      "viewport": {
+        "width": 2048,
+        "height": 980,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
+      },
+      "overflowX": 0,
+      "column": {
+        "width": 1792,
+        "height": 2881,
+        "left": 256,
+        "right": 2048
+      },
+      "content": {
+        "width": 1792,
+        "height": 2825,
+        "left": 256,
+        "right": 2048
+      },
+      "overview": {
+        "width": 1744,
+        "height": 2773,
+        "left": 280,
+        "right": 2024
+      },
+      "band": {
+        "width": 1744,
+        "height": 59,
+        "left": 280,
+        "right": 2024
+      },
+      "list": {
+        "width": 1744,
+        "height": 2493,
+        "left": 280,
+        "right": 2024
+      },
+      "row": {
+        "width": 1744,
+        "height": 87,
+        "left": 280,
+        "right": 2024
+      },
+      "contentMaxWidth": "none",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
     },
     "dark1280": {
       "viewport": {
         "width": 1280,
-        "height": 900
+        "height": 900,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
       },
       "overflowX": 0,
-      "content": {
-        "width": 1024,
-        "height": 1992,
-        "left": 256,
-        "right": 1280
-      },
       "column": {
         "width": 1024,
-        "height": 2048,
+        "height": 2881,
         "left": 256,
         "right": 1280
       },
-      "row": {
+      "content": {
+        "width": 1024,
+        "height": 2825,
+        "left": 256,
+        "right": 1280
+      },
+      "overview": {
         "width": 976,
-        "height": 59,
+        "height": 2773,
         "left": 280,
         "right": 1256
-      },
-      "chip": {
-        "width": 44,
-        "height": 20,
-        "left": 935,
-        "right": 980
-      },
-      "open": {
-        "width": 44,
-        "height": 44,
-        "left": 1200,
-        "right": 1244
-      },
-      "name": {
-        "width": 382,
-        "height": 20,
-        "left": 292,
-        "right": 674
-      },
-      "meta": {
-        "width": 382,
-        "height": 18,
-        "left": 292,
-        "right": 674
       },
       "band": {
         "width": 976,
@@ -218,70 +303,47 @@
       },
       "list": {
         "width": 976,
-        "height": 1712,
+        "height": 2493,
         "left": 280,
         "right": 1256
       },
-      "nameText": "Client Alfa",
-      "metaText": "Fără CUI sau contact",
-      "styles": {
-        "contentMaxWidth": "1440px",
-        "contentMargin": "0px",
-        "chipWidth": "44.4531px",
-        "metaColor": "rgb(195, 202, 211)",
-        "metaBg": "rgb(29, 36, 46)",
-        "selectedBg": "#2a3442",
-        "muted": "#8b94a1",
-        "secondary": "#c3cad3"
-      }
+      "row": {
+        "width": 976,
+        "height": 87,
+        "left": 280,
+        "right": 1256
+      },
+      "contentMaxWidth": "none",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
     },
     "dark768": {
       "viewport": {
         "width": 768,
-        "height": 1024
+        "height": 1024,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1
       },
       "overflowX": 0,
-      "content": {
-        "width": 768,
-        "height": 3913,
-        "left": 0,
-        "right": 768
-      },
       "column": {
         "width": 768,
-        "height": 3969,
+        "height": 4121,
         "left": 0,
         "right": 768
       },
-      "row": {
+      "content": {
+        "width": 768,
+        "height": 4065,
+        "left": 0,
+        "right": 768
+      },
+      "overview": {
         "width": 720,
-        "height": 125,
+        "height": 4013,
         "left": 24,
         "right": 744
-      },
-      "chip": {
-        "width": 44,
-        "height": 20,
-        "left": 36,
-        "right": 81
-      },
-      "open": {
-        "width": 44,
-        "height": 44,
-        "left": 688,
-        "right": 732
-      },
-      "name": {
-        "width": 636,
-        "height": 20,
-        "left": 36,
-        "right": 672
-      },
-      "meta": {
-        "width": 636,
-        "height": 18,
-        "left": 36,
-        "right": 672
       },
       "band": {
         "width": 720,
@@ -291,30 +353,21 @@
       },
       "list": {
         "width": 720,
-        "height": 3430,
+        "height": 3531,
         "left": 24,
         "right": 744
       },
-      "nameText": "Client Alfa",
-      "metaText": "Fără CUI sau contact",
-      "styles": {
-        "contentMaxWidth": "100%",
-        "contentMargin": "0px",
-        "chipWidth": "44.4531px",
-        "metaColor": "rgb(195, 202, 211)",
-        "metaBg": "rgb(29, 36, 46)",
-        "selectedBg": "#2a3442",
-        "muted": "#8b94a1",
-        "secondary": "#c3cad3"
-      }
+      "row": {
+        "width": 720,
+        "height": 126,
+        "left": 24,
+        "right": 744
+      },
+      "contentMaxWidth": "100%",
+      "contentMargin": "0px",
+      "rightDeadSpacePx": 0,
+      "rowToContentRight": 24,
+      "gutter": 24
     }
-  },
-  "contrast": {
-    "lightMetaOnRow": 9.43,
-    "darkMetaOnRow": 9.46
-  },
-  "nameMetaCollision": {
-    "light": "Client AlfaFără CUI sau contact",
-    "separate": true
   }
 }
