@@ -60,13 +60,17 @@ describe("ClientsOverviewPage", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByRole("heading", { name: "Clienți" })).toBeInTheDocument();
+    expect(screen.getAllByText("Retrași").length).toBeGreaterThan(0);
     expect(screen.getByText("Client Alpha")).toBeInTheDocument();
     expect(screen.getByText("Client Retras").closest(".registry-row-name")).not.toBeNull();
     expect(screen.getByText("Fără CUI sau contact")).toHaveClass("registry-row-meta");
     expect(screen.getByText(/RO111/)).toBeInTheDocument();
-    expect(screen.getByText("Cereri 1 · Oferte 2 · Lucrări 1")).toBeInTheDocument();
+    const alphaRow = screen.getByText("Client Alpha").closest(".registry-row");
+    expect(alphaRow).not.toBeNull();
+    expect(alphaRow?.querySelector(".registry-row-summary")).toHaveTextContent("1Cereri2Oferte1Lucrări");
     expect(screen.getByText("Ana · RO111")).toBeInTheDocument();
-    expect(screen.getByText("1 cerere necesită acțiune")).toBeInTheDocument();
+    expect(screen.getByText("1 cerere necesită acțiune")).toHaveClass("registry-row-flag");
+    expect(alphaRow?.querySelector(".registry-row-attention")).toBeNull();
     expect(screen.getAllByRole("link", { name: "Deschide clientul" })[0]).toHaveAttribute(
       "href",
       "/clients/cus%3Aalpha",
@@ -83,7 +87,7 @@ describe("ClientsOverviewPage", () => {
       </MemoryRouter>,
     );
     await screen.findByText("Client Alpha");
-    await userEvent.click(screen.getByRole("button", { name: "Retrasi" }));
+    await userEvent.click(screen.getByRole("button", { name: "Retrași" }));
     expect(screen.getByText("Client Retras")).toBeInTheDocument();
     expect(screen.queryByText("Client Alpha")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Toți" }));

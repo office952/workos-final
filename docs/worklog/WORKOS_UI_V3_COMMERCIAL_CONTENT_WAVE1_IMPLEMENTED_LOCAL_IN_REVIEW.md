@@ -12,8 +12,8 @@ NEXT_WAVE                   = NO
 Presentation-only Wave 1 on `feat/ui-v3-commercial-content-wave1`.
 
 - `/clients` stays list → Client Hub. No SplitPane.
-- Shared page width: `.app-content` uses the main working region (`max-width: 90rem`, left-aligned, no `margin: auto`).
-- Clients rows use one CSS grid law (identity / attention / state / open). No DataRow React component.
+- Shared page width: `.app-content` is fluid (`max-width: none`). Workspace fills the shell column; inner controls may keep their own readable max-width.
+- Clients rows use identity + flags left, commercial counters right, compact chevron. No dedicated attention column. No DataRow React component.
 - Open action is a 44×44 chevron with accessible name `Deschide clientul`.
 - Status stays a compact `StatusChip`. Selected-row metadata uses `--text-secondary`.
 - One shared primitive remains: `MetricCard`.

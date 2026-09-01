@@ -120,7 +120,7 @@ export function ClientsOverviewPage() {
         <div className="metric-band">
           <MetricCard label="Clienți" value={registry.summary.total} />
           <MetricCard label="Activi" value={registry.summary.active} />
-          <MetricCard label="Retrasi" value={registry.summary.retired} />
+          <MetricCard label="Retrași" value={registry.summary.retired} />
           <MetricCard
             label="Necesită atenție"
             value={registry.summary.needsAttention}
@@ -146,22 +146,9 @@ export function ClientsOverviewPage() {
       ) : (
         <>
           <div className="registry-toolbar">
-            <div className="filter-row" role="group" aria-label="Filtre clienți">
-              {CUSTOMER_REGISTRY_FILTERS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={item === filter ? "button-quiet is-selected" : "button-quiet"}
-                  aria-pressed={item === filter}
-                  onClick={() => setFilter(item)}
-                >
-                  {customerRegistryFilterLabel(item)}
-                </button>
-              ))}
-            </div>
             <RegistrySearchField
               label="Caută client"
-              placeholder="Caută client..."
+              placeholder="Caută client, CUI, contact, oraș..."
               value={query}
               onChange={setQuery}
               resultSummary={registrySearchResultSummary({
@@ -172,6 +159,19 @@ export function ClientsOverviewPage() {
                 nounPlural: "clienți",
               })}
             />
+            <div className="filter-row" role="group" aria-label="Filtre clienți">
+              {CUSTOMER_REGISTRY_FILTERS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={item === filter ? "button-quiet is-selected" : "button-quiet"}
+                  aria-pressed={item === filter}
+                  onClick={() => setFilter(item)}
+                >
+                  {clientsFilterLabel(item)}
+                </button>
+              ))}
+            </div>
           </div>
           {visible.length === 0 ? (
             <EmptyState
@@ -190,20 +190,31 @@ export function ClientsOverviewPage() {
                       {customer.displayName}
                     </Link>
                     <span className="registry-row-meta">{clientIdentityMeta(customer)}</span>
+                    <div className="registry-row-flags">
+                      <StatusChip
+                        label={customer.statusLabel}
+                        tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
+                      />
+                      {customer.attentionLabel ? (
+                        <span className="registry-row-flag is-attention">
+                          {customer.attentionLabel}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                  <p className="registry-row-attention">{customer.attentionLabel ?? ""}</p>
-                  <div className="registry-row-state">
-                    <StatusChip
-                      label={customer.statusLabel}
-                      tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
-                    />
-                    <p className="clients-counters">
-                      Cereri {customer.openRequestCount}
-                      {" · "}
-                      Oferte {customer.quoteCount}
-                      {" · "}
-                      Lucrări {customer.jobCount}
-                    </p>
+                  <div className="registry-row-summary" aria-label="Activitate comercială">
+                    <div className="registry-row-metric">
+                      <b>{customer.openRequestCount}</b>
+                      <span>Cereri</span>
+                    </div>
+                    <div className="registry-row-metric">
+                      <b>{customer.quoteCount}</b>
+                      <span>Oferte</span>
+                    </div>
+                    <div className="registry-row-metric">
+                      <b>{customer.jobCount}</b>
+                      <span>Lucrări</span>
+                    </div>
                   </div>
                   <Link
                     className="registry-row-open"
@@ -220,6 +231,10 @@ export function ClientsOverviewPage() {
       )}
     </section>
   );
+}
+
+function clientsFilterLabel(filter: CustomerRegistryFilter): string {
+  return filter === "RETIRED" ? "Retrași" : customerRegistryFilterLabel(filter);
 }
 
 function clientIdentityMeta(

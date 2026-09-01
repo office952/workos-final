@@ -736,9 +736,11 @@ body {
 }
 
 .app-content {
-  flex: 1;
+  flex: 1 1 auto;
   width: 100%;
-  max-width: 90rem;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
   margin: 0;
   padding: 1.25rem 1.5rem 2rem;
 }
@@ -2195,11 +2197,10 @@ details summary {
 }
 
 .registry-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.55rem 1.15rem;
-  margin: 0 0 0.65rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.45rem;
+  margin: 0 0 0.7rem;
 }
 
 .registry-toolbar .filter-row {
@@ -2208,8 +2209,8 @@ details summary {
 
 .registry-toolbar .registry-search {
   margin: 0;
-  flex: 1 1 16rem;
-  max-width: 22rem;
+  width: min(36rem, 100%);
+  max-width: 36rem;
 }
 
 .registry-search {
@@ -2459,6 +2460,8 @@ details summary {
 }
 
 .jobs-overview {
+  width: 100%;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
@@ -2568,31 +2571,29 @@ a.jobs-customer {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.3rem;
+  width: 100%;
+  gap: 0.35rem;
 }
 
 .clients-list .registry-row,
 .registry-row {
   margin: 0;
-  padding: 0.4rem 0.7rem;
+  padding: 0.55rem 0.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-s);
   background: var(--surface-raised);
   display: grid;
-  grid-template-columns:
-    minmax(16rem, 2fr)
-    minmax(13rem, 1.2fr)
-    minmax(14rem, 1.3fr)
-    2.75rem;
-  grid-template-areas: "identity attention state open";
-  gap: 0.25rem 1rem;
+  grid-template-columns: minmax(0, 1fr) auto 2.75rem;
+  grid-template-areas: "identity summary open";
+  gap: 0.4rem 1.25rem;
   align-items: center;
+  width: 100%;
 }
 
 .registry-row-identity {
   grid-area: identity;
   display: grid;
-  gap: 0.12rem;
+  gap: 0.18rem;
   min-width: 0;
 }
 
@@ -2602,7 +2603,7 @@ a.jobs-customer {
   color: inherit;
   font-weight: 650;
   text-decoration: none;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .registry-row-name:hover {
@@ -2613,33 +2614,65 @@ a.jobs-customer {
   display: block;
   color: var(--text-secondary);
   font-size: 0.88rem;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
-.registry-row-attention {
-  grid-area: attention;
-  margin: 0;
-  min-width: 0;
-  color: var(--bad);
-  font-size: 0.9rem;
-  line-height: 1.3;
+.registry-row-flags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-.registry-row-state {
-  grid-area: state;
-  display: grid;
-  justify-items: start;
-  gap: 0.12rem;
-  min-width: 0;
-}
-
-.registry-row-state .status-chip {
+.registry-row-flags .status-chip {
   width: max-content;
-  justify-self: start;
 }
 
-.registry-row-state .clients-counters {
+.registry-row-flag {
+  display: inline-block;
+  margin: 0;
+  padding: 0.12rem 0.45rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.registry-row-flag.is-attention {
+  border-color: var(--status-warning);
+  color: var(--status-warning);
+}
+
+.registry-row-summary {
+  grid-area: summary;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(3.25rem, auto));
+  gap: 0.15rem 1.15rem;
+  justify-items: end;
+  min-width: 0;
   font-variant-numeric: tabular-nums;
+}
+
+.registry-row-metric {
+  display: grid;
+  justify-items: end;
+  gap: 0;
+  min-width: 0;
+}
+
+.registry-row-metric b {
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.registry-row-metric span {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.2;
 }
 
 .registry-row-open {
@@ -2982,8 +3015,15 @@ a.jobs-customer {
     grid-template-columns: minmax(0, 1fr) 2.75rem;
     grid-template-areas:
       "identity open"
-      "attention open"
-      "state open";
+      "summary open";
+  }
+
+  .registry-row-summary {
+    justify-items: start;
+  }
+
+  .registry-row-metric {
+    justify-items: start;
   }
 
   .client-workspace-header {
