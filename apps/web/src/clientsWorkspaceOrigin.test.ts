@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   CLIENTS_WORKSPACE_ORIGIN_KEY,
+  clearClientsWorkspaceOrigin,
   clientsRegistryReturnHref,
   clientsRegistryReturnState,
   markClientsWorkspaceOrigin,
@@ -34,5 +35,38 @@ describe("clientsWorkspaceOrigin", () => {
     expect(resolveClientsWorkspaceOrigin("cus:alpha", null)).toBeNull();
     expect(clientsRegistryReturnHref(null)).toBe("/clients");
     expect(clientsRegistryReturnState(null)).toEqual({ clientsFreshVisit: true });
+  });
+
+  it("prefers the current history-entry origin over leftover storage", () => {
+    markClientsWorkspaceOrigin({
+      customerId: "cus:alpha",
+      search: "?q=stale&status=all",
+      scrollY: 400,
+    });
+    expect(
+      resolveClientsWorkspaceOrigin("cus:alpha", {
+        clientsWorkspaceOrigin: {
+          customerId: "cus:alpha",
+          search: "?q=live&status=active",
+          scrollY: 80,
+        },
+      }),
+    ).toEqual({
+      customerId: "cus:alpha",
+      search: "?q=live&status=active",
+      scrollY: 80,
+    });
+  });
+
+  it("does not reuse storage after the registry consumes the origin", () => {
+    markClientsWorkspaceOrigin({
+      customerId: "cus:alpha",
+      search: "?q=alpha&status=active&attention=1",
+      scrollY: 240,
+    });
+    clearClientsWorkspaceOrigin();
+    expect(readClientsWorkspaceOrigin("cus:alpha")).toBeNull();
+    expect(resolveClientsWorkspaceOrigin("cus:alpha", null)).toBeNull();
+    expect(clientsRegistryReturnHref(null)).toBe("/clients");
   });
 });

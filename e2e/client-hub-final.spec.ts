@@ -103,7 +103,7 @@ test("registry filters and scroll return through ← Clienți", async ({ page, r
   const scrolled = await registryScrollY(page);
   expect(scrolled).toBeGreaterThan(40);
 
-  await card(page, `Hub Mid ${token}`).click();
+  await card(page, `Hub Mid ${token}`).click({ force: true });
   await expect(page.getByRole("heading", { name: `Hub Mid ${token}` })).toBeVisible();
   await expect(page.getByRole("link", { name: "Înapoi la Clienți" })).toBeVisible();
   await page.getByRole("navigation", { name: "Secțiuni client" }).getByRole("link", { name: "Oferte" }).click();
@@ -116,6 +116,66 @@ test("registry filters and scroll return through ← Clienți", async ({ page, r
   await expect(page).toHaveURL(new RegExp(`q=${token}`, "i"));
   await expect(page.getByLabel("Caută client")).toHaveValue(token);
   await expect.poll(async () => registryScrollY(page)).toBeGreaterThan(40);
+});
+
+test("the same customer deep-linked after a finished registry journey is a fresh Clients visit", async ({
+  page,
+  request,
+}) => {
+  const token = uniqueRequestToken("CHS");
+  const customer = await createCustomer(request, `Hub Stale Mid ${token}`);
+  await createRequestForCustomer(request, customer.customerId, `Cerere Stale ${token}`);
+  for (let index = 0; index < 14; index += 1) {
+    const filler = await createCustomer(
+      request,
+      `Hub Stale Lorem ${token} ${String(index).padStart(2, "0")}`,
+    );
+    await createRequestForCustomer(request, filler.customerId, `Cerere Stale Lorem ${token} ${index}`);
+  }
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/clients?q=${encodeURIComponent(token)}&status=active&attention=1`);
+  await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
+  await page.locator(".clients-overview .registry-row").last().scrollIntoViewIfNeeded();
+  expect(await registryScrollY(page)).toBeGreaterThan(40);
+
+  await card(page, `Hub Stale Mid ${token}`).click({ force: true });
+  await expect(page.getByRole("heading", { name: `Hub Stale Mid ${token}` })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Înapoi la Clienți" })).toHaveAttribute(
+    "href",
+    new RegExp(`q=${token}`, "i"),
+  );
+
+  await page.getByRole("link", { name: "Înapoi la Clienți" }).click();
+  await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/status=active/);
+  await expect(page).toHaveURL(/attention=1/);
+  await expect(page).toHaveURL(new RegExp(`q=${token}`, "i"));
+  await expect.poll(async () => registryScrollY(page)).toBeGreaterThan(40);
+
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: `Hub Stale Mid ${token}` })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Înapoi la Clienți" })).toHaveAttribute(
+    "href",
+    new RegExp(`q=${token}`, "i"),
+  );
+  await page.goForward();
+  await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/status=active/);
+  await expect.poll(async () => registryScrollY(page)).toBeGreaterThan(40);
+
+  await page.goto("/requests");
+  await expect(page.getByRole("heading", { name: "Cereri de ofertă", exact: true })).toBeVisible();
+  await page.goto(`/clients/${encodeURIComponent(customer.customerId)}`);
+  await expect(page.getByRole("heading", { name: `Hub Stale Mid ${token}` })).toBeVisible();
+  await page.getByRole("link", { name: "Înapoi la Clienți" }).click();
+  await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/clients$/);
+  await expect(page).not.toHaveURL(/status=/);
+  await expect(page).not.toHaveURL(/attention=/);
+  await expect(page).not.toHaveURL(new RegExp(`q=${token}`, "i"));
+  await expect(page.getByLabel("Caută client")).toHaveValue("");
+  await expect.poll(async () => registryScrollY(page)).toBeLessThan(20);
 });
 
 test("a deep-linked Client Workspace falls back to a fresh Clients visit", async ({
@@ -336,6 +396,18 @@ test("runtime visual evidence matches the accepted Client Hub floorplan", async 
     if (shot.name === "oferte") {
       await expect(page.locator(".client-quote-row")).toContainText(quote.inscription);
       await expect(page.getByText(/624,82 EUR/)).toBeVisible();
+      await expect(page.locator(".client-quote-row a.client-collection-chevron")).toHaveCount(0);
+      await expect(page.locator(".client-quote-row span.client-collection-chevron")).toHaveCount(1);
+      const quoteLinks = page.locator(".client-quote-row a");
+      await expect(quoteLinks).toHaveCount(3);
+      await expect(quoteLinks.nth(0)).toBeVisible();
+      await expect(quoteLinks.nth(1)).toHaveAttribute("aria-label", "Descarcă oferta PDF");
+      await quoteLinks.nth(0).focus();
+      await expect(quoteLinks.nth(0)).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(quoteLinks.nth(1)).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(quoteLinks.nth(2)).toBeFocused();
     }
     if (shot.name === "lucrari") {
       await expect(page.locator(".client-job-row")).toContainText(jobQuote.inscription);

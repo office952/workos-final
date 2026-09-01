@@ -205,6 +205,15 @@ describe("ClientWorkspacePage", () => {
     expect(await screen.findByText(/OF-ABCDEF01/)).toBeInTheDocument();
     expect(screen.getByText(/624,82 EUR/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Descarcă oferta PDF" })).toBeInTheDocument();
+    const quoteRow = document.querySelector(".client-quote-row");
+    expect(quoteRow).not.toBeNull();
+    expect(quoteRow!.querySelector("a.client-collection-chevron")).toBeNull();
+    expect(quoteRow!.querySelector("span.client-collection-chevron")).not.toBeNull();
+    const quoteLinks = within(quoteRow as HTMLElement).getAllByRole("link");
+    expect(quoteLinks).toHaveLength(3);
+    expect(quoteLinks[0]).toHaveAttribute("href", "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?quote=qts%3Aalpha");
+    expect(quoteLinks[1]).toHaveAttribute("aria-label", "Descarcă oferta PDF");
+    expect(quoteLinks[2]).toHaveTextContent("Marchează acceptată");
     cleanup();
 
     renderWorkspace("/clients/cus:alpha?section=lucrari");
@@ -291,6 +300,24 @@ describe("ClientWorkspacePage", () => {
     expect(await screen.findByRole("link", { name: "Înapoi la Clienți" })).toHaveAttribute(
       "href",
       "/clients?q=stored&status=all",
+    );
+
+    cleanup();
+    markClientsWorkspaceOrigin({
+      customerId: "cus:alpha",
+      search: "?q=stale&status=active&attention=1",
+      scrollY: 400,
+    });
+    renderWorkspace("/clients/cus:alpha", {
+      clientsWorkspaceOrigin: {
+        customerId: "cus:alpha",
+        search: "?q=live&status=active",
+        scrollY: 80,
+      },
+    });
+    expect(await screen.findByRole("link", { name: "Înapoi la Clienți" })).toHaveAttribute(
+      "href",
+      "/clients?q=live&status=active",
     );
   });
 

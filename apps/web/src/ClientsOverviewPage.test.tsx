@@ -6,6 +6,7 @@ import type { CustomerRegistryProjection } from "@workos-final/domain";
 import { ClientsOverviewPage } from "./ClientsOverviewPage";
 import {
   CLIENTS_WORKSPACE_ORIGIN_KEY,
+  markClientsWorkspaceOrigin,
   readClientsWorkspaceOrigin,
 } from "./clientsWorkspaceOrigin";
 import { createCustomer, fetchCustomerRegistry } from "./customerApi";
@@ -236,6 +237,18 @@ describe("ClientsOverviewPage", () => {
       "Client Nou",
       expect.objectContaining({ cui: "RO1" }),
     );
+  });
+
+  it("consumes a leftover workspace origin when the registry becomes active", async () => {
+    vi.mocked(fetchCustomerRegistry).mockResolvedValue(registry);
+    markClientsWorkspaceOrigin({
+      customerId: "cus:alpha",
+      search: "?q=stale&status=active&attention=1",
+      scrollY: 220,
+    });
+    renderClients();
+    await screen.findByRole("heading", { name: "Clienți" });
+    expect(readClientsWorkspaceOrigin("cus:alpha")).toBeNull();
   });
 
   it("marks an explicit workspace origin when a registry card is opened", async () => {

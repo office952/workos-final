@@ -186,6 +186,7 @@ export function ClientWorkspacePage() {
           <Link
             key={item}
             to={`${customerHref(customer.customerId)}?section=${CLIENT_WORKSPACE_SECTION_PATH[item]}`}
+            state={origin ? { clientsWorkspaceOrigin: origin } : undefined}
             aria-current={item === section ? "page" : undefined}
           >
             {customerWorkspaceSectionLabel(item)}
@@ -375,9 +376,9 @@ function QuotesPane({ quotes }: { quotes: readonly QuoteOverviewItem[] }) {
             <Link className="client-collection-next" to={quote.href}>
               {quote.nextActionLabel}
             </Link>
-            <Link className="client-collection-chevron" to={quote.href} tabIndex={-1} aria-hidden="true">
+            <span className="client-collection-chevron" aria-hidden="true">
               <ChevronRight size={16} strokeWidth={1.75} />
-            </Link>
+            </span>
           </div>
         </li>
       ))}

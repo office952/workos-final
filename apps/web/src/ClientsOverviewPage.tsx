@@ -27,7 +27,7 @@ import { EmptyState } from "./ui/EmptyState";
 import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
-import { markClientsWorkspaceOrigin } from "./clientsWorkspaceOrigin";
+import { clearClientsWorkspaceOrigin, markClientsWorkspaceOrigin } from "./clientsWorkspaceOrigin";
 import {
   persistClientsRegistryScroll,
   readClientsRegistryScrollY,
@@ -50,6 +50,10 @@ export function ClientsOverviewPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   useClientsRegistryScroll(page.kind === "ready");
+
+  useEffect(() => {
+    clearClientsWorkspaceOrigin();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -213,20 +217,26 @@ export function ClientsOverviewPage() {
                   customer.needsAttention ? "registry-row is-attention" : "registry-row"
                 }
                 to={customer.href}
-                state={{
-                  clientsWorkspaceOrigin: {
-                    customerId: customer.customerId,
-                    search: location.search,
-                    scrollY: readClientsRegistryScrollY(),
-                  },
-                }}
-                onClick={() => {
+                onClick={(event) => {
+                  if (
+                    event.defaultPrevented ||
+                    event.button !== 0 ||
+                    event.metaKey ||
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey
+                  ) {
+                    return;
+                  }
+                  event.preventDefault();
                   persistClientsRegistryScroll(location.key);
-                  markClientsWorkspaceOrigin({
+                  const origin = {
                     customerId: customer.customerId,
                     search: location.search,
                     scrollY: readClientsRegistryScrollY(),
-                  });
+                  };
+                  markClientsWorkspaceOrigin(origin);
+                  navigate(customer.href, { state: { clientsWorkspaceOrigin: origin } });
                 }}
               >
                 <div className="registry-row-identity">

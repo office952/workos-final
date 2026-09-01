@@ -32,6 +32,10 @@ export function markClientsWorkspaceOrigin(origin: ClientsWorkspaceOrigin): void
   sessionStorage.setItem(CLIENTS_WORKSPACE_ORIGIN_KEY, JSON.stringify(origin));
 }
 
+export function clearClientsWorkspaceOrigin(): void {
+  sessionStorage.removeItem(CLIENTS_WORKSPACE_ORIGIN_KEY);
+}
+
 export function readClientsWorkspaceOrigin(customerId: string): ClientsWorkspaceOrigin | null {
   const raw = sessionStorage.getItem(CLIENTS_WORKSPACE_ORIGIN_KEY);
   if (!raw) {
@@ -52,17 +56,13 @@ export function resolveClientsWorkspaceOrigin(
   customerId: string,
   locationState: unknown,
 ): ClientsWorkspaceOrigin | null {
-  const stored = readClientsWorkspaceOrigin(customerId);
-  if (stored) {
-    return stored;
-  }
   if (locationState && typeof locationState === "object") {
     const stateOrigin = (locationState as ClientsRegistryReturnState).clientsWorkspaceOrigin;
     if (isClientsWorkspaceOrigin(stateOrigin) && stateOrigin.customerId === customerId) {
       return stateOrigin;
     }
   }
-  return null;
+  return readClientsWorkspaceOrigin(customerId);
 }
 
 export function clientsRegistryReturnHref(origin: ClientsWorkspaceOrigin | null): string {

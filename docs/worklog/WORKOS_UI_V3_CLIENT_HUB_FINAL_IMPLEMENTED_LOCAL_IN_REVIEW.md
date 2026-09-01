@@ -90,11 +90,26 @@ Explicit origin marker, not `history.length` or `document.referrer`.
 
 - Session key: `workos.clients.workspaceOrigin`
 - Written on Clients registry card click (`markClientsWorkspaceOrigin`) together with location state
+- `location.state` on the current history entry is authoritative when present
+- Session storage is only a fallback for the active workspace journey (section links)
+- Clients registry mount calls `clearClientsWorkspaceOrigin()` so a later deep-link to the same customer cannot resurrect the previous `q` / `status` / `attention` / scroll
 - Scroll at click time is persisted; render-time `scrollY` is treated as stale
+- Registry scroll restore uses `history.scrollRestoration = "manual"` and reapplies the target until the list can actually reach it, without persisting `0` mid-restore
 - `← Clienți` (`aria-label="Înapoi la Clienți"`) returns `/clients` + stored `q` / `status` / `attention` and restores scroll
 - Deep link / no matching origin: `/clients` with `{ clientsFreshVisit: true }` (top)
 - Sidebar Clienți remains a fresh visit
-- Ordinary browser Back is unchanged
+- Ordinary browser Back / Forward on a history entry that still carries origin remains valid
+
+## Runtime closure amendment
+
+Independent review required a behavioral/a11y closure before Owner runtime review. No Figma or visual redesign.
+
+```text
+STALE_ORIGIN_FIX = clear on registry mount; prefer location.state
+ORIGIN_SCROLLY = captured at click, not at last card render
+SCROLL_RESTORE_FIX = manual restoration + bounded rAF until reachable
+QUOTE_CHEVRON = decorative span, not a hidden link
+```
 
 ## Attention gate
 
@@ -166,27 +181,25 @@ SYNTHETIC_EVIDENCE   = YES
 LINT                         = PASS (pre-existing react-refresh / hook warnings only)
 TYPECHECK                    = PASS
 BUILD                        = PASS
-WEB_UNIT                     = 180 passed
+WEB_UNIT                     = 183 passed
 DOMAIN_UNIT                  = 395 passed
-API_UNIT                     = 251 passed on isolated retry
-UNIT_FLAKES_IN_FULL_PARALLEL = api-shutdown SIGTERM timeout; cloud-provision two-process SQLITE_ERROR
-UNIT_FLAKES_ISOLATED_RETRY   = PASS
-FOCUSED_PLAYWRIGHT           = 21 passed / 0 failed
-CLIENT_HUB_PLAYWRIGHT        = 9 passed
+API_UNIT                     = 251 passed
+REPEAT_EACH_3_RETRIES_0      = 39 passed / 0 failed (clients-registry + client-hub-final)
+FOCUSED_PLAYWRIGHT           = 28 passed / 0 failed
+CLIENT_HUB_PLAYWRIGHT        = 10 passed
 CLIENT_WORKSPACE_PLAYWRIGHT  = PASS
 CLIENTS_REGISTRY_PLAYWRIGHT  = PASS
 NAV_SHELL_PLAYWRIGHT         = PASS
 SMOKE_PLAYWRIGHT             = PASS
 ATELIER_OPERATOR_REGRESSION  = PASS
 EXECUTION_OPERATOR_REGRESSION = PASS
-FULL_E2E_CONTINUOUS          = Vite died at hf-wave2 after 42 passed / 4 skipped; later failures were ECONNREFUSED 5186
-FULL_E2E_REMAINING_RERUN     = 48 passed / 2 skipped / 0 failed
+FULL_E2E_LOCAL               = 91 passed / 5 skipped / 0 failed / retries=0
 FULL_E2E_PRODUCT_FAILURE     = NO
 ```
 
 Unit coverage: active identity, attention from `summary.*NeedsAction`, next-action fallback is not attention, retired (no Cerere nouă), empty, section routing, drawer preserves `?section=`, registry origin marker, deep-link fallback `/clients`, long name, Prezentare without full lists.
 
-Playwright journeys: registry return (q / status / attention / scroll), deep-link fallback, drawer cancel/save stay on Oferte, retired, attention before profile, empty, 768 two-line name, dark no white islands, visual evidence pack, global `/clients` `/requests` `/quotes` `/jobs` page-content regression.
+Playwright journeys: registry return (q / status / attention / scroll), same-customer stale deep-link after a finished registry journey, browser Back/Forward on a history entry that still carries origin, deep-link fallback, drawer cancel/save stay on Oferte, retired, attention before profile, empty, 768 two-line name, dark no white islands, quote chevron is non-interactive, visual evidence pack, global `/clients` `/requests` `/quotes` `/jobs` page-content regression.
 
 ## Runtime visual watch after recapture
 
@@ -208,13 +221,8 @@ DRAFT_PR              = https://github.com/office952/workos-final/pull/3
 PR_1_REUSED           = NO
 PUSH_MAIN             = NO
 MERGE_MAIN            = NO
-GITHUB_CI_RUN         = 33554629580
-GITHUB_CI_URL         = https://github.com/office952/workos-final/actions/runs/33554629580
-GITHUB_CI_STATUS      = completed
-GITHUB_CI_CONCLUSION  = success
-PUSH_CI_RUN           = 33554597986
-PUSH_CI_CONCLUSION    = success
-FULL_E2E_CI           = 90 passed / 5 skipped / 0 failed
+PREVIOUS_HEAD_CI_RUN  = 33555572302
+PREVIOUS_HEAD_CI      = success with 1 in-scope flaky scroll restore
 ```
 
-Draft PR against `origin/main` (`1228397`). New PR. PR #1 not reused. Merge not authorized. Runtime not Owner accepted.
+Draft PR against `origin/main` (`1228397`). New PR. PR #1 not reused. Merge not authorized. Runtime not Owner accepted. Authoritative GitHub CI for the amendment head is recorded in the final report, not chased with a docs-only commit.
