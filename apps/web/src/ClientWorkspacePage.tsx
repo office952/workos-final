@@ -1,17 +1,31 @@
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { usePathIdAfter } from "./navigation/usePathIdAfter";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  CUSTOMER_WORKSPACE_SECTIONS,
   customerHref,
   customerWorkspaceSectionLabel,
   type Customer,
   type CustomerWorkspaceProjection,
-  type CustomerWorkspaceSection,
   type JobOverviewItem,
   type QuoteOverviewItem,
   type RequestOverviewItem,
 } from "@workos-final/domain";
+import {
+  customerAddressLine,
+  customerHasCommercialActivity,
+  customerIdentityLine,
+  customerWorkspaceAttentionAction,
+  clientWorkspaceSectionItems,
+  displayOrUnset,
+  formatClientDate,
+  sectionFromQuery,
+  CLIENT_WORKSPACE_SECTION_PATH,
+} from "./clientWorkspaceView";
+import {
+  clientsRegistryReturnHref,
+  clientsRegistryReturnState,
+  resolveClientsWorkspaceOrigin,
+} from "./clientsWorkspaceOrigin";
 import {
   CustomerProfileFields,
   customerProfilePatchFromForm,
@@ -20,24 +34,11 @@ import {
 } from "./CustomerProfileFields";
 import { fetchCustomerWorkspace, updateCustomer } from "./customerApi";
 import { pageErrorKind } from "./fetchAccess";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import { quoteDocumentUrl } from "./productApi";
+import { ActionDrawer } from "./ui/ActionDrawer";
 import { EmptyState } from "./ui/EmptyState";
 import { PageStatus } from "./ui/PageStatus";
-import { StatusChip } from "./ui/StatusChip";
-
-const SECTION_QUERY: Record<string, CustomerWorkspaceSection> = {
-  prezentare: "OVERVIEW",
-  cereri: "REQUESTS",
-  oferte: "QUOTES",
-  lucrari: "JOBS",
-};
-
-const SECTION_PATH: Record<CustomerWorkspaceSection, string> = {
-  OVERVIEW: "prezentare",
-  REQUESTS: "cereri",
-  QUOTES: "oferte",
-  JOBS: "lucrari",
-};
 
 type PageState =
   | { kind: "loading" }
@@ -48,12 +49,14 @@ type PageState =
 
 export function ClientWorkspacePage() {
   const customerId = usePathIdAfter("/clients/");
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<CustomerProfileFormValue>(emptyCustomerProfileForm());
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const editTriggerRef = useRef<HTMLButtonElement | null>(null);
   const section = sectionFromQuery(searchParams.get("section"));
 
   useEffect(() => {
@@ -81,7 +84,7 @@ export function ClientWorkspacePage() {
     };
   }, [customerId]);
 
-  if (page.kind === "loading") {
+  if (page.kind === "loading" || (page.kind === "ready" && page.workspace.customer.customerId !== customerId)) {
     return <PageStatus kind="loading">Se încarcă clientul…</PageStatus>;
   }
   if (page.kind === "missing") {
@@ -96,6 +99,10 @@ export function ClientWorkspacePage() {
 
   const { workspace } = page;
   const { customer } = workspace;
+  const origin = resolveClientsWorkspaceOrigin(customer.customerId, location.state);
+  const backHref = clientsRegistryReturnHref(origin);
+  const identity = customerIdentityLine(customer);
+  const attention = customerWorkspaceAttentionAction(workspace);
 
   async function handleSave() {
     setBusy(true);
@@ -120,70 +127,65 @@ export function ClientWorkspacePage() {
     }
   }
 
+  function closeEditor() {
+    setEditing(false);
+    setDraft(formFromCustomer(customer));
+    setNotice(null);
+  }
+
   return (
     <section className="client-workspace">
-      <header className="client-workspace-header">
-        <div>
-          <p className="client-kicker">Client</p>
+      <Link
+        className="client-object-back"
+        to={backHref}
+        state={clientsRegistryReturnState(origin)}
+        aria-label="Înapoi la Clienți"
+      >
+        <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+        Clienți
+      </Link>
+
+      <header className="client-object-header">
+        <div className="client-object-titles">
           <h1>{customer.displayName}</h1>
-          <p className="client-header-meta">
-            Cereri, oferte și lucrări ale acestui client.
-          </p>
-          <p className="client-header-meta">{headerSummary(customer)}</p>
+          {identity ? <p className="client-object-identity">{identity}</p> : null}
+          {workspace.canCreateRequest ? null : (
+            <p className="client-object-retired">Retras · Istoricul rămâne vizibil.</p>
+          )}
         </div>
-        <div className="client-header-side">
-          <StatusChip
-            label={workspace.statusLabel}
-            tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
-          />
-          <div className="client-header-actions">
-            <button
-              type="button"
-              className="button-quiet"
-              disabled={busy}
-              onClick={() => {
-                setEditing((current) => !current);
-                setSearchParams({ section: "prezentare" });
-              }}
+        <div className="client-object-actions">
+          <button
+            ref={editTriggerRef}
+            type="button"
+            className="button-quiet"
+            disabled={busy}
+            onClick={() => {
+              setDraft(formFromCustomer(customer));
+              setEditing(true);
+            }}
+          >
+            Editează datele
+          </button>
+          {workspace.canCreateRequest ? (
+            <Link
+              className="button-link"
+              to={`/requests?customer=${encodeURIComponent(customer.customerId)}`}
             >
-              {editing ? "Anulează editarea" : "Editează datele"}
-            </button>
-            {workspace.canCreateRequest ? (
-              <Link
-                className="button-link"
-                to={`/requests?customer=${encodeURIComponent(customer.customerId)}`}
-              >
-                Cerere nouă
-              </Link>
-            ) : (
-              <p className="client-retired-note">
-                Client retras. Istoricul rămâne vizibil.
-              </p>
-            )}
-          </div>
+              Cerere nouă
+            </Link>
+          ) : null}
         </div>
       </header>
 
-      {workspace.nextActions.length > 0 ? (
-        <div className="client-next">
-          <p>Următorul pas</p>
-          <div className="client-next-actions">
-            {workspace.nextActions.map((action) => (
-              <Link key={`${action.href}-${action.label}`} to={action.href}>
-                {action.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <ClientSummaryRail summary={workspace.summary} />
 
       {notice ? <p>{notice}</p> : null}
 
-      <nav className="client-sections" aria-label="Secțiuni client">
-        {CUSTOMER_WORKSPACE_SECTIONS.map((item) => (
+      <nav className="client-local-nav" aria-label="Secțiuni client">
+        {clientWorkspaceSectionItems().map((item) => (
           <Link
             key={item}
-            to={`${customerHref(customer.customerId)}?section=${SECTION_PATH[item]}`}
+            to={`${customerHref(customer.customerId)}?section=${CLIENT_WORKSPACE_SECTION_PATH[item]}`}
             aria-current={item === section ? "page" : undefined}
           >
             {customerWorkspaceSectionLabel(item)}
@@ -192,174 +194,144 @@ export function ClientWorkspacePage() {
       </nav>
 
       {section === "OVERVIEW" ? (
-        <OverviewPane
-          workspace={workspace}
-          editing={editing}
-          draft={draft}
-          busy={busy}
-          onDraftChange={setDraft}
-          onSave={() => void handleSave()}
-        />
+        <OverviewPane workspace={workspace} attention={attention} />
       ) : null}
       {section === "REQUESTS" ? <RequestsPane requests={workspace.requests} /> : null}
       {section === "QUOTES" ? <QuotesPane quotes={workspace.quotes} /> : null}
       {section === "JOBS" ? <JobsPane jobs={workspace.jobs} /> : null}
+
+      <ActionDrawer title="Editează clientul" open={editing} onClose={closeEditor}>
+        <form
+          className="client-edit-drawer-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSave();
+          }}
+        >
+          <div className="client-edit-drawer-fields">
+            <CustomerProfileFields value={draft} onChange={setDraft} disabled={busy} />
+          </div>
+          <div className="action-drawer-actions client-edit-drawer-footer">
+            <button type="button" className="button-quiet" disabled={busy} onClick={closeEditor}>
+              Anulează
+            </button>
+            <button type="submit" disabled={busy || draft.displayName.trim().length === 0}>
+              Salvează
+            </button>
+          </div>
+        </form>
+      </ActionDrawer>
     </section>
+  );
+}
+
+function ClientSummaryRail({
+  summary,
+}: {
+  summary: CustomerWorkspaceProjection["summary"];
+}) {
+  return (
+    <div className="client-summary-rail" aria-label="Rezumat comercial">
+      <div className="client-summary-segment">
+        <strong>{summary.requestCount}</strong>
+        <span>Cereri</span>
+      </div>
+      <div className="client-summary-segment">
+        <strong>{summary.quoteCount}</strong>
+        <span>Oferte</span>
+      </div>
+      <div className="client-summary-segment">
+        <strong>{summary.jobCount}</strong>
+        <span>Lucrări</span>
+      </div>
+    </div>
   );
 }
 
 function OverviewPane({
   workspace,
-  editing,
-  draft,
-  busy,
-  onDraftChange,
-  onSave,
+  attention,
 }: {
   workspace: CustomerWorkspaceProjection;
-  editing: boolean;
-  draft: CustomerProfileFormValue;
-  busy: boolean;
-  onDraftChange: (next: CustomerProfileFormValue) => void;
-  onSave: () => void;
+  attention: ReturnType<typeof customerWorkspaceAttentionAction>;
 }) {
-  const { customer, summary } = workspace;
+  const { customer } = workspace;
+  const hasActivity = customerHasCommercialActivity(workspace);
   return (
     <div className="client-overview">
-      <article className="client-current-card">
-        <h2>Date curente</h2>
-        <p className="client-current-hint">
-          Aceste date se actualizează. Ofertele și comenzile înghețate păstrează
+      {attention ? (
+        <Link className="client-attention-row" to={attention.href}>
+          <span className="client-attention-copy">
+            <span className="client-attention-label">Necesită atenție</span>
+            <span>{attention.label}</span>
+          </span>
+          <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+        </Link>
+      ) : null}
+
+      <article className="client-profile-panel">
+        <h2>Date client</h2>
+        <p className="client-profile-hint">
+          Datele curente se pot modifica. Ofertele și comenzile înghețate păstrează
           identitatea de atunci.
         </p>
-        {editing ? (
-          <form
-            className="client-edit-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onSave();
-            }}
-          >
-            <CustomerProfileFields value={draft} onChange={onDraftChange} disabled={busy} />
-            <button type="submit" disabled={busy || draft.displayName.trim().length === 0}>
-              Salvează datele
-            </button>
-          </form>
-        ) : (
-          <dl className="client-profile-list">
-            <ProfileRow label="CUI" value={customer.cui} />
-            <ProfileRow label="Contact" value={customer.contactName} />
-            <ProfileRow label="Telefon" value={customer.phone} />
-            <ProfileRow label="Email" value={customer.email} />
-            <ProfileRow label="Adresă" value={addressLine(customer)} />
-            <ProfileRow label="Note" value={customer.notes} />
-          </dl>
-        )}
+        <dl className="client-profile-list">
+          <ProfileRow label="CUI" value={customer.cui} />
+          <ProfileRow label="Contact" value={customer.contactName} />
+          <ProfileRow label="Telefon" value={customer.phone} />
+          <ProfileRow label="Email" value={customer.email} />
+          <ProfileRow label="Adresă" value={customerAddressLine(customer)} />
+          <ProfileRow label="Note" value={customer.notes} />
+        </dl>
       </article>
 
-      <div className="client-count-grid">
-        <SectionJump
-          href={`${customerHref(customer.customerId)}?section=cereri`}
-          label="Cereri"
-          value={summary.requestCount}
-          detail={
-            summary.requestNeedsAction > 0
-              ? `${summary.requestNeedsAction} necesită acțiune`
-              : summary.openRequestCount > 0
-                ? `${summary.openRequestCount} deschise`
-                : "Nicio cerere deschisă"
-          }
-        />
-        <SectionJump
-          href={`${customerHref(customer.customerId)}?section=oferte`}
-          label="Oferte"
-          value={summary.quoteCount}
-          detail={
-            summary.quoteNeedsAction > 0
-              ? `${summary.quoteNeedsAction} necesită acțiune`
-              : "Nicio ofertă în așteptare"
-          }
-        />
-        <SectionJump
-          href={`${customerHref(customer.customerId)}?section=lucrari`}
-          label="Lucrări"
-          value={summary.jobCount}
-          detail={
-            summary.jobNeedsAction > 0
-              ? `${summary.jobNeedsAction} necesită acțiune`
-              : "Nicio lucrare în așteptare"
-          }
-        />
-      </div>
+      {!hasActivity ? (
+        <EmptyState title="Clientul nu are încă activitate comercială." />
+      ) : null}
 
-      <RelatedWorkspace
-        requests={workspace.requests}
-        quotes={workspace.quotes}
-        jobs={workspace.jobs}
-      />
-
-      {workspace.recentActivity.length > 0 ? (
-        <article className="client-activity-card">
-          <h2>Activitate recentă</h2>
-          <ol className="client-activity">
+      <section className="client-activity-block">
+        <h2>Activitate recentă</h2>
+        {workspace.recentActivity.length === 0 ? (
+          <p className="client-activity-empty">Nicio activitate înregistrată.</p>
+        ) : (
+          <ul className="client-activity-list">
             {workspace.recentActivity.map((item) => (
               <li key={`${item.href}-${item.at}`}>
-                <Link to={item.href}>{item.label}</Link>
-                <span>{formatDate(item.at)}</span>
+                <Link className="client-activity-row" to={item.href}>
+                  <span className="client-activity-title">{item.label}</span>
+                  <span className="client-activity-meta">{formatClientDate(item.at)}</span>
+                  <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                </Link>
               </li>
             ))}
-          </ol>
-        </article>
-      ) : null}
-    </div>
-  );
-}
-
-function RelatedWorkspace({
-  requests,
-  quotes,
-  jobs,
-}: {
-  requests: readonly RequestOverviewItem[];
-  quotes: readonly QuoteOverviewItem[];
-  jobs: readonly JobOverviewItem[];
-}) {
-  if (requests.length === 0 && quotes.length === 0 && jobs.length === 0) {
-    return <EmptyState title="Acest client nu are încă cereri, oferte sau lucrări." />;
-  }
-  return (
-    <div className="client-related">
-      {requests.length > 0 ? <RequestsPane requests={requests} /> : null}
-      {quotes.length > 0 ? <QuotesPane quotes={quotes} /> : null}
-      {jobs.length > 0 ? <JobsPane jobs={jobs} /> : null}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
 
 function RequestsPane({ requests }: { requests: readonly RequestOverviewItem[] }) {
   if (requests.length === 0) {
-    return <EmptyState title="Acest client nu are cereri." />;
+    return <EmptyState title="Nicio cerere înregistrată." />;
   }
   return (
-    <ul className="jobs-list">
+    <ul className="client-collection-list">
       {requests.map((request) => (
         <li key={request.requestId}>
-          <div className="jobs-identity">
-            <Link to={request.href}>{request.title}</Link>
-            <span>{request.reference}</span>
-          </div>
-          <div className="jobs-status">
-            <StatusChip label={request.statusLabel} tone="progress" />
-            {request.commercialProgressLabel ? (
-              <p>{request.commercialProgressLabel}</p>
-            ) : null}
-            {request.attentionLabel ? (
-              <p className="jobs-attention">{request.attentionLabel}</p>
-            ) : null}
-          </div>
-          <p className="jobs-date">{formatDate(request.createdAt)}</p>
-          <Link className="button-link" to={request.nextActionHref}>
-            {request.nextActionLabel}
+          <Link
+            className={
+              request.needsAttention
+                ? "client-collection-row is-attention"
+                : "client-collection-row"
+            }
+            to={request.href}
+          >
+            <span className="client-collection-identity">{request.title}</span>
+            <span className="client-collection-ref">{request.reference}</span>
+            <span className="client-collection-status">{request.statusLabel}</span>
+            <span className="client-collection-next">{request.nextActionLabel}</span>
+            <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </li>
       ))}
@@ -369,35 +341,42 @@ function RequestsPane({ requests }: { requests: readonly RequestOverviewItem[] }
 
 function QuotesPane({ quotes }: { quotes: readonly QuoteOverviewItem[] }) {
   if (quotes.length === 0) {
-    return <EmptyState title="Acest client nu are oferte." />;
+    return <EmptyState title="Nicio ofertă înregistrată." />;
   }
   return (
-    <ul className="jobs-list">
+    <ul className="client-collection-list">
       {quotes.map((quote) => (
         <li key={quote.quoteSnapshotId}>
-          <div className="jobs-identity">
-            <Link to={quote.href}>{quote.inscription}</Link>
-            <span>
-              {quote.reference} · {quote.productLabel} · {quote.grossDisplay} {quote.currency}
+          <div
+            className={
+              quote.needsAttention
+                ? "client-collection-row client-quote-row is-attention"
+                : "client-collection-row client-quote-row"
+            }
+          >
+            <Link className="client-collection-identity" to={quote.href}>
+              <span>{quote.inscription}</span>
+              <span className="client-collection-frozen">
+                Client la înghețare: {quote.customerDisplayName ?? "—"}
+              </span>
+            </Link>
+            <span className="client-collection-ref">{quote.reference}</span>
+            <span className="client-collection-amount">
+              {quote.grossDisplay} {quote.currency}
             </span>
-            <span>Client la înghețare: {quote.customerDisplayName ?? "—"}</span>
-          </div>
-          <div className="jobs-status">
-            <StatusChip label={quote.stageLabel} tone="progress" />
-            {quote.attentionLabel ? (
-              <p className="jobs-attention">{quote.attentionLabel}</p>
-            ) : null}
-          </div>
-          <p className="jobs-date">{formatDate(quote.createdAt)}</p>
-          <div className="client-row-actions">
+            <span className="client-collection-status">{quote.stageLabel}</span>
             <a
-              className="button-link"
+              className="client-collection-pdf"
               href={quoteDocumentUrl(quote.productCode, quote.quoteSnapshotId)}
+              aria-label="Descarcă oferta PDF"
             >
-              Descarcă oferta PDF
+              PDF
             </a>
-            <Link className="button-link" to={quote.href}>
+            <Link className="client-collection-next" to={quote.href}>
               {quote.nextActionLabel}
+            </Link>
+            <Link className="client-collection-chevron" to={quote.href} tabIndex={-1} aria-hidden="true">
+              <ChevronRight size={16} strokeWidth={1.75} />
             </Link>
           </div>
         </li>
@@ -408,26 +387,29 @@ function QuotesPane({ quotes }: { quotes: readonly QuoteOverviewItem[] }) {
 
 function JobsPane({ jobs }: { jobs: readonly JobOverviewItem[] }) {
   if (jobs.length === 0) {
-    return <EmptyState title="Acest client nu are lucrări." />;
+    return <EmptyState title="Nicio lucrare înregistrată." />;
   }
   return (
-    <ul className="jobs-list">
+    <ul className="client-collection-list">
       {jobs.map((job) => (
         <li key={job.jobId}>
-          <div className="jobs-identity">
-            <Link to={job.href}>{job.inscription}</Link>
-            <span>{job.productLabel}</span>
-          </div>
-          <div className="jobs-status">
-            <StatusChip label={job.stageLabel} tone="progress" />
-            {job.progressLabel ? <p>{job.progressLabel}</p> : null}
-            {job.attentionLabel ? (
-              <p className="jobs-attention">{job.attentionLabel}</p>
-            ) : null}
-          </div>
-          <p className="jobs-date">{formatDate(job.createdAt)}</p>
-          <Link className="button-link" to={job.href}>
-            {job.nextActionLabel}
+          <Link
+            className={
+              job.needsAttention
+                ? "client-collection-row client-job-row is-attention"
+                : "client-collection-row client-job-row"
+            }
+            to={job.href}
+          >
+            <span className="client-collection-identity">
+              <span>{job.inscription}</span>
+              <span className="client-collection-frozen">{job.productLabel}</span>
+            </span>
+            <span className="client-collection-status">
+              {job.progressLabel ?? job.stageLabel}
+            </span>
+            <span className="client-collection-next">{job.nextActionLabel}</span>
+            <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </li>
       ))}
@@ -435,46 +417,13 @@ function JobsPane({ jobs }: { jobs: readonly JobOverviewItem[] }) {
   );
 }
 
-function SectionJump({
-  href,
-  label,
-  value,
-  detail,
-}: {
-  href: string;
-  label: string;
-  value: number;
-  detail: string;
-}) {
-  return (
-    <Link className="client-count-card" to={href}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <span>{detail}</span>
-    </Link>
-  );
-}
-
 function ProfileRow({ label, value }: { label: string; value: string | null }) {
   return (
     <div>
       <dt>{label}</dt>
-      <dd>{value && value.trim().length > 0 ? value : "—"}</dd>
+      <dd>{displayOrUnset(value)}</dd>
     </div>
   );
-}
-
-function headerSummary(customer: Customer): string {
-  return [customer.cui, customer.contactName, customer.phone, customer.email]
-    .filter((value): value is string => Boolean(value))
-    .join(" · ") || "Completează datele curente ale clientului.";
-}
-
-function addressLine(customer: Customer): string | null {
-  const parts = [customer.address, customer.city].filter(
-    (value): value is string => Boolean(value),
-  );
-  return parts.length > 0 ? parts.join(", ") : null;
 }
 
 function formFromCustomer(customer: Customer): CustomerProfileFormValue {
@@ -488,19 +437,4 @@ function formFromCustomer(customer: Customer): CustomerProfileFormValue {
     city: customer.city ?? "",
     notes: customer.notes ?? "",
   };
-}
-
-function sectionFromQuery(value: string | null): CustomerWorkspaceSection {
-  if (!value) {
-    return "OVERVIEW";
-  }
-  return SECTION_QUERY[value] ?? "OVERVIEW";
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString("ro-RO", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 }

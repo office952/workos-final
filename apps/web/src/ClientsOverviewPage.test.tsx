@@ -1,9 +1,13 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CustomerRegistryProjection } from "@workos-final/domain";
 import { ClientsOverviewPage } from "./ClientsOverviewPage";
+import {
+  CLIENTS_WORKSPACE_ORIGIN_KEY,
+  readClientsWorkspaceOrigin,
+} from "./clientsWorkspaceOrigin";
 import { createCustomer, fetchCustomerRegistry } from "./customerApi";
 
 function customer(
@@ -106,6 +110,10 @@ function metricValue(label: string): string {
 }
 
 describe("ClientsOverviewPage", () => {
+  afterEach(() => {
+    sessionStorage.removeItem(CLIENTS_WORKSPACE_ORIGIN_KEY);
+  });
+
   it("projects registry metrics and lists A–Z cards as one link each", async () => {
     vi.mocked(fetchCustomerRegistry).mockResolvedValue(registry);
     renderClients();
@@ -228,5 +236,16 @@ describe("ClientsOverviewPage", () => {
       "Client Nou",
       expect.objectContaining({ cui: "RO1" }),
     );
+  });
+
+  it("marks an explicit workspace origin when a registry card is opened", async () => {
+    vi.mocked(fetchCustomerRegistry).mockResolvedValue(registry);
+    renderClients(["/clients?q=alpha&status=active&attention=1"]);
+    await userEvent.click(await screen.findByRole("link", { name: /Client Alpha/ }));
+    expect(readClientsWorkspaceOrigin("cus:alpha")).toEqual({
+      customerId: "cus:alpha",
+      search: "?q=alpha&status=active&attention=1",
+      scrollY: expect.any(Number),
+    });
   });
 });

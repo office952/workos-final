@@ -27,8 +27,10 @@ import { EmptyState } from "./ui/EmptyState";
 import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
+import { markClientsWorkspaceOrigin } from "./clientsWorkspaceOrigin";
 import {
   persistClientsRegistryScroll,
+  readClientsRegistryScrollY,
   useClientsRegistryScroll,
 } from "./useClientsRegistryScroll";
 import { useClientsRegistryState } from "./useClientsRegistryState";
@@ -211,7 +213,21 @@ export function ClientsOverviewPage() {
                   customer.needsAttention ? "registry-row is-attention" : "registry-row"
                 }
                 to={customer.href}
-                onClick={() => persistClientsRegistryScroll(location.key)}
+                state={{
+                  clientsWorkspaceOrigin: {
+                    customerId: customer.customerId,
+                    search: location.search,
+                    scrollY: readClientsRegistryScrollY(),
+                  },
+                }}
+                onClick={() => {
+                  persistClientsRegistryScroll(location.key);
+                  markClientsWorkspaceOrigin({
+                    customerId: customer.customerId,
+                    search: location.search,
+                    scrollY: readClientsRegistryScrollY(),
+                  });
+                }}
               >
                 <div className="registry-row-identity">
                   <div className="registry-row-title">

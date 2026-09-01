@@ -37,11 +37,42 @@ export function persistClientsRegistryScroll(locationKey: string) {
   sessionStorage.setItem(clientsRegistryScrollStorageKey(locationKey), String(readScrollY()));
 }
 
+export function readClientsRegistryScrollY(): number {
+  return readScrollY();
+}
+
+export function restoreClientsRegistryScrollY(y: number) {
+  writeScrollY(y);
+}
+
 export function useClientsRegistryScroll(enabled: boolean) {
-  const { key } = useLocation();
+  const location = useLocation();
+  const { key, state } = location;
+  const restoreY =
+    state && typeof state === "object" && "restoreClientsRegistryScroll" in state
+      ? (state as { restoreClientsRegistryScroll?: unknown }).restoreClientsRegistryScroll
+      : undefined;
+  const freshVisit =
+    state && typeof state === "object" && "clientsFreshVisit" in state
+      ? Boolean((state as { clientsFreshVisit?: unknown }).clientsFreshVisit)
+      : false;
 
   useLayoutEffect(() => {
-    if (!enabled || !key) {
+    if (!enabled) {
+      return;
+    }
+    if (freshVisit) {
+      writeScrollY(0);
+      return;
+    }
+    if (typeof restoreY === "number" && Number.isFinite(restoreY) && restoreY > 0) {
+      writeScrollY(restoreY);
+      const frame = window.requestAnimationFrame(() => {
+        writeScrollY(restoreY);
+      });
+      return () => window.cancelAnimationFrame(frame);
+    }
+    if (!key) {
       return;
     }
     const raw = sessionStorage.getItem(clientsRegistryScrollStorageKey(key));
@@ -57,7 +88,7 @@ export function useClientsRegistryScroll(enabled: boolean) {
       writeScrollY(y);
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [enabled, key]);
+  }, [enabled, freshVisit, key, restoreY]);
 
   useEffect(() => {
     if (!enabled || !key) {

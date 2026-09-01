@@ -59,7 +59,7 @@ test("office can open one client and see requests, offers and works", async ({
   await createForm.getByRole("button", { name: "Salvează clientul" }).click();
 
   await expect(page.getByRole("heading", { name: customerName })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Date curente" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Date client" })).toBeVisible();
   await expect(page.getByText("RO12345678", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Ana Pop").first()).toBeVisible();
   const workspaceUrl = page.url();
@@ -144,7 +144,7 @@ test("office can open one client and see requests, offers and works", async ({
   await page.getByRole("button", { name: "Editează datele" }).click();
   const name = page.getByLabel("Nume");
   await name.fill(renamed);
-  await page.getByRole("button", { name: "Salvează datele" }).click();
+  await page.getByRole("button", { name: "Salvează" }).click();
   await expect(page.getByRole("heading", { name: renamed })).toBeVisible();
   expect(page.url()).toMatch(/\/clients\/cus/);
   await page.getByRole("navigation", { name: "Secțiuni client" }).getByRole("link", { name: "Cereri" }).click();
@@ -195,7 +195,7 @@ test("office can open one client and see requests, offers and works", async ({
     data: { status: "RETIRED" },
   });
   await page.goto(workspaceUrl);
-  await expect(page.getByText("Client retras. Istoricul rămâne vizibil.")).toBeVisible();
+  await expect(page.getByText("Retras · Istoricul rămâne vizibil.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Cerere nouă" })).toHaveCount(0);
   await page.getByRole("navigation", { name: "Secțiuni client" }).getByRole("link", { name: "Cereri" }).click();
   await expect(page.getByText(title)).toBeVisible();
