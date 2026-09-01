@@ -203,4 +203,18 @@ Tiny semantic-token CSS only. No new visual concept. No Figma reopen.
 
 ## GitHub
 
-Draft PR against `origin/main` (`1228397`). New PR. PR #1 not reused. Merge not authorized. Runtime not Owner accepted. CI recorded after push.
+```text
+DRAFT_PR              = https://github.com/office952/workos-final/pull/3
+PR_1_REUSED           = NO
+PUSH_MAIN             = NO
+MERGE_MAIN            = NO
+GITHUB_CI_RUN         = 33554629580
+GITHUB_CI_URL         = https://github.com/office952/workos-final/actions/runs/33554629580
+GITHUB_CI_STATUS      = completed
+GITHUB_CI_CONCLUSION  = success
+PUSH_CI_RUN           = 33554597986
+PUSH_CI_CONCLUSION    = success
+FULL_E2E_CI           = 90 passed / 5 skipped / 0 failed
+```
+
+Draft PR against `origin/main` (`1228397`). New PR. PR #1 not reused. Merge not authorized. Runtime not Owner accepted.
