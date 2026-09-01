@@ -66,7 +66,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = f5eb96d56306db1d02cc0fb731a074e391640067
+ORIGIN_MAIN                          = 6190207b72fb723ef0c0276864d74dcb2bc7aa4a
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -93,7 +93,12 @@ OS_S2_TRANSACTION_SAFETY             = CLOSED
 OS_S3                                = NOT_STARTED / NOT_AUTHORIZED
 UI_UX_NAVIGATION_V3_DESIGN           = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION   = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION    = NOT_STARTED
+UI_V3_PAGE_CONTENT_TRANSFORMATION    = IN_PROGRESS
+CLIENTS_V3                           = INTEGRATED_ON_MAIN
+CLIENTS_FIGMA_DIRECTION              = OWNER_ACCEPTED
+CLIENTS_RUNTIME                      = OWNER_ACCEPTED
+CLIENTS_UI_UX_GATE                   = CLOSED
+CLIENTS_PRODUCT_SHA                  = 6190207b72fb723ef0c0276864d74dcb2bc7aa4a
 NEXT_PROGRAM_PRIORITY                = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
@@ -228,7 +233,11 @@ OS_S2_TRANSACTION_SAFETY = CLOSED
 OS_S3 = NOT_STARTED / NOT_AUTHORIZED
 UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION = NOT_STARTED
+UI_V3_PAGE_CONTENT_TRANSFORMATION = IN_PROGRESS
+CLIENTS_V3 = INTEGRATED_ON_MAIN
+CLIENTS_FIGMA_DIRECTION = OWNER_ACCEPTED
+CLIENTS_RUNTIME = OWNER_ACCEPTED
+CLIENTS_UI_UX_GATE = CLOSED
 NEXT_PROGRAM_PRIORITY = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
@@ -325,7 +334,11 @@ OS_S3                                    = NOT_STARTED / NOT_AUTHORIZED
 OS_S3_EVIDENCE_AND_EIC                   = NOT_STARTED / NOT_AUTHORIZED
 UI_UX_NAVIGATION_V3_DESIGN               = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION       = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION        = NOT_STARTED
+UI_V3_PAGE_CONTENT_TRANSFORMATION        = IN_PROGRESS
+CLIENTS_V3                               = INTEGRATED_ON_MAIN
+CLIENTS_FIGMA_DIRECTION                  = OWNER_ACCEPTED
+CLIENTS_RUNTIME                          = OWNER_ACCEPTED
+CLIENTS_UI_UX_GATE                       = CLOSED
 NEXT_PROGRAM_PRIORITY                    = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 OS_S4_SERVICE_COMMERCIAL                 = NOT_STARTED
 OS_S5_MULTI_LINE_QUOTE                   = NOT_STARTED
@@ -348,6 +361,8 @@ Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no
 See `docs/architecture/OPERATIONAL_SERVICES_CANON.md` and `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md`.
 
 Architecture C UI Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. It does not replace the HUB sequence and does not authorize Wave 2, Figma publish, or the first real LETTERS job. Execution detail lives in `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md`.
+
+Clients V3 registry is `INTEGRATED_ON_MAIN` at product SHA `6190207b72fb723ef0c0276864d74dcb2bc7aa4a`. Page-content transformation is `IN_PROGRESS` for that accepted registry only. Client Hub, Cereri, Oferte, and Lucrări page-content redesigns are not accepted and are not integrated. Commercial page reorganization is not complete. The next unfinished commercial domain is selected only after independent roadmap review. Record: `docs/worklog/WORKOS_UI_V3_CLIENTS_FINAL_INTEGRATED_ON_MAIN.md`.
 
 ## Real Cloud recovery
 
