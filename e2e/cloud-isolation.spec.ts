@@ -81,7 +81,11 @@ test.describe("Cloud two-organization isolation", () => {
 
     await switchOrganization(page, orgB);
     await expectAccountOrganization(page, orgB);
+    await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Cont" })).toBeVisible();
+    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Atelier" }).click();
     await expect(page.getByRole("button", { name: "Identifică-te" })).toBeVisible();
+    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }).click();
     await expect(page.getByText("Client Alpha")).toHaveCount(0);
     await expect(page.getByText("Client Test")).toBeVisible();
     await page.screenshot({

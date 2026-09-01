@@ -5,6 +5,7 @@ import {
   NAVIGATION_DESTINATIONS,
   destinationAccessibleName,
   findActiveDestination,
+  isOperationalOperatorRoute,
 } from "./navigationRegistry";
 
 const CANONICAL_ORDER = [
@@ -84,6 +85,21 @@ describe("navigationRegistry", () => {
     );
     expect(findActiveDestination({ pathname: "/system", search: "" })?.id).toBe("governance");
     expect(findActiveDestination({ pathname: "/admin/processes", search: "" })).toBeNull();
+  });
+
+  it("treats only Atelier and Execution as interactive operator routes", () => {
+    expect(isOperationalOperatorRoute("/atelier")).toBe(true);
+    expect(isOperationalOperatorRoute("/execution/exp:1")).toBe(true);
+    expect(isOperationalOperatorRoute("/clients")).toBe(false);
+    expect(isOperationalOperatorRoute("/clients/cus:1")).toBe(false);
+    expect(isOperationalOperatorRoute("/requests")).toBe(false);
+    expect(isOperationalOperatorRoute("/quotes")).toBe(false);
+    expect(isOperationalOperatorRoute("/")).toBe(false);
+    expect(isOperationalOperatorRoute("/jobs/ord:1")).toBe(false);
+    expect(isOperationalOperatorRoute("/products")).toBe(false);
+    expect(isOperationalOperatorRoute("/admin")).toBe(false);
+    expect(isOperationalOperatorRoute("/admin/resources")).toBe(false);
+    expect(isOperationalOperatorRoute("/governance")).toBe(false);
   });
 
   it("builds collapsed accessible names as Categorie — Pagină", () => {

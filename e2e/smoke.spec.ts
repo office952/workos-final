@@ -11,14 +11,16 @@ test("platform shell shows real health and no fake business menu", async ({
 
   await page.goto("/");
 
-  await expect(page.getByText("WorkOS Final", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "WorkOS", exact: true })).toBeVisible();
+  await expect(page.getByText("WorkOS Final", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("navigation", { name: "Navigare principală" }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Lucrări" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Cereri" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Catalog" })).toBeVisible();
+  const primaryNav = page.getByRole("navigation", { name: "Navigare principală" });
+  await expect(primaryNav.getByRole("link", { name: "Lucrări" })).toBeVisible();
+  await expect(primaryNav.getByRole("link", { name: "Cereri" })).toBeVisible();
+  await expect(primaryNav.getByRole("link", { name: "Catalog", exact: true })).toBeVisible();
   await expect(
     page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Comercial", exact: true }),
   ).toHaveCount(0);
@@ -33,7 +35,7 @@ test("platform shell shows real health and no fake business menu", async ({
   await expect(page.getByRole("link", { name: "Comenzi" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Rapoarte" })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "WorkOS Final" }).click();
+  await page.getByRole("link", { name: "WorkOS", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
 
   await page.goto("/system");

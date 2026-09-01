@@ -10,6 +10,7 @@ type FieldProps = {
   label: string;
   hint?: string;
   error?: string;
+  hideLabel?: boolean;
   children: ReactNode;
 };
 
@@ -18,7 +19,7 @@ type FieldControlProps = {
   "aria-invalid"?: boolean;
 };
 
-export function Field({ label, hint, error, children }: FieldProps) {
+export function Field({ label, hint, error, hideLabel = false, children }: FieldProps) {
   const errorId = useId();
   const hintId = useId();
   const describedBy = [error ? errorId : null, hint ? hintId : null]
@@ -33,7 +34,7 @@ export function Field({ label, hint, error, children }: FieldProps) {
 
   return (
     <label className={error ? "field field-invalid" : "field"}>
-      <span className="field-label">{label}</span>
+      <span className={hideLabel ? "visually-hidden" : "field-label"}>{label}</span>
       {control}
       {error ? (
         <p id={errorId} className="field-error" role="alert">
