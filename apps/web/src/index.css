@@ -738,9 +738,9 @@ body {
 .app-content {
   flex: 1;
   width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 1.5rem 1.5rem 2.5rem;
+  max-width: 90rem;
+  margin: 0;
+  padding: 1.25rem 1.5rem 2rem;
 }
 
 .app-boot,
@@ -2194,6 +2194,24 @@ details summary {
   margin: 0.7rem 0 0.35rem;
 }
 
+.registry-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.55rem 1.15rem;
+  margin: 0 0 0.65rem;
+}
+
+.registry-toolbar .filter-row {
+  margin: 0;
+}
+
+.registry-toolbar .registry-search {
+  margin: 0;
+  flex: 1 1 16rem;
+  max-width: 22rem;
+}
+
 .registry-search {
   margin: 0.55rem 0 0.85rem;
   max-width: 28rem;
@@ -2546,23 +2564,102 @@ a.jobs-customer {
 }
 
 .clients-list {
-  margin: 0.6rem 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
-.clients-list li {
+.clients-list .registry-row,
+.registry-row {
   margin: 0;
-  padding: 0.45rem 0.65rem;
-  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-s);
   background: var(--surface-raised);
   display: grid;
-  grid-template-columns: minmax(12rem, 1.6fr) minmax(10rem, 1.2fr) auto;
-  gap: 0.35rem 0.75rem;
+  grid-template-columns:
+    minmax(16rem, 2fr)
+    minmax(13rem, 1.2fr)
+    minmax(14rem, 1.3fr)
+    2.75rem;
+  grid-template-areas: "identity attention state open";
+  gap: 0.25rem 1rem;
   align-items: center;
+}
+
+.registry-row-identity {
+  grid-area: identity;
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.registry-row-name {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  font-weight: 650;
+  text-decoration: none;
+  line-height: 1.25;
+}
+
+.registry-row-name:hover {
+  text-decoration: underline;
+}
+
+.registry-row-meta {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+
+.registry-row-attention {
+  grid-area: attention;
+  margin: 0;
+  min-width: 0;
+  color: var(--bad);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.registry-row-state {
+  grid-area: state;
+  display: grid;
+  justify-items: start;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.registry-row-state .status-chip {
+  width: max-content;
+  justify-self: start;
+}
+
+.registry-row-state .clients-counters {
+  font-variant-numeric: tabular-nums;
+}
+
+.registry-row-open {
+  grid-area: open;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  justify-self: end;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 1.45rem;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.registry-row-open:hover,
+.registry-row-open:focus-visible {
+  color: var(--text-primary);
 }
 
 .client-workspace {
@@ -2768,12 +2865,6 @@ a.jobs-customer {
   margin-top: 0.75rem;
 }
 
-@media (max-width: 80rem) {
-  .app-content {
-    max-width: 72rem;
-  }
-}
-
 @media (max-width: 768px) {
   .app-sidebar-desktop {
     display: none;
@@ -2880,11 +2971,19 @@ a.jobs-customer {
   }
 
   .jobs-list li,
-  .clients-list li,
   .client-profile-list,
   .client-profile-fields,
   .client-count-grid {
     grid-template-columns: 1fr;
+  }
+
+  .clients-list .registry-row,
+  .registry-row {
+    grid-template-columns: minmax(0, 1fr) 2.75rem;
+    grid-template-areas:
+      "identity open"
+      "attention open"
+      "state open";
   }
 
   .client-workspace-header {
@@ -3075,14 +3174,14 @@ a.jobs-customer {
 
 .metric-band {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-2);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 0.75rem;
 }
 
 .metric-card {
   min-width: 0;
-  padding: var(--space-2) var(--space-3);
+  padding: 0.4rem 0.7rem;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-s);
   background: var(--surface-raised);

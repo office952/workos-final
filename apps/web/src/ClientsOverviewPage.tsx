@@ -145,32 +145,34 @@ export function ClientsOverviewPage() {
         <EmptyState title="Nu există încă clienți." />
       ) : (
         <>
-          <div className="filter-row" role="group" aria-label="Filtre clienți">
-            {CUSTOMER_REGISTRY_FILTERS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={item === filter ? "button-quiet is-selected" : "button-quiet"}
-                aria-pressed={item === filter}
-                onClick={() => setFilter(item)}
-              >
-                {customerRegistryFilterLabel(item)}
-              </button>
-            ))}
+          <div className="registry-toolbar">
+            <div className="filter-row" role="group" aria-label="Filtre clienți">
+              {CUSTOMER_REGISTRY_FILTERS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={item === filter ? "button-quiet is-selected" : "button-quiet"}
+                  aria-pressed={item === filter}
+                  onClick={() => setFilter(item)}
+                >
+                  {customerRegistryFilterLabel(item)}
+                </button>
+              ))}
+            </div>
+            <RegistrySearchField
+              label="Caută client"
+              placeholder="Caută client..."
+              value={query}
+              onChange={setQuery}
+              resultSummary={registrySearchResultSummary({
+                visibleCount: visible.length,
+                poolCount: filteredPool.length,
+                totalCount: registry.summary.total,
+                query,
+                nounPlural: "clienți",
+              })}
+            />
           </div>
-          <RegistrySearchField
-            label="Caută client"
-            placeholder="Caută client..."
-            value={query}
-            onChange={setQuery}
-            resultSummary={registrySearchResultSummary({
-              visibleCount: visible.length,
-              poolCount: filteredPool.length,
-              totalCount: registry.summary.total,
-              query,
-              nounPlural: "clienți",
-            })}
-          />
           {visible.length === 0 ? (
             <EmptyState
               title={
@@ -182,33 +184,33 @@ export function ClientsOverviewPage() {
           ) : (
             <ul className="clients-list">
               {visible.map((customer) => (
-                <li key={customer.customerId}>
-                  <div className="jobs-identity">
-                    <Link to={customer.href}>{customer.displayName}</Link>
-                    <span>
-                      {[customer.cui, customer.contactName, customer.city]
-                        .filter(Boolean)
-                        .join(" · ") || "Fără CUI sau contact"}
-                    </span>
-                    {customer.attentionLabel ? (
-                      <p className="jobs-attention">{customer.attentionLabel}</p>
-                    ) : null}
+                <li key={customer.customerId} className="registry-row">
+                  <div className="registry-row-identity">
+                    <Link className="registry-row-name" to={customer.href}>
+                      {customer.displayName}
+                    </Link>
+                    <span className="registry-row-meta">{clientIdentityMeta(customer)}</span>
                   </div>
-                  <div className="jobs-status">
+                  <p className="registry-row-attention">{customer.attentionLabel ?? ""}</p>
+                  <div className="registry-row-state">
                     <StatusChip
                       label={customer.statusLabel}
                       tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
                     />
                     <p className="clients-counters">
-                      Cereri deschise {customer.openRequestCount}
+                      Cereri {customer.openRequestCount}
                       {" · "}
                       Oferte {customer.quoteCount}
                       {" · "}
                       Lucrări {customer.jobCount}
                     </p>
                   </div>
-                  <Link className="button-link" to={customer.href}>
-                    Deschide clientul
+                  <Link
+                    className="registry-row-open"
+                    to={customer.href}
+                    aria-label="Deschide clientul"
+                  >
+                    <span aria-hidden="true">›</span>
                   </Link>
                 </li>
               ))}
@@ -218,6 +220,15 @@ export function ClientsOverviewPage() {
       )}
     </section>
   );
+}
+
+function clientIdentityMeta(
+  customer: CustomerRegistryProjection["customers"][number],
+): string {
+  const parts = [customer.contactName, customer.cui, customer.city].filter(
+    (part): part is string => Boolean(part),
+  );
+  return parts.length > 0 ? parts.join(" · ") : "Fără CUI sau contact";
 }
 
 function ClientCreateForm({

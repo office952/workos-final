@@ -61,8 +61,12 @@ describe("ClientsOverviewPage", () => {
     );
     expect(await screen.findByRole("heading", { name: "Clienți" })).toBeInTheDocument();
     expect(screen.getByText("Client Alpha")).toBeInTheDocument();
+    expect(screen.getByText("Client Retras").closest(".registry-row-name")).not.toBeNull();
+    expect(screen.getByText("Fără CUI sau contact")).toHaveClass("registry-row-meta");
     expect(screen.getByText(/RO111/)).toBeInTheDocument();
-    expect(screen.getByText(/Cereri deschise 1/)).toBeInTheDocument();
+    expect(screen.getByText("Cereri 1 · Oferte 2 · Lucrări 1")).toBeInTheDocument();
+    expect(screen.getByText("Ana · RO111")).toBeInTheDocument();
+    expect(screen.getByText("1 cerere necesită acțiune")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Deschide clientul" })[0]).toHaveAttribute(
       "href",
       "/clients/cus%3Aalpha",
