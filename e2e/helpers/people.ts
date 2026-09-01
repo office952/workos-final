@@ -148,12 +148,47 @@ async function settleOperatorChrome(page: Page) {
   await expect(page.getByText("Se verifică operatorul…")).toHaveCount(0);
 }
 
+function isOperationalOperatorPage(page: Page): boolean {
+  const pathname = new URL(page.url()).pathname;
+  return (
+    pathname === "/atelier" ||
+    pathname.startsWith("/atelier/") ||
+    pathname === "/execution" ||
+    pathname.startsWith("/execution/")
+  );
+}
+
+async function waitForOperationalIdentifyChrome(page: Page) {
+  await expect
+    .poll(async () => {
+      if (await page.getByRole("button", { name: "Ieși" }).isVisible()) {
+        return "identified";
+      }
+      if (
+        (await page
+          .locator("form.operator-identify-form")
+          .getByRole("textbox", { name: "PIN" })
+          .count()) > 0
+      ) {
+        return "form";
+      }
+      if (await page.getByRole("button", { name: "Identifică-te" }).isVisible()) {
+        return "identify";
+      }
+      return "";
+    })
+    .not.toEqual("");
+}
+
 export async function identifyTestExecutorOnPage(
   page: Page,
   displayName = TEST_EXECUTOR_NAME,
   pin = TEST_OPERATOR_PIN,
 ) {
   await settleOperatorChrome(page);
+  if (isOperationalOperatorPage(page)) {
+    await waitForOperationalIdentifyChrome(page);
+  }
   if (await operatorAlreadyIdentified(page)) {
     return;
   }
