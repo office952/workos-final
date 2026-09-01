@@ -1,0 +1,320 @@
+{
+  "runtimeUrl": "http://127.0.0.1:5318",
+  "modelUrl": "file://C:/Users/offic/workspace/workos-final-docs-integrate/.tmp/workos-v3-whole-app-content/board/index.html",
+  "shots": [
+    "model/clients_1440_dark.png",
+    "model/clients_1440_light.png",
+    "runtime/clients_1440_dark.png",
+    "runtime/clients_1440_light.png",
+    "runtime/clients_1280_dark.png",
+    "runtime/clients_768_dark.png",
+    "runtime/client-hub_1440_dark.png",
+    "runtime/requests_1440_dark.png",
+    "runtime/quotes_1440_dark.png",
+    "runtime/jobs_1440_dark.png",
+    "comparisons/clients_1440_dark_model_vs_runtime.png",
+    "comparisons/clients_1440_light_model_vs_runtime.png"
+  ],
+  "measures": {
+    "dark1440": {
+      "viewport": {
+        "width": 1440,
+        "height": 980
+      },
+      "overflowX": 0,
+      "content": {
+        "width": 1184,
+        "height": 1992,
+        "left": 256,
+        "right": 1440
+      },
+      "column": {
+        "width": 1184,
+        "height": 2048,
+        "left": 256,
+        "right": 1440
+      },
+      "row": {
+        "width": 1136,
+        "height": 59,
+        "left": 280,
+        "right": 1416
+      },
+      "chip": {
+        "width": 44,
+        "height": 20,
+        "left": 1049,
+        "right": 1094
+      },
+      "open": {
+        "width": 44,
+        "height": 44,
+        "left": 1360,
+        "right": 1404
+      },
+      "name": {
+        "width": 453,
+        "height": 20,
+        "left": 292,
+        "right": 745
+      },
+      "meta": {
+        "width": 453,
+        "height": 18,
+        "left": 292,
+        "right": 745
+      },
+      "band": {
+        "width": 1136,
+        "height": 59,
+        "left": 280,
+        "right": 1416
+      },
+      "list": {
+        "width": 1136,
+        "height": 1712,
+        "left": 280,
+        "right": 1416
+      },
+      "nameText": "Client Alfa",
+      "metaText": "Fără CUI sau contact",
+      "styles": {
+        "contentMaxWidth": "1440px",
+        "contentMargin": "0px",
+        "chipWidth": "44.4531px",
+        "metaColor": "rgb(195, 202, 211)",
+        "metaBg": "rgb(29, 36, 46)",
+        "selectedBg": "#2a3442",
+        "muted": "#8b94a1",
+        "secondary": "#c3cad3"
+      }
+    },
+    "light1440": {
+      "viewport": {
+        "width": 1440,
+        "height": 980
+      },
+      "overflowX": 0,
+      "content": {
+        "width": 1184,
+        "height": 1992,
+        "left": 256,
+        "right": 1440
+      },
+      "column": {
+        "width": 1184,
+        "height": 2048,
+        "left": 256,
+        "right": 1440
+      },
+      "row": {
+        "width": 1136,
+        "height": 59,
+        "left": 280,
+        "right": 1416
+      },
+      "chip": {
+        "width": 44,
+        "height": 20,
+        "left": 1049,
+        "right": 1094
+      },
+      "open": {
+        "width": 44,
+        "height": 44,
+        "left": 1360,
+        "right": 1404
+      },
+      "name": {
+        "width": 453,
+        "height": 20,
+        "left": 292,
+        "right": 745
+      },
+      "meta": {
+        "width": 453,
+        "height": 18,
+        "left": 292,
+        "right": 745
+      },
+      "band": {
+        "width": 1136,
+        "height": 59,
+        "left": 280,
+        "right": 1416
+      },
+      "list": {
+        "width": 1136,
+        "height": 1712,
+        "left": 280,
+        "right": 1416
+      },
+      "nameText": "Client Alfa",
+      "metaText": "Fără CUI sau contact",
+      "styles": {
+        "contentMaxWidth": "1440px",
+        "contentMargin": "0px",
+        "chipWidth": "44.4531px",
+        "metaColor": "rgb(61, 71, 84)",
+        "metaBg": "rgb(255, 255, 255)",
+        "selectedBg": "#e8eef4",
+        "muted": "#66707d",
+        "secondary": "#3d4754"
+      }
+    },
+    "dark1280": {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "overflowX": 0,
+      "content": {
+        "width": 1024,
+        "height": 1992,
+        "left": 256,
+        "right": 1280
+      },
+      "column": {
+        "width": 1024,
+        "height": 2048,
+        "left": 256,
+        "right": 1280
+      },
+      "row": {
+        "width": 976,
+        "height": 59,
+        "left": 280,
+        "right": 1256
+      },
+      "chip": {
+        "width": 44,
+        "height": 20,
+        "left": 935,
+        "right": 980
+      },
+      "open": {
+        "width": 44,
+        "height": 44,
+        "left": 1200,
+        "right": 1244
+      },
+      "name": {
+        "width": 382,
+        "height": 20,
+        "left": 292,
+        "right": 674
+      },
+      "meta": {
+        "width": 382,
+        "height": 18,
+        "left": 292,
+        "right": 674
+      },
+      "band": {
+        "width": 976,
+        "height": 59,
+        "left": 280,
+        "right": 1256
+      },
+      "list": {
+        "width": 976,
+        "height": 1712,
+        "left": 280,
+        "right": 1256
+      },
+      "nameText": "Client Alfa",
+      "metaText": "Fără CUI sau contact",
+      "styles": {
+        "contentMaxWidth": "1440px",
+        "contentMargin": "0px",
+        "chipWidth": "44.4531px",
+        "metaColor": "rgb(195, 202, 211)",
+        "metaBg": "rgb(29, 36, 46)",
+        "selectedBg": "#2a3442",
+        "muted": "#8b94a1",
+        "secondary": "#c3cad3"
+      }
+    },
+    "dark768": {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "overflowX": 0,
+      "content": {
+        "width": 768,
+        "height": 3913,
+        "left": 0,
+        "right": 768
+      },
+      "column": {
+        "width": 768,
+        "height": 3969,
+        "left": 0,
+        "right": 768
+      },
+      "row": {
+        "width": 720,
+        "height": 125,
+        "left": 24,
+        "right": 744
+      },
+      "chip": {
+        "width": 44,
+        "height": 20,
+        "left": 36,
+        "right": 81
+      },
+      "open": {
+        "width": 44,
+        "height": 44,
+        "left": 688,
+        "right": 732
+      },
+      "name": {
+        "width": 636,
+        "height": 20,
+        "left": 36,
+        "right": 672
+      },
+      "meta": {
+        "width": 636,
+        "height": 18,
+        "left": 36,
+        "right": 672
+      },
+      "band": {
+        "width": 720,
+        "height": 262,
+        "left": 24,
+        "right": 744
+      },
+      "list": {
+        "width": 720,
+        "height": 3430,
+        "left": 24,
+        "right": 744
+      },
+      "nameText": "Client Alfa",
+      "metaText": "Fără CUI sau contact",
+      "styles": {
+        "contentMaxWidth": "100%",
+        "contentMargin": "0px",
+        "chipWidth": "44.4531px",
+        "metaColor": "rgb(195, 202, 211)",
+        "metaBg": "rgb(29, 36, 46)",
+        "selectedBg": "#2a3442",
+        "muted": "#8b94a1",
+        "secondary": "#c3cad3"
+      }
+    }
+  },
+  "contrast": {
+    "lightMetaOnRow": 9.43,
+    "darkMetaOnRow": 9.46
+  },
+  "nameMetaCollision": {
+    "light": "Client AlfaFără CUI sau contact",
+    "separate": true
+  }
+}
