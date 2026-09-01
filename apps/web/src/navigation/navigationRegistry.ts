@@ -333,6 +333,10 @@ export function pathEqualsOrChild(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+export function isOperationalOperatorRoute(pathname: string): boolean {
+  return pathEqualsOrChild(pathname, "/atelier") || pathEqualsOrChild(pathname, "/execution");
+}
+
 export function productContinuation(
   location: NavigationLocation,
 ): "request" | "quote" | "order" | null {
@@ -361,24 +365,4 @@ export function findActiveDestination(
   destinations: readonly NavigationDestination[] = NAVIGATION_DESTINATIONS,
 ): NavigationDestination | null {
   return destinations.find((destination) => destination.match(location)) ?? null;
-}
-
-export function contextTitleForLocation(
-  location: NavigationLocation,
-  destinations: readonly NavigationDestination[] = NAVIGATION_DESTINATIONS,
-): string {
-  const active = findActiveDestination(location, destinations);
-  if (active) {
-    return active.label;
-  }
-  if (location.pathname === "/admin") {
-    return "Administrare";
-  }
-  if (pathEqualsOrChild(location.pathname, "/admin/processes")) {
-    return "Procese operaționale";
-  }
-  if (pathEqualsOrChild(location.pathname, "/admin/customers")) {
-    return "Clienți";
-  }
-  return "WorkOS Final";
 }

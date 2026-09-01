@@ -10,6 +10,29 @@ function card(page: import("@playwright/test").Page, name: string) {
   return page.locator(".clients-overview .registry-row").filter({ hasText: name }).first();
 }
 
+async function registryScrollY(page: import("@playwright/test").Page) {
+  return page.evaluate(() => {
+    const column = document.querySelector(".app-shell-column");
+    if (column instanceof HTMLElement && column.scrollTop > 0) {
+      return column.scrollTop;
+    }
+    return document.scrollingElement instanceof HTMLElement
+      ? document.scrollingElement.scrollTop || window.scrollY
+      : window.scrollY;
+  });
+}
+
+async function clearRegistryScroll(page: import("@playwright/test").Page) {
+  await page.evaluate(() => {
+    const keys = Object.keys(sessionStorage).filter((key) =>
+      key.startsWith("workos.clients.registry.scroll"),
+    );
+    for (const key of keys) {
+      sessionStorage.removeItem(key);
+    }
+  });
+}
+
 async function createRequestForCustomer(
   request: import("@playwright/test").APIRequestContext,
   customerId: string,
@@ -47,11 +70,14 @@ test("clients registry matches the accepted Figma interaction contract", async (
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/clients");
-  await page.evaluate(() => sessionStorage.removeItem("workos.clients.registry.scroll"));
+  await clearRegistryScroll(page);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "WorkOS", exact: true })).toBeVisible();
   await expect(page.getByText("WorkOS Final", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".app-context-title")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Cont" })).toBeVisible();
   await expect(page.locator(".registry-pagination")).toHaveCount(0);
 
   const names = await page.locator(".clients-overview .registry-row-name").allTextContents();
@@ -137,7 +163,7 @@ test("clients registry matches the accepted Figma interaction contract", async (
     "true",
   );
   await page.locator(".clients-overview .registry-row").last().scrollIntoViewIfNeeded();
-  const scrolled = await page.evaluate(() => window.scrollY);
+  const scrolled = await registryScrollY(page);
   expect(scrolled).toBeGreaterThan(40);
   await card(page, `Mid ${token}`).click();
   await expect(page.getByRole("heading", { name: `Mid ${token}` })).toBeVisible();
@@ -151,7 +177,36 @@ test("clients registry matches the accepted Figma interaction contract", async (
     "aria-pressed",
     "true",
   );
-  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(40);
+  await expect.poll(async () => registryScrollY(page)).toBeGreaterThan(40);
+});
+
+test("a fresh Clients sidebar visit does not restore a previous scroll", async ({
+  page,
+  request,
+}) => {
+  const token = uniqueRequestToken("CLN");
+  for (let index = 0; index < 16; index += 1) {
+    await createCustomer(request, `Scroll ${token} ${String(index).padStart(2, "0")}`);
+  }
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/clients");
+  await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
+  await page.locator(".clients-overview .registry-row").last().scrollIntoViewIfNeeded();
+  expect(await registryScrollY(page)).toBeGreaterThan(40);
+
+  await page
+    .getByRole("navigation", { name: "Navigare principală" })
+    .getByRole("link", { name: "Cereri" })
+    .click();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+  await page
+    .getByRole("navigation", { name: "Navigare principală" })
+    .getByRole("link", { name: "Clienți" })
+    .click();
+  await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
+  await expect.poll(async () => registryScrollY(page)).toBeLessThan(20);
 });
 
 test("clients runtime viewports and sibling shell stay fluid", async ({ page, request }) => {
@@ -201,6 +256,12 @@ test("clients runtime viewports and sibling shell stay fluid", async ({ page, re
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("link", { name: "WorkOS", exact: true })).toBeVisible();
     await expect(page.getByText("WorkOS Final", { exact: true })).toHaveCount(0);
+    await expect(page.locator(".app-context-title")).toHaveCount(0);
+    if (path === "/atelier") {
+      await expect(page.getByRole("button", { name: "Identifică-te" })).toBeVisible();
+    } else {
+      await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
+    }
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth + 1,
     );

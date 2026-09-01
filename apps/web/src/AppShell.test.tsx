@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
 import { CloudSessionProvider } from "./CloudSessionContext";
 import { SIDEBAR_COLLAPSED_STORAGE_KEY } from "./navigation/navigationRegistry";
+import { fetchOperatorSession } from "./operatorSessionApi";
 import { OperatorSessionProvider } from "./OperatorSessionContext";
 import { ThemeProvider } from "./theme/ThemeProvider";
 
@@ -47,10 +48,25 @@ function primaryNav() {
   return screen.getByRole("navigation", { name: "Navigare principală" });
 }
 
+function mockIdentifiedOperator(displayName = "Ana Pop") {
+  vi.mocked(fetchOperatorSession).mockResolvedValue({
+    operator: {
+      personId: "per:ana",
+      displayName,
+      availability: "AVAILABLE",
+    },
+    session: {
+      sessionId: "ops:1",
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    },
+  });
+}
+
 describe("AppShell", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.removeItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
+    vi.mocked(fetchOperatorSession).mockResolvedValue({ operator: null, session: null });
   });
 
   it("shows the Romanian sidebar without internal capability names or top-nav L2", async () => {
@@ -69,7 +85,9 @@ describe("AppShell", () => {
     expect(within(primaryNav()).queryByRole("link", { name: /^Administrare$/ })).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Navigare comercială" })).not.toBeInTheDocument();
     expect(screen.getByText("conținut")).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: "Identifică-te" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Identifică-te" })).not.toBeInTheDocument();
+    expect(document.querySelector(".app-context-title")).toBeNull();
+    expect(screen.getByRole("button", { name: "Cont" })).toBeInTheDocument();
     expect(screen.queryByText("PRODUCT")).not.toBeInTheDocument();
     expect(screen.queryByText("TRUTH_COMPILER")).not.toBeInTheDocument();
     expect(screen.queryByText("RESOURCES_COST")).not.toBeInTheDocument();
@@ -355,5 +373,64 @@ describe("AppShell", () => {
       "aria-current",
       "page",
     );
+  });
+
+  it("keeps Clients header free of page title and identify CTA when no operator exists", async () => {
+    renderShell(
+      <AppShell>
+        <h1>Clienți</h1>
+      </AppShell>,
+      ["/clients"],
+    );
+
+    expect(await screen.findByRole("link", { name: "WorkOS" })).toBeInTheDocument();
+    expect(screen.queryByText("WorkOS Final")).not.toBeInTheDocument();
+    expect(document.querySelector(".app-context-title")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Identifică-te" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Operator curent")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cont" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Clienți" })).toBeInTheDocument();
+  });
+
+  it("keeps operator identification available on Atelier when required", async () => {
+    renderShell(
+      <AppShell>
+        <p>atelier</p>
+      </AppShell>,
+      ["/atelier"],
+    );
+
+    expect(await screen.findByRole("button", { name: "Identifică-te" })).toBeInTheDocument();
+    expect(document.querySelector(".app-context-title")).toBeNull();
+  });
+
+  it("shows an identified operator passively on commercial pages", async () => {
+    mockIdentifiedOperator();
+    renderShell(
+      <AppShell>
+        <h1>Clienți</h1>
+      </AppShell>,
+      ["/clients"],
+    );
+
+    expect(await screen.findByLabelText("Operator curent")).toHaveTextContent("Operator: Ana Pop");
+    expect(screen.queryByRole("button", { name: "Identifică-te" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Schimbă" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ieși" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cont" })).toBeInTheDocument();
+  });
+
+  it("keeps Schimbă and Ieși on Execution after identification", async () => {
+    mockIdentifiedOperator();
+    renderShell(
+      <AppShell>
+        <p>execuție</p>
+      </AppShell>,
+      ["/execution/exp:1"],
+    );
+
+    expect(await screen.findByRole("button", { name: "Schimbă" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ieși" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Operator curent")).toHaveTextContent("Operator: Ana Pop");
   });
 });

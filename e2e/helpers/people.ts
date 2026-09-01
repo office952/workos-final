@@ -99,12 +99,33 @@ export async function configureTestExecutorPin(
   expect(configured.ok()).toBeTruthy();
 }
 
+async function completeOperatorIdentifyForm(
+  page: Page,
+  displayName: string,
+  pin: string,
+) {
+  await page.getByLabel("Persoană").selectOption({ label: displayName });
+  await page.getByRole("textbox", { name: "PIN" }).fill(pin);
+  await page.getByRole("button", { name: "Confirmă" }).click();
+}
+
+async function operatorAlreadyIdentified(page: Page): Promise<boolean> {
+  if (await page.getByRole("button", { name: "Ieși" }).isVisible()) {
+    return true;
+  }
+  const chip = page.getByLabel("Operator curent");
+  if ((await chip.count()) === 0) {
+    return false;
+  }
+  return (await chip.locator("strong").count()) > 0;
+}
+
 export async function identifyTestExecutorOnPage(
   page: Page,
   displayName = TEST_EXECUTOR_NAME,
   pin = TEST_OPERATOR_PIN,
 ) {
-  if (await page.getByRole("button", { name: "Ieși" }).isVisible()) {
+  if (await operatorAlreadyIdentified(page)) {
     return;
   }
   const pageForm = page.locator("form.operator-identify-form");
@@ -118,11 +139,20 @@ export async function identifyTestExecutorOnPage(
     await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
     return;
   }
+  const identify = page.getByRole("button", { name: "Identifică-te" });
+  if (await identify.isVisible()) {
+    await identify.click();
+    await completeOperatorIdentifyForm(page, displayName, pin);
+    await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
+    return;
+  }
+  const returnUrl = page.url();
+  await page.goto("/atelier");
   await page.getByRole("button", { name: "Identifică-te" }).click();
-  await page.getByLabel("Persoană").selectOption({ label: displayName });
-  await page.getByRole("textbox", { name: "PIN" }).fill(pin);
-  await page.getByRole("button", { name: "Confirmă" }).click();
+  await completeOperatorIdentifyForm(page, displayName, pin);
   await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
+  await page.goto(returnUrl);
+  await expect.poll(async () => operatorAlreadyIdentified(page)).toBe(true);
 }
 
 export async function assignProviderIfNeeded(card: Locator, providerLabel?: string) {

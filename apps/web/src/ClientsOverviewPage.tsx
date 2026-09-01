@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, Search, TriangleAlert, UserCheck, UserMinus, Users } from "lucide-react";
 import {
   CUSTOMER_REGISTRY_FILTERS,
@@ -41,6 +41,7 @@ type PageState =
 
 export function ClientsOverviewPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const { query, setQuery, status, setStatus, attention, setAttention } =
     useClientsRegistryState();
@@ -210,7 +211,7 @@ export function ClientsOverviewPage() {
                   customer.needsAttention ? "registry-row is-attention" : "registry-row"
                 }
                 to={customer.href}
-                onClick={() => persistClientsRegistryScroll()}
+                onClick={() => persistClientsRegistryScroll(location.key)}
               >
                 <div className="registry-row-identity">
                   <div className="registry-row-title">

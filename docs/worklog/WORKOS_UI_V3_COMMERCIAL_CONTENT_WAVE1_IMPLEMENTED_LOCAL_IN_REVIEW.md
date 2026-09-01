@@ -27,6 +27,16 @@ Owner accepted the Clients Figma final direction. This worklog records that desi
 - Result-count slot is always reserved and derived from the filtered set.
 - Cards are one semantic `Link`. Signal Edge is 3px warning only when `needsAttention`.
 - Default order is `displayName` A–Z. Attention does not reorder.
-- Return Context uses `?q=`, `?status=`, `?attention=1` plus session scroll restore.
-- Shared shell: WorkOS mark + WorkOS in the sidebar. Header no longer shows `WorkOS Final`.
+- Return Context uses `?q=`, `?status=`, `?attention=1`. Scroll is stored per React Router `location.key`, so Back restores the same history entry and a new sidebar visit starts at the top.
+- Shared shell: WorkOS mark + WorkOS in the sidebar. The global header no longer shows a page-context title; `PageHeader` owns `Clienți`.
+- Operator chrome is interactive only on `/atelier` and `/execution/*`. Commercial and admin pages show an existing operator passively, or nothing.
 - APIs, domain contracts, and commercial mutations unchanged.
+
+## Clients final runtime alignment
+
+Focused amendment after independent review of `2c8daf3`. No Clients page redesign.
+
+- Removed `app-context-title` from `AppShell`.
+- Replaced admin-only hide of `Identifică-te` with the operational-route law.
+- Replaced the global `workos.clients.registry.scroll` key with a per-history-entry key.
+- Runtime owner acceptance remains `NO`.

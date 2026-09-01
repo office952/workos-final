@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { useCloudSessionOptional } from "./CloudSessionContext";
-import { contextTitleForLocation } from "./navigation/navigationRegistry";
+import { isOperationalOperatorRoute } from "./navigation/navigationRegistry";
 import { readSidebarCollapsed, writeSidebarCollapsed } from "./navigation/sidebarCollapse";
 import {
   DEFAULT_NAVIGATION_VISIBILITY,
@@ -21,14 +21,14 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-  const { pathname, search, hash } = useLocation();
+  const { pathname, hash } = useLocation();
   const cloud = useCloudSessionOptional();
   const { ready, operator, logout } = useOperatorSession();
   const [identifyOpen, setIdentifyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(readSidebarCollapsed);
   const [legalName, setLegalName] = useState<string | null>(null);
-  const officeRoute = isAdminOfficeRoute(pathname);
+  const operationalRoute = isOperationalOperatorRoute(pathname);
   const visibilityContext = useMemo(
     () => visibilityContextFromSession(cloud),
     [cloud],
@@ -37,8 +37,6 @@ export function AppShell({ children }: AppShellProps) {
     () => resolveVisibleDestinations(visibilityContext),
     [visibilityContext],
   );
-  const location = useMemo(() => ({ pathname, search }), [pathname, search]);
-  const contextTitle = contextTitleForLocation(location, visibleDestinations);
 
   useEffect(() => {
     if (hash !== "#continut-principal") {
@@ -110,7 +108,6 @@ export function AppShell({ children }: AppShellProps) {
                   >
                     Meniu
                   </button>
-                  <p className="app-context-title">{contextTitle}</p>
                 </div>
                 <div className="app-utilities" role="group" aria-label="Utilitare">
                   {cloud?.mode === "cloud" && cloud.organization ? (
@@ -130,13 +127,7 @@ export function AppShell({ children }: AppShellProps) {
                   ) : (
                     <IdentityMenu shortName="Atelier Demo" />
                   )}
-                  {officeRoute ? (
-                    <OfficeOperatorChip
-                      ready={ready}
-                      operatorName={operator?.displayName ?? null}
-                      dev={isDevOperatorUiEnabled()}
-                    />
-                  ) : (
+                  {operationalRoute ? (
                     <div className="operator-chip" aria-label="Operator curent">
                       {!ready ? (
                         <span className="operator-chip-muted">Se verifică operatorul…</span>
@@ -171,6 +162,12 @@ export function AppShell({ children }: AppShellProps) {
                         </button>
                       )}
                     </div>
+                  ) : (
+                    <OfficeOperatorChip
+                      ready={ready}
+                      operatorName={operator?.displayName ?? null}
+                      dev={isDevOperatorUiEnabled()}
+                    />
                   )}
                 </div>
               </div>
@@ -211,10 +208,6 @@ function OfficeOperatorChip({
       Operator: <strong>{operatorName}</strong>
     </p>
   );
-}
-
-function isAdminOfficeRoute(pathname: string): boolean {
-  return pathname === "/admin" || pathname.startsWith("/admin/");
 }
 
 function visibilityContextFromSession(
