@@ -104,9 +104,33 @@ async function completeOperatorIdentifyForm(
   displayName: string,
   pin: string,
 ) {
-  await page.getByLabel("Persoană").selectOption({ label: displayName });
-  await page.getByRole("textbox", { name: "PIN" }).fill(pin);
-  await page.getByRole("button", { name: "Confirmă" }).click();
+  const dialog = page.getByRole("dialog", { name: "Identifică operatorul" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByLabel("Persoană").selectOption({ label: displayName });
+  await dialog.getByRole("textbox", { name: "PIN" }).fill(pin);
+  await dialog.getByRole("button", { name: "Confirmă" }).click();
+  await expect(dialog).toBeHidden();
+}
+
+async function identifyOperatorFromPageRequest(
+  page: Page,
+  displayName: string,
+  pin: string,
+) {
+  const listed = await page.request.get("/api/people");
+  expect(listed.ok()).toBeTruthy();
+  const body = (await listed.json()) as { people?: PersonRecord[] };
+  const person = (body.people ?? []).find(
+    (item) => item.displayName === displayName && item.status === "ACTIVE",
+  );
+  expect(person).toBeTruthy();
+  if (!person) {
+    return;
+  }
+  const identified = await page.request.post("/api/operator-session", {
+    data: { personId: person.personId, pin },
+  });
+  expect(identified.ok()).toBeTruthy();
 }
 
 async function operatorAlreadyIdentified(page: Page): Promise<boolean> {
@@ -120,11 +144,16 @@ async function operatorAlreadyIdentified(page: Page): Promise<boolean> {
   return (await chip.locator("strong").count()) > 0;
 }
 
+async function settleOperatorChrome(page: Page) {
+  await expect(page.getByText("Se verifică operatorul…")).toHaveCount(0);
+}
+
 export async function identifyTestExecutorOnPage(
   page: Page,
   displayName = TEST_EXECUTOR_NAME,
   pin = TEST_OPERATOR_PIN,
 ) {
+  await settleOperatorChrome(page);
   if (await operatorAlreadyIdentified(page)) {
     return;
   }
@@ -146,13 +175,7 @@ export async function identifyTestExecutorOnPage(
     await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
     return;
   }
-  const returnUrl = page.url();
-  await page.goto("/atelier");
-  await page.getByRole("button", { name: "Identifică-te" }).click();
-  await completeOperatorIdentifyForm(page, displayName, pin);
-  await expect(page.getByRole("button", { name: "Ieși" })).toBeVisible();
-  await page.goto(returnUrl);
-  await expect.poll(async () => operatorAlreadyIdentified(page)).toBe(true);
+  await identifyOperatorFromPageRequest(page, displayName, pin);
 }
 
 export async function assignProviderIfNeeded(card: Locator, providerLabel?: string) {

@@ -40,3 +40,7 @@ Focused amendment after independent review of `2c8daf3`. No Clients page redesig
 - Replaced admin-only hide of `Identifică-te` with the operational-route law.
 - Replaced the global `workos.clients.registry.scroll` key with a per-history-entry key.
 - Runtime owner acceptance remains `NO`.
+
+## CI gate — operator identify helper
+
+Full GitHub e2e failed after the shell amendment because `completeOperatorIdentifyForm()` used page-global `Persoană` / `PIN` / `Confirmă` while Execution also has a person control in content. The helper now scopes those fields to dialog `Identifică operatorul`. The page-level Atelier form stays scoped to `form.operator-identify-form`. When no interactive chrome exists, the helper establishes the OperatorSession through `page.request` instead of navigating to `/atelier`, which remounted the current page and dropped in-memory product confirmation. It also waits for `Se verifică operatorul…` to clear before choosing a path, so Execution is not sent through the API fallback while the chip is still loading. No product UI change.
