@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useCloudSessionOptional } from "./CloudSessionContext";
 import { contextTitleForLocation } from "./navigation/navigationRegistry";
 import { readSidebarCollapsed, writeSidebarCollapsed } from "./navigation/sidebarCollapse";
@@ -110,9 +110,6 @@ export function AppShell({ children }: AppShellProps) {
                   >
                     Meniu
                   </button>
-                  <p className="app-brand">
-                    <Link to="/">WorkOS Final</Link>
-                  </p>
                   <p className="app-context-title">{contextTitle}</p>
                 </div>
                 <div className="app-utilities" role="group" aria-label="Utilitare">

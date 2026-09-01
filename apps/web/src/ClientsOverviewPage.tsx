@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ChevronRight, Search, TriangleAlert, UserCheck, UserMinus, Users } from "lucide-react";
 import {
   CUSTOMER_REGISTRY_FILTERS,
   customerRegistryFilterLabel,
@@ -8,6 +9,11 @@ import {
   type CustomerRegistryProjection,
 } from "@workos-final/domain";
 import {
+  clientIdentityMeta,
+  clientsResultCountLabel,
+  visibleClients,
+} from "./clientsRegistryView";
+import {
   CustomerProfileFields,
   customerProfilePatchFromForm,
   emptyCustomerProfileForm,
@@ -15,17 +21,17 @@ import {
 } from "./CustomerProfileFields";
 import { createCustomer, fetchCustomerRegistry } from "./customerApi";
 import { pageErrorKind } from "./fetchAccess";
-import {
-  RegistrySearchField,
-  registrySearchResultSummary,
-} from "./RegistrySearchField";
+import { RegistrySearchField } from "./RegistrySearchField";
 import { ActionDrawer } from "./ui/ActionDrawer";
 import { EmptyState } from "./ui/EmptyState";
 import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
-import { StatusChip } from "./ui/StatusChip";
-import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
+import {
+  persistClientsRegistryScroll,
+  useClientsRegistryScroll,
+} from "./useClientsRegistryScroll";
+import { useClientsRegistryState } from "./useClientsRegistryState";
 
 type PageState =
   | { kind: "loading" }
@@ -36,10 +42,11 @@ type PageState =
 export function ClientsOverviewPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
-  const [filter, setFilter] = useState<CustomerRegistryFilter>("ALL");
-  const [query, setQuery] = useRegistrySearchQuery();
+  const { query, setQuery, status, setStatus, attention, setAttention } =
+    useClientsRegistryState();
   const [notice, setNotice] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  useClientsRegistryScroll(page.kind === "ready");
 
   useEffect(() => {
     let cancelled = false;
@@ -59,19 +66,12 @@ export function ClientsOverviewPage() {
     };
   }, []);
 
-  const filteredPool = useMemo(() => {
-    if (page.kind !== "ready") {
-      return [];
-    }
-    return [...filterCustomerRegistry(page.registry, filter, "")];
-  }, [filter, page]);
-
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
       return [];
     }
-    return [...filterCustomerRegistry(page.registry, filter, query)];
-  }, [filter, page, query]);
+    return visibleClients(filterCustomerRegistry(page.registry, status, query), attention);
+  }, [attention, page, query, status]);
 
   async function handleCreate(value: CustomerProfileFormValue) {
     setNotice(null);
@@ -102,11 +102,11 @@ export function ClientsOverviewPage() {
   }
 
   const { registry } = page;
-  const empty = registry.customers.length === 0;
+  const emptyCatalog = registry.customers.length === 0;
   const searching = query.trim().length > 0;
 
   return (
-    <section className="jobs-overview">
+    <section className="clients-overview">
       <PageHeader
         title="Clienți"
         lead="Cine sunt clienții, ce activitate comercială au și ce trebuie deschis acum."
@@ -116,17 +116,30 @@ export function ClientsOverviewPage() {
           </button>
         }
       />
-      {empty ? null : (
-        <div className="metric-band">
-          <MetricCard label="Clienți" value={registry.summary.total} />
-          <MetricCard label="Activi" value={registry.summary.active} />
-          <MetricCard label="Retrași" value={registry.summary.retired} />
-          <MetricCard
-            label="Necesită atenție"
-            value={registry.summary.needsAttention}
-          />
-        </div>
-      )}
+
+      <div className="metric-band">
+        <MetricCard
+          label="Clienți"
+          value={registry.summary.total}
+          icon={<Users size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Activi"
+          value={registry.summary.active}
+          icon={<UserCheck size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Retrași"
+          value={registry.summary.retired}
+          icon={<UserMinus size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Necesită atenție"
+          value={registry.summary.needsAttention}
+          icon={<TriangleAlert size={40} strokeWidth={1.5} />}
+          iconTone="warning"
+        />
+      </div>
 
       {notice ? <p>{notice}</p> : null}
 
@@ -141,93 +154,95 @@ export function ClientsOverviewPage() {
         />
       </ActionDrawer>
 
-      {empty ? (
-        <EmptyState title="Nu există încă clienți." />
-      ) : (
-        <>
-          <div className="registry-toolbar">
-            <RegistrySearchField
-              label="Caută client"
-              placeholder="Caută client, CUI, contact, oraș..."
-              value={query}
-              onChange={setQuery}
-              resultSummary={registrySearchResultSummary({
-                visibleCount: visible.length,
-                poolCount: filteredPool.length,
-                totalCount: registry.summary.total,
-                query,
-                nounPlural: "clienți",
-              })}
-            />
-            <div className="filter-row" role="group" aria-label="Filtre clienți">
-              {CUSTOMER_REGISTRY_FILTERS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={item === filter ? "button-quiet is-selected" : "button-quiet"}
-                  aria-pressed={item === filter}
-                  onClick={() => setFilter(item)}
-                >
-                  {clientsFilterLabel(item)}
-                </button>
-              ))}
-            </div>
+      <div className="registry-toolbar">
+        <div className="registry-toolbar-primary">
+          <div className="filter-row" role="group" aria-label="Status clienți">
+            {CUSTOMER_REGISTRY_FILTERS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={item === status ? "button-quiet is-selected" : "button-quiet"}
+                aria-pressed={item === status}
+                onClick={() => setStatus(item)}
+              >
+                {clientsFilterLabel(item)}
+              </button>
+            ))}
           </div>
-          {visible.length === 0 ? (
-            <EmptyState
-              title={
-                searching
-                  ? "Niciun client nu corespunde căutării."
-                  : "Niciun client în acest filtru."
-              }
-            />
-          ) : (
-            <ul className="clients-list">
-              {visible.map((customer) => (
-                <li key={customer.customerId} className="registry-row">
-                  <div className="registry-row-identity">
-                    <Link className="registry-row-name" to={customer.href}>
-                      {customer.displayName}
-                    </Link>
-                    <span className="registry-row-meta">{clientIdentityMeta(customer)}</span>
-                    <div className="registry-row-flags">
-                      <StatusChip
-                        label={customer.statusLabel}
-                        tone={customer.status === "ACTIVE" ? "ok" : "neutral"}
-                      />
-                      {customer.attentionLabel ? (
-                        <span className="registry-row-flag is-attention">
-                          {customer.attentionLabel}
-                        </span>
-                      ) : null}
-                    </div>
+          <div className="filter-row" role="group" aria-label="Filtru atenție">
+            <button
+              type="button"
+              className={attention ? "button-quiet is-selected" : "button-quiet"}
+              aria-pressed={attention}
+              onClick={() => setAttention(!attention)}
+            >
+              Necesită atenție
+            </button>
+          </div>
+          <p className="registry-result-count">{clientsResultCountLabel(visible.length)}</p>
+        </div>
+        <RegistrySearchField
+          label="Caută client"
+          placeholder="Caută client, CUI, contact, oraș..."
+          value={query}
+          onChange={setQuery}
+          hideLabel
+          leadingIcon={<Search size={16} strokeWidth={1.75} />}
+        />
+      </div>
+
+      {emptyCatalog ? (
+        <EmptyState title="Nu există încă clienți." />
+      ) : visible.length === 0 ? (
+        <EmptyState
+          title={
+            searching
+              ? "Niciun client nu corespunde căutării."
+              : "Niciun client în acest filtru."
+          }
+        />
+      ) : (
+        <ul className="clients-list">
+          {visible.map((customer) => (
+            <li key={customer.customerId}>
+              <Link
+                className={
+                  customer.needsAttention ? "registry-row is-attention" : "registry-row"
+                }
+                to={customer.href}
+                onClick={() => persistClientsRegistryScroll()}
+              >
+                <div className="registry-row-identity">
+                  <div className="registry-row-title">
+                    <span className="registry-row-name">{customer.displayName}</span>
+                    <span className="registry-row-status">{customer.statusLabel}</span>
+                    {customer.needsAttention && customer.attentionLabel ? (
+                      <span className="registry-row-attention">{customer.attentionLabel}</span>
+                    ) : null}
                   </div>
-                  <div className="registry-row-summary" aria-label="Activitate comercială">
-                    <div className="registry-row-metric">
-                      <b>{customer.openRequestCount}</b>
-                      <span>Cereri</span>
-                    </div>
-                    <div className="registry-row-metric">
-                      <b>{customer.quoteCount}</b>
-                      <span>Oferte</span>
-                    </div>
-                    <div className="registry-row-metric">
-                      <b>{customer.jobCount}</b>
-                      <span>Lucrări</span>
-                    </div>
+                  <span className="registry-row-meta">{clientIdentityMeta(customer)}</span>
+                </div>
+                <div className="registry-row-summary" aria-label="Activitate comercială">
+                  <div className="registry-row-metric">
+                    <b>{customer.openRequestCount}</b>
+                    <span>Cereri</span>
                   </div>
-                  <Link
-                    className="registry-row-open"
-                    to={customer.href}
-                    aria-label="Deschide clientul"
-                  >
-                    <span aria-hidden="true">›</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
+                  <div className="registry-row-metric">
+                    <b>{customer.quoteCount}</b>
+                    <span>Oferte</span>
+                  </div>
+                  <div className="registry-row-metric">
+                    <b>{customer.jobCount}</b>
+                    <span>Lucrări</span>
+                  </div>
+                </div>
+                <span className="registry-row-open" aria-hidden="true">
+                  <ChevronRight size={16} strokeWidth={1.75} />
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );
@@ -235,15 +250,6 @@ export function ClientsOverviewPage() {
 
 function clientsFilterLabel(filter: CustomerRegistryFilter): string {
   return filter === "RETIRED" ? "Retrași" : customerRegistryFilterLabel(filter);
-}
-
-function clientIdentityMeta(
-  customer: CustomerRegistryProjection["customers"][number],
-): string {
-  const parts = [customer.contactName, customer.cui, customer.city].filter(
-    (part): part is string => Boolean(part),
-  );
-  return parts.length > 0 ? parts.join(" · ") : "Fără CUI sau contact";
 }
 
 function ClientCreateForm({

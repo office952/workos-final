@@ -60,7 +60,8 @@ describe("AppShell", () => {
       </AppShell>,
     );
 
-    expect(screen.getByText("WorkOS Final")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "WorkOS" })).toBeInTheDocument();
+    expect(screen.queryByText("WorkOS Final")).not.toBeInTheDocument();
     expect(primaryNav()).toBeInTheDocument();
     expect(within(primaryNav()).getByRole("link", { name: "Lucrări" })).toBeInTheDocument();
     expect(within(primaryNav()).getByRole("link", { name: "Catalog" })).toBeInTheDocument();
