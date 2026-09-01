@@ -17,11 +17,15 @@ This file records the **implemented** shell. Living navigation direction is the 
 IMPLEMENTED_SHELL                      = STABLE_SIDEBAR_V3
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION     = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION      = NOT_STARTED
+UI_V3_PAGE_CONTENT_TRANSFORMATION      = IN_PROGRESS
+CLIENTS_V3                             = INTEGRATED_ON_MAIN
+CLIENTS_FIGMA_DIRECTION                = OWNER_ACCEPTED
+CLIENTS_RUNTIME                        = OWNER_ACCEPTED
+CLIENTS_UI_UX_GATE                     = CLOSED
 NEXT_PROGRAM_PRIORITY                  = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
-Wave 1 implements this sidebar on main. Page-content transformation is not started.
+Wave 1 implements this sidebar on main. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub, Cereri, Oferte, and Lucrări page-content transformations remain unaccepted.
 
 Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
 
