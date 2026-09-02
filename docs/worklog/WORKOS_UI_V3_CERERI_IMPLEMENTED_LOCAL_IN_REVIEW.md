@@ -9,12 +9,12 @@ FIGMA_REOPEN_REQUIRED          = NO
 REQUESTS_IMPLEMENTATION        = AUTHORIZED
 REQUESTS_RUNTIME               = OWNER_ACCEPTED
 REQUESTS_RUNTIME_ACCEPTED      = YES
-REQUESTS_INTEGRATED_ON_MAIN    = NO
+REQUESTS_INTEGRATED_ON_MAIN    = YES
 NEXT_WAVE                      = NO
-MAIN_MERGE                     = NO
+MAIN_MERGE                     = YES — exact fast-forward after later Owner GO
 ```
 
-Owner authorized React implementation of the accepted Cereri V3 Figma for `/requests` and `/requests/:requestId` only. This file is the implementation worklog. It does not rewrite the Figma accept record. Owner later accepted the runtime; integration on main still requires a separate GO.
+Owner authorized React implementation of the accepted Cereri V3 Figma for `/requests` and `/requests/:requestId` only. This file is the implementation worklog. It does not rewrite the Figma accept record. Owner later accepted the runtime. Integration on `main` is recorded in `docs/worklog/WORKOS_UI_V3_CERERI_INTEGRATED_ON_MAIN.md`.
 
 ## Identity
 
@@ -230,10 +230,10 @@ Playwright also wrote `docs/worklog/screenshots/requests-overview-desktop.png`, 
 COMMIT                = YES — after Owner pre-commit closure
 PUSH_FEATURE_BRANCH   = YES
 DRAFT_PR              = YES — new draft, not PR #1
-PUSH_MAIN             = NO
-MERGE_MAIN            = NO
+PUSH_MAIN             = YES — later exact fast-forward after Owner GO
+MERGE_MAIN            = YES — fast-forward only
 FORCE                 = NO
 OWNER_RUNTIME_ACCEPTED = YES
 ```
 
-Owner accepted this runtime on 2026-09-02. Record: `docs/worklog/WORKOS_UI_V3_CERERI_RUNTIME_FINAL_OWNER_ACCEPTED.md`. Integration on `main` is not authorized by that accept.
+Owner accepted this runtime on 2026-09-02. Record: `docs/worklog/WORKOS_UI_V3_CERERI_RUNTIME_FINAL_OWNER_ACCEPTED.md`. Integration record: `docs/worklog/WORKOS_UI_V3_CERERI_INTEGRATED_ON_MAIN.md`.

@@ -10,18 +10,18 @@ CERERI_TECHNICAL_GATE           = CLOSED
 CERERI_RUNTIME                  = OWNER_ACCEPTED
 REQUESTS_RUNTIME                = OWNER_ACCEPTED
 CERERI_IMPLEMENTED              = YES
-CERERI_INTEGRATED_ON_MAIN       = NO
+CERERI_INTEGRATED_ON_MAIN       = YES
 FIGMA_REOPEN                    = NO
 RUNTIME_REOPEN                  = NO
-PR_4                            = OPEN / DRAFT / UNMERGED
-MERGE_MAIN                      = NOT_YET_AUTHORIZED
+PR_4                            = OPEN / DRAFT after fast-forward — head contained in main
+MERGE_MAIN                      = YES — exact fast-forward
 NEXT_WAVE                       = NO
 OS_S3                           = NO
 OFERTE_V3                       = NOT_AUTHORIZED
 LUCRARI_V3                      = NOT_AUTHORIZED
 ```
 
-Owner accepted the Cereri V3 runtime for `/requests` and `/requests/:requestId`. This record does not authorize merge, Oferte, Lucrări, or the next wave.
+Owner accepted the Cereri V3 runtime for `/requests` and `/requests/:requestId`. A later Owner GO authorized exact fast-forward onto `main`. This record does not authorize Oferte, Lucrări, or the next wave.
 
 Cereri is closed as product and UI. Do not open another polish cycle without a real regression.
 
@@ -69,20 +69,15 @@ The original Figma UX LOCK remains historical visual evidence. Geometry stays ac
 ## Explicit non-claims
 
 ```text
-REQUESTS_REDESIGN_INTEGRATED   = NO
+REQUESTS_REDESIGN_INTEGRATED   = YES
 QUOTES_REDESIGN                = NO
 JOBS_REDESIGN                  = NO
 COMMERCIAL_PAGE_REORGANIZATION = NOT_COMPLETE
-PUSH_MAIN                      = NO
-MERGE_MAIN                     = NO
+PUSH_MAIN                      = YES — later exact fast-forward
+MERGE_MAIN                     = YES — fast-forward only
 FORCE                          = NO
 ```
 
 Implementation record: `docs/worklog/WORKOS_UI_V3_CERERI_IMPLEMENTED_LOCAL_IN_REVIEW.md`.
 Figma accept record: `docs/worklog/WORKOS_UI_V3_CERERI_FIGMA_FINAL_OWNER_ACCEPTED.md`.
-
-The next Owner command, if integration should continue:
-
-```text
-GO INTEGRATE CERERI ON MAIN
-```
+Integration record: `docs/worklog/WORKOS_UI_V3_CERERI_INTEGRATED_ON_MAIN.md`.

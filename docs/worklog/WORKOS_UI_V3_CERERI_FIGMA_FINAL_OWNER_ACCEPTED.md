@@ -153,3 +153,22 @@ Living status is recorded in:
 - `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md`
 - `AGENTS.md`
+
+## Later repository status — 2026-09-02 integration
+
+The Figma accept header above stays historical. It does not rewrite `REQUESTS_RUNTIME = NOT_AUTHORIZED` from the accept moment. After later Owner GOs:
+
+```text
+REQUESTS_RUNTIME              = OWNER_ACCEPTED
+CERERI_RUNTIME                = OWNER_ACCEPTED
+CERERI_INTEGRATED_ON_MAIN     = YES
+REQUESTS_INTEGRATED_ON_MAIN   = YES
+FIGMA_REOPEN                  = NO
+RUNTIME_REOPEN                = NO
+FIGMA_WRITE                   = NO
+HISTORICAL_UX_LOCK_CONFLICT   = PRESERVED
+```
+
+Figma UX LOCK still visually contains `NEW → ATTENTION / De preluat` and full client-profile quick-create. The 2026-09-02 Owner amendment supersedes only those business lines. Do not modify Figma. Do not reintroduce those semantics into runtime.
+
+Integration record: `docs/worklog/WORKOS_UI_V3_CERERI_INTEGRATED_ON_MAIN.md`.
