@@ -7,12 +7,13 @@ CLIENT_HUB_DIRECTION           = OWNER_ACCEPTED
 CLIENT_HUB_FIGMA_FINAL         = OWNER_ACCEPTED
 FIGMA_REOPEN_REQUIRED          = NO
 CLIENT_HUB_IMPLEMENTATION      = AUTHORIZED
-CLIENT_HUB_RUNTIME_ACCEPTED    = NO
-CLIENT_HUB_INTEGRATED_ON_MAIN  = NO
+CLIENT_HUB_RUNTIME_ACCEPTED    = YES
+CLIENT_HUB_RUNTIME             = OWNER_ACCEPTED
+CLIENT_HUB_INTEGRATED_ON_MAIN  = YES
 CLIENTS_V3                     = CLOSED
 CLIENTS_REOPEN                 = NO
 NEXT_WAVE                      = NO
-MAIN_MERGE                     = NOT_AUTHORIZED
+MAIN_MERGE                     = FAST_FORWARD_DONE
 ```
 
 Owner explicitly accepted the final Client Hub Figma and authorized React implementation of `/clients/:customerId` only. The four leftover graphic-design notes stay runtime watch items. This file is the implementation worklog. It does not rewrite the roadmap or the UI/UX canons.

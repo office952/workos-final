@@ -22,10 +22,14 @@ CLIENTS_V3                             = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION                = OWNER_ACCEPTED
 CLIENTS_RUNTIME                        = OWNER_ACCEPTED
 CLIENTS_UI_UX_GATE                     = CLOSED
+CLIENT_HUB_FIGMA_FINAL                 = OWNER_ACCEPTED
+CLIENT_HUB_RUNTIME                     = OWNER_ACCEPTED
+CLIENT_HUB_TECHNICAL_GATE              = CLOSED
+CLIENT_HUB                             = INTEGRATED_ON_MAIN
 NEXT_PROGRAM_PRIORITY                  = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
-Wave 1 implements this sidebar on main. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub, Cereri, Oferte, and Lucrări page-content transformations remain unaccepted.
+Wave 1 implements this sidebar on main. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub is `INTEGRATED_ON_MAIN`. Cereri, Oferte, and Lucrări page-content transformations remain unaccepted.
 
 Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
 
