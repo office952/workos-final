@@ -46,6 +46,9 @@ export type ResourceCostProjection = {
   classificationLabel: string;
   note: string;
   amountDisplay: string;
+  supplierLabel?: string | null;
+  validFrom?: string | null;
+  validUntil?: string | null;
 };
 
 export type ResourceAdminRecord = {
@@ -243,6 +246,9 @@ function toCostProjection(evidence: CostEvidence): ResourceCostProjection {
     sourceLabel: costSourceLabel(evidence.source),
     classificationLabel: costClassificationLabel(evidence.classification),
     note: evidence.note,
+    supplierLabel: evidence.supplierLabel ?? null,
+    validFrom: evidence.validFrom ?? null,
+    validUntil: evidence.validUntil ?? null,
     amountDisplay: qualifier
       ? `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel} · ${qualifier}`
       : `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel}`,

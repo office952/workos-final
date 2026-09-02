@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   CANONICAL_PRODUCT_CODE,
@@ -7,6 +10,7 @@ import {
 } from "@workos-final/domain";
 import { resetCloudLoginAttemptGuard } from "../src/cloud/controlPlane.js";
 import { createApp } from "../src/app.js";
+import { createProductSystemRuntime } from "../src/productSystem/runtime.js";
 import {
   addOrganization,
   addUser,
@@ -16,6 +20,22 @@ import {
   MEMBER_PASSWORD,
   OWNER_PASSWORD,
 } from "./cloud-harness.js";
+
+const isolatedRuntimes: Array<{ close: () => void; dir: string }> = [];
+
+afterEach(() => {
+  for (const item of isolatedRuntimes.splice(0)) {
+    item.close();
+    rmSync(item.dir, { recursive: true, force: true });
+  }
+});
+
+function isolatedApp() {
+  const dir = mkdtempSync(join(tmpdir(), "workos-prequote-atom-"));
+  const productSystem = createProductSystemRuntime(join(dir, "product-system.sqlite"));
+  isolatedRuntimes.push({ close: () => productSystem.close(), dir });
+  return createApp({ productSystem });
+}
 
 type JsonObject = Record<string, unknown>;
 
@@ -32,7 +52,7 @@ const lettersValues = {
 };
 
 describe("first real letters pre-quote API", () => {
-  it("lets the owner complete INTERNAL install and freeze a v2 quote, not a product-only v1", async () => {
+  it("lets the owner complete INTERNAL install preview and refuses live v2 freeze", async () => {
     const app = createApp();
     const enable = await app.request("/api/operational-services/SITE_INSTALLATION", {
       method: "PATCH",
@@ -140,11 +160,12 @@ describe("first real letters pre-quote API", () => {
         requestId,
       }),
     });
-    expect(frozen.status).toBe(200);
-    const snapshot = (await readBody(frozen)).quoteSnapshot as JsonObject;
-    expect(snapshot.schemaVersion).toBe(2);
-    expect((snapshot.jobCommercial as JsonObject).grossPrice).toBe(866.82);
-    expect(snapshot.commercial).toMatchObject({ grossPrice: 624.82 });
+    expect(frozen.status).toBe(422);
+    const refused = await readBody(frozen);
+    expect(refused.error).toBe("service_quote_freeze_not_authorized");
+    expect(refused.reasons).toEqual([
+      "Previzualizarea ofertei cu montaj este pregătită. Înghețarea acestei oferte nu este activată în această etapă.",
+    ]);
 
     const productOnlyCompile = await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
@@ -171,7 +192,7 @@ describe("first real letters pre-quote API", () => {
     expect(((await readBody(productFrozen)).quoteSnapshot as JsonObject).schemaVersion).toBe(1);
   });
 
-  it("lets the owner complete SUBCONTRACTED install with supplier evidence, not the 200 EUR selling price", async () => {
+  it("lets the owner complete SUBCONTRACTED install preview and refuses live v2 freeze", async () => {
     const app = createApp();
     const enable = await app.request("/api/operational-services/SITE_INSTALLATION", {
       method: "PATCH",
@@ -265,15 +286,8 @@ describe("first real letters pre-quote API", () => {
         requestId,
       }),
     });
-    expect(frozen.status).toBe(200);
-    const snapshot = (await readBody(frozen)).quoteSnapshot as JsonObject;
-    expect(snapshot.schemaVersion).toBe(2);
-    expect((snapshot.jobCommercial as JsonObject).grossPrice).toBe(866.82);
-    const installLine = ((snapshot.lines as Array<JsonObject>) ?? []).find(
-      (line) => line.kind === "SITE_INSTALLATION",
-    );
-    expect((installLine?.eic as JsonObject | undefined)?.total).toBe(180);
-    expect((installLine?.commercial as JsonObject | undefined)?.grossPrice).toBe(242);
+    expect(frozen.status).toBe(422);
+    expect((await readBody(frozen)).error).toBe("service_quote_freeze_not_authorized");
   });
 });
 
@@ -376,5 +390,213 @@ describe("first real letters pre-quote owner writes", () => {
     });
     expect(memberEvidence.status).toBe(403);
     fixture.close();
+  });
+});
+
+describe("cost evidence supersede atomicity", () => {
+  async function activeSubcontract(app: ReturnType<typeof createApp>) {
+    const admin = await readBody(await app.request("/api/resources-admin"));
+    return ((admin.costEvidence as Array<JsonObject>) ?? []).filter(
+      (row) => row.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID,
+    );
+  }
+
+  async function seedSubcontract(app: ReturnType<typeof createApp>) {
+    const created = await app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        resourceId: SVC_SITE_INSTALL_SUBCONTRACT_ID,
+        amount: 180,
+        note: "Evidență activă.",
+        supplierLabel: "Montaj Rapid SRL",
+        validFrom: "2026-01-01",
+        validUntil: "2026-12-31",
+      }),
+    });
+    expect(created.status).toBe(201);
+    return (await readBody(created)).evidence as JsonObject;
+  }
+
+  it("refuses invalid replacements without superseding the old row", async () => {
+    const app = isolatedApp();
+    const evidence = await seedSubcontract(app);
+    const rowId = String(evidence.evidenceRowId);
+    const refusals: Array<{ body: JsonObject; status: number }> = [];
+    for (const body of [
+      { amount: 180, note: "x", supplierLabel: 12 },
+      { amount: 180, note: "x", supplierLabel: "", validUntil: "2026-12-31" },
+      { amount: 180, note: "x", supplierLabel: "X", validUntil: "2026-02-30" },
+      {
+        amount: 180,
+        note: "x",
+        supplierLabel: "X",
+        validFrom: "2026-12-31",
+        validUntil: "2026-01-01",
+      },
+      { amount: -1, note: "x", supplierLabel: "X", validUntil: "2026-12-31" },
+      { amount: 180, note: 9, supplierLabel: "X", validUntil: "2026-12-31" },
+    ]) {
+      refusals.push({
+        status: (
+          await app.request(
+            `/api/resources-admin/cost-evidence/${encodeURIComponent(rowId)}`,
+            {
+              method: "PATCH",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify(body),
+            },
+          )
+        ).status,
+        body,
+      });
+    }
+    expect(refusals.every((item) => item.status >= 400)).toBe(true);
+    const active = await activeSubcontract(app);
+    expect(active).toHaveLength(1);
+    expect(active[0]?.evidenceRowId).toBe(rowId);
+    expect(active[0]?.amount).toBe(180);
+    expect(active[0]?.supplierLabel).toBe("Montaj Rapid SRL");
+  });
+
+  it("supersedes exactly once on a valid subcontract renewal", async () => {
+    const app = isolatedApp();
+    const evidence = await seedSubcontract(app);
+    const rowId = String(evidence.evidenceRowId);
+    const renewed = await app.request(
+      `/api/resources-admin/cost-evidence/${encodeURIComponent(rowId)}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          amount: 175,
+          note: "Reînnoit.",
+          supplierLabel: "Montaj Nou SRL",
+          validFrom: "2026-06-01",
+          validUntil: "2027-06-01",
+        }),
+      },
+    );
+    expect(renewed.status).toBe(200);
+    const next = (await readBody(renewed)).evidence as JsonObject;
+    expect(next.evidenceRowId).not.toBe(rowId);
+    const active = await activeSubcontract(app);
+    expect(active).toHaveLength(1);
+    expect(active[0]?.evidenceRowId).toBe(next.evidenceRowId);
+    expect(active[0]?.amount).toBe(175);
+    expect(active[0]?.supplierLabel).toBe("Montaj Nou SRL");
+    expect(active[0]?.validUntil).toBe("2027-06-01");
+  });
+
+  it("renews expired subcontract evidence to COMPLETE without a second active row", async () => {
+    const app = isolatedApp();
+    const enable = await app.request("/api/operational-services/SITE_INSTALLATION", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ offerMode: "SUBCONTRACTED" }),
+    });
+    expect(enable.status).toBe(200);
+    const createdCustomer = await app.request("/api/customers", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ displayName: "Client reînnoire" }),
+    });
+    const customerId = String(
+      ((await readBody(createdCustomer)).customer as JsonObject).customerId,
+    );
+    const createdRequest = await app.request("/api/requests", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        customerId,
+        title: "Litere evidență expirată",
+        description: "Cerere sintetică pentru reînnoire.",
+      }),
+    });
+    const requestId = String(((await readBody(createdRequest)).request as JsonObject).requestId);
+    expect(
+      (
+        await app.request(`/api/requests/${encodeURIComponent(requestId)}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await app.request(
+          `/api/requests/${encodeURIComponent(requestId)}/installation-facts`,
+          {
+            method: "PATCH",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              expectedVersion: 0,
+              street: "Strada Fabricii 10",
+              city: "București",
+              measurementStatus: "OFFICE_MEASURED",
+              facadeType: "CONCRETE",
+              fixingMethod: "MECHANICAL_ANCHOR",
+              siteElectrical: "NOT_APPLICABLE",
+            }),
+          },
+        )
+      ).status,
+    ).toBe(200);
+    const expired = await seedSubcontract(app);
+    const expiredId = String(expired.evidenceRowId);
+    const stale = await app.request(
+      `/api/resources-admin/cost-evidence/${encodeURIComponent(expiredId)}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          amount: 180,
+          note: "Expirat.",
+          supplierLabel: "Montaj Rapid SRL",
+          validFrom: "2020-01-01",
+          validUntil: "2020-06-01",
+        }),
+      },
+    );
+    expect(stale.status).toBe(200);
+    const priced = await app.request(
+      `/api/requests/${encodeURIComponent(requestId)}/installation-price`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ netPrice: 200 }),
+      },
+    );
+    expect(priced.status).toBe(200);
+    expect(
+      (((await readBody(priced)).detail as JsonObject).installationScope as JsonObject)
+        .eicCompleteness,
+    ).toBe("PARTIAL");
+    const renewedId = String(((await readBody(stale)).evidence as JsonObject).evidenceRowId);
+    const renewed = await app.request(
+      `/api/resources-admin/cost-evidence/${encodeURIComponent(renewedId)}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          amount: 180,
+          note: "Reînnoit prin admin.",
+          supplierLabel: "Montaj Rapid SRL",
+          validFrom: "2026-01-01",
+          validUntil: "2027-12-31",
+        }),
+      },
+    );
+    expect(renewed.status).toBe(200);
+    const after = await readBody(
+      await app.request(`/api/requests/${encodeURIComponent(requestId)}`),
+    );
+    expect(((after.detail as JsonObject).installationScope as JsonObject).eicCompleteness).toBe(
+      "COMPLETE",
+    );
+    const active = await activeSubcontract(app);
+    expect(active).toHaveLength(1);
+    expect(active[0]?.evidenceRowId).not.toBe(expiredId);
   });
 });

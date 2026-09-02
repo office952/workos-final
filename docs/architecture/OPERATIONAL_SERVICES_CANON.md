@@ -283,7 +283,7 @@ See `docs/architecture/COMMERCIAL_PRICE_RULES_CANON.md`.
 
 ## Quote service lines
 
-`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: product-only freeze stays schema v1 (one product EIC, one product commercial, one LETTERS `productionInput`). Selected COMPLETE installation freezes additive schema v2 lines (`PRODUCT`, `SITE_INSTALLATION`) plus `jobCommercial`. Historical v1 rows are not rewritten. Not Owner-accepted runtime. Not integrated on main.
+`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: product-only freeze stays schema v1 (one product EIC, one product commercial, one LETTERS `productionInput`). Domain can construct additive schema v2 lines (`PRODUCT`, `SITE_INSTALLATION`) plus `jobCommercial` for synthetic proof. Live `POST quote-snapshots` refuses a selected SITE_INSTALLATION quote with `service_quote_freeze_not_authorized` before persist or request link. Live v2 acceptance and live v2 PDF are also refused. Historical v1 rows are not rewritten. Not Owner-accepted runtime. Not integrated on main.
 
 `OWNER_ACCEPTED_TARGET`: one Quote Snapshot, additive lines (product, installation, optional transport), one job total. Historical v1 snapshots stay readable. Hashes of old snapshots are not rewritten.
 

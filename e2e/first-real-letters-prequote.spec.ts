@@ -6,7 +6,7 @@ import {
   uniqueRequestToken,
 } from "./helpers/requests";
 
-test("pre-quote INTERNAL wave freezes a v2 job quote without rewriting product-only v1", async ({
+test("pre-quote INTERNAL wave shows the job preview and refuses live v2 freeze", async ({
   page,
   request,
 }) => {
@@ -92,25 +92,47 @@ test("pre-quote INTERNAL wave freezes a v2 job quote without rewriting product-o
   await expect(page.getByText("Montaj la locație: 242,00 EUR")).toBeVisible();
   await expect(page.getByText("Preț final client: 866,82 EUR")).toBeVisible();
   const createQuote = page.getByRole("button", { name: "Creează oferta" });
-  await expect(createQuote).toBeEnabled();
-  await createQuote.click();
-  await expect(page.getByRole("heading", { name: "Ofertă creată" })).toBeVisible();
-  await expect(page.getByText("Preț final: 866,82 EUR")).toBeVisible();
-
-  const quotes = await request.get("/api/quotes");
-  const quotesBody = (await quotes.json()) as {
-    overview: { quotes: Array<{ quoteSnapshotId: string }> };
-  };
-  const latestId = quotesBody.overview.quotes[0]?.quoteSnapshotId;
-  expect(latestId).toBeTruthy();
-  const snapshot = await request.get(
-    `/api/products/${CANONICAL_LETTERS_PRODUCT_CODE}/quote-snapshots/${encodeURIComponent(latestId ?? "")}`,
+  await expect(createQuote).toBeDisabled();
+  await expect(
+    page.getByText(
+      "Previzualizarea ofertei cu montaj este pregătită. Înghețarea acestei oferte nu este activată în această etapă.",
+    ),
+  ).toBeVisible();
+  const compile = await request.post(
+    `/api/products/${CANONICAL_LETTERS_PRODUCT_CODE}/compile`,
+    {
+      data: {
+        values: {
+          "root.inscription": token.slice(0, 8),
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    },
   );
-  const snapshotBody = (await snapshot.json()) as {
-    quoteSnapshot: { schemaVersion: number; jobCommercial?: { grossPrice: number } };
+  expect(compile.ok()).toBeTruthy();
+  const compiled = (await compile.json()) as {
+    definition: unknown;
+    reviewId: string;
   };
-  expect(snapshotBody.quoteSnapshot.schemaVersion).toBe(2);
-  expect(snapshotBody.quoteSnapshot.jobCommercial?.grossPrice).toBe(866.82);
+  const freeze = await request.post(
+    `/api/products/${CANONICAL_LETTERS_PRODUCT_CODE}/quote-snapshots`,
+    {
+      data: {
+        definition: compiled.definition,
+        reviewId: compiled.reviewId,
+        customerId,
+        requestId,
+      },
+    },
+  );
+  expect(freeze.status()).toBe(422);
+  expect(((await freeze.json()) as { error: string }).error).toBe(
+    "service_quote_freeze_not_authorized",
+  );
 
   const productOnly = await request.post("/api/requests", {
     data: {
@@ -125,4 +147,122 @@ test("pre-quote INTERNAL wave freezes a v2 job quote without rewriting product-o
   await confirmCanonicalLettersOnPage(page, "NOPQ");
   await expect(page.getByText("Preț final client: 624,82 EUR")).toBeVisible();
   await expect(page.getByRole("button", { name: "Creează oferta" })).toBeEnabled();
+});
+
+test("expired subcontract evidence can be renewed through Resurse și costuri", async ({
+  page,
+  request,
+}) => {
+  const token = uniqueRequestToken("PQ2");
+  const enable = await request.patch("/api/operational-services/SITE_INSTALLATION", {
+    data: { offerMode: "SUBCONTRACTED" },
+  });
+  expect(enable.ok()).toBeTruthy();
+  const customer = await request.post("/api/customers", {
+    data: { displayName: `Client ${token}` },
+  });
+  const customerId = ((await customer.json()) as { customer: { customerId: string } }).customer
+    .customerId;
+  const created = await request.post("/api/requests", {
+    data: {
+      customerId,
+      title: `Litere reînnoire ${token}`,
+      description: "Cerere sintetică pentru reînnoire evidență.",
+    },
+  });
+  const requestId = ((await created.json()) as { request: { requestId: string } }).request
+    .requestId;
+  expect(
+    (
+      await request.patch(`/api/requests/${encodeURIComponent(requestId)}`, {
+        data: { optionalScopeIds: ["SITE_INSTALLATION"] },
+      })
+    ).ok(),
+  ).toBeTruthy();
+  expect(
+    (
+      await request.patch(
+        `/api/requests/${encodeURIComponent(requestId)}/installation-facts`,
+        {
+          data: {
+            expectedVersion: 0,
+            street: "Strada Fabricii 10",
+            city: "București",
+            measurementStatus: "OFFICE_MEASURED",
+            facadeType: "CONCRETE",
+            fixingMethod: "MECHANICAL_ANCHOR",
+            siteElectrical: "NOT_APPLICABLE",
+          },
+        },
+      )
+    ).ok(),
+  ).toBeTruthy();
+
+  const evidence = await request.post("/api/resources-admin/cost-evidence", {
+    data: {
+      resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+      amount: 180,
+      note: "Evidență expirată pentru reînnoire.",
+      supplierLabel: "Montaj Rapid SRL",
+      validFrom: "2020-01-01",
+      validUntil: "2020-06-01",
+    },
+  });
+  if (evidence.status() === 409) {
+    const admin = await request.get("/api/resources-admin");
+    const adminBody = (await admin.json()) as {
+      costEvidence: Array<{ resourceId: string; evidenceRowId: string | null }>;
+    };
+    const row = adminBody.costEvidence.find(
+      (item) => item.resourceId === "SVC-SITE-INSTALL-SUBCONTRACT",
+    );
+    expect(row?.evidenceRowId).toBeTruthy();
+    const supersede = await request.patch(
+      `/api/resources-admin/cost-evidence/${encodeURIComponent(row?.evidenceRowId ?? "")}`,
+      {
+        data: {
+          amount: 180,
+          note: "Evidență expirată pentru reînnoire.",
+          supplierLabel: "Montaj Rapid SRL",
+          validFrom: "2020-01-01",
+          validUntil: "2020-06-01",
+        },
+      },
+    );
+    expect(supersede.ok()).toBeTruthy();
+  } else {
+    expect(evidence.ok()).toBeTruthy();
+  }
+
+  const price = await request.patch(
+    `/api/requests/${encodeURIComponent(requestId)}/installation-price`,
+    { data: { netPrice: 200 } },
+  );
+  expect(price.ok()).toBeTruthy();
+
+  await configureCanonicalLettersForRequest(page, requestId);
+  await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
+  await expect(
+    page.getByText("Evidența subcontractantului nu este validă pentru această dată."),
+  ).toBeVisible();
+  await expect(page.getByText("Montajul nu are încă un cost complet.")).toBeVisible();
+  await expect(page.getByText("Preț final client: 866,82 EUR")).toHaveCount(0);
+
+  await page.goto(
+    "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",
+  );
+  await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
+  await expect(page.getByText("Montaj Rapid SRL").first()).toBeVisible();
+  await expect(page.getByText("2020-06-01").first()).toBeVisible();
+  await page.getByRole("button", { name: "Confirmă tarif" }).click();
+  await expect(page.getByLabel("Furnizor")).toHaveValue("Montaj Rapid SRL");
+  await page.getByLabel("Valid de la").fill("2026-01-01");
+  await page.getByLabel("Valid până la").fill("2027-12-31");
+  await page.getByRole("button", { name: "Confirmă tarif" }).click();
+  await expect(page.getByText("2027-12-31").first()).toBeVisible();
+
+  await configureCanonicalLettersForRequest(page, requestId);
+  await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
+  await expect(page.getByText("Preț final client: 866,82 EUR")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Creează oferta" })).toBeDisabled();
 });

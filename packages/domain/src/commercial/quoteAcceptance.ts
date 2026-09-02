@@ -1,10 +1,15 @@
-import { isSupportedQuoteSnapshot, type QuoteSnapshot } from "./quoteSnapshot.js";
+import {
+  QUOTE_SNAPSHOT_SCHEMA_VERSION_V2,
+  isSupportedQuoteSnapshot,
+  type QuoteSnapshot,
+} from "./quoteSnapshot.js";
 
 export const QUOTE_ACCEPTANCE_SCHEMA_VERSION = 1 as const;
 
 export const QUOTE_ACCEPTANCE_ERRORS = [
   "quote_not_acceptable",
   "incompatible_quote",
+  "service_quote_not_acceptable",
 ] as const;
 export type QuoteAcceptanceError = (typeof QUOTE_ACCEPTANCE_ERRORS)[number];
 
@@ -23,11 +28,20 @@ export type QuoteAcceptanceResult =
 const NOT_ACCEPTABLE_REASON =
   "Oferta nu poate fi acceptată până când snapshot-ul înghețat nu este complet.";
 const INCOMPATIBLE_REASON = "Snapshot-ul de ofertă nu poate fi acceptat.";
+export const SERVICE_QUOTE_NOT_ACCEPTABLE_REASON =
+  "Oferta cu montaj nu poate fi acceptată în această etapă.";
 
 export function recordQuoteAcceptance(
   snapshot: QuoteSnapshot,
   options?: { acceptedAt?: string },
 ): QuoteAcceptanceResult {
+  if (snapshot.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION_V2) {
+    return {
+      ok: false,
+      error: "service_quote_not_acceptable",
+      reasons: [SERVICE_QUOTE_NOT_ACCEPTABLE_REASON],
+    };
+  }
   if (
     !isSupportedQuoteSnapshot(snapshot) ||
     snapshot.quoteSnapshotId.trim() === "" ||
@@ -68,6 +82,8 @@ export function quoteAcceptanceErrorLabel(error: QuoteAcceptanceError): string {
       return NOT_ACCEPTABLE_REASON;
     case "incompatible_quote":
       return INCOMPATIBLE_REASON;
+    case "service_quote_not_acceptable":
+      return SERVICE_QUOTE_NOT_ACCEPTABLE_REASON;
     default: {
       const _exhaustive: never = error;
       return _exhaustive;

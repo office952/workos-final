@@ -135,7 +135,7 @@ describe("quote acceptance decision", () => {
         ...snapshot,
         schemaVersion: 2 as typeof snapshot.schemaVersion,
       }),
-    ).toMatchObject({ ok: false, error: "incompatible_quote" });
+    ).toMatchObject({ ok: false, error: "service_quote_not_acceptable" });
     expect(
       recordQuoteAcceptance({
         ...snapshot,

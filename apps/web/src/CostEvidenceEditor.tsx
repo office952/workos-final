@@ -1,5 +1,8 @@
 import { useState } from "react";
-import type { ResourcesAdminProjection } from "@workos-final/domain";
+import {
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
+  type ResourcesAdminProjection,
+} from "@workos-final/domain";
 import { createCostEvidence, patchCostEvidence } from "./systemApi";
 
 type CostEvidenceItem = ResourcesAdminProjection["costEvidence"][number];
@@ -23,17 +26,22 @@ export function CostEvidenceEditor({
   const [editing, setEditing] = useState(creating);
   const [draft, setDraft] = useState(evidence ? String(evidence.amount) : "");
   const [note, setNote] = useState(evidence?.note ?? "");
-  const [supplierLabel, setSupplierLabel] = useState("");
-  const [validFrom, setValidFrom] = useState("");
-  const [validUntil, setValidUntil] = useState("");
+  const [supplierLabel, setSupplierLabel] = useState(evidence?.supplierLabel ?? "");
+  const [validFrom, setValidFrom] = useState(evidence?.validFrom ?? "");
+  const [validUntil, setValidUntil] = useState(evidence?.validUntil ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const unitLabel = createFor?.unitLabel ?? evidence?.unitLabel ?? "";
-  const requiresSupplier = createFor?.requiresSupplier ?? false;
+  const requiresSupplier =
+    createFor?.requiresSupplier ??
+    evidence?.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID;
 
   function startEdit() {
     setDraft(evidence ? String(evidence.amount) : "");
     setNote(evidence?.note ?? "");
+    setSupplierLabel(evidence?.supplierLabel ?? "");
+    setValidFrom(evidence?.validFrom ?? "");
+    setValidUntil(evidence?.validUntil ?? "");
     setError(null);
     setEditing(true);
   }
@@ -48,6 +56,9 @@ export function CostEvidenceEditor({
     } else {
       setDraft(evidence ? String(evidence.amount) : "");
       setNote(evidence?.note ?? "");
+      setSupplierLabel(evidence?.supplierLabel ?? "");
+      setValidFrom(evidence?.validFrom ?? "");
+      setValidUntil(evidence?.validUntil ?? "");
     }
     setError(null);
     setEditing(false);
@@ -87,6 +98,13 @@ export function CostEvidenceEditor({
             evidenceRowId: evidence?.evidenceRowId ?? "",
             amount,
             note,
+            ...(requiresSupplier
+              ? {
+                  supplierLabel: supplierLabel.trim(),
+                  validFrom: validFrom.trim() || undefined,
+                  validUntil: validUntil.trim(),
+                }
+              : {}),
           });
       try {
         onSaved(admin);
@@ -207,6 +225,24 @@ export function CostEvidenceEditor({
               <div>
                 <dt>Calificativ</dt>
                 <dd>{evidence.qualifierLabel}</dd>
+              </div>
+            ) : null}
+            {requiresSupplier && evidence?.supplierLabel ? (
+              <div>
+                <dt>Furnizor</dt>
+                <dd>{evidence.supplierLabel}</dd>
+              </div>
+            ) : null}
+            {requiresSupplier && evidence?.validFrom ? (
+              <div>
+                <dt>Valid de la</dt>
+                <dd>{evidence.validFrom}</dd>
+              </div>
+            ) : null}
+            {requiresSupplier && evidence?.validUntil ? (
+              <div>
+                <dt>Valid până la</dt>
+                <dd>{evidence.validUntil}</dd>
               </div>
             ) : null}
           </dl>

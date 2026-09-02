@@ -16,9 +16,15 @@ import { compileEic } from "../resources/eic.js";
 import { DEFAULT_COMMERCIAL_POLICY, type CommercialPolicy } from "./policy.js";
 import { projectCommercialPrice } from "./price.js";
 import { projectManualFixedServicePrice } from "./servicePrice.js";
-import { freezeQuoteSnapshot } from "./quoteSnapshot.js";
+import {
+  PRODUCT_COMMERCIAL_STRATEGY,
+  freezeQuoteSnapshot,
+  isSupportedQuoteSnapshot,
+} from "./quoteSnapshot.js";
 import { freezeOrderSnapshot } from "./orderSnapshot.js";
 import { recordQuoteAcceptance } from "./quoteAcceptance.js";
+import { MANUAL_FIXED_SERVICE_STRATEGY } from "./servicePrice.js";
+import { LAB_SITE_INSTALL_ID } from "../resources/catalog.js";
 
 const readyValues: DraftValues = {
   "root.inscription": "WORKOS",
@@ -328,6 +334,25 @@ describe("quote snapshot freeze", () => {
       createdAt: "2026-09-02T00:00:00.000Z",
       installation: {
         label: "Montaj la locație",
+        providerMode: "INTERNAL",
+        requestId: "req:prequote-v2",
+        technicalConfiguration: {
+          measurementStatus: "OFFICE_MEASURED",
+          facadeType: "CONCRETE",
+          fixingMethod: "MECHANICAL_ANCHOR",
+          siteElectrical: "NOT_APPLICABLE",
+          crewSize: 3,
+          plannedDurationHours: 4,
+        },
+        evidence: {
+          resourceId: LAB_SITE_INSTALL_ID,
+          amount: 25,
+          currency: "EUR",
+          perUnit: "person_hour",
+          source: "OWNER_CONFIRMED_WORKSHOP",
+          classification: "OWNER_CONFIRMED",
+          note: "Tarif intern sintetic.",
+        },
         eic: {
           completeness: "COMPLETE",
           completenessReasons: [],
@@ -335,7 +360,7 @@ describe("quote snapshot freeze", () => {
           currency: "EUR",
           lines: [
             {
-              resourceId: "LAB-SITE-INSTALL",
+              resourceId: LAB_SITE_INSTALL_ID,
               label: "Manoperă montaj la locație",
               quantity: 12,
               unit: "person_hour",
@@ -361,12 +386,71 @@ describe("quote snapshot freeze", () => {
     expect(withInstall.snapshot.commercial.grossPrice).toBe(624.82);
     expect(withInstall.snapshot.jobCommercial?.grossPrice).toBe(866.82);
     expect(withInstall.snapshot.lines).toHaveLength(2);
-    const accepted = recordQuoteAcceptance(withInstall.snapshot);
-    expect(accepted.ok).toBe(true);
-    if (!accepted.ok) {
-      return;
-    }
-    expect(freezeOrderSnapshot(withInstall.snapshot, accepted.decision)).toMatchObject({
+    const productLine = withInstall.snapshot.lines?.[0];
+    const installLine = withInstall.snapshot.lines?.[1];
+    expect(productLine).toMatchObject({
+      kind: "PRODUCT",
+      commercialStrategy: PRODUCT_COMMERCIAL_STRATEGY,
+    });
+    expect(installLine).toMatchObject({
+      kind: "SITE_INSTALLATION",
+      commercialStrategy: MANUAL_FIXED_SERVICE_STRATEGY,
+      providerMode: "INTERNAL",
+      sourceRequestId: "req:prequote-v2",
+      quantity: 12,
+      commercialUnit: "person_hour",
+      technicalConfiguration: {
+        measurementStatus: "OFFICE_MEASURED",
+        facadeType: "CONCRETE",
+        fixingMethod: "MECHANICAL_ANCHOR",
+        siteElectrical: "NOT_APPLICABLE",
+        crewSize: 3,
+        plannedDurationHours: 4,
+      },
+      evidence: {
+        resourceId: LAB_SITE_INSTALL_ID,
+        classification: "OWNER_CONFIRMED",
+        amount: 25,
+        perUnit: "person_hour",
+      },
+    });
+    expect(isSupportedQuoteSnapshot(withInstall.snapshot)).toBe(true);
+    expect(isSupportedQuoteSnapshot({
+      ...withInstall.snapshot,
+      jobCommercial: {
+        ...withInstall.snapshot.jobCommercial!,
+        grossPrice: 1,
+      },
+    })).toBe(false);
+    expect(isSupportedQuoteSnapshot({
+      ...withInstall.snapshot,
+      lines: withInstall.snapshot.lines?.map((line) =>
+        line.kind === "SITE_INSTALLATION"
+          ? { ...line, providerMode: "SUBCONTRACTED", commercialUnit: "job" }
+          : line,
+      ),
+    })).toBe(false);
+    expect(isSupportedQuoteSnapshot({
+      ...withInstall.snapshot,
+      lines: withInstall.snapshot.lines?.map((line) =>
+        line.kind === "SITE_INSTALLATION"
+          ? { ...line, sourceRequestId: "" }
+          : line,
+      ),
+    })).toBe(false);
+    expect(recordQuoteAcceptance(withInstall.snapshot)).toMatchObject({
+      ok: false,
+      error: "service_quote_not_acceptable",
+    });
+    expect(
+      freezeOrderSnapshot(withInstall.snapshot, {
+        acceptanceId: "qad:blocked",
+        schemaVersion: 1,
+        quoteSnapshotId: withInstall.snapshot.quoteSnapshotId,
+        quoteContentHash: withInstall.snapshot.contentHash,
+        acceptedAt: "2026-09-02T00:00:00.000Z",
+      }),
+    ).toMatchObject({
       ok: false,
       error: "service_lines_not_orderable",
     });

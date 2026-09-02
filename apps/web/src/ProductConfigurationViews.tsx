@@ -23,6 +23,8 @@ import {
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
+  SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED_REASON,
+  SERVICE_QUOTE_NOT_ACCEPTABLE_REASON,
   SITE_INSTALLATION_FREEZE_REASON,
   type LiveJobCommercial,
   type SiteInstallationOperatorView,
@@ -586,6 +588,9 @@ export function QuoteSnapshotSection({
           {new Date(snapshot.createdAt).toLocaleDateString("ro-RO")}
         </p>
         <p className="page-lead">Oferta a fost salvată. Modificările ulterioare nu schimbă această ofertă.</p>
+        {snapshot.schemaVersion === 2 ? (
+          <p className="page-lead">{SERVICE_QUOTE_NOT_ACCEPTABLE_REASON}</p>
+        ) : null}
         <div className="action-row">
           <Link
             className="button-link"
@@ -593,10 +598,14 @@ export function QuoteSnapshotSection({
           >
             Inspectează oferta
           </Link>
-          <QuoteDocumentDownloadLink snapshot={snapshot} />
-          <button type="button" className="button-secondary" onClick={onAccept} disabled={busy}>
-            {commercialPrimaryActionLabel("ACCEPT_QUOTE")}
-          </button>
+          {snapshot.schemaVersion === 2 ? null : (
+            <QuoteDocumentDownloadLink snapshot={snapshot} />
+          )}
+          {snapshot.schemaVersion === 2 ? null : (
+            <button type="button" className="button-secondary" onClick={onAccept} disabled={busy}>
+              {commercialPrimaryActionLabel("ACCEPT_QUOTE")}
+            </button>
+          )}
         </div>
       </section>
     );
@@ -616,6 +625,7 @@ export function QuoteSnapshotSection({
   }
 
   const installationReady = !installationScope || jobCommercial !== null;
+  const serviceInclusivePreview = Boolean(installationScope && jobCommercial);
 
   return (
     <section className="result-section quote-section">
@@ -652,11 +662,13 @@ export function QuoteSnapshotSection({
         <button
           type="button"
           onClick={onFreeze}
-          disabled={busy || !selectedCustomerId || !installationReady}
+          disabled={busy || !selectedCustomerId || !installationReady || serviceInclusivePreview}
         >
           {commercialPrimaryActionLabel("CREATE_QUOTE")}
         </button>
-        {installationScope && !installationReady ? (
+        {serviceInclusivePreview ? (
+          <p className="page-lead">{SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED_REASON}</p>
+        ) : installationScope && !installationReady ? (
           <p className="page-lead">{SITE_INSTALLATION_FREEZE_REASON}</p>
         ) : null}
       </div>

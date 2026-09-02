@@ -104,4 +104,65 @@ describe("CostEvidenceEditor", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Confirmă tarif" })).toBeInTheDocument();
   });
+
+  it("renews existing subcontract evidence with supplier and validity extras", async () => {
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    const subcontract = {
+      ...evidence,
+      resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+      resourceLabel: "Montaj la locație subcontractat",
+      kindLabel: "Serviciu",
+      evidenceRowId: "cev:subcontract",
+      amount: 180,
+      unitLabel: "lucrare",
+      amountDisplay: "180,00 EUR / lucrare",
+      supplierLabel: "Montaj Rapid SRL",
+      validFrom: "2020-01-01",
+      validUntil: "2020-06-01",
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          evidence: {
+            ...subcontract,
+            validUntil: "2027-12-31",
+          },
+          admin: { writeState: "READY" },
+        }),
+      }),
+    );
+    render(<CostEvidenceEditor evidence={subcontract} onSaved={onSaved} />);
+    expect(screen.getByText("Montaj Rapid SRL")).toBeInTheDocument();
+    expect(screen.getByText("2020-01-01")).toBeInTheDocument();
+    expect(screen.getByText("2020-06-01")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    expect(screen.getByLabelText("Furnizor")).toHaveValue("Montaj Rapid SRL");
+    expect(screen.getByLabelText("Valid de la")).toHaveValue("2020-01-01");
+    expect(screen.getByLabelText("Valid până la")).toHaveValue("2020-06-01");
+    await user.clear(screen.getByLabelText("Valid până la"));
+    await user.type(screen.getByLabelText("Valid până la"), "2027-12-31");
+    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    const [, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [
+      string,
+      { method?: string; body?: string },
+    ];
+    expect(init.method).toBe("PATCH");
+    expect(JSON.parse(init.body ?? "{}")).toMatchObject({
+      amount: 180,
+      supplierLabel: "Montaj Rapid SRL",
+      validFrom: "2020-01-01",
+      validUntil: "2027-12-31",
+    });
+  });
+
+  it("does not show supplier validity fields on workshop evidence", async () => {
+    render(<CostEvidenceEditor evidence={evidence} onSaved={vi.fn()} />);
+    expect(screen.queryByText("Furnizor")).not.toBeInTheDocument();
+    expect(screen.queryByText("Valid de la")).not.toBeInTheDocument();
+    expect(screen.queryByText("Valid până la")).not.toBeInTheDocument();
+  });
 });

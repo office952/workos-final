@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
+  calendarDateOrderIsValid,
+  parseCanonicalCalendarDate,
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
   costEvidence,
   getResource,
@@ -228,15 +230,6 @@ export function supersedeCostEvidence(
       return { ok: false, error: "unknown_resource" };
     }
 
-    const createdAt = new Date().toISOString();
-    db.prepare(
-      `
-      UPDATE resource_cost_evidence
-      SET superseded_at = ?
-      WHERE evidence_row_id = ? AND superseded_at IS NULL
-    `,
-    ).run(createdAt, evidenceRowId);
-
     const supplier = parseOptionalText(extras?.supplierLabel, 200);
     if (!supplier.ok) {
       return { ok: false, error: "invalid_supplier" };
@@ -260,6 +253,18 @@ export function supersedeCostEvidence(
         return { ok: false, error: "invalid_supplier" };
       }
     }
+    if (!calendarDateOrderIsValid(nextValidFrom, nextValidUntil)) {
+      return { ok: false, error: "invalid_validity" };
+    }
+
+    const createdAt = new Date().toISOString();
+    db.prepare(
+      `
+      UPDATE resource_cost_evidence
+      SET superseded_at = ?
+      WHERE evidence_row_id = ? AND superseded_at IS NULL
+    `,
+    ).run(createdAt, evidenceRowId);
 
     const nextId = `cev:${randomUUID()}`;
     db.prepare(
@@ -308,7 +313,7 @@ export function supersedeCostEvidence(
       .get(nextId) as CostEvidenceRow;
     const evidence = toCostEvidence(inserted);
     if (!evidence) {
-      return { ok: false, error: "unknown_resource" };
+      throw new Error("cost_evidence_insert_invariant");
     }
     return { ok: true, evidence };
   });
@@ -405,6 +410,9 @@ export function createInitialCostEvidence(
       return { ok: false, error: "invalid_supplier" };
     }
   }
+  if (!calendarDateOrderIsValid(validFrom.value ?? null, validUntil.value ?? null)) {
+    return { ok: false, error: "invalid_validity" };
+  }
 
   const write = db.transaction((): CostEvidenceWriteResult => {
     const existing = db
@@ -465,7 +473,7 @@ export function createInitialCostEvidence(
       .get(nextId) as CostEvidenceRow;
     const evidence = toCostEvidence(inserted);
     if (!evidence) {
-      return { ok: false, error: "unknown_resource" };
+      throw new Error("cost_evidence_insert_invariant");
     }
     return { ok: true, evidence };
   });
@@ -514,11 +522,11 @@ function parseOptionalDate(
   if (typeof value !== "string") {
     return { ok: false, error: "invalid_validity" };
   }
-  const trimmed = value.trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) && Number.isNaN(Date.parse(trimmed))) {
+  const parsed = parseCanonicalCalendarDate(value.trim());
+  if (!parsed.ok) {
     return { ok: false, error: "invalid_validity" };
   }
-  return { ok: true, value: trimmed };
+  return { ok: true, value: parsed.date };
 }
 
 function isResourceUnit(value: string): value is ResourceUnit {

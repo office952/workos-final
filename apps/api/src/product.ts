@@ -26,6 +26,10 @@ import {
   materializeExecutionPlanFromSnapshot,
   presentSiteInstallationScope,
   projectSiteInstallationScope,
+  SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED,
+  SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED_REASON,
+  SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED,
+  SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED_REASON,
   SITE_INSTALLATION_SCOPE_ID,
   siteInstallationEvidenceFromRows,
   siteInstallationFreezeRefusal,
@@ -225,10 +229,14 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     const access = financialAccess(c, "commercial");
     const commercialPrice = projectCommercialPrice(compiled.eic);
     const installationProjection = readInstallationProjection(runtime, body);
-    const jobCommercial = projectLiveJobCommercial(
-      commercialPrice,
-      installationProjection?.commercial,
-    );
+    const jobCommercial =
+      installationProjection &&
+      installationProjection.eic.completeness !== "COMPLETE"
+        ? null
+        : projectLiveJobCommercial(
+            commercialPrice,
+            installationProjection?.commercial,
+          );
     return c.json({
       truth: compiled.truth,
       aggregate: compiled.aggregate,
@@ -366,6 +374,15 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
           ...installationReadinessForRequest(runtime, requestId).readiness,
         })
       : null;
+    if (installationForFreeze) {
+      return c.json(
+        {
+          error: SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED,
+          reasons: [SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED_REASON],
+        },
+        422,
+      );
+    }
     const frozen = freezeQuoteSnapshot(
       compiled.truth,
       compiled.aggregate,
@@ -379,15 +396,6 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
         },
         seller,
         costEvidenceRows: compiled.costEvidenceRows,
-        ...(installationForFreeze
-          ? {
-              installation: {
-                label: installationForFreeze.label,
-                eic: installationForFreeze.eic,
-                commercial: installationForFreeze.commercial,
-              },
-            }
-          : {}),
       },
     );
     if (!frozen.ok) {
@@ -437,6 +445,15 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       const snapshot = runtime.readQuoteSnapshot(c.req.param("quoteSnapshotId"));
       if (!snapshot || snapshot.productCode !== c.req.param("productCode")) {
         return c.json({ error: "not_found" }, 404);
+      }
+      if (snapshot.schemaVersion === 2) {
+        return c.json(
+          {
+            error: SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED,
+            reasons: [SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED_REASON],
+          },
+          422,
+        );
       }
       const model = projectQuoteDocument(snapshot);
       const bytes = await renderQuoteDocumentPdf(model);

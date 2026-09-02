@@ -18,9 +18,33 @@ import {
 export type { FrozenCustomerIdentity, FrozenSellerIdentity };
 import type { ProductAggregate, ProductTruth } from "../product/types.js";
 import type { EicResult } from "../resources/eic.js";
-import type { CostEvidence } from "../resources/catalog.js";
+import {
+  LAB_SITE_INSTALL_ID,
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
+  type CostEvidence,
+} from "../resources/catalog.js";
+import {
+  isOperationalServiceProviderMode,
+  type OperationalServiceProviderMode,
+} from "../operationalServices.js";
+import {
+  SITE_INSTALLATION_SCOPE_ID,
+} from "../installation/scope.js";
+import {
+  isSiteInstallationElectricalState,
+  isSiteInstallationFacadeType,
+  isSiteInstallationFixingMethod,
+  isSiteInstallationMeasurementStatus,
+  type SiteInstallationElectricalState,
+  type SiteInstallationFacadeType,
+  type SiteInstallationFixingMethod,
+  type SiteInstallationMeasurementStatus,
+} from "../installation/facts.js";
 import type { CommercialPriceProjection } from "./price.js";
-import { projectLiveJobCommercial } from "./servicePrice.js";
+import {
+  MANUAL_FIXED_SERVICE_STRATEGY,
+  projectLiveJobCommercial,
+} from "./servicePrice.js";
 
 export const QUOTE_SNAPSHOT_SCHEMA_VERSION = 1 as const;
 export const QUOTE_SNAPSHOT_SCHEMA_VERSION_V2 = 2 as const;
@@ -31,6 +55,14 @@ export const QUOTE_SNAPSHOT_STATUSES = ["FROZEN"] as const;
 export type QuoteSnapshotStatus = (typeof QUOTE_SNAPSHOT_STATUSES)[number];
 export const FROZEN_QUOTE_LINE_KINDS = ["PRODUCT", "SITE_INSTALLATION"] as const;
 export type FrozenQuoteLineKind = (typeof FROZEN_QUOTE_LINE_KINDS)[number];
+export const FROZEN_QUOTE_LINE_VERSION = 1 as const;
+export const PRODUCT_COMMERCIAL_STRATEGY = "PRODUCT_COST_PLUS" as const;
+export const SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED = "service_quote_freeze_not_authorized";
+export const SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED_REASON =
+  "Previzualizarea ofertei cu montaj este pregătită. Înghețarea acestei oferte nu este activată în această etapă.";
+export const SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED = "service_quote_document_not_authorized";
+export const SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED_REASON =
+  "Documentul ofertei cu montaj nu este activat în această etapă.";
 
 export const QUOTE_SNAPSHOT_ERRORS = [
   "incomplete_offer",
@@ -56,11 +88,62 @@ export type FrozenCommercialOffer = {
   completeness: "COMPLETE";
 };
 
-export type FrozenQuoteLine = {
-  kind: FrozenQuoteLineKind;
+export type FrozenInstallationTechnicalConfiguration = {
+  measurementStatus: SiteInstallationMeasurementStatus;
+  facadeType: SiteInstallationFacadeType;
+  fixingMethod: SiteInstallationFixingMethod;
+  siteElectrical: SiteInstallationElectricalState;
+  crewSize: number | null;
+  plannedDurationHours: number | null;
+};
+
+export type FrozenServiceEvidenceProvenance = {
+  resourceId: string;
+  classification: CostEvidence["classification"];
+  amount: number;
+  currency: "EUR";
+  perUnit: CostEvidence["perUnit"];
+  supplierLabel?: string;
+  validFrom?: string;
+  validUntil?: string;
+};
+
+export type FrozenProductQuoteLine = {
+  kind: "PRODUCT";
+  lineVersion: typeof FROZEN_QUOTE_LINE_VERSION;
+  commercialStrategy: typeof PRODUCT_COMMERCIAL_STRATEGY;
   label: string;
+  productCode: string;
   eic: FrozenEicReference;
   commercial: FrozenCommercialOffer;
+};
+
+export type FrozenSiteInstallationQuoteLine = {
+  kind: "SITE_INSTALLATION";
+  lineVersion: typeof FROZEN_QUOTE_LINE_VERSION;
+  scopeId: typeof SITE_INSTALLATION_SCOPE_ID;
+  commercialStrategy: typeof MANUAL_FIXED_SERVICE_STRATEGY;
+  providerMode: OperationalServiceProviderMode;
+  label: string;
+  sourceRequestId: string;
+  quantity: number;
+  commercialUnit: "person_hour" | "job";
+  eic: FrozenEicReference;
+  commercial: FrozenCommercialOffer;
+  technicalConfiguration: FrozenInstallationTechnicalConfiguration;
+  evidence: FrozenServiceEvidenceProvenance;
+};
+
+export type FrozenQuoteLine = FrozenProductQuoteLine | FrozenSiteInstallationQuoteLine;
+
+export type QuoteInstallationFreezeInput = {
+  label: string;
+  eic: EicResult;
+  commercial: CommercialPriceProjection;
+  providerMode: OperationalServiceProviderMode;
+  requestId: string;
+  technicalConfiguration: FrozenInstallationTechnicalConfiguration;
+  evidence: CostEvidence;
 };
 
 export type FrozenJobCommercial = {
@@ -121,11 +204,7 @@ export function freezeQuoteSnapshot(
     customer?: FrozenCustomerIdentity;
     seller?: FrozenSellerIdentity;
     costEvidenceRows?: readonly CostEvidence[];
-    installation?: {
-      label: string;
-      eic: EicResult;
-      commercial: CommercialPriceProjection;
-    };
+    installation?: QuoteInstallationFreezeInput;
   },
 ): QuoteSnapshotResult {
   if (eic.completeness !== "COMPLETE" || commercial.completeness !== "COMPLETE") {
@@ -219,14 +298,18 @@ export function freezeQuoteSnapshot(
   const frozenProductEic = freezeEic(eic);
   const v2Fields = installation
     ? freezeJobQuoteFields({
+        productCode: truth.templateCode,
         productLabel: aggregate.productLabel,
         productEic: frozenProductEic,
         productCommercial: frozenProductCommercial,
         installation,
       })
     : null;
+  if (v2Fields && !v2Fields.ok) {
+    return v2Fields;
+  }
   const hashedContent = {
-    schemaVersion: v2Fields
+    schemaVersion: v2Fields && v2Fields.ok
       ? QUOTE_SNAPSHOT_SCHEMA_VERSION_V2
       : QUOTE_SNAPSHOT_SCHEMA_VERSION,
     status: "FROZEN" as const,
@@ -248,7 +331,9 @@ export function freezeQuoteSnapshot(
       costEvidenceRows: options?.costEvidenceRows,
     }),
     commercial: frozenProductCommercial,
-    ...(v2Fields ?? {}),
+    ...(v2Fields && v2Fields.ok
+      ? { lines: v2Fields.lines, jobCommercial: v2Fields.jobCommercial }
+      : {}),
     ...(customer ? { customer } : {}),
     ...(seller ? { seller } : {}),
   };
@@ -273,11 +358,7 @@ export function isSupportedQuoteSnapshot(snapshot: QuoteSnapshot): boolean {
     return snapshot.lines === undefined && snapshot.jobCommercial === undefined;
   }
   if (snapshot.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION_V2) {
-    return (
-      (snapshot.lines?.length ?? 0) >= 2 &&
-      snapshot.jobCommercial?.completeness === "COMPLETE" &&
-      snapshot.jobCommercial.currency === "EUR"
-    );
+    return isExactQuoteSnapshotV2(snapshot);
   }
   return false;
 }
@@ -299,58 +380,268 @@ export function quoteSnapshotErrorLabel(error: QuoteSnapshotError): string {
   }
 }
 
+const SERVICE_LINE_INVARIANT_REASON =
+  "Linia de montaj nu poate fi înghețată fără strategia, modul și proveniența cerute.";
+
 function freezeJobQuoteFields(input: {
+  productCode: string;
   productLabel: string;
   productEic: FrozenEicReference;
   productCommercial: FrozenCommercialOffer;
-  installation: {
-    label: string;
-    eic: EicResult;
-    commercial: CommercialPriceProjection;
-  };
-}): {
-  lines: readonly FrozenQuoteLine[];
-  jobCommercial: FrozenJobCommercial;
-} {
+  installation: QuoteInstallationFreezeInput;
+}):
+  | {
+      ok: true;
+      lines: readonly FrozenQuoteLine[];
+      jobCommercial: FrozenJobCommercial;
+    }
+  | { ok: false; error: QuoteSnapshotError; reasons: readonly string[] } {
   const installCommercial = input.installation.commercial;
+  if (
+    !isOperationalServiceProviderMode(input.installation.providerMode) ||
+    input.installation.requestId.trim() === "" ||
+    !isCompleteFrozenCommercial(installCommercial)
+  ) {
+    return {
+      ok: false,
+      error: "unavailable_offer",
+      reasons: [SERVICE_LINE_INVARIANT_REASON],
+    };
+  }
+  const quantity = installationLineQuantity(input.installation);
+  if (!quantity) {
+    return {
+      ok: false,
+      error: "unavailable_offer",
+      reasons: [SERVICE_LINE_INVARIANT_REASON],
+    };
+  }
+  const evidence = freezeServiceEvidenceProvenance(
+    input.installation.providerMode,
+    input.installation.evidence,
+  );
+  if (!evidence) {
+    return {
+      ok: false,
+      error: "unavailable_offer",
+      reasons: [SERVICE_LINE_INVARIANT_REASON],
+    };
+  }
   const installLineCommercial: FrozenCommercialOffer = {
     policyId: installCommercial.policyId,
     policyVersion: installCommercial.policyVersion,
     markupPercent: installCommercial.markupPercent,
-    markupAmount: installCommercial.markupAmount ?? 0,
+    markupAmount: installCommercial.markupAmount,
     discountPercent: installCommercial.discountPercent,
-    discountAmount: installCommercial.discountAmount ?? 0,
-    adjustmentAmount: installCommercial.adjustmentAmount ?? 0,
-    netPrice: installCommercial.netPrice ?? 0,
+    discountAmount: installCommercial.discountAmount,
+    adjustmentAmount: installCommercial.adjustmentAmount,
+    netPrice: installCommercial.netPrice,
     vatPercent: installCommercial.vatPercent,
-    vatAmount: installCommercial.vatAmount ?? 0,
-    grossPrice: installCommercial.grossPrice ?? 0,
+    vatAmount: installCommercial.vatAmount,
+    grossPrice: installCommercial.grossPrice,
     currency: "EUR",
     completeness: "COMPLETE",
   };
+  const jobCommercial = projectLiveJobCommercial(
+    input.productCommercial,
+    installLineCommercial,
+  );
+  if (!jobCommercial) {
+    return {
+      ok: false,
+      error: "unavailable_offer",
+      reasons: [SERVICE_LINE_INVARIANT_REASON],
+    };
+  }
   return {
+    ok: true,
     lines: [
       {
         kind: "PRODUCT",
+        lineVersion: FROZEN_QUOTE_LINE_VERSION,
+        commercialStrategy: PRODUCT_COMMERCIAL_STRATEGY,
         label: input.productLabel,
+        productCode: input.productCode,
         eic: input.productEic,
         commercial: input.productCommercial,
       },
       {
         kind: "SITE_INSTALLATION",
+        lineVersion: FROZEN_QUOTE_LINE_VERSION,
+        scopeId: SITE_INSTALLATION_SCOPE_ID,
+        commercialStrategy: MANUAL_FIXED_SERVICE_STRATEGY,
+        providerMode: input.installation.providerMode,
         label: input.installation.label,
+        sourceRequestId: input.installation.requestId,
+        quantity: quantity.quantity,
+        commercialUnit: quantity.commercialUnit,
         eic: freezeEic(input.installation.eic),
         commercial: installLineCommercial,
+        technicalConfiguration: input.installation.technicalConfiguration,
+        evidence,
       },
     ],
-    jobCommercial: projectLiveJobCommercial(input.productCommercial, installLineCommercial) ?? {
-      netPrice: input.productCommercial.netPrice + installLineCommercial.netPrice,
-      vatAmount: input.productCommercial.vatAmount + installLineCommercial.vatAmount,
-      grossPrice: input.productCommercial.grossPrice + installLineCommercial.grossPrice,
-      currency: "EUR",
-      completeness: "COMPLETE",
-    },
+    jobCommercial,
   };
+}
+
+function isCompleteFrozenCommercial(
+  commercial: CommercialPriceProjection,
+): commercial is CommercialPriceProjection & FrozenCommercialOffer {
+  return (
+    commercial.completeness === "COMPLETE" &&
+    commercial.currency === "EUR" &&
+    commercial.markupAmount !== null &&
+    commercial.discountAmount !== null &&
+    commercial.adjustmentAmount !== null &&
+    commercial.netPrice !== null &&
+    commercial.vatAmount !== null &&
+    commercial.grossPrice !== null
+  );
+}
+
+function installationLineQuantity(input: QuoteInstallationFreezeInput): {
+  quantity: number;
+  commercialUnit: FrozenSiteInstallationQuoteLine["commercialUnit"];
+} | null {
+  if (input.providerMode === "INTERNAL") {
+    const crew = input.technicalConfiguration.crewSize;
+    const hours = input.technicalConfiguration.plannedDurationHours;
+    if (!crew || !hours || crew <= 0 || hours <= 0) {
+      return null;
+    }
+    return { quantity: crew * hours, commercialUnit: "person_hour" };
+  }
+  if (input.providerMode === "SUBCONTRACTED") {
+    return { quantity: 1, commercialUnit: "job" };
+  }
+  return null;
+}
+
+function isFrozenInstallationTechnicalConfiguration(
+  value: FrozenInstallationTechnicalConfiguration | undefined,
+): value is FrozenInstallationTechnicalConfiguration {
+  if (!value) {
+    return false;
+  }
+  return (
+    isSiteInstallationMeasurementStatus(value.measurementStatus) &&
+    isSiteInstallationFacadeType(value.facadeType) &&
+    isSiteInstallationFixingMethod(value.fixingMethod) &&
+    isSiteInstallationElectricalState(value.siteElectrical)
+  );
+}
+
+function isFrozenServiceEvidenceProvenance(
+  providerMode: OperationalServiceProviderMode,
+  evidence: FrozenServiceEvidenceProvenance | undefined,
+): evidence is FrozenServiceEvidenceProvenance {
+  if (!evidence || evidence.currency !== "EUR" || evidence.classification !== "OWNER_CONFIRMED") {
+    return false;
+  }
+  if (providerMode === "INTERNAL") {
+    return evidence.resourceId === LAB_SITE_INSTALL_ID && evidence.perUnit === "person_hour";
+  }
+  if (providerMode === "SUBCONTRACTED") {
+    return (
+      evidence.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID &&
+      evidence.perUnit === "job" &&
+      Boolean(evidence.supplierLabel?.trim())
+    );
+  }
+  return false;
+}
+
+function freezeServiceEvidenceProvenance(
+  providerMode: OperationalServiceProviderMode,
+  evidence: CostEvidence,
+): FrozenServiceEvidenceProvenance | null {
+  if (evidence.currency !== "EUR" || evidence.classification !== "OWNER_CONFIRMED") {
+    return null;
+  }
+  if (providerMode === "INTERNAL") {
+    if (evidence.resourceId !== LAB_SITE_INSTALL_ID || evidence.perUnit !== "person_hour") {
+      return null;
+    }
+  } else if (providerMode === "SUBCONTRACTED") {
+    if (
+      evidence.resourceId !== SVC_SITE_INSTALL_SUBCONTRACT_ID ||
+      evidence.perUnit !== "job" ||
+      !evidence.supplierLabel?.trim()
+    ) {
+      return null;
+    }
+  } else {
+    return null;
+  }
+  return {
+    resourceId: evidence.resourceId,
+    classification: evidence.classification,
+    amount: evidence.amount,
+    currency: "EUR",
+    perUnit: evidence.perUnit,
+    ...(evidence.supplierLabel ? { supplierLabel: evidence.supplierLabel } : {}),
+    ...(evidence.validFrom ? { validFrom: evidence.validFrom } : {}),
+    ...(evidence.validUntil ? { validUntil: evidence.validUntil } : {}),
+  };
+}
+
+function isExactQuoteSnapshotV2(snapshot: QuoteSnapshot): boolean {
+  const lines = snapshot.lines;
+  const job = snapshot.jobCommercial;
+  if (!lines || lines.length !== 2 || !job) {
+    return false;
+  }
+  const product = lines.find((line) => line.kind === "PRODUCT");
+  const installation = lines.find((line) => line.kind === "SITE_INSTALLATION");
+  if (
+    !product ||
+    !installation ||
+    product.kind !== "PRODUCT" ||
+    installation.kind !== "SITE_INSTALLATION"
+  ) {
+    return false;
+  }
+  if (
+    product.commercialStrategy !== PRODUCT_COMMERCIAL_STRATEGY ||
+    product.lineVersion !== FROZEN_QUOTE_LINE_VERSION ||
+    product.productCode.trim() === "" ||
+    product.eic.completeness !== "COMPLETE" ||
+    product.commercial.completeness !== "COMPLETE" ||
+    product.commercial.currency !== "EUR"
+  ) {
+    return false;
+  }
+  if (
+    installation.scopeId !== SITE_INSTALLATION_SCOPE_ID ||
+    installation.commercialStrategy !== MANUAL_FIXED_SERVICE_STRATEGY ||
+    installation.lineVersion !== FROZEN_QUOTE_LINE_VERSION ||
+    !isOperationalServiceProviderMode(installation.providerMode) ||
+    installation.sourceRequestId.trim() === "" ||
+    installation.label.trim() === "" ||
+    installation.quantity <= 0 ||
+    installation.eic.completeness !== "COMPLETE" ||
+    installation.commercial.completeness !== "COMPLETE" ||
+    installation.commercial.currency !== "EUR" ||
+    installation.commercialUnit !==
+      (installation.providerMode === "INTERNAL" ? "person_hour" : "job") ||
+    !isFrozenInstallationTechnicalConfiguration(installation.technicalConfiguration) ||
+    !isFrozenServiceEvidenceProvenance(
+      installation.providerMode,
+      installation.evidence,
+    )
+  ) {
+    return false;
+  }
+  const projected = projectLiveJobCommercial(product.commercial, installation.commercial);
+  return (
+    projected !== null &&
+    job.completeness === "COMPLETE" &&
+    job.currency === "EUR" &&
+    job.netPrice === projected.netPrice &&
+    job.vatAmount === projected.vatAmount &&
+    job.grossPrice === projected.grossPrice
+  );
 }
 
 function freezeQuantities(aggregate: ProductAggregate): FrozenQuantity[] {

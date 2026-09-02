@@ -398,7 +398,12 @@ describe("Product configuration views", () => {
         }}
       />,
     );
-    expect(screen.getByRole("button", { name: "Creează oferta" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Creează oferta" })).toBeDisabled();
+    expect(
+      screen.getByText(
+        "Previzualizarea ofertei cu montaj este pregătită. Înghețarea acestei oferte nu este activată în această etapă.",
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText("Produs: 624,82 EUR")).toBeInTheDocument();
     expect(screen.getByText("Montaj la locație: 242,00 EUR")).toBeInTheDocument();
     expect(screen.getByText("Preț final client: 866,82 EUR")).toBeInTheDocument();
@@ -480,6 +485,52 @@ describe("Product configuration views", () => {
     expect(screen.getByRole("button", { name: "Marchează acceptată" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Creează oferta" })).not.toBeInTheDocument();
     expect(screen.queryByText("382,50 EUR")).not.toBeInTheDocument();
+  });
+
+  it("hides accept and PDF actions on a frozen service-inclusive quote", () => {
+    const snapshot = {
+      quoteSnapshotId: "qts:v2",
+      schemaVersion: 2,
+      productCode: "PRD-TEST",
+      productLabel: "Litere",
+      createdAt: "2026-08-17T00:00:00.000Z",
+      commercial: {
+        policyVersion: 1,
+        markupPercent: 35,
+        markupAmount: 133.88,
+        netPrice: 516.38,
+        vatPercent: 21,
+        vatAmount: 108.44,
+        grossPrice: 624.82,
+        currency: "EUR",
+      },
+      jobCommercial: {
+        netPrice: 716.38,
+        vatAmount: 150.44,
+        grossPrice: 866.82,
+        currency: "EUR",
+      },
+      eic: { total: 382.5, currency: "EUR" },
+    } as unknown as QuoteSnapshot;
+    render(
+      <MemoryRouter>
+        <QuoteSnapshotSection
+          price={{ completeness: "COMPLETE" } as CommercialPriceProjection}
+          snapshot={snapshot}
+          reused={false}
+          busy={false}
+          onFreeze={() => undefined}
+          onAccept={() => undefined}
+          onCreateOrder={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("heading", { name: "Ofertă creată" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Oferta cu montaj nu poate fi acceptată în această etapă."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Marchează acceptată" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Descarcă oferta PDF" })).not.toBeInTheDocument();
   });
 
   it("renders accepted quote from the frozen snapshot only", () => {

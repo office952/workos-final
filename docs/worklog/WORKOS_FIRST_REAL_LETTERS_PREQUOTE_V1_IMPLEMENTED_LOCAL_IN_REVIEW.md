@@ -16,8 +16,12 @@ REAL_CLOUD_WRITE                       = NO
 REAL_REQUEST_PATCH                     = NO
 QUOTE_CREATE                           = NO
 QUOTE_FREEZE                           = NO
-LIVE_REQUEST_TO_V2_QUOTE_CREATE_ROUTE  = ENABLED
-LIVE_V2_FREEZE_BUTTON                  = ENABLED
+LIVE_REQUEST_TO_V2_QUOTE_CREATE_ROUTE  = DISABLED
+LIVE_V2_FREEZE_BUTTON                  = DISABLED
+LIVE_V2_QUOTE_PERSIST                  = NO
+LIVE_V2_REQUEST_LINK                   = NO
+LIVE_V2_ACCEPTANCE                     = DISABLED
+LIVE_V2_PDF                            = DISABLED
 REAL_CLOUD_V2_QUOTE_MUTATION           = NO
 OWNER_ACCEPTED_RUNTIME                 = NO
 INTEGRATED_ON_MAIN                     = NO
@@ -64,10 +68,13 @@ INSTALLATION COMMERCIAL         = MANUAL_FIXED_PER_REQUEST
 Request                         = mutable until first linked Quote lock
 Quote freeze                    = immutable
 NO_CLIENT_CODE_FORK             = YES
-CUSTOMER_OPERABLE_WITHOUT_CURSOR = YES for new Owner surfaces
+CUSTOMER_OPERABLE_WITHOUT_CURSOR = YES_FOR_IMPLEMENTED_PREQUOTE_PATHS
 200 EUR                         = Owner-entered net on that Request, not a catalog default
 VAT                             = net 200 + 21% = 242 gross
 INTERNAL EIC PROOF              = 3 × 4 × 25 = 300 ≠ 200
+SUBCONTRACT_EVIDENCE_RENEWAL_UI = YES
+SITE_ELECTRICAL_INCLUDED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
+SITE_ELECTRICAL_SUBCONTRACTED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
 ```
 
 ## What landed
@@ -91,13 +98,13 @@ INTERNAL EIC PROOF              = 3 × 4 × 25 = 300 ≠ 200
 - First cost-evidence create for the new resources requires Owner.
 - Deselect clears the manual price. First linked Quote locks the write.
 
-### OS-S5 — additive Quote v2
+### OS-S5 — additive Quote v2 domain, live mutation gated
 
-- Product-only freeze stays schema v1. Hashed v1 content is unchanged when installation is omitted. The existing `POST /api/products/:code/quote-snapshots` route can emit v2 when a Request has selected COMPLETE installation. That is a reusable capability plus synthetic proof, not a real-Cloud or HUB MEDIA mutation GO.
-- When installation is selected and both product and install are COMPLETE, freeze writes schema v2: `lines[]` (`PRODUCT` | `SITE_INSTALLATION`) plus `jobCommercial`. Top-level `eic` and `commercial` stay product-only (canonical 624.82). Job total 866.82 = 624.82 + 242.
-- `projectLiveJobCommercial` is the single job-total projector. Confirm returns it. The UI displays it. It does not add prices in the browser.
-- v2 acceptance is allowed. Order from v2 is refused (`service_lines_not_orderable`). Create Order stays hidden on a v2 snapshot.
-- PDF v1 unchanged. PDF v2 adds line labels and uses `jobCommercial` for totals.
+- Product-only freeze stays schema v1. Hashed v1 content is unchanged when installation is omitted.
+- Domain `freezeQuoteSnapshot` can still construct schema v2 for synthetic tests: discriminated `PRODUCT` / `SITE_INSTALLATION` lines with `commercialStrategy`, `providerMode`, source Request provenance, typed technical configuration, and immutable evidence projection. Job total comes only from `projectLiveJobCommercial`. There is no arithmetic fallback.
+- Live `POST /api/products/:code/quote-snapshots` refuses a Request with selected SITE_INSTALLATION (`service_quote_freeze_not_authorized`) before persist or request link. The configurator shows the two-line preview and keeps **Creează oferta** disabled.
+- Live v2 acceptance is refused (`service_quote_not_acceptable`). Live v2 PDF is refused. Order from v2 stays `service_lines_not_orderable`.
+- `isSupportedQuoteSnapshot` for v2 requires the exact line contract, not merely two lines and a COMPLETE job total.
 
 ## Persistence
 
@@ -113,8 +120,8 @@ Migration `028_first_real_letters_prequote.sql`:
 ## Operator / Owner surfaces
 
 - Cerere: crew and planned hours when mode is INTERNAL; Owner-only montaj net price.
-- Configurator confirm with `?request=`: two-line preview when `jobCommercial` is COMPLETE; freeze stays disabled while install is incomplete.
-- Resurse: uncosted category plus first-evidence create; subcontract supplier and validity.
+- Configurator confirm with `?request=`: two-line preview when `jobCommercial` is COMPLETE; **Creează oferta** stays disabled with the prequote-only reason.
+- Resurse: uncosted category plus first-evidence create; existing subcontract evidence can renew Furnizor / Valid de la / Valid până la through the normal editor. Workshop materials do not show those fields.
 - No Oferte V3 page. No Lucrări V3 page.
 
 ## Proof
@@ -123,25 +130,26 @@ Migration `028_first_real_letters_prequote.sql`:
 LINT              = PASS (0 errors; pre-existing web warnings only)
 TYPECHECK         = packages/domain + apps/api + apps/web PASS
 BUILD             = PASS
-DOMAIN_VITEST     = 407 passed
-API_VITEST        = 254 passed
-WEB_VITEST        = 205 passed
+DOMAIN_VITEST     = 410 passed
+API_VITEST        = 257 passed
+WEB_VITEST        = 208 passed
 QUOTE_V1_GOLDEN_HASH = 35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27
 QUOTE_V1_HASH_VS_ORIGIN_MAIN = EQUAL
 FOCUSED_E2E       = first-real-letters-prequote, optional-site-installation,
                     request-installation-facts, os-s1-admin, os-s1-org-capability
-                    = 6 passed, retries 0, ports 8871 / 5271
+                    = 7 passed, retries 0, ports 8875 / 5275
 LOCAL_FULL_E2E    = NOT_PASS
-                    48 passed / 51 failed / 3 skipped
-                    first failure = jobs-overview apiRequestContext.post ECONNRESET
+                    48 passed / 52 failed / 3 skipped
+                    first-real-letters-prequote passed before the cascade
+                    first listed failure = hf-wave3-cloud-atelier Atelier heading
                     remaining failures = ECONNREFUSED after web-server death
                     not a wave product assertion
                     GitHub CI is authoritative after push
 ```
 
-Synthetic INTERNAL path: facts + crew 3 + 4 h + labor 25 + Owner price 200 → confirm job 866.82 → freeze v2. Product-only freeze stays v1.
+Synthetic INTERNAL path: facts + crew 3 + 4 h + labor 25 + Owner price 200 → confirm job 866.82 → live freeze refused. Product-only freeze stays v1.
 
-Synthetic SUBCONTRACTED path: supplier evidence 180 + Owner price 200 → freeze v2 with install EIC 180 and install commercial 242.
+Synthetic SUBCONTRACTED path: supplier evidence 180 + Owner price 200 → confirm install EIC 180 and install commercial 242 → live freeze refused.
 
 Cloud member: price write 403, first install evidence create 403.
 
@@ -153,14 +161,18 @@ REAL_CLOUD_WRITE           = NO
 REAL_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
 QUOTE_FREEZE               = NO
-LIVE_REQUEST_TO_V2_QUOTE_CREATE_ROUTE = ENABLED
-LIVE_V2_FREEZE_BUTTON      = ENABLED
+LIVE_REQUEST_TO_V2_QUOTE_CREATE_ROUTE = DISABLED
+LIVE_V2_FREEZE_BUTTON      = DISABLED
+LIVE_V2_QUOTE_PERSIST      = NO
+LIVE_V2_ACCEPTANCE         = DISABLED
 REAL_CLOUD_V2_QUOTE_MUTATION = NO
 TRANSPORT_OS_S6            = NOT_AUTHORIZED
 OFERTE_V3                  = NOT_AUTHORIZED
 LUCRARI_V3                 = NOT_AUTHORIZED
 ORDER_FROM_QUOTE_V2        = REFUSED
-SITE_ELECTRICAL INCLUDED / SUBCONTRACTED = still SITE_ELECTRICAL_COST_REQUIRED
+SITE_ELECTRICAL_INCLUDED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
+SITE_ELECTRICAL_SUBCONTRACTED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
+ADMIN_TOOLING_DEBT         = NONE for implemented INTERNAL / SUBCONTRACTED base paths after renewal closure
 ACCESS_METHOD_AND_EQUIPMENT = NOT_IMPLEMENTED
 FIXINGS_CONSUMABLES        = NOT_IMPLEMENTED
 SITE_PHOTOS                = NOT_IMPLEMENTED

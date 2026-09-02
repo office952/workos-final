@@ -214,8 +214,7 @@ export function scopeQuoteSnapshot(
       const lineEic = scopeEic(line.eic, access);
       return omitForbiddenFinancialFields(
         {
-          kind: line.kind,
-          label: line.label,
+          ...line,
           ...(lineCommercial ? { commercial: lineCommercial } : {}),
           ...(lineEic ? { eic: lineEic } : {}),
         },

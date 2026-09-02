@@ -332,6 +332,13 @@ function costEvidenceSections(
         { label: "Resursă", value: item.resourceLabel },
         { label: "Fel", value: item.kindLabel },
         { label: "Sursă", value: item.sourceLabel },
+        ...(item.supplierLabel
+          ? [{ label: "Furnizor", value: item.supplierLabel }]
+          : []),
+        ...(item.validFrom ? [{ label: "Valid de la", value: item.validFrom }] : []),
+        ...(item.validUntil
+          ? [{ label: "Valid până la", value: item.validUntil }]
+          : []),
         ...(item.lastChangedAt
           ? [
               {
