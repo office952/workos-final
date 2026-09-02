@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -14,6 +14,10 @@ import {
   updateCommercialRequest,
   updateInstallationFacts,
 } from "./requestsApi";
+import {
+  REQUESTS_WORKSPACE_ORIGIN_KEY,
+  markRequestsWorkspaceOrigin,
+} from "./requestsWorkspaceOrigin";
 
 const detail: RequestDetailProjection = {
   request: {
@@ -503,5 +507,59 @@ describe("RequestDetailPage", () => {
     expect(back).toHaveAttribute("href", "/clients/cus%3A1?section=cereri");
     expect(back).toHaveTextContent("Client Alpha S.R.L.");
     expect(screen.queryByRole("link", { name: "Înapoi la Cereri" })).not.toBeInTheDocument();
+  });
+
+  it("consumes session fallback once the current history entry owns the origin", async () => {
+    vi.mocked(readRequestDetail).mockResolvedValue(detail);
+    markRequestsWorkspaceOrigin({
+      kind: "client-hub",
+      requestId: "crq:11111111-2222-3333-4444-555555555555",
+      customerId: "cus:1",
+      customerDisplayName: "Client Alpha S.R.L.",
+    });
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/requests/crq:11111111-2222-3333-4444-555555555555",
+            state: {
+              requestsWorkspaceOrigin: {
+                kind: "client-hub",
+                requestId: "crq:11111111-2222-3333-4444-555555555555",
+                customerId: "cus:1",
+                customerDisplayName: "Client Alpha S.R.L.",
+              },
+            },
+          },
+        ]}
+      >
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole("link", { name: "Înapoi la Client Alpha S.R.L." })).toBeVisible();
+    expect(sessionStorage.getItem(REQUESTS_WORKSPACE_ORIGIN_KEY)).toBeNull();
+  });
+
+  it("adopts a session-only hub origin into the current history entry", async () => {
+    vi.mocked(readRequestDetail).mockResolvedValue(detail);
+    markRequestsWorkspaceOrigin({
+      kind: "client-hub",
+      requestId: "crq:11111111-2222-3333-4444-555555555555",
+      customerId: "cus:1",
+      customerDisplayName: "Client Alpha S.R.L.",
+    });
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole("link", { name: "Înapoi la Client Alpha S.R.L." })).toBeVisible();
+    await waitFor(() => {
+      expect(sessionStorage.getItem(REQUESTS_WORKSPACE_ORIGIN_KEY)).toBeNull();
+    });
   });
 });

@@ -130,15 +130,44 @@ export function readRequestsWorkspaceOrigin(requestId: string): RequestsWorkspac
   }
 }
 
+export function originFromLocationState(
+  requestId: string,
+  locationState: unknown,
+): RequestsWorkspaceOrigin | null {
+  if (!requestId || !locationState || typeof locationState !== "object") {
+    return null;
+  }
+  const stateOrigin = (locationState as RequestsRegistryReturnState).requestsWorkspaceOrigin;
+  if (!isRequestsWorkspaceOrigin(stateOrigin) || stateOrigin.requestId !== requestId) {
+    return null;
+  }
+  return stateOrigin;
+}
+
+export function consumeRequestsWorkspaceSession(requestId: string): void {
+  if (!requestId) {
+    return;
+  }
+  if (readRequestsWorkspaceOrigin(requestId)) {
+    clearRequestsWorkspaceOrigin();
+  }
+}
+
 export function resolveRequestsWorkspaceOrigin(
   requestId: string,
   locationState: unknown,
 ): RequestsWorkspaceOrigin | null {
-  if (locationState && typeof locationState === "object") {
-    const stateOrigin = (locationState as RequestsRegistryReturnState).requestsWorkspaceOrigin;
-    if (isRequestsWorkspaceOrigin(stateOrigin) && stateOrigin.requestId === requestId) {
-      return stateOrigin;
-    }
+  return originFromLocationState(requestId, locationState) ?? readRequestsWorkspaceOrigin(requestId);
+}
+
+export function bindRequestObjectOrigin(
+  requestId: string,
+  locationState: unknown,
+): RequestsWorkspaceOrigin | null {
+  const stateOrigin = originFromLocationState(requestId, locationState);
+  if (stateOrigin) {
+    consumeRequestsWorkspaceSession(requestId);
+    return stateOrigin;
   }
   return readRequestsWorkspaceOrigin(requestId);
 }

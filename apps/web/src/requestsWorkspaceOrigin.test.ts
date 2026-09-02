@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   bindClientHubOrigin,
+  bindRequestObjectOrigin,
+  consumeRequestsWorkspaceSession,
   isRequestsWorkspaceOrigin,
+  markRequestsWorkspaceOrigin,
   requestObjectBack,
   requestsRegistryReturnHref,
   requestsRegistryReturnState,
@@ -85,10 +88,7 @@ describe("requestsWorkspaceOrigin", () => {
   });
 
   it("prefers location state over leftover session storage", () => {
-    sessionStorage.setItem(
-      "workos.requests.workspaceOrigin",
-      JSON.stringify({ ...registryOrigin, search: "?q=stale" }),
-    );
+    markRequestsWorkspaceOrigin({ ...registryOrigin, search: "?q=stale" });
     expect(resolveRequestsWorkspaceOrigin("crq:1", { requestsWorkspaceOrigin: hubOrigin })).toEqual(
       hubOrigin,
     );
@@ -97,5 +97,48 @@ describe("requestsWorkspaceOrigin", () => {
       search: "?q=stale",
     });
     expect(resolveRequestsWorkspaceOrigin("crq:other", { requestsWorkspaceOrigin: hubOrigin })).toBeNull();
+  });
+
+  it("does not let a hub origin survive after that history entry binds it", () => {
+    markRequestsWorkspaceOrigin(hubOrigin);
+    expect(bindRequestObjectOrigin("crq:1", { requestsWorkspaceOrigin: hubOrigin })).toEqual(hubOrigin);
+    expect(resolveRequestsWorkspaceOrigin("crq:1", null)).toBeNull();
+    expect(requestObjectBack(resolveRequestsWorkspaceOrigin("crq:1", null))).toEqual({
+      href: "/requests",
+      label: "Cereri",
+      ariaLabel: "Înapoi la Cereri",
+      state: { requestsFreshVisit: true },
+    });
+    expect(resolveRequestsWorkspaceOrigin("crq:1", { requestsWorkspaceOrigin: hubOrigin })).toEqual(
+      hubOrigin,
+    );
+  });
+
+  it("does not let a registry origin survive after that history entry binds it", () => {
+    markRequestsWorkspaceOrigin(registryOrigin);
+    expect(bindRequestObjectOrigin("crq:1", { requestsWorkspaceOrigin: registryOrigin })).toEqual(
+      registryOrigin,
+    );
+    expect(resolveRequestsWorkspaceOrigin("crq:1", null)).toBeNull();
+    expect(requestObjectBack(resolveRequestsWorkspaceOrigin("crq:1", null)).href).toBe("/requests");
+    expect(
+      resolveRequestsWorkspaceOrigin("crq:1", { requestsWorkspaceOrigin: registryOrigin }),
+    ).toEqual(registryOrigin);
+  });
+
+  it("keeps a session fallback only until the current entry can adopt it", () => {
+    markRequestsWorkspaceOrigin(hubOrigin);
+    expect(bindRequestObjectOrigin("crq:1", null)).toEqual(hubOrigin);
+    expect(resolveRequestsWorkspaceOrigin("crq:1", null)).toEqual(hubOrigin);
+    consumeRequestsWorkspaceSession("crq:1");
+    expect(resolveRequestsWorkspaceOrigin("crq:1", null)).toBeNull();
+  });
+
+  it("never lets one request inherit another request's origin", () => {
+    markRequestsWorkspaceOrigin(hubOrigin);
+    expect(resolveRequestsWorkspaceOrigin("crq:other", null)).toBeNull();
+    expect(bindRequestObjectOrigin("crq:other", { requestsWorkspaceOrigin: hubOrigin })).toBeNull();
+    consumeRequestsWorkspaceSession("crq:other");
+    expect(resolveRequestsWorkspaceOrigin("crq:1", null)).toEqual(hubOrigin);
   });
 });

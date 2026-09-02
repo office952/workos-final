@@ -59,6 +59,33 @@ RELATED                       = Oferte și lucrări legate · Ofertă + Lucrare 
 INSTALLATION_INCOMPATIBLE     = Modul salvat nu mai este oferit de organizație.
 ```
 
+## Post-acceptance Owner amendment — 2026-09-02
+
+```text
+SUPERSEDES_BUSINESS_LINES_ONLY = YES
+FIGMA_GEOMETRY_REOPENED        = NO
+FIGMA_WRITE                    = NO
+```
+
+On 2026-09-02 Owner amended two business lines after Figma acceptance. The original Figma UX LOCK (`105:4079` / `105:4081`) remains historical visual evidence. These later Owner business semantics govern implementation. Do not modify the Figma file. Do not rewrite the timestamps above or pretend this amendment existed before Figma acceptance.
+
+```text
+ATTENTION =
+  BLOCKED +
+  READY_FOR_QUOTE_WITHOUT_LINKED_QUOTE
+NEW_ATTENTION              = NO
+IN_REVIEW_ATTENTION        = NO
+WAITING_CUSTOMER_ATTENTION = NO
+CANCELLED_ATTENTION        = NO
+QUICK_CLIENT_CREATE        = MINIMAL_NAME_ONLY_ON_REQUESTS_REGISTRY
+HUB_ENTRY                  = CUSTOMER_LOCKED
+NO_QUICK_CREATE            = YES
+DEFAULT_SORT               = CREATED_AT_DESC
+ATTENTION_SORT             = NO
+```
+
+The Figma 1920 frame still draws NEW with Signal Edge and `De preluat`. Runtime must not reproduce that semantic. The accepted geometry stays; only those business lines are superseded.
+
 ## Accepted frames
 
 | Frame | Node |

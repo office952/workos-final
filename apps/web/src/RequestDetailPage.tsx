@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   COMMERCIAL_REQUEST_STATUSES,
@@ -27,8 +27,12 @@ import {
 } from "./requestObjectView";
 import { formatRequestDate } from "./requestsRegistryView";
 import {
+  consumeRequestsWorkspaceSession,
+  originFromLocationState,
+  readRequestsWorkspaceOrigin,
   requestObjectBack,
   resolveRequestsWorkspaceOrigin,
+  type RequestsWorkspaceOrigin,
 } from "./requestsWorkspaceOrigin";
 import { RequestInstallationFactsForm } from "./RequestInstallationFactsForm";
 import {
@@ -52,9 +56,56 @@ type PageState =
   | { kind: "missing" }
   | { kind: "ready"; detail: RequestDetailProjection };
 
+function useRequestObjectOrigin(requestId: string): RequestsWorkspaceOrigin | null {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const adoptedRequestIdRef = useRef<string | null>(null);
+  const origin = resolveRequestsWorkspaceOrigin(requestId, location.state);
+
+  useLayoutEffect(() => {
+    if (!requestId) {
+      return;
+    }
+    if (originFromLocationState(requestId, location.state)) {
+      consumeRequestsWorkspaceSession(requestId);
+      adoptedRequestIdRef.current = requestId;
+    }
+  }, [location.state, requestId]);
+
+  useEffect(() => {
+    if (!requestId || originFromLocationState(requestId, location.state)) {
+      return;
+    }
+    if (adoptedRequestIdRef.current === requestId) {
+      return;
+    }
+    const sessionOrigin = readRequestsWorkspaceOrigin(requestId);
+    if (!sessionOrigin) {
+      return;
+    }
+    const currentState =
+      location.state && typeof location.state === "object"
+        ? (location.state as Record<string, unknown>)
+        : {};
+    adoptedRequestIdRef.current = requestId;
+    navigate(
+      { pathname: location.pathname, search: location.search, hash: location.hash },
+      {
+        replace: true,
+        state: {
+          ...currentState,
+          requestsWorkspaceOrigin: sessionOrigin,
+        },
+      },
+    );
+  }, [location.hash, location.pathname, location.search, location.state, navigate, requestId]);
+
+  return origin;
+}
+
 export function RequestDetailPage() {
   const requestId = usePathIdAfter("/requests/");
-  const location = useLocation();
+  const origin = useRequestObjectOrigin(requestId);
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -264,7 +315,6 @@ export function RequestDetailPage() {
 
   const { detail } = page;
   const { request } = detail;
-  const origin = resolveRequestsWorkspaceOrigin(request.requestId, location.state);
   const back = requestObjectBack(origin);
   const primary = requestObjectPrimaryAction(detail);
   const related = requestRelatedItems(detail);
