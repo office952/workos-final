@@ -147,7 +147,8 @@ LOCAL_FULL_E2E    = PASS
                     retries 0
                     ports 8912 / 5312
                     isolated data dir
-GITHUB_CI         = pending after this amend push
+GITHUB_CI_PUSH    = 33695359066 SUCCESS on 561584bffa08990414597dd6bd7fbb9291448e3b
+GITHUB_CI_PR      = 33695363565 SUCCESS on the same head
 ```
 
 Synthetic INTERNAL path: facts + crew 3 + 4 h + labor 25 + Owner price 200 → confirm job 866.82 → live freeze refused. Product-only freeze stays v1.
@@ -207,6 +208,8 @@ INVALID_HTML                  = CLOSED — price confirm uses action-row, not ne
 LAB_RESOURCE_POST_SAVE_NAV    = resource:LAB-SITE-INSTALL redirects to created cost item
 EXPIRED_RESOURCE_BADGE        = Expirat · calendar date when projection proves validUntil
 SYNTHETIC_ONLY                = YES
+GITHUB_CI_PUSH                = 33695359066 SUCCESS
+GITHUB_CI_PR                  = 33695363565 SUCCESS
 OWNER_ACCEPTED_RUNTIME        = NO
 INTEGRATED_ON_MAIN            = NO
 ```
