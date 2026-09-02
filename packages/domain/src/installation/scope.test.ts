@@ -188,6 +188,32 @@ describe("optional site installation scope", () => {
     );
   });
 
+  it("treats validUntil as inclusive through the last UTC calendar date", () => {
+    const window = {
+      ...ownerSubcontract(180),
+      validFrom: "2027-01-01",
+      validUntil: "2027-12-31",
+    };
+    const lastDay = projectSiteInstallationScope({
+      selected: true,
+      facts: completeFacts(),
+      providerMode: "SUBCONTRACTED",
+      evidence: { subcontract: window },
+      manualNetPrice: 200,
+      asOf: "2027-12-31T23:59:59Z",
+    });
+    expect(lastDay?.eic.completeness).toBe("COMPLETE");
+    const nextDay = projectSiteInstallationScope({
+      selected: true,
+      facts: completeFacts(),
+      providerMode: "SUBCONTRACTED",
+      evidence: { subcontract: window },
+      manualNetPrice: 200,
+      asOf: "2028-01-01T00:00:00Z",
+    });
+    expect(nextDay?.eic.completeness).toBe("PARTIAL");
+  });
+
   it("does not complete EIC from customer price alone", () => {
     const projected = projectSiteInstallationScope({
       selected: true,

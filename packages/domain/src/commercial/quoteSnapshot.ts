@@ -546,7 +546,8 @@ function isFrozenServiceEvidenceProvenance(
     return (
       evidence.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID &&
       evidence.perUnit === "job" &&
-      Boolean(evidence.supplierLabel?.trim())
+      Boolean(evidence.supplierLabel?.trim()) &&
+      Boolean(evidence.validUntil?.trim())
     );
   }
   return false;
@@ -567,7 +568,8 @@ function freezeServiceEvidenceProvenance(
     if (
       evidence.resourceId !== SVC_SITE_INSTALL_SUBCONTRACT_ID ||
       evidence.perUnit !== "job" ||
-      !evidence.supplierLabel?.trim()
+      !evidence.supplierLabel?.trim() ||
+      !evidence.validUntil
     ) {
       return null;
     }

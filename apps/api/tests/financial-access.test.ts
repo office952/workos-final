@@ -3,6 +3,7 @@ import {
   CANONICAL_PRODUCT_CODE,
   OWNER_CONFIRMED_SELLER,
   collectFinancialKeys,
+  type QuoteSnapshot,
 } from "@workos-final/domain";
 import { resetCloudLoginAttemptGuard } from "../src/cloud/controlPlane.js";
 import {
@@ -278,4 +279,215 @@ describe("ALT_B_SCOPED financial access", () => {
 
     fixture.close();
   });
+
+  it("does not expose persisted v2 service evidence to a commercial member", async () => {
+    const fixture = createCloudFixture();
+    const org = await addOrganization(fixture, "Acces V2");
+    await addUser(fixture, {
+      email: "owner-v2@test",
+      password: OWNER_PASSWORD,
+      organizationId: org.organization.organizationId,
+      role: "owner",
+    });
+    await addUser(fixture, {
+      email: "member-v2@test",
+      password: MEMBER_PASSWORD,
+      organizationId: org.organization.organizationId,
+      role: "member",
+    });
+    const owner = await loginCloud(
+      fixture.app,
+      "owner-v2@test",
+      OWNER_PASSWORD,
+      org.organization.organizationId,
+    );
+    const member = await loginCloud(
+      fixture.app,
+      "member-v2@test",
+      MEMBER_PASSWORD,
+      org.organization.organizationId,
+    );
+    expect(
+      (
+        await fixture.app.request(`/api/products/${CANONICAL_PRODUCT_CODE}`, {
+          headers: { cookie: owner.cookie ?? "" },
+        })
+      ).status,
+    ).toBe(200);
+    const runtime = fixture.registry.getOrOpen(org.plane, fixture.cloudRoot);
+    runtime.persistQuoteSnapshot(syntheticPersistedQuoteV2());
+
+    const memberResponse = await fixture.app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${encodeURIComponent("qts:v2-subcontract")}`,
+      { headers: { cookie: member.cookie ?? "" } },
+    );
+    expect(memberResponse.status).toBe(200);
+    const memberQuote = await json(memberResponse);
+    const snapshot = memberQuote.quoteSnapshot as Record<string, unknown>;
+    const lines = (snapshot.lines as Array<Record<string, unknown>>) ?? [];
+    const install = lines.find((line) => line.kind === "SITE_INSTALLATION");
+    expect(install?.commercial).toMatchObject({ netPrice: 200, grossPrice: 242 });
+    expect(install).not.toHaveProperty("evidence");
+    expect(install).not.toHaveProperty("eic");
+    expect(JSON.stringify(memberQuote)).not.toContain("Montaj Rapid SRL");
+    expect(JSON.stringify(memberQuote)).not.toContain("\"amount\":180");
+    expect(collectFinancialKeys(memberQuote).has("eic")).toBe(false);
+
+    const ownerResponse = await fixture.app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots/${encodeURIComponent("qts:v2-subcontract")}`,
+      { headers: { cookie: owner.cookie ?? "" } },
+    );
+    expect(ownerResponse.status).toBe(200);
+    const ownerQuote = await json(ownerResponse);
+    const ownerInstall = (
+      ((ownerQuote.quoteSnapshot as Record<string, unknown>).lines as Array<
+        Record<string, unknown>
+      >) ?? []
+    ).find((line) => line.kind === "SITE_INSTALLATION");
+    expect(ownerInstall?.evidence).toMatchObject({
+      amount: 180,
+      supplierLabel: "Montaj Rapid SRL",
+    });
+    fixture.close();
+  });
 });
+
+function syntheticPersistedQuoteV2() {
+  return {
+    quoteSnapshotId: "qts:v2-subcontract",
+    schemaVersion: 2,
+    status: "FROZEN",
+    productCode: CANONICAL_PRODUCT_CODE,
+    productLabel: "Litere",
+    inscription: "ACCESS",
+    sourceReviewId: "rev:v2",
+    sourceConfirmedAt: "2026-09-02T00:00:00.000Z",
+    createdAt: "2026-09-02T00:00:00.000Z",
+    contentHash: "hash-v2-subcontract-api",
+    truth: {
+      templateCode: CANONICAL_PRODUCT_CODE,
+      templateVersion: "1",
+      familyId: "letters",
+      selectedComponentIds: [],
+      values: {},
+      measurements: [],
+    },
+    quantities: [],
+    eic: { total: 382.5, currency: "EUR", completeness: "COMPLETE", lines: [] },
+    commercial: {
+      policyId: "policy",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+    },
+    productionInput: {
+      schemaVersion: 1,
+      requirements: [],
+      operations: [],
+      usedTechnicalSettings: [],
+      usedRecipes: [],
+      contentHash: "input",
+    },
+    lines: [
+      {
+        kind: "PRODUCT",
+        lineVersion: 1,
+        commercialStrategy: "PRODUCT_COST_PLUS",
+        label: "Litere",
+        productCode: CANONICAL_PRODUCT_CODE,
+        eic: { total: 382.5, currency: "EUR", completeness: "COMPLETE", lines: [] },
+        commercial: {
+          policyId: "policy",
+          policyVersion: 1,
+          markupPercent: 35,
+          markupAmount: 133.88,
+          discountPercent: 0,
+          discountAmount: 0,
+          adjustmentAmount: 0,
+          netPrice: 516.38,
+          vatPercent: 21,
+          vatAmount: 108.44,
+          grossPrice: 624.82,
+          currency: "EUR",
+          completeness: "COMPLETE",
+        },
+      },
+      {
+        kind: "SITE_INSTALLATION",
+        lineVersion: 1,
+        scopeId: "SITE_INSTALLATION",
+        commercialStrategy: "MANUAL_FIXED_PER_REQUEST",
+        providerMode: "SUBCONTRACTED",
+        label: "Montaj la locație",
+        sourceRequestId: "req:v2-subcontract",
+        quantity: 1,
+        commercialUnit: "job",
+        eic: {
+          total: 180,
+          currency: "EUR",
+          completeness: "COMPLETE",
+          lines: [
+            {
+              resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+              label: "Montaj la locație subcontractat",
+              quantity: 1,
+              unit: "job",
+              rate: 180,
+              currency: "EUR",
+              cost: 180,
+            },
+          ],
+        },
+        commercial: {
+          policyId: "policy",
+          policyVersion: 1,
+          markupPercent: 0,
+          markupAmount: 0,
+          discountPercent: 0,
+          discountAmount: 0,
+          adjustmentAmount: 0,
+          netPrice: 200,
+          vatPercent: 21,
+          vatAmount: 42,
+          grossPrice: 242,
+          currency: "EUR",
+          completeness: "COMPLETE",
+        },
+        technicalConfiguration: {
+          measurementStatus: "OFFICE_MEASURED",
+          facadeType: "CONCRETE",
+          fixingMethod: "MECHANICAL_ANCHOR",
+          siteElectrical: "NOT_APPLICABLE",
+          crewSize: null,
+          plannedDurationHours: null,
+        },
+        evidence: {
+          resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+          classification: "OWNER_CONFIRMED",
+          amount: 180,
+          currency: "EUR",
+          perUnit: "job",
+          supplierLabel: "Montaj Rapid SRL",
+          validFrom: "2027-01-01",
+          validUntil: "2027-12-31",
+        },
+      },
+    ],
+    jobCommercial: {
+      netPrice: 716.38,
+      vatAmount: 150.44,
+      grossPrice: 866.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+    },
+  } as unknown as QuoteSnapshot;
+}

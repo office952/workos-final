@@ -1,3 +1,4 @@
+import { calendarDateCoversAsOf } from "../calendarDate.js";
 import {
   LAB_SITE_INSTALL_ID,
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
@@ -21,23 +22,11 @@ export function costEvidenceCoversInstant(
   evidence: CostEvidence,
   asOf: string,
 ): boolean {
-  const instant = Date.parse(asOf);
-  if (Number.isNaN(instant)) {
-    return false;
-  }
-  if (evidence.validFrom) {
-    const from = Date.parse(evidence.validFrom);
-    if (Number.isNaN(from) || from > instant) {
-      return false;
-    }
-  }
-  if (evidence.validUntil) {
-    const until = Date.parse(evidence.validUntil);
-    if (Number.isNaN(until) || until < instant) {
-      return false;
-    }
-  }
-  return true;
+  return calendarDateCoversAsOf({
+    validFrom: evidence.validFrom,
+    validUntil: evidence.validUntil,
+    asOf,
+  });
 }
 
 export function isCompleteInternalInstallLaborEvidence(

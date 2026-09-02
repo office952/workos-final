@@ -1,7 +1,13 @@
 import type { CommercialPriceProjection } from "./price.js";
-import type { FrozenCommercialOffer } from "./quoteSnapshot.js";
+import type {
+  FrozenCommercialOffer,
+  FrozenProductQuoteLine,
+  FrozenQuoteLine,
+  FrozenServiceEvidenceProvenance,
+  FrozenSiteInstallationQuoteLine,
+  QuoteSnapshot,
+} from "./quoteSnapshot.js";
 import type { OrderSnapshot } from "./orderSnapshot.js";
-import type { QuoteSnapshot } from "./quoteSnapshot.js";
 import type { EicResult } from "../resources/eic.js";
 import type { FrozenEicReference } from "../production/snapshot.js";
 import type { ExecutionPlanView } from "../execution/plan.js";
@@ -205,22 +211,7 @@ export function scopeQuoteSnapshot(
     scoped.eic = eic;
   }
   if (snapshot.lines) {
-    scoped.lines = snapshot.lines.map((line) => {
-      const lineCommercial = scopeFrozenCommercial(
-        line.commercial,
-        access,
-        line.eic.total,
-      );
-      const lineEic = scopeEic(line.eic, access);
-      return omitForbiddenFinancialFields(
-        {
-          ...line,
-          ...(lineCommercial ? { commercial: lineCommercial } : {}),
-          ...(lineEic ? { eic: lineEic } : {}),
-        },
-        access,
-      );
-    });
+    scoped.lines = snapshot.lines.map((line) => scopeFrozenQuoteLine(line, access));
   }
   if (snapshot.jobCommercial && access !== "workshop") {
     scoped.jobCommercial = {
@@ -304,6 +295,93 @@ export function scopeExecutionPlanView(
   delete (scoped.plan as { eicCurrency?: string }).eicCurrency;
   delete (scoped.plan as { eicCompleteness?: string }).eicCompleteness;
   return omitForbiddenFinancialFields(scoped, access) as Record<string, unknown>;
+}
+
+export function scopeFrozenServiceEvidence(
+  evidence: FrozenServiceEvidenceProvenance,
+  access: FinancialAccessScope,
+): FrozenServiceEvidenceProvenance | undefined {
+  if (access !== "owner") {
+    return undefined;
+  }
+  return evidence;
+}
+
+export function scopeFrozenQuoteLine(
+  line: FrozenQuoteLine,
+  access: FinancialAccessScope,
+): Record<string, unknown> {
+  switch (line.kind) {
+    case "PRODUCT":
+      return scopeFrozenProductQuoteLine(line, access);
+    case "SITE_INSTALLATION":
+      return scopeFrozenSiteInstallationQuoteLine(line, access);
+    default: {
+      const _exhaustive: never = line;
+      return _exhaustive;
+    }
+  }
+}
+
+function scopeFrozenProductQuoteLine(
+  line: FrozenProductQuoteLine,
+  access: FinancialAccessScope,
+): Record<string, unknown> {
+  const scoped: Record<string, unknown> = {
+    kind: line.kind,
+    lineVersion: line.lineVersion,
+    commercialStrategy: line.commercialStrategy,
+    label: line.label,
+    productCode: line.productCode,
+  };
+  if (access === "workshop") {
+    return scoped;
+  }
+  const commercial = scopeFrozenCommercial(line.commercial, access, line.eic.total);
+  const eic = scopeEic(line.eic, access);
+  if (commercial) {
+    scoped.commercial = commercial;
+  }
+  if (eic) {
+    scoped.eic = eic;
+  }
+  return scoped;
+}
+
+function scopeFrozenSiteInstallationQuoteLine(
+  line: FrozenSiteInstallationQuoteLine,
+  access: FinancialAccessScope,
+): Record<string, unknown> {
+  const scoped: Record<string, unknown> = {
+    kind: line.kind,
+    lineVersion: line.lineVersion,
+    scopeId: line.scopeId,
+    label: line.label,
+    quantity: line.quantity,
+    commercialUnit: line.commercialUnit,
+  };
+  if (access === "workshop") {
+    return scoped;
+  }
+  scoped.commercialStrategy = line.commercialStrategy;
+  scoped.providerMode = line.providerMode;
+  const commercial = scopeFrozenCommercial(line.commercial, access, line.eic.total);
+  if (commercial) {
+    scoped.commercial = commercial;
+  }
+  if (access === "owner") {
+    scoped.sourceRequestId = line.sourceRequestId;
+    scoped.technicalConfiguration = line.technicalConfiguration;
+    const eic = scopeEic(line.eic, access);
+    if (eic) {
+      scoped.eic = eic;
+    }
+    const evidence = scopeFrozenServiceEvidence(line.evidence, access);
+    if (evidence) {
+      scoped.evidence = evidence;
+    }
+  }
+  return scoped;
 }
 
 export function collectFinancialKeys(value: unknown, found = new Set<string>()): Set<string> {

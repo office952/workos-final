@@ -8,6 +8,9 @@ export {
   type CapabilityStatus,
 } from "./capabilities.js";
 export {
+  VALID_UNTIL_INCLUSIVE,
+  calendarDateCoversAsOf,
+  calendarDateFromUtcInstant,
   calendarDateOrderIsValid,
   parseCanonicalCalendarDate,
 } from "./calendarDate.js";
@@ -475,6 +478,8 @@ export {
   scopeExecutionPlanPreview,
   scopeExecutionPlanView,
   scopeFrozenCommercial,
+  scopeFrozenQuoteLine,
+  scopeFrozenServiceEvidence,
   scopeOrderSnapshot,
   scopeQuoteSnapshot,
   orderSnapshotErrorLabel,

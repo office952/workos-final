@@ -188,4 +188,212 @@ describe("financial access", () => {
     expect(workshop.actualInternalCost).toBeUndefined();
     expect((workshop.plan as { eicTotal?: number }).eicTotal).toBeUndefined();
   });
+
+  it("scopes schema v2 service lines by ownership instead of spreading evidence", () => {
+    const snapshot = syntheticSubcontractQuoteV2();
+    const owner = scopeQuoteSnapshot(snapshot, "owner");
+    const commercial = scopeQuoteSnapshot(snapshot, "commercial");
+    const workshop = scopeQuoteSnapshot(snapshot, "workshop");
+    const ownerInstall = findInstallLine(owner);
+    const commercialInstall = findInstallLine(commercial);
+    const workshopInstall = findInstallLine(workshop);
+
+    expect(ownerInstall?.evidence).toMatchObject({
+      amount: 180,
+      supplierLabel: "Montaj Rapid SRL",
+      validFrom: "2027-01-01",
+      validUntil: "2027-12-31",
+      resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+    });
+    expect(ownerInstall?.eic).toMatchObject({ total: 180, completeness: "COMPLETE" });
+    expect(ownerInstall?.commercial).toMatchObject({ netPrice: 200, grossPrice: 242 });
+    expect(owner.jobCommercial).toMatchObject({ grossPrice: 866.82 });
+
+    expect(commercialInstall).toMatchObject({
+      kind: "SITE_INSTALLATION",
+      commercialStrategy: "MANUAL_FIXED_PER_REQUEST",
+      providerMode: "SUBCONTRACTED",
+      quantity: 1,
+      commercialUnit: "job",
+    });
+    expect(commercialInstall?.commercial).toMatchObject({ netPrice: 200, grossPrice: 242 });
+    expect(commercialInstall).not.toHaveProperty("evidence");
+    expect(commercialInstall).not.toHaveProperty("eic");
+    expect(commercialInstall).not.toHaveProperty("sourceRequestId");
+    expect(commercial.jobCommercial).toMatchObject({
+      netPrice: 716.38,
+      grossPrice: 866.82,
+    });
+    expect(collectFinancialKeys(commercial).has("eic")).toBe(false);
+    expect(collectFinancialKeys(commercial).has("rate")).toBe(false);
+    expect(collectFinancialKeys(commercial).has("cost")).toBe(false);
+    expect(JSON.stringify(commercial)).not.toContain("evidence");
+    expect(JSON.stringify(commercial)).not.toContain("Montaj Rapid SRL");
+    expect(JSON.stringify(commercial)).not.toContain("supplierLabel");
+    expect(JSON.stringify(commercial)).not.toContain("validFrom");
+    expect(JSON.stringify(commercial)).not.toContain("validUntil");
+    expect(JSON.stringify(commercial)).not.toContain("\"amount\":180");
+    expect(JSON.stringify(commercial)).not.toContain("\"total\":180");
+
+    expect(workshopInstall).toMatchObject({
+      kind: "SITE_INSTALLATION",
+      quantity: 1,
+      commercialUnit: "job",
+    });
+    expect(workshopInstall).not.toHaveProperty("evidence");
+    expect(workshopInstall).not.toHaveProperty("eic");
+    expect(workshopInstall).not.toHaveProperty("commercial");
+    expect(workshopInstall).not.toHaveProperty("providerMode");
+    expect(workshop.jobCommercial).toBeUndefined();
+    expect(workshop.commercial).toBeUndefined();
+    expect(JSON.stringify(workshop)).not.toContain("Montaj Rapid SRL");
+    expect(JSON.stringify(workshop)).not.toContain("\"netPrice\"");
+    expect(JSON.stringify(workshop)).not.toContain("\"grossPrice\"");
+    expect(JSON.stringify(workshop)).not.toContain("\"amount\":180");
+    expect(collectFinancialKeys(workshop).has("eic")).toBe(false);
+    expect(collectFinancialKeys(workshop).has("cost")).toBe(false);
+  });
 });
+
+function findInstallLine(snapshot: Record<string, unknown>) {
+  const lines = snapshot.lines as Array<Record<string, unknown>> | undefined;
+  return lines?.find((line) => line.kind === "SITE_INSTALLATION");
+}
+
+function syntheticSubcontractQuoteV2(): QuoteSnapshot {
+  const productCommercial = {
+    policyId: "policy",
+    policyVersion: 1,
+    markupPercent: 35,
+    markupAmount: 133.88,
+    discountPercent: 0,
+    discountAmount: 0,
+    adjustmentAmount: 0,
+    netPrice: 516.38,
+    vatPercent: 21,
+    vatAmount: 108.44,
+    grossPrice: 624.82,
+    currency: "EUR" as const,
+    completeness: "COMPLETE" as const,
+  };
+  const installCommercial = {
+    policyId: "policy",
+    policyVersion: 1,
+    markupPercent: 0,
+    markupAmount: 0,
+    discountPercent: 0,
+    discountAmount: 0,
+    adjustmentAmount: 0,
+    netPrice: 200,
+    vatPercent: 21,
+    vatAmount: 42,
+    grossPrice: 242,
+    currency: "EUR" as const,
+    completeness: "COMPLETE" as const,
+  };
+  return {
+    quoteSnapshotId: "qts:v2-subcontract",
+    schemaVersion: 2,
+    status: "FROZEN",
+    productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+    productLabel: "Litere",
+    inscription: "ACCESS",
+    sourceReviewId: "rev:v2",
+    sourceConfirmedAt: "2026-09-02T00:00:00.000Z",
+    createdAt: "2026-09-02T00:00:00.000Z",
+    contentHash: "hash-v2-subcontract",
+    truth: {
+      templateCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      templateVersion: "1",
+      familyId: "letters",
+      selectedComponentIds: [],
+      values: {},
+      measurements: [],
+    },
+    quantities: [],
+    eic: {
+      total: 382.5,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      lines: [],
+    },
+    commercial: productCommercial,
+    productionInput: {
+      schemaVersion: 1,
+      requirements: [],
+      operations: [],
+      usedTechnicalSettings: [],
+      usedRecipes: [],
+      contentHash: "input",
+    },
+    lines: [
+      {
+        kind: "PRODUCT",
+        lineVersion: 1,
+        commercialStrategy: "PRODUCT_COST_PLUS",
+        label: "Litere",
+        productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+        eic: {
+          total: 382.5,
+          currency: "EUR",
+          completeness: "COMPLETE",
+          lines: [],
+        },
+        commercial: productCommercial,
+      },
+      {
+        kind: "SITE_INSTALLATION",
+        lineVersion: 1,
+        scopeId: "SITE_INSTALLATION",
+        commercialStrategy: "MANUAL_FIXED_PER_REQUEST",
+        providerMode: "SUBCONTRACTED",
+        label: "Montaj la locație",
+        sourceRequestId: "req:v2-subcontract",
+        quantity: 1,
+        commercialUnit: "job",
+        eic: {
+          total: 180,
+          currency: "EUR",
+          completeness: "COMPLETE",
+          lines: [
+            {
+              resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+              label: "Montaj la locație subcontractat",
+              quantity: 1,
+              unit: "job",
+              rate: 180,
+              currency: "EUR",
+              cost: 180,
+            },
+          ],
+        },
+        commercial: installCommercial,
+        technicalConfiguration: {
+          measurementStatus: "OFFICE_MEASURED",
+          facadeType: "CONCRETE",
+          fixingMethod: "MECHANICAL_ANCHOR",
+          siteElectrical: "NOT_APPLICABLE",
+          crewSize: null,
+          plannedDurationHours: null,
+        },
+        evidence: {
+          resourceId: "SVC-SITE-INSTALL-SUBCONTRACT",
+          classification: "OWNER_CONFIRMED",
+          amount: 180,
+          currency: "EUR",
+          perUnit: "job",
+          supplierLabel: "Montaj Rapid SRL",
+          validFrom: "2027-01-01",
+          validUntil: "2027-12-31",
+        },
+      },
+    ],
+    jobCommercial: {
+      netPrice: 716.38,
+      vatAmount: 150.44,
+      grossPrice: 866.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+    },
+  } as unknown as QuoteSnapshot;
+}

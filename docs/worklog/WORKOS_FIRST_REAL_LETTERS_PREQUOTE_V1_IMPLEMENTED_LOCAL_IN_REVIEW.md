@@ -75,6 +75,7 @@ INTERNAL EIC PROOF              = 3 × 4 × 25 = 300 ≠ 200
 SUBCONTRACT_EVIDENCE_RENEWAL_UI = YES
 SITE_ELECTRICAL_INCLUDED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
 SITE_ELECTRICAL_SUBCONTRACTED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
+VALID_UNTIL_INCLUSIVE           = YES
 ```
 
 ## What landed
@@ -105,6 +106,8 @@ SITE_ELECTRICAL_SUBCONTRACTED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
 - Live `POST /api/products/:code/quote-snapshots` refuses a Request with selected SITE_INSTALLATION (`service_quote_freeze_not_authorized`) before persist or request link. The configurator shows the two-line preview and keeps **Creează oferta** disabled.
 - Live v2 acceptance is refused (`service_quote_not_acceptable`). Live v2 PDF is refused. Order from v2 stays `service_lines_not_orderable`.
 - `isSupportedQuoteSnapshot` for v2 requires the exact line contract, not merely two lines and a COMPLETE job total.
+- `scopeQuoteSnapshot` projects v2 lines explicitly. Owner keeps evidence, EIC, and supplier provenance. Commercial and workshop never receive `evidence`, supplier identity, or internal EIC. Live v2 persist stays disabled.
+- `VALID_UNTIL_INCLUSIVE = YES`. Coverage compares UTC calendar dates: `validFrom <= asOfDate <= validUntil`. `2027-12-31T23:59:59Z` is valid; `2028-01-01T00:00:00Z` is not.
 
 ## Persistence
 
@@ -172,6 +175,8 @@ LUCRARI_V3                 = NOT_AUTHORIZED
 ORDER_FROM_QUOTE_V2        = REFUSED
 SITE_ELECTRICAL_INCLUDED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
 SITE_ELECTRICAL_SUBCONTRACTED_PREQUOTE = NO_COMPLETE_PATH_IN_THIS_WAVE
+VALID_UNTIL_INCLUSIVE      = YES
+BEFORE_LIVE_V2_ENABLE_ADVISORY = commercial v2 omits technicalConfiguration and sourceRequestId by construction; SUBCONTRACTED freeze now requires supplier + validUntil; remaining live-v2 enablement is a later GO
 ADMIN_TOOLING_DEBT         = NONE for implemented INTERNAL / SUBCONTRACTED base paths after renewal closure
 ACCESS_METHOD_AND_EQUIPMENT = NOT_IMPLEMENTED
 FIXINGS_CONSUMABLES        = NOT_IMPLEMENTED

@@ -30,6 +30,8 @@ export {
   scopeExecutionPlanView,
   scopeFrozenCommercial,
   scopeOrderSnapshot,
+  scopeFrozenQuoteLine,
+  scopeFrozenServiceEvidence,
   scopeQuoteSnapshot,
   type FinancialAccessScope,
   type FinancialEndpointFamily,

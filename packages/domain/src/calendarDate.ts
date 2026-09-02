@@ -30,3 +30,48 @@ export function calendarDateOrderIsValid(
   }
   return from <= until;
 }
+
+/** `Valid până la YYYY-MM-DD` covers that whole UTC calendar date and expires the next day. */
+export const VALID_UNTIL_INCLUSIVE = true;
+
+export function calendarDateFromUtcInstant(
+  value: string,
+): { ok: true; date: string } | { ok: false } {
+  const already = parseCanonicalCalendarDate(value);
+  if (already.ok) {
+    return already;
+  }
+  const ms = Date.parse(value);
+  if (Number.isNaN(ms)) {
+    return { ok: false };
+  }
+  const utc = new Date(ms);
+  const year = String(utc.getUTCFullYear()).padStart(4, "0");
+  const month = String(utc.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(utc.getUTCDate()).padStart(2, "0");
+  return parseCanonicalCalendarDate(`${year}-${month}-${day}`);
+}
+
+export function calendarDateCoversAsOf(input: {
+  validFrom?: string | null;
+  validUntil?: string | null;
+  asOf: string;
+}): boolean {
+  const asOf = calendarDateFromUtcInstant(input.asOf);
+  if (!asOf.ok) {
+    return false;
+  }
+  if (input.validFrom) {
+    const from = parseCanonicalCalendarDate(input.validFrom);
+    if (!from.ok || from.date > asOf.date) {
+      return false;
+    }
+  }
+  if (input.validUntil) {
+    const until = parseCanonicalCalendarDate(input.validUntil);
+    if (!until.ok || until.date < asOf.date) {
+      return false;
+    }
+  }
+  return true;
+}
