@@ -7,14 +7,14 @@ CERERI_V3_FIGMA_FINAL          = OWNER_ACCEPTED
 REQUESTS_DIRECTION             = OWNER_ACCEPTED
 FIGMA_REOPEN_REQUIRED          = NO
 REQUESTS_IMPLEMENTATION        = AUTHORIZED
-REQUESTS_RUNTIME               = IMPLEMENTED_LOCAL_IN_REVIEW
-REQUESTS_RUNTIME_ACCEPTED      = NO
+REQUESTS_RUNTIME               = OWNER_ACCEPTED
+REQUESTS_RUNTIME_ACCEPTED      = YES
 REQUESTS_INTEGRATED_ON_MAIN    = NO
 NEXT_WAVE                      = NO
 MAIN_MERGE                     = NO
 ```
 
-Owner authorized React implementation of the accepted Cereri V3 Figma for `/requests` and `/requests/:requestId` only. This file is the implementation worklog. It does not rewrite the Figma accept record and does not accept runtime or integrate on main.
+Owner authorized React implementation of the accepted Cereri V3 Figma for `/requests` and `/requests/:requestId` only. This file is the implementation worklog. It does not rewrite the Figma accept record. Owner later accepted the runtime; integration on main still requires a separate GO.
 
 ## Identity
 
@@ -39,7 +39,7 @@ ROADMAP_READ            = YES
 UI_UX_CANON_READ        = YES
 DIRECTION_CONFLICT      = YES — Figma UX LOCK 105:4079 still lists NEW → ATTENTION / De preluat and a full client profile create. Owner amend 2026-09-02 overrides those two business lines. Visual geometry stays Figma. No Figma write.
 CURRENT_MILESTONE       = HUB_MEDIA_CLEAN_PILOT
-NEXT_STEP               = Independent ChatGPT final technical review, then Owner runtime inspection/acceptance.
+NEXT_STEP               = GO INTEGRATE CERERI ON MAIN — only if the Owner gives that command explicitly.
 THEME_IMPACT            = BOTH
 NEW_HARDCODED_CSS       = NO
 BACKEND_DETAILS_EXPOSED = NO
@@ -147,9 +147,7 @@ Primary action order:
 - No fake LUC- IDs
 - No pagination
 - No Figma write
-- Runtime not Owner-accepted
-- Not integrated on main
-- Runtime not Owner-accepted
+- Runtime Owner-accepted on 2026-09-02
 - Not integrated on main
 
 ## Figma nodes used as final visual authority (read-only)
@@ -235,7 +233,7 @@ DRAFT_PR              = YES — new draft, not PR #1
 PUSH_MAIN             = NO
 MERGE_MAIN            = NO
 FORCE                 = NO
-OWNER_RUNTIME_ACCEPTED = NO
+OWNER_RUNTIME_ACCEPTED = YES
 ```
 
-Independent code, CI, runtime, and graphic review are required before any merge.
+Owner accepted this runtime on 2026-09-02. Record: `docs/worklog/WORKOS_UI_V3_CERERI_RUNTIME_FINAL_OWNER_ACCEPTED.md`. Integration on `main` is not authorized by that accept.
