@@ -2,6 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { expect, test } from "./fixtures";
 import {
   CANONICAL_LETTERS_PRODUCT_CODE,
+  configureCanonicalLettersForRequest,
   confirmCanonicalLettersOnPage,
   uniqueRequestToken,
 } from "./helpers/requests";
@@ -85,10 +86,7 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   await page.getByLabel("Stradă").focus();
   await expect(page.getByLabel("Stradă")).toBeFocused();
 
-  await page
-    .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
-    .filter({ hasText: "Configurează" })
-    .click();
+  await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
   await expect(page.getByRole("heading", { name: "Montaj la locație" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Salvează datele de montaj" })).toHaveCount(0);

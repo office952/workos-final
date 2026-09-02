@@ -22,6 +22,60 @@ export async function listRequestOverview(request: APIRequestContext) {
   };
 }
 
+export async function createNamedCustomer(request: APIRequestContext, displayName: string) {
+  const response = await request.post("/api/customers", { data: { displayName } });
+  const body = await readJson(response);
+  return {
+    ok: response.ok(),
+    customerId: (body.customer as JsonObject | undefined)?.customerId as string | undefined,
+    displayName,
+  };
+}
+
+export async function createNamedRequest(
+  request: APIRequestContext,
+  input: { customerId: string; title: string; description?: string },
+) {
+  const response = await request.post("/api/requests", {
+    data: {
+      customerId: input.customerId,
+      title: input.title,
+      description: input.description ?? "Descriere pentru verificarea cererii.",
+    },
+  });
+  const body = await readJson(response);
+  return {
+    ok: response.ok(),
+    requestId: (body.request as JsonObject | undefined)?.requestId as string | undefined,
+    title: input.title,
+  };
+}
+
+export async function updateRequestStatus(
+  request: APIRequestContext,
+  requestId: string,
+  status: string,
+) {
+  const response = await request.patch(`/api/requests/${encodeURIComponent(requestId)}`, {
+    data: { status },
+  });
+  return { ok: response.ok() };
+}
+
+export function overviewRequestByTitle(overview: JsonObject, title: string) {
+  const requests = (overview.requests as Array<JsonObject> | undefined) ?? [];
+  return requests.find((item) => item.title === title) ?? null;
+}
+
+export async function configureCanonicalLettersForRequest(page: Page, requestId: string) {
+  await page.goto(`/products?request=${encodeURIComponent(requestId)}`);
+  await page
+    .getByRole("link", {
+      name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
+    })
+    .click();
+}
+
 export async function confirmCanonicalLettersOnPage(
   page: Page,
   inscription: string,

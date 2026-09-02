@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import { usePathIdAfter } from "./navigation/usePathIdAfter";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   COMMERCIAL_REQUEST_STATUSES,
   SITE_INSTALLATION_SCOPE_ID,
   commercialRequestStatusLabel,
-  jobHref,
   operationalServiceProviderModeLabel,
   type CommercialRequestStatus,
   type OperationalServiceProviderMode,
@@ -13,7 +12,25 @@ import {
   type SiteInstallationFactsPatch,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
-import { fetchProductCatalog } from "./productApi";
+import { pageErrorKind } from "./fetchAccess";
+import { usePathIdAfter } from "./navigation/usePathIdAfter";
+import {
+  requestEditareValue,
+  requestFilesValue,
+  requestInstallationHeadline,
+  requestMontajValue,
+  requestObjectMeta,
+  requestObjectPrimaryAction,
+  requestOperatorIncompleteReasons,
+  requestRelatedItems,
+  requestSavedModeLabel,
+} from "./requestObjectView";
+import { formatRequestDate } from "./requestsRegistryView";
+import {
+  requestObjectBack,
+  resolveRequestsWorkspaceOrigin,
+} from "./requestsWorkspaceOrigin";
+import { RequestInstallationFactsForm } from "./RequestInstallationFactsForm";
 import {
   readRequestDetail,
   requestAttachmentErrorMessage,
@@ -22,16 +39,11 @@ import {
   updateInstallationFacts,
   uploadRequestAttachment,
 } from "./requestsApi";
-import { RequestInstallationFactsForm } from "./RequestInstallationFactsForm";
 import { ActionDrawer } from "./ui/ActionDrawer";
-import { flattenCatalogProducts } from "./catalogProducts";
-import { pageErrorKind } from "./fetchAccess";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
-import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
-import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
   | { kind: "loading" }
@@ -42,13 +54,14 @@ type PageState =
 
 export function RequestDetailPage() {
   const requestId = usePathIdAfter("/requests/");
+  const location = useLocation();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
-  const [products, setProducts] = useState<Array<{ code: string; label: string }>>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<CommercialRequestStatus>("NEW");
   const [busy, setBusy] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [installationSelected, setInstallationSelected] = useState(false);
   const [installationMode, setInstallationMode] =
     useState<OperationalServiceProviderMode | null>(null);
@@ -63,8 +76,8 @@ export function RequestDetailPage() {
   useEffect(() => {
     let cancelled = false;
     setPage({ kind: "loading" });
-    void Promise.all([readRequestDetail(requestId), fetchProductCatalog()])
-      .then(([detail, catalog]) => {
+    void readRequestDetail(requestId)
+      .then((detail) => {
         if (cancelled) {
           return;
         }
@@ -72,15 +85,7 @@ export function RequestDetailPage() {
           setPage({ kind: "missing" });
           return;
         }
-        setTitle(detail.request.title);
-        setDescription(detail.request.description);
-        setStatus(detail.request.status);
-        setInstallationSelected(detail.installationOffer.selected);
-        setInstallationMode(detail.installationOffer.mode);
-        setProducts(flattenCatalogProducts(catalog).map((item) => ({
-          code: item.code,
-          label: item.label,
-        })));
+        applyDetail(detail);
         setPage({ kind: "ready", detail });
       })
       .catch((error: unknown) => {
@@ -92,6 +97,14 @@ export function RequestDetailPage() {
       cancelled = true;
     };
   }, [requestId]);
+
+  function applyDetail(detail: RequestDetailProjection) {
+    setTitle(detail.request.title);
+    setDescription(detail.request.description);
+    setStatus(detail.request.status);
+    setInstallationSelected(detail.installationOffer.selected);
+    setInstallationMode(detail.installationOffer.mode);
+  }
 
   async function handleSave() {
     if (page.kind !== "ready") {
@@ -105,10 +118,9 @@ export function RequestDetailPage() {
         description,
         status: page.detail.canUpdateStatus ? status : undefined,
       });
+      applyDetail(detail);
       setPage({ kind: "ready", detail });
-      setTitle(detail.request.title);
-      setDescription(detail.request.description);
-      setStatus(detail.request.status);
+      setEditing(false);
     } catch {
       setNotice("Cererea nu a putut fi actualizată.");
     } finally {
@@ -154,9 +166,8 @@ export function RequestDetailPage() {
           ? { confirmDeleteInstallationFacts: true }
           : {}),
       });
+      applyDetail(detail);
       setPage({ kind: "ready", detail });
-      setInstallationSelected(detail.installationOffer.selected);
-      setInstallationMode(detail.installationOffer.mode);
       setConfirmDeselect(false);
       setFactsNotice(null);
     } catch (error) {
@@ -182,9 +193,8 @@ export function RequestDetailPage() {
       const detail = await updateCommercialRequest(page.detail.request.requestId, {
         siteInstallationMode: mode,
       });
+      applyDetail(detail);
       setPage({ kind: "ready", detail });
-      setInstallationSelected(detail.installationOffer.selected);
-      setInstallationMode(detail.installationOffer.mode);
     } catch (error) {
       setInstallationMode(page.detail.installationOffer.mode);
       const code = error instanceof Error ? error.message : "request_unavailable";
@@ -206,9 +216,8 @@ export function RequestDetailPage() {
         patch,
         page.detail.installationFacts?.version ?? 0,
       );
+      applyDetail(detail);
       setPage({ kind: "ready", detail });
-      setInstallationSelected(detail.installationOffer.selected);
-      setInstallationMode(detail.installationOffer.mode);
       setFactsNotice({ tone: "ok", text: "Datele de montaj au fost salvate." });
     } catch (error) {
       const code = error instanceof Error ? error.message : "request_unavailable";
@@ -226,6 +235,7 @@ export function RequestDetailPage() {
     setUploadNotice(null);
     try {
       const detail = await uploadRequestAttachment(page.detail.request.requestId, file);
+      applyDetail(detail);
       setPage({ kind: "ready", detail });
       setUploadNotice("Fișierul a fost atașat.");
     } catch (error) {
@@ -254,107 +264,139 @@ export function RequestDetailPage() {
 
   const { detail } = page;
   const { request } = detail;
+  const origin = resolveRequestsWorkspaceOrigin(request.requestId, location.state);
+  const back = requestObjectBack(origin);
+  const primary = requestObjectPrimaryAction(detail);
+  const related = requestRelatedItems(detail);
+  const headline = requestInstallationHeadline(detail);
+  const incompleteReasons = detail.installationScope?.incompleteReasons ?? [];
+  const operatorReasons = requestOperatorIncompleteReasons(incompleteReasons);
+  const formReasons = incompleteReasons.filter((reason) => reason.id === "MISSING_COST_EVIDENCE");
+  const showInstallation =
+    detail.installationOffer.selected || detail.installationOffer.canSelectNew;
 
-  const firstProduct = products[0];
-  const linkedQuote = detail.linkedOffers[0];
-  const linkedJobs = detail.linkedOffers.flatMap((offer) =>
-    offer.orderSnapshotId
-      ? [{ ...offer, orderSnapshotId: offer.orderSnapshotId }]
-      : [],
-  );
-  const catalogHref = `/products?request=${encodeURIComponent(request.requestId)}`;
+  function focusTarget(id: string) {
+    const section = document.getElementById(id);
+    section?.scrollIntoView({ block: "start" });
+    section?.querySelector<HTMLElement>("select, textarea, input, button")?.focus();
+  }
 
   return (
-    <section className="jobs-overview decision-workspace">
-      <PageHeader
-        title={request.title}
-        lead={`${request.reference}${
-          detail.customerDisplayName ? ` · ${detail.customerDisplayName}` : ""
-        }`}
-        actions={
-          <>
-            <Link className="button-link" to={catalogHref}>
-              Deschide catalogul
-            </Link>
-            {linkedQuote ? (
-              <Link className="button-quiet" to={linkedQuote.href}>
-                Deschide oferta
-              </Link>
-            ) : null}
-          </>
-        }
-        meta={
-          <p className="page-summary">
-            Client {detail.customerDisplayName ?? "—"}
-            {firstProduct ? ` · Produs ${firstProduct.label}` : ""}
-            {` · stare ${detail.statusLabel}`}
-            {detail.commercialProgressLabel
-              ? ` · ${detail.commercialProgressLabel}`
-              : ""}
-          </p>
-        }
-      />
+    <section className="request-object">
+      <Link
+        className="client-object-back"
+        to={back.href}
+        state={back.state}
+        aria-label={back.ariaLabel}
+      >
+        <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+        {back.label}
+      </Link>
 
-      <p>
-        <StatusChip label={detail.statusLabel} tone="progress" />
-      </p>
-      <p>
-        <ClientLink
-          customerId={request.customerId}
-          displayName={detail.customerDisplayName}
-        />
-      </p>
+      <header className="client-object-header">
+        <div className="client-object-titles">
+          <h1>{request.title}</h1>
+          <p className="client-object-identity">{requestObjectMeta(detail)}</p>
+        </div>
+        <div className="client-object-actions">
+          <button
+            type="button"
+            className="button-quiet"
+            disabled={busy}
+            onClick={() => setEditing(true)}
+          >
+            Editează cererea
+          </button>
+          {primary?.kind === "href" ? (
+            <Link className="button-link" to={primary.href}>
+              {primary.label}
+            </Link>
+          ) : null}
+          {primary?.kind === "focus" ? (
+            <button type="button" onClick={() => focusTarget(primary.targetId)}>
+              {primary.label}
+            </button>
+          ) : null}
+        </div>
+      </header>
+
       {notice ? (
         <Notice tone="warn" compact>
           <p>{notice}</p>
         </Notice>
       ) : null}
 
-      <form
-        className="people-create"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void handleSave();
-        }}
-      >
-        <Field label="Titlu">
-          <input
-            value={title}
-            disabled={busy}
-            onChange={(event) => setTitle(event.target.value)}
-          />
-        </Field>
-        <Field label="Descriere">
-          <textarea
-            value={description}
-            disabled={busy}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-        </Field>
-        {detail.canUpdateStatus ? (
-          <Field label="Stare">
-            <select
-              value={status}
-              disabled={busy}
-              onChange={(event) =>
-                setStatus(event.target.value as CommercialRequestStatus)
-              }
-            >
-              {COMMERCIAL_REQUEST_STATUSES.map((item) => (
-                <option key={item} value={item}>
-                  {commercialRequestStatusLabel(item)}
-                </option>
-              ))}
-            </select>
-          </Field>
-        ) : (
-          <p>Stare: {detail.statusLabel}</p>
-        )}
-        {detail.installationOffer.selected || detail.installationOffer.canSelectNew ? (
-          <Field
-            label="Montaj la locație"
-            hint={installationHint(detail)}
-          >
+      <section className="request-section">
+        <h2>Ce a cerut</h2>
+        <RequestDescription text={request.description} />
+        <dl className="request-facts">
+          <div>
+            <dt>Client</dt>
+            <dd>
+              <ClientLink
+                customerId={request.customerId}
+                displayName={detail.customerDisplayName}
+                prefix=""
+              />
+            </dd>
+          </div>
+          <div>
+            <dt>Stare</dt>
+            <dd>{detail.statusLabel}</dd>
+          </div>
+          <div>
+            <dt>Progres</dt>
+            <dd>{detail.commercialProgressLabel ?? "—"}</dd>
+          </div>
+          <div>
+            <dt>Montaj</dt>
+            <dd>{requestMontajValue(detail)}</dd>
+          </div>
+          <div>
+            <dt>Fișiere</dt>
+            <dd>{requestFilesValue(detail)}</dd>
+          </div>
+        </dl>
+      </section>
+
+      {showInstallation ? (
+        <section className="request-section" id="request-installation">
+          <h2>Montaj la locație</h2>
+          {headline ? <p className="request-installation-headline">{headline}</p> : null}
+          {detail.installationOffer.persistedModeIncompatible ? (
+            <ul className="request-installation-reasons">
+              <li>Modul salvat nu mai este oferit de organizație.</li>
+              <li>Modul salvat rămâne pe cerere. Oferta rămâne incompletă.</li>
+            </ul>
+          ) : null}
+          {operatorReasons.length > 0 ? (
+            <div>
+              <p className="request-installation-missing">Lipsesc</p>
+              <ul className="request-installation-reasons">
+                {operatorReasons.map((reason) => (
+                  <li key={reason.id}>{reason.label}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <dl className="request-facts">
+            {requestSavedModeLabel(detail) ? (
+              <div>
+                <dt>Mod salvat</dt>
+                <dd>
+                  {requestSavedModeLabel(detail)}
+                  {detail.installationOffer.persistedModeIncompatible
+                    ? " — nu mai este oferit"
+                    : ""}
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>Editare</dt>
+              <dd>{requestEditareValue(detail)}</dd>
+            </div>
+          </dl>
+          <Field label="Montaj la locație" hint={installationHint(detail)}>
             <input
               type="checkbox"
               checked={installationSelected}
@@ -364,89 +406,52 @@ export function RequestDetailPage() {
               }}
             />
           </Field>
-        ) : null}
-        {detail.installationOffer.selected && detail.installationOffer.mode ? (
-          <p>
-            Mod salvat: {operationalServiceProviderModeLabel(detail.installationOffer.mode)}
-            {detail.installationOffer.persistedModeIncompatible
-              ? " — nu mai este oferit de organizație."
-              : ""}
-          </p>
-        ) : null}
-        {detail.installationOffer.showModeControl ? (
-          <Field label="Mod montaj" hint="Obligatoriu când organizația oferă ambele căi.">
-            <select
-              value={
-                installationMode &&
-                detail.installationOffer.availableModes.includes(installationMode)
-                  ? installationMode
-                  : ""
-              }
-              disabled={
-                busy ||
-                (detail.installationOffer.selected && !detail.installationOffer.canChangeMode)
-              }
-              onChange={(event) => {
-                const value = event.target.value;
-                if (value === "INTERNAL" || value === "SUBCONTRACTED") {
-                  void handleInstallationMode(value);
+          {detail.installationOffer.showModeControl ? (
+            <Field label="Mod montaj" hint="Obligatoriu când organizația oferă ambele căi.">
+              <select
+                value={
+                  installationMode &&
+                  detail.installationOffer.availableModes.includes(installationMode)
+                    ? installationMode
+                    : ""
                 }
+                disabled={
+                  busy ||
+                  (detail.installationOffer.selected && !detail.installationOffer.canChangeMode)
+                }
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value === "INTERNAL" || value === "SUBCONTRACTED") {
+                    void handleInstallationMode(value);
+                  }
+                }}
+              >
+                <option value="">Alege modul</option>
+                {detail.installationOffer.availableModes.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {operationalServiceProviderModeLabel(mode)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
+          {detail.installationOffer.selected ? (
+            <RequestInstallationFactsForm
+              facts={detail.installationFacts}
+              reasons={formReasons}
+              locked={!detail.canWriteInstallationFacts}
+              busy={busy}
+              notice={factsNotice}
+              onSave={(patch) => {
+                void handleSaveFacts(patch);
               }}
-            >
-              <option value="">Alege modul</option>
-              {detail.installationOffer.availableModes.map((mode) => (
-                <option key={mode} value={mode}>
-                  {operationalServiceProviderModeLabel(mode)}
-                </option>
-              ))}
-            </select>
-          </Field>
-        ) : null}
-        <button type="submit" disabled={busy}>
-          Salvează
-        </button>
-      </form>
-
-      {detail.installationOffer.selected ? (
-        <RequestInstallationFactsForm
-          facts={detail.installationFacts}
-          reasons={detail.installationScope?.incompleteReasons ?? []}
-          locked={!detail.canWriteInstallationFacts}
-          busy={busy}
-          notice={factsNotice}
-          onSave={(patch) => {
-            void handleSaveFacts(patch);
-          }}
-        />
+            />
+          ) : null}
+        </section>
       ) : null}
 
-      <ActionDrawer
-        title="Renunți la montaj?"
-        open={confirmDeselect}
-        onClose={() => setConfirmDeselect(false)}
-      >
-        <p>
-          Datele de montaj salvate vor fi șterse. Anularea păstrează selecția și
-          datele.
-        </p>
-        <p className="action-row">
-          <button type="button" className="button-quiet" onClick={() => setConfirmDeselect(false)}>
-            Anulează
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              void persistInstallationSelection(false, true);
-            }}
-          >
-            Șterge datele de montaj
-          </button>
-        </p>
-      </ActionDrawer>
-
-      <section className="result-section request-attachments">
-        <h3>Fișiere client</h3>
+      <section className="request-section request-attachments">
+        <h2>Fișiere client</h2>
         <p className="request-attachments-lead">
           Fișierele primite de la client rămân atașate acestei cereri.
         </p>
@@ -478,21 +483,16 @@ export function RequestDetailPage() {
         {detail.attachments.length === 0 ? (
           <EmptyState title="Nu există încă fișiere atașate acestei cereri." />
         ) : (
-          <ul className="jobs-list request-attachments-list">
+          <ul className="request-related-list">
             {detail.attachments.map((attachment) => (
               <li key={attachment.attachmentId}>
-                <div className="jobs-identity">
-                  <span className="request-attachment-name">
-                    {attachment.originalFileName}
-                  </span>
+                <a className="request-related-row" href={attachment.downloadHref}>
+                  <span className="request-attachment-name">{attachment.originalFileName}</span>
                   <span>
                     {attachment.sizeLabel}
                     {" · "}
                     {formatRequestDate(attachment.createdAt)}
                   </span>
-                </div>
-                <a className="button-link" href={attachment.downloadHref}>
-                  Descarcă
                 </a>
               </li>
             ))}
@@ -500,89 +500,153 @@ export function RequestDetailPage() {
         )}
       </section>
 
-      {detail.linkedOffers.length > 0 ? (
-        <section className="result-section">
-          <h3>Oferte legate</h3>
-          <ul className="jobs-list">
-            {detail.linkedOffers.map((offer) => (
-              <li key={offer.quoteSnapshotId}>
-                <div className="jobs-identity">
-                  <Link to={offer.href}>{offer.reference}</Link>
-                  <span>{offer.productLabel}</span>
+      <section className="request-section">
+        <h2>Oferte și lucrări legate</h2>
+        {related.length === 0 ? (
+          <p className="client-activity-empty">Nicio ofertă sau lucrare legată.</p>
+        ) : (
+          <ul className="request-related-list">
+            {related.map((item) => (
+              <li key={item.key}>
+                <Link className="request-related-row" to={item.href}>
                   <span>
-                    {offer.grossDisplay} {offer.currency}
+                    <strong>{item.title}</strong>
+                    <span>{item.meta}</span>
                   </span>
-                </div>
-                <div className="jobs-status">
-                  <StatusChip label={offer.stageLabel} tone="progress" />
-                  {offer.needsAttention && offer.attentionLabel ? (
-                    <p className="jobs-attention">{offer.attentionLabel}</p>
-                  ) : null}
-                </div>
-                <Link className="button-link" to={offer.href}>
-                  {offer.nextActionLabel}
+                  <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </Link>
               </li>
             ))}
           </ul>
-        </section>
-      ) : null}
+        )}
+      </section>
 
-      {linkedJobs.length > 0 ? (
-        <section className="result-section">
-          <h3>Lucrări legate</h3>
-          <ul className="jobs-list">
-            {linkedJobs.map((offer) => (
-              <li key={offer.orderSnapshotId}>
-                <div className="jobs-identity">
-                  <Link
-                    to={jobHref({ orderSnapshotId: offer.orderSnapshotId })}
-                  >
-                    {offer.inscription}
-                  </Link>
-                  <span>{offer.productLabel}</span>
-                </div>
-                <Link
-                  className="button-link"
-                  to={jobHref({ orderSnapshotId: offer.orderSnapshotId })}
-                >
-                  Deschide lucrarea
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <ActionDrawer
+        title="Editează cererea"
+        open={editing}
+        onClose={() => {
+          applyDetail(detail);
+          setEditing(false);
+        }}
+      >
+        <form
+          className="people-create"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSave();
+          }}
+        >
+          <Field label="Titlu">
+            <input
+              value={title}
+              disabled={busy}
+              onChange={(event) => setTitle(event.target.value)}
+            />
+          </Field>
+          <Field label="Descriere">
+            <textarea
+              value={description}
+              disabled={busy}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </Field>
+          {detail.canUpdateStatus ? (
+            <Field label="Stare">
+              <select
+                value={status}
+                disabled={busy}
+                onChange={(event) =>
+                  setStatus(event.target.value as CommercialRequestStatus)
+                }
+              >
+                {COMMERCIAL_REQUEST_STATUSES.map((item) => (
+                  <option key={item} value={item}>
+                    {commercialRequestStatusLabel(item)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : (
+            <p>Stare: {detail.statusLabel}</p>
+          )}
+          <div className="action-drawer-actions">
+            <button
+              type="button"
+              className="button-quiet"
+              disabled={busy}
+              onClick={() => {
+                applyDetail(detail);
+                setEditing(false);
+              }}
+            >
+              Anulează
+            </button>
+            <button type="submit" disabled={busy}>
+              Salvează
+            </button>
+          </div>
+        </form>
+      </ActionDrawer>
 
-      {request.status !== "CANCELLED" ? (
-        <section className="result-section">
-          <h3>Alege produs</h3>
-          <p>Deschide catalogul, apoi configurează pentru această cerere.</p>
-          <p>
-            <Link className="button-quiet" to={catalogHref}>
-              Deschide catalogul
-            </Link>
-          </p>
-          <ul className="jobs-list">
-            {products.map((product) => (
-              <li key={product.code}>
-                <div className="jobs-identity">
-                  <span>{product.label}</span>
-                </div>
-                <Link
-                  className="button-link"
-                  to={`/products/${encodeURIComponent(product.code)}?request=${encodeURIComponent(
-                    request.requestId,
-                  )}`}
-                >
-                  Configurează
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <ActionDrawer
+        title="Renunți la montaj?"
+        open={confirmDeselect}
+        onClose={() => setConfirmDeselect(false)}
+      >
+        <p>
+          Datele de montaj salvate vor fi șterse. Anularea păstrează selecția și
+          datele.
+        </p>
+        <p className="action-row">
+          <button type="button" className="button-quiet" onClick={() => setConfirmDeselect(false)}>
+            Anulează
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              void persistInstallationSelection(false, true);
+            }}
+          >
+            Șterge datele de montaj
+          </button>
+        </p>
+      </ActionDrawer>
     </section>
+  );
+}
+
+function RequestDescription({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement | null>(null);
+  const [overflows, setOverflows] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) {
+      return;
+    }
+    setOverflows(node.scrollHeight > node.clientHeight + 1);
+  }, [text]);
+
+  return (
+    <div className="request-description">
+      <p
+        ref={ref}
+        className={expanded ? "request-description-text is-expanded" : "request-description-text"}
+      >
+        {text}
+      </p>
+      {overflows ? (
+        <button
+          type="button"
+          className="button-quiet"
+          onClick={() => setExpanded((current) => !current)}
+        >
+          {expanded ? "Restrânge" : "Arată tot"}
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -597,12 +661,4 @@ function installationHint(detail: RequestDetailProjection): string {
     return "Montajul rămâne selectat pe această cerere. Nu poate fi adăugat pe cereri noi până ownerul configurează serviciul.";
   }
   return "Dacă este selectat, montajul rămâne separat și blochează oferta până există un cost complet.";
-}
-
-function formatRequestDate(value: string): string {
-  return new Date(value).toLocaleDateString("ro-RO", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 }

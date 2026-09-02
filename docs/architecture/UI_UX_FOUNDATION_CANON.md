@@ -26,10 +26,13 @@ CLIENT_HUB_FIGMA_FINAL                 = OWNER_ACCEPTED
 CLIENT_HUB_RUNTIME                     = OWNER_ACCEPTED
 CLIENT_HUB_TECHNICAL_GATE              = CLOSED
 CLIENT_HUB                             = INTEGRATED_ON_MAIN
+CERERI_V3_FIGMA_FINAL                  = OWNER_ACCEPTED
+REQUESTS_DIRECTION                     = OWNER_ACCEPTED
+REQUESTS_RUNTIME                       = IMPLEMENTED_LOCAL_IN_REVIEW
 NEXT_PROGRAM_PRIORITY                  = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
-Wave 1 implements this sidebar on main. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub is `INTEGRATED_ON_MAIN`. Cereri, Oferte, and Lucrări page-content transformations remain unaccepted.
+Wave 1 implements this sidebar on main. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub is `INTEGRATED_ON_MAIN`. Cereri V3 Figma is `OWNER_ACCEPTED`. Cereri V3 runtime is `IMPLEMENTED_LOCAL_IN_REVIEW`. Oferte and Lucrări page-content transformations remain unaccepted.
 
 Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
 

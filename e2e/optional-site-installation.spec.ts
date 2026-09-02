@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import {
   CANONICAL_LETTERS_PRODUCT_CODE,
+  configureCanonicalLettersForRequest,
   confirmCanonicalLettersOnPage,
   uniqueRequestToken,
 } from "./helpers/requests";
@@ -40,10 +41,7 @@ test("optional site installation is silent until selected and then blocks quote 
   await expect(checkbox).toBeVisible();
   await expect(checkbox).not.toBeChecked();
 
-  await page
-    .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
-    .filter({ hasText: "Configurează" })
-    .click();
+  await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
   await expect(page.getByRole("heading", { name: "Ofertă" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Montaj la locație" })).toHaveCount(0);
@@ -64,10 +62,7 @@ test("optional site installation is silent until selected and then blocks quote 
   await page.reload();
   await expect(page.getByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
 
-  await page
-    .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
-    .filter({ hasText: "Configurează" })
-    .click();
+  await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
   await expect(page.getByText(/Preț final client: 624,82 EUR/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Montaj la locație" })).toBeVisible();
@@ -132,10 +127,7 @@ test("optional site installation is silent until selected and then blocks quote 
     ),
     page.getByRole("checkbox", { name: /Montaj la locație/ }).click(),
   ]);
-  await page
-    .locator(`a[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"]`)
-    .filter({ hasText: "Configurează" })
-    .click();
+  await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
   await expect(page.getByRole("heading", { name: "Montaj la locație" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Creează oferta" })).toBeEnabled();

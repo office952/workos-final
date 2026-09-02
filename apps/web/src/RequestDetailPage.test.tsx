@@ -87,6 +87,7 @@ vi.mock("./productApi", () => ({
 
 describe("RequestDetailPage", () => {
   beforeEach(() => {
+    sessionStorage.clear();
     vi.mocked(readRequestDetail).mockReset();
     vi.mocked(updateCommercialRequest).mockReset();
     vi.mocked(updateInstallationFacts).mockReset();
@@ -126,32 +127,36 @@ describe("RequestDetailPage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Litere exterior" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Înapoi la Cereri" })).toHaveAttribute(
+      "href",
+      "/requests",
+    );
     expect(screen.getByText(/CER-11111111/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Client: HUB MEDIA" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "HUB MEDIA" })).toHaveAttribute(
       "href",
       "/clients/cus%3A1",
     );
-    expect(screen.getByLabelText("Descriere")).toHaveValue("Pe fațadă, text HUB MEDIA.");
+    expect(screen.getByText("Pe fațadă, text HUB MEDIA.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Arată tot" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Fișiere client" })).toBeInTheDocument();
     expect(
       screen.getByText("Nu există încă fișiere atașate acestei cereri."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Oferte legate" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "OF-ABCDEF01" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "Oferte și lucrări legate" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Ofertă OF-ABCDEF01/ })).toHaveAttribute(
       "href",
       "/quotes/qts%3A1",
     );
-    expect(screen.getAllByRole("link", { name: "Deschide catalogul" })[0]).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Deschide oferta" })).toHaveAttribute(
       "href",
-      "/products?request=crq%3A11111111-2222-3333-4444-555555555555",
+      "/quotes/qts%3A1",
     );
-    expect(screen.getByRole("link", { name: "Configurează" })).toHaveAttribute(
-      "href",
-      "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=crq%3A11111111-2222-3333-4444-555555555555",
-    );
+    expect(screen.queryByRole("link", { name: "Configurează" })).not.toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: /Montaj la locație/ })).not.toBeInTheDocument();
     expect(screen.queryByText("contentHash")).not.toBeInTheDocument();
+    expect(screen.queryByText("Lock")).not.toBeInTheDocument();
 
+    await userEvent.click(screen.getByRole("button", { name: "Editează cererea" }));
     await userEvent.selectOptions(screen.getByLabelText("Stare"), "READY_FOR_QUOTE");
     await userEvent.click(screen.getByRole("button", { name: "Salvează" }));
     expect(updateCommercialRequest).toHaveBeenCalledWith(
@@ -258,8 +263,10 @@ describe("RequestDetailPage", () => {
     );
 
     expect(await screen.findByRole("checkbox", { name: /Montaj la locație/ })).toBeChecked();
-    expect(screen.getByText(/Mod salvat: Echipă internă/)).toBeInTheDocument();
+    expect(screen.getByText(/Echipă internă/)).toBeInTheDocument();
     expect(screen.getByText(/nu mai este oferit de organizație/)).toBeInTheDocument();
+    expect(screen.getByText("Editare")).toBeInTheDocument();
+    expect(screen.queryByText("Lock")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Salvează datele de montaj" })).toBeInTheDocument();
   });
 
@@ -439,5 +446,62 @@ describe("RequestDetailPage", () => {
         confirmDeleteInstallationFacts: true,
       }),
     );
+  });
+
+  it("returns to Cereri from registry origin", async () => {
+    vi.mocked(readRequestDetail).mockResolvedValue(detail);
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/requests/crq:11111111-2222-3333-4444-555555555555",
+            state: {
+              requestsWorkspaceOrigin: {
+                kind: "registry",
+                requestId: "crq:11111111-2222-3333-4444-555555555555",
+                search: "?q=vest",
+                scrollY: 40,
+              },
+            },
+          },
+        ]}
+      >
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const back = await screen.findByRole("link", { name: "Înapoi la Cereri" });
+    expect(back).toHaveAttribute("href", "/requests?q=vest");
+    expect(back).toHaveTextContent("Cereri");
+  });
+
+  it("returns to the Client Hub customer from hub origin", async () => {
+    vi.mocked(readRequestDetail).mockResolvedValue(detail);
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/requests/crq:11111111-2222-3333-4444-555555555555",
+            state: {
+              requestsWorkspaceOrigin: {
+                kind: "client-hub",
+                requestId: "crq:11111111-2222-3333-4444-555555555555",
+                customerId: "cus:1",
+                customerDisplayName: "Client Alpha S.R.L.",
+              },
+            },
+          },
+        ]}
+      >
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const back = await screen.findByRole("link", { name: "Înapoi la Client Alpha S.R.L." });
+    expect(back).toHaveAttribute("href", "/clients/cus%3A1?section=cereri");
+    expect(back).toHaveTextContent("Client Alpha S.R.L.");
+    expect(screen.queryByRole("link", { name: "Înapoi la Cereri" })).not.toBeInTheDocument();
   });
 });

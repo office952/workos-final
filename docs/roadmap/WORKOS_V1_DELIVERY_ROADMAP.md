@@ -104,6 +104,9 @@ CLIENT_HUB_RUNTIME                   = OWNER_ACCEPTED
 CLIENT_HUB_TECHNICAL_GATE            = CLOSED
 CLIENT_HUB                           = INTEGRATED_ON_MAIN
 CLIENT_HUB_PRODUCT_SHA               = 05b8ae2ccf769f82ee9c702b37950a108d8203a2
+CERERI_V3_FIGMA_FINAL                = OWNER_ACCEPTED
+REQUESTS_DIRECTION                   = OWNER_ACCEPTED
+REQUESTS_RUNTIME                     = IMPLEMENTED_LOCAL_IN_REVIEW
 NEXT_PROGRAM_PRIORITY                = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
@@ -247,6 +250,9 @@ CLIENT_HUB_FIGMA_FINAL = OWNER_ACCEPTED
 CLIENT_HUB_RUNTIME = OWNER_ACCEPTED
 CLIENT_HUB_TECHNICAL_GATE = CLOSED
 CLIENT_HUB = INTEGRATED_ON_MAIN
+CERERI_V3_FIGMA_FINAL = OWNER_ACCEPTED
+REQUESTS_DIRECTION = OWNER_ACCEPTED
+REQUESTS_RUNTIME = IMPLEMENTED_LOCAL_IN_REVIEW
 NEXT_PROGRAM_PRIORITY = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
@@ -352,6 +358,9 @@ CLIENT_HUB_FIGMA_FINAL                   = OWNER_ACCEPTED
 CLIENT_HUB_RUNTIME                       = OWNER_ACCEPTED
 CLIENT_HUB_TECHNICAL_GATE                = CLOSED
 CLIENT_HUB                               = INTEGRATED_ON_MAIN
+CERERI_V3_FIGMA_FINAL                    = OWNER_ACCEPTED
+REQUESTS_DIRECTION                       = OWNER_ACCEPTED
+REQUESTS_RUNTIME                         = IMPLEMENTED_LOCAL_IN_REVIEW
 NEXT_PROGRAM_PRIORITY                    = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 OS_S4_SERVICE_COMMERCIAL                 = NOT_STARTED
 OS_S5_MULTI_LINE_QUOTE                   = NOT_STARTED
@@ -375,7 +384,7 @@ See `docs/architecture/OPERATIONAL_SERVICES_CANON.md` and `docs/architecture/OPT
 
 Architecture C UI Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. It does not replace the HUB sequence and does not authorize Wave 2, Figma publish, or the first real LETTERS job. Execution detail lives in `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md`.
 
-Clients V3 registry is `INTEGRATED_ON_MAIN` at product SHA `6190207b72fb723ef0c0276864d74dcb2bc7aa4a`. Client Hub is `INTEGRATED_ON_MAIN` at product SHA `05b8ae2ccf769f82ee9c702b37950a108d8203a2`. Page-content transformation remains `IN_PROGRESS`. Cereri, Oferte, and Lucrări page-content redesigns are not accepted and are not integrated. Commercial page reorganization is not complete. The next unfinished commercial domain is selected only after independent roadmap review. Records: `docs/worklog/WORKOS_UI_V3_CLIENTS_FINAL_INTEGRATED_ON_MAIN.md` and `docs/worklog/WORKOS_UI_V3_CLIENT_HUB_FINAL_INTEGRATED_ON_MAIN.md`.
+Clients V3 registry is `INTEGRATED_ON_MAIN` at product SHA `6190207b72fb723ef0c0276864d74dcb2bc7aa4a`. Client Hub is `INTEGRATED_ON_MAIN` at product SHA `05b8ae2ccf769f82ee9c702b37950a108d8203a2`. Cereri V3 Figma is `OWNER_ACCEPTED`. Cereri V3 runtime is `IMPLEMENTED_LOCAL_IN_REVIEW`. Page-content transformation remains `IN_PROGRESS`. Oferte and Lucrări page-content redesigns are not accepted and are not integrated. Commercial page reorganization is not complete. The next unfinished commercial domain is selected only after independent roadmap review. Records: `docs/worklog/WORKOS_UI_V3_CLIENTS_FINAL_INTEGRATED_ON_MAIN.md`, `docs/worklog/WORKOS_UI_V3_CLIENT_HUB_FINAL_INTEGRATED_ON_MAIN.md`, `docs/worklog/WORKOS_UI_V3_CERERI_FIGMA_FINAL_OWNER_ACCEPTED.md`, and `docs/worklog/WORKOS_UI_V3_CERERI_IMPLEMENTED_LOCAL_IN_REVIEW.md`.
 
 ## Real Cloud recovery
 

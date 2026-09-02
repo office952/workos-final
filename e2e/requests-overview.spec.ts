@@ -8,7 +8,7 @@ import {
 } from "./helpers/requests";
 
 function requestRow(page: import("@playwright/test").Page, title: string) {
-  return page.locator(".jobs-list li").filter({ hasText: title });
+  return page.locator(".requests-list li").filter({ hasText: title });
 }
 
 test("office can record a request, configure a product, and find the linked quote", async ({
@@ -45,9 +45,13 @@ test("office can record a request, configure a product, and find the linked quot
   await expect(page.getByRole("link", { name: "Cereri" })).toBeVisible();
   await page.getByRole("button", { name: "Cerere nouă" }).click();
   const createForm = page.locator("form.people-create");
+  await createForm.getByRole("button", { name: "Clientul nu e în listă" }).click();
+  await expect(createForm.getByLabel("CUI")).toHaveCount(0);
+  await expect(createForm.getByLabel("Email")).toHaveCount(0);
+  await expect(createForm.getByLabel("Telefon")).toHaveCount(0);
   await createForm.getByRole("textbox", { name: "Nume client" }).fill(customerName);
-  await createForm.getByRole("button", { name: "Adaugă client" }).click();
-  await expect(createForm.getByRole("combobox")).toHaveValue(/cus:/);
+  await createForm.getByRole("button", { name: "Creează clientul" }).click();
+  await expect(createForm.getByRole("combobox", { name: "Client" })).toHaveValue(/cus:/);
   await createForm.getByRole("textbox", { name: "Titlu" }).fill(title);
   await createForm.getByRole("textbox", { name: "Descriere" }).fill(
     "Clientul sună pentru litere luminoase pe fațadă, text scurt, adâncime 60 mm.",
@@ -55,15 +59,18 @@ test("office can record a request, configure a product, and find the linked quot
   await createForm.getByRole("button", { name: "Creează cererea" }).click();
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
   await expect(page.getByText(/CER-[0-9A-F]{8}/)).toBeVisible();
-  await expect(page.getByText(`Client: ${customerName}`)).toBeVisible();
+  await expect(page.getByRole("link", { name: customerName })).toBeVisible();
   const requestUrl = page.url();
   expect(requestUrl).toMatch(/\/requests\/crq/);
 
-  await page.getByRole("link", { name: "Cereri" }).click();
+  await page.getByRole("link", { name: "Înapoi la Cereri" }).click();
   await expect(page.getByRole("heading", { name: "Cereri de ofertă" })).toBeVisible();
   await expect(requestRow(page, title)).toBeVisible();
-  await expect(requestRow(page, title)).toContainText(`Client: ${customerName}`);
+  await expect(requestRow(page, title)).toContainText(customerName);
   await expect(requestRow(page, title)).toContainText("Nouă");
+  await expect(requestRow(page, title)).not.toContainText("De preluat");
+  await expect(requestRow(page, title)).not.toContainText("Urmează oferta");
+  await expect(requestRow(page, title).locator("a.registry-row")).not.toHaveClass(/is-attention/);
   await expect(requestRow(page, title)).toContainText("Deschide");
   await expect(page.getByText("contentHash")).toHaveCount(0);
   await expect(page.getByText("Intake")).toHaveCount(0);
@@ -72,11 +79,12 @@ test("office can record a request, configure a product, and find the linked quot
     fullPage: true,
   });
 
-  await requestRow(page, title).getByRole("link", { name: "Deschide" }).click();
+  await requestRow(page, title).getByRole("link", { name: title }).click();
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
-  await expect(page.getByLabel("Descriere")).toHaveValue(
-    "Clientul sună pentru litere luminoase pe fațadă, text scurt, adâncime 60 mm.",
-  );
+  await expect(
+    page.getByText("Clientul sună pentru litere luminoase pe fațadă, text scurt, adâncime 60 mm."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Editează cererea" }).click();
   await page.getByLabel("Stare").selectOption({ label: "În lucru" });
   await page.getByRole("button", { name: "Salvează" }).click();
   await expect(page.getByText("În lucru", { exact: true }).first()).toBeVisible();
@@ -85,9 +93,12 @@ test("office can record a request, configure a product, and find the linked quot
     fullPage: true,
   });
 
-  await expect(page.getByRole("heading", { name: "Alege produs" })).toBeVisible();
+  await page.getByRole("link", { name: "Alege produs" }).click();
+  await expect(page).toHaveURL(/\/products\?request=/);
   await page
-    .locator(`a.button-link[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"][href*="request="]`)
+    .getByRole("link", {
+      name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
+    })
     .click();
   await expect(page).toHaveURL(new RegExp(`/products/${CANONICAL_LETTERS_PRODUCT_CODE}\\?request=`));
   await expect(page.getByText(/Cerere CER-[0-9A-F]{8}/).first()).toBeVisible();
@@ -109,7 +120,7 @@ test("office can record a request, configure a product, and find the linked quot
   await expect(quote.getByText(/OF-[0-9A-F]{8}/)).toBeVisible();
 
   await page.goto(requestUrl);
-  await expect(page.getByRole("heading", { name: "Oferte legate" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Oferte și lucrări legate" })).toBeVisible();
   await expect(page.getByText("Ofertă creată")).toBeVisible();
   await expect(page.getByRole("link", { name: /OF-[0-9A-F]{8}/ })).toBeVisible();
   await page.screenshot({
@@ -117,7 +128,7 @@ test("office can record a request, configure a product, and find the linked quot
     fullPage: true,
   });
 
-  await page.getByRole("link", { name: "Marchează acceptată" }).click();
+  await page.getByRole("link", { name: /Ofertă OF-/ }).click();
   await expect(page).toHaveURL(/\/quotes\//);
   await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
   await expect(page.getByText("Creată", { exact: true }).first()).toBeVisible();
@@ -128,7 +139,7 @@ test("office can record a request, configure a product, and find the linked quot
   await page.goto(requestUrl);
   await expect(page.getByText("Ofertă acceptată")).toBeVisible();
 
-  await page.getByRole("link", { name: "Creează comanda" }).click();
+  await page.getByRole("link", { name: /Ofertă OF-/ }).click();
   await expect(page).toHaveURL(/\/quotes\//);
   await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
   await page.getByRole("button", { name: "Creează comanda" }).click();
@@ -154,15 +165,13 @@ test("office can record a request, configure a product, and find the linked quot
     "href",
     /\/requests\//,
   );
-  await expect(
-    requestRow(page, title).getByRole("link", { name: "Deschide oferta" }),
-  ).toHaveAttribute("href", /\/quotes\//);
+  await expect(requestRow(page, title)).toContainText("Deschide oferta");
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/requests");
   await expect(page.getByRole("heading", { name: "Cereri de ofertă" })).toBeVisible();
   await expect(requestRow(page, title)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Toate" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Stare" })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > 390);
   expect(overflow).toBe(false);
   await page.screenshot({

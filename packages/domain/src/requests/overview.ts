@@ -230,23 +230,19 @@ export function deriveRequestOverviewAttention(input: {
   status: CommercialRequestStatus;
   hasLinkedQuotes: boolean;
 }): { needsAttention: boolean; attentionLabel: string | null } {
+  if (input.hasLinkedQuotes && input.status !== "BLOCKED") {
+    return { needsAttention: false, attentionLabel: null };
+  }
   switch (input.status) {
-    case "BLOCKED":
-      return { needsAttention: true, attentionLabel: "Blocat" };
+    case "NEW":
+    case "IN_REVIEW":
+    case "WAITING_CUSTOMER":
     case "CANCELLED":
       return { needsAttention: false, attentionLabel: null };
-    case "NEW":
-      return { needsAttention: true, attentionLabel: "Urmează preluarea" };
-    case "WAITING_CUSTOMER":
-      return { needsAttention: true, attentionLabel: "Așteaptă clientul" };
     case "READY_FOR_QUOTE":
-      return input.hasLinkedQuotes
-        ? { needsAttention: false, attentionLabel: null }
-        : { needsAttention: true, attentionLabel: "Urmează oferta" };
-    case "IN_REVIEW":
-      return input.hasLinkedQuotes
-        ? { needsAttention: false, attentionLabel: null }
-        : { needsAttention: true, attentionLabel: "În lucru" };
+      return { needsAttention: true, attentionLabel: "Urmează oferta" };
+    case "BLOCKED":
+      return { needsAttention: true, attentionLabel: "Blocat" };
     default: {
       const _exhaustive: never = input.status;
       return _exhaustive;
@@ -298,12 +294,9 @@ export function projectRequestOverviewItem(input: {
 export function projectRequestOverview(
   requests: readonly RequestOverviewItem[],
 ): RequestOverviewProjection {
-  const sorted = [...requests].sort((left, right) => {
-    if (left.needsAttention !== right.needsAttention) {
-      return left.needsAttention ? -1 : 1;
-    }
-    return right.createdAt.localeCompare(left.createdAt);
-  });
+  const sorted = [...requests].sort((left, right) =>
+    right.createdAt.localeCompare(left.createdAt),
+  );
   return {
     summary: {
       total: sorted.length,

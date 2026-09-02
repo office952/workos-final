@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { createCustomer } from "../customers/identity.js";
+import { projectCustomerWorkspace } from "../customers/workspace.js";
 import type { QuoteOverviewItem } from "../quotes/overview.js";
 import type { CommercialRequest } from "./commercialRequest.js";
 import {
   deriveRequestCommercialProgress,
+  deriveRequestOverviewAttention,
   filterRequestOverview,
   projectRequestDetail,
   projectRequestOverview,
@@ -89,33 +92,83 @@ describe("request overview projection", () => {
     ).toBe("ORDER_CREATED");
   });
 
-  it("orders useful work first and filters by request status", () => {
+  it("applies the accepted request attention law", () => {
+    expect(deriveRequestOverviewAttention({ status: "NEW", hasLinkedQuotes: false })).toEqual({
+      needsAttention: false,
+      attentionLabel: null,
+    });
+    expect(deriveRequestOverviewAttention({ status: "IN_REVIEW", hasLinkedQuotes: false })).toEqual({
+      needsAttention: false,
+      attentionLabel: null,
+    });
+    expect(
+      deriveRequestOverviewAttention({ status: "WAITING_CUSTOMER", hasLinkedQuotes: false }),
+    ).toEqual({
+      needsAttention: false,
+      attentionLabel: null,
+    });
+    expect(
+      deriveRequestOverviewAttention({ status: "READY_FOR_QUOTE", hasLinkedQuotes: false }),
+    ).toEqual({
+      needsAttention: true,
+      attentionLabel: "Urmează oferta",
+    });
+    expect(
+      deriveRequestOverviewAttention({ status: "READY_FOR_QUOTE", hasLinkedQuotes: true }),
+    ).toEqual({
+      needsAttention: false,
+      attentionLabel: null,
+    });
+    expect(deriveRequestOverviewAttention({ status: "BLOCKED", hasLinkedQuotes: true })).toEqual({
+      needsAttention: true,
+      attentionLabel: "Blocat",
+    });
+    expect(deriveRequestOverviewAttention({ status: "CANCELLED", hasLinkedQuotes: false })).toEqual({
+      needsAttention: false,
+      attentionLabel: null,
+    });
+  });
+
+  it("orders by createdAt descending and does not promote attention", () => {
     const overview = projectRequestOverview([
       projectRequestOverviewItem({
         request: request({
-          requestId: "crq:old",
-          status: "CANCELLED",
-          createdAt: "2026-08-17T12:00:00.000Z",
+          requestId: "crq:old-blocked",
+          status: "BLOCKED",
+          createdAt: "2026-08-17T10:00:00.000Z",
         }),
         customerDisplayName: "A",
         quotes: [],
       }),
       projectRequestOverviewItem({
         request: request({
-          requestId: "crq:new",
+          requestId: "crq:newer",
           status: "NEW",
-          createdAt: "2026-08-17T11:00:00.000Z",
+          createdAt: "2026-08-17T12:00:00.000Z",
         }),
         customerDisplayName: "B",
         quotes: [],
       }),
+      projectRequestOverviewItem({
+        request: request({
+          requestId: "crq:old",
+          status: "CANCELLED",
+          createdAt: "2026-08-17T11:00:00.000Z",
+        }),
+        customerDisplayName: "C",
+        quotes: [],
+      }),
     ]);
-    expect(overview.requests.map((item) => item.requestId)).toEqual(["crq:new", "crq:old"]);
+    expect(overview.requests.map((item) => item.requestId)).toEqual([
+      "crq:newer",
+      "crq:old",
+      "crq:old-blocked",
+    ]);
     expect(overview.summary.needsAttention).toBe(1);
     expect(filterRequestOverview(overview, "NEW")).toHaveLength(1);
     expect(filterRequestOverview(overview, "CANCELLED")[0]?.requestId).toBe("crq:old");
-    expect(filterRequestOverview(overview, "ALL", "CER-11111111")).toHaveLength(2);
-    expect(filterRequestOverview(overview, "CANCELLED", "A")[0]?.requestId).toBe("crq:old");
+    expect(filterRequestOverview(overview, "ALL", "CER-11111111")).toHaveLength(3);
+    expect(filterRequestOverview(overview, "CANCELLED", "C")[0]?.requestId).toBe("crq:old");
     expect(filterRequestOverview(overview, "NEW", "B")).toHaveLength(1);
     expect(filterRequestOverview(overview, "NEW", "zz-missing")).toHaveLength(0);
   });
@@ -183,5 +236,35 @@ describe("request overview projection", () => {
     expect(detail.canUploadAttachments).toBe(false);
     expect(detail.attachments).toHaveLength(1);
     expect(detail.attachments[0]?.sizeLabel).toBe("2.0 KB");
+  });
+
+  it("keeps Client Hub requestNeedsAction on the same request attention truth", () => {
+    const created = createCustomer("Client Alpha", { customerId: "cus:alpha" });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    const fresh = projectRequestOverviewItem({
+      request: request({ status: "NEW" }),
+      customerDisplayName: "Client Alpha",
+      quotes: [],
+    });
+    const ready = projectRequestOverviewItem({
+      request: request({
+        requestId: "crq:ready",
+        status: "READY_FOR_QUOTE",
+      }),
+      customerDisplayName: "Client Alpha",
+      quotes: [],
+    });
+    expect(fresh.needsAttention).toBe(false);
+    expect(ready.needsAttention).toBe(true);
+    const workspace = projectCustomerWorkspace({
+      customer: created.customer,
+      requests: [fresh, ready],
+      quotes: [],
+      jobs: [],
+    });
+    expect(workspace.summary.requestNeedsAction).toBe(1);
   });
 });

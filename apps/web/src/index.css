@@ -2680,7 +2680,8 @@ a.jobs-customer {
   font-weight: 400;
 }
 
-.client-workspace {
+.client-workspace,
+.request-object {
   display: grid;
   gap: 1.5rem;
   max-width: none;
@@ -2711,7 +2712,8 @@ a.jobs-customer {
   flex: 1;
 }
 
-.client-workspace h1 {
+.client-workspace h1,
+.request-object h1 {
   margin: 0;
   font-size: 1.75rem;
   font-weight: 600;
@@ -2738,7 +2740,8 @@ a.jobs-customer {
   gap: 0.5rem;
 }
 
-.client-workspace .button-quiet {
+.client-workspace .button-quiet,
+.request-object .button-quiet {
   min-height: 44px;
   min-width: 44px;
   padding: 0 0.875rem;
@@ -2746,11 +2749,13 @@ a.jobs-customer {
   cursor: pointer;
 }
 
-.client-workspace .button-quiet:hover {
+.client-workspace .button-quiet:hover,
+.request-object .button-quiet:hover {
   background: var(--surface-selected);
 }
 
-.client-workspace .button-quiet:focus-visible {
+.client-workspace .button-quiet:focus-visible,
+.request-object .button-quiet:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
@@ -3198,7 +3203,8 @@ a.jobs-customer {
     grid-template-columns: 1fr;
   }
 
-  .client-workspace h1 {
+  .client-workspace h1,
+  .request-object h1 {
     font-size: 1.5rem;
     line-height: 1.29;
   }
@@ -3722,5 +3728,351 @@ a.jobs-customer {
   .clients-overview .registry-row-metric {
     justify-items: start;
     width: auto;
+  }
+}
+
+.requests-overview {
+  display: grid;
+  gap: 0;
+}
+
+.requests-overview .metric-card-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.requests-overview .registry-toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  margin: 0 0 0.75rem;
+}
+
+.requests-overview .registry-toolbar-primary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.requests-overview .registry-toolbar .filter-row {
+  margin: 0;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+
+.requests-overview .registry-toolbar .button-quiet {
+  min-height: 44px;
+}
+
+.requests-overview .registry-toolbar .button-quiet.is-selected {
+  background: var(--surface-selected);
+  border-color: var(--border-strong);
+}
+
+.requests-overview .registry-result-count {
+  margin: 0;
+  min-width: 7.5rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.requests-overview .registry-search {
+  margin: 0;
+  width: min(36rem, 100%);
+  max-width: 36rem;
+  flex: 0 1 36rem;
+  min-width: 0;
+}
+
+.requests-overview .registry-search .field {
+  gap: 0;
+}
+
+.requests-overview .registry-search-controls {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-primary);
+  min-height: 44px;
+  padding: 0 0.75rem;
+  gap: 0.5rem;
+}
+
+.requests-overview .registry-search-controls input {
+  border: 0;
+  background: transparent;
+  min-height: 42px;
+  padding: 0;
+}
+
+.requests-status-filter {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.requests-status-filter select {
+  min-height: 44px;
+  min-width: 10rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-primary);
+  color: inherit;
+}
+
+.requests-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  width: 100%;
+  gap: 0.35rem;
+}
+
+.requests-overview .registry-row {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  min-height: 4.25rem;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.6fr) minmax(7rem, 0.8fr) minmax(6rem, 0.6fr) minmax(7rem, 0.7fr) 2.75rem;
+  grid-template-areas: "identity status date action open";
+}
+
+.requests-row-status,
+.requests-row-date,
+.requests-row-action {
+  margin: 0;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.requests-row-status {
+  grid-area: status;
+  display: grid;
+  gap: 0.15rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.requests-row-attention {
+  color: var(--status-warning);
+  font-weight: 500;
+}
+
+.requests-row-date {
+  grid-area: date;
+}
+
+.requests-row-action {
+  grid-area: action;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.requests-overview .registry-row:hover {
+  background: var(--surface-selected);
+  border-color: var(--border-strong);
+  transform: none;
+  box-shadow: none;
+}
+
+.requests-overview .registry-row:focus {
+  outline: none;
+}
+
+.requests-overview .registry-row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.requests-overview .registry-row.is-attention::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  bottom: -1px;
+  width: 3px;
+  background: var(--status-warning);
+  border-radius: var(--radius-s) 0 0 var(--radius-s);
+  pointer-events: none;
+}
+
+.requests-overview .registry-row-name:hover {
+  text-decoration: none;
+}
+
+.request-inline-create-trigger {
+  justify-self: start;
+}
+
+.request-section {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.request-section h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.request-description-text {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.request-description-text.is-expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.request-facts {
+  margin: 0;
+  display: grid;
+  gap: 0.65rem 1.5rem;
+}
+
+.request-facts > div {
+  display: grid;
+  grid-template-columns: 8.75rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.request-facts dt {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.request-facts dd {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.request-installation-headline {
+  margin: 0;
+  color: var(--status-warning);
+  font-weight: 650;
+}
+
+.request-installation-missing {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.request-installation-reasons {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.request-related-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.request-related-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  padding: 0.65rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--border-subtle) 70%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+
+.request-related-row span {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.request-related-row span span,
+.request-related-row > span:last-of-type {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+@media (max-width: 1919px) {
+  .requests-status-chips {
+    display: none;
+  }
+
+  .requests-status-filter {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 1280px) {
+  .requests-overview .registry-search {
+    flex: 1 1 14rem;
+    width: auto;
+    max-width: 36rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .requests-overview .metric-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .requests-overview .registry-toolbar {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .requests-overview .registry-toolbar-primary {
+    flex-wrap: wrap;
+  }
+
+  .requests-overview .registry-search {
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+  }
+
+  .requests-overview .registry-row {
+    grid-template-columns: minmax(0, 1fr) 2.75rem;
+    grid-template-areas:
+      "identity open"
+      "status open"
+      "date open"
+      "action open";
+  }
+
+  .request-object .client-object-header,
+  .request-object .client-object-actions {
+    display: grid;
+  }
+
+  .request-facts > div {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
   }
 }

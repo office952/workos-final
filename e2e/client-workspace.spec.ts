@@ -1,6 +1,6 @@
 import { expect, test } from "./fixtures";
 import {
-  CANONICAL_LETTERS_PRODUCT_CODE,
+  configureCanonicalLettersForRequest,
   confirmCanonicalLettersOnPage,
   uniqueRequestToken,
 } from "./helpers/requests";
@@ -85,9 +85,15 @@ test("office can open one client and see requests, offers and works", async ({
   await requestForm.getByLabel("Descriere").fill(
     "Clientul sună pentru litere luminoase pe fațadă, text scurt, adâncime 60 mm.",
   );
+  await expect(requestForm.getByRole("button", { name: "Clientul nu e în listă" })).toHaveCount(0);
   await requestForm.getByRole("button", { name: "Creează cererea" }).click();
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
   const requestUrl = page.url();
+  await expect(page.getByRole("link", { name: `Înapoi la ${customerName}` })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Înapoi la Cereri" })).toHaveCount(0);
+  await page.getByRole("link", { name: `Înapoi la ${customerName}` }).click();
+  await expect(page).toHaveURL(/\/clients\/cus.*[?&]section=cereri/);
+  await expect(page.getByRole("heading", { name: customerName })).toBeVisible();
 
   await page.goto(workspaceUrl);
   await page.getByRole("navigation", { name: "Secțiuni client" }).getByRole("link", { name: "Cereri" }).click();
@@ -100,9 +106,8 @@ test("office can open one client and see requests, offers and works", async ({
 
   await page.getByRole("link", { name: title }).click();
   await expect(page).toHaveURL(requestUrl);
-  await page
-    .locator(`a.button-link[href*="${CANONICAL_LETTERS_PRODUCT_CODE}"][href*="request="]`)
-    .click();
+  const requestId = decodeURIComponent(new URL(requestUrl).pathname.split("/").pop() ?? "");
+  await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, inscription);
   const quote = page.locator(".quote-section");
   await quote.getByRole("button", { name: "Creează oferta" }).click();
