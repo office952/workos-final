@@ -186,6 +186,8 @@ FOCUSED_PLAYWRIGHT           = 7 passed / 0 failed / retries=0
 
 The two API failures on the first full `pnpm test` are Cloud/shutdown timing, not Cereri. Isolated re-run of those files passed. Focused Playwright used ports `8805` / `5195` and `.tmp/e2e-data-cereri-amend`.
 
+GitHub PR CI then failed 5 Client Hub / Clients registry e2e tests: they seeded `NEW` requests and still expected `requestNeedsAction` / Signal Edge. Those fixtures now create `READY_FOR_QUOTE` without a linked quote so they follow the same Owner attention truth. No Hub or Clients visual change.
+
 ## Browser verification
 
 Real local runtime against that API, not mocks.

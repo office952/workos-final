@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "./fixtures";
 import { createCustomer } from "./helpers/customers";
-import { uniqueRequestToken } from "./helpers/requests";
+import { createRequestNeedingAction, uniqueRequestToken } from "./helpers/requests";
 
 const EVIDENCE_DIR = join(
   process.cwd(),
@@ -44,14 +44,13 @@ async function createRequestForCustomer(
   customerId: string,
   title: string,
 ) {
-  const created = await request.post("/api/requests", {
-    data: {
-      customerId,
-      title,
-      description: "Cerere sintetică pentru filtrul de atenție.",
-    },
-  });
-  expect(created.ok()).toBeTruthy();
+  const created = await createRequestNeedingAction(
+    request,
+    customerId,
+    title,
+    "Cerere sintetică pentru filtrul de atenție.",
+  );
+  expect(created.ok).toBeTruthy();
 }
 
 test("clients registry matches the accepted Figma interaction contract", async ({

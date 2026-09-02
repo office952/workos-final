@@ -8,7 +8,7 @@ import {
   createOrderFromQuote,
   uniqueQuoteInscription,
 } from "./helpers/quotes";
-import { uniqueRequestToken } from "./helpers/requests";
+import { createRequestNeedingAction, uniqueRequestToken } from "./helpers/requests";
 import { setTheme } from "./helpers/account";
 
 const EVIDENCE_DIR = join(process.cwd(), ".tmp", "client-hub-final-evidence");
@@ -40,14 +40,8 @@ async function createRequestForCustomer(
   customerId: string,
   title: string,
 ) {
-  const created = await request.post("/api/requests", {
-    data: {
-      customerId,
-      title,
-      description: "Cerere sintetică pentru Client Hub.",
-    },
-  });
-  expect(created.ok()).toBeTruthy();
+  const created = await createRequestNeedingAction(request, customerId, title);
+  expect(created.ok).toBeTruthy();
 }
 
 async function createProfiledCustomer(

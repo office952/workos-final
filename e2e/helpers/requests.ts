@@ -62,6 +62,20 @@ export async function updateRequestStatus(
   return { ok: response.ok() };
 }
 
+export async function createRequestNeedingAction(
+  request: APIRequestContext,
+  customerId: string,
+  title: string,
+  description = "Cerere sintetică pentru atenție de birou.",
+) {
+  const created = await createNamedRequest(request, { customerId, title, description });
+  if (!created.ok || !created.requestId) {
+    return created;
+  }
+  const patched = await updateRequestStatus(request, created.requestId, "READY_FOR_QUOTE");
+  return { ...created, ok: patched.ok };
+}
+
 export function overviewRequestByTitle(overview: JsonObject, title: string) {
   const requests = (overview.requests as Array<JsonObject> | undefined) ?? [];
   return requests.find((item) => item.title === title) ?? null;
