@@ -13,9 +13,17 @@ import {
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { getProductSystem, isOwner, type ApiEnv } from "../cloud/context.js";
+import { getProductSystem, isOwner, type ApiContext, type ApiEnv } from "../cloud/context.js";
 import { requireOwnerRole } from "../cloud/middleware.js";
+import { financialAccess, scopedRequestDetail } from "../financial/access.js";
 import { httpPathIdentity } from "../httpPathIdentity.js";
+
+function requestDetailFor(c: ApiContext, requestId: string) {
+  return scopedRequestDetail(
+    getProductSystem(c).readRequestDetail(requestId),
+    financialAccess(c, "commercial"),
+  );
+}
 
 export function registerRequestRoutes(app: Hono<ApiEnv>): void {
   app.get("/api/requests", (c) => {
@@ -38,12 +46,11 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
     if (!result.ok) {
       return c.json({ error: result.error }, requestMutationStatus(result.error));
     }
-    return c.json({ request: result.request, detail: runtime.readRequestDetail(result.request.requestId) }, 201);
+    return c.json({ request: result.request, detail: requestDetailFor(c, result.request.requestId) }, 201);
   });
 
   app.get("/api/requests/:requestId", (c) => {
-    const runtime = getProductSystem(c);
-    const detail = runtime.readRequestDetail(httpPathIdentity(c.req.path, "/api/requests/"));
+    const detail = requestDetailFor(c, httpPathIdentity(c.req.path, "/api/requests/"));
     if (!detail) {
       return c.json({ error: "not_found" }, 404);
     }
@@ -64,7 +71,7 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
     return c.json({
       alreadyApplied: result.alreadyApplied,
       request: result.request,
-      detail: runtime.readRequestDetail(result.request.requestId),
+      detail: requestDetailFor(c, result.request.requestId),
     });
   });
 
@@ -86,7 +93,7 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
     return c.json({
       alreadyApplied: result.alreadyApplied,
       facts: result.facts,
-      detail: runtime.readRequestDetail(c.req.param("requestId")),
+      detail: requestDetailFor(c, c.req.param("requestId")),
     });
   });
 
@@ -111,7 +118,7 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
       return c.json({
         alreadyApplied: result.alreadyApplied,
         request: result.request,
-        detail: runtime.readRequestDetail(result.request.requestId),
+        detail: requestDetailFor(c, result.request.requestId),
       });
     },
   );
@@ -136,7 +143,7 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
     return c.json({
       alreadyApplied: result.alreadyApplied,
       link: result.link,
-      detail: runtime.readRequestDetail(c.req.param("requestId")),
+      detail: requestDetailFor(c, c.req.param("requestId")),
     });
   });
 
@@ -177,7 +184,7 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
       return c.json(
         {
           attachment: result.attachment,
-          detail: runtime.readRequestDetail(c.req.param("requestId")),
+          detail: requestDetailFor(c, c.req.param("requestId")),
         },
         201,
       );

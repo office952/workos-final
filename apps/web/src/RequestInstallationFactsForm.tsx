@@ -52,6 +52,7 @@ export function RequestInstallationFactsForm({
   busy,
   notice,
   providerMode = null,
+  costEvidenceReady = false,
   onSave,
 }: {
   facts: SiteInstallationFacts | null;
@@ -60,6 +61,7 @@ export function RequestInstallationFactsForm({
   busy: boolean;
   notice: { tone: "ok" | "warn"; text: string } | null;
   providerMode?: OperationalServiceProviderMode | null;
+  costEvidenceReady?: boolean;
   onSave: (patch: SiteInstallationFactsPatch) => void;
 }) {
   const [form, setForm] = useState<FormState>(() => formFromFacts(facts));
@@ -74,8 +76,10 @@ export function RequestInstallationFactsForm({
     <section className="result-section request-installation-facts">
       <h3>Date de montaj</h3>
       <p>
-        Datele sunt ale locului de execuție, nu ale clientului. Costul de montaj
-        rămâne incomplet până există evidență de cost.
+        Datele sunt ale locului de execuție, nu ale clientului.
+        {costEvidenceReady
+          ? " Evidența de cost pentru montaj este confirmată."
+          : " Costul de montaj rămâne incomplet până există evidență de cost."}
       </p>
       {reasons.length > 0 ? (
         <ul className="request-installation-facts-reasons">

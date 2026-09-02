@@ -12,6 +12,8 @@ import type { EicResult } from "../resources/eic.js";
 import type { FrozenEicReference } from "../production/snapshot.js";
 import type { ExecutionPlanView } from "../execution/plan.js";
 import type { ExecutionPlanPreview } from "../execution/preview.js";
+import type { SiteInstallationOperatorView } from "../installation/scope.js";
+import type { RequestDetailProjection } from "../requests/overview.js";
 
 export const FINANCIAL_ACCESS_SCOPES = ["owner", "commercial", "workshop"] as const;
 export type FinancialAccessScope = (typeof FINANCIAL_ACCESS_SCOPES)[number];
@@ -295,6 +297,31 @@ export function scopeExecutionPlanView(
   delete (scoped.plan as { eicCurrency?: string }).eicCurrency;
   delete (scoped.plan as { eicCompleteness?: string }).eicCompleteness;
   return omitForbiddenFinancialFields(scoped, access) as Record<string, unknown>;
+}
+
+export function scopeSiteInstallationOperatorView(
+  view: SiteInstallationOperatorView,
+  access: FinancialAccessScope,
+): SiteInstallationOperatorView {
+  if (access === "owner" || !view.ownerInternalCost) {
+    return view;
+  }
+  const rest = { ...view };
+  delete rest.ownerInternalCost;
+  return rest;
+}
+
+export function scopeRequestDetailProjection(
+  detail: RequestDetailProjection,
+  access: FinancialAccessScope,
+): RequestDetailProjection {
+  if (!detail.installationScope) {
+    return detail;
+  }
+  return {
+    ...detail,
+    installationScope: scopeSiteInstallationOperatorView(detail.installationScope, access),
+  };
 }
 
 export function scopeFrozenServiceEvidence(

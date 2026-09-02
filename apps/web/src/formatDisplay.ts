@@ -28,6 +28,15 @@ export function formatDateTime(value: string): string {
   return new Date(value).toLocaleString("ro-RO");
 }
 
+export function formatCalendarDate(value: string): string {
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00Z` : value;
+  return new Date(iso).toLocaleDateString("ro-RO", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function formatCostCompleteness(
   completeness: "PARTIAL" | "COMPLETE",
 ): string {

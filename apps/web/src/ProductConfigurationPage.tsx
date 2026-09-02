@@ -17,7 +17,10 @@ import {
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
+  type OperationalServiceProviderMode,
   type RequestDetailProjection,
+  siteInstallationIsPrequoteReady,
+  siteInstallationReadinessLabel,
   type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
@@ -55,6 +58,7 @@ import {
   readQuoteSnapshot,
   type TemplateProjection,
 } from "./productApi";
+import { formatMoney } from "./formatDisplay";
 import { appPathname } from "./navigation/routePath";
 import { readRequestDetail } from "./requestsApi";
 import { Notice } from "./ui/Notice";
@@ -120,6 +124,7 @@ export function ProductConfigurationPage() {
     eic?: EicResult;
     commercialPrice: CommercialPriceProjection;
     jobCommercial?: LiveJobCommercial | null;
+    installationScope?: SiteInstallationOperatorView | null;
     executionPlanPreview: ExecutionPlanPreview;
     definition: ProductDefinition;
     quoteSnapshot?: QuoteSnapshot;
@@ -335,6 +340,7 @@ export function ProductConfigurationPage() {
           eic: result.eic,
           commercialPrice: result.commercialPrice,
           jobCommercial: result.jobCommercial ?? null,
+          installationScope: result.installationScope ?? null,
           executionPlanPreview: result.executionPlanPreview,
           definition,
         });
@@ -826,8 +832,12 @@ export function ProductConfigurationPage() {
     restoredRequest.kind === "ready" ? restoredRequest.detail : null;
 
   const summaryFacts = selectedConfigurationFacts(formSchema, values);
+  const installationScope =
+    confirmed?.installationScope ?? requestContext?.installationScope ?? null;
   const summaryStatus = confirmed
-    ? "Completă"
+    ? installationScope && !siteInstallationIsPrequoteReady(installationScope)
+      ? siteInstallationReadinessLabel(installationScope)
+      : "Completă"
     : reviewing
       ? "Pregătită pentru confirmare"
       : definition?.readiness === "blocked"
@@ -836,6 +846,8 @@ export function ProductConfigurationPage() {
   const priceLabel =
     confirmed && confirmed.jobCommercial
       ? `Preț client ${formatJobGross(confirmed.jobCommercial)}`
+      : confirmed && installationScope
+        ? null
       : confirmed && confirmed.commercialPrice.completeness === "COMPLETE"
         ? `Preț client ${formatCommercialGross(confirmed.commercialPrice)}`
         : null;
@@ -953,7 +965,8 @@ export function ProductConfigurationPage() {
           onRelease={() => void handleReleaseProduction()}
           onAcceptProduction={() => void handleAcceptProduction()}
           onCreatePlan={() => void handleCreateExecutionPlan()}
-          installationScope={requestContext?.installationScope ?? null}
+          installationScope={installationScope}
+          installationMode={requestContext?.installationOffer.mode ?? null}
         />
       ) : null}
         </div>
@@ -979,6 +992,7 @@ type ConfirmedProduct = {
   eic?: EicResult;
   commercialPrice: CommercialPriceProjection;
   jobCommercial?: LiveJobCommercial | null;
+  installationScope?: SiteInstallationOperatorView | null;
   executionPlanPreview: ExecutionPlanPreview;
   quoteSnapshot?: QuoteSnapshot;
   quoteReused?: boolean;
@@ -1005,6 +1019,7 @@ function ConfirmedCommercialWorkspace({
   onAcceptProduction,
   onCreatePlan,
   installationScope = null,
+  installationMode = null,
 }: {
   confirmed: ConfirmedProduct;
   busy: boolean;
@@ -1020,6 +1035,7 @@ function ConfirmedCommercialWorkspace({
   onAcceptProduction: () => void;
   onCreatePlan: () => void;
   installationScope?: SiteInstallationOperatorView | null;
+  installationMode?: OperationalServiceProviderMode | null;
 }) {
   const commercialRelease =
     confirmed.snapshot &&
@@ -1074,7 +1090,12 @@ function ConfirmedCommercialWorkspace({
         installationScope={installationScope}
         jobCommercial={confirmed.jobCommercial ?? null}
       />
-      {installationScope ? <InstallationScopeSection scope={installationScope} /> : null}
+      {installationScope ? (
+        <InstallationScopeSection
+          scope={installationScope}
+          providerMode={installationMode}
+        />
+      ) : null}
 
       {confirmed.orderSnapshot ? (
         <>
@@ -1128,6 +1149,23 @@ function ConfirmedCommercialWorkspace({
 
       <details className="secondary-details">
         <summary>Detalii interne</summary>
+        {installationScope?.ownerInternalCost && confirmed.eic?.completeness === "COMPLETE" ? (
+          <dl className="owner-internal-costs">
+            <div>
+              <dt>Cost intern produs</dt>
+              <dd>
+                {formatMoney(confirmed.eic.total)} {confirmed.eic.currency}
+              </dd>
+            </div>
+            <div>
+              <dt>{installationScope.ownerInternalCost.label}</dt>
+              <dd>
+                {formatMoney(installationScope.ownerInternalCost.total)}{" "}
+                {installationScope.ownerInternalCost.currency}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
         {confirmed.eic ? (
           <EicSection eic={confirmed.eic} aggregate={confirmed.aggregate} />
         ) : null}

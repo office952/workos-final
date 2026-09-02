@@ -55,6 +55,25 @@ export function ResourcesAdminPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (page.kind !== "ready") {
+      return;
+    }
+    const catalog = buildResourcesCatalog(page.admin);
+    const resolved = resolveResourcesSelection(catalog, page.admin, selected);
+    if (!resolved.redirectTo || resolved.redirectTo === selected) {
+      return;
+    }
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.set("selected", resolved.redirectTo ?? "");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [page, selected, setSearchParams]);
+
   function retryLoad() {
     setPage({ kind: "loading" });
     void fetchResourcesAdministration()
@@ -119,7 +138,8 @@ export function ResourcesAdminPage() {
   const summary = resourcesAdminSummary(page.admin);
   const writable = page.admin.writeState === "READY" && canAdminister;
   const catalog = buildResourcesCatalog(page.admin);
-  const selectedItem = selected ? findCatalogItem(catalog, selected) : undefined;
+  const resolved = resolveResourcesSelection(catalog, page.admin, selected);
+  const selectedItem = resolved.item;
 
   return (
     <section>
@@ -164,9 +184,18 @@ export function ResourcesAdminPage() {
               item={selectedItem}
               actions={
                 writable
-                  ? renderCostAction(page.admin, selectedItem.id, (admin) =>
-                      setPage({ kind: "ready", admin }),
-                    )
+                  ? renderCostAction(page.admin, selectedItem.id, (admin) => {
+                      setPage({ kind: "ready", admin });
+                      if (selectedItem.id.startsWith("resource:")) {
+                        const resourceId = selectedItem.id.slice("resource:".length);
+                        const created = admin.costEvidence.find(
+                          (row) => row.resourceId === resourceId,
+                        );
+                        if (created) {
+                          selectItem(costEvidenceItemId(created));
+                        }
+                      }
+                    })
                   : null
               }
             />
@@ -226,4 +255,30 @@ function renderCostAction(
       onSaved={onSaved}
     />
   );
+}
+
+function resolveResourcesSelection(
+  catalog: ReturnType<typeof buildResourcesCatalog>,
+  admin: ResourcesAdminProjection,
+  selected: string | null,
+): { item: ReturnType<typeof findCatalogItem>; redirectTo: string | null } {
+  if (!selected) {
+    return { item: undefined, redirectTo: null };
+  }
+  const item = findCatalogItem(catalog, selected);
+  if (item) {
+    return { item, redirectTo: null };
+  }
+  if (selected.startsWith("resource:")) {
+    const resourceId = selected.slice("resource:".length);
+    const evidence = admin.costEvidence.find((row) => row.resourceId === resourceId);
+    if (evidence) {
+      const redirectTo = costEvidenceItemId(evidence);
+      return {
+        item: findCatalogItem(catalog, redirectTo),
+        redirectTo,
+      };
+    }
+  }
+  return { item: undefined, redirectTo: null };
 }

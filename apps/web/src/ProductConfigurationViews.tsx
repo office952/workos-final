@@ -26,6 +26,8 @@ import {
   SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED_REASON,
   SERVICE_QUOTE_NOT_ACCEPTABLE_REASON,
   SITE_INSTALLATION_FREEZE_REASON,
+  siteInstallationIsPrequoteReady,
+  siteInstallationReadinessLabel,
   type LiveJobCommercial,
   type SiteInstallationOperatorView,
 } from "@workos-final/domain";
@@ -37,6 +39,7 @@ import {
 } from "./formatDisplay";
 import { ClientLink } from "./ClientLink";
 import { quoteDocumentUrl } from "./productApi";
+import { installationCostEvidenceHref } from "./installationPresentation";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 import { StatusChip } from "./ui/StatusChip";
@@ -632,16 +635,40 @@ export function QuoteSnapshotSection({
       <h3>Ofertă</h3>
       {installationScope && jobCommercial ? (
         <div className="commercial-job-preview">
+          <p className="commercial-gross">
+            Total ofertă client
+            <span>
+              {" "}
+              {formatMoney(jobCommercial.grossPrice)} {jobCommercial.currency}
+            </span>
+          </p>
+          <dl className="commercial-job-breakdown">
+            <div>
+              <dt>Produs</dt>
+              <dd>
+                {formatMoney(price.grossPrice ?? 0)} {price.currency}
+              </dd>
+            </div>
+            <div>
+              <dt>{installationScope.label}</dt>
+              <dd>
+                {formatMoney(installationScope.commercialGrossPrice ?? 0)} {price.currency}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      ) : installationScope ? (
+        <div className="commercial-job-preview">
           <p>
             Produs: {formatMoney(price.grossPrice ?? 0)} {price.currency}
           </p>
-          <p>
-            {installationScope.label}: {formatMoney(installationScope.commercialGrossPrice ?? 0)}{" "}
-            {price.currency}
-          </p>
-          <p className="commercial-gross">
-            Preț final client: {formatMoney(jobCommercial.grossPrice)} {jobCommercial.currency}
-          </p>
+          {installationScope.commercialGrossPrice != null ? (
+            <p>
+              Preț montaj client: {formatMoney(installationScope.commercialGrossPrice)}{" "}
+              {price.currency}
+            </p>
+          ) : null}
+          <p className="page-lead">Totalul ofertei nu este gata.</p>
         </div>
       ) : (
         <p className="commercial-gross">
@@ -681,14 +708,23 @@ function QuoteJobPrice({ snapshot }: { snapshot: QuoteSnapshot }) {
   if (job && snapshot.lines && snapshot.lines.length > 0) {
     return (
       <div className="commercial-job-preview">
-        {snapshot.lines.map((line) => (
-          <p key={line.kind}>
-            {line.label}: {formatMoney(line.commercial.grossPrice)} {line.commercial.currency}
-          </p>
-        ))}
         <p className="commercial-gross">
-          Preț final: {formatMoney(job.grossPrice)} {job.currency}
+          Total ofertă client
+          <span>
+            {" "}
+            {formatMoney(job.grossPrice)} {job.currency}
+          </span>
         </p>
+        <dl className="commercial-job-breakdown">
+          {snapshot.lines.map((line) => (
+            <div key={line.kind}>
+              <dt>{line.label}</dt>
+              <dd>
+                {formatMoney(line.commercial.grossPrice)} {line.commercial.currency}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     );
   }
@@ -701,21 +737,41 @@ function QuoteJobPrice({ snapshot }: { snapshot: QuoteSnapshot }) {
 
 export function InstallationScopeSection({
   scope,
+  providerMode = null,
 }: {
   scope: SiteInstallationOperatorView;
+  providerMode?: "INTERNAL" | "SUBCONTRACTED" | null;
 }) {
+  const ready = siteInstallationIsPrequoteReady(scope);
+  const costHref = installationCostEvidenceHref({
+    providerMode,
+    incompleteReasons: scope.incompleteReasons,
+  });
   return (
     <section className="result-section installation-scope-section">
       <div className="commercial-summary">
         <h3>{scope.label}</h3>
         <StatusChip
-          label={commercialCompletenessLabel(scope.commercialCompleteness)}
-          tone={scope.commercialCompleteness === "COMPLETE" ? "ok" : "warn"}
+          label={siteInstallationReadinessLabel(scope)}
+          tone={ready ? "ok" : "warn"}
         />
       </div>
       {scope.commercialCompleteness === "COMPLETE" && scope.commercialGrossPrice != null ? (
         <p>
-          Preț montaj: {formatMoney(scope.commercialGrossPrice)} EUR
+          Preț montaj client: {formatMoney(scope.commercialGrossPrice)} EUR
+        </p>
+      ) : (
+        <p>Prețul de montaj pentru client nu este confirmat.</p>
+      )}
+      {scope.ownerInternalCost ? (
+        <p>
+          {scope.ownerInternalCost.label}: {formatMoney(scope.ownerInternalCost.total)}{" "}
+          {scope.ownerInternalCost.currency}
+          <span className="page-lead">
+            {" "}
+            ({formatQuantity(scope.ownerInternalCost.quantity)} {scope.ownerInternalCost.unitLabel}{" "}
+            × {formatMoney(scope.ownerInternalCost.rate)} {scope.ownerInternalCost.currency})
+          </span>
         </p>
       ) : null}
       {scope.incompleteReasons.length > 0 ? (
@@ -724,6 +780,13 @@ export function InstallationScopeSection({
             <li key={reason.id}>{reason.label}</li>
           ))}
         </ul>
+      ) : null}
+      {costHref ? (
+        <p>
+          <Link className="button-link" to={costHref}>
+            Actualizează dovada de cost
+          </Link>
+        </p>
       ) : null}
     </section>
   );

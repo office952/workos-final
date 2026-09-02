@@ -132,6 +132,12 @@ describe("first real letters pre-quote API", () => {
     expect(installationScope.eicCompleteness).toBe("COMPLETE");
     expect(installationScope.commercialCompleteness).toBe("COMPLETE");
     expect(installationScope.commercialGrossPrice).toBe(242);
+    expect((installationScope.ownerInternalCost as JsonObject).total).toBe(300);
+    expect((installationScope.ownerInternalCost as JsonObject).label).toBe(
+      "Cost intern estimat montaj",
+    );
+    expect((installationScope.ownerInternalCost as JsonObject).quantity).toBe(12);
+    expect((installationScope.ownerInternalCost as JsonObject).rate).toBe(25);
 
     const compile = await app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/compile`, {
       method: "POST",
@@ -149,7 +155,11 @@ describe("first real letters pre-quote API", () => {
       }),
     });
     expect(confirmed.status).toBe(200);
-    expect(((await readBody(confirmed)).jobCommercial as JsonObject).grossPrice).toBe(866.82);
+    const confirmedBody = await readBody(confirmed);
+    expect((confirmedBody.jobCommercial as JsonObject).grossPrice).toBe(866.82);
+    expect(
+      ((confirmedBody.installationScope as JsonObject).ownerInternalCost as JsonObject).total,
+    ).toBe(300);
     const frozen = await app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -269,6 +279,8 @@ describe("first real letters pre-quote API", () => {
     const scope = installationScope.installationScope as JsonObject;
     expect(scope.eicCompleteness).toBe("COMPLETE");
     expect(scope.commercialGrossPrice).toBe(242);
+    expect((scope.ownerInternalCost as JsonObject).total).toBe(180);
+    expect((scope.ownerInternalCost as JsonObject).label).toBe("Cost subcontractat montaj");
 
     const compile = await app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/compile`, {
       method: "POST",
@@ -389,6 +401,145 @@ describe("first real letters pre-quote owner writes", () => {
       }),
     });
     expect(memberEvidence.status).toBe(403);
+    fixture.close();
+  });
+
+  it("does not expose live installation EIC to a commercial member", async () => {
+    const fixture = createCloudFixture();
+    const alpha = await addOrganization(fixture, "Atelier Prequote Leak");
+    await addUser(fixture, {
+      email: "owner-prequote-leak@example.test",
+      password: OWNER_PASSWORD,
+      organizationId: alpha.organization.organizationId,
+      role: "owner",
+    });
+    await addUser(fixture, {
+      email: "member-prequote-leak@example.test",
+      password: MEMBER_PASSWORD,
+      organizationId: alpha.organization.organizationId,
+      role: "member",
+    });
+    const owner = await loginCloud(
+      fixture.app,
+      "owner-prequote-leak@example.test",
+      OWNER_PASSWORD,
+    );
+    const member = await loginCloud(
+      fixture.app,
+      "member-prequote-leak@example.test",
+      MEMBER_PASSWORD,
+      alpha.organization.organizationId,
+    );
+    const ownerHeaders = {
+      cookie: owner.cookie ?? "",
+      "content-type": "application/json",
+    };
+    await fixture.app.request("/api/operational-services/SITE_INSTALLATION", {
+      method: "PATCH",
+      headers: ownerHeaders,
+      body: JSON.stringify({ offerMode: "INTERNAL" }),
+    });
+    const createdCustomer = await fixture.app.request("/api/customers", {
+      method: "POST",
+      headers: ownerHeaders,
+      body: JSON.stringify({ displayName: "Client leak" }),
+    });
+    const customerId = String(
+      ((await readBody(createdCustomer)).customer as JsonObject).customerId,
+    );
+    const createdRequest = await fixture.app.request("/api/requests", {
+      method: "POST",
+      headers: ownerHeaders,
+      body: JSON.stringify({
+        customerId,
+        title: "Litere leak",
+        description: "Cerere pentru separare financiară.",
+      }),
+    });
+    const requestId = String(((await readBody(createdRequest)).request as JsonObject).requestId);
+    await fixture.app.request(`/api/requests/${encodeURIComponent(requestId)}`, {
+      method: "PATCH",
+      headers: ownerHeaders,
+      body: JSON.stringify({ optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] }),
+    });
+    await fixture.app.request(
+      `/api/requests/${encodeURIComponent(requestId)}/installation-facts`,
+      {
+        method: "PATCH",
+        headers: ownerHeaders,
+        body: JSON.stringify({
+          expectedVersion: 0,
+          street: "Strada Test 10",
+          city: "Oraș Test",
+          measurementStatus: "OFFICE_MEASURED",
+          facadeType: "CONCRETE",
+          fixingMethod: "MECHANICAL_ANCHOR",
+          siteElectrical: "NOT_APPLICABLE",
+          crewSize: 3,
+          plannedDurationHours: 4,
+        }),
+      },
+    );
+    await fixture.app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: ownerHeaders,
+      body: JSON.stringify({
+        resourceId: LAB_SITE_INSTALL_ID,
+        amount: 25,
+        note: "Tarif leak.",
+      }),
+    });
+    await fixture.app.request(
+      `/api/requests/${encodeURIComponent(requestId)}/installation-price`,
+      {
+        method: "PATCH",
+        headers: ownerHeaders,
+        body: JSON.stringify({ netPrice: 200 }),
+      },
+    );
+    const ownerDetail = await readBody(
+      await fixture.app.request(`/api/requests/${encodeURIComponent(requestId)}`, {
+        headers: { cookie: owner.cookie ?? "" },
+      }),
+    );
+    expect(
+      (((ownerDetail.detail as JsonObject).installationScope as JsonObject)
+        .ownerInternalCost as JsonObject).total,
+    ).toBe(300);
+    const memberDetail = await readBody(
+      await fixture.app.request(`/api/requests/${encodeURIComponent(requestId)}`, {
+        headers: { cookie: member.cookie ?? "" },
+      }),
+    );
+    const memberScope = (memberDetail.detail as JsonObject).installationScope as JsonObject;
+    expect(memberScope.commercialGrossPrice).toBe(242);
+    expect(memberScope.ownerInternalCost).toBeUndefined();
+    expect(JSON.stringify(memberDetail)).not.toContain("\"total\":300");
+    expect(JSON.stringify(memberDetail)).not.toContain("\"rate\":25");
+    const compile = await fixture.app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/compile`, {
+      method: "POST",
+      headers: ownerHeaders,
+      body: JSON.stringify({ values: { "root.inscription": "LEAK", ...lettersValues } }),
+    });
+    const compiled = await readBody(compile);
+    const memberConfirm = await readBody(
+      await fixture.app.request(`/api/products/${CANONICAL_PRODUCT_CODE}/confirm`, {
+        method: "POST",
+        headers: {
+          cookie: member.cookie ?? "",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          definition: compiled.definition,
+          reviewId: compiled.reviewId,
+          requestId,
+        }),
+      }),
+    );
+    expect(
+      (memberConfirm.installationScope as JsonObject | undefined)?.ownerInternalCost,
+    ).toBeUndefined();
+    expect(JSON.stringify(memberConfirm)).not.toContain("\"total\":300");
     fixture.close();
   });
 });

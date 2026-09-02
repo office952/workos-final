@@ -12,6 +12,8 @@ export {
   sameOptionalScopeIds,
   siteInstallationBlocksQuoteFreeze,
   siteInstallationFreezeRefusal,
+  siteInstallationIsPrequoteReady,
+  siteInstallationReadinessLabel,
   SITE_INSTALLATION_PRICE_FREEZE_REASON,
   siteInstallationIncompleteReasonIds,
   siteInstallationIncompleteReasonLabel,
@@ -22,6 +24,7 @@ export {
   type SiteInstallationIncompleteReason,
   type SiteInstallationIncompleteReasonId,
   type SiteInstallationOperatorView,
+  type SiteInstallationOwnerInternalCost,
   type SiteInstallationProjectionInput,
   type SiteInstallationScopeProjection,
 } from "./scope.js";

@@ -8,6 +8,7 @@ import {
   LAB_SITE_INSTALL_ID,
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
   getResource,
+  resourceUnitLabel,
 } from "../resources/catalog.js";
 import { roundMoney } from "../commercial/price.js";
 import type { EicLine, EicResult } from "../resources/eic.js";
@@ -72,6 +73,15 @@ export type SiteInstallationScopeProjection = {
   incompleteReasons: readonly SiteInstallationIncompleteReason[];
 };
 
+export type SiteInstallationOwnerInternalCost = {
+  label: string;
+  total: number;
+  currency: "EUR";
+  quantity: number;
+  unitLabel: string;
+  rate: number;
+};
+
 export type SiteInstallationOperatorView = {
   scopeId: typeof SITE_INSTALLATION_SCOPE_ID;
   label: typeof SITE_INSTALLATION_LABEL;
@@ -80,6 +90,7 @@ export type SiteInstallationOperatorView = {
   commercialNetPrice: number | null;
   commercialGrossPrice: number | null;
   incompleteReasons: readonly SiteInstallationIncompleteReason[];
+  ownerInternalCost?: SiteInstallationOwnerInternalCost;
 };
 
 export function isKnownOptionalScopeId(value: string): value is OptionalCommercialScopeId {
@@ -257,6 +268,7 @@ export function presentSiteInstallationScope(
     return null;
   }
   const commercialComplete = projection.commercial.completeness === "COMPLETE";
+  const ownerInternalCost = presentOwnerInternalCost(projection.eic);
   return {
     scopeId: projection.scopeId,
     label: projection.label,
@@ -265,7 +277,78 @@ export function presentSiteInstallationScope(
     commercialNetPrice: commercialComplete ? projection.commercial.netPrice : null,
     commercialGrossPrice: commercialComplete ? projection.commercial.grossPrice : null,
     incompleteReasons: projection.incompleteReasons,
+    ...(ownerInternalCost ? { ownerInternalCost } : {}),
   };
+}
+
+export function siteInstallationIsPrequoteReady(
+  view: Pick<
+    SiteInstallationOperatorView,
+    "eicCompleteness" | "commercialCompleteness" | "incompleteReasons"
+  >,
+): boolean {
+  return (
+    view.eicCompleteness === "COMPLETE" &&
+    view.commercialCompleteness === "COMPLETE" &&
+    view.incompleteReasons.length === 0
+  );
+}
+
+export function siteInstallationReadinessLabel(
+  view: Pick<
+    SiteInstallationOperatorView,
+    "eicCompleteness" | "commercialCompleteness" | "incompleteReasons"
+  >,
+): string {
+  if (siteInstallationIsPrequoteReady(view)) {
+    return "Pregătit pentru ofertă";
+  }
+  const expired = view.incompleteReasons.some(
+    (reason) => reason.id === "SUBCONTRACT_EVIDENCE_INVALID",
+  );
+  const costReady = view.eicCompleteness === "COMPLETE";
+  const priceConfirmed = view.commercialCompleteness === "COMPLETE";
+  if (priceConfirmed && expired) {
+    return "Preț client confirmat · Dovadă subcontract expirată";
+  }
+  if (priceConfirmed && !costReady) {
+    return "Preț client confirmat · Cost intern incomplet";
+  }
+  if (!priceConfirmed && costReady) {
+    return "Cost intern pregătit · Preț client neconfirmat";
+  }
+  return "Incomplet";
+}
+
+function presentOwnerInternalCost(
+  eic: EicResult,
+): SiteInstallationOwnerInternalCost | undefined {
+  if (eic.completeness !== "COMPLETE" || eic.lines.length === 0) {
+    return undefined;
+  }
+  const line = eic.lines[0];
+  if (!line) {
+    return undefined;
+  }
+  return {
+    label: ownerInternalCostLabel(line.resourceId),
+    total: eic.total,
+    currency: eic.currency,
+    quantity: line.quantity,
+    unitLabel: resourceUnitLabel(line.unit),
+    rate: line.rate,
+  };
+}
+
+function ownerInternalCostLabel(resourceId: string): string {
+  switch (resourceId) {
+    case LAB_SITE_INSTALL_ID:
+      return "Cost intern estimat montaj";
+    case SVC_SITE_INSTALL_SUBCONTRACT_ID:
+      return "Cost subcontractat montaj";
+    default:
+      return "Cost intern montaj";
+  }
 }
 
 export function siteInstallationBlocksQuoteFreeze(

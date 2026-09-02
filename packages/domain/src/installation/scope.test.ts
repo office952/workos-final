@@ -18,6 +18,8 @@ import {
   siteInstallationBlocksQuoteFreeze,
   siteInstallationFreezeRefusal,
   siteInstallationIncompleteReasons,
+  siteInstallationIsPrequoteReady,
+  siteInstallationReadinessLabel,
 } from "./scope.js";
 
 const requestId = "crq:prequote-scope";
@@ -156,6 +158,17 @@ describe("optional site installation scope", () => {
     expect(projected?.commercial.netPrice).toBe(200);
     expect(projected?.commercial.grossPrice).toBe(242);
     expect(projected?.commercial.markupAmount).toBe(0);
+    const presented = presentSiteInstallationScope(projected);
+    expect(presented?.ownerInternalCost).toEqual({
+      label: "Cost intern estimat montaj",
+      total: 300,
+      currency: "EUR",
+      quantity: 12,
+      unitLabel: "ore-persoană",
+      rate: 25,
+    });
+    expect(siteInstallationIsPrequoteReady(presented!)).toBe(true);
+    expect(siteInstallationReadinessLabel(presented!)).toBe("Pregătit pentru ofertă");
   });
 
   it("completes SUBCONTRACTED EIC from supplier job evidence, not from customer price", () => {
@@ -171,6 +184,13 @@ describe("optional site installation scope", () => {
     expect(projected?.eic.total).toBe(180);
     expect(projected?.eic.lines[0]?.resourceId).toBe(SVC_SITE_INSTALL_SUBCONTRACT_ID);
     expect(projected?.commercial.netPrice).toBe(200);
+    expect(presentSiteInstallationScope(projected)?.ownerInternalCost).toMatchObject({
+      label: "Cost subcontractat montaj",
+      total: 180,
+      quantity: 1,
+      unitLabel: "lucrare",
+      rate: 180,
+    });
   });
 
   it("refuses expired subcontract evidence", () => {
@@ -185,6 +205,12 @@ describe("optional site installation scope", () => {
     expect(projected?.eic.completeness).toBe("PARTIAL");
     expect(projected?.incompleteReasons.map((reason) => reason.id)).toContain(
       "SUBCONTRACT_EVIDENCE_INVALID",
+    );
+    const presented = presentSiteInstallationScope(projected);
+    expect(presented?.ownerInternalCost).toBeUndefined();
+    expect(siteInstallationIsPrequoteReady(presented!)).toBe(false);
+    expect(siteInstallationReadinessLabel(presented!)).toBe(
+      "Preț client confirmat · Dovadă subcontract expirată",
     );
   });
 
@@ -223,6 +249,11 @@ describe("optional site installation scope", () => {
     });
     expect(projected?.eic.completeness).toBe("PARTIAL");
     expect(projected?.commercial.completeness).toBe("COMPLETE");
+    const presented = presentSiteInstallationScope(projected);
+    expect(presented?.ownerInternalCost).toBeUndefined();
+    expect(siteInstallationReadinessLabel(presented!)).toBe(
+      "Preț client confirmat · Cost intern incomplet",
+    );
   });
 
   it("normalizes known scopes and refuses unknown ones", () => {

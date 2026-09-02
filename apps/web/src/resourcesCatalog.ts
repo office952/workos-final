@@ -1,5 +1,5 @@
 import type { ResourcesAdminProjection } from "@workos-final/domain";
-import { formatDateTime } from "./formatDisplay";
+import { formatCalendarDate, formatDateTime } from "./formatDisplay";
 import type {
   CatalogChip,
   CatalogDetailSection,
@@ -339,6 +339,9 @@ function costEvidenceSections(
         ...(item.validUntil
           ? [{ label: "Valid până la", value: item.validUntil }]
           : []),
+        ...(item.validityState === "expired" && item.validUntil
+          ? [{ label: "Valabilitate", value: `Expirat · ${formatCalendarDate(item.validUntil)}` }]
+          : []),
         ...(item.lastChangedAt
           ? [
               {
@@ -383,6 +386,12 @@ function costChips(
     return [];
   }
   const chips: CatalogChip[] = [];
+  if (cost.validityState === "expired" && cost.validUntil) {
+    chips.push({
+      label: `Expirat · ${formatCalendarDate(cost.validUntil)}`,
+      tone: "warn",
+    });
+  }
   if (cost.classificationLabel === "Confirmat de owner") {
     chips.push({ label: cost.classificationLabel, tone: "ok" });
   } else if (cost.classificationLabel === "Default de dezvoltare") {

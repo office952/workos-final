@@ -348,7 +348,10 @@ describe("Product configuration views", () => {
     const freeze = screen.getByRole("button", { name: "Creează oferta" });
     expect(freeze).toBeDisabled();
     expect(screen.getByText("Montajul nu are încă un cost complet.")).toBeInTheDocument();
-    expect(screen.getByText("Preț final client: 665,98 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Produs: 665,98 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Totalul ofertei nu este gata.")).toBeInTheDocument();
+    expect(screen.queryByText("Preț final client: 665,98 EUR")).not.toBeInTheDocument();
+    expect(screen.queryByText("Total ofertă client")).not.toBeInTheDocument();
   });
 
   it("shows the projected job total without adding prices in the UI", () => {
@@ -404,9 +407,13 @@ describe("Product configuration views", () => {
         "Previzualizarea ofertei cu montaj este pregătită. Înghețarea acestei oferte nu este activată în această etapă.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText("Produs: 624,82 EUR")).toBeInTheDocument();
-    expect(screen.getByText("Montaj la locație: 242,00 EUR")).toBeInTheDocument();
-    expect(screen.getByText("Preț final client: 866,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Total ofertă client")).toBeInTheDocument();
+    expect(screen.getByText("866,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Produs")).toBeInTheDocument();
+    expect(screen.getByText("624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Montaj la locație")).toBeInTheDocument();
+    expect(screen.getByText("242,00 EUR")).toBeInTheDocument();
+    expect(screen.queryByText("Preț final client: 866,82 EUR")).not.toBeInTheDocument();
   });
 
   it("renders installation PARTIAL reasons without a 0 EUR price", () => {
@@ -430,9 +437,74 @@ describe("Product configuration views", () => {
       />,
     );
     expect(screen.getByRole("heading", { name: "Montaj la locație" })).toBeInTheDocument();
-    expect(screen.getByText("Parțial")).toBeInTheDocument();
+    expect(screen.getByText("Incomplet")).toBeInTheDocument();
+    expect(screen.getByText("Prețul de montaj pentru client nu este confirmat.")).toBeInTheDocument();
     expect(screen.getByText("Evidența de cost pentru montaj lipsește.")).toBeInTheDocument();
     expect(screen.queryByText(/0(?:[.,]00)? EUR/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Complet")).not.toBeInTheDocument();
+  });
+
+  it("shows Owner installation EIC separately from the customer price", () => {
+    render(
+      <InstallationScopeSection
+        scope={{
+          scopeId: "SITE_INSTALLATION",
+          label: "Montaj la locație",
+          eicCompleteness: "COMPLETE",
+          commercialCompleteness: "COMPLETE",
+          commercialNetPrice: 200,
+          commercialGrossPrice: 242,
+          incompleteReasons: [],
+          ownerInternalCost: {
+            label: "Cost intern estimat montaj",
+            total: 300,
+            currency: "EUR",
+            quantity: 12,
+            unitLabel: "ore-persoană",
+            rate: 25,
+          },
+        }}
+      />,
+    );
+    expect(screen.getByText("Pregătit pentru ofertă")).toBeInTheDocument();
+    expect(screen.getByText("Preț montaj client: 242,00 EUR")).toBeInTheDocument();
+    expect(screen.getByText(/Cost intern estimat montaj: 300,00 EUR/)).toBeInTheDocument();
+    expect(screen.getByText(/12 ore-persoană × 25,00 EUR/)).toBeInTheDocument();
+  });
+
+  it("keeps an expired subcontract commercially visible but not overall complete", () => {
+    render(
+      <MemoryRouter>
+        <InstallationScopeSection
+          providerMode="SUBCONTRACTED"
+          scope={{
+            scopeId: "SITE_INSTALLATION",
+            label: "Montaj la locație",
+            eicCompleteness: "PARTIAL",
+            commercialCompleteness: "COMPLETE",
+            commercialNetPrice: 200,
+            commercialGrossPrice: 242,
+            incompleteReasons: [
+              {
+                id: "SUBCONTRACT_EVIDENCE_INVALID",
+                label: "Evidența subcontractantului nu este validă pentru această dată.",
+              },
+            ],
+          }}
+        />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getByText("Preț client confirmat · Dovadă subcontract expirată"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Preț montaj client: 242,00 EUR")).toBeInTheDocument();
+    expect(screen.queryByText("Complet")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Actualizează dovada de cost" }),
+    ).toHaveAttribute(
+      "href",
+      "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",
+    );
   });
 
   it("renders frozen quote values from the snapshot only", () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   UNCONFIGURED_SITE_INSTALLATION_OFFER,
   projectSiteInstallationRequestOffer,
+  siteInstallationIsPrequoteReady,
   type RequestDetailProjection,
 } from "@workos-final/domain";
 import {
@@ -71,6 +72,43 @@ describe("requestObjectView", () => {
         }),
       ),
     ).toBe("Blocată după ofertă");
+  });
+
+  it("does not call a blocked request complete when customer price is confirmed", () => {
+    const blocked = detail({
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "SUBCONTRACTED",
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "SUBCONTRACTED",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+      installationScope: {
+        scopeId: "SITE_INSTALLATION",
+        label: "Montaj la locație",
+        eicCompleteness: "PARTIAL",
+        commercialCompleteness: "COMPLETE",
+        commercialNetPrice: 200,
+        commercialGrossPrice: 242,
+        incompleteReasons: [
+          {
+            id: "SUBCONTRACT_EVIDENCE_INVALID",
+            label: "Evidența subcontractantului nu este validă pentru această dată.",
+          },
+        ],
+      },
+    });
+    expect(requestInstallationHeadline(blocked)).toBe(
+      "Selectat · Preț client confirmat · Dovadă subcontract expirată",
+    );
+    expect(blocked.installationScope && siteInstallationIsPrequoteReady(blocked.installationScope)).toBe(
+      false,
+    );
   });
 
   it("prioritizes incompatible mode and incomplete installation over catalog", () => {

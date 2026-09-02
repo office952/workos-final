@@ -1048,6 +1048,51 @@ h1 {
   font-weight: 700;
 }
 
+.commercial-job-preview {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.commercial-job-preview .commercial-gross {
+  margin: 0;
+}
+
+.commercial-job-breakdown,
+.owner-internal-costs,
+.request-prequote-readiness {
+  display: grid;
+  gap: 0.35rem 1.25rem;
+  margin: 0;
+}
+
+.commercial-job-breakdown > div,
+.owner-internal-costs > div,
+.request-prequote-readiness > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.commercial-job-breakdown dt,
+.owner-internal-costs dt,
+.request-prequote-readiness dt {
+  margin: 0;
+  font-weight: 450;
+  color: var(--muted, #5b6573);
+}
+
+.commercial-job-breakdown dd,
+.owner-internal-costs dd,
+.request-prequote-readiness dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.request-installation-price-actions {
+  align-items: start;
+}
+
 .commercial-progress {
   display: flex;
   flex-wrap: wrap;

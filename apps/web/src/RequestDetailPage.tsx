@@ -6,6 +6,7 @@ import {
   SITE_INSTALLATION_SCOPE_ID,
   commercialRequestStatusLabel,
   operationalServiceProviderModeLabel,
+  siteInstallationIsPrequoteReady,
   type CommercialRequestStatus,
   type OperationalServiceProviderMode,
   type RequestDetailProjection,
@@ -26,6 +27,8 @@ import {
   requestRelatedItems,
   requestSavedModeLabel,
 } from "./requestObjectView";
+import { formatMoney } from "./formatDisplay";
+import { installationCostEvidenceHref } from "./installationPresentation";
 import { formatRequestDate } from "./requestsRegistryView";
 import {
   consumeRequestsWorkspaceSession,
@@ -456,6 +459,15 @@ export function RequestDetailPage() {
         <section className="request-section" id="request-installation">
           <h2>Montaj la locație</h2>
           {headline ? <p className="request-installation-headline">{headline}</p> : null}
+          {detail.installationOffer.selected && detail.installationScope ? (
+            <RequestPrequoteReadiness
+              detail={detail}
+              costHref={installationCostEvidenceHref({
+                providerMode: detail.installationOffer.mode,
+                incompleteReasons: incompleteReasons,
+              })}
+            />
+          ) : null}
           {detail.installationOffer.persistedModeIncompatible ? (
             <ul className="request-installation-reasons">
               <li>Modul salvat nu mai este oferit de organizație.</li>
@@ -489,16 +501,6 @@ export function RequestDetailPage() {
               <dd>{requestEditareValue(detail)}</dd>
             </div>
           </dl>
-          <Field label="Montaj la locație" hint={installationHint(detail)}>
-            <input
-              type="checkbox"
-              checked={installationSelected}
-              disabled={busy || !detail.installationOffer.canChangeSelection}
-              onChange={(event) => {
-                void handleInstallationToggle(event.target.checked);
-              }}
-            />
-          </Field>
           {detail.installationOffer.showModeControl ? (
             <Field label="Mod montaj" hint="Obligatoriu când organizația oferă ambele căi.">
               <select
@@ -528,6 +530,23 @@ export function RequestDetailPage() {
               </select>
             </Field>
           ) : null}
+          <Field
+            label="Montaj la locație"
+            hint={installationHint(detail, installationMode, installationSelected)}
+          >
+            <input
+              type="checkbox"
+              checked={installationSelected}
+              disabled={
+                busy ||
+                !detail.installationOffer.canChangeSelection ||
+                installationActivationBlocked(detail, installationMode, installationSelected)
+              }
+              onChange={(event) => {
+                void handleInstallationToggle(event.target.checked);
+              }}
+            />
+          </Field>
           {detail.installationOffer.selected && canAdminister ? (
             <Field
               label="Preț montaj (EUR fără TVA)"
@@ -542,7 +561,7 @@ export function RequestDetailPage() {
             </Field>
           ) : null}
           {detail.installationOffer.selected && canAdminister ? (
-            <p>
+            <div className="action-row request-installation-price-actions">
               {priceNotice ? (
                 <Notice tone={priceNotice.tone} compact>
                   <p>{priceNotice.text}</p>
@@ -557,7 +576,7 @@ export function RequestDetailPage() {
               >
                 Confirmă prețul de montaj
               </button>
-            </p>
+            </div>
           ) : null}
           {detail.installationOffer.selected ? (
             <RequestInstallationFactsForm
@@ -567,6 +586,7 @@ export function RequestDetailPage() {
               busy={busy}
               notice={factsNotice}
               providerMode={detail.installationOffer.mode}
+              costEvidenceReady={detail.installationScope?.eicCompleteness === "COMPLETE"}
               onSave={(patch) => {
                 void handleSaveFacts(patch);
               }}
@@ -775,7 +795,26 @@ function RequestDescription({ text }: { text: string }) {
   );
 }
 
-function installationHint(detail: RequestDetailProjection): string {
+function installationActivationBlocked(
+  detail: RequestDetailProjection,
+  installationMode: OperationalServiceProviderMode | null,
+  installationSelected: boolean,
+): boolean {
+  return (
+    !installationSelected &&
+    detail.installationOffer.availableModes.length > 1 &&
+    !installationMode
+  );
+}
+
+function installationHint(
+  detail: RequestDetailProjection,
+  installationMode: OperationalServiceProviderMode | null,
+  installationSelected: boolean,
+): string {
+  if (installationActivationBlocked(detail, installationMode, installationSelected)) {
+    return "Alege modul de montaj pentru a activa montajul.";
+  }
   if (detail.installationOffer.selectionLocked) {
     return "Selecția și modul sunt blocate după prima ofertă legată.";
   }
@@ -785,5 +824,81 @@ function installationHint(detail: RequestDetailProjection): string {
   if (detail.installationOffer.persistedSelectionPreserved) {
     return "Montajul rămâne selectat pe această cerere. Nu poate fi adăugat pe cereri noi până ownerul configurează serviciul.";
   }
+  if (detail.installationScope?.eicCompleteness === "COMPLETE") {
+    return "Montajul este selectat. Costul intern există; prețul client rămâne separat.";
+  }
   return "Dacă este selectat, montajul rămâne separat și blochează oferta până există un cost complet.";
+}
+
+function RequestPrequoteReadiness({
+  detail,
+  costHref,
+}: {
+  detail: RequestDetailProjection;
+  costHref: string | null;
+}) {
+  const scope = detail.installationScope;
+  if (!scope) {
+    return null;
+  }
+  const ready = siteInstallationIsPrequoteReady(scope);
+  const expired = scope.incompleteReasons.some(
+    (reason) => reason.id === "SUBCONTRACT_EVIDENCE_INVALID",
+  );
+  const costLabel = ready
+    ? "Pregătit"
+    : expired
+      ? "Dovadă subcontract expirată"
+      : scope.eicCompleteness === "COMPLETE"
+        ? "Pregătit"
+        : "Incomplet";
+  return (
+    <dl className="request-prequote-readiness">
+      <div>
+        <dt>Montaj</dt>
+        <dd>Selectat</dd>
+      </div>
+      <div>
+        <dt>Preț client</dt>
+        <dd>
+          {scope.commercialCompleteness === "COMPLETE" && scope.commercialNetPrice != null
+            ? `Confirmat · ${formatMoney(scope.commercialNetPrice)} EUR`
+            : "Neconfirmat"}
+        </dd>
+      </div>
+      <div>
+        <dt>Cost intern</dt>
+        <dd>
+          {scope.ownerInternalCost
+            ? `${scope.ownerInternalCost.label}: ${formatMoney(scope.ownerInternalCost.total)} ${scope.ownerInternalCost.currency}`
+            : costLabel}
+        </dd>
+      </div>
+      {ready ? (
+        <div>
+          <dt>Stare ofertă</dt>
+          <dd>Pregătit pentru previzualizare. Înghețarea rămâne dezactivată în această etapă.</dd>
+        </div>
+      ) : (
+        <div>
+          <dt>Blochează oferta</dt>
+          <dd>
+            {expired
+              ? "Dovada subcontractantului nu este valabilă."
+              : scope.eicCompleteness !== "COMPLETE"
+                ? "Costul intern de montaj nu este complet."
+                : "Prețul de montaj pentru client nu este confirmat."}
+          </dd>
+        </div>
+      )}
+      {!ready && costHref ? (
+        <div>
+          <dt>Următorul pas</dt>
+          <dd>
+            <Link to={costHref}>Actualizează dovada de cost</Link>
+          </dd>
+        </div>
+      ) : null}
+    </dl>
+  );
 }

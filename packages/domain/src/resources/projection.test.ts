@@ -7,6 +7,7 @@ import {
   MAT_LED_PSU_12V_160W_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
   costEvidence,
 } from "./catalog.js";
 import { projectResourcesAdministration } from "./projection.js";
@@ -135,5 +136,32 @@ describe("resources administration projection", () => {
     expect(admin.costEvidence[0]?.lastChangedAt).toBe("2026-08-18T00:00:00.000Z");
     const plexi = admin.costEvidence.find((item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID);
     expect(plexi?.qualifierIdentity).toBe("unqualified");
+  });
+
+  it("marks subcontract evidence expired when validUntil is before asOf", () => {
+    const admin = projectResourcesAdministration(
+      [
+        {
+          resourceId: SVC_SITE_INSTALL_SUBCONTRACT_ID,
+          amount: 180,
+          currency: "EUR",
+          perUnit: "job",
+          source: "OWNER_CONFIRMED_PURCHASE",
+          classification: "OWNER_CONFIRMED",
+          note: "Expirat.",
+          supplierLabel: "Montaj Demo SRL",
+          validFrom: "2020-01-01",
+          validUntil: "2020-06-01",
+          evidenceRowId: "cev:expired-sub",
+          createdAt: "2026-09-03T00:00:00.000Z",
+        },
+      ],
+      "2026-09-03T12:00:00.000Z",
+    );
+    const row = admin.costEvidence.find(
+      (item) => item.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID,
+    );
+    expect(row?.validityState).toBe("expired");
+    expect(row?.validUntil).toBe("2020-06-01");
   });
 });

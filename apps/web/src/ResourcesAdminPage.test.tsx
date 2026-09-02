@@ -3,7 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  LAB_SITE_INSTALL_ID,
   PLEXIGLAS_3MM_OPAL_ID,
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
   costEvidence,
   projectResourcesAdministration,
 } from "@workos-final/domain";
@@ -315,5 +317,66 @@ describe("ResourcesAdminPage", () => {
     );
     expect(await screen.findByText(OWNER_WRITE_HINT)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirmă tarif" })).not.toBeInTheDocument();
+  });
+
+  it("opens the created LAB-SITE-INSTALL evidence instead of Element inexistent", async () => {
+    const admin = projectResourcesAdministration(
+      [
+        ...costEvidence.map((item, index) => ({
+          ...item,
+          evidenceRowId: `cev:test:${index}`,
+          createdAt: "2026-08-18T00:00:00.000Z",
+        })),
+        {
+          resourceId: LAB_SITE_INSTALL_ID,
+          amount: 25,
+          currency: "EUR" as const,
+          perUnit: "person_hour" as const,
+          source: "OWNER_CONFIRMED_WORKSHOP" as const,
+          classification: "OWNER_CONFIRMED" as const,
+          note: "Tarif intern montaj.",
+          evidenceRowId: "cev:lab-site",
+          createdAt: "2026-09-03T00:00:00.000Z",
+        },
+      ],
+      "2026-09-03T12:00:00.000Z",
+    );
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(admin);
+    renderResources(`/admin/resources?selected=resource:${LAB_SITE_INSTALL_ID}`);
+    expect(
+      await screen.findByRole("heading", { name: "Manoperă montaj la locație" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Element inexistent")).not.toBeInTheDocument();
+    expect(screen.getAllByText("25,00 EUR / ore-persoană").length).toBeGreaterThan(0);
+  });
+
+  it("shows an expired badge for outdated subcontract evidence", async () => {
+    const admin = projectResourcesAdministration(
+      [
+        {
+          resourceId: SVC_SITE_INSTALL_SUBCONTRACT_ID,
+          amount: 180,
+          currency: "EUR",
+          perUnit: "job",
+          source: "OWNER_CONFIRMED_PURCHASE",
+          classification: "OWNER_CONFIRMED",
+          note: "Expirat.",
+          supplierLabel: "Montaj Demo SRL",
+          validFrom: "2020-01-01",
+          validUntil: "2020-06-01",
+          evidenceRowId: "cev:sub-expired",
+          createdAt: "2026-09-03T00:00:00.000Z",
+        },
+      ],
+      "2026-09-03T12:00:00.000Z",
+    );
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(admin);
+    renderResources(
+      "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",
+    );
+    expect(
+      await screen.findByText("Expirat · 1 iun. 2020", { selector: ".status-chip" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Montaj Demo SRL").length).toBeGreaterThan(0);
   });
 });

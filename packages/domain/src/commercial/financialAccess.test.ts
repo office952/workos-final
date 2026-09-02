@@ -5,6 +5,7 @@ import {
   scopeCommercialPrice,
   scopeExecutionPlanView,
   scopeQuoteSnapshot,
+  scopeSiteInstallationOperatorView,
 } from "./financialAccess.js";
 import { projectCommercialPrice } from "./price.js";
 import type { QuoteSnapshot } from "./quoteSnapshot.js";
@@ -252,6 +253,38 @@ describe("financial access", () => {
     expect(JSON.stringify(workshop)).not.toContain("\"amount\":180");
     expect(collectFinancialKeys(workshop).has("eic")).toBe(false);
     expect(collectFinancialKeys(workshop).has("cost")).toBe(false);
+  });
+
+  it("keeps live installation EIC on Owner views and strips it for Commercial and Workshop", () => {
+    const view = {
+      scopeId: "SITE_INSTALLATION" as const,
+      label: "Montaj la locație" as const,
+      eicCompleteness: "COMPLETE" as const,
+      commercialCompleteness: "COMPLETE" as const,
+      commercialNetPrice: 200,
+      commercialGrossPrice: 242,
+      incompleteReasons: [],
+      ownerInternalCost: {
+        label: "Cost intern estimat montaj",
+        total: 300,
+        currency: "EUR" as const,
+        quantity: 12,
+        unitLabel: "ore-persoană",
+        rate: 25,
+      },
+    };
+    expect(scopeSiteInstallationOperatorView(view, "owner").ownerInternalCost?.total).toBe(300);
+    const commercial = scopeSiteInstallationOperatorView(view, "commercial");
+    const workshop = scopeSiteInstallationOperatorView(view, "workshop");
+    expect(commercial.ownerInternalCost).toBeUndefined();
+    expect(workshop.ownerInternalCost).toBeUndefined();
+    expect(commercial.commercialGrossPrice).toBe(242);
+    expect(workshop.commercialGrossPrice).toBe(242);
+    expect(JSON.stringify(commercial)).not.toContain("300");
+    expect(JSON.stringify(commercial)).not.toContain("\"rate\":25");
+    expect(JSON.stringify(workshop)).not.toContain("300");
+    expect(collectFinancialKeys(commercial).has("rate")).toBe(false);
+    expect(collectFinancialKeys(workshop).has("rate")).toBe(false);
   });
 });
 

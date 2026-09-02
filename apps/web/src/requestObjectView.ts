@@ -1,6 +1,8 @@
 import {
   jobHref,
   operationalServiceProviderModeLabel,
+  siteInstallationIsPrequoteReady,
+  siteInstallationReadinessLabel,
   type RequestDetailProjection,
   type SiteInstallationIncompleteReason,
 } from "@workos-final/domain";
@@ -69,6 +71,13 @@ export function requestInstallationHeadline(detail: RequestDetailProjection): st
   }
   if (detail.installationOffer.selectionLocked) {
     return "Selectat · Blocat după ofertă";
+  }
+  const scope = detail.installationScope;
+  if (scope && siteInstallationIsPrequoteReady(scope)) {
+    return "Selectat · Pregătit pentru ofertă";
+  }
+  if (scope) {
+    return `Selectat · ${siteInstallationReadinessLabel(scope)}`;
   }
   if (requestOperatorIncompleteReasons(detail.installationScope?.incompleteReasons ?? []).length > 0) {
     return "Selectat · Incomplet";

@@ -25,6 +25,7 @@ import {
   lettersProcessCompositionInspections,
   materializeExecutionPlanFromSnapshot,
   presentSiteInstallationScope,
+  scopeSiteInstallationOperatorView,
   projectSiteInstallationScope,
   SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED,
   SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED_REASON,
@@ -242,7 +243,12 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       aggregate: compiled.aggregate,
       eic: scopeEic(compiled.eic, access),
       commercialPrice: scopeCommercialPrice(commercialPrice, access),
-      installationScope: presentSiteInstallationScope(installationProjection),
+      installationScope: (() => {
+        const presented = presentSiteInstallationScope(installationProjection);
+        return presented
+          ? scopeSiteInstallationOperatorView(presented, access)
+          : null;
+      })(),
       jobCommercial: access === "workshop" ? null : jobCommercial,
       executionPlanPreview: scopeExecutionPlanPreview(
         compileExecutionPlanPreview(

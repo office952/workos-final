@@ -88,9 +88,13 @@ test("pre-quote INTERNAL wave shows the job preview and refuses live v2 freeze",
 
   await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
-  await expect(page.getByText("Produs: 624,82 EUR")).toBeVisible();
-  await expect(page.getByText("Montaj la locație: 242,00 EUR")).toBeVisible();
-  await expect(page.getByText("Preț final client: 866,82 EUR")).toBeVisible();
+  await expect(page.getByText("Total ofertă client")).toBeVisible();
+  await expect(page.locator(".commercial-job-preview .commercial-gross")).toContainText(
+    "866,82 EUR",
+  );
+  await expect(page.locator(".commercial-job-breakdown")).toContainText("624,82 EUR");
+  await expect(page.locator(".commercial-job-breakdown")).toContainText("242,00 EUR");
+  await expect(page.getByText(/Cost intern estimat montaj: 300,00 EUR/)).toBeVisible();
   const createQuote = page.getByRole("button", { name: "Creează oferta" });
   await expect(createQuote).toBeDisabled();
   await expect(
@@ -247,6 +251,9 @@ test("expired subcontract evidence can be renewed through Resurse și costuri", 
   ).toBeVisible();
   await expect(page.getByText("Montajul nu are încă un cost complet.")).toBeVisible();
   await expect(page.getByText("Preț final client: 866,82 EUR")).toHaveCount(0);
+  await expect(page.getByText("Total ofertă client")).toHaveCount(0);
+  await expect(page.getByText("Totalul ofertei nu este gata.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Actualizează dovada de cost" })).toBeVisible();
 
   await page.goto(
     "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",
@@ -263,6 +270,9 @@ test("expired subcontract evidence can be renewed through Resurse și costuri", 
 
   await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
-  await expect(page.getByText("Preț final client: 866,82 EUR")).toBeVisible();
+  await expect(page.getByText("Total ofertă client")).toBeVisible();
+  await expect(page.locator(".commercial-job-preview .commercial-gross")).toContainText(
+    "866,82 EUR",
+  );
   await expect(page.getByRole("button", { name: "Creează oferta" })).toBeDisabled();
 });

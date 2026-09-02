@@ -33,6 +33,8 @@ export {
   scopeFrozenQuoteLine,
   scopeFrozenServiceEvidence,
   scopeQuoteSnapshot,
+  scopeRequestDetailProjection,
+  scopeSiteInstallationOperatorView,
   type FinancialAccessScope,
   type FinancialEndpointFamily,
   type ScopedClientCommercial,

@@ -13,6 +13,7 @@ import {
   readRequestDetail,
   updateCommercialRequest,
   updateInstallationFacts,
+  updateInstallationManualPrice,
 } from "./requestsApi";
 import {
   REQUESTS_WORKSPACE_ORIGIN_KEY,
@@ -80,6 +81,7 @@ vi.mock("./requestsApi", () => ({
   readRequestDetail: vi.fn(),
   updateCommercialRequest: vi.fn(),
   updateInstallationFacts: vi.fn(),
+  updateInstallationManualPrice: vi.fn(),
   uploadRequestAttachment: vi.fn(),
   requestAttachmentErrorMessage: (error: string) => error,
   requestServiceErrorMessage: (error: string) => error,
@@ -95,6 +97,7 @@ describe("RequestDetailPage", () => {
     vi.mocked(readRequestDetail).mockReset();
     vi.mocked(updateCommercialRequest).mockReset();
     vi.mocked(updateInstallationFacts).mockReset();
+    vi.mocked(updateInstallationManualPrice).mockReset();
     vi.mocked(fetchProductCatalog).mockReset();
   });
 
@@ -567,5 +570,167 @@ describe("RequestDetailPage", () => {
     await waitFor(() => {
       expect(sessionStorage.getItem(REQUESTS_WORKSPACE_ORIGIN_KEY)).toBeNull();
     });
+  });
+
+  it("does not allow BOTH-mode installation activation before a mode is chosen", async () => {
+    const selectable = {
+      ...detail,
+      linkedOffers: [],
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: false,
+        mode: null,
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "BOTH",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(selectable);
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const checkbox = await screen.findByRole("checkbox", { name: /Montaj la locație/ });
+    expect(checkbox).toBeDisabled();
+    expect(
+      screen.getByText("Alege modul de montaj pentru a activa montajul."),
+    ).toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByRole("combobox"), "INTERNAL");
+    expect(screen.getByRole("checkbox", { name: /Montaj la locație/ })).toBeEnabled();
+  });
+
+  it("does not nest the price notice inside a paragraph", async () => {
+    const selected = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      canWriteInstallationFacts: true,
+      request: {
+        ...detail.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "INTERNAL" as const,
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "INTERNAL",
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "INTERNAL",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+      installationScope: {
+        scopeId: "SITE_INSTALLATION" as const,
+        label: "Montaj la locație" as const,
+        eicCompleteness: "PARTIAL" as const,
+        commercialCompleteness: "PARTIAL" as const,
+        commercialNetPrice: null,
+        commercialGrossPrice: null,
+        incompleteReasons: [
+          { id: "MISSING_COST_EVIDENCE" as const, label: "Evidența de cost pentru montaj lipsește." },
+        ],
+      },
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(selected);
+    vi.mocked(updateInstallationManualPrice).mockResolvedValue({
+      ...selected,
+      request: { ...selected.request, installationManualNetEur: 200 },
+      installationScope: {
+        ...selected.installationScope,
+        commercialCompleteness: "COMPLETE",
+        commercialNetPrice: 200,
+        commercialGrossPrice: 242,
+      },
+    });
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+    const { container } = render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await userEvent.type(await screen.findByLabelText(/Preț montaj/), "200");
+    await userEvent.click(screen.getByRole("button", { name: "Confirmă prețul de montaj" }));
+    expect(await screen.findByText("Prețul de montaj a fost confirmat.")).toBeInTheDocument();
+    expect(container.querySelector("p p")).toBeNull();
+    expect(updateInstallationManualPrice).toHaveBeenCalledWith(
+      "crq:11111111-2222-3333-4444-555555555555",
+      200,
+    );
+  });
+
+  it("shows the request blocker before product confirm when cost evidence is expired", async () => {
+    const expired = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      canWriteInstallationFacts: true,
+      request: {
+        ...detail.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "SUBCONTRACTED" as const,
+        installationManualNetEur: 200,
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "SUBCONTRACTED",
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "SUBCONTRACTED",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+      installationScope: {
+        scopeId: "SITE_INSTALLATION" as const,
+        label: "Montaj la locație" as const,
+        eicCompleteness: "PARTIAL" as const,
+        commercialCompleteness: "COMPLETE" as const,
+        commercialNetPrice: 200,
+        commercialGrossPrice: 242,
+        incompleteReasons: [
+          {
+            id: "SUBCONTRACT_EVIDENCE_INVALID" as const,
+            label: "Evidența subcontractantului nu este validă pentru această dată.",
+          },
+        ],
+      },
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(expired);
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(
+      await screen.findByText("Selectat · Preț client confirmat · Dovadă subcontract expirată"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Dovada subcontractantului nu este valabilă.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Actualizează dovada de cost" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Alege produs" })).toBeInTheDocument();
+    expect(screen.queryByText("Completă")).not.toBeInTheDocument();
   });
 });

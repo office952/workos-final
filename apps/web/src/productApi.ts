@@ -15,6 +15,7 @@ import type {
   OrderSnapshot,
   QuoteAcceptanceDecision,
   QuoteSnapshot,
+  SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import { fetchCloudSession } from "./cloudSessionApi";
 import { throwIfListFailed } from "./fetchAccess";
@@ -94,6 +95,7 @@ export async function confirmReviewedConfiguration(
       eic?: EicResult;
       commercialPrice: CommercialPriceProjection;
       jobCommercial?: LiveJobCommercial | null;
+      installationScope?: SiteInstallationOperatorView | null;
       executionPlanPreview: ExecutionPlanPreview;
     }
   | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
@@ -113,6 +115,7 @@ export async function confirmReviewedConfiguration(
     eic?: EicResult;
     commercialPrice?: CommercialPriceProjection;
     jobCommercial?: LiveJobCommercial | null;
+    installationScope?: SiteInstallationOperatorView | null;
     executionPlanPreview?: ExecutionPlanPreview;
     definition?: ProductDefinition;
     error?: string;
@@ -140,6 +143,7 @@ export async function confirmReviewedConfiguration(
     eic: body.eic,
     commercialPrice: body.commercialPrice,
     jobCommercial: body.jobCommercial ?? null,
+    installationScope: body.installationScope ?? null,
     executionPlanPreview: body.executionPlanPreview,
   };
 }

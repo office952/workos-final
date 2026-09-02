@@ -64,9 +64,12 @@ test("optional site installation is silent until selected and then blocks quote 
 
   await configureCanonicalLettersForRequest(page, requestId);
   await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
-  await expect(page.getByText(/Preț final client: 624,82 EUR/)).toBeVisible();
+  await expect(page.getByText("Produs: 624,82 EUR")).toBeVisible();
+  await expect(page.getByText("Totalul ofertei nu este gata.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Montaj la locație" })).toBeVisible();
-  await expect(page.getByText("Parțial")).toBeVisible();
+  await expect(
+    page.locator(".installation-scope-section .status-chip").getByText("Incomplet", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("Montajul nu are încă un cost complet.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Creează oferta" })).toBeDisabled();
   await expect(page.locator(".installation-scope-section")).not.toContainText(/0(?:[.,]00)? EUR/);

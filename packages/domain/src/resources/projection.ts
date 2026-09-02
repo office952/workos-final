@@ -31,6 +31,7 @@ import {
   type RecipeKind,
 } from "./recipes.js";
 import { resourceWhereUsed, type ResourceUse } from "./whereUsed.js";
+import { calendarDateCoversAsOf } from "../calendarDate.js";
 
 export type ResourceUseProjection = ResourceUse & {
   roleLabel: string;
@@ -49,6 +50,7 @@ export type ResourceCostProjection = {
   supplierLabel?: string | null;
   validFrom?: string | null;
   validUntil?: string | null;
+  validityState?: "current" | "expired";
 };
 
 export type ResourceAdminRecord = {
@@ -119,12 +121,13 @@ export type ResourcesAdminProjection = {
 
 export function projectResourcesAdministration(
   evidenceRows: readonly CostEvidence[] = costEvidence,
+  asOf = new Date().toISOString(),
 ): ResourcesAdminProjection {
   const materials = resourceCatalog
     .filter((item) => item.kind === "MATERIAL")
-    .map((item) => toAdminRecord(item, evidenceRows));
-  const services = listServiceResources().map((item) => toAdminRecord(item, evidenceRows));
-  const labor = listLaborResources().map((item) => toAdminRecord(item, evidenceRows));
+    .map((item) => toAdminRecord(item, evidenceRows, asOf));
+  const services = listServiceResources().map((item) => toAdminRecord(item, evidenceRows, asOf));
+  const labor = listLaborResources().map((item) => toAdminRecord(item, evidenceRows, asOf));
   const writable = evidenceRows.every((item) => Boolean(item.evidenceRowId));
   return {
     families: materialFamilies.map((family) => ({
@@ -135,14 +138,14 @@ export function projectResourcesAdministration(
     services,
     labor,
     serviceRecipes: recipesOfKind("SERVICE").map((recipe) =>
-      toRecipeRecord(recipe, evidenceRows),
+      toRecipeRecord(recipe, evidenceRows, asOf),
     ),
-    laborRecipes: recipesOfKind("LABOR").map((recipe) => toRecipeRecord(recipe, evidenceRows)),
+    laborRecipes: recipesOfKind("LABOR").map((recipe) => toRecipeRecord(recipe, evidenceRows, asOf)),
     missingServiceRecipes: processesMissingRecipe("SERVICE").map(toMissingRecipe),
     missingLaborRecipes: processesMissingRecipe("LABOR").map(toMissingRecipe),
     costEvidence: evidenceRows.map((item) => {
       const resource = resourceCatalog.find((entry) => entry.id === item.resourceId);
-      const projected = toCostProjection(item);
+      const projected = toCostProjection(item, asOf);
       return {
         resourceId: item.resourceId,
         resourceLabel: resource?.label ?? item.resourceId,
@@ -165,6 +168,7 @@ export function projectResourcesAdministration(
 function toRecipeRecord(
   recipe: CostRecipe,
   evidenceRows: readonly CostEvidence[],
+  asOf: string,
 ): RecipeAdminRecord {
   const evidence = lookupCostEvidence(evidenceRows, recipe.costEvidenceId);
   const resource = getResource(recipe.costEvidenceId);
@@ -183,7 +187,7 @@ function toRecipeRecord(
     unitLabel: resourceUnitLabel(recipe.unit),
     costEvidenceId: recipe.costEvidenceId,
     costEvidenceLabel: resource?.label ?? recipe.costEvidenceId,
-    cost: evidence ? toCostProjection(evidence) : null,
+    cost: evidence ? toCostProjection(evidence, asOf) : null,
   };
 }
 
@@ -201,6 +205,7 @@ function toMissingRecipe(processId: string): MissingRecipeAdminRecord {
 function toAdminRecord(
   resource: ResourceDefinition,
   evidenceRows: readonly CostEvidence[],
+  asOf: string,
 ): ResourceAdminRecord {
   const family = resource.familyId ? getMaterialFamily(resource.familyId) : undefined;
   const spec = resource.specification;
@@ -229,11 +234,11 @@ function toAdminRecord(
         ? `${resource.electrical.capacityW} W`
         : null,
     usedBy: projectUses(resource.id),
-    cost: evidence ? toCostProjection(evidence) : null,
+    cost: evidence ? toCostProjection(evidence, asOf) : null,
   };
 }
 
-function toCostProjection(evidence: CostEvidence): ResourceCostProjection {
+function toCostProjection(evidence: CostEvidence, asOf: string): ResourceCostProjection {
   const unitLabel = resourceUnitLabel(evidence.perUnit);
   const qualifier =
     evidence.when?.volumeDepthMm !== undefined
@@ -249,6 +254,17 @@ function toCostProjection(evidence: CostEvidence): ResourceCostProjection {
     supplierLabel: evidence.supplierLabel ?? null,
     validFrom: evidence.validFrom ?? null,
     validUntil: evidence.validUntil ?? null,
+    ...(evidence.validUntil
+      ? {
+          validityState: calendarDateCoversAsOf({
+            validFrom: evidence.validFrom,
+            validUntil: evidence.validUntil,
+            asOf,
+          })
+            ? ("current" as const)
+            : ("expired" as const),
+        }
+      : {}),
     amountDisplay: qualifier
       ? `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel} · ${qualifier}`
       : `${formatAmount(evidence.amount)} ${evidence.currency} / ${unitLabel}`,
