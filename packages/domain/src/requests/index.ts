@@ -7,6 +7,7 @@ export {
   canChangeCommercialRequestStatus,
   commercialRequestReference,
   commercialRequestStatusLabel,
+  applyInstallationManualPrice,
   createCommercialRequest,
   generateCommercialRequestId,
   isCommercialRequestStatus,

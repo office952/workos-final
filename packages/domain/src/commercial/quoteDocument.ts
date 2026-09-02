@@ -98,7 +98,10 @@ export function projectQuoteDocument(snapshot: QuoteSnapshot): QuoteDocumentMode
     ...(inscription ? { inscription } : {}),
     ...(customerDisplayName ? { customerDisplayName } : {}),
     ...(seller ? { seller } : {}),
-    configuration,
+    configuration: [
+      ...configuration,
+      ...projectOfferLineLabels(snapshot),
+    ],
     technicalSummary,
     commercial: projectCommercialLines(snapshot),
     filename: `Oferta-${reference}.pdf`,
@@ -168,8 +171,25 @@ function optionalDocumentField(
   return text ? { [key]: text } : {};
 }
 
+function projectOfferLineLabels(snapshot: QuoteSnapshot): QuoteDocumentLine[] {
+  if (snapshot.schemaVersion !== 2 || !snapshot.lines) {
+    return [];
+  }
+  return snapshot.lines.map((line) => ({
+    label: line.label,
+    value: formatCustomerMoneyAmount(line.commercial.netPrice, line.commercial.currency),
+  }));
+}
+
 function projectCommercialLines(snapshot: QuoteSnapshot): QuoteDocumentCommercial {
-  const { commercial } = snapshot;
+  const commercial = snapshot.jobCommercial
+    ? {
+        ...snapshot.commercial,
+        netPrice: snapshot.jobCommercial.netPrice,
+        vatAmount: snapshot.jobCommercial.vatAmount,
+        grossPrice: snapshot.jobCommercial.grossPrice,
+      }
+    : snapshot.commercial;
   return {
     netLabel: "Subtotal",
     netDisplay: formatCustomerMoney(commercial.netPrice),

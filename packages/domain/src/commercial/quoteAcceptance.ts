@@ -1,7 +1,4 @@
-import {
-  QUOTE_SNAPSHOT_SCHEMA_VERSION,
-  type QuoteSnapshot,
-} from "./quoteSnapshot.js";
+import { isSupportedQuoteSnapshot, type QuoteSnapshot } from "./quoteSnapshot.js";
 
 export const QUOTE_ACCEPTANCE_SCHEMA_VERSION = 1 as const;
 
@@ -32,8 +29,7 @@ export function recordQuoteAcceptance(
   options?: { acceptedAt?: string },
 ): QuoteAcceptanceResult {
   if (
-    snapshot.schemaVersion !== QUOTE_SNAPSHOT_SCHEMA_VERSION ||
-    snapshot.status !== "FROZEN" ||
+    !isSupportedQuoteSnapshot(snapshot) ||
     snapshot.quoteSnapshotId.trim() === "" ||
     snapshot.contentHash.trim() === ""
   ) {

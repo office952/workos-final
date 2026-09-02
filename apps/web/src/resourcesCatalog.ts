@@ -76,6 +76,38 @@ export function buildResourcesCatalog(
         ],
       },
       {
+        id: "uncosted-resources",
+        label: "Resurse fără evidență",
+        kindLabel: "Categorie",
+        items: [...admin.services, ...admin.labor]
+          .filter((item) => item.cost === null)
+          .map((item) => ({
+            id: `resource:${item.id}`,
+            label: item.label,
+            kindLabel: item.kindLabel,
+            summary: "Fără dovadă de cost confirmată",
+            listHint: "fără dovadă",
+            chips: [{ id: "missing", label: "Fără evidență", tone: "warn" as const }],
+            groups: [
+              {
+                id: item.id,
+                kindLabel: item.kindLabel,
+                title: item.label,
+                sections: [
+                  {
+                    id: "cost",
+                    title: "Cost intern",
+                    facts: [
+                      { label: "Tarif", value: "fără dovadă activă" },
+                      { label: "Unitate", value: item.unitLabel },
+                    ],
+                  },
+                ],
+              },
+            ],
+          })),
+      },
+      {
         id: "cost-evidence",
         label: "Dovezi de cost",
         kindLabel: "Categorie",

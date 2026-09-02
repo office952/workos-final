@@ -12,16 +12,26 @@ export {
   sameOptionalScopeIds,
   siteInstallationBlocksQuoteFreeze,
   siteInstallationFreezeRefusal,
+  SITE_INSTALLATION_PRICE_FREEZE_REASON,
   siteInstallationIncompleteReasonIds,
   siteInstallationIncompleteReasonLabel,
   siteInstallationIncompleteReasons,
   type IncompleteOfferRefusal,
   type OptionalCommercialScopeId,
+  type SiteInstallationEvidenceInput,
   type SiteInstallationIncompleteReason,
   type SiteInstallationIncompleteReasonId,
   type SiteInstallationOperatorView,
+  type SiteInstallationProjectionInput,
   type SiteInstallationScopeProjection,
 } from "./scope.js";
+export {
+  costEvidenceCoversInstant,
+  isCompleteInternalInstallLaborEvidence,
+  isCompleteSubcontractInstallEvidence,
+  isOwnerConfirmedCostEvidence,
+  siteInstallationEvidenceFromRows,
+} from "./evidence.js";
 export {
   DEFAULT_SITE_INSTALLATION_COUNTRY_CODE,
   SITE_INSTALLATION_ELECTRICAL_STATES,

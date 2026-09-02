@@ -13,7 +13,8 @@ import {
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { getProductSystem, type ApiEnv } from "../cloud/context.js";
+import { getProductSystem, isOwner, type ApiEnv } from "../cloud/context.js";
+import { requireOwnerRole } from "../cloud/middleware.js";
 import { httpPathIdentity } from "../httpPathIdentity.js";
 
 export function registerRequestRoutes(app: Hono<ApiEnv>): void {
@@ -88,6 +89,32 @@ export function registerRequestRoutes(app: Hono<ApiEnv>): void {
       detail: runtime.readRequestDetail(c.req.param("requestId")),
     });
   });
+
+  app.patch(
+    "/api/requests/:requestId/installation-price",
+    requireOwnerRole(),
+    async (c) => {
+      const runtime = getProductSystem(c);
+      const body = await c.req.json().catch(() => null);
+      const netPrice = readManualNetPrice(body);
+      if (netPrice === false) {
+        return c.json({ error: "invalid_payload" }, 400);
+      }
+      const result = runtime.updateInstallationManualPrice(
+        c.req.param("requestId"),
+        netPrice,
+        isOwner(c),
+      );
+      if (!result.ok) {
+        return c.json({ error: result.error }, priceMutationStatus(result.error));
+      }
+      return c.json({
+        alreadyApplied: result.alreadyApplied,
+        request: result.request,
+        detail: runtime.readRequestDetail(result.request.requestId),
+      });
+    },
+  );
 
   app.post("/api/requests/:requestId/quotes", async (c) => {
     const runtime = getProductSystem(c);
@@ -329,6 +356,27 @@ function readOptionalMillimetres(value: unknown): number | null | undefined | fa
   return typeof value === "number" && Number.isFinite(value) ? value : false;
 }
 
+function readOptionalNumber(value: unknown): number | null | undefined | false {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  return typeof value === "number" && Number.isFinite(value) ? value : false;
+}
+
+function readManualNetPrice(body: unknown): number | null | false {
+  if (typeof body !== "object" || body === null || !("netPrice" in body)) {
+    return false;
+  }
+  const value = (body as { netPrice: unknown }).netPrice;
+  if (value === null) {
+    return null;
+  }
+  return typeof value === "number" && Number.isFinite(value) ? value : false;
+}
+
 function readInstallationFactsInput(body: unknown):
   | { ok: true; patch: SiteInstallationFactsPatch; expectedVersion: number }
   | { ok: false; error: "invalid_payload" | "expected_version_required" } {
@@ -481,6 +529,20 @@ function readInstallationFactsInput(body: unknown):
     }
     patch.siteElectrical = payload.siteElectrical;
   }
+  const crewSize = readOptionalNumber(payload.crewSize);
+  if (crewSize === false) {
+    return { ok: false, error: "invalid_payload" };
+  }
+  if (crewSize !== undefined) {
+    patch.crewSize = crewSize;
+  }
+  const plannedDurationHours = readOptionalNumber(payload.plannedDurationHours);
+  if (plannedDurationHours === false) {
+    return { ok: false, error: "invalid_payload" };
+  }
+  if (plannedDurationHours !== undefined) {
+    patch.plannedDurationHours = plannedDurationHours;
+  }
   if (Object.keys(patch).length === 0) {
     return { ok: false, error: "invalid_payload" };
   }
@@ -507,12 +569,16 @@ function requestMutationStatus(error: CommercialRequestMutationError): 400 | 404
     case "service_mode_required":
     case "service_mode_unavailable":
     case "invalid_service_mode":
+    case "owner_required":
+    case "installation_not_selected":
+    case "invalid_manual_price":
       return 400;
     case "not_found":
       return 404;
     case "customer_locked":
     case "service_selection_locked":
     case "installation_facts_delete_confirmation_required":
+    case "installation_price_locked":
       return 409;
     default: {
       const _exhaustive: never = error;
@@ -541,6 +607,8 @@ function factsMutationStatus(error: SiteInstallationFactsMutationError): 400 | 4
     case "invalid_contact_phone":
     case "invalid_access_notes":
     case "invalid_measurement_notes":
+    case "invalid_crew_size":
+    case "invalid_planned_duration":
     case "other_note_required":
     case "expected_version_required":
       return 400;
@@ -554,6 +622,15 @@ function factsMutationStatus(error: SiteInstallationFactsMutationError): 400 | 4
       return _exhaustive;
     }
   }
+}
+
+function priceMutationStatus(
+  error: CommercialRequestMutationError,
+): 400 | 403 | 404 | 409 {
+  if (error === "owner_required") {
+    return 403;
+  }
+  return requestMutationStatus(error);
 }
 
 function requestLinkStatus(error: CommercialRequestLinkError): 400 | 404 | 409 {

@@ -20,10 +20,17 @@ import type { ProductAggregate, ProductTruth } from "../product/types.js";
 import type { EicResult } from "../resources/eic.js";
 import type { CostEvidence } from "../resources/catalog.js";
 import type { CommercialPriceProjection } from "./price.js";
+import { projectLiveJobCommercial } from "./servicePrice.js";
 
 export const QUOTE_SNAPSHOT_SCHEMA_VERSION = 1 as const;
+export const QUOTE_SNAPSHOT_SCHEMA_VERSION_V2 = 2 as const;
+export type QuoteSnapshotSchemaVersion =
+  | typeof QUOTE_SNAPSHOT_SCHEMA_VERSION
+  | typeof QUOTE_SNAPSHOT_SCHEMA_VERSION_V2;
 export const QUOTE_SNAPSHOT_STATUSES = ["FROZEN"] as const;
 export type QuoteSnapshotStatus = (typeof QUOTE_SNAPSHOT_STATUSES)[number];
+export const FROZEN_QUOTE_LINE_KINDS = ["PRODUCT", "SITE_INSTALLATION"] as const;
+export type FrozenQuoteLineKind = (typeof FROZEN_QUOTE_LINE_KINDS)[number];
 
 export const QUOTE_SNAPSHOT_ERRORS = [
   "incomplete_offer",
@@ -49,9 +56,24 @@ export type FrozenCommercialOffer = {
   completeness: "COMPLETE";
 };
 
+export type FrozenQuoteLine = {
+  kind: FrozenQuoteLineKind;
+  label: string;
+  eic: FrozenEicReference;
+  commercial: FrozenCommercialOffer;
+};
+
+export type FrozenJobCommercial = {
+  netPrice: number;
+  vatAmount: number;
+  grossPrice: number;
+  currency: "EUR";
+  completeness: "COMPLETE";
+};
+
 export type QuoteSnapshot = {
   quoteSnapshotId: string;
-  schemaVersion: typeof QUOTE_SNAPSHOT_SCHEMA_VERSION;
+  schemaVersion: QuoteSnapshotSchemaVersion;
   status: QuoteSnapshotStatus;
   productCode: string;
   productLabel: string;
@@ -74,6 +96,8 @@ export type QuoteSnapshot = {
   productionInput: FrozenProductionInput;
   customer?: FrozenCustomerIdentity;
   seller?: FrozenSellerIdentity;
+  lines?: readonly FrozenQuoteLine[];
+  jobCommercial?: FrozenJobCommercial;
 };
 
 export type QuoteSnapshotResult =
@@ -97,6 +121,11 @@ export function freezeQuoteSnapshot(
     customer?: FrozenCustomerIdentity;
     seller?: FrozenSellerIdentity;
     costEvidenceRows?: readonly CostEvidence[];
+    installation?: {
+      label: string;
+      eic: EicResult;
+      commercial: CommercialPriceProjection;
+    };
   },
 ): QuoteSnapshotResult {
   if (eic.completeness !== "COMPLETE" || commercial.completeness !== "COMPLETE") {
@@ -123,6 +152,36 @@ export function freezeQuoteSnapshot(
     };
   }
 
+  const installation = options?.installation;
+  if (installation) {
+    if (
+      installation.eic.completeness !== "COMPLETE" ||
+      installation.commercial.completeness !== "COMPLETE"
+    ) {
+      return {
+        ok: false,
+        error: "incomplete_offer",
+        reasons: [INCOMPLETE_REASON],
+      };
+    }
+    if (
+      installation.eic.currency !== "EUR" ||
+      installation.commercial.currency !== "EUR" ||
+      installation.commercial.markupAmount === null ||
+      installation.commercial.discountAmount === null ||
+      installation.commercial.adjustmentAmount === null ||
+      installation.commercial.netPrice === null ||
+      installation.commercial.vatAmount === null ||
+      installation.commercial.grossPrice === null
+    ) {
+      return {
+        ok: false,
+        error: "unavailable_offer",
+        reasons: [UNAVAILABLE_REASON],
+      };
+    }
+  }
+
   const customer = options?.customer
     ? freezeCustomerIdentity(options.customer)
     : undefined;
@@ -142,8 +201,34 @@ export function freezeQuoteSnapshot(
     };
   }
 
+  const frozenProductCommercial = {
+    policyId: commercial.policyId,
+    policyVersion: commercial.policyVersion,
+    markupPercent: commercial.markupPercent,
+    markupAmount: commercial.markupAmount,
+    discountPercent: commercial.discountPercent,
+    discountAmount: commercial.discountAmount,
+    adjustmentAmount: commercial.adjustmentAmount,
+    netPrice: commercial.netPrice,
+    vatPercent: commercial.vatPercent,
+    vatAmount: commercial.vatAmount,
+    grossPrice: commercial.grossPrice,
+    currency: "EUR" as const,
+    completeness: "COMPLETE" as const,
+  };
+  const frozenProductEic = freezeEic(eic);
+  const v2Fields = installation
+    ? freezeJobQuoteFields({
+        productLabel: aggregate.productLabel,
+        productEic: frozenProductEic,
+        productCommercial: frozenProductCommercial,
+        installation,
+      })
+    : null;
   const hashedContent = {
-    schemaVersion: QUOTE_SNAPSHOT_SCHEMA_VERSION,
+    schemaVersion: v2Fields
+      ? QUOTE_SNAPSHOT_SCHEMA_VERSION_V2
+      : QUOTE_SNAPSHOT_SCHEMA_VERSION,
     status: "FROZEN" as const,
     productCode: truth.templateCode,
     productLabel: aggregate.productLabel,
@@ -158,25 +243,12 @@ export function freezeQuoteSnapshot(
       measurements: truth.measurements.map((item) => ({ ...item })),
     },
     quantities: freezeQuantities(aggregate),
-    eic: freezeEic(eic),
+    eic: frozenProductEic,
     productionInput: freezeProductionInput(aggregate, composition, {
       costEvidenceRows: options?.costEvidenceRows,
     }),
-    commercial: {
-      policyId: commercial.policyId,
-      policyVersion: commercial.policyVersion,
-      markupPercent: commercial.markupPercent,
-      markupAmount: commercial.markupAmount,
-      discountPercent: commercial.discountPercent,
-      discountAmount: commercial.discountAmount,
-      adjustmentAmount: commercial.adjustmentAmount,
-      netPrice: commercial.netPrice,
-      vatPercent: commercial.vatPercent,
-      vatAmount: commercial.vatAmount,
-      grossPrice: commercial.grossPrice,
-      currency: "EUR" as const,
-      completeness: "COMPLETE" as const,
-    },
+    commercial: frozenProductCommercial,
+    ...(v2Fields ?? {}),
     ...(customer ? { customer } : {}),
     ...(seller ? { seller } : {}),
   };
@@ -191,6 +263,23 @@ export function freezeQuoteSnapshot(
       contentHash,
     }),
   };
+}
+
+export function isSupportedQuoteSnapshot(snapshot: QuoteSnapshot): boolean {
+  if (snapshot.status !== "FROZEN") {
+    return false;
+  }
+  if (snapshot.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION) {
+    return snapshot.lines === undefined && snapshot.jobCommercial === undefined;
+  }
+  if (snapshot.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION_V2) {
+    return (
+      (snapshot.lines?.length ?? 0) >= 2 &&
+      snapshot.jobCommercial?.completeness === "COMPLETE" &&
+      snapshot.jobCommercial.currency === "EUR"
+    );
+  }
+  return false;
 }
 
 export function quoteSnapshotErrorLabel(error: QuoteSnapshotError): string {
@@ -208,6 +297,60 @@ export function quoteSnapshotErrorLabel(error: QuoteSnapshotError): string {
       return _exhaustive;
     }
   }
+}
+
+function freezeJobQuoteFields(input: {
+  productLabel: string;
+  productEic: FrozenEicReference;
+  productCommercial: FrozenCommercialOffer;
+  installation: {
+    label: string;
+    eic: EicResult;
+    commercial: CommercialPriceProjection;
+  };
+}): {
+  lines: readonly FrozenQuoteLine[];
+  jobCommercial: FrozenJobCommercial;
+} {
+  const installCommercial = input.installation.commercial;
+  const installLineCommercial: FrozenCommercialOffer = {
+    policyId: installCommercial.policyId,
+    policyVersion: installCommercial.policyVersion,
+    markupPercent: installCommercial.markupPercent,
+    markupAmount: installCommercial.markupAmount ?? 0,
+    discountPercent: installCommercial.discountPercent,
+    discountAmount: installCommercial.discountAmount ?? 0,
+    adjustmentAmount: installCommercial.adjustmentAmount ?? 0,
+    netPrice: installCommercial.netPrice ?? 0,
+    vatPercent: installCommercial.vatPercent,
+    vatAmount: installCommercial.vatAmount ?? 0,
+    grossPrice: installCommercial.grossPrice ?? 0,
+    currency: "EUR",
+    completeness: "COMPLETE",
+  };
+  return {
+    lines: [
+      {
+        kind: "PRODUCT",
+        label: input.productLabel,
+        eic: input.productEic,
+        commercial: input.productCommercial,
+      },
+      {
+        kind: "SITE_INSTALLATION",
+        label: input.installation.label,
+        eic: freezeEic(input.installation.eic),
+        commercial: installLineCommercial,
+      },
+    ],
+    jobCommercial: projectLiveJobCommercial(input.productCommercial, installLineCommercial) ?? {
+      netPrice: input.productCommercial.netPrice + installLineCommercial.netPrice,
+      vatAmount: input.productCommercial.vatAmount + installLineCommercial.vatAmount,
+      grossPrice: input.productCommercial.grossPrice + installLineCommercial.grossPrice,
+      currency: "EUR",
+      completeness: "COMPLETE",
+    },
+  };
 }
 
 function freezeQuantities(aggregate: ProductAggregate): FrozenQuantity[] {

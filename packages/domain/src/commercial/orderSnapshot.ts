@@ -26,6 +26,7 @@ export const ORDER_SNAPSHOT_ERRORS = [
   "quote_not_accepted",
   "acceptance_mismatch",
   "incompatible_order_source",
+  "service_lines_not_orderable",
 ] as const;
 export type OrderSnapshotError = (typeof ORDER_SNAPSHOT_ERRORS)[number];
 
@@ -59,12 +60,21 @@ export type OrderSnapshotResult =
 const NOT_ACCEPTED_REASON = "Comanda poate fi creată doar dintr-o ofertă acceptată.";
 const MISMATCH_REASON = "Decizia de acceptare nu corespunde ofertei înghețate.";
 const INCOMPATIBLE_REASON = "Oferta acceptată nu poate fi transformată în comandă.";
+const SERVICE_LINES_REASON =
+  "Oferta cu montaj nu poate fi transformată în comandă în această etapă.";
 
 export function freezeOrderSnapshot(
   quote: QuoteSnapshot,
   acceptance: QuoteAcceptanceDecision,
   options?: { createdAt?: string },
 ): OrderSnapshotResult {
+  if (quote.schemaVersion === 2) {
+    return {
+      ok: false,
+      error: "service_lines_not_orderable",
+      reasons: [SERVICE_LINES_REASON],
+    };
+  }
   if (
     quote.schemaVersion !== QUOTE_SNAPSHOT_SCHEMA_VERSION ||
     quote.status !== "FROZEN" ||
@@ -155,6 +165,8 @@ export function orderSnapshotErrorLabel(error: OrderSnapshotError): string {
       return MISMATCH_REASON;
     case "incompatible_order_source":
       return INCOMPATIBLE_REASON;
+    case "service_lines_not_orderable":
+      return SERVICE_LINES_REASON;
     default: {
       const _exhaustive: never = error;
       return _exhaustive;

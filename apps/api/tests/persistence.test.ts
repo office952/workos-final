@@ -1164,7 +1164,7 @@ describe("product system persistence", () => {
         .prepare("SELECT id FROM schema_migrations ORDER BY id")
         .all()
         .map((item) => (item as { id: string }).id),
-    ).toContain("027_commercial_request_installation_facts.sql");
+    ).toContain("028_first_real_letters_prequote.sql");
     expect(() =>
       first
         .prepare(
@@ -1185,7 +1185,7 @@ describe("product system persistence", () => {
       (
         again
           .prepare("SELECT COUNT(*) AS count FROM schema_migrations WHERE id = ?")
-          .get("027_commercial_request_installation_facts.sql") as { count: number }
+          .get("028_first_real_letters_prequote.sql") as { count: number }
       ).count,
     ).toBe(1);
     expect(

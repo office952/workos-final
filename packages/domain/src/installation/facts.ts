@@ -68,6 +68,8 @@ export const SITE_INSTALLATION_FACTS_MUTATION_ERRORS = [
   "invalid_contact_phone",
   "invalid_access_notes",
   "invalid_measurement_notes",
+  "invalid_crew_size",
+  "invalid_planned_duration",
   "other_note_required",
   "expected_version_required",
   "version_conflict",
@@ -98,6 +100,8 @@ export type SiteInstallationFacts = {
   fixingMethod: SiteInstallationFixingMethod;
   fixingOtherNote: string | null;
   siteElectrical: SiteInstallationElectricalState;
+  crewSize: number | null;
+  plannedDurationHours: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -123,6 +127,8 @@ export type SiteInstallationFactsPatch = {
   fixingMethod?: string;
   fixingOtherNote?: string | null;
   siteElectrical?: string;
+  crewSize?: number | null;
+  plannedDurationHours?: number | null;
 };
 
 export type SiteInstallationFactsMutationResult =
@@ -274,6 +280,8 @@ export function blankSiteInstallationFacts(input: {
     fixingMethod: "UNCONFIRMED",
     fixingOtherNote: null,
     siteElectrical: "UNCONFIRMED",
+    crewSize: null,
+    plannedDurationHours: null,
     createdAt: input.createdAt,
     updatedAt: input.createdAt,
   };
@@ -303,7 +311,9 @@ export function sameSiteInstallationFactsContent(
     left.facadeOtherNote === right.facadeOtherNote &&
     left.fixingMethod === right.fixingMethod &&
     left.fixingOtherNote === right.fixingOtherNote &&
-    left.siteElectrical === right.siteElectrical
+    left.siteElectrical === right.siteElectrical &&
+    left.crewSize === right.crewSize &&
+    left.plannedDurationHours === right.plannedDurationHours
   );
 }
 
@@ -522,6 +532,20 @@ function mergeFactsPatch(
     }
     next = { ...next, siteElectrical: patch.siteElectrical };
   }
+  if (patch.crewSize !== undefined) {
+    const crewSize = readOptionalCrewSize(patch.crewSize);
+    if (crewSize === false) {
+      return { ok: false, error: "invalid_crew_size" };
+    }
+    next = { ...next, crewSize };
+  }
+  if (patch.plannedDurationHours !== undefined) {
+    const plannedDurationHours = readOptionalPlannedDuration(patch.plannedDurationHours);
+    if (plannedDurationHours === false) {
+      return { ok: false, error: "invalid_planned_duration" };
+    }
+    next = { ...next, plannedDurationHours };
+  }
 
   if (next.facadeType === "OTHER" && !next.facadeOtherNote) {
     return { ok: false, error: "other_note_required" };
@@ -567,6 +591,30 @@ function readOptionalMillimetres(value: number | null): number | null | false {
     return false;
   }
   return value;
+}
+
+function readOptionalCrewSize(value: number | null): number | null | false {
+  if (value === null) {
+    return null;
+  }
+  if (!Number.isInteger(value) || value < 1 || value > 99) {
+    return false;
+  }
+  return value;
+}
+
+function readOptionalPlannedDuration(value: number | null): number | null | false {
+  if (value === null) {
+    return null;
+  }
+  if (!Number.isFinite(value) || value <= 0 || value > 1000) {
+    return false;
+  }
+  const scaled = Math.round(value * 100);
+  if (Math.abs(value * 100 - scaled) > 1e-8) {
+    return false;
+  }
+  return scaled / 100;
 }
 
 function readOptionalMeasuredAt(value: string | null): string | null | false {

@@ -91,6 +91,28 @@ export async function updateCommercialRequest(
   return body.detail;
 }
 
+export async function updateInstallationManualPrice(
+  requestId: string,
+  netPrice: number | null,
+): Promise<RequestDetailProjection> {
+  const response = await fetch(
+    `${baseUrl}/api/requests/${encodeURIComponent(requestId)}/installation-price`,
+    {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ netPrice }),
+    },
+  );
+  const body = await readJson<{
+    detail?: RequestDetailProjection;
+    error?: string;
+  }>(response);
+  if (!response.ok || !body.detail) {
+    throw new Error(body.error ?? "request_unavailable");
+  }
+  return body.detail;
+}
+
 export async function updateInstallationFacts(
   requestId: string,
   patch: SiteInstallationFactsPatch,
@@ -192,6 +214,16 @@ export function requestServiceErrorMessage(error: string): string {
     case "invalid_dimensions":
     case "invalid_elevation":
       return "Dimensiunile de șantier trebuie să fie numere pozitive.";
+    case "invalid_crew_size":
+      return "Numărul de persoane trebuie să fie un întreg pozitiv.";
+    case "invalid_planned_duration":
+      return "Durata planificată trebuie să fie un număr pozitiv.";
+    case "owner_required":
+      return "Doar ownerul poate confirma prețul de montaj.";
+    case "invalid_manual_price":
+      return "Prețul de montaj trebuie să fie un număr mai mare decât zero.";
+    case "installation_price_locked":
+      return "Prețul de montaj este blocat după prima ofertă legată.";
     default:
       return "Cererea nu a putut fi actualizată.";
   }

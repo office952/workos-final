@@ -40,10 +40,24 @@ export function requestFilesValue(detail: RequestDetailProjection): string {
   return count === 1 ? "1 fișier" : `${count} fișiere`;
 }
 
+const OWNER_INSTALLATION_REASON_IDS = new Set([
+  "MISSING_COST_EVIDENCE",
+  "MISSING_INTERNAL_LABOR_EVIDENCE",
+  "MISSING_SUBCONTRACT_EVIDENCE",
+  "SUBCONTRACT_EVIDENCE_INVALID",
+  "SITE_ELECTRICAL_COST_REQUIRED",
+]);
+
 export function requestOperatorIncompleteReasons(
   reasons: readonly SiteInstallationIncompleteReason[],
 ): readonly SiteInstallationIncompleteReason[] {
-  return reasons.filter((reason) => reason.id !== "MISSING_COST_EVIDENCE");
+  return reasons.filter((reason) => !OWNER_INSTALLATION_REASON_IDS.has(reason.id));
+}
+
+export function requestOwnerIncompleteReasons(
+  reasons: readonly SiteInstallationIncompleteReason[],
+): readonly SiteInstallationIncompleteReason[] {
+  return reasons.filter((reason) => OWNER_INSTALLATION_REASON_IDS.has(reason.id));
 }
 
 export function requestInstallationHeadline(detail: RequestDetailProjection): string | null {

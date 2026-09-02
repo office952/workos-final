@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import {
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
   costEvidence,
   getResource,
   isValidCostAmount,
   ownerConfirmedCostSource,
   type CostEvidence,
+  type ResourceKind,
   type ResourceUnit,
 } from "@workos-final/domain";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
@@ -30,7 +32,7 @@ const COST_CLASSIFICATIONS = [
   "DEVELOPMENT_DEFAULT",
 ] as const;
 
-const RESOURCE_UNITS = ["m", "m2", "buc"] as const;
+const RESOURCE_UNITS = ["m", "m2", "buc", "person_hour", "job"] as const;
 
 const NOTE_MAX_LENGTH = 2000;
 
@@ -44,6 +46,9 @@ type CostEvidenceRow = {
   source: string;
   classification: string;
   note: string;
+  supplier_label: string | null;
+  valid_from: string | null;
+  valid_until: string | null;
   created_at: string;
   superseded_at: string | null;
 };
@@ -53,7 +58,10 @@ export type CostEvidenceWriteError =
   | "stale_cost_evidence"
   | "invalid_amount"
   | "invalid_note"
-  | "unknown_resource";
+  | "unknown_resource"
+  | "already_exists"
+  | "invalid_supplier"
+  | "invalid_validity";
 
 export type CostEvidenceWriteResult =
   | { ok: true; evidence: CostEvidence }
@@ -94,9 +102,12 @@ export function ensureCostEvidence(
         source,
         classification,
         note,
+        supplier_label,
+        valid_from,
+        valid_until,
         created_at,
         superseded_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
     `,
     );
     for (const seed of seeds) {
@@ -110,6 +121,9 @@ export function ensureCostEvidence(
         seed.source,
         seed.classification,
         seed.note,
+        seed.supplierLabel ?? null,
+        seed.validFrom ?? null,
+        seed.validUntil ?? null,
         createdAt,
       );
     }
@@ -142,7 +156,8 @@ export function listActiveCostEvidence(db: SqliteDatabase): CostEvidence[] {
     .prepare(
       `
       SELECT evidence_row_id, resource_id, volume_depth_mm, amount, currency,
-             per_unit, source, classification, note, created_at, superseded_at
+             per_unit, source, classification, note, supplier_label, valid_from,
+             valid_until, created_at, superseded_at
       FROM resource_cost_evidence
       WHERE superseded_at IS NULL
     `,
@@ -170,6 +185,11 @@ export function supersedeCostEvidence(
   evidenceRowId: string,
   amount: unknown,
   note: unknown,
+  extras?: {
+    supplierLabel?: unknown;
+    validFrom?: unknown;
+    validUntil?: unknown;
+  },
 ): CostEvidenceWriteResult {
   if (!isValidCostAmount(typeof amount === "number" ? amount : Number.NaN)) {
     return { ok: false, error: "invalid_amount" };
@@ -184,7 +204,8 @@ export function supersedeCostEvidence(
       .prepare(
         `
         SELECT evidence_row_id, resource_id, volume_depth_mm, amount, currency,
-               per_unit, source, classification, note, created_at, superseded_at
+               per_unit, source, classification, note, supplier_label, valid_from,
+               valid_until, created_at, superseded_at
         FROM resource_cost_evidence
         WHERE evidence_row_id = ? AND superseded_at IS NULL
       `,
@@ -216,6 +237,30 @@ export function supersedeCostEvidence(
     `,
     ).run(createdAt, evidenceRowId);
 
+    const supplier = parseOptionalText(extras?.supplierLabel, 200);
+    if (!supplier.ok) {
+      return { ok: false, error: "invalid_supplier" };
+    }
+    const validFrom = parseOptionalDate(extras?.validFrom);
+    if (!validFrom.ok) {
+      return { ok: false, error: "invalid_validity" };
+    }
+    const validUntil = parseOptionalDate(extras?.validUntil);
+    if (!validUntil.ok) {
+      return { ok: false, error: "invalid_validity" };
+    }
+    const nextSupplier =
+      supplier.value !== undefined ? supplier.value : active.supplier_label;
+    const nextValidFrom =
+      validFrom.value !== undefined ? validFrom.value : active.valid_from;
+    const nextValidUntil =
+      validUntil.value !== undefined ? validUntil.value : active.valid_until;
+    if (active.resource_id === SVC_SITE_INSTALL_SUBCONTRACT_ID) {
+      if (!nextSupplier || !nextValidUntil) {
+        return { ok: false, error: "invalid_supplier" };
+      }
+    }
+
     const nextId = `cev:${randomUUID()}`;
     db.prepare(
       `
@@ -229,9 +274,12 @@ export function supersedeCostEvidence(
         source,
         classification,
         note,
+        supplier_label,
+        valid_from,
+        valid_until,
         created_at,
         superseded_at
-      ) VALUES (?, ?, ?, ?, 'EUR', ?, ?, 'OWNER_CONFIRMED', ?, ?, NULL)
+      ) VALUES (?, ?, ?, ?, 'EUR', ?, ?, 'OWNER_CONFIRMED', ?, ?, ?, ?, ?, NULL)
     `,
     ).run(
       nextId,
@@ -239,8 +287,11 @@ export function supersedeCostEvidence(
       active.volume_depth_mm,
       amount,
       active.per_unit,
-      ownerConfirmedCostSource(resource.kind),
+      ownerConfirmedSourceForResource(resource.id, resource.kind),
       parsedNote.note === "" ? active.note : parsedNote.note,
+      nextSupplier,
+      nextValidFrom,
+      nextValidUntil,
       createdAt,
     );
 
@@ -248,7 +299,8 @@ export function supersedeCostEvidence(
       .prepare(
         `
         SELECT evidence_row_id, resource_id, volume_depth_mm, amount, currency,
-               per_unit, source, classification, note, created_at, superseded_at
+               per_unit, source, classification, note, supplier_label, valid_from,
+               valid_until, created_at, superseded_at
         FROM resource_cost_evidence
         WHERE evidence_row_id = ?
       `,
@@ -308,7 +360,165 @@ function toCostEvidence(row: CostEvidenceRow): CostEvidence | null {
         : { volumeDepthMm: row.volume_depth_mm },
     evidenceRowId: row.evidence_row_id,
     createdAt: row.created_at,
+    ...(row.supplier_label ? { supplierLabel: row.supplier_label } : {}),
+    ...(row.valid_from ? { validFrom: row.valid_from } : {}),
+    ...(row.valid_until ? { validUntil: row.valid_until } : {}),
   };
+}
+
+export function createInitialCostEvidence(
+  db: SqliteDatabase,
+  input: {
+    resourceId: string;
+    amount: unknown;
+    note?: unknown;
+    supplierLabel?: unknown;
+    validFrom?: unknown;
+    validUntil?: unknown;
+  },
+): CostEvidenceWriteResult {
+  if (!isValidCostAmount(typeof input.amount === "number" ? input.amount : Number.NaN)) {
+    return { ok: false, error: "invalid_amount" };
+  }
+  const parsedNote = parseNote(input.note);
+  if (!parsedNote.ok) {
+    return parsedNote;
+  }
+  const resource = getResource(input.resourceId);
+  if (!resource) {
+    return { ok: false, error: "unknown_resource" };
+  }
+  const supplier = parseOptionalText(input.supplierLabel, 200);
+  if (!supplier.ok) {
+    return { ok: false, error: "invalid_supplier" };
+  }
+  const validFrom = parseOptionalDate(input.validFrom);
+  if (!validFrom.ok) {
+    return { ok: false, error: "invalid_validity" };
+  }
+  const validUntil = parseOptionalDate(input.validUntil);
+  if (!validUntil.ok) {
+    return { ok: false, error: "invalid_validity" };
+  }
+  if (resource.id === SVC_SITE_INSTALL_SUBCONTRACT_ID) {
+    if (!supplier.value || !validUntil.value) {
+      return { ok: false, error: "invalid_supplier" };
+    }
+  }
+
+  const write = db.transaction((): CostEvidenceWriteResult => {
+    const existing = db
+      .prepare(
+        `
+        SELECT evidence_row_id
+        FROM resource_cost_evidence
+        WHERE resource_id = ? AND superseded_at IS NULL AND volume_depth_mm IS NULL
+      `,
+      )
+      .get(input.resourceId) as { evidence_row_id: string } | undefined;
+    if (existing) {
+      return { ok: false, error: "already_exists" };
+    }
+    const createdAt = new Date().toISOString();
+    const nextId = `cev:${randomUUID()}`;
+    db.prepare(
+      `
+      INSERT INTO resource_cost_evidence (
+        evidence_row_id,
+        resource_id,
+        volume_depth_mm,
+        amount,
+        currency,
+        per_unit,
+        source,
+        classification,
+        note,
+        supplier_label,
+        valid_from,
+        valid_until,
+        created_at,
+        superseded_at
+      ) VALUES (?, ?, NULL, ?, 'EUR', ?, ?, 'OWNER_CONFIRMED', ?, ?, ?, ?, ?, NULL)
+    `,
+    ).run(
+      nextId,
+      resource.id,
+      input.amount,
+      resource.unit,
+      ownerConfirmedSourceForResource(resource.id, resource.kind),
+      parsedNote.note,
+      supplier.value ?? null,
+      validFrom.value ?? null,
+      validUntil.value ?? null,
+      createdAt,
+    );
+    const inserted = db
+      .prepare(
+        `
+        SELECT evidence_row_id, resource_id, volume_depth_mm, amount, currency,
+               per_unit, source, classification, note, supplier_label, valid_from,
+               valid_until, created_at, superseded_at
+        FROM resource_cost_evidence
+        WHERE evidence_row_id = ?
+      `,
+      )
+      .get(nextId) as CostEvidenceRow;
+    const evidence = toCostEvidence(inserted);
+    if (!evidence) {
+      return { ok: false, error: "unknown_resource" };
+    }
+    return { ok: true, evidence };
+  });
+  return write();
+}
+
+function ownerConfirmedSourceForResource(
+  resourceId: string,
+  kind: ResourceKind,
+): CostEvidence["source"] {
+  if (resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID) {
+    return "OWNER_CONFIRMED_PURCHASE";
+  }
+  return ownerConfirmedCostSource(kind);
+}
+
+function parseOptionalText(
+  value: unknown,
+  maxLength: number,
+): { ok: true; value?: string | null } | { ok: false; error: "invalid_supplier" } {
+  if (value === undefined) {
+    return { ok: true };
+  }
+  if (value === null) {
+    return { ok: true, value: null };
+  }
+  if (typeof value !== "string") {
+    return { ok: false, error: "invalid_supplier" };
+  }
+  const trimmed = value.trim();
+  if (trimmed.length > maxLength) {
+    return { ok: false, error: "invalid_supplier" };
+  }
+  return { ok: true, value: trimmed.length === 0 ? null : trimmed };
+}
+
+function parseOptionalDate(
+  value: unknown,
+): { ok: true; value?: string | null } | { ok: false; error: "invalid_validity" } {
+  if (value === undefined) {
+    return { ok: true };
+  }
+  if (value === null || value === "") {
+    return { ok: true, value: null };
+  }
+  if (typeof value !== "string") {
+    return { ok: false, error: "invalid_validity" };
+  }
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed) && Number.isNaN(Date.parse(trimmed))) {
+    return { ok: false, error: "invalid_validity" };
+  }
+  return { ok: true, value: trimmed };
 }
 
 function isResourceUnit(value: string): value is ResourceUnit {

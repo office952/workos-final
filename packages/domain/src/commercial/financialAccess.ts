@@ -204,6 +204,34 @@ export function scopeQuoteSnapshot(
   if (eic) {
     scoped.eic = eic;
   }
+  if (snapshot.lines) {
+    scoped.lines = snapshot.lines.map((line) => {
+      const lineCommercial = scopeFrozenCommercial(
+        line.commercial,
+        access,
+        line.eic.total,
+      );
+      const lineEic = scopeEic(line.eic, access);
+      return omitForbiddenFinancialFields(
+        {
+          kind: line.kind,
+          label: line.label,
+          ...(lineCommercial ? { commercial: lineCommercial } : {}),
+          ...(lineEic ? { eic: lineEic } : {}),
+        },
+        access,
+      );
+    });
+  }
+  if (snapshot.jobCommercial && access !== "workshop") {
+    scoped.jobCommercial = {
+      netPrice: snapshot.jobCommercial.netPrice,
+      vatAmount: snapshot.jobCommercial.vatAmount,
+      grossPrice: snapshot.jobCommercial.grossPrice,
+      currency: snapshot.jobCommercial.currency,
+      completeness: snapshot.jobCommercial.completeness,
+    };
+  }
   return omitForbiddenFinancialFields(scoped, access) as Record<string, unknown>;
 }
 

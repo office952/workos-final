@@ -6,6 +6,7 @@ import {
   ACM_CASSETTE_NONE_PRODUCT_CODE,
   CANONICAL_PRODUCT_CODE,
   SITE_INSTALLATION_FREEZE_REASON,
+  SITE_INSTALLATION_PRICE_FREEZE_REASON,
   SITE_INSTALLATION_SCOPE_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
@@ -103,12 +104,15 @@ describe("commercial request installation facts API", () => {
     };
     expect(selectedDetail.installationFacts).toBeNull();
     expect(selectedDetail.installationScope.incompleteReasons.map((item) => item.id)).toEqual([
-      "MISSING_COST_EVIDENCE",
       "SITE_ADDRESS_INCOMPLETE",
       "SITE_MEASUREMENTS_UNCONFIRMED",
       "FACADE_UNCONFIRMED",
       "FIXING_UNCONFIRMED",
       "SITE_ELECTRICAL_UNCONFIRMED",
+      "MISSING_CREW_SIZE",
+      "MISSING_PLANNED_DURATION",
+      "MISSING_INTERNAL_LABOR_EVIDENCE",
+      "MISSING_COST_EVIDENCE",
     ]);
   });
 
@@ -148,6 +152,9 @@ describe("commercial request installation facts API", () => {
     );
     expect(reloaded.installationFacts.city).toBe("București");
     expect(reloaded.installationScope.incompleteReasons.map((item) => item.id)).toEqual([
+      "MISSING_CREW_SIZE",
+      "MISSING_PLANNED_DURATION",
+      "MISSING_INTERNAL_LABOR_EVIDENCE",
       "MISSING_COST_EVIDENCE",
     ]);
     expect(reloaded.installationScope.eicCompleteness).toBe("PARTIAL");
@@ -457,7 +464,10 @@ describe("commercial request installation facts API", () => {
       body: JSON.stringify({ quoteSnapshotId }),
     });
     expect(linked.status).toBe(422);
-    expect((await readBody(linked)).reasons).toEqual([SITE_INSTALLATION_FREEZE_REASON]);
+    expect((await readBody(linked)).reasons).toEqual([
+      SITE_INSTALLATION_FREEZE_REASON,
+      SITE_INSTALLATION_PRICE_FREEZE_REASON,
+    ]);
     const db = openSqliteDatabase(sqlitePath);
     db.prepare(
       `

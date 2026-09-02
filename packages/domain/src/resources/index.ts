@@ -2,6 +2,8 @@ export {
   ACM_3MM_ID,
   ALUMINIUM_RETURN_PROFILE_ID,
   LAB_ATTACH_INTERNAL_FRAME_ID,
+  LAB_SITE_INSTALL_ID,
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
   LAB_FORM_SHEET_CASSETTE_ID,
   FOREX_10MM_ID,
   MAT_LED_MODULE_ID,
@@ -23,6 +25,7 @@ export {
   listCostEvidenceFrom,
   costEvidenceQualifierIdentity,
   ownerConfirmedCostSource,
+  isProductResourceUnit,
   isValidCostAmount,
   getMaterialFamily,
   getResource,
@@ -46,6 +49,7 @@ export {
   type MaterialSpecification,
   type ResourceDefinition,
   type ResourceKind,
+  type ProductResourceUnit,
   type ResourceUnit,
 } from "./catalog.js";
 export {

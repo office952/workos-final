@@ -8,6 +8,8 @@ import {
   requestEditareValue,
   requestInstallationHeadline,
   requestObjectPrimaryAction,
+  requestOperatorIncompleteReasons,
+  requestOwnerIncompleteReasons,
   requestRelatedItems,
 } from "./requestObjectView";
 
@@ -126,5 +128,25 @@ describe("requestObjectView", () => {
     );
     expect(related.map((item) => item.kind)).toEqual(["quote", "job"]);
     expect(related.some((item) => item.title.startsWith("Cerere"))).toBe(false);
+  });
+
+  it("keeps owner cost gaps out of the operator missing list", () => {
+    const reasons = [
+      { id: "SITE_ADDRESS_INCOMPLETE" as const, label: "Adresa locului de execuție este incompletă." },
+      { id: "MISSING_CREW_SIZE" as const, label: "Numărul de persoane pentru montajul intern lipsește." },
+      { id: "MISSING_COST_EVIDENCE" as const, label: "Evidența de cost pentru montaj lipsește." },
+      {
+        id: "MISSING_INTERNAL_LABOR_EVIDENCE" as const,
+        label: "Tariful intern de montaj pe oră-persoană nu este confirmat.",
+      },
+    ];
+    expect(requestOperatorIncompleteReasons(reasons).map((item) => item.id)).toEqual([
+      "SITE_ADDRESS_INCOMPLETE",
+      "MISSING_CREW_SIZE",
+    ]);
+    expect(requestOwnerIncompleteReasons(reasons).map((item) => item.id)).toEqual([
+      "MISSING_COST_EVIDENCE",
+      "MISSING_INTERNAL_LABOR_EVIDENCE",
+    ]);
   });
 });

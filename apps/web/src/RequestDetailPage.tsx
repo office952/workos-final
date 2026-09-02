@@ -22,6 +22,7 @@ import {
   requestObjectMeta,
   requestObjectPrimaryAction,
   requestOperatorIncompleteReasons,
+  requestOwnerIncompleteReasons,
   requestRelatedItems,
   requestSavedModeLabel,
 } from "./requestObjectView";
@@ -34,6 +35,7 @@ import {
   resolveRequestsWorkspaceOrigin,
   type RequestsWorkspaceOrigin,
 } from "./requestsWorkspaceOrigin";
+import { useCanAdministerOrganization } from "./CloudSessionContext";
 import { RequestInstallationFactsForm } from "./RequestInstallationFactsForm";
 import {
   readRequestDetail,
@@ -41,6 +43,7 @@ import {
   requestServiceErrorMessage,
   updateCommercialRequest,
   updateInstallationFacts,
+  updateInstallationManualPrice,
   uploadRequestAttachment,
 } from "./requestsApi";
 import { ActionDrawer } from "./ui/ActionDrawer";
@@ -106,6 +109,7 @@ function useRequestObjectOrigin(requestId: string): RequestsWorkspaceOrigin | nu
 export function RequestDetailPage() {
   const requestId = usePathIdAfter("/requests/");
   const origin = useRequestObjectOrigin(requestId);
+  const canAdminister = useCanAdministerOrganization();
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -122,6 +126,10 @@ export function RequestDetailPage() {
   );
   const [confirmDeselect, setConfirmDeselect] = useState(false);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = useState("");
+  const [priceNotice, setPriceNotice] = useState<{ tone: "ok" | "warn"; text: string } | null>(
+    null,
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -155,6 +163,11 @@ export function RequestDetailPage() {
     setStatus(detail.request.status);
     setInstallationSelected(detail.installationOffer.selected);
     setInstallationMode(detail.installationOffer.mode);
+    setPriceDraft(
+      detail.request.installationManualNetEur != null
+        ? String(detail.request.installationManualNetEur)
+        : "",
+    );
   }
 
   async function handleSave() {
@@ -278,6 +291,36 @@ export function RequestDetailPage() {
     }
   }
 
+  async function handleSavePrice() {
+    if (page.kind !== "ready") {
+      return;
+    }
+    const parsed = Number(priceDraft.replace(",", "."));
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setPriceNotice({
+        tone: "warn",
+        text: "Prețul de montaj trebuie să fie un număr mai mare decât zero.",
+      });
+      return;
+    }
+    setBusy(true);
+    setPriceNotice(null);
+    try {
+      const detail = await updateInstallationManualPrice(
+        page.detail.request.requestId,
+        parsed,
+      );
+      applyDetail(detail);
+      setPage({ kind: "ready", detail });
+      setPriceNotice({ tone: "ok", text: "Prețul de montaj a fost confirmat." });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "request_unavailable";
+      setPriceNotice({ tone: "warn", text: requestServiceErrorMessage(code) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleUpload(file: File | undefined) {
     if (page.kind !== "ready" || !file || !page.detail.canUploadAttachments) {
       return;
@@ -321,7 +364,7 @@ export function RequestDetailPage() {
   const headline = requestInstallationHeadline(detail);
   const incompleteReasons = detail.installationScope?.incompleteReasons ?? [];
   const operatorReasons = requestOperatorIncompleteReasons(incompleteReasons);
-  const formReasons = incompleteReasons.filter((reason) => reason.id === "MISSING_COST_EVIDENCE");
+  const formReasons = requestOwnerIncompleteReasons(incompleteReasons);
   const showInstallation =
     detail.installationOffer.selected || detail.installationOffer.canSelectNew;
 
@@ -485,6 +528,37 @@ export function RequestDetailPage() {
               </select>
             </Field>
           ) : null}
+          {detail.installationOffer.selected && canAdminister ? (
+            <Field
+              label="Preț montaj (EUR fără TVA)"
+              hint="Prețul client pentru această cerere. Nu este cost intern."
+            >
+              <input
+                inputMode="decimal"
+                value={priceDraft}
+                disabled={busy || !detail.canWriteInstallationFacts}
+                onChange={(event) => setPriceDraft(event.target.value)}
+              />
+            </Field>
+          ) : null}
+          {detail.installationOffer.selected && canAdminister ? (
+            <p>
+              {priceNotice ? (
+                <Notice tone={priceNotice.tone} compact>
+                  <p>{priceNotice.text}</p>
+                </Notice>
+              ) : null}
+              <button
+                type="button"
+                disabled={busy || !detail.canWriteInstallationFacts}
+                onClick={() => {
+                  void handleSavePrice();
+                }}
+              >
+                Confirmă prețul de montaj
+              </button>
+            </p>
+          ) : null}
           {detail.installationOffer.selected ? (
             <RequestInstallationFactsForm
               facts={detail.installationFacts}
@@ -492,6 +566,7 @@ export function RequestDetailPage() {
               locked={!detail.canWriteInstallationFacts}
               busy={busy}
               notice={factsNotice}
+              providerMode={detail.installationOffer.mode}
               onSave={(patch) => {
                 void handleSaveFacts(patch);
               }}

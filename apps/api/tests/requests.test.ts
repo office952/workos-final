@@ -3,6 +3,7 @@ import {
   ACM_CASSETTE_NONE_PRODUCT_CODE,
   CANONICAL_PRODUCT_CODE,
   SITE_INSTALLATION_FREEZE_REASON,
+  SITE_INSTALLATION_PRICE_FREEZE_REASON,
   SITE_INSTALLATION_SCOPE_ID,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
@@ -333,7 +334,10 @@ describe("commercial request API", () => {
     expect(freeze.status).toBe(422);
     const freezeBody = await readBody(freeze);
     expect(freezeBody.error).toBe("incomplete_offer");
-    expect(freezeBody.reasons).toEqual([SITE_INSTALLATION_FREEZE_REASON]);
+    expect(freezeBody.reasons).toEqual([
+      SITE_INSTALLATION_FREEZE_REASON,
+      SITE_INSTALLATION_PRICE_FREEZE_REASON,
+    ]);
     expect(freezeBody.quoteSnapshot).toBeUndefined();
     const quotesAfter = (
       (await readBody(await app.request("/api/quotes"))).overview as {
@@ -406,7 +410,10 @@ describe("commercial request API", () => {
     expect(linked.status).toBe(422);
     const linkedBody = await readBody(linked);
     expect(linkedBody.error).toBe("incomplete_offer");
-    expect(linkedBody.reasons).toEqual([SITE_INSTALLATION_FREEZE_REASON]);
+    expect(linkedBody.reasons).toEqual([
+      SITE_INSTALLATION_FREEZE_REASON,
+      SITE_INSTALLATION_PRICE_FREEZE_REASON,
+    ]);
     expect(linkedBody.link).toBeUndefined();
 
     const detailAfter = (await readBody(await app.request(`/api/requests/${requestId}`)))

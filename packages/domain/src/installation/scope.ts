@@ -1,21 +1,41 @@
 import {
-  projectCommercialPrice,
-  type CommercialPriceCompleteness,
-  type CommercialPriceProjection,
-} from "../commercial/price.js";
-import type { EicResult } from "../resources/eic.js";
+  projectManualFixedServicePrice,
+} from "../commercial/servicePrice.js";
+import type { CommercialPriceCompleteness } from "../commercial/price.js";
+import type { OperationalServiceProviderMode } from "../operationalServices.js";
+import type { CostEvidence } from "../resources/catalog.js";
+import {
+  LAB_SITE_INSTALL_ID,
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
+  getResource,
+} from "../resources/catalog.js";
+import { roundMoney } from "../commercial/price.js";
+import type { EicLine, EicResult } from "../resources/eic.js";
+import {
+  isCompleteInternalInstallLaborEvidence,
+  isCompleteSubcontractInstallEvidence,
+} from "./evidence.js";
 import type { SiteInstallationFacts } from "./facts.js";
 
 export const SITE_INSTALLATION_SCOPE_ID = "SITE_INSTALLATION";
 export const SITE_INSTALLATION_LABEL = "Montaj la locație";
 export const SITE_INSTALLATION_FREEZE_REASON =
   "Montajul nu are încă un cost complet.";
+export const SITE_INSTALLATION_PRICE_FREEZE_REASON =
+  "Prețul de montaj nu este confirmat de owner.";
 
 export const OPTIONAL_COMMERCIAL_SCOPE_IDS = [SITE_INSTALLATION_SCOPE_ID] as const;
 export type OptionalCommercialScopeId = (typeof OPTIONAL_COMMERCIAL_SCOPE_IDS)[number];
 
 export const SITE_INSTALLATION_INCOMPLETE_REASON_IDS = [
   "MISSING_COST_EVIDENCE",
+  "MISSING_PROVIDER_MODE",
+  "MISSING_CREW_SIZE",
+  "MISSING_PLANNED_DURATION",
+  "MISSING_INTERNAL_LABOR_EVIDENCE",
+  "MISSING_SUBCONTRACT_EVIDENCE",
+  "SUBCONTRACT_EVIDENCE_INVALID",
+  "SITE_ELECTRICAL_COST_REQUIRED",
   "SITE_ADDRESS_INCOMPLETE",
   "SITE_MEASUREMENTS_UNCONFIRMED",
   "FACADE_UNCONFIRMED",
@@ -30,11 +50,25 @@ export type SiteInstallationIncompleteReason = {
   label: string;
 };
 
+export type SiteInstallationEvidenceInput = {
+  internalLabor?: CostEvidence | null;
+  subcontract?: CostEvidence | null;
+};
+
+export type SiteInstallationProjectionInput = {
+  selected: boolean;
+  facts?: SiteInstallationFacts | null;
+  providerMode?: OperationalServiceProviderMode | null;
+  evidence?: SiteInstallationEvidenceInput;
+  manualNetPrice?: number | null;
+  asOf?: string;
+};
+
 export type SiteInstallationScopeProjection = {
   scopeId: typeof SITE_INSTALLATION_SCOPE_ID;
   label: typeof SITE_INSTALLATION_LABEL;
   eic: EicResult;
-  commercial: CommercialPriceProjection;
+  commercial: ReturnType<typeof projectManualFixedServicePrice>;
   incompleteReasons: readonly SiteInstallationIncompleteReason[];
 };
 
@@ -43,6 +77,8 @@ export type SiteInstallationOperatorView = {
   label: typeof SITE_INSTALLATION_LABEL;
   eicCompleteness: EicResult["completeness"];
   commercialCompleteness: CommercialPriceCompleteness;
+  commercialNetPrice: number | null;
+  commercialGrossPrice: number | null;
   incompleteReasons: readonly SiteInstallationIncompleteReason[];
 };
 
@@ -85,6 +121,20 @@ export function siteInstallationIncompleteReasonLabel(
   switch (id) {
     case "MISSING_COST_EVIDENCE":
       return "Evidența de cost pentru montaj lipsește.";
+    case "MISSING_PROVIDER_MODE":
+      return "Modul de execuție al montajului nu este ales.";
+    case "MISSING_CREW_SIZE":
+      return "Numărul de persoane pentru montajul intern lipsește.";
+    case "MISSING_PLANNED_DURATION":
+      return "Durata planificată pentru montajul intern lipsește.";
+    case "MISSING_INTERNAL_LABOR_EVIDENCE":
+      return "Tariful intern de montaj pe oră-persoană nu este confirmat.";
+    case "MISSING_SUBCONTRACT_EVIDENCE":
+      return "Evidența de cost a subcontractantului lipsește.";
+    case "SUBCONTRACT_EVIDENCE_INVALID":
+      return "Evidența subcontractantului nu este validă pentru această dată.";
+    case "SITE_ELECTRICAL_COST_REQUIRED":
+      return "Racordul electric inclus sau subcontractat nu are evidență de cost.";
     case "SITE_ADDRESS_INCOMPLETE":
       return "Adresa locului de execuție este incompletă.";
     case "SITE_MEASUREMENTS_UNCONFIRMED":
@@ -103,12 +153,17 @@ export function siteInstallationIncompleteReasonLabel(
 }
 
 export function siteInstallationIncompleteReasonIds(
-  facts?: SiteInstallationFacts | null,
+  input: Pick<SiteInstallationProjectionInput, "facts" | "providerMode" | "evidence" | "asOf"> = {},
 ): readonly SiteInstallationIncompleteReasonId[] {
+  const facts = input.facts;
+  const asOf = input.asOf ?? new Date().toISOString();
+  const ids: SiteInstallationIncompleteReasonId[] = [];
+
   if (facts === undefined) {
-    return ["MISSING_COST_EVIDENCE"];
+    ids.push("MISSING_COST_EVIDENCE");
+    return ids;
   }
-  const ids: SiteInstallationIncompleteReasonId[] = ["MISSING_COST_EVIDENCE"];
+
   const street = facts?.street.trim() ?? "";
   const city = facts?.city.trim() ?? "";
   if (!street || !city) {
@@ -126,43 +181,70 @@ export function siteInstallationIncompleteReasonIds(
   if (!facts || facts.siteElectrical === "UNCONFIRMED") {
     ids.push("SITE_ELECTRICAL_UNCONFIRMED");
   }
-  return ids;
+  if (
+    facts?.siteElectrical === "INCLUDED" ||
+    facts?.siteElectrical === "SUBCONTRACTED"
+  ) {
+    ids.push("SITE_ELECTRICAL_COST_REQUIRED");
+  }
+
+  const mode = input.providerMode ?? null;
+  if (!mode) {
+    ids.push("MISSING_PROVIDER_MODE");
+    ids.push("MISSING_COST_EVIDENCE");
+    return uniqueReasonIds(ids);
+  }
+
+  if (mode === "INTERNAL") {
+    if (!facts?.crewSize) {
+      ids.push("MISSING_CREW_SIZE");
+    }
+    if (!facts?.plannedDurationHours) {
+      ids.push("MISSING_PLANNED_DURATION");
+    }
+    if (!isCompleteInternalInstallLaborEvidence(input.evidence?.internalLabor)) {
+      ids.push("MISSING_INTERNAL_LABOR_EVIDENCE");
+      ids.push("MISSING_COST_EVIDENCE");
+    }
+    return uniqueReasonIds(ids);
+  }
+
+  const subcontract = input.evidence?.subcontract ?? null;
+  if (!subcontract) {
+    ids.push("MISSING_SUBCONTRACT_EVIDENCE");
+    ids.push("MISSING_COST_EVIDENCE");
+    return uniqueReasonIds(ids);
+  }
+  if (!isCompleteSubcontractInstallEvidence(subcontract, asOf)) {
+    ids.push("SUBCONTRACT_EVIDENCE_INVALID");
+    ids.push("MISSING_COST_EVIDENCE");
+  }
+  return uniqueReasonIds(ids);
 }
 
 export function siteInstallationIncompleteReasons(
-  facts?: SiteInstallationFacts | null,
+  input: Pick<SiteInstallationProjectionInput, "facts" | "providerMode" | "evidence" | "asOf"> = {},
 ): readonly SiteInstallationIncompleteReason[] {
-  return siteInstallationIncompleteReasonIds(facts).map((id) => ({
+  return siteInstallationIncompleteReasonIds(input).map((id) => ({
     id,
     label: siteInstallationIncompleteReasonLabel(id),
   }));
 }
 
-export function projectSiteInstallationScope(input: {
-  selected: boolean;
-  facts?: SiteInstallationFacts | null;
-}): SiteInstallationScopeProjection | null {
+export function projectSiteInstallationScope(
+  input: SiteInstallationProjectionInput,
+): SiteInstallationScopeProjection | null {
   if (!input.selected) {
     return null;
   }
-  const incompleteReasons = siteInstallationIncompleteReasons(input.facts);
-  const eic: EicResult = {
-    completeness: "PARTIAL",
-    completenessReasons: incompleteReasons.map((reason) => reason.label),
-    geometryLabel: null,
-    currency: "EUR",
-    lines: [],
-    total: 0,
-    excludedComponentLabels: [],
-  };
+  const incompleteReasons = siteInstallationIncompleteReasons(input);
+  const eic = compileSiteInstallationEic(input, incompleteReasons);
   return {
     scopeId: SITE_INSTALLATION_SCOPE_ID,
     label: SITE_INSTALLATION_LABEL,
     eic,
-    commercial: projectCommercialPrice({
-      total: eic.total,
-      currency: eic.currency,
-      completeness: eic.completeness,
+    commercial: projectManualFixedServicePrice({
+      netPrice: input.manualNetPrice ?? null,
     }),
     incompleteReasons,
   };
@@ -174,25 +256,35 @@ export function presentSiteInstallationScope(
   if (!projection) {
     return null;
   }
+  const commercialComplete = projection.commercial.completeness === "COMPLETE";
   return {
     scopeId: projection.scopeId,
     label: projection.label,
     eicCompleteness: projection.eic.completeness,
     commercialCompleteness: projection.commercial.completeness,
+    commercialNetPrice: commercialComplete ? projection.commercial.netPrice : null,
+    commercialGrossPrice: commercialComplete ? projection.commercial.grossPrice : null,
     incompleteReasons: projection.incompleteReasons,
   };
 }
 
 export function siteInstallationBlocksQuoteFreeze(
   optionalScopeIds: readonly string[],
+  readiness?: Omit<SiteInstallationProjectionInput, "selected">,
 ): boolean {
+  const selected = commercialRequestHasOptionalScope(
+    optionalScopeIds,
+    SITE_INSTALLATION_SCOPE_ID,
+  );
   const projection = projectSiteInstallationScope({
-    selected: commercialRequestHasOptionalScope(
-      optionalScopeIds,
-      SITE_INSTALLATION_SCOPE_ID,
-    ),
+    selected,
+    ...readiness,
   });
-  return projection !== null && projection.eic.completeness !== "COMPLETE";
+  return (
+    projection !== null &&
+    (projection.eic.completeness !== "COMPLETE" ||
+      projection.commercial.completeness !== "COMPLETE")
+  );
 }
 
 export type IncompleteOfferRefusal = {
@@ -202,12 +294,104 @@ export type IncompleteOfferRefusal = {
 
 export function siteInstallationFreezeRefusal(
   optionalScopeIds: readonly string[],
+  readiness?: Omit<SiteInstallationProjectionInput, "selected">,
 ): IncompleteOfferRefusal | null {
-  if (!siteInstallationBlocksQuoteFreeze(optionalScopeIds)) {
+  if (!siteInstallationBlocksQuoteFreeze(optionalScopeIds, readiness)) {
     return null;
+  }
+  const projection = projectSiteInstallationScope({
+    selected: true,
+    ...readiness,
+  });
+  const reasons = [SITE_INSTALLATION_FREEZE_REASON];
+  if (projection && projection.commercial.completeness !== "COMPLETE") {
+    reasons.push(SITE_INSTALLATION_PRICE_FREEZE_REASON);
   }
   return {
     error: "incomplete_offer",
-    reasons: [SITE_INSTALLATION_FREEZE_REASON],
+    reasons,
   };
+}
+
+function compileSiteInstallationEic(
+  input: SiteInstallationProjectionInput,
+  incompleteReasons: readonly SiteInstallationIncompleteReason[],
+): EicResult {
+  const lines = buildInstallEicLines(input);
+  const complete = incompleteReasons.length === 0 && lines.length > 0;
+  const total = roundMoney(lines.reduce((sum, line) => sum + line.cost, 0));
+  return {
+    completeness: complete ? "COMPLETE" : "PARTIAL",
+    completenessReasons: incompleteReasons.map((reason) => reason.label),
+    geometryLabel: null,
+    currency: "EUR",
+    lines: complete ? lines : [],
+    total: complete ? total : 0,
+    excludedComponentLabels: [],
+  };
+}
+
+function buildInstallEicLines(input: SiteInstallationProjectionInput): EicLine[] {
+  const asOf = input.asOf ?? new Date().toISOString();
+  if (input.providerMode === "INTERNAL") {
+    const evidence = input.evidence?.internalLabor ?? null;
+    const crew = input.facts?.crewSize;
+    const hours = input.facts?.plannedDurationHours;
+    if (
+      !crew ||
+      !hours ||
+      !isCompleteInternalInstallLaborEvidence(evidence)
+    ) {
+      return [];
+    }
+    const resource = getResource(LAB_SITE_INSTALL_ID);
+    if (!resource) {
+      return [];
+    }
+    const quantity = roundMoney(crew * hours);
+    const cost = roundMoney(quantity * evidence.amount);
+    return [
+      {
+        resourceId: resource.id,
+        label: resource.label,
+        quantity,
+        unit: resource.unit,
+        rate: evidence.amount,
+        currency: "EUR",
+        cost,
+        kind: resource.kind,
+        group: "labor",
+      },
+    ];
+  }
+  if (input.providerMode === "SUBCONTRACTED") {
+    const evidence = input.evidence?.subcontract ?? null;
+    if (!isCompleteSubcontractInstallEvidence(evidence, asOf)) {
+      return [];
+    }
+    const resource = getResource(SVC_SITE_INSTALL_SUBCONTRACT_ID);
+    if (!resource) {
+      return [];
+    }
+    return [
+      {
+        resourceId: resource.id,
+        label: resource.label,
+        quantity: 1,
+        unit: resource.unit,
+        rate: evidence.amount,
+        currency: "EUR",
+        cost: evidence.amount,
+        kind: resource.kind,
+        group: "services",
+      },
+    ];
+  }
+  return [];
+}
+
+function uniqueReasonIds(
+  ids: readonly SiteInstallationIncompleteReasonId[],
+): SiteInstallationIncompleteReasonId[] {
+  return [...new Set(ids)];
 }

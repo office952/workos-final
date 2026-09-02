@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { emptyCustomerProfile, type Customer } from "../customers/identity.js";
 import {
   SITE_INSTALLATION_FREEZE_REASON,
+  SITE_INSTALLATION_PRICE_FREEZE_REASON,
   SITE_INSTALLATION_SCOPE_ID,
 } from "../installation/scope.js";
 import type { OrganizationServiceOffer } from "../operationalServices.js";
@@ -18,6 +19,7 @@ import {
   commercialRequestReference,
   createCommercialRequest,
   generateCommercialRequestId,
+  applyInstallationManualPrice,
   isCommercialRequestStatus,
   linkCommercialRequestQuote,
   updateCommercialRequest,
@@ -225,7 +227,7 @@ describe("commercial request identity", () => {
     ).toEqual({
       ok: false,
       error: "incomplete_offer",
-      reasons: [SITE_INSTALLATION_FREEZE_REASON],
+      reasons: [SITE_INSTALLATION_FREEZE_REASON, SITE_INSTALLATION_PRICE_FREEZE_REASON],
     });
     const alreadyLinked = linkCommercialRequestQuote({
       request: selected.request,
@@ -330,5 +332,60 @@ describe("commercial request identity", () => {
         { hasLinkedQuotes: true, serviceOffer: internalOffer },
       ),
     ).toEqual({ ok: false, error: "service_selection_locked" });
+  });
+
+  it("lets only the owner write a manual installation price on a selected request", () => {
+    const created = createCommercialRequest({
+      customer: customer(),
+      title: "Titlu",
+      description: "Descriere",
+    });
+    if (!created.ok) {
+      throw new Error("expected create");
+    }
+    expect(
+      applyInstallationManualPrice({
+        request: created.request,
+        netPrice: 200,
+        isOwner: true,
+        hasLinkedQuotes: false,
+      }),
+    ).toEqual({ ok: false, error: "installation_not_selected" });
+    const selected = updateCommercialRequest(
+      created.request,
+      { optionalScopeIds: [SITE_INSTALLATION_SCOPE_ID] },
+      { hasLinkedQuotes: false, serviceOffer: internalOffer },
+    );
+    if (!selected.ok) {
+      throw new Error("expected select");
+    }
+    expect(
+      applyInstallationManualPrice({
+        request: selected.request,
+        netPrice: 200,
+        isOwner: false,
+        hasLinkedQuotes: false,
+      }),
+    ).toEqual({ ok: false, error: "owner_required" });
+    const written = applyInstallationManualPrice({
+      request: selected.request,
+      netPrice: 200,
+      isOwner: true,
+      hasLinkedQuotes: false,
+      updatedAt: "2026-09-02T12:00:00.000Z",
+    });
+    expect(written).toMatchObject({
+      ok: true,
+      alreadyApplied: false,
+      request: { installationManualNetEur: 200 },
+    });
+    expect(
+      applyInstallationManualPrice({
+        request: written.ok ? written.request : selected.request,
+        netPrice: 200,
+        isOwner: true,
+        hasLinkedQuotes: true,
+      }),
+    ).toEqual({ ok: false, error: "installation_price_locked" });
   });
 });

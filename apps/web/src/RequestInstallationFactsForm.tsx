@@ -10,6 +10,7 @@ import {
   siteInstallationMeasurementStatusLabel,
   type SiteInstallationElectricalState,
   type SiteInstallationFacadeType,
+  type OperationalServiceProviderMode,
   type SiteInstallationFacts,
   type SiteInstallationFactsPatch,
   type SiteInstallationFixingMethod,
@@ -40,6 +41,8 @@ type FormState = {
   fixingMethod: SiteInstallationFixingMethod;
   fixingOtherNote: string;
   siteElectrical: SiteInstallationElectricalState;
+  crewSize: string;
+  plannedDurationHours: string;
 };
 
 export function RequestInstallationFactsForm({
@@ -48,6 +51,7 @@ export function RequestInstallationFactsForm({
   locked,
   busy,
   notice,
+  providerMode = null,
   onSave,
 }: {
   facts: SiteInstallationFacts | null;
@@ -55,6 +59,7 @@ export function RequestInstallationFactsForm({
   locked: boolean;
   busy: boolean;
   notice: { tone: "ok" | "warn"; text: string } | null;
+  providerMode?: OperationalServiceProviderMode | null;
   onSave: (patch: SiteInstallationFactsPatch) => void;
 }) {
   const [form, setForm] = useState<FormState>(() => formFromFacts(facts));
@@ -341,6 +346,28 @@ export function RequestInstallationFactsForm({
             ))}
           </select>
         </Field>
+        {providerMode === "INTERNAL" ? (
+          <>
+            <Field label="Persoane în echipă">
+              <input
+                inputMode="numeric"
+                value={form.crewSize}
+                disabled={disabled}
+                onChange={(event) => setForm({ ...form, crewSize: event.target.value })}
+              />
+            </Field>
+            <Field label="Durată planificată (ore)">
+              <input
+                inputMode="decimal"
+                value={form.plannedDurationHours}
+                disabled={disabled}
+                onChange={(event) =>
+                  setForm({ ...form, plannedDurationHours: event.target.value })
+                }
+              />
+            </Field>
+          </>
+        ) : null}
         {locked ? null : (
           <p>
             <button type="submit" disabled={busy}>
@@ -375,6 +402,8 @@ function formFromFacts(facts: SiteInstallationFacts | null): FormState {
     fixingMethod: facts?.fixingMethod ?? "UNCONFIRMED",
     fixingOtherNote: facts?.fixingOtherNote ?? "",
     siteElectrical: facts?.siteElectrical ?? "UNCONFIRMED",
+    crewSize: facts?.crewSize?.toString() ?? "",
+    plannedDurationHours: facts?.plannedDurationHours?.toString() ?? "",
   };
 }
 
@@ -400,7 +429,18 @@ function patchFromForm(form: FormState): SiteInstallationFactsPatch {
     fixingMethod: form.fixingMethod,
     fixingOtherNote: form.fixingOtherNote,
     siteElectrical: form.siteElectrical,
+    crewSize: readOptionalInteger(form.crewSize),
+    plannedDurationHours: readOptionalNumber(form.plannedDurationHours),
   };
+}
+
+function readOptionalInteger(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const parsed = Number(trimmed);
+  return Number.isInteger(parsed) ? parsed : Number.NaN;
 }
 
 function readOptionalNumber(value: string): number | null {

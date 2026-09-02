@@ -64,8 +64,10 @@ Current live specifications:
 - ACM 3 mm — sheet, m² — AI_DECISION 32 EUR/m² on developed blank area; not owner-confirmed
 - Profil oțel cadru intern — profile, m — AI_DECISION 3.50 EUR/m on frame perimeter; not owner-confirmed
 
-Typed units currently used: `m`, `m²`, `buc`.
+Typed units currently used: `m`, `m²`, `buc`, plus additive site-install units `person_hour` and `job`.
 `buc` is the piece-count unit for LED modules and PSU units. It is not a generic arbitrary-unit engine.
+`person_hour` is only for `LAB-SITE-INSTALL` (INTERNAL site labor). It is not LETTERS workshop hourly costing and not pontaj.
+`job` is only for `SVC-SITE-INSTALL-SUBCONTRACT`.
 
 LED module power is a Product System technical setting, not a resource SKU variant.
 PSU capacity and cost live on the resource. 150 W is not a live catalog row.
@@ -114,7 +116,7 @@ Do not overwrite destructively when that slice arrives.
 
 No customer price, markup, or VAT inside Resources.
 Those belong to Commercial.
-No hourly or elapsed-time costing.
+Workshop LETTERS recipes stay per-unit (`m`, `m²`, `buc`), not hourly. Site-install INTERNAL labor uses one additive `person_hour` resource (`LAB-SITE-INSTALL`). That is not pontaj, employee wage, or a LETTERS workshop hourly engine. Subcontracted install uses `job` (`SVC-SITE-INSTALL-SUBCONTRACT`). Neither resource has a seed amount.
 
 ## Persistence
 

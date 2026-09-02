@@ -337,6 +337,8 @@ describe("Product configuration views", () => {
           label: "Montaj la locație",
           eicCompleteness: "PARTIAL",
           commercialCompleteness: "PARTIAL",
+          commercialNetPrice: null,
+          commercialGrossPrice: null,
           incompleteReasons: [
             { id: "MISSING_COST_EVIDENCE", label: "Evidența de cost pentru montaj lipsește." },
           ],
@@ -349,6 +351,59 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Preț final client: 665,98 EUR")).toBeInTheDocument();
   });
 
+  it("shows the projected job total without adding prices in the UI", () => {
+    const complete: CommercialPriceProjection = {
+      internalCost: 382.5,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    render(
+      <QuoteSnapshotSection
+        price={complete}
+        reused={false}
+        busy={false}
+        selectedCustomerId="cus:1"
+        onFreeze={() => undefined}
+        onAccept={() => undefined}
+        onCreateOrder={() => undefined}
+        installationScope={{
+          scopeId: "SITE_INSTALLATION",
+          label: "Montaj la locație",
+          eicCompleteness: "COMPLETE",
+          commercialCompleteness: "COMPLETE",
+          commercialNetPrice: 200,
+          commercialGrossPrice: 242,
+          incompleteReasons: [],
+        }}
+        jobCommercial={{
+          netPrice: 716.38,
+          vatAmount: 150.44,
+          grossPrice: 866.82,
+          currency: "EUR",
+          completeness: "COMPLETE",
+        }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Creează oferta" })).toBeEnabled();
+    expect(screen.getByText("Produs: 624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Montaj la locație: 242,00 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Preț final client: 866,82 EUR")).toBeInTheDocument();
+  });
+
   it("renders installation PARTIAL reasons without a 0 EUR price", () => {
     render(
       <InstallationScopeSection
@@ -357,6 +412,8 @@ describe("Product configuration views", () => {
           label: "Montaj la locație",
           eicCompleteness: "PARTIAL",
           commercialCompleteness: "PARTIAL",
+          commercialNetPrice: null,
+          commercialGrossPrice: null,
           incompleteReasons: [
             { id: "MISSING_COST_EVIDENCE", label: "Evidența de cost pentru montaj lipsește." },
             {

@@ -7,6 +7,7 @@ import {
   freezeQuoteSnapshot,
   projectQuoteDocument,
   projectCommercialPrice,
+  projectLiveJobCommercial,
   omitForbiddenFinancialFields,
   scopeCommercialPrice,
   scopeEic,
@@ -26,6 +27,7 @@ import {
   presentSiteInstallationScope,
   projectSiteInstallationScope,
   SITE_INSTALLATION_SCOPE_ID,
+  siteInstallationEvidenceFromRows,
   siteInstallationFreezeRefusal,
   projectExecutionPlanView,
   type ActualConsumptionLineInput,
@@ -88,23 +90,39 @@ function readRequestId(body: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function readInstallationScope(
-  runtime: { readCommercialRequest(requestId: string): { optionalScopeIds: readonly string[] } | null },
+function installationReadinessForRequest(
+  runtime: ProductSystemRuntime,
+  requestId: string,
+) {
+  const request = runtime.readCommercialRequest(requestId);
+  const detail = runtime.readRequestDetail(requestId);
+  return {
+    request,
+    readiness: {
+      facts: detail?.installationFacts ?? null,
+      providerMode: request?.siteInstallationMode ?? null,
+      evidence: siteInstallationEvidenceFromRows(runtime.listActiveCostEvidence()),
+      manualNetPrice: request?.installationManualNetEur ?? null,
+    },
+  };
+}
+
+function readInstallationProjection(
+  runtime: ProductSystemRuntime,
   body: unknown,
 ) {
   const requestId = readRequestId(body);
   if (!requestId) {
     return null;
   }
-  const request = runtime.readCommercialRequest(requestId);
+  const { request, readiness } = installationReadinessForRequest(runtime, requestId);
   if (!request) {
     return null;
   }
-  return presentSiteInstallationScope(
-    projectSiteInstallationScope({
-      selected: request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
-    }),
-  );
+  return projectSiteInstallationScope({
+    selected: request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+    ...readiness,
+  });
 }
 
 function readCustomerId(body: unknown): string | null {
@@ -206,12 +224,18 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     }
     const access = financialAccess(c, "commercial");
     const commercialPrice = projectCommercialPrice(compiled.eic);
+    const installationProjection = readInstallationProjection(runtime, body);
+    const jobCommercial = projectLiveJobCommercial(
+      commercialPrice,
+      installationProjection?.commercial,
+    );
     return c.json({
       truth: compiled.truth,
       aggregate: compiled.aggregate,
       eic: scopeEic(compiled.eic, access),
       commercialPrice: scopeCommercialPrice(commercialPrice, access),
-      installationScope: readInstallationScope(runtime, body),
+      installationScope: presentSiteInstallationScope(installationProjection),
+      jobCommercial: access === "workshop" ? null : jobCommercial,
       executionPlanPreview: scopeExecutionPlanPreview(
         compileExecutionPlanPreview(
           compiled.truth,
@@ -312,7 +336,11 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
           422,
         );
       }
-      const installationRefusal = siteInstallationFreezeRefusal(request.optionalScopeIds);
+      const { readiness } = installationReadinessForRequest(runtime, requestId);
+      const installationRefusal = siteInstallationFreezeRefusal(
+        request.optionalScopeIds,
+        readiness,
+      );
       if (installationRefusal) {
         return c.json(installationRefusal, 422);
       }
@@ -328,6 +356,16 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
         422,
       );
     }
+    const installationForFreeze = requestId
+      ? projectSiteInstallationScope({
+          selected: Boolean(
+            runtime
+              .readCommercialRequest(requestId)
+              ?.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID),
+          ),
+          ...installationReadinessForRequest(runtime, requestId).readiness,
+        })
+      : null;
     const frozen = freezeQuoteSnapshot(
       compiled.truth,
       compiled.aggregate,
@@ -341,6 +379,15 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
         },
         seller,
         costEvidenceRows: compiled.costEvidenceRows,
+        ...(installationForFreeze
+          ? {
+              installation: {
+                label: installationForFreeze.label,
+                eic: installationForFreeze.eic,
+                commercial: installationForFreeze.commercial,
+              },
+            }
+          : {}),
       },
     );
     if (!frozen.ok) {

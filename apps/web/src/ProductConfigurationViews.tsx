@@ -24,6 +24,7 @@ import {
   type QuoteAcceptanceDecision,
   type QuoteSnapshot,
   SITE_INSTALLATION_FREEZE_REASON,
+  type LiveJobCommercial,
   type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import {
@@ -520,6 +521,7 @@ export function QuoteSnapshotSection({
   onAccept,
   onCreateOrder,
   installationScope = null,
+  jobCommercial = null,
 }: {
   price?: CommercialPriceProjection;
   snapshot?: QuoteSnapshot;
@@ -535,6 +537,7 @@ export function QuoteSnapshotSection({
   onAccept: () => void;
   onCreateOrder: () => void;
   installationScope?: SiteInstallationOperatorView | null;
+  jobCommercial?: LiveJobCommercial | null;
 }) {
   if (snapshot && acceptance) {
     return (
@@ -543,19 +546,21 @@ export function QuoteSnapshotSection({
           <h3>Ofertă acceptată</h3>
           <StatusChip label="Acceptată" tone="ok" />
         </div>
-        <p className="commercial-gross">
-          Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
-        </p>
+        <QuoteJobPrice snapshot={snapshot} />
         <FrozenCustomerLine customer={snapshot.customer} />
         <p>
           {snapshot.contentHash ? `${quoteDocumentReference(snapshot.contentHash)} · ` : null}
           {new Date(acceptance.acceptedAt).toLocaleDateString("ro-RO")}
         </p>
-        {order ? null : (
+        {order ? null : snapshot.schemaVersion === 2 ? (
+          <p className="page-lead">
+            Oferta cu montaj nu poate fi transformată în comandă în această etapă.
+          </p>
+        ) : (
           <p className="page-lead">Următorul pas: creează comanda.</p>
         )}
         <div className="action-row">
-          {order ? null : (
+          {order || snapshot.schemaVersion === 2 ? null : (
             <button type="button" onClick={onCreateOrder} disabled={busy}>
               {commercialPrimaryActionLabel("CREATE_ORDER")}
             </button>
@@ -574,9 +579,7 @@ export function QuoteSnapshotSection({
           <StatusChip label="Creată" tone="ok" />
         </div>
         {reused ? <p className="page-lead">Oferta era deja creată pentru această configurație.</p> : null}
-        <p className="commercial-gross">
-          Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
-        </p>
+        <QuoteJobPrice snapshot={snapshot} />
         <FrozenCustomerLine customer={snapshot.customer} />
         <p>
           {snapshot.contentHash ? `${quoteDocumentReference(snapshot.contentHash)} · ` : null}
@@ -612,12 +615,29 @@ export function QuoteSnapshotSection({
     );
   }
 
+  const installationReady = !installationScope || jobCommercial !== null;
+
   return (
     <section className="result-section quote-section">
       <h3>Ofertă</h3>
-      <p className="commercial-gross">
-        Preț final client: {formatMoney(price.grossPrice ?? 0)} {price.currency}
-      </p>
+      {installationScope && jobCommercial ? (
+        <div className="commercial-job-preview">
+          <p>
+            Produs: {formatMoney(price.grossPrice ?? 0)} {price.currency}
+          </p>
+          <p>
+            {installationScope.label}: {formatMoney(installationScope.commercialGrossPrice ?? 0)}{" "}
+            {price.currency}
+          </p>
+          <p className="commercial-gross">
+            Preț final client: {formatMoney(jobCommercial.grossPrice)} {jobCommercial.currency}
+          </p>
+        </div>
+      ) : (
+        <p className="commercial-gross">
+          Preț final client: {formatMoney(price.grossPrice ?? 0)} {price.currency}
+        </p>
+      )}
       {onSelectCustomer && onCreateCustomer ? (
         <CustomerSelectionFields
           customers={customers}
@@ -632,19 +652,38 @@ export function QuoteSnapshotSection({
         <button
           type="button"
           onClick={onFreeze}
-          disabled={
-            busy ||
-            !selectedCustomerId ||
-            Boolean(installationScope)
-          }
+          disabled={busy || !selectedCustomerId || !installationReady}
         >
           {commercialPrimaryActionLabel("CREATE_QUOTE")}
         </button>
-        {installationScope ? (
+        {installationScope && !installationReady ? (
           <p className="page-lead">{SITE_INSTALLATION_FREEZE_REASON}</p>
         ) : null}
       </div>
     </section>
+  );
+}
+
+function QuoteJobPrice({ snapshot }: { snapshot: QuoteSnapshot }) {
+  const job = snapshot.jobCommercial;
+  if (job && snapshot.lines && snapshot.lines.length > 0) {
+    return (
+      <div className="commercial-job-preview">
+        {snapshot.lines.map((line) => (
+          <p key={line.kind}>
+            {line.label}: {formatMoney(line.commercial.grossPrice)} {line.commercial.currency}
+          </p>
+        ))}
+        <p className="commercial-gross">
+          Preț final: {formatMoney(job.grossPrice)} {job.currency}
+        </p>
+      </div>
+    );
+  }
+  return (
+    <p className="commercial-gross">
+      Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
+    </p>
   );
 }
 
@@ -659,14 +698,21 @@ export function InstallationScopeSection({
         <h3>{scope.label}</h3>
         <StatusChip
           label={commercialCompletenessLabel(scope.commercialCompleteness)}
-          tone="warn"
+          tone={scope.commercialCompleteness === "COMPLETE" ? "ok" : "warn"}
         />
       </div>
-      <ul>
-        {scope.incompleteReasons.map((reason) => (
-          <li key={reason.id}>{reason.label}</li>
-        ))}
-      </ul>
+      {scope.commercialCompleteness === "COMPLETE" && scope.commercialGrossPrice != null ? (
+        <p>
+          Preț montaj: {formatMoney(scope.commercialGrossPrice)} EUR
+        </p>
+      ) : null}
+      {scope.incompleteReasons.length > 0 ? (
+        <ul>
+          {scope.incompleteReasons.map((reason) => (
+            <li key={reason.id}>{reason.label}</li>
+          ))}
+        </ul>
+      ) : null}
     </section>
   );
 }

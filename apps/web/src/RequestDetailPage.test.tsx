@@ -306,6 +306,8 @@ describe("RequestDetailPage", () => {
         label: "Montaj la locație" as const,
         eicCompleteness: "PARTIAL" as const,
         commercialCompleteness: "PARTIAL" as const,
+        commercialNetPrice: null,
+        commercialGrossPrice: null,
         incompleteReasons: [
           { id: "MISSING_COST_EVIDENCE" as const, label: "Evidența de cost pentru montaj lipsește." },
         ],
@@ -380,6 +382,8 @@ describe("RequestDetailPage", () => {
         fixingMethod: "MECHANICAL_ANCHOR" as const,
         fixingOtherNote: null,
         siteElectrical: "NOT_APPLICABLE" as const,
+        crewSize: null,
+        plannedDurationHours: null,
         createdAt: "2026-08-29T10:00:00.000Z",
         updatedAt: "2026-08-29T10:00:00.000Z",
       },
@@ -388,6 +392,8 @@ describe("RequestDetailPage", () => {
         label: "Montaj la locație" as const,
         eicCompleteness: "PARTIAL" as const,
         commercialCompleteness: "PARTIAL" as const,
+        commercialNetPrice: null,
+        commercialGrossPrice: null,
         incompleteReasons: [
           { id: "MISSING_COST_EVIDENCE" as const, label: "Evidența de cost pentru montaj lipsește." },
         ],

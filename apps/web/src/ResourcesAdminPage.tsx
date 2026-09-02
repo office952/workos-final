@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import type { ResourcesAdminProjection } from "@workos-final/domain";
+import {
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
+  type ResourcesAdminProjection,
+} from "@workos-final/domain";
 import { findCatalogItem } from "./catalogQuery";
 import { CostEvidenceEditor } from "./CostEvidenceEditor";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
@@ -190,6 +193,26 @@ function renderCostAction(
   itemId: string,
   onSaved: (admin: ResourcesAdminProjection) => void,
 ) {
+  if (itemId.startsWith("resource:")) {
+    const resourceId = itemId.slice("resource:".length);
+    const resource =
+      admin.labor.find((item) => item.id === resourceId) ??
+      admin.services.find((item) => item.id === resourceId);
+    if (!resource) {
+      return null;
+    }
+    return (
+      <CostEvidenceEditor
+        key={itemId}
+        createFor={{
+          resourceId: resource.id,
+          unitLabel: resource.unitLabel,
+          requiresSupplier: resource.id === SVC_SITE_INSTALL_SUBCONTRACT_ID,
+        }}
+        onSaved={onSaved}
+      />
+    );
+  }
   const evidence = admin.costEvidence.find(
     (row) => costEvidenceItemId(row) === itemId,
   );

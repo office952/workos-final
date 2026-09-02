@@ -1,8 +1,10 @@
 import {
   SITE_INSTALLATION_SCOPE_ID,
+  applyInstallationManualPrice,
   createCommercialRequest,
   isOperationalServiceProviderMode,
   linkCommercialRequestQuote,
+  siteInstallationEvidenceFromRows,
   updateCommercialRequest,
   type CommercialRequest,
   type CommercialRequestAttachment,
@@ -17,6 +19,7 @@ import { getQuoteSnapshot } from "../commercial/store.js";
 import { getCustomer } from "../customers/store.js";
 import { readOrganizationServiceOffer } from "../operationalServices/store.js";
 import type { SqliteDatabase } from "../persistence/sqlite.js";
+import { listActiveCostEvidence } from "../resources/store.js";
 import { deleteInstallationFacts, getInstallationFacts } from "./installationFacts.js";
 
 type OptionalServiceSelection = {
@@ -31,6 +34,7 @@ type RequestRow = {
   title: string;
   description: string;
   status: string;
+  installation_manual_net_eur: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -61,6 +65,7 @@ function requestFromRow(
     status: row.status as CommercialRequestStatus,
     optionalScopeIds: selections.map((item) => item.scopeId),
     siteInstallationMode: installation?.mode ?? null,
+    installationManualNetEur: row.installation_manual_net_eur,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -180,7 +185,8 @@ export function listCommercialRequests(db: SqliteDatabase): CommercialRequest[] 
   const rows = db
     .prepare(
       `
-      SELECT request_id, reference, customer_id, title, description, status, created_at, updated_at
+      SELECT request_id, reference, customer_id, title, description, status,
+             installation_manual_net_eur, created_at, updated_at
       FROM commercial_requests
       ORDER BY created_at DESC
     `,
@@ -200,7 +206,8 @@ export function getCommercialRequest(
   const row = db
     .prepare(
       `
-      SELECT request_id, reference, customer_id, title, description, status, created_at, updated_at
+      SELECT request_id, reference, customer_id, title, description, status,
+             installation_manual_net_eur, created_at, updated_at
       FROM commercial_requests
       WHERE request_id = ?
     `,
@@ -317,7 +324,8 @@ export function persistUpdatedCommercialRequest(
     db.prepare(
       `
       UPDATE commercial_requests
-      SET customer_id = ?, title = ?, description = ?, status = ?, updated_at = ?
+      SET customer_id = ?, title = ?, description = ?, status = ?,
+          installation_manual_net_eur = ?, updated_at = ?
       WHERE request_id = ?
     `,
     ).run(
@@ -325,6 +333,7 @@ export function persistUpdatedCommercialRequest(
       updated.request.title,
       updated.request.description,
       updated.request.status,
+      updated.request.installationManualNetEur ?? null,
       updated.request.updatedAt,
       requestId,
     );
@@ -375,6 +384,53 @@ export function getCommercialRequestQuoteLinkByQuote(
   return row ? linkFromRow(row) : null;
 }
 
+export function persistInstallationManualPrice(
+  db: SqliteDatabase,
+  requestId: string,
+  netPrice: number | null,
+  isOwner: boolean,
+): CommercialRequestMutationResult {
+  return db.transaction((): CommercialRequestMutationResult => {
+    const current = getCommercialRequest(db, requestId);
+    if (!current) {
+      return { ok: false, error: "not_found" };
+    }
+    const updated = applyInstallationManualPrice({
+      request: current,
+      netPrice,
+      isOwner,
+      hasLinkedQuotes: requestHasLinkedQuotes(db, requestId),
+    });
+    if (!updated.ok || updated.alreadyApplied) {
+      return updated;
+    }
+    db.prepare(
+      `
+      UPDATE commercial_requests
+      SET installation_manual_net_eur = ?, updated_at = ?
+      WHERE request_id = ?
+    `,
+    ).run(
+      updated.request.installationManualNetEur ?? null,
+      updated.request.updatedAt,
+      requestId,
+    );
+    return updated;
+  }).immediate();
+}
+
+export function readInstallationReadiness(
+  db: SqliteDatabase,
+  request: CommercialRequest,
+) {
+  return {
+    facts: getInstallationFacts(db, request.requestId),
+    providerMode: request.siteInstallationMode,
+    evidence: siteInstallationEvidenceFromRows(listActiveCostEvidence(db)),
+    manualNetPrice: request.installationManualNetEur ?? null,
+  };
+}
+
 export function persistCommercialRequestQuoteLink(
   db: SqliteDatabase,
   requestId: string,
@@ -394,6 +450,7 @@ export function persistCommercialRequestQuoteLink(
       quoteSnapshotId,
       quoteCustomerId: quote.customer?.customerId,
       existingLink: getCommercialRequestQuoteLinkByQuote(db, quoteSnapshotId),
+      installationReadiness: readInstallationReadiness(db, request),
     });
     if (!linked.ok || linked.alreadyApplied) {
       return linked;

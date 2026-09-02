@@ -75,10 +75,40 @@ export async function fetchResourcesAdministration(): Promise<ResourcesAdminProj
   return readJson<ResourcesAdminProjection>(response);
 }
 
+export async function createCostEvidence(input: {
+  resourceId: string;
+  amount: number;
+  note: string;
+  supplierLabel?: string;
+  validFrom?: string;
+  validUntil?: string;
+}): Promise<ResourcesAdminProjection> {
+  const response = await fetch(`${baseUrl}/api/resources-admin/cost-evidence`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const body = (await response.json()) as {
+    error?: string;
+    admin?: ResourcesAdminProjection;
+  };
+  if (!response.ok) {
+    throw new Error(body.error ?? "cost_evidence_write_failed");
+  }
+  if (!body.admin) {
+    throw new Error("cost_evidence_write_failed");
+  }
+  return body.admin;
+}
+
 export async function patchCostEvidence(input: {
   evidenceRowId: string;
   amount: number;
   note: string;
+  supplierLabel?: string;
+  validFrom?: string;
+  validUntil?: string;
 }): Promise<ResourcesAdminProjection> {
   const response = await fetch(
     `${baseUrl}/api/resources-admin/cost-evidence/${input.evidenceRowId}`,
@@ -89,6 +119,9 @@ export async function patchCostEvidence(input: {
       body: JSON.stringify({
         amount: input.amount,
         note: input.note,
+        supplierLabel: input.supplierLabel,
+        validFrom: input.validFrom,
+        validUntil: input.validUntil,
       }),
     },
   );

@@ -32,7 +32,11 @@ OS_S2_DESIGN               = OWNER_ACCEPTED
 OS_S2_TYPED_FACTS          = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY   = CLOSED
-OS_S3                      = NOT_STARTED / NOT_AUTHORIZED
+OS_S3                      = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S4                      = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S5                      = IMPLEMENTED_LOCAL_IN_REVIEW
+FIRST_REAL_LETTERS_PREQUOTE_V1 = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED_RUNTIME     = NO
 UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
 UI_V3_PAGE_CONTENT_TRANSFORMATION = NOT_STARTED
@@ -236,7 +240,7 @@ Do not invent EUR amounts. Confirm these values before Phase 2 write.
 | Site electrical attendance | EUR / job | When contract is INCLUDED or SUBCONTRACTED | Cost evidence for those modes. EXCLUDED_CUSTOMER_RESPONSIBILITY and NOT_APPLICABLE need no cost row | LETTERS electrical finish is workshop close-out | Site electrical | Resources / Cost or exclusion text |
 | LED mount service | do not reuse | Never as site install | — | `LED installation service` is workshop module mounting | Must not be copied | Keep on LETTERS LIGHTING only |
 
-`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. OS-S2 design decisions 1–5 are closed. OS-S2 write is implemented on main. Transaction safety is closed. OS-S3 remains closed until a later Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. V3 navigation design is Owner-accepted; implementation is not authorized by this file.
+`INSTALLATION_EIC = COMPLETE` only when every applicable installation row has Owner-confirmed **internal** evidence. Customer `200 EUR + TVA` does not satisfy this gate and must not trigger cost-plus. Transport completeness is a separate `TRANSPORT_EIC` gate. OS-S2 design decisions 1–5 are closed. OS-S2 write is implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `IMPLEMENTED_LOCAL_IN_REVIEW` and not Owner-accepted. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in the local pre-quote wave. V3 navigation design is Owner-accepted. This file does not authorize OS-S6, Oferte V3, Lucrări V3, or a live first-job quote.
 
 ## Phase 3 — one Quote, separate lines (not implemented)
 

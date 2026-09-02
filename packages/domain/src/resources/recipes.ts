@@ -23,6 +23,7 @@ import {
   costEvidence,
   getCostEvidence,
   getResource,
+  isProductResourceUnit,
   lookupCostEvidence,
   type CostEvidence,
   LAB_ATTACH_INTERNAL_FRAME_ID,
@@ -489,7 +490,7 @@ export function collectRecipeRequirements(
     }
     seen.add(recipe.id);
     const quantity = quantityForRecipe(recipe, aggregate);
-    if (quantity === undefined) {
+    if (quantity === undefined || !isProductResourceUnit(recipe.unit)) {
       continue;
     }
     requirements.push({

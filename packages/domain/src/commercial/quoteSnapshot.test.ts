@@ -15,7 +15,10 @@ import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { DEFAULT_COMMERCIAL_POLICY, type CommercialPolicy } from "./policy.js";
 import { projectCommercialPrice } from "./price.js";
+import { projectManualFixedServicePrice } from "./servicePrice.js";
 import { freezeQuoteSnapshot } from "./quoteSnapshot.js";
+import { freezeOrderSnapshot } from "./orderSnapshot.js";
+import { recordQuoteAcceptance } from "./quoteAcceptance.js";
 
 const readyValues: DraftValues = {
   "root.inscription": "WORKOS",
@@ -83,7 +86,10 @@ describe("quote snapshot freeze", () => {
     expect(result.snapshot.quoteSnapshotId).toBe(
       `qts:${CANONICAL_PRODUCT_CODE}:${result.snapshot.contentHash}`,
     );
-    expect(result.snapshot.contentHash).toHaveLength(64);
+    expect(result.snapshot.contentHash).toBe(
+      // Proven equal on origin/main 33c2f9fae4402b152f2840c96cf6da98a1c74a03.
+      "35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27",
+    );
     expect(JSON.stringify(result.snapshot)).not.toMatch(
       /ExecutionPlan|ExecutionTask|inventory|actualCost|OrderSnapshot/i,
     );
@@ -297,6 +303,72 @@ describe("quote snapshot freeze", () => {
       ok: false,
       error: "invalid_customer",
       reasons: ["Identitatea clientului nu este validă pentru înghețare."],
+    });
+  });
+
+  it("keeps the product-only hash on schema v1 and freezes a separate v2 job hash", () => {
+    const { truth, aggregate, composition, eic } = confirmedSpine();
+    const commercial = projectCommercialPrice(eic);
+    const productOnly = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      createdAt: "2026-09-02T00:00:00.000Z",
+    });
+    const again = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      createdAt: "2026-09-02T12:00:00.000Z",
+    });
+    expect(productOnly.ok && again.ok).toBe(true);
+    if (!productOnly.ok || !again.ok) {
+      return;
+    }
+    expect(productOnly.snapshot.schemaVersion).toBe(1);
+    expect(productOnly.snapshot.contentHash).toBe(again.snapshot.contentHash);
+    expect(productOnly.snapshot.lines).toBeUndefined();
+
+    const installCommercial = projectManualFixedServicePrice({ netPrice: 200 });
+    const withInstall = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      createdAt: "2026-09-02T00:00:00.000Z",
+      installation: {
+        label: "Montaj la locație",
+        eic: {
+          completeness: "COMPLETE",
+          completenessReasons: [],
+          geometryLabel: null,
+          currency: "EUR",
+          lines: [
+            {
+              resourceId: "LAB-SITE-INSTALL",
+              label: "Manoperă montaj la locație",
+              quantity: 12,
+              unit: "person_hour",
+              rate: 25,
+              currency: "EUR",
+              cost: 300,
+              kind: "LABOR",
+              group: "labor",
+            },
+          ],
+          total: 300,
+          excludedComponentLabels: [],
+        },
+        commercial: installCommercial,
+      },
+    });
+    expect(withInstall.ok).toBe(true);
+    if (!withInstall.ok) {
+      return;
+    }
+    expect(withInstall.snapshot.schemaVersion).toBe(2);
+    expect(withInstall.snapshot.contentHash).not.toBe(productOnly.snapshot.contentHash);
+    expect(withInstall.snapshot.commercial.grossPrice).toBe(624.82);
+    expect(withInstall.snapshot.jobCommercial?.grossPrice).toBe(866.82);
+    expect(withInstall.snapshot.lines).toHaveLength(2);
+    const accepted = recordQuoteAcceptance(withInstall.snapshot);
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) {
+      return;
+    }
+    expect(freezeOrderSnapshot(withInstall.snapshot, accepted.decision)).toMatchObject({
+      ok: false,
+      error: "service_lines_not_orderable",
     });
   });
 });

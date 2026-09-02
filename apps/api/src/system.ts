@@ -42,16 +42,24 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
         c.req.param("evidenceRowId"),
         body?.amount,
         body?.note,
+        {
+          supplierLabel: (body as { supplierLabel?: unknown } | null)?.supplierLabel,
+          validFrom: (body as { validFrom?: unknown } | null)?.validFrom,
+          validUntil: (body as { validUntil?: unknown } | null)?.validUntil,
+        },
       );
       if (!result.ok) {
         switch (result.error) {
           case "invalid_amount":
           case "invalid_note":
+          case "invalid_supplier":
+          case "invalid_validity":
             return c.json({ error: result.error }, 400);
           case "unknown_resource":
           case "not_found":
             return c.json({ error: result.error }, 404);
           case "stale_cost_evidence":
+          case "already_exists":
             return c.json({ error: result.error }, 409);
           default: {
             const _exhaustive: never = result.error;
@@ -63,6 +71,56 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
         evidence: result.evidence,
         admin: projectResourcesAdministration(runtime.listActiveCostEvidence()),
       });
+    },
+  );
+
+  app.post(
+    "/api/resources-admin/cost-evidence",
+    requireOwnerRole(),
+    async (c) => {
+      const runtime = getProductSystem(c);
+      const body = (await c.req.json().catch(() => null)) as {
+        resourceId?: unknown;
+        amount?: unknown;
+        note?: unknown;
+        supplierLabel?: unknown;
+        validFrom?: unknown;
+        validUntil?: unknown;
+      } | null;
+      if (!body || typeof body.resourceId !== "string") {
+        return c.json({ error: "invalid_payload" }, 400);
+      }
+      const result = runtime.createInitialCostEvidence({
+        resourceId: body.resourceId,
+        amount: body.amount,
+        note: body.note,
+        supplierLabel: body.supplierLabel,
+        validFrom: body.validFrom,
+        validUntil: body.validUntil,
+      });
+      if (!result.ok) {
+        switch (result.error) {
+          case "invalid_amount":
+          case "invalid_note":
+          case "invalid_supplier":
+          case "invalid_validity":
+            return c.json({ error: result.error }, 400);
+          case "unknown_resource":
+          case "not_found":
+            return c.json({ error: result.error }, 404);
+          case "stale_cost_evidence":
+          case "already_exists":
+            return c.json({ error: result.error }, 409);
+          default: {
+            const _exhaustive: never = result.error;
+            return c.json({ error: _exhaustive }, 500);
+          }
+        }
+      }
+      return c.json({
+        evidence: result.evidence,
+        admin: projectResourcesAdministration(runtime.listActiveCostEvidence()),
+      }, 201);
     },
   );
 

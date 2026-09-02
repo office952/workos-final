@@ -11,6 +11,7 @@ import {
   SITE_INSTALLATION_SCOPE_ID,
   presentSiteInstallationScope,
   projectSiteInstallationScope,
+  type SiteInstallationEvidenceInput,
   type SiteInstallationOperatorView,
 } from "../installation/scope.js";
 import type { SiteInstallationFacts } from "../installation/facts.js";
@@ -355,6 +356,8 @@ export function projectRequestDetail(input: {
   attachments?: readonly CommercialRequestAttachment[];
   serviceOffer?: OrganizationServiceOffer;
   installationFacts?: SiteInstallationFacts | null;
+  installationEvidence?: SiteInstallationEvidenceInput;
+  asOf?: string;
 }): RequestDetailProjection {
   const commercialProgress = deriveRequestCommercialProgress(input.quotes);
   const attachments = (input.attachments ?? []).map(projectRequestAttachment);
@@ -378,6 +381,10 @@ export function projectRequestDetail(input: {
       projectSiteInstallationScope({
         selected,
         facts: installationFacts,
+        providerMode: input.request.siteInstallationMode,
+        evidence: input.installationEvidence,
+        manualNetPrice: input.request.installationManualNetEur ?? null,
+        asOf: input.asOf,
       }),
     ),
     installationOffer: projectSiteInstallationRequestOffer({

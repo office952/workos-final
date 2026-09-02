@@ -10,6 +10,7 @@ import {
   type ExecutionPlanPreview,
   type ExecutionPlanView,
   type FormSchema,
+  type LiveJobCommercial,
   type ProductAggregate,
   type ProductDefinition,
   type ProductTruth,
@@ -118,6 +119,7 @@ export function ProductConfigurationPage() {
     aggregate: ProductAggregate;
     eic?: EicResult;
     commercialPrice: CommercialPriceProjection;
+    jobCommercial?: LiveJobCommercial | null;
     executionPlanPreview: ExecutionPlanPreview;
     definition: ProductDefinition;
     quoteSnapshot?: QuoteSnapshot;
@@ -321,13 +323,18 @@ export function ProductConfigurationPage() {
     setBusy(true);
     setConfirmNotice(null);
     try {
-      const result = await confirmReviewedConfiguration(productCode, definition);
+      const result = await confirmReviewedConfiguration(
+        productCode,
+        definition,
+        requestId ?? undefined,
+      );
       if (result.ok) {
         setConfirmed({
           truth: result.truth,
           aggregate: result.aggregate,
           eic: result.eic,
           commercialPrice: result.commercialPrice,
+          jobCommercial: result.jobCommercial ?? null,
           executionPlanPreview: result.executionPlanPreview,
           definition,
         });
@@ -827,9 +834,11 @@ export function ProductConfigurationPage() {
         ? "Blocat"
         : "Neconfirmată";
   const priceLabel =
-    confirmed && confirmed.commercialPrice.completeness === "COMPLETE"
-      ? `Preț client ${formatCommercialGross(confirmed.commercialPrice)}`
-      : null;
+    confirmed && confirmed.jobCommercial
+      ? `Preț client ${formatJobGross(confirmed.jobCommercial)}`
+      : confirmed && confirmed.commercialPrice.completeness === "COMPLETE"
+        ? `Preț client ${formatCommercialGross(confirmed.commercialPrice)}`
+        : null;
   const catalogHref = requestContext
     ? `/products?request=${encodeURIComponent(requestContext.request.requestId)}`
     : "/products";
@@ -969,6 +978,7 @@ type ConfirmedProduct = {
   aggregate: ProductAggregate;
   eic?: EicResult;
   commercialPrice: CommercialPriceProjection;
+  jobCommercial?: LiveJobCommercial | null;
   executionPlanPreview: ExecutionPlanPreview;
   quoteSnapshot?: QuoteSnapshot;
   quoteReused?: boolean;
@@ -1062,6 +1072,7 @@ function ConfirmedCommercialWorkspace({
         onAccept={onAccept}
         onCreateOrder={onCreateOrder}
         installationScope={installationScope}
+        jobCommercial={confirmed.jobCommercial ?? null}
       />
       {installationScope ? <InstallationScopeSection scope={installationScope} /> : null}
 
@@ -1182,6 +1193,13 @@ function formatCommercialGross(price: CommercialPriceProjection): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${price.currency}`;
+}
+
+function formatJobGross(job: LiveJobCommercial): string {
+  return `${job.grossPrice.toLocaleString("ro-RO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ${job.currency}`;
 }
 
 async function loadCommercialExecution(

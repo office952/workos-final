@@ -68,6 +68,7 @@ import {
   type QuoteSnapshot,
   type TaskCompletionInput,
   type TaskMutationResult,
+  siteInstallationEvidenceFromRows,
   type CostEvidence,
   workcenterRegistry,
   type WorkcenterRegistry,
@@ -167,6 +168,7 @@ import {
   listCommercialRequests,
   persistCommercialRequestQuoteLink,
   persistCreatedCommercialRequest,
+  persistInstallationManualPrice,
   persistUpdatedCommercialRequest,
 } from "../requests/store.js";
 import {
@@ -191,6 +193,7 @@ import {
   type DisplayLabelWriteResult,
 } from "./store.js";
 import {
+  createInitialCostEvidence as persistInitialCostEvidence,
   listActiveCostEvidence as readActiveCostEvidence,
   supersedeCostEvidence as persistSupersededCostEvidence,
   type CostEvidenceWriteResult,
@@ -298,7 +301,20 @@ export type ProductSystemRuntime = {
     evidenceRowId: string,
     amount: unknown,
     note: unknown,
+    extras?: {
+      supplierLabel?: unknown;
+      validFrom?: unknown;
+      validUntil?: unknown;
+    },
   ): CostEvidenceWriteResult;
+  createInitialCostEvidence(input: {
+    resourceId: string;
+    amount: unknown;
+    note?: unknown;
+    supplierLabel?: unknown;
+    validFrom?: unknown;
+    validUntil?: unknown;
+  }): CostEvidenceWriteResult;
   listPeople(): Person[];
   getPerson(personId: string): Person | null;
   listPeopleRegistry(): PeopleRegistryProjection;
@@ -381,6 +397,11 @@ export type ProductSystemRuntime = {
     patch: SiteInstallationFactsPatch,
     expectedVersion: number,
   ): SiteInstallationFactsMutationResult;
+  updateInstallationManualPrice(
+    requestId: string,
+    netPrice: number | null,
+    isOwner: boolean,
+  ): CommercialRequestMutationResult;
   linkRequestQuote(
     requestId: string,
     quoteSnapshotId: string,
@@ -765,6 +786,7 @@ export function createProductSystemRuntimeFromOpenDb(
         attachments: listCommercialRequestAttachments(db, request.requestId),
         serviceOffer: readOrganizationServiceOffer(db),
         installationFacts: getInstallationFacts(db, request.requestId),
+        installationEvidence: siteInstallationEvidenceFromRows(readActiveCostEvidence(db)),
       });
     },
     listRequestAttachments(requestId) {
@@ -850,6 +872,9 @@ export function createProductSystemRuntimeFromOpenDb(
     updateInstallationFacts(requestId, patch, expectedVersion) {
       return persistUpdatedInstallationFacts(db, requestId, patch, expectedVersion);
     },
+    updateInstallationManualPrice(requestId, netPrice, isOwner) {
+      return persistInstallationManualPrice(db, requestId, netPrice, isOwner);
+    },
     linkRequestQuote(requestId, quoteSnapshotId) {
       return persistCommercialRequestQuoteLink(db, requestId, quoteSnapshotId);
     },
@@ -901,8 +926,11 @@ export function createProductSystemRuntimeFromOpenDb(
     listActiveCostEvidence() {
       return readActiveCostEvidence(db);
     },
-    supersedeCostEvidence(evidenceRowId, amount, note) {
-      return persistSupersededCostEvidence(db, evidenceRowId, amount, note);
+    supersedeCostEvidence(evidenceRowId, amount, note, extras) {
+      return persistSupersededCostEvidence(db, evidenceRowId, amount, note, extras);
+    },
+    createInitialCostEvidence(input) {
+      return persistInitialCostEvidence(db, input);
     },
     close() {
       db.close();

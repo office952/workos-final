@@ -86,35 +86,33 @@ A COMPLETE product commercial projection is not a COMPLETE job when a selected o
 Canonical 60 mm none/none is COMPLETE.
 30 / 80 / 100 mm, vinyl, and RAL stay PARTIAL while internal-cost evidence is unconfirmed.
 
-## Service commercial channel — OWNER_ACCEPTED_TARGET, not implemented
+## Service commercial channel — CURRENT_RUNTIME local in review
 
 ```text
 SERVICE_COMMERCIAL_STRATEGY = MANUAL_FIXED_PER_REQUEST
 PRODUCT_STRATEGY            = COST_PLUS
-CURRENT_PROJECTOR           = projectCommercialPrice  (product cost-plus only)
+CURRENT_PRODUCT_PROJECTOR   = projectCommercialPrice
+CURRENT_SERVICE_PROJECTOR   = projectManualFixedServicePrice
+CURRENT_JOB_PROJECTOR       = projectLiveJobCommercial
+SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_ONLY
+QUOTE_V2                    = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED_RUNTIME      = NO
 ```
 
-Accepted future law:
+Accepted law now implemented locally, not Owner-accepted:
 
 - product cost-plus remains unchanged;
 - a service fixed price is a distinct commercial strategy;
-- that fixed price may be frozen only after the required readiness gates (service facts + service EIC COMPLETE + later multi-line Quote);
-- `200 EUR + TVA` belongs to the first real installation Request/offer;
+- that fixed price may be frozen only after service facts + service EIC COMPLETE + Owner-written net + additive Quote v2;
+- `200 EUR + TVA` belongs to the first real installation Request/offer when the Owner writes 200;
 - it is not a universal list price and not an organization default;
 - it does not complete EIC;
-- it must be frozen into the future Quote service line;
 - later policy or rate changes never rewrite frozen Quotes;
 - completing service EIC must not activate product cost-plus on that service.
 
-```text
-SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_DECISION_REQUIRED_BEFORE_OS_S4
-```
+`ALT_B_SCOPED` decides who may see money. Owner role decides who may write the service fixed price.
 
-`ALT_B_SCOPED` decides who may see money. It does not decide who may write a service fixed price. That write authority is deferred and does not block OS-S1.
-
-`CURRENT_RUNTIME`: `projectCommercialPrice` remains the only projector. Selected installation therefore still gets a PARTIAL cost-plus projection from a 0 EIC total. The operator view must not treat that as a sold price.
-
-Do not implement `MANUAL_FIXED_PER_REQUEST` from this document.
+`CURRENT_RUNTIME` on the pre-quote branch: selected installation uses `projectManualFixedServicePrice`, not cost-plus from install EIC. The operator view must not treat a PARTIAL or 0 EUR projection as a sold price. Product-only Quote v1 is unchanged.
 
 ## Planned vs actual
 

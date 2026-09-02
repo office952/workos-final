@@ -32,13 +32,14 @@ function completeFactsPatch() {
 
 describe("site installation facts", () => {
   it("treats a request without a facts row as null defaults", () => {
-    expect(siteInstallationIncompleteReasonIds(null)).toEqual([
-      "MISSING_COST_EVIDENCE",
+    expect(siteInstallationIncompleteReasonIds({ facts: null })).toEqual([
       "SITE_ADDRESS_INCOMPLETE",
       "SITE_MEASUREMENTS_UNCONFIRMED",
       "FACADE_UNCONFIRMED",
       "FIXING_UNCONFIRMED",
       "SITE_ELECTRICAL_UNCONFIRMED",
+      "MISSING_PROVIDER_MODE",
+      "MISSING_COST_EVIDENCE",
     ]);
   });
 
@@ -59,7 +60,8 @@ describe("site installation facts", () => {
     expect(saved.facts.version).toBe(1);
     expect(saved.facts.countryCode).toBe("RO");
     expect(saved.facts.siteElectrical).toBe("NOT_APPLICABLE");
-    expect(siteInstallationIncompleteReasonIds(saved.facts)).toEqual([
+    expect(siteInstallationIncompleteReasonIds({ facts: saved.facts })).toEqual([
+      "MISSING_PROVIDER_MODE",
       "MISSING_COST_EVIDENCE",
     ]);
     const again = applySiteInstallationFactsPatch({

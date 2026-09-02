@@ -34,6 +34,8 @@ type FactsRow = {
   fixing_method: string;
   fixing_other_note: string | null;
   site_electrical: string;
+  crew_size: number | null;
+  planned_duration_hours: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -70,6 +72,8 @@ function factsFromRow(row: FactsRow): SiteInstallationFacts | null {
     fixingMethod: row.fixing_method,
     fixingOtherNote: row.fixing_other_note,
     siteElectrical: row.site_electrical,
+    crewSize: row.crew_size,
+    plannedDurationHours: row.planned_duration_hours,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -87,7 +91,7 @@ export function getInstallationFacts(
              measurement_status, mounting_surface_width_mm, mounting_surface_height_mm,
              installation_elevation_mm, measured_at, measurement_notes,
              facade_type, facade_other_note, fixing_method, fixing_other_note,
-             site_electrical, created_at, updated_at
+             site_electrical, crew_size, planned_duration_hours, created_at, updated_at
       FROM commercial_request_installation_facts
       WHERE request_id = ?
     `,
@@ -129,6 +133,8 @@ function factsBindValues(facts: SiteInstallationFacts): unknown[] {
     facts.fixingMethod,
     facts.fixingOtherNote,
     facts.siteElectrical,
+    facts.crewSize,
+    facts.plannedDurationHours,
     facts.createdAt,
     facts.updatedAt,
   ];
@@ -160,9 +166,9 @@ function insertInstallationFactsIfAbsent(
         measurement_status, mounting_surface_width_mm, mounting_surface_height_mm,
         installation_elevation_mm, measured_at, measurement_notes,
         facade_type, facade_other_note, fixing_method, fixing_other_note,
-        site_electrical, created_at, updated_at
+        site_electrical, crew_size, planned_duration_hours, created_at, updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     ).run(...factsBindValues(facts));
     return true;
@@ -204,6 +210,8 @@ function updateInstallationFactsIfVersion(
           fixing_method = ?,
           fixing_other_note = ?,
           site_electrical = ?,
+          crew_size = ?,
+          planned_duration_hours = ?,
           updated_at = ?
       WHERE request_id = ? AND version = ?
     `,
@@ -230,6 +238,8 @@ function updateInstallationFactsIfVersion(
       facts.fixingMethod,
       facts.fixingOtherNote,
       facts.siteElectrical,
+      facts.crewSize,
+      facts.plannedDurationHours,
       facts.updatedAt,
       facts.requestId,
       expectedVersion,

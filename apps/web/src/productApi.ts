@@ -5,6 +5,7 @@ import type {
   DraftValues,
   EicResult,
   ExecutionPlanPreview,
+  LiveJobCommercial,
   ExecutionPlanView,
   FormSchema,
   ProductAggregate,
@@ -84,6 +85,7 @@ export async function compileConfiguration(
 export async function confirmReviewedConfiguration(
   productCode: string,
   definition: ProductDefinition,
+  requestId?: string,
 ): Promise<
   | {
       ok: true;
@@ -91,6 +93,7 @@ export async function confirmReviewedConfiguration(
       aggregate: ProductAggregate;
       eic?: EicResult;
       commercialPrice: CommercialPriceProjection;
+      jobCommercial?: LiveJobCommercial | null;
       executionPlanPreview: ExecutionPlanPreview;
     }
   | { ok: false; reason: "not_ready" | "review_mismatch"; definition: ProductDefinition }
@@ -101,6 +104,7 @@ export async function confirmReviewedConfiguration(
     body: JSON.stringify({
       definition,
       reviewId: definition.reviewId,
+      ...(requestId ? { requestId } : {}),
     }),
   });
   const body = await readJson<{
@@ -108,6 +112,7 @@ export async function confirmReviewedConfiguration(
     aggregate?: ProductAggregate;
     eic?: EicResult;
     commercialPrice?: CommercialPriceProjection;
+    jobCommercial?: LiveJobCommercial | null;
     executionPlanPreview?: ExecutionPlanPreview;
     definition?: ProductDefinition;
     error?: string;
@@ -134,6 +139,7 @@ export async function confirmReviewedConfiguration(
     aggregate: body.aggregate,
     eic: body.eic,
     commercialPrice: body.commercialPrice,
+    jobCommercial: body.jobCommercial ?? null,
     executionPlanPreview: body.executionPlanPreview,
   };
 }

@@ -21,8 +21,12 @@ OS_S2_DESIGN               = OWNER_ACCEPTED
 OS_S2_TYPED_FACTS          = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY   = CLOSED
-OS_S3                      = NOT_STARTED / NOT_AUTHORIZED
-OS_S3_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
+OS_S3                      = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S4                      = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S5                      = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S6_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
+FIRST_REAL_LETTERS_PREQUOTE_V1 = IMPLEMENTED_LOCAL_IN_REVIEW
+OWNER_ACCEPTED_RUNTIME     = NO
 UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
 UI_V3_PAGE_CONTENT_TRANSFORMATION = NOT_STARTED
@@ -216,7 +220,7 @@ Mode is required once the service is selected and the org is not `SERVICE_DISABL
 
 ## Resources / Cost evidence
 
-`CURRENT_RUNTIME`: workshop catalog only. Units `m` / `m2` / `buc`. Owner can supersede amounts on `/admin/resources`. No site-install labor, no supplier identity, no validity window, no person-hour unit.
+`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: workshop recipes stay `m` / `m2` / `buc`. Additive site-install identities exist without seeded amounts: `LAB-SITE-INSTALL` (`person_hour`) and `SVC-SITE-INSTALL-SUBCONTRACT` (`job`, supplier + validity). Owner writes first evidence and supersedes amounts on `/admin/resources`. Not pontaj. Not Owner-accepted runtime. Not integrated on main.
 
 `OWNER_ACCEPTED_TARGET`:
 
@@ -241,19 +245,19 @@ Workshop LETTERS recipes, `SVC-PLACE-LED-MODULES`, and `SVC-ELECTRICAL-FINISH` m
 
 ## Service EIC
 
-`CURRENT_RUNTIME`: selected `SITE_INSTALLATION` projects a PARTIAL `EicResult` with empty lines and total 0. Operator view strips money. Freeze and link refuse `incomplete_offer`. There is no COMPLETE path.
+`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: selected `SITE_INSTALLATION` can reach COMPLETE service EIC from applicable INTERNAL or SUBCONTRACTED evidence only. Incomplete, expired, or missing-supplier evidence stays PARTIAL with empty lines and total 0. Operator view still strips money. Freeze and link refuse `incomplete_offer` until EIC and Owner-written service price are both COMPLETE. Not Owner-accepted runtime. Not integrated on main.
 
 `OWNER_ACCEPTED_TARGET`: each selected capability has its own EIC compiler and `EicResult`. COMPLETE only when every **applicable** internal or supplier row has Owner-confirmed evidence. Customer selling price cannot complete EIC. Transport completeness is a separate `TRANSPORT_EIC` gate.
 
-Person-hour labor math is **TARGET_ONLY**. Runtime has no hour unit and no crew/duration inputs.
+Person-hour labor math is `IMPLEMENTED_LOCAL_IN_REVIEW` for site-install INTERNAL labor only. Workshop LETTERS recipes stay `m` / `m²` / `buc`. This is not pontaj and not Owner-accepted runtime.
 
-`FUTURE_SLICE`: OS-S3.
+`FUTURE_SLICE`: OS-S6 transport and later.
 
 ---
 
 ## Service commercial price
 
-`CURRENT_RUNTIME`: `projectCommercialPrice` is the only projector and is cost-plus on EIC. Selected install therefore projects PARTIAL commercial from a 0 total. `200 EUR + TVA` is not in code.
+`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: product still uses `projectCommercialPrice` (cost-plus). Installation uses `projectManualFixedServicePrice` (Owner-written net, markup 0). `200 EUR + TVA` is an Owner-entered Request value in tests and UI, not a catalog or org default. Not Owner-accepted runtime. Not integrated on main.
 
 `OWNER_ACCEPTED_TARGET`:
 
@@ -264,32 +268,32 @@ SERVICE_COST_PLUS           = REJECTED
 FIRST_REAL_JOB_PRICE        = 200 EUR + TVA
 NOT_ORG_UNIVERSAL_DEFAULT   = YES
 NOT_EIC                     = YES
-SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_DECISION_REQUIRED_BEFORE_OS_S4
+SERVICE_MANUAL_PRICE_WRITE_PERMISSION = OWNER_ONLY
 ```
 
 The first real installation offer uses `200 EUR + TVA` as a **manual fixed customer price on that Request/offer**. It is not a company list price, not install EIC, and not markup on install EIC. It may be frozen only after required readiness gates (selected service facts and install EIC COMPLETE, plus the later multi-line Quote). Later policy or rate changes never rewrite frozen Quotes.
 
-`ALT_B_SCOPED` decides who may **see** money. It does not decide who may **write** a service fixed price. That write authority is deferred and does not block OS-S1.
+`ALT_B_SCOPED` decides who may **see** money. It does not decide who may **write** a service fixed price. Write is `OWNER_ONLY` and is enforced server-side on this feature branch.
 
 See `docs/architecture/COMMERCIAL_PRICE_RULES_CANON.md`.
 
-`FUTURE_SLICE`: OS-S4 projection; OS-S5 freeze.
+`FUTURE_SLICE`: OS-S6 transport. Live first-job quote remains unauthorized.
 
 ---
 
 ## Quote service lines
 
-`CURRENT_RUNTIME`: Quote Snapshot schema v1 is product-only: one EIC, one commercial block, one LETTERS `productionInput`.
+`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: product-only freeze stays schema v1 (one product EIC, one product commercial, one LETTERS `productionInput`). Selected COMPLETE installation freezes additive schema v2 lines (`PRODUCT`, `SITE_INSTALLATION`) plus `jobCommercial`. Historical v1 rows are not rewritten. Not Owner-accepted runtime. Not integrated on main.
 
 `OWNER_ACCEPTED_TARGET`: one Quote Snapshot, additive lines (product, installation, optional transport), one job total. Historical v1 snapshots stay readable. Hashes of old snapshots are not rewritten.
 
-`FUTURE_SLICE`: OS-S5. `QUOTE_CREATE = NO` until an explicit later GO.
+`FUTURE_SLICE`: Owner-triggered live first-job quote. The existing freeze route can emit v2 in synthetic/local proof; this wave does not authorize a real Cloud or HUB MEDIA quote.
 
 ---
 
 ## Order service truth
 
-`CURRENT_RUNTIME`: Order copies the accepted product freeze. No service package.
+`CURRENT_RUNTIME` on `feat/first-real-letters-prequote-v1`: Order from valid v1 is unchanged. Order from schema v2 fail-closes with `service_lines_not_orderable`. OS-S7 is not implemented.
 
 `OWNER_ACCEPTED_TARGET`: Order copies all frozen lines. Copy, do not recalculate.
 

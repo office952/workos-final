@@ -207,7 +207,10 @@ test("orphan product quote cannot link to a request with incomplete site install
     link?: unknown;
   };
   expect(linkedBody.error).toBe("incomplete_offer");
-  expect(linkedBody.reasons).toEqual(["Montajul nu are încă un cost complet."]);
+  expect(linkedBody.reasons).toEqual([
+    "Montajul nu are încă un cost complet.",
+    "Prețul de montaj nu este confirmat de owner.",
+  ]);
   expect(linkedBody.link).toBeUndefined();
 
   const detailAfter = await request.get(`/api/requests/${encodeURIComponent(requestId)}`);

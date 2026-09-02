@@ -290,12 +290,14 @@ describe("resources catalog presentation", () => {
       "materials",
       "services",
       "labor",
+      "uncosted-resources",
       "cost-evidence",
     ]);
     expect(catalog.categories.map((item) => item.label)).toEqual([
       "Materiale",
       "Servicii",
       "Manoperă",
+      "Resurse fără evidență",
       "Dovezi de cost",
     ]);
     expect(catalog.categories[0]?.items.map((item) => item.label)).toEqual([
@@ -349,18 +351,18 @@ describe("resources catalog presentation", () => {
     );
     expect(catalog.categories[2]?.items[0]?.kindLabel).toBe("Rețetă manoperă");
     expect(catalog.categories[2]?.items[0]?.listHint).toBe("5,00 EUR / m²");
-    expect(catalog.categories[3]?.items[0]?.kindLabel).toBe("Dovadă de cost intern");
-    expect(catalog.categories[3]?.items[0]?.id).toBe(
+    expect(catalog.categories[4]?.items[0]?.kindLabel).toBe("Dovadă de cost intern");
+    expect(catalog.categories[4]?.items[0]?.id).toBe(
       "cost:aluminium_return_profile:volumeDepthMm=60",
     );
-    expect(catalog.categories[3]?.items.map((item) => item.id)).toContain(
+    expect(catalog.categories[4]?.items.map((item) => item.id)).toContain(
       "cost:plexiglas_3mm_opal:unqualified",
     );
-    expect(catalog.categories[3]?.items.map((item) => item.label)).toContain(
+    expect(catalog.categories[4]?.items.map((item) => item.label)).toContain(
       "Plexiglas 3 mm opal",
     );
-    expect(JSON.stringify(catalog.categories[3])).not.toMatch(/cev:/);
-    expect(JSON.stringify(catalog.categories[3])).not.toMatch(/Ultima modificare/);
+    expect(JSON.stringify(catalog.categories[4])).not.toMatch(/cev:/);
+    expect(JSON.stringify(catalog.categories[4])).not.toMatch(/Ultima modificare/);
     expect(formatResourcesAdminSummary(resourcesAdminSummary(projectResourcesAdministration()))).toMatch(
       /^Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+$/,
     );
@@ -395,12 +397,12 @@ describe("resources catalog presentation", () => {
         })),
       ),
     );
-    const firstIds = first.categories[3]?.items.map((item) => item.id);
-    const secondIds = second.categories[3]?.items.map((item) => item.id);
+    const firstIds = first.categories[4]?.items.map((item) => item.id);
+    const secondIds = second.categories[4]?.items.map((item) => item.id);
     expect(firstIds).toEqual(secondIds);
     expect(firstIds).toContain("cost:plexiglas_3mm_opal:unqualified");
-    expect(JSON.stringify(second.categories[3])).toMatch(/Ultima modificare/);
-    expect(JSON.stringify(second.categories[3])).not.toMatch(/cev:after:/);
+    expect(JSON.stringify(second.categories[4])).toMatch(/Ultima modificare/);
+    expect(JSON.stringify(second.categories[4])).not.toMatch(/cev:after:/);
   });
 });
 

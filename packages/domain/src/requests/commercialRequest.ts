@@ -1,9 +1,11 @@
 import type { Customer } from "../customers/identity.js";
+import { isValidManualServiceNetPrice } from "../commercial/servicePrice.js";
 import {
   SITE_INSTALLATION_SCOPE_ID,
   sameOptionalScopeIds,
   siteInstallationFreezeRefusal,
   type IncompleteOfferRefusal,
+  type SiteInstallationProjectionInput,
 } from "../installation/scope.js";
 import {
   UNCONFIGURED_SITE_INSTALLATION_OFFER,
@@ -35,6 +37,7 @@ export type CommercialRequest = {
   status: CommercialRequestStatus;
   optionalScopeIds: readonly string[];
   siteInstallationMode: OperationalServiceProviderMode | null;
+  installationManualNetEur?: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -60,6 +63,10 @@ export const COMMERCIAL_REQUEST_MUTATION_ERRORS = [
   "service_mode_unavailable",
   "invalid_service_mode",
   "installation_facts_delete_confirmation_required",
+  "owner_required",
+  "installation_not_selected",
+  "installation_price_locked",
+  "invalid_manual_price",
 ] as const;
 export type CommercialRequestMutationError =
   (typeof COMMERCIAL_REQUEST_MUTATION_ERRORS)[number];
@@ -163,6 +170,7 @@ export function createCommercialRequest(input: {
       status: "NEW",
       optionalScopeIds: [],
       siteInstallationMode: null,
+      installationManualNetEur: null,
       createdAt,
       updatedAt: createdAt,
     },
@@ -252,6 +260,11 @@ export function updateCommercialRequest(
       ...next,
       optionalScopeIds: applied.optionalScopeIds,
       siteInstallationMode: applied.siteInstallationMode,
+      installationManualNetEur: applied.optionalScopeIds.includes(
+        SITE_INSTALLATION_SCOPE_ID,
+      )
+        ? (next.installationManualNetEur ?? null)
+        : null,
     };
   }
 
@@ -261,7 +274,8 @@ export function updateCommercialRequest(
     next.status === current.status &&
     next.customerId === current.customerId &&
     sameOptionalScopeIds(next.optionalScopeIds, current.optionalScopeIds) &&
-    sameServiceMode(next.siteInstallationMode, current.siteInstallationMode)
+    sameServiceMode(next.siteInstallationMode, current.siteInstallationMode) &&
+    (next.installationManualNetEur ?? null) === (current.installationManualNetEur ?? null)
   ) {
     return { ok: true, request: current, alreadyApplied: true };
   }
@@ -273,12 +287,47 @@ export function updateCommercialRequest(
   };
 }
 
+export function applyInstallationManualPrice(input: {
+  request: CommercialRequest;
+  netPrice: number | null;
+  isOwner: boolean;
+  hasLinkedQuotes: boolean;
+  updatedAt?: string;
+}): CommercialRequestMutationResult {
+  if (!input.isOwner) {
+    return { ok: false, error: "owner_required" };
+  }
+  if (!input.request.optionalScopeIds.includes(SITE_INSTALLATION_SCOPE_ID)) {
+    return { ok: false, error: "installation_not_selected" };
+  }
+  if (input.hasLinkedQuotes) {
+    return { ok: false, error: "installation_price_locked" };
+  }
+  if (input.netPrice !== null && !isValidManualServiceNetPrice(input.netPrice)) {
+    return { ok: false, error: "invalid_manual_price" };
+  }
+  const nextPrice = input.netPrice;
+  if ((input.request.installationManualNetEur ?? null) === nextPrice) {
+    return { ok: true, request: input.request, alreadyApplied: true };
+  }
+  return {
+    ok: true,
+    alreadyApplied: false,
+    request: {
+      ...input.request,
+      installationManualNetEur: nextPrice,
+      updatedAt: input.updatedAt ?? new Date().toISOString(),
+    },
+  };
+}
+
 export function linkCommercialRequestQuote(input: {
   request: CommercialRequest;
   quoteSnapshotId: string;
   quoteCustomerId: string | null | undefined;
   existingLink: CommercialRequestQuoteLink | null;
   linkedAt?: string;
+  installationReadiness?: Omit<SiteInstallationProjectionInput, "selected">;
 }): CommercialRequestLinkResult {
   if (input.request.status === "CANCELLED") {
     return { ok: false, error: "request_cancelled" };
@@ -295,7 +344,10 @@ export function linkCommercialRequestQuote(input: {
     }
     return { ok: false, error: "quote_already_linked" };
   }
-  const readinessRefusal = siteInstallationFreezeRefusal(input.request.optionalScopeIds);
+  const readinessRefusal = siteInstallationFreezeRefusal(
+    input.request.optionalScopeIds,
+    input.installationReadiness,
+  );
   if (readinessRefusal) {
     return { ok: false, ...readinessRefusal };
   }

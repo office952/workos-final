@@ -65,19 +65,35 @@ export {
   type QuoteDocumentSeller,
 } from "./quoteDocument.js";
 export {
+  FROZEN_QUOTE_LINE_KINDS,
   QUOTE_SNAPSHOT_ERRORS,
   QUOTE_SNAPSHOT_SCHEMA_VERSION,
+  QUOTE_SNAPSHOT_SCHEMA_VERSION_V2,
   QUOTE_SNAPSHOT_STATUSES,
   freezeQuoteSnapshot,
+  isSupportedQuoteSnapshot,
   quoteSnapshotErrorLabel,
   type FrozenCommercialOffer,
   type FrozenCustomerIdentity,
+  type FrozenJobCommercial,
+  type FrozenQuoteLine,
+  type FrozenQuoteLineKind,
   type FrozenSellerIdentity,
   type QuoteSnapshot,
   type QuoteSnapshotError,
   type QuoteSnapshotResult,
+  type QuoteSnapshotSchemaVersion,
   type QuoteSnapshotStatus,
 } from "./quoteSnapshot.js";
+export {
+  MANUAL_FIXED_SERVICE_STRATEGY,
+  MISSING_MANUAL_SERVICE_PRICE_REASON,
+  isValidManualServiceNetPrice,
+  projectLiveJobCommercial,
+  projectManualFixedServicePrice,
+  serviceCommercialCompletenessLabel,
+  type LiveJobCommercial,
+} from "./servicePrice.js";
 export {
   QUOTE_ACCEPTANCE_ERRORS,
   QUOTE_ACCEPTANCE_SCHEMA_VERSION,

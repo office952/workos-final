@@ -72,6 +72,7 @@ describe("resources administration projection", () => {
       "LAB-CLOSE-LETTER-BODY",
       "LAB-FORM-SHEET-CASSETTE",
       "LAB-ATTACH-INTERNAL-FRAME",
+      "LAB-SITE-INSTALL",
     ]);
     expect(admin.serviceRecipes.map((item) => item.id)).toEqual(
       expect.arrayContaining([

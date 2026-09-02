@@ -2,10 +2,12 @@ export type CostQualifier = {
   volumeDepthMm?: number;
 };
 
+import type { ProductResourceUnit } from "./catalog.js";
+
 export type ResourceRequirement = {
   componentId: string;
   resourceId: string;
   quantity: number;
-  unit: "m" | "m2" | "buc";
+  unit: ProductResourceUnit;
   costQualifier?: CostQualifier;
 };
