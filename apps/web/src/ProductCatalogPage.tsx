@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
 import {
   catalogFamilyFilters,
   flattenCatalogProducts,
@@ -102,13 +103,13 @@ export function ProductCatalogPage() {
     : "/products";
 
   return (
-    <section className="catalog-workspace">
+    <section className="catalog-workspace requests-overview">
       <PageHeader
         title="Catalog"
         lead={
           requestId
             ? "Alege produsul, apoi configurează pentru cererea curentă."
-            : "Produsele din catalog. Alegeți un produs."
+            : "Produsele din catalog. Alege un produs, apoi configurează."
         }
       />
 
@@ -116,12 +117,37 @@ export function ProductCatalogPage() {
         <EmptyState title="Nu există încă produse în catalog." />
       ) : (
         <>
-          <div className="catalog-toolbar">
+          <div className="registry-toolbar catalog-toolbar">
+            <div className="registry-toolbar-primary">
+              <div className="filter-row" role="group" aria-label="Filtre familie">
+                <button
+                  type="button"
+                  className={familyId === "ALL" ? "button-quiet is-selected" : "button-quiet"}
+                  aria-pressed={familyId === "ALL"}
+                  onClick={() => setFamilyId("ALL")}
+                >
+                  Toate familiile
+                </button>
+                {families.map((family) => (
+                  <button
+                    key={family.id}
+                    type="button"
+                    className={familyId === family.id ? "button-quiet is-selected" : "button-quiet"}
+                    aria-pressed={familyId === family.id}
+                    onClick={() => setFamilyId(family.id)}
+                  >
+                    {family.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <RegistrySearchField
               label="Caută produs"
               placeholder="Caută produs..."
               value={query}
               onChange={setQuery}
+              hideLabel
+              leadingIcon={<Search size={16} strokeWidth={1.75} />}
               resultSummary={registrySearchResultSummary({
                 visibleCount: visible.length,
                 poolCount:
@@ -133,27 +159,6 @@ export function ProductCatalogPage() {
                 nounPlural: "produse",
               })}
             />
-            <div className="filter-row" role="group" aria-label="Filtre familie">
-              <button
-                type="button"
-                className={familyId === "ALL" ? "button-quiet is-selected" : "button-quiet"}
-                aria-pressed={familyId === "ALL"}
-                onClick={() => setFamilyId("ALL")}
-              >
-                Toate familiile
-              </button>
-              {families.map((family) => (
-                <button
-                  key={family.id}
-                  type="button"
-                  className={familyId === family.id ? "button-quiet is-selected" : "button-quiet"}
-                  aria-pressed={familyId === family.id}
-                  onClick={() => setFamilyId(family.id)}
-                >
-                  {family.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {visible.length === 0 ? (

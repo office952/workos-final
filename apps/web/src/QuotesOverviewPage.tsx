@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronRight, FileCheck, FileText, Search, TriangleAlert } from "lucide-react";
 import {
   QUOTE_OVERVIEW_FILTERS,
   filterQuoteOverview,
@@ -8,19 +9,15 @@ import {
   type QuoteOverviewFilter,
   type QuoteOverviewItem,
   type QuoteOverviewProjection,
-  type QuoteOverviewStage,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
-import {
-  RegistrySearchField,
-  registrySearchResultSummary,
-} from "./RegistrySearchField";
+import { RegistrySearchField } from "./RegistrySearchField";
 import { pageErrorKind } from "./fetchAccess";
 import { fetchQuoteOverview } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
-import { StatusChip, type StatusTone } from "./ui/StatusChip";
 import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
@@ -52,13 +49,6 @@ export function QuotesOverviewPage() {
     };
   }, []);
 
-  const filteredPool = useMemo(() => {
-    if (page.kind !== "ready") {
-      return [];
-    }
-    return [...filterQuoteOverview(page.overview, filter, "")];
-  }, [filter, page]);
-
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
       return [];
@@ -81,24 +71,35 @@ export function QuotesOverviewPage() {
   const searching = query.trim().length > 0;
 
   return (
-    <section className="jobs-overview">
+    <section className="requests-overview">
       <PageHeader
         title="Oferte"
         lead="Ofertele înghețate, starea lor comercială și ce trebuie făcut acum."
-        meta={
-          empty ? null : (
-            <p className="page-summary">
-              Oferte {overview.summary.total}
-              {" · "}
-              Necesită atenție {overview.summary.needsAttention}
-              {" · "}
-              Acceptate {overview.summary.accepted}
-              {" · "}
-              Cu comandă {overview.summary.ordered}
-            </p>
-          )
-        }
       />
+
+      <div className="metric-band">
+        <MetricCard
+          label="Oferte"
+          value={overview.summary.total}
+          icon={<FileText size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Necesită atenție"
+          value={overview.summary.needsAttention}
+          icon={<TriangleAlert size={40} strokeWidth={1.5} />}
+          iconTone="warning"
+        />
+        <MetricCard
+          label="Acceptate"
+          value={overview.summary.accepted}
+          icon={<FileCheck size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Cu comandă"
+          value={overview.summary.ordered}
+          icon={<FileCheck size={40} strokeWidth={1.5} />}
+        />
+      </div>
 
       {empty ? (
         <EmptyState
@@ -111,72 +112,84 @@ export function QuotesOverviewPage() {
         />
       ) : (
         <>
-          <div className="filter-row" role="group" aria-label="Filtre oferte">
-            {QUOTE_OVERVIEW_FILTERS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={item === filter ? "button-quiet is-selected" : "button-quiet"}
-                aria-pressed={item === filter}
-                onClick={() => setFilter(item)}
-              >
-                {quoteOverviewFilterLabel(item)}
-              </button>
-            ))}
+          <div className="registry-toolbar">
+            <div className="registry-toolbar-primary">
+              <div className="filter-row" role="group" aria-label="Filtre oferte">
+                {QUOTE_OVERVIEW_FILTERS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={item === filter ? "button-quiet is-selected" : "button-quiet"}
+                    aria-pressed={item === filter}
+                    onClick={() => setFilter(item)}
+                  >
+                    {quoteOverviewFilterLabel(item)}
+                  </button>
+                ))}
+              </div>
+              <p className="registry-result-count">{quoteResultCountLabel(visible.length)}</p>
+            </div>
+            <RegistrySearchField
+              label="Caută ofertă"
+              placeholder="Caută ofertă, client sau OF-."
+              value={query}
+              onChange={setQuery}
+              hideLabel
+              leadingIcon={<Search size={16} strokeWidth={1.75} />}
+            />
           </div>
-          <RegistrySearchField
-            label="Caută ofertă"
-            placeholder="Caută ofertă..."
-            value={query}
-            onChange={setQuery}
-            resultSummary={registrySearchResultSummary({
-              visibleCount: visible.length,
-              poolCount: filteredPool.length,
-              totalCount: overview.summary.total,
-              query,
-              nounPlural: "oferte",
-            })}
-          />
           {visible.length === 0 ? (
             <EmptyState
-              title={
-                searching ? "Nicio ofertă găsită." : "Nicio ofertă în acest filtru."
-              }
+              title={searching ? "Nicio ofertă găsită." : "Nicio ofertă în acest filtru."}
             />
           ) : (
-            <ul className="jobs-list">
+            <ul className="requests-list">
               {visible.map((quote) => (
                 <li key={quote.quoteSnapshotId}>
-                  <div className="jobs-identity">
-                    <Link to={{ pathname: quote.href }}>{quote.reference}</Link>
-                    <span>{quote.inscription}</span>
-                    <span>{quote.productLabel}</span>
-                    <ClientLink
-                      customerId={quote.customerId}
-                      displayName={quote.customerDisplayName}
-                    />
-                    <span className="commercial-gross">
-                      {quote.grossDisplay} {quote.currency}
-                    </span>
-                    {quote.requestId && quote.requestReference ? (
-                      <Link
-                        className="registry-provenance-link"
-                        to={requestOverviewHref(quote.requestId)}
-                      >
-                        Din cererea {quote.requestReference}
+                  <div
+                    className={
+                      quote.needsAttention ? "registry-row is-attention" : "registry-row"
+                    }
+                  >
+                    <div className="registry-row-identity">
+                      <Link className="registry-row-name" to={{ pathname: quote.href }}>
+                        {quote.reference}
                       </Link>
-                    ) : null}
+                      <span className="registry-row-meta">{quoteRowMeta(quote)}</span>
+                      <ClientLink
+                        customerId={quote.customerId}
+                        displayName={quote.customerDisplayName}
+                      />
+                      <span className="commercial-gross">
+                        {quote.grossDisplay} {quote.currency}
+                      </span>
+                      {quote.requestId && quote.requestReference ? (
+                        <Link
+                          className="registry-provenance-link"
+                          to={requestOverviewHref(quote.requestId)}
+                        >
+                          Din cererea {quote.requestReference}
+                        </Link>
+                      ) : null}
+                    </div>
+                    <div className="requests-row-status">
+                      <span>{quote.stageLabel}</span>
+                      {quote.attentionLabel ? (
+                        <span className="requests-row-attention">{quote.attentionLabel}</span>
+                      ) : null}
+                    </div>
+                    <p className="requests-row-date">{formatQuoteDate(quote.createdAt)}</p>
+                    <Link className="requests-row-action" to={{ pathname: quote.href }}>
+                      {quote.nextActionLabel}
+                    </Link>
+                    <Link
+                      className="registry-row-open"
+                      to={{ pathname: quote.href }}
+                      aria-label={`Deschide ${quote.reference}`}
+                    >
+                      <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                    </Link>
                   </div>
-                  <div className="jobs-status">
-                    <StatusChip label={quote.stageLabel} tone={stageTone(quote.stage)} />
-                    {quote.attentionLabel ? (
-                      <p className="jobs-attention">{quote.attentionLabel}</p>
-                    ) : null}
-                  </div>
-                  <p className="jobs-date">{formatQuoteDate(quote.createdAt)}</p>
-                  <Link className="button-link" to={{ pathname: quote.href }}>
-                    {quote.nextActionLabel}
-                  </Link>
                 </li>
               ))}
             </ul>
@@ -187,26 +200,19 @@ export function QuotesOverviewPage() {
   );
 }
 
+function quoteRowMeta(quote: QuoteOverviewItem): string {
+  return [quote.inscription, quote.productLabel].filter(Boolean).join(" · ");
+}
+
+function quoteResultCountLabel(count: number): string {
+  return count === 1 ? "1 ofertă" : `${count} oferte`;
+}
+
 function compareQuoteRows(left: QuoteOverviewItem, right: QuoteOverviewItem): number {
   if (left.needsAttention !== right.needsAttention) {
     return left.needsAttention ? -1 : 1;
   }
   return right.createdAt.localeCompare(left.createdAt);
-}
-
-function stageTone(stage: QuoteOverviewStage): StatusTone {
-  switch (stage) {
-    case "QUOTE_CREATED":
-      return "warn";
-    case "QUOTE_ACCEPTED":
-      return "progress";
-    case "ORDER_CREATED":
-      return "done";
-    default: {
-      const _exhaustive: never = stage;
-      return _exhaustive;
-    }
-  }
 }
 
 function formatQuoteDate(value: string): string {

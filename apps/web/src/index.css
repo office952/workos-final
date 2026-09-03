@@ -4490,4 +4490,35 @@ a.jobs-customer {
     grid-template-columns: 1fr;
     gap: 0.2rem;
   }
+
+  .catalog-product-detail {
+    display: none;
+  }
+}
+
+.requests-overview .registry-row a.registry-row-name,
+.requests-overview .registry-row a.requests-row-action,
+.requests-overview .registry-row a.registry-row-open {
+  color: inherit;
+  text-decoration: none;
+}
+
+.requests-overview .registry-row a.registry-row-name:focus-visible,
+.requests-overview .registry-row a.requests-row-action:focus-visible,
+.requests-overview .registry-row a.registry-row-open:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.requests-overview .registry-row .jobs-customer,
+.requests-overview .registry-row .registry-provenance-link,
+.requests-overview .registry-row .commercial-gross {
+  display: block;
+  min-height: 0;
+  font-size: 0.8125rem;
+}
+
+.catalog-product-row,
+.catalog-product-detail {
+  border-color: var(--border-subtle);
 }

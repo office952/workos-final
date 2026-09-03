@@ -152,13 +152,13 @@ test("office can record a request, configure a product, and find the linked quot
 
   await page.getByRole("link", { name: "Oferte" }).click();
   await expect(page.getByRole("heading", { name: "Oferte" })).toBeVisible();
-  await expect(page.locator(".jobs-list li").filter({ hasText: inscription })).toContainText(
+  await expect(page.locator(".requests-list li").filter({ hasText: inscription })).toContainText(
     "Cu comandă",
   );
 
   await page.getByRole("link", { name: "Lucrări" }).click();
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
-  await expect(page.locator(".jobs-list li").filter({ hasText: inscription })).toBeVisible();
+  await expect(page.locator(".requests-list li").filter({ hasText: inscription })).toBeVisible();
 
   await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Cereri" }).click();
   await expect(requestRow(page, title).getByRole("link", { name: title })).toHaveAttribute(
@@ -202,6 +202,6 @@ test("product and quote paths still work without a request", async ({ page, requ
 
   await page.goto("/quotes");
   await expect(page.getByRole("heading", { name: "Oferte" })).toBeVisible();
-  await expect(page.locator(".jobs-list li").filter({ hasText: orphan.inscription })).toBeVisible();
+  await expect(page.locator(".requests-list li").filter({ hasText: orphan.inscription })).toBeVisible();
   expect(requests.some((item) => item.title.includes(orphan.inscription))).toBe(false);
 });

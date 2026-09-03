@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Briefcase, CheckCircle2, ChevronRight, PlayCircle, Search, TriangleAlert } from "lucide-react";
 import {
   JOB_FILTERS,
   filterJobOverview,
@@ -7,22 +8,21 @@ import {
   type JobFilter,
   type JobOverviewItem,
   type JobOverviewProjection,
-  type JobStage,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { fetchJobOverview } from "./jobsApi";
-import {
-  RegistrySearchField,
-  registrySearchResultSummary,
-} from "./RegistrySearchField";
+import { RegistrySearchField } from "./RegistrySearchField";
+import { pageErrorKind } from "./fetchAccess";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
-import { StatusChip, type StatusTone } from "./ui/StatusChip";
+import { PageStatus } from "./ui/PageStatus";
 import { useRegistrySearchQuery } from "./useRegistrySearchQuery";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "forbidden" }
   | { kind: "ready"; overview: JobOverviewProjection };
 
 export function JobsOverviewPage() {
@@ -38,22 +38,15 @@ export function JobsOverviewPage() {
           setPage({ kind: "ready", overview });
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          setPage({ kind: "error" });
+          setPage({ kind: pageErrorKind(error) });
         }
       });
     return () => {
       cancelled = true;
     };
   }, []);
-
-  const filteredPool = useMemo(() => {
-    if (page.kind !== "ready") {
-      return [];
-    }
-    return [...filterJobOverview(page.overview, filter, "")];
-  }, [filter, page]);
 
   const visible = useMemo(() => {
     if (page.kind !== "ready") {
@@ -63,10 +56,13 @@ export function JobsOverviewPage() {
   }, [filter, page, query]);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă lucrările…</p>;
+    return <PageStatus kind="loading">Se încarcă lucrările…</PageStatus>;
+  }
+  if (page.kind === "forbidden") {
+    return <PageStatus kind="forbidden">Nu ai acces la lista de lucrări.</PageStatus>;
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca lucrările.</p>;
+    return <PageStatus kind="error">Nu s-au putut încărca lucrările.</PageStatus>;
   }
 
   const { overview } = page;
@@ -74,24 +70,35 @@ export function JobsOverviewPage() {
   const searching = query.trim().length > 0;
 
   return (
-    <section className="jobs-overview">
+    <section className="requests-overview">
       <PageHeader
         title="Lucrări"
         lead="Lucrările comerciale curente, starea lor și ce trebuie făcut acum."
-        meta={
-          empty ? null : (
-            <p className="page-summary">
-              Lucrări active {overview.summary.active}
-              {" · "}
-              În execuție {overview.summary.inExecution}
-              {" · "}
-              Necesită atenție {overview.summary.needsAttention}
-              {" · "}
-              Finalizate {overview.summary.completed}
-            </p>
-          )
-        }
       />
+
+      <div className="metric-band">
+        <MetricCard
+          label="Lucrări"
+          value={overview.summary.total}
+          icon={<Briefcase size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="În execuție"
+          value={overview.summary.inExecution}
+          icon={<PlayCircle size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Necesită atenție"
+          value={overview.summary.needsAttention}
+          icon={<TriangleAlert size={40} strokeWidth={1.5} />}
+          iconTone="warning"
+        />
+        <MetricCard
+          label="Finalizate"
+          value={overview.summary.completed}
+          icon={<CheckCircle2 size={40} strokeWidth={1.5} />}
+        />
+      </div>
 
       {empty ? (
         <EmptyState
@@ -104,32 +111,32 @@ export function JobsOverviewPage() {
         />
       ) : (
         <>
-          <div className="filter-row" role="group" aria-label="Filtre lucrări">
-            {JOB_FILTERS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={item === filter ? "button-quiet is-selected" : "button-quiet"}
-                aria-pressed={item === filter}
-                onClick={() => setFilter(item)}
-              >
-                {jobFilterLabel(item)}
-              </button>
-            ))}
+          <div className="registry-toolbar">
+            <div className="registry-toolbar-primary">
+              <div className="filter-row" role="group" aria-label="Filtre lucrări">
+                {JOB_FILTERS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={item === filter ? "button-quiet is-selected" : "button-quiet"}
+                    aria-pressed={item === filter}
+                    onClick={() => setFilter(item)}
+                  >
+                    {jobFilterLabel(item)}
+                  </button>
+                ))}
+              </div>
+              <p className="registry-result-count">{jobResultCountLabel(visible.length)}</p>
+            </div>
+            <RegistrySearchField
+              label="Caută lucrare"
+              placeholder="Caută lucrare, client sau text."
+              value={query}
+              onChange={setQuery}
+              hideLabel
+              leadingIcon={<Search size={16} strokeWidth={1.75} />}
+            />
           </div>
-          <RegistrySearchField
-            label="Caută lucrare"
-            placeholder="Caută lucrare..."
-            value={query}
-            onChange={setQuery}
-            resultSummary={registrySearchResultSummary({
-              visibleCount: visible.length,
-              poolCount: filteredPool.length,
-              totalCount: overview.summary.total,
-              query,
-              nounPlural: "lucrări",
-            })}
-          />
           {visible.length === 0 ? (
             <EmptyState
               title={
@@ -139,28 +146,37 @@ export function JobsOverviewPage() {
               }
             />
           ) : (
-            <ul className="jobs-list">
+            <ul className="requests-list">
               {visible.map((job) => (
                 <li key={job.jobId}>
-                  <div className="jobs-identity">
-                    <Link to={job.href}>{job.inscription}</Link>
-                    <span>{job.productLabel}</span>
-                    <ClientLink
-                      customerId={job.customerId}
-                      displayName={job.customerDisplayName}
-                    />
+                  <div
+                    className={job.needsAttention ? "registry-row is-attention" : "registry-row"}
+                  >
+                    <div className="registry-row-identity">
+                      <Link className="registry-row-name" to={job.href}>
+                        {job.inscription}
+                      </Link>
+                      <span className="registry-row-meta">{job.productLabel}</span>
+                      <ClientLink
+                        customerId={job.customerId}
+                        displayName={job.customerDisplayName}
+                      />
+                    </div>
+                    <div className="requests-row-status">
+                      <span>{job.stageLabel}</span>
+                      {job.progressLabel ? <span>{job.progressLabel}</span> : null}
+                      {job.attentionLabel ? (
+                        <span className="requests-row-attention">{job.attentionLabel}</span>
+                      ) : null}
+                    </div>
+                    <p className="requests-row-date">{formatJobDate(job.createdAt)}</p>
+                    <Link className="requests-row-action" to={job.href}>
+                      {job.nextActionLabel}
+                    </Link>
+                    <Link className="registry-row-open" to={job.href} aria-label={`Deschide ${job.inscription}`}>
+                      <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                    </Link>
                   </div>
-                  <div className="jobs-status">
-                    <StatusChip label={job.stageLabel} tone={stageTone(job.stage)} />
-                    {job.progressLabel ? <p>{job.progressLabel}</p> : null}
-                    {job.attentionLabel ? (
-                      <p className="jobs-attention">{job.attentionLabel}</p>
-                    ) : null}
-                  </div>
-                  <p className="jobs-date">{formatJobDate(job.createdAt)}</p>
-                  <Link className="button-link" to={job.href}>
-                    {job.nextActionLabel}
-                  </Link>
                 </li>
               ))}
             </ul>
@@ -171,28 +187,15 @@ export function JobsOverviewPage() {
   );
 }
 
+function jobResultCountLabel(count: number): string {
+  return count === 1 ? "1 lucrare" : `${count} lucrări`;
+}
+
 function compareJobRows(left: JobOverviewItem, right: JobOverviewItem): number {
   if (left.needsAttention !== right.needsAttention) {
     return left.needsAttention ? -1 : 1;
   }
   return right.createdAt.localeCompare(left.createdAt);
-}
-
-function stageTone(stage: JobStage): StatusTone {
-  switch (stage) {
-    case "ORDER_CREATED":
-    case "RELEASED":
-      return "warn";
-    case "EXECUTION_PLANNED":
-    case "EXECUTION_IN_PROGRESS":
-      return "progress";
-    case "EXECUTION_COMPLETED":
-      return "done";
-    default: {
-      const _exhaustive: never = stage;
-      return _exhaustive;
-    }
-  }
 }
 
 function formatJobDate(value: string): string {

@@ -11,7 +11,7 @@ import {
 } from "./helpers/jobs";
 
 function jobRow(page: import("@playwright/test").Page, inscription: string) {
-  return page.locator(".jobs-list li").filter({ hasText: inscription });
+  return page.locator(".requests-list li").filter({ hasText: inscription });
 }
 
 test("operator can scan commercial jobs and open the correct workspace", async ({
@@ -71,16 +71,16 @@ test("operator can scan commercial jobs and open the correct workspace", async (
     path: "docs/worklog/screenshots/letters-jobs-needs-action.png",
     fullPage: true,
   });
-  await page.locator(".jobs-list li", { hasText: released.inscription }).screenshot({
+  await page.locator(".requests-list li", { hasText: released.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-released.png",
   });
-  await page.locator(".jobs-list li", { hasText: active.inscription }).screenshot({
+  await page.locator(".requests-list li", { hasText: active.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-in-progress.png",
   });
-  await page.locator(".jobs-list li", { hasText: completed.inscription }).screenshot({
+  await page.locator(".requests-list li", { hasText: completed.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-completed.png",
   });
-  await page.locator(".jobs-list li", { hasText: orderOnly.inscription }).screenshot({
+  await page.locator(".requests-list li", { hasText: orderOnly.inscription }).screenshot({
     path: "docs/worklog/screenshots/letters-jobs-attention.png",
   });
 

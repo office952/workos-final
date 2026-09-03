@@ -85,7 +85,7 @@ test("commercial catalog configurator reaches a stable job", async ({ page, requ
 
   await page.goto("/quotes");
   await expect(page.getByRole("heading", { name: "Oferte" })).toBeVisible();
-  await expect(page.locator(".jobs-list li").filter({ hasText: inscription })).toContainText(/OF-/);
+  await expect(page.locator(".requests-list li").filter({ hasText: inscription })).toContainText(/OF-/);
   await page.screenshot({ path: shot("quotes-list"), fullPage: true });
   await page.goto("/requests");
   await expect(page.getByRole("heading", { name: "Cereri de ofertă" })).toBeVisible();

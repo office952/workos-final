@@ -7,7 +7,7 @@ import {
 } from "./helpers/quotes";
 
 function quoteRow(page: import("@playwright/test").Page, inscription: string) {
-  return page.locator(".jobs-list li").filter({ hasText: inscription });
+  return page.locator(".requests-list li").filter({ hasText: inscription });
 }
 
 test("operator can find frozen quotes and continue the commercial path", async ({

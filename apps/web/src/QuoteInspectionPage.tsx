@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { formatCustomerMoneyAmount, type QuoteOverviewStage } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
 import { appPathname } from "./navigation/routePath";
@@ -8,6 +9,7 @@ import { acceptQuoteSnapshot, createOrderSnapshot } from "./productApi";
 import { fetchQuoteInspection, type QuoteInspectionResponse } from "./quotesApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Notice } from "./ui/Notice";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
@@ -31,7 +33,7 @@ function textValue(value: unknown): string | null {
   return null;
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <dt>{label}</dt>
@@ -92,32 +94,16 @@ export function QuoteInspectionPage() {
   }, [quoteSnapshotId]);
 
   if (page.kind === "loading") {
-    return (
-      <article className="decision-workspace">
-        <p>Se încarcă oferta…</p>
-      </article>
-    );
+    return <PageStatus kind="loading">Se încarcă oferta…</PageStatus>;
   }
   if (page.kind === "not_found") {
-    return (
-      <article className="decision-workspace">
-        <EmptyState title="Oferta nu a fost găsită." />
-      </article>
-    );
+    return <EmptyState title="Oferta nu a fost găsită." />;
   }
   if (page.kind === "forbidden") {
-    return (
-      <article className="decision-workspace">
-        <Notice tone="warn">Nu ai acces la această ofertă.</Notice>
-      </article>
-    );
+    return <PageStatus kind="forbidden">Nu ai acces la această ofertă.</PageStatus>;
   }
   if (page.kind === "error") {
-    return (
-      <article className="decision-workspace">
-        <Notice tone="warn">Oferta nu a putut fi încărcată.</Notice>
-      </article>
-    );
+    return <PageStatus kind="error">Oferta nu a putut fi încărcată.</PageStatus>;
   }
 
   const { quote, quoteSnapshot, order } = page.detail;
@@ -166,87 +152,93 @@ export function QuoteInspectionPage() {
         : null;
 
   return (
-    <article className="decision-workspace">
-      <header className="decision-header">
-        <div className="decision-title-row">
+    <section className="request-object">
+      <Link className="client-object-back" to="/quotes" aria-label="Înapoi la Oferte">
+        <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+        Înapoi la Oferte
+      </Link>
+
+      <header className="client-object-header">
+        <div className="client-object-titles">
           <h1>{quote.inscription}</h1>
+          <p className="client-object-identity">
+            {quote.reference} · Ofertă înghețată. Verifică datele înainte de decizie.
+          </p>
           <StatusChip label={quote.stageLabel} tone={accepted ? "ok" : "progress"} />
         </div>
-        <p className="decision-identity">
-          {quote.reference} · Ofertă înghețată. Verifică datele înainte de decizie.
-        </p>
+        <div className="client-object-actions">
+          {primary ? (
+            <button type="button" onClick={() => void primary.onClick()} disabled={busy}>
+              {primary.label}
+            </button>
+          ) : order ? (
+            <Link className="button-link" to={order.href}>
+              Deschide lucrarea
+            </Link>
+          ) : null}
+        </div>
       </header>
-      <div className="decision-grid">
-        <section className="decision-card" aria-labelledby="quote-source">
-          <h2 id="quote-source">Client și sursă</h2>
-          <dl className="decision-fields">
-            <Field label="Client">
-              {quote.customerId && quote.customerDisplayName ? (
-                <ClientLink customerId={quote.customerId} displayName={quote.customerDisplayName} />
-              ) : (
-                "—"
-              )}
-            </Field>
-            <Field label="Cerere sursă">
-              {page.detail.request ? (
-                <Link to={page.detail.request.href}>
-                  {page.detail.request.reference ?? "Deschide cererea"}
-                </Link>
-              ) : (
-                "—"
-              )}
-            </Field>
-            <Field label="Produs">{quote.productLabel}</Field>
-            <Field label="Configurație">{configuration ?? "—"}</Field>
-          </dl>
-        </section>
-        <section className="decision-card decision-card-finance" aria-labelledby="quote-price">
-          <h2 id="quote-price">Valori comerciale</h2>
-          <dl className="decision-fields">
-            {money(commercial.netPrice) ? <Field label="Net">{money(commercial.netPrice)}</Field> : null}
-            {typeof commercial.vatPercent === "number" ? (
-              <Field label="TVA">
-                <span>TVA {commercial.vatPercent}%</span>
-              </Field>
-            ) : null}
-            {money(commercial.grossPrice) ? (
-              <Field label="Preț client">
-                <span className="commercial-gross">Brut: {money(commercial.grossPrice)}</span>
-              </Field>
-            ) : (
-              <Field label="Preț client">
-                Brut: {quote.grossDisplay} {quote.currency}
-              </Field>
-            )}
-            {typeof commercial.internalCost === "number" ? (
-              <Field label="Cost intern">{money(commercial.internalCost)}</Field>
-            ) : null}
-            {typeof commercial.markupPercent === "number" ? (
-              <Field label="Adaos">{commercial.markupPercent}%</Field>
-            ) : null}
-            {typeof commercial.marginAmount === "number" ? (
-              <Field label="Marjă">{money(commercial.marginAmount)}</Field>
-            ) : null}
-            <Field label="Stare">
-              {quote.stageLabel}
-              {accepted ? " · valabilă ca snapshot înghețat" : ""}
-            </Field>
-            <Field label="Consecința deciziei">{quoteConsequence(quote.stage)}</Field>
-          </dl>
-        </section>
-      </div>
+
       {actionError ? <Notice tone="warn">{actionError}</Notice> : null}
-      <p className="decision-actions">
-        {primary ? (
-          <button type="button" onClick={() => void primary.onClick()} disabled={busy}>
-            {primary.label}
-          </button>
-        ) : order ? (
-          <Link className="button-link" to={order.href}>
-            Deschide lucrarea
-          </Link>
-        ) : null}
-      </p>
-    </article>
+
+      <section className="request-section" aria-labelledby="quote-source">
+        <h2 id="quote-source">Client și sursă</h2>
+        <dl className="request-facts">
+          <Fact label="Client">
+            {quote.customerId && quote.customerDisplayName ? (
+              <ClientLink customerId={quote.customerId} displayName={quote.customerDisplayName} />
+            ) : (
+              "—"
+            )}
+          </Fact>
+          <Fact label="Cerere sursă">
+            {page.detail.request ? (
+              <Link to={page.detail.request.href}>
+                {page.detail.request.reference ?? "Deschide cererea"}
+              </Link>
+            ) : (
+              "—"
+            )}
+          </Fact>
+          <Fact label="Produs">{quote.productLabel}</Fact>
+          <Fact label="Configurație">{configuration ?? "—"}</Fact>
+        </dl>
+      </section>
+
+      <section className="request-section" aria-labelledby="quote-price">
+        <h2 id="quote-price">Valori comerciale</h2>
+        <dl className="request-facts">
+          {money(commercial.netPrice) ? <Fact label="Net">{money(commercial.netPrice)}</Fact> : null}
+          {typeof commercial.vatPercent === "number" ? (
+            <Fact label="TVA">
+              <span>TVA {commercial.vatPercent}%</span>
+            </Fact>
+          ) : null}
+          {money(commercial.grossPrice) ? (
+            <Fact label="Preț client">
+              <span className="commercial-gross">Brut: {money(commercial.grossPrice)}</span>
+            </Fact>
+          ) : (
+            <Fact label="Preț client">
+              Brut: {quote.grossDisplay} {quote.currency}
+            </Fact>
+          )}
+          {typeof commercial.internalCost === "number" ? (
+            <Fact label="Cost intern">{money(commercial.internalCost)}</Fact>
+          ) : null}
+          {typeof commercial.markupPercent === "number" ? (
+            <Fact label="Adaos">{commercial.markupPercent}%</Fact>
+          ) : null}
+          {typeof commercial.marginAmount === "number" ? (
+            <Fact label="Marjă">{money(commercial.marginAmount)}</Fact>
+          ) : null}
+          <Fact label="Stare">
+            {quote.stageLabel}
+            {accepted ? " · valabilă ca snapshot înghețat" : ""}
+          </Fact>
+          <Fact label="Consecința deciziei">{quoteConsequence(quote.stage)}</Fact>
+        </dl>
+      </section>
+    </section>
   );
 }
