@@ -5,6 +5,7 @@ import { OwnerWriteHint } from "./OwnerWriteHint";
 import { fetchSellerProfile, updateSellerProfile } from "./sellerApi";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -49,10 +50,26 @@ export function SellerAdminPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă datele firmei…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Date firmă"
+          lead="Identitatea vânzătorului folosită pe oferte noi. Nu este catalogul de clienți și nu este un Settings general."
+        />
+        <PageStatus kind="loading">Se încarcă datele firmei…</PageStatus>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca datele firmei.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Date firmă"
+          lead="Identitatea vânzătorului folosită pe oferte noi. Nu este catalogul de clienți și nu este un Settings general."
+        />
+        <PageStatus kind="error">Nu s-au putut încărca datele firmei.</PageStatus>
+      </section>
+    );
   }
 
   return (

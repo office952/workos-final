@@ -3,6 +3,8 @@ import type { GovernanceProjection } from "@workos-final/domain";
 import { OwnerCatalogView } from "./OwnerCatalogView";
 import { buildGovernanceCatalog } from "./ownerCatalog";
 import { fetchSystemGovernance } from "./systemApi";
+import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -31,10 +33,26 @@ export function GovernancePage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă guvernanța…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Guvernanța sistemului"
+          lead="Catalogul limitelor de autoritate. Proiectează regulile din domeniu; nu le rescrie."
+        />
+        <PageStatus kind="loading">Se încarcă guvernanța…</PageStatus>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-a putut încărca guvernanța sistemului.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Guvernanța sistemului"
+          lead="Catalogul limitelor de autoritate. Proiectează regulile din domeniu; nu le rescrie."
+        />
+        <PageStatus kind="error">Nu s-a putut încărca guvernanța sistemului.</PageStatus>
+      </section>
+    );
   }
 
   return (

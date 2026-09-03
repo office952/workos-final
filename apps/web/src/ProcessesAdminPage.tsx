@@ -9,6 +9,7 @@ import {
 import { fetchOperationalProcessesAdministration } from "./systemApi";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -43,7 +44,7 @@ export function ProcessesAdminPage() {
           title="Procese operaționale"
           lead="Cum se lucrează în atelier. Nu spune ce utilaj se alocă, cine execută sau când se programează."
         />
-        <p>Se încarcă procesele operaționale…</p>
+        <PageStatus kind="loading">Se încarcă procesele operaționale…</PageStatus>
       </section>
     );
   }
@@ -54,7 +55,7 @@ export function ProcessesAdminPage() {
           title="Procese operaționale"
           lead="Cum se lucrează în atelier. Nu spune ce utilaj se alocă, cine execută sau când se programează."
         />
-        <p>Nu s-au putut încărca procesele operaționale.</p>
+        <PageStatus kind="error">Nu s-au putut încărca procesele operaționale.</PageStatus>
       </section>
     );
   }

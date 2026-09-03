@@ -3,6 +3,8 @@ import type { ProductSystemAdminProjection } from "@workos-final/domain";
 import { OwnerCatalogView } from "./OwnerCatalogView";
 import { buildProductSystemAdminCatalog } from "./ownerCatalog";
 import { fetchProductSystemAdministration } from "./systemApi";
+import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -31,10 +33,26 @@ export function ComponentsPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă sistemul de produs…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Module și componente"
+          lead="Proiecție de inspecție a sistemului de produs. Editarea etichetelor se face în Administrare."
+        />
+        <PageStatus kind="loading">Se încarcă sistemul de produs…</PageStatus>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-a putut încărca fundația sistemului de produs.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Module și componente"
+          lead="Proiecție de inspecție a sistemului de produs. Editarea etichetelor se face în Administrare."
+        />
+        <PageStatus kind="error">Nu s-a putut încărca fundația sistemului de produs.</PageStatus>
+      </section>
+    );
   }
 
   return (

@@ -6,6 +6,8 @@ import { buildProductSystemAdministrationCatalog } from "./ownerCatalog";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
 import { OwnerWriteHint } from "./OwnerWriteHint";
 import { fetchProductSystemAdministration } from "./systemApi";
+import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -40,10 +42,26 @@ export function ProductSystemAdminPage() {
   }, []);
 
   if (page.kind === "loading") {
-    return <p>Se încarcă administrarea sistemului de produs…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Sistem produs"
+          lead="Editează eticheta afișată. Identitatea tehnică, compoziția și setările tehnice rămân neschimbate."
+        />
+        <PageStatus kind="loading">Se încarcă administrarea sistemului de produs…</PageStatus>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-a putut încărca administrarea sistemului de produs.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Sistem produs"
+          lead="Editează eticheta afișată. Identitatea tehnică, compoziția și setările tehnice rămân neschimbate."
+        />
+        <PageStatus kind="error">Nu s-a putut încărca administrarea sistemului de produs.</PageStatus>
+      </section>
+    );
   }
 
   return (

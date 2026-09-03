@@ -10,6 +10,7 @@ import {
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
@@ -57,10 +58,26 @@ export function CustomerAdminPage() {
   }
 
   if (page.kind === "loading") {
-    return <p>Se încarcă clienții…</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Clienți"
+          lead="Ciclu de viață: adăugare, redenumire și retragere. Datele de lucru se editează în workspace-ul clientului."
+        />
+        <PageStatus kind="loading">Se încarcă clienții…</PageStatus>
+      </section>
+    );
   }
   if (page.kind === "error") {
-    return <p>Nu s-au putut încărca clienții.</p>;
+    return (
+      <section>
+        <PageHeader
+          title="Clienți"
+          lead="Ciclu de viață: adăugare, redenumire și retragere. Datele de lucru se editează în workspace-ul clientului."
+        />
+        <PageStatus kind="error">Nu s-au putut încărca clienții.</PageStatus>
+      </section>
+    );
   }
 
   const active = page.customers.filter((customer) => customer.status === "ACTIVE");
@@ -70,8 +87,11 @@ export function CustomerAdminPage() {
     <section>
       <PageHeader
         title="Clienți"
-        lead="Ciclu de viață: adăugare, redenumire și retragere. Datele de lucru se editează în workspace-ul clientului."
+        lead="Ciclu de viață: adăugare, redenumire și retragere. Registrul comercial rămâne la Clienți."
       />
+      <p className="client-object-identity">
+        <Link to="/clients">Deschide registrul Clienți</Link> pentru activitatea comercială.
+      </p>
       <form
         className="people-create"
         onSubmit={(event) => {
