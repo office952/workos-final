@@ -46,18 +46,33 @@ test("shows complete customer price after confirmed 60 mm internal cost", async 
   });
 });
 
-test("keeps 30 mm customer price partial and not final", async ({ page }) => {
+test("shows complete customer price after confirmed 30 mm internal cost", async ({
+  page,
+}) => {
   await confirmLetters(page, { inscription: "COM30", depth: "30" });
-  await expect(page.getByText("Total cost intern estimat: 345,00 EUR")).toBeVisible();
+  await expect(page.getByText("Total cost intern estimat: 370,00 EUR")).toBeVisible();
+  await expect(page.locator(".eic-section").getByText("Complet")).toBeVisible();
   const quote = page.locator(".quote-section");
   await expect(quote.getByRole("heading", { name: "Ofertă" })).toBeVisible();
-  await expect(quote.getByText("Costul intern nu este complet.")).toBeVisible();
-  await expect(quote.getByText("Preț final client")).toHaveCount(0);
+  await expect(quote.getByText("Preț final client: 604,40 EUR")).toBeVisible();
+  await expect(quote.getByRole("button", { name: "Creează oferta" })).toBeVisible();
   await expect(quote.getByText("624,82 EUR")).toHaveCount(0);
-  await quote.screenshot({
-    path: "docs/worklog/screenshots/letters-commercial-30mm-partial.png",
-  });
 });
+
+for (const { depth, eic, gross } of [
+  { depth: "80", eic: "395,00 EUR", gross: "645,23 EUR" },
+  { depth: "100", eic: "407,50 EUR", gross: "665,66 EUR" },
+] as const) {
+  test(`shows complete customer price after confirmed ${depth} mm internal cost`, async ({
+    page,
+  }) => {
+    await confirmLetters(page, { inscription: `COM${depth}`, depth });
+    await expect(page.getByText(`Total cost intern estimat: ${eic}`)).toBeVisible();
+    const quote = page.locator(".quote-section");
+    await expect(quote.getByText(`Preț final client: ${gross}`)).toBeVisible();
+    await expect(quote.getByRole("button", { name: "Creează oferta" })).toBeVisible();
+  });
+}
 
 test("keeps commercial readable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });

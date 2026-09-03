@@ -222,17 +222,25 @@ describe("commercial configuration gate", () => {
     expect(JSON.stringify(price)).not.toMatch(/FACE|VOLUME|actualCost|inventory/i);
   });
 
-  it.each([30, 80, 100] as const)("stays PARTIAL at %s mm", (depthMm) => {
+  it.each([
+    { depthMm: 30, eicTotal: 370, gross: 604.4 },
+    { depthMm: 60, eicTotal: 382.5, gross: 624.82 },
+    { depthMm: 80, eicTotal: 395, gross: 645.23 },
+    { depthMm: 100, eicTotal: 407.5, gross: 665.66 },
+  ] as const)("is COMPLETE at $depthMm mm", ({ depthMm, eicTotal, gross }) => {
     const eic = confirmedEic({
       ...readyValues,
       "volume.depthMm": String(depthMm),
     });
-    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.total).toBe(eicTotal);
     const price = projectCommercialPrice(eic);
-    expect(price.completeness).toBe("PARTIAL");
-    expect(price.unavailableReasons).toEqual([
-      "Costul intern nu este complet pentru această configurație.",
-    ]);
+    expect(price.completeness).toBe("COMPLETE");
+    expect(price.grossPrice).toBe(gross);
+    expect(price.unavailableReasons).toEqual([]);
+    expect(price.grossPrice).toBe(
+      roundMoney((eic.total + roundMoney(eic.total * 0.35)) * 1.21),
+    );
   });
 
   it("stays PARTIAL for vinyl and painted finishes", () => {

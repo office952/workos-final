@@ -218,9 +218,21 @@ describe("resource catalog", () => {
     expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 60 })?.amount).toBe(
       3,
     );
-    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 30 })).toBeUndefined();
-    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 80 })).toBeUndefined();
-    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 100 })).toBeUndefined();
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 30 })?.amount).toBe(
+      2,
+    );
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 80 })?.amount).toBe(
+      4,
+    );
+    expect(getCostEvidence(ALUMINIUM_RETURN_PROFILE_ID, { volumeDepthMm: 100 })?.amount).toBe(
+      5,
+    );
+    expect(
+      costEvidence
+        .filter((item) => item.resourceId === ALUMINIUM_RETURN_PROFILE_ID)
+        .map((item) => item.when?.volumeDepthMm)
+        .sort((left, right) => (left ?? 0) - (right ?? 0)),
+    ).toEqual([30, 60, 80, 100]);
     expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.amount).toBe(5);
     expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.source).toBe("OWNER_CONFIRMED_WORKSHOP");
     expect(JSON.stringify(resourceCatalog)).not.toMatch(/"amount":/);

@@ -79,8 +79,8 @@ describe("letters process composition", () => {
         ...canonicalGeometry,
         "volume.depthMm": depthMm,
       });
-      expect(composition.costCompleteness).toBe("PARTIAL");
-      expect(composition.costCompletenessLabel).toBe("Necesită calibrare");
+      expect(composition.costCompleteness).toBe("COMPLETE");
+      expect(composition.costCompletenessLabel).toBe("Complete pentru configurația curentă");
     }
 
     const vinyl = composeProductProcesses(frontlitPlexiAl06Template, {

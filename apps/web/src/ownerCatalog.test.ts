@@ -355,6 +355,14 @@ describe("resources catalog presentation", () => {
     expect(catalog.categories[4]?.items[0]?.id).toBe(
       "cost:aluminium_return_profile:volumeDepthMm=60",
     );
+    expect(catalog.categories[4]?.items.map((item) => item.id)).toEqual(
+      expect.arrayContaining([
+        "cost:aluminium_return_profile:volumeDepthMm=30",
+        "cost:aluminium_return_profile:volumeDepthMm=60",
+        "cost:aluminium_return_profile:volumeDepthMm=80",
+        "cost:aluminium_return_profile:volumeDepthMm=100",
+      ]),
+    );
     expect(catalog.categories[4]?.items.map((item) => item.id)).toContain(
       "cost:plexiglas_3mm_opal:unqualified",
     );

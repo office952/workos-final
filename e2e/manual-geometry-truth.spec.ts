@@ -54,7 +54,7 @@ test("accepts confirmed manual geometry and shows owner-confirmed 60 mm EIC", as
   });
 });
 
-test("keeps 30 mm aluminium profile cost unconfirmed", async ({ page }) => {
+test("confirms 30 mm aluminium profile cost as complete", async ({ page }) => {
   await page.goto("/products");
   await page
     .getByRole("link", {
@@ -71,16 +71,11 @@ test("keeps 30 mm aluminium profile cost unconfirmed", async ({ page }) => {
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await revealSecondaryProductSurfaces(page);
-  await expect(page.locator(".eic-section").getByText("Parțial", { exact: true })).toBeVisible();
+  await expect(page.locator(".eic-section").getByText("Complet")).toBeVisible();
   await expect(
-    page.getByText(
-      "Costul intern rămâne parțial: Tarif profil aluminiu neconfirmat pentru adâncimea 30 mm.",
-    ),
-  ).toBeVisible();
-  await expect(page.getByText("Total cost intern estimat: 345,00 EUR")).toBeVisible();
-  await page.locator(".eic-section").screenshot({
-    path: "docs/worklog/screenshots/letters-cost-calibration-30mm-eic.png",
-  });
+    page.getByText("Tarif profil aluminiu neconfirmat pentru adâncimea 30 mm"),
+  ).toHaveCount(0);
+  await expect(page.getByText("Total cost intern estimat: 370,00 EUR")).toBeVisible();
 });
 
 test("blocks missing face area without inventing Analyzer geometry", async ({ page }) => {

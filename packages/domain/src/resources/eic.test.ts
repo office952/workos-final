@@ -137,27 +137,58 @@ describe("EIC", () => {
     expect(JSON.stringify(eic)).not.toMatch(/customer|markup|quote|if process|LETTERS/i);
   });
 
-  it.each([30, 80, 100] as const)(
-    "does not inherit the 60 mm aluminium rate at %s mm",
-    (depthMm) => {
+  it.each([
+    { depthMm: 30, profileRate: 2, profileCost: 25, total: 370 },
+    { depthMm: 60, profileRate: 3, profileCost: 37.5, total: 382.5 },
+    { depthMm: 80, profileRate: 4, profileCost: 50, total: 395 },
+    { depthMm: 100, profileRate: 5, profileCost: 62.5, total: 407.5 },
+  ] as const)(
+    "uses depth-scoped aluminium purchase evidence at $depthMm mm",
+    ({ depthMm, profileRate, profileCost, total }) => {
       const { aggregate, composition } = confirmedSpine({
         ...readyValues,
         "volume.depthMm": String(depthMm),
       });
       const eic = compileEic(aggregate, composition);
-      expect(eic.completeness).toBe("PARTIAL");
-      expect(eic.completenessReasons).toEqual([
-        `Tarif profil aluminiu neconfirmat pentru adâncimea ${depthMm} mm`,
-      ]);
+      expect(eic.completeness).toBe("COMPLETE");
+      expect(eic.completenessReasons).toEqual([]);
       expect(eic.geometryLabel).toBe(EIC_GEOMETRY_CONFIRMED_LABEL);
-      expect(lineCost(eic, "aluminium_return_profile")).toBe(0);
+      expect(lineCost(eic, "aluminium_return_profile")).toBe(profileCost);
       expect(lineCost(eic, RETURN_CANT_FORMING_ID)).toBe(62.5);
-      expect(eic.total).toBe(345);
-      expect(eic.lines.some((line) => line.rate === 3 && line.resourceId === "aluminium_return_profile")).toBe(
-        false,
+      expect(eic.total).toBe(total);
+      const profileLine = eic.lines.find(
+        (line) => line.resourceId === "aluminium_return_profile",
+      );
+      expect(profileLine?.rate).toBe(profileRate);
+      expect(eic.lines.filter((line) => line.resourceId === "aluminium_return_profile")).toHaveLength(
+        1,
       );
     },
   );
+
+  it("does not let 30 mm inherit a 60 mm-only aluminium row", () => {
+    const { aggregate, composition } = confirmedSpine({
+      ...readyValues,
+      "volume.depthMm": "30",
+    });
+    const sixtyOnly = costEvidence.filter(
+      (item) =>
+        item.resourceId !== "aluminium_return_profile" || item.when?.volumeDepthMm === 60,
+    );
+    const eic = compileEic(aggregate, composition, sixtyOnly);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completenessReasons).toEqual([
+      "Tarif profil aluminiu neconfirmat pentru adâncimea 30 mm",
+    ]);
+    expect(lineCost(eic, "aluminium_return_profile")).toBe(0);
+    expect(lineCost(eic, RETURN_CANT_FORMING_ID)).toBe(62.5);
+    expect(eic.total).toBe(345);
+    expect(
+      eic.lines.some(
+        (line) => line.rate === 3 && line.resourceId === "aluminium_return_profile",
+      ),
+    ).toBe(false);
+  });
 
   it("keeps vinyl material and application labor separate when vinyl is selected", () => {
     const { aggregate, composition } = confirmedSpine({

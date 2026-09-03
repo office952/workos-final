@@ -101,7 +101,7 @@ describe("system projection API", () => {
     expect(body.services[0]).toEqual(
       expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
     );
-    expect(body.costEvidence).toHaveLength(26);
+    expect(body.costEvidence).toHaveLength(29);
     expect(body.costEvidence.every((item) => typeof item.evidenceRowId === "string")).toBe(
       true,
     );

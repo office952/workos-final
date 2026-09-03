@@ -133,7 +133,8 @@ describe("quote snapshot freeze", () => {
   it("blocks PARTIAL EIC and commercial from becoming a frozen quote", () => {
     const { truth, aggregate, composition, eic } = confirmedSpine({
       ...readyValues,
-      "volume.depthMm": "30",
+      "face.finish": "vinyl",
+      "face.color": "alb",
     });
     const commercial = projectCommercialPrice(eic);
     expect(eic.completeness).toBe("PARTIAL");
@@ -150,8 +151,6 @@ describe("quote snapshot freeze", () => {
   it.each<DraftValues>([
     { "face.finish": "vinyl", "face.color": "alb" },
     { "volume.finish": "painted", "volume.color": "RAL 9010" },
-    { "volume.depthMm": "80" },
-    { "volume.depthMm": "100" },
   ])("blocks incomplete configuration %o", (overrides) => {
     const { truth, aggregate, composition, eic } = confirmedSpine({
       ...readyValues,
@@ -161,6 +160,32 @@ describe("quote snapshot freeze", () => {
       freezeQuoteSnapshot(truth, aggregate, composition, eic, projectCommercialPrice(eic)).ok,
     ).toBe(false);
   });
+
+  it.each([
+    { depthMm: "30", eicTotal: 370, gross: 604.4 },
+    { depthMm: "80", eicTotal: 395, gross: 645.23 },
+    { depthMm: "100", eicTotal: 407.5, gross: 665.66 },
+  ] as const)(
+    "freezes a COMPLETE none/none offer at $depthMm mm",
+    ({ depthMm, eicTotal, gross }) => {
+      const { truth, aggregate, composition, eic } = confirmedSpine({
+        ...readyValues,
+        "volume.depthMm": depthMm,
+      });
+      const commercial = projectCommercialPrice(eic);
+      expect(eic.completeness).toBe("COMPLETE");
+      expect(eic.total).toBe(eicTotal);
+      expect(commercial.completeness).toBe("COMPLETE");
+      expect(commercial.grossPrice).toBe(gross);
+      const frozen = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial);
+      expect(frozen.ok).toBe(true);
+      if (!frozen.ok) {
+        return;
+      }
+      expect(frozen.snapshot.eic.total).toBe(eicTotal);
+      expect(frozen.snapshot.commercial.grossPrice).toBe(gross);
+    },
+  );
 
   it("does not reprice when the current commercial policy changes", () => {
     const { truth, aggregate, composition, eic } = confirmedSpine();

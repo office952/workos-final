@@ -118,7 +118,7 @@ describe("resource cost evidence persistence", () => {
     const app = createApp({ productSystem: first });
     const admin = await readBody(await app.request("/api/resources-admin"));
     expect(admin.writeState).toBe("READY");
-    expect((admin.costEvidence as JsonObject[]).length).toBe(26);
+    expect((admin.costEvidence as JsonObject[]).length).toBe(29);
     const plexi = (admin.costEvidence as JsonObject[]).find(
       (item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID,
     );
@@ -291,9 +291,12 @@ describe("resource cost evidence live compile and freeze", () => {
       ...lettersValues,
       "volume.depthMm": "30",
     });
-    expect((thirty.body.eic as JsonObject).completeness).toBe("PARTIAL");
-    const reasons = (thirty.body.eic as JsonObject).completenessReasons as string[];
-    expect(reasons.join(" ")).toMatch(/30 mm/);
+    expect((thirty.body.eic as JsonObject).completeness).toBe("COMPLETE");
+    expect((thirty.body.eic as JsonObject).total).toBe(370);
+    const thirtyProfile = ((thirty.body.eic as JsonObject).lines as JsonObject[]).find(
+      (item) => item.resourceId === ALUMINIUM_RETURN_PROFILE_ID,
+    );
+    expect(thirtyProfile?.rate).toBe(2);
     const sixty = await confirmProduct(app, CANONICAL_PRODUCT_CODE, lettersValues);
     const aluminiumLine = ((sixty.body.eic as JsonObject).lines as JsonObject[]).find(
       (item) => item.resourceId === ALUMINIUM_RETURN_PROFILE_ID,

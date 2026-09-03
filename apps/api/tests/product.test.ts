@@ -230,7 +230,7 @@ describe("product configuration API", () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          values: { ...readyValues, "volume.depthMm": "30" },
+          values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
         }),
       },
     );
@@ -251,12 +251,93 @@ describe("product configuration API", () => {
     const eic = body.eic as JsonObject;
     const commercialPrice = body.commercialPrice as JsonObject;
     expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.total).toBe(345);
     expect(commercialPrice.completeness).toBe("PARTIAL");
     expect(commercialPrice.unavailableReasons).toEqual([
       "Costul intern nu este complet pentru această configurație.",
     ]);
   });
+
+  it.each([
+    { depthMm: "30", eicTotal: 370, gross: 604.4 },
+    { depthMm: "80", eicTotal: 395, gross: 645.23 },
+    { depthMm: "100", eicTotal: 407.5, gross: 665.66 },
+  ] as const)(
+    "confirms COMPLETE commercial for none/none $depthMm mm",
+    async ({ depthMm, eicTotal, gross }) => {
+      const compiled = await createApp().request(
+        `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            values: { ...readyValues, "volume.depthMm": depthMm },
+          }),
+        },
+      );
+      const reviewed = await readBody(compiled);
+      const response = await createApp().request(
+        `/api/products/${CANONICAL_PRODUCT_CODE}/confirm`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            definition: reviewed.definition,
+            reviewId: reviewed.reviewId,
+          }),
+        },
+      );
+      expect(response.status).toBe(200);
+      const body = await readBody(response);
+      const eic = body.eic as JsonObject;
+      const commercialPrice = body.commercialPrice as JsonObject;
+      expect(eic.completeness).toBe("COMPLETE");
+      expect(eic.total).toBe(eicTotal);
+      expect(commercialPrice.completeness).toBe("COMPLETE");
+      expect(commercialPrice.grossPrice).toBe(gross);
+    },
+  );
+
+  it.each([
+    { depthMm: "30", eicTotal: 370, gross: 604.4 },
+    { depthMm: "80", eicTotal: 395, gross: 645.23 },
+    { depthMm: "100", eicTotal: 407.5, gross: 665.66 },
+  ] as const)(
+    "freezes a quote snapshot for none/none $depthMm mm",
+    async ({ depthMm, eicTotal, gross }) => {
+      const app = createApp();
+      const compiled = await app.request(
+        `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            values: { ...readyValues, "volume.depthMm": depthMm },
+          }),
+        },
+      );
+      const reviewed = await readBody(compiled);
+      const response = await app.request(
+        `/api/products/${CANONICAL_PRODUCT_CODE}/quote-snapshots`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            definition: reviewed.definition,
+            reviewId: reviewed.reviewId,
+            customerId: await createCustomer(app),
+          }),
+        },
+      );
+      expect(response.status).toBe(200);
+      const body = await readBody(response);
+      const snapshot = body.quoteSnapshot as JsonObject;
+      expect(snapshot.status).toBe("FROZEN");
+      expect((snapshot.eic as JsonObject).completeness).toBe("COMPLETE");
+      expect((snapshot.eic as JsonObject).total).toBe(eicTotal);
+      expect((snapshot.commercial as JsonObject).completeness).toBe("COMPLETE");
+      expect((snapshot.commercial as JsonObject).grossPrice).toBe(gross);
+    },
+  );
 
   it("freezes a quote snapshot from server-confirmed truth without production side effects", async () => {
     const reviewed = await compileReady();
@@ -749,7 +830,7 @@ describe("product configuration API", () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          values: { ...readyValues, "volume.depthMm": "30" },
+          values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
         }),
       },
     );

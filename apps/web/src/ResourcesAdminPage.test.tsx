@@ -258,9 +258,9 @@ describe("ResourcesAdminPage", () => {
       within(selected).getByRole("heading", { name: "Plexiglas 3 mm opal" }),
     ).toBeInTheDocument();
     expect(within(selected).getAllByText("18,00 EUR / m²").length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("button", { name: /Profil aluminiu/ }),
-    ).not.toHaveAttribute("aria-current");
+    for (const button of screen.getAllByRole("button", { name: /Profil aluminiu/ })) {
+      expect(button).not.toHaveAttribute("aria-current");
+    }
   });
 
   it("shows platform-default cost provenance as not owner-confirmed", async () => {

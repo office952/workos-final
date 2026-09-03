@@ -56,17 +56,22 @@ test("freezes a quote from complete commercial price without production acceptan
   });
 });
 
-test("blocks quote freeze when 30 mm commercial is partial", async ({ page }) => {
-  await confirmLetters(page, { inscription: "QTS30", depth: "30" });
-  const quote = page.locator(".quote-section");
-  await expect(quote.getByRole("button", { name: "Creează oferta" })).toHaveCount(0);
-  await expect(
-    quote.getByText("Costul intern nu este complet."),
-  ).toBeVisible();
-  await quote.screenshot({
-    path: "docs/worklog/screenshots/letters-quote-30mm-blocked.png",
+for (const { depth, gross } of [
+  { depth: "30", gross: "604,40 EUR" },
+  { depth: "80", gross: "645,23 EUR" },
+  { depth: "100", gross: "665,66 EUR" },
+] as const) {
+  test(`freezes a quote from complete ${depth} mm commercial price`, async ({ page }) => {
+    await confirmLetters(page, { inscription: `QTS${depth}`, depth });
+    const quote = page.locator(".quote-section");
+    await expect(quote.getByText(`Preț final client: ${gross}`)).toBeVisible();
+    await expect(quote.getByRole("button", { name: "Creează oferta" })).toBeVisible();
+    await selectOrCreateCustomer(page, "Client Demo LETTERS");
+    await quote.getByRole("button", { name: "Creează oferta" }).click();
+    await expect(quote.getByRole("heading", { name: "Ofertă creată" })).toBeVisible();
+    await expect(quote.getByText(`Preț final: ${gross}`)).toBeVisible();
   });
-});
+}
 
 test("keeps frozen quote readable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
