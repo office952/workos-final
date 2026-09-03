@@ -1924,6 +1924,165 @@ a.button-link.button-secondary {
   gap: 0.45rem;
 }
 
+.product-prequote,
+.product-prequote-workspace,
+.product-prequote .confirmed-result {
+  min-width: 0;
+}
+
+.product-prequote-identity {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.product-prequote-identity h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.product-prequote-meta,
+.product-prequote-provenance,
+.confirmed-tech-meta {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.product-prequote .confirmed-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 21rem);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.product-prequote .confirmed-result > :not(.product-decision-rail) {
+  grid-column: 1;
+}
+
+.product-decision-rail {
+  grid-column: 2;
+  grid-row: 1 / span 20;
+  min-width: 0;
+  padding: 0.25rem 0 0 1.25rem;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.product-decision-rail .quote-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.product-decision-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.product-decision-status {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.product-decision-status[data-tone="ok"] {
+  color: var(--status-success);
+}
+
+.product-decision-status[data-tone="warn"] {
+  color: var(--status-warning);
+}
+
+.product-decision-rail .commercial-job-preview {
+  max-width: none;
+}
+
+.product-decision-rail .commercial-job-total-value {
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.product-decision-rail .quote-create-action button:disabled {
+  opacity: 0.55;
+  background: var(--surface-selected);
+  color: var(--text-secondary);
+}
+
+.confirmed-summary-compact .confirmed-components {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.confirmed-summary-compact .confirmed-components h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+}
+
+.installation-ops-facts {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.installation-ops-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.installation-ops-facts dt,
+.installation-ops-facts dd {
+  margin: 0;
+}
+
+.installation-ops-facts dt {
+  color: var(--text-secondary);
+}
+
+.request-install-price-label {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.request-install-price-hero {
+  margin: 0.2rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.request-install-price-net,
+.request-install-next {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+}
+
+.request-repair-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: var(--radius-s);
+  background: var(--status-warn);
+  color: var(--status-warning);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.request-installation-facts {
+  max-width: none;
+}
+
 .client-related {
   display: grid;
   gap: 0.75rem;
@@ -3334,6 +3493,12 @@ a.jobs-customer {
   }
 }
 
+@media (max-width: 80rem) and (min-width: 48.01rem) {
+  .product-prequote .confirmed-result {
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+  }
+}
+
 @media (max-width: 48rem) {
   .app-header-row {
     display: flex;
@@ -3410,6 +3575,22 @@ a.jobs-customer {
 
   .configurator-summary {
     position: static;
+  }
+
+  .product-prequote .confirmed-result {
+    grid-template-columns: 1fr;
+  }
+
+  .product-prequote .product-decision-rail {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 0 0 1rem;
+    border-left: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .product-prequote .confirmed-result > :not(.product-decision-rail) {
+    grid-column: 1;
   }
 
   .task-row-main {
@@ -4201,8 +4382,15 @@ a.jobs-customer {
 
 .request-installation-headline {
   margin: 0;
-  color: var(--status-warning);
   font-weight: 650;
+}
+
+.request-installation-headline[data-tone="ok"] {
+  color: var(--status-success);
+}
+
+.request-installation-headline[data-tone="warn"] {
+  color: var(--status-warning);
 }
 
 .request-installation-missing {

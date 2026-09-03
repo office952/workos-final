@@ -55,7 +55,6 @@ import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 import { PageStatus } from "./ui/PageStatus";
-import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
   | { kind: "loading" }
@@ -406,7 +405,10 @@ export function RequestDetailPage() {
             Editează cererea
           </button>
           {primary?.kind === "href" ? (
-            <Link className="button-link" to={primary.href}>
+            <Link
+              className={primary.label === "Deschide oferta" ? "button-link" : "button-quiet"}
+              to={primary.href}
+            >
               {primary.label}
             </Link>
           ) : null}
@@ -422,6 +424,28 @@ export function RequestDetailPage() {
         <Notice tone="warn" compact>
           <p>{notice}</p>
         </Notice>
+      ) : null}
+
+      {detail.installationOffer.selected && detail.installationScope ? (
+        <section className="request-section request-install-decision-section">
+          {headline ? (
+            <p
+              className="request-installation-headline"
+              data-tone={
+                siteInstallationIsPrequoteReady(detail.installationScope) ? "ok" : "warn"
+              }
+            >
+              {headline}
+            </p>
+          ) : null}
+          <RequestPrequoteReadiness
+            detail={detail}
+            costHref={installationCostEvidenceHref({
+              providerMode: detail.installationOffer.mode,
+              incompleteReasons: incompleteReasons,
+            })}
+          />
+        </section>
       ) : null}
 
       <section className="request-section">
@@ -460,16 +484,6 @@ export function RequestDetailPage() {
       {showInstallation ? (
         <section className="request-section" id="request-installation">
           <h2>Montaj la locație</h2>
-          {headline ? <p className="request-installation-headline">{headline}</p> : null}
-          {detail.installationOffer.selected && detail.installationScope ? (
-            <RequestPrequoteReadiness
-              detail={detail}
-              costHref={installationCostEvidenceHref({
-                providerMode: detail.installationOffer.mode,
-                incompleteReasons: incompleteReasons,
-              })}
-            />
-          ) : null}
           {detail.installationOffer.persistedModeIncompatible ? (
             <ul className="request-installation-reasons">
               <li>Modul salvat nu mai este oferit de organizație.</li>
@@ -572,6 +586,9 @@ export function RequestDetailPage() {
               ) : null}
               <button
                 type="button"
+                className={
+                  detail.request.installationManualNetEur != null ? "button-secondary" : undefined
+                }
                 disabled={busy || !detail.canWriteInstallationFacts}
                 onClick={() => {
                   void handleSavePrice();
@@ -848,11 +865,6 @@ function RequestPrequoteReadiness({
   const expired = scope.incompleteReasons.some(
     (reason) => reason.id === "SUBCONTRACT_EVIDENCE_INVALID",
   );
-  const costLabel = expired
-    ? "Dovadă subcontract expirată"
-    : scope.eicCompleteness === "COMPLETE"
-      ? "Pregătit"
-      : "Incomplet";
   const customerNetPrice = scope.commercialNetPrice;
   const customerGrossPrice = scope.commercialGrossPrice;
   const priceConfirmed =
@@ -866,59 +878,47 @@ function RequestPrequoteReadiness({
         : "Prețul de montaj pentru client nu este confirmat.";
   return (
     <div className="request-install-decision">
-      <p className="request-install-decision-status">
-        <StatusChip
-          label={siteInstallationReadinessLabel(scope)}
-          tone={ready ? "ok" : "warn"}
-        />
+      <p
+        className="product-decision-status"
+        data-tone={ready ? "ok" : "warn"}
+      >
+        {ready ? "Pregătit pentru ofertă" : "Necesită acțiune"}
       </p>
-      <dl className="request-prequote-readiness">
-        <div className="request-install-decision-price">
-          <dt>Preț client</dt>
-          <dd>
-            {priceConfirmed && customerNetPrice != null ? (
-              <>
-                <strong>
-                  {formatMoney(customerNetPrice)} EUR fără TVA
-                </strong>
-                {customerGrossPrice != null ? (
-                  <span>{formatMoney(customerGrossPrice)} EUR cu TVA</span>
-                ) : null}
-              </>
-            ) : (
-              "Neconfirmat"
-            )}
-          </dd>
-        </div>
-        <div className="request-install-decision-cost">
-          <dt>Cost intern estimat</dt>
-          <dd>
-            {scope.ownerInternalCost ? (
-              <>
-                <strong>
-                  {formatMoney(scope.ownerInternalCost.total)} {scope.ownerInternalCost.currency}
-                </strong>
-                <span>
-                  {formatQuantity(scope.ownerInternalCost.quantity)}{" "}
-                  {scope.ownerInternalCost.unitLabel} ×{" "}
-                  {formatMoney(scope.ownerInternalCost.rate)} {scope.ownerInternalCost.currency}
-                </span>
-              </>
-            ) : (
-              costLabel
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt>Următorul pas</dt>
-          <dd>
-            <span>{nextStep}</span>
-            {!ready && costHref ? (
-              <Link to={costHref}>Actualizează dovada de cost</Link>
+      <p className="visually-hidden">{siteInstallationReadinessLabel(scope)}</p>
+      <div className="request-install-decision-price">
+        <p className="request-install-price-label">Preț montaj către client</p>
+        {priceConfirmed && customerGrossPrice != null ? (
+          <>
+            <p className="request-install-price-hero">
+              {formatMoney(customerGrossPrice)} EUR cu TVA
+            </p>
+            {customerNetPrice != null ? (
+              <p className="request-install-price-net">
+                {formatMoney(customerNetPrice)} EUR fără TVA
+              </p>
             ) : null}
-          </dd>
-        </div>
-      </dl>
+          </>
+        ) : (
+          <p>Neconfirmat</p>
+        )}
+      </div>
+      {scope.ownerInternalCost ? (
+        <p className="request-install-decision-cost">
+          Cost intern estimat · {formatMoney(scope.ownerInternalCost.total)}{" "}
+          {scope.ownerInternalCost.currency} ·{" "}
+          {formatQuantity(scope.ownerInternalCost.quantity)}{" "}
+          {scope.ownerInternalCost.unitLabel} ×{" "}
+          {formatMoney(scope.ownerInternalCost.rate)} {scope.ownerInternalCost.currency}
+        </p>
+      ) : null}
+      <p className="request-install-next">{nextStep}</p>
+      {!ready && costHref ? (
+        <p>
+          <Link className="button-link request-repair-cta" to={costHref}>
+            Actualizează dovada de cost
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
 }

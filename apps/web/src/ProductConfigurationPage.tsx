@@ -33,6 +33,7 @@ import {
   ConfirmedSummary,
   ConstructionFacts,
   EicSection,
+  InstallationOperationalFacts,
   InstallationScopeSection,
   OrderSnapshotSection,
   ProductionPreviewSection,
@@ -864,22 +865,62 @@ export function ProductConfigurationPage() {
   const catalogHref = requestContext
     ? `/products?request=${encodeURIComponent(requestContext.request.requestId)}`
     : "/products";
+  const prequoteFloorplan = Boolean(
+    confirmed && !confirmed.quoteSnapshot && installationScope,
+  );
 
   return (
-    <section className="product-page configurator-workspace">
-      <PageHeader
-        title={template.label}
-        lead={
-          confirmed
-            ? `${confirmed.aggregate.inscription} — configurație confirmată.`
-            : reviewing
-              ? "Configurația este pregătită pentru confirmare."
-              : "Completează configurația, apoi verifică."
-        }
-      />
-      <div className="configurator-layout">
+    <section
+      className={
+        prequoteFloorplan
+          ? "product-page configurator-workspace product-prequote"
+          : "product-page configurator-workspace"
+      }
+    >
+      {prequoteFloorplan ? (
+        <header className="product-prequote-identity">
+          {requestContext ? (
+            <Link
+              className="client-object-back"
+              to={`/requests/${encodeURIComponent(requestContext.request.requestId)}`}
+            >
+              Înapoi la cerere
+            </Link>
+          ) : (
+            <Link className="client-object-back" to={catalogHref}>
+              Înapoi la Catalog
+            </Link>
+          )}
+          <h1>{template.label}</h1>
+          {template.identityFacts.length > 0 ? (
+            <p className="product-prequote-meta">
+              {template.identityFacts.map((fact) => fact.value).join("  ·  ")}
+            </p>
+          ) : null}
+          {requestContext ? (
+            <p className="product-prequote-provenance">
+              {requestContext.request.reference}
+              {requestContext.customerDisplayName
+                ? `  ·  ${requestContext.customerDisplayName}`
+                : ""}
+            </p>
+          ) : null}
+        </header>
+      ) : (
+        <PageHeader
+          title={template.label}
+          lead={
+            confirmed
+              ? `${confirmed.aggregate.inscription} — configurație confirmată.`
+              : reviewing
+                ? "Configurația este pregătită pentru confirmare."
+                : "Completează configurația, apoi verifică."
+          }
+        />
+      )}
+      <div className={prequoteFloorplan ? "product-prequote-workspace" : "configurator-layout"}>
         <div className="configurator-main">
-      {requestContext ? (
+      {requestContext && !prequoteFloorplan ? (
         <Notice tone="ok" compact>
           <div className="request-return-context">
             <p>
@@ -902,7 +943,7 @@ export function ProductConfigurationPage() {
         </Notice>
       ) : null}
 
-      <ConstructionFacts facts={template.identityFacts} />
+      {prequoteFloorplan ? null : <ConstructionFacts facts={template.identityFacts} />}
 
       {editing ? (
         <>
@@ -977,9 +1018,12 @@ export function ProductConfigurationPage() {
           onCreatePlan={() => void handleCreateExecutionPlan()}
           installationScope={installationScope}
           installationMode={requestContext?.installationOffer.mode ?? null}
+          installationFacts={requestContext?.installationFacts ?? null}
+          prequoteFloorplan={prequoteFloorplan}
         />
       ) : null}
         </div>
+        {prequoteFloorplan ? null : (
         <ConfiguratorSummary
           statusLabel={summaryStatus}
           statusTone={summaryTone}
@@ -993,6 +1037,7 @@ export function ProductConfigurationPage() {
           priceUnavailableLabel={priceUnavailableLabel}
           catalogHref={catalogHref}
         />
+        )}
       </div>
     </section>
   );
@@ -1032,6 +1077,8 @@ function ConfirmedCommercialWorkspace({
   onCreatePlan,
   installationScope = null,
   installationMode = null,
+  installationFacts = null,
+  prequoteFloorplan = false,
 }: {
   confirmed: ConfirmedProduct;
   busy: boolean;
@@ -1048,6 +1095,8 @@ function ConfirmedCommercialWorkspace({
   onCreatePlan: () => void;
   installationScope?: SiteInstallationOperatorView | null;
   installationMode?: OperationalServiceProviderMode | null;
+  installationFacts?: RequestDetailProjection["installationFacts"];
+  prequoteFloorplan?: boolean;
 }) {
   const commercialRelease =
     confirmed.snapshot &&
@@ -1066,9 +1115,31 @@ function ConfirmedCommercialWorkspace({
   });
   const quoteFrozen = Boolean(confirmed.quoteSnapshot);
 
+  const quoteSection = (
+    <QuoteSnapshotSection
+      price={confirmed.commercialPrice}
+      snapshot={confirmed.quoteSnapshot}
+      acceptance={confirmed.quoteAcceptance}
+      order={confirmed.orderSnapshot}
+      reused={Boolean(confirmed.quoteReused)}
+      busy={busy}
+      customers={customers}
+      selectedCustomerId={selectedCustomerId}
+      onSelectCustomer={onSelectCustomer}
+      onCreateCustomer={onCreateCustomer}
+      onFreeze={onFreeze}
+      onAccept={onAccept}
+      onCreateOrder={onCreateOrder}
+      installationScope={installationScope}
+      jobCommercial={confirmed.jobCommercial ?? null}
+      providerMode={installationMode}
+      presentInternalCost={Boolean(confirmed.eic)}
+    />
+  );
+
   return (
     <div className="confirmed-result">
-      <CommercialProgress experience={experience} />
+      {prequoteFloorplan ? null : <CommercialProgress experience={experience} />}
       {quoteFrozen ? (
         <details className="phase-summary">
           <summary>Configurație confirmată</summary>
@@ -1076,33 +1147,38 @@ function ConfirmedCommercialWorkspace({
         </details>
       ) : (
         <>
-          <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
+          <ConfirmedSummary
+            aggregate={confirmed.aggregate}
+            truth={confirmed.truth}
+            compact={prequoteFloorplan}
+          />
           <div className="action-row">
-            <button type="button" className="button-secondary" onClick={onEditConfiguration}>
+            <button
+              type="button"
+              className={prequoteFloorplan ? "button-quiet" : "button-secondary"}
+              onClick={onEditConfiguration}
+            >
               Modifică configurația
             </button>
           </div>
         </>
       )}
 
-      <QuoteSnapshotSection
-        price={confirmed.commercialPrice}
-        snapshot={confirmed.quoteSnapshot}
-        acceptance={confirmed.quoteAcceptance}
-        order={confirmed.orderSnapshot}
-        reused={Boolean(confirmed.quoteReused)}
-        busy={busy}
-        customers={customers}
-        selectedCustomerId={selectedCustomerId}
-        onSelectCustomer={onSelectCustomer}
-        onCreateCustomer={onCreateCustomer}
-        onFreeze={onFreeze}
-        onAccept={onAccept}
-        onCreateOrder={onCreateOrder}
-        installationScope={installationScope}
-        jobCommercial={confirmed.jobCommercial ?? null}
-      />
-      {installationScope ? (
+      {prequoteFloorplan ? (
+        <aside className="product-decision-rail" aria-label="Decizie comercială">
+          {quoteSection}
+        </aside>
+      ) : (
+        quoteSection
+      )}
+      {prequoteFloorplan && installationScope ? (
+        <InstallationOperationalFacts
+          scope={installationScope}
+          providerMode={installationMode}
+          crewSize={installationFacts?.crewSize ?? null}
+          plannedDurationHours={installationFacts?.plannedDurationHours ?? null}
+        />
+      ) : !prequoteFloorplan && installationScope ? (
         <InstallationScopeSection
           scope={installationScope}
           providerMode={installationMode}

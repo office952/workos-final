@@ -351,7 +351,9 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Montajul nu are încă un cost complet.")).toBeInTheDocument();
     expect(screen.getByText("Produs: 665,98 EUR")).toBeInTheDocument();
     expect(screen.getByText("Totalul ofertei nu este gata.")).toBeInTheDocument();
-    expect(screen.getByText("Total ofertă indisponibil")).toBeInTheDocument();
+    expect(screen.getByText("Necesită acțiune")).toBeInTheDocument();
+    expect(screen.getByText("Total ofertă")).toBeInTheDocument();
+    expect(screen.getAllByText("Indisponibil").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("Preț final client: 665,98 EUR")).not.toBeInTheDocument();
     expect(screen.queryByText("Total ofertă client")).not.toBeInTheDocument();
     expect(screen.queryByText("Preț client neconfirmat.")).not.toBeInTheDocument();
@@ -433,6 +435,183 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Montaj la locație")).toBeInTheDocument();
     expect(screen.getByText("242,00 EUR")).toBeInTheDocument();
     expect(screen.queryByText("Preț final client: 866,82 EUR")).not.toBeInTheDocument();
+    expect(screen.getAllByText("866,82 EUR")).toHaveLength(1);
+    expect(screen.queryByText("Cost intern")).not.toBeInTheDocument();
+  });
+
+  it("shows Owner internal installation cost only when the scoped projection includes it", () => {
+    const complete: CommercialPriceProjection = {
+      internalCost: 382.5,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    render(
+      <QuoteSnapshotSection
+        price={complete}
+        reused={false}
+        busy={false}
+        selectedCustomerId="cus:1"
+        onFreeze={() => undefined}
+        onAccept={() => undefined}
+        onCreateOrder={() => undefined}
+        installationScope={{
+          scopeId: "SITE_INSTALLATION",
+          label: "Montaj la locație",
+          eicCompleteness: "COMPLETE",
+          commercialCompleteness: "COMPLETE",
+          commercialNetPrice: 200,
+          commercialGrossPrice: 242,
+          incompleteReasons: [],
+          ownerInternalCost: {
+            label: "Cost intern estimat montaj",
+            total: 300,
+            currency: "EUR",
+            quantity: 12,
+            unitLabel: "ore-persoană",
+            rate: 25,
+          },
+        }}
+        jobCommercial={{
+          netPrice: 716.38,
+          vatAmount: 150.44,
+          grossPrice: 866.82,
+          currency: "EUR",
+          completeness: "COMPLETE",
+        }}
+        presentInternalCost
+      />,
+    );
+    expect(screen.getByText("Cost intern")).toBeInTheDocument();
+    expect(screen.getByText("300,00 EUR")).toBeInTheDocument();
+    expect(screen.getByText(/12 ore-persoană × 25,00 EUR/)).toBeInTheDocument();
+  });
+
+  it("keeps confirmed install price visible when the composed total is unavailable", () => {
+    const complete: CommercialPriceProjection = {
+      internalCost: 382.5,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    render(
+      <MemoryRouter>
+        <QuoteSnapshotSection
+          price={complete}
+          reused={false}
+          busy={false}
+          selectedCustomerId="cus:1"
+          providerMode="SUBCONTRACTED"
+          onFreeze={() => undefined}
+          onAccept={() => undefined}
+          onCreateOrder={() => undefined}
+          installationScope={{
+            scopeId: "SITE_INSTALLATION",
+            label: "Montaj la locație",
+            eicCompleteness: "PARTIAL",
+            commercialCompleteness: "COMPLETE",
+            commercialNetPrice: 200,
+            commercialGrossPrice: 242,
+            incompleteReasons: [
+              {
+                id: "SUBCONTRACT_EVIDENCE_INVALID",
+                label: "Evidența subcontractantului nu este validă pentru această dată.",
+              },
+            ],
+          }}
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("Necesită acțiune")).toBeInTheDocument();
+    expect(screen.getAllByText("Indisponibil").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("242,00 EUR")).toBeInTheDocument();
+    expect(screen.queryByText("866,82 EUR")).not.toBeInTheDocument();
+    expect(screen.queryByText("624,82 EUR")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Creează oferta" })).toBeDisabled();
+    expect(
+      screen.getByRole("link", { name: "Actualizează dovada de cost" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Cost intern")).not.toBeInTheDocument();
+    expect(screen.queryByText("Cost subcontractat")).not.toBeInTheDocument();
+  });
+
+  it("shows Owner-only unavailable internal cost when the scoped product EIC is present", () => {
+    const complete: CommercialPriceProjection = {
+      internalCost: 382.5,
+      internalCostCurrency: "EUR",
+      internalCostCompleteness: "COMPLETE",
+      policyId: "DEFAULT_COMMERCIAL_POLICY",
+      policyVersion: 1,
+      markupPercent: 35,
+      markupAmount: 133.88,
+      discountPercent: 0,
+      discountAmount: 0,
+      adjustmentAmount: 0,
+      netPrice: 516.38,
+      vatPercent: 21,
+      vatAmount: 108.44,
+      grossPrice: 624.82,
+      currency: "EUR",
+      completeness: "COMPLETE",
+      unavailableReasons: [],
+    };
+    render(
+      <MemoryRouter>
+        <QuoteSnapshotSection
+          price={complete}
+          reused={false}
+          busy={false}
+          selectedCustomerId="cus:1"
+          providerMode="SUBCONTRACTED"
+          presentInternalCost
+          onFreeze={() => undefined}
+          onAccept={() => undefined}
+          onCreateOrder={() => undefined}
+          installationScope={{
+            scopeId: "SITE_INSTALLATION",
+            label: "Montaj la locație",
+            eicCompleteness: "PARTIAL",
+            commercialCompleteness: "COMPLETE",
+            commercialNetPrice: 200,
+            commercialGrossPrice: 242,
+            incompleteReasons: [
+              {
+                id: "SUBCONTRACT_EVIDENCE_INVALID",
+                label: "Evidența subcontractantului nu este validă pentru această dată.",
+              },
+            ],
+          }}
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("Cost subcontractat")).toBeInTheDocument();
+    expect(screen.getAllByText("Indisponibil").length).toBeGreaterThanOrEqual(2);
   });
 
   it("renders installation PARTIAL reasons without a 0 EUR price", () => {

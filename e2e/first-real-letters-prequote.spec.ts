@@ -1,4 +1,6 @@
+import { mkdir } from "node:fs/promises";
 import { expect, test } from "./fixtures";
+import { setTheme } from "./helpers/account";
 import {
   CANONICAL_LETTERS_PRODUCT_CODE,
   configureCanonicalLettersForRequest,
@@ -10,6 +12,7 @@ test("pre-quote INTERNAL wave shows the job preview and refuses live v2 freeze",
   page,
   request,
 }) => {
+  test.setTimeout(90_000);
   const token = uniqueRequestToken("PQ1");
   const enable = await request.patch("/api/operational-services/SITE_INSTALLATION", {
     data: { offerMode: "INTERNAL" },
@@ -94,7 +97,9 @@ test("pre-quote INTERNAL wave shows the job preview and refuses live v2 freeze",
   );
   await expect(page.locator(".commercial-job-breakdown")).toContainText("624,82 EUR");
   await expect(page.locator(".commercial-job-breakdown")).toContainText("242,00 EUR");
-  await expect(page.getByText(/Cost intern estimat montaj: 300,00 EUR/)).toBeVisible();
+  await expect(page.locator(".product-decision-rail .owner-internal-costs")).toContainText(
+    "300,00 EUR",
+  );
   const createQuote = page.getByRole("button", { name: "Creează oferta" });
   await expect(createQuote).toBeDisabled();
   await expect(
@@ -102,6 +107,48 @@ test("pre-quote INTERNAL wave shows the job preview and refuses live v2 freeze",
       "Previzualizarea ofertei cu montaj este pregătită. Înghețarea acestei oferte nu este activată în această etapă.",
     ),
   ).toBeVisible();
+  await expect(page.getByLabel("Decizie comercială")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rezumat" })).toHaveCount(0);
+  await expect(page.getByText("866,82 EUR")).toHaveCount(1);
+  await mkdir(".tmp/review/prequote-v3-lock", { recursive: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/01-product-ready-1440-light.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/05-product-ready-1280-light.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 768, height: 900 });
+  await expect(page.getByText("866,82 EUR")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rezumat" })).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/06-product-ready-768-light.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await setTheme(page, "Întunecată");
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/07-product-ready-1440-dark.png",
+    fullPage: true,
+  });
+  await setTheme(page, "Deschisă");
+  await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await expect(page.getByText("242,00 EUR cu TVA")).toBeVisible();
+  await expect(page.getByText("200,00 EUR fără TVA")).toBeVisible();
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/03-request-ready-1440-light.png",
+    fullPage: true,
+  });
+  await configureCanonicalLettersForRequest(page, requestId);
+  await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
   const compile = await request.post(
     `/api/products/${CANONICAL_LETTERS_PRODUCT_CODE}/compile`,
     {
@@ -157,6 +204,7 @@ test("expired subcontract evidence can be renewed through Resurse și costuri", 
   page,
   request,
 }) => {
+  test.setTimeout(90_000);
   const token = uniqueRequestToken("PQ2");
   const enable = await request.patch("/api/operational-services/SITE_INSTALLATION", {
     data: { offerMode: "SUBCONTRACTED" },
@@ -254,6 +302,24 @@ test("expired subcontract evidence can be renewed through Resurse și costuri", 
   await expect(page.getByText("Total ofertă client")).toHaveCount(0);
   await expect(page.getByText("Totalul ofertei nu este gata.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Actualizează dovada de cost" })).toBeVisible();
+  await expect(page.getByText("242,00 EUR")).toBeVisible();
+  await expect(page.getByText("866,82 EUR")).toHaveCount(0);
+  await mkdir(".tmp/review/prequote-v3-lock", { recursive: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/02-product-blocked-1440-light.png",
+    fullPage: true,
+  });
+  await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await expect(page.getByText("Necesită acțiune")).toBeVisible();
+  await expect(page.getByText("242,00 EUR cu TVA")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Actualizează dovada de cost" })).toBeVisible();
+  await page.screenshot({
+    path: ".tmp/review/prequote-v3-lock/04-request-blocked-1440-light.png",
+    fullPage: true,
+  });
+  await configureCanonicalLettersForRequest(page, requestId);
+  await confirmCanonicalLettersOnPage(page, token.slice(0, 8));
 
   await page.goto(
     "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",

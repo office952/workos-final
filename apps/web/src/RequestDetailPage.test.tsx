@@ -735,5 +735,102 @@ describe("RequestDetailPage", () => {
     expect(screen.getByRole("group", { name: "Execuție montaj" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Alege produs" })).toBeInTheDocument();
     expect(screen.queryByText("Completă")).not.toBeInTheDocument();
+    expect(screen.getByText("Necesită acțiune")).toBeInTheDocument();
+    expect(screen.getByText("242,00 EUR cu TVA")).toBeInTheDocument();
+    expect(screen.getByText("200,00 EUR fără TVA")).toBeInTheDocument();
+    expect(screen.queryByText(/Cost intern/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editează cererea" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvează datele de montaj" })).toBeInTheDocument();
+  });
+
+  it("shows the request installation customer price as the commercial focal point when ready", async () => {
+    const ready = {
+      ...detail,
+      linkedOffers: [],
+      canChangeCustomer: true,
+      commercialProgress: null,
+      commercialProgressLabel: null,
+      canWriteInstallationFacts: true,
+      request: {
+        ...detail.request,
+        optionalScopeIds: ["SITE_INSTALLATION"],
+        siteInstallationMode: "INTERNAL" as const,
+        installationManualNetEur: 200,
+      },
+      installationOffer: projectSiteInstallationRequestOffer({
+        selected: true,
+        mode: "INTERNAL",
+        offer: {
+          capabilityId: "SITE_INSTALLATION",
+          configured: true,
+          offerMode: "INTERNAL",
+          version: 1,
+          updatedAt: "2026-08-28T20:00:00.000Z",
+        },
+        hasLinkedQuotes: false,
+      }),
+      installationFacts: {
+        requestId: "crq:11111111-2222-3333-4444-555555555555",
+        version: 1,
+        siteName: null,
+        street: "Strada Fabricii 10",
+        city: "București",
+        county: null,
+        postalCode: null,
+        countryCode: "RO",
+        contactName: null,
+        contactPhone: null,
+        accessNotes: null,
+        measurementStatus: "OFFICE_MEASURED" as const,
+        mountingSurfaceWidthMm: null,
+        mountingSurfaceHeightMm: null,
+        installationElevationMm: null,
+        measuredAt: null,
+        measurementNotes: null,
+        facadeType: "CONCRETE" as const,
+        facadeOtherNote: null,
+        fixingMethod: "MECHANICAL_ANCHOR" as const,
+        fixingOtherNote: null,
+        siteElectrical: "NOT_APPLICABLE" as const,
+        crewSize: 3,
+        plannedDurationHours: 4,
+        createdAt: "2026-08-29T10:00:00.000Z",
+        updatedAt: "2026-08-29T10:00:00.000Z",
+      },
+      installationScope: {
+        scopeId: "SITE_INSTALLATION" as const,
+        label: "Montaj la locație" as const,
+        eicCompleteness: "COMPLETE" as const,
+        commercialCompleteness: "COMPLETE" as const,
+        commercialNetPrice: 200,
+        commercialGrossPrice: 242,
+        incompleteReasons: [],
+        ownerInternalCost: {
+          label: "Cost intern estimat montaj",
+          total: 300,
+          currency: "EUR" as const,
+          quantity: 12,
+          unitLabel: "ore-persoană",
+          rate: 25,
+        },
+      },
+    };
+    vi.mocked(readRequestDetail).mockResolvedValue(ready);
+    vi.mocked(fetchProductCatalog).mockResolvedValue([]);
+    render(
+      <MemoryRouter initialEntries={["/requests/crq:11111111-2222-3333-4444-555555555555"]}>
+        <Routes>
+          <Route path="/requests/:requestId" element={<RequestDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("242,00 EUR cu TVA")).toBeInTheDocument();
+    expect(screen.getByText("Pregătit pentru previzualizare. Înghețarea rămâne dezactivată în această etapă.")).toBeInTheDocument();
+    expect(screen.getByText("200,00 EUR fără TVA")).toBeInTheDocument();
+    expect(screen.getByText(/Cost intern estimat · 300,00 EUR/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editează cererea" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Alege produs" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Salvează datele de montaj" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Actualizează dovada de cost" })).not.toBeInTheDocument();
   });
 });

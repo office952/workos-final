@@ -28,7 +28,9 @@ import {
   SITE_INSTALLATION_FREEZE_REASON,
   siteInstallationIsPrequoteReady,
   siteInstallationReadinessLabel,
+  operationalServiceProviderModeLabel,
   type LiveJobCommercial,
+  type OperationalServiceProviderMode,
   type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import {
@@ -234,15 +236,17 @@ export function ReviewPanel({
 export function ConfirmedSummary({
   aggregate,
   truth,
+  compact = false,
 }: {
   aggregate: ProductAggregate;
   truth: ProductTruth;
+  compact?: boolean;
 }) {
   return (
-    <section className="result-section">
+    <section className={compact ? "result-section confirmed-summary-compact" : "result-section"}>
       <div className="confirmed-head">
         <h2>Configurație confirmată</h2>
-        <p className="confirmed-inscription">{aggregate.inscription}</p>
+        {compact ? null : <p className="confirmed-inscription">{aggregate.inscription}</p>}
       </div>
       <div className="confirmed-components">
         {aggregate.components
@@ -264,7 +268,16 @@ export function ConfirmedSummary({
         </p>
       ))}
       {aggregate.quantities.length === 0 ? (
-        <p>Cantitatea tehnică nu poate fi calculată fără măsurătoare confirmată.</p>
+        compact ? null : (
+          <p>Cantitatea tehnică nu poate fi calculată fără măsurătoare confirmată.</p>
+        )
+      ) : compact ? (
+        <p className="confirmed-tech-meta">
+          Detalii tehnice
+          {aggregate.quantities
+            .map((quantity) => ` · ${formatQuantity(quantity.value)} ${formatUnit(quantity.unit)}`)
+            .join("")}
+        </p>
       ) : (
         <ul className="metric-row">
           {aggregate.quantities.map((quantity) => (
@@ -535,6 +548,8 @@ export function QuoteSnapshotSection({
   onCreateOrder,
   installationScope = null,
   jobCommercial = null,
+  providerMode = null,
+  presentInternalCost = false,
 }: {
   price?: CommercialPriceProjection;
   snapshot?: QuoteSnapshot;
@@ -551,6 +566,8 @@ export function QuoteSnapshotSection({
   onCreateOrder: () => void;
   installationScope?: SiteInstallationOperatorView | null;
   jobCommercial?: LiveJobCommercial | null;
+  providerMode?: OperationalServiceProviderMode | null;
+  presentInternalCost?: boolean;
 }) {
   if (snapshot && acceptance) {
     return (
@@ -637,10 +654,31 @@ export function QuoteSnapshotSection({
 
   const installationReady = !installationScope || jobCommercial !== null;
   const serviceInclusivePreview = Boolean(installationScope && jobCommercial);
+  const installPriceConfirmed =
+    installationScope?.commercialCompleteness === "COMPLETE" &&
+    installationScope.commercialGrossPrice != null;
+  const costHref = installationScope
+    ? installationCostEvidenceHref({
+        providerMode,
+        incompleteReasons: installationScope.incompleteReasons,
+      })
+    : null;
+  const expiredEvidence = Boolean(
+    installationScope?.incompleteReasons.some((reason) => reason.id === "SUBCONTRACT_EVIDENCE_INVALID"),
+  );
 
   return (
-    <section className="result-section quote-section">
-      <h3>Ofertă</h3>
+    <section className="result-section quote-section product-decision-stack">
+      {installationScope ? (
+        <p
+          className="product-decision-status"
+          data-tone={jobCommercial ? "ok" : "warn"}
+        >
+          {jobCommercial ? "Pregătit pentru ofertă" : "Necesită acțiune"}
+        </p>
+      ) : (
+        <h3>Ofertă</h3>
+      )}
       {installationScope && jobCommercial ? (
         <div className="commercial-job-preview">
           <p className="commercial-gross">
@@ -663,20 +701,67 @@ export function QuoteSnapshotSection({
               </dd>
             </div>
           </dl>
+          {installationScope.ownerInternalCost ? (
+            <>
+              <dl className="owner-internal-costs">
+                <div>
+                  <dt>Cost intern</dt>
+                  <dd>
+                    {formatMoney(installationScope.ownerInternalCost.total)}{" "}
+                    {installationScope.ownerInternalCost.currency}
+                  </dd>
+                </div>
+              </dl>
+              <p className="page-lead">
+                {formatQuantity(installationScope.ownerInternalCost.quantity)}{" "}
+                {installationScope.ownerInternalCost.unitLabel} ×{" "}
+                {formatMoney(installationScope.ownerInternalCost.rate)}{" "}
+                {installationScope.ownerInternalCost.currency}
+              </p>
+            </>
+          ) : null}
         </div>
       ) : installationScope ? (
         <div className="commercial-job-preview">
-          <p className="commercial-job-unavailable">Total ofertă indisponibil</p>
-          <p>
-            Produs: {formatMoney(price.grossPrice ?? 0)} {price.currency}
-          </p>
-          {installationScope.commercialGrossPrice != null ? (
+          <p className="commercial-job-total-label">Total ofertă</p>
+          <p className="commercial-job-unavailable">Indisponibil</p>
+          {installPriceConfirmed ? (
+            <dl className="commercial-job-breakdown">
+              <div>
+                <dt>{installationScope.label}</dt>
+                <dd>
+                  {formatMoney(installationScope.commercialGrossPrice ?? 0)} {price.currency}
+                </dd>
+              </div>
+            </dl>
+          ) : (
             <p>
-              Preț montaj client: {formatMoney(installationScope.commercialGrossPrice)}{" "}
-              {price.currency}
+              Produs: {formatMoney(price.grossPrice ?? 0)} {price.currency}
             </p>
+          )}
+          {presentInternalCost || installationScope.ownerInternalCost ? (
+            <dl className="owner-internal-costs">
+              <div>
+                <dt>{expiredEvidence ? "Cost subcontractat" : "Cost intern"}</dt>
+                <dd>
+                  {installationScope.ownerInternalCost
+                    ? `${formatMoney(installationScope.ownerInternalCost.total)} ${installationScope.ownerInternalCost.currency}`
+                    : "Indisponibil"}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+          {installationScope.incompleteReasons.length > 0 ? (
+            <p className="page-lead">{installationScope.incompleteReasons[0]?.label}</p>
           ) : null}
           <p className="page-lead">Totalul ofertei nu este gata.</p>
+          {costHref ? (
+            <p>
+              <Link className="button-link request-repair-cta" to={costHref}>
+                Actualizează dovada de cost
+              </Link>
+            </p>
+          ) : null}
         </div>
       ) : (
         <p className="commercial-gross">
@@ -739,6 +824,65 @@ function QuoteJobPrice({ snapshot }: { snapshot: QuoteSnapshot }) {
     <p className="commercial-gross">
       Preț final: {formatMoney(snapshot.commercial.grossPrice)} {snapshot.commercial.currency}
     </p>
+  );
+}
+
+export function InstallationOperationalFacts({
+  scope,
+  providerMode = null,
+  crewSize = null,
+  plannedDurationHours = null,
+}: {
+  scope: SiteInstallationOperatorView;
+  providerMode?: OperationalServiceProviderMode | null;
+  crewSize?: number | null;
+  plannedDurationHours?: number | null;
+}) {
+  const expired = scope.incompleteReasons.some(
+    (reason) => reason.id === "SUBCONTRACT_EVIDENCE_INVALID",
+  );
+  const modeLabel = providerMode ? operationalServiceProviderModeLabel(providerMode) : null;
+  return (
+    <section className="result-section installation-ops-section">
+      <h2>{scope.label}</h2>
+      <dl className="installation-ops-facts">
+        {modeLabel ? (
+          <div>
+            <dt>Mod</dt>
+            <dd>{modeLabel}</dd>
+          </div>
+        ) : null}
+        {providerMode === "INTERNAL" && crewSize != null ? (
+          <div>
+            <dt>Echipă</dt>
+            <dd>{crewSize} persoane</dd>
+          </div>
+        ) : null}
+        {providerMode === "INTERNAL" && plannedDurationHours != null ? (
+          <div>
+            <dt>Durată</dt>
+            <dd>{formatQuantity(plannedDurationHours)} ore</dd>
+          </div>
+        ) : null}
+        {providerMode === "SUBCONTRACTED" ? (
+          <>
+            <div>
+              <dt>Dovadă</dt>
+              <dd>{expired ? "Expirată" : scope.eicCompleteness === "COMPLETE" ? "Validă" : "Incompletă"}</dd>
+            </div>
+            <div>
+              <dt>Valabilitate</dt>
+              <dd>{expired ? "Expirată" : scope.eicCompleteness === "COMPLETE" ? "Validă" : "—"}</dd>
+            </div>
+          </>
+        ) : null}
+      </dl>
+      <p className="page-lead">
+        {expired
+          ? "Prețul de montaj către client rămâne confirmat. Datele de montaj rămân pe cerere."
+          : "Inclus în totalul ofertei. Datele de montaj rămân pe cerere."}
+      </p>
+    </section>
   );
 }
 

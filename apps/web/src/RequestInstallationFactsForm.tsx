@@ -71,6 +71,7 @@ export function RequestInstallationFactsForm({
   }, [facts]);
 
   const disabled = busy || locked;
+  const dirty = !installationFormsEqual(form, formFromFacts(facts));
 
   return (
     <section className="result-section request-installation-facts">
@@ -383,7 +384,11 @@ export function RequestInstallationFactsForm({
         </fieldset>
         {locked ? null : (
           <p className="request-installation-facts-submit">
-            <button type="submit" disabled={busy}>
+            <button
+              type="submit"
+              className={dirty ? "button-secondary" : "button-quiet"}
+              disabled={busy}
+            >
               Salvează datele de montaj
             </button>
           </p>
@@ -391,6 +396,11 @@ export function RequestInstallationFactsForm({
       </form>
     </section>
   );
+}
+
+function installationFormsEqual(left: FormState, right: FormState): boolean {
+  const keys = Object.keys(left) as Array<keyof FormState>;
+  return keys.every((key) => left[key] === right[key]);
 }
 
 function formFromFacts(facts: SiteInstallationFacts | null): FormState {
