@@ -235,6 +235,27 @@ OWNER_ACCEPTED_RUNTIME            = NO
 INTEGRATED_ON_MAIN                = NO
 ```
 
+## Figma UX LOCK → React (2026-09-03)
+
+Owner closed the design gate (`FIGMA_READY_FOR_IMPLEMENTATION`) and authorized React implementation of the accepted Product Configuration / Prequote UX LOCK. No Figma write.
+
+```text
+FIGMA_DIRECTION            = ACCEPTED_FOR_IMPLEMENTATION
+UX_LOCK_NODE               = 176:8886
+FIGMA_WRITE                = NO
+DOMAIN_WRITE               = NO
+API_WRITE                  = NO
+DATABASE_WRITE             = NO
+REACT_IMPLEMENTATION       = LOCAL_IN_REVIEW
+PRODUCT_ONLY_PATH          = unchanged v1 floorplan
+INSTALLATION_PREQUOTE_UI   = F1–F6 composition
+SAVE_ACTION                = quiet when clean; secondary when dirty
+REPAIR_CTA                 = outranks Edit/Save when blocked
+OWNER_ACCEPTED_RUNTIME     = NO
+```
+
+Runtime evidence (synthetic, ignored): `.tmp/review/prequote-v3-lock/`.
+
 ## Next gate
 
-Independent ChatGPT screenshot review, then Owner inspection. Do not merge `main` and do not mark Owner-accepted from this file.
+Independent ChatGPT code / runtime / Figma fidelity review. Do not merge `main` and do not mark Owner-accepted from this file.
