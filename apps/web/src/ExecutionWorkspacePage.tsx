@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { appPathname } from "./navigation/routePath";
 import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import type { ExecutionPlanView } from "@workos-final/domain";
@@ -106,7 +107,7 @@ export function ExecutionWorkspacePage() {
 
   if (page.kind === "loading") {
     return (
-      <section className="execution-workspace">
+      <section className="request-object execution-workspace">
         <PageHeader title="Execuție" lead="Planul de execuție." />
         <PageStatus kind="loading">Se încarcă execuția…</PageStatus>
       </section>
@@ -114,23 +115,25 @@ export function ExecutionWorkspacePage() {
   }
   if (page.kind === "missing") {
     return (
-      <section className="execution-workspace">
+      <section className="request-object execution-workspace">
+        <Link className="client-object-back" to="/atelier" aria-label="Înapoi la Atelier">
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          Înapoi la Atelier
+        </Link>
         <PageHeader title="Execuție" lead="Planul de execuție nu este disponibil." />
         <PageStatus kind="missing">Planul cerut nu este disponibil.</PageStatus>
-        <p className="execution-workspace-nav">
-          <Link to="/atelier">Înapoi la Atelier</Link>
-        </p>
       </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <section className="execution-workspace">
+      <section className="request-object execution-workspace">
+        <Link className="client-object-back" to="/atelier" aria-label="Înapoi la Atelier">
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          Înapoi la Atelier
+        </Link>
         <PageHeader title="Execuție" lead="Execuția nu a putut fi încărcată." />
         <PageStatus kind="error">Execuția nu a putut fi încărcată.</PageStatus>
-        <p className="execution-workspace-nav">
-          <Link to="/atelier">Înapoi la Atelier</Link>
-        </p>
       </section>
     );
   }
@@ -139,30 +142,41 @@ export function ExecutionWorkspacePage() {
   const nextTask = view.tasks.find((task) => task.status === "IN_PROGRESS" || task.canStart);
 
   return (
-    <section className="execution-workspace">
+    <section className="request-object execution-workspace">
+      {view.jobHref ? (
+        <Link
+          className="client-object-back"
+          to={appPathname(view.jobHref)}
+          aria-label="Înapoi la lucrare"
+        >
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          Înapoi la lucrare
+        </Link>
+      ) : (
+        <Link className="client-object-back" to="/atelier" aria-label="Înapoi la Atelier">
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          Înapoi la Atelier
+        </Link>
+      )}
       <PageHeader
         title={view.plan.inscription}
         lead={`${view.plan.productLabel}. ${view.sourceKindLabel}.`}
         meta={
-          <ul className="metric-row">
-            <li>Stare: {view.statusLabel}</li>
-            <li>
-              {view.progress.completed} / {view.progress.total} finalizate
-            </li>
-            {nextTask ? <li>Următorul: {nextTask.processLabel}</li> : null}
-          </ul>
+          <p className="client-object-identity">
+            {view.statusLabel}
+            {" · "}
+            {view.progress.completed} / {view.progress.total} finalizate
+            {nextTask ? ` · Următorul: ${nextTask.processLabel}` : null}
+          </p>
+        }
+        actions={
+          <Link className="button-quiet" to="/atelier">
+            Înapoi la Atelier
+          </Link>
         }
       />
       <p className="execution-workspace-nav">
-        {view.jobHref ? (
-          <>
-            <Link to={appPathname(view.jobHref)}>Înapoi la lucrare</Link>
-            {" · "}
-          </>
-        ) : null}
         <Link to={`/products/${view.plan.productCode}`}>Înapoi la produs</Link>
-        {" · "}
-        <Link to="/atelier">Înapoi la Atelier</Link>
       </p>
       {notice ? (
         <Notice tone="warn" compact>

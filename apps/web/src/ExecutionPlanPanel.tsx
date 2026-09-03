@@ -63,7 +63,7 @@ export function ExecutionPlanPanel({
     <div className="execution-plan">
       <header className="execution-plan-head">
         <h2>{reused ? "Plan de execuție deja creat" : "Plan de execuție"}</h2>
-        <p className="execution-plan-product">{view.plan.inscription}</p>
+        <p className="client-object-identity">{view.plan.inscription}</p>
         <p className={`task-status status-chip ${statusTone(view.statusLabel)}`}>
           Stare: {view.statusLabel}
         </p>

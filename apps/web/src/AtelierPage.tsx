@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { Clock3, PlayCircle, TriangleAlert, Wrench } from "lucide-react";
 import type { OperatorInboxTaskItem, OperatorTaskInboxProjection } from "@workos-final/domain";
 import { appLocation } from "./navigation/routePath";
 import { fetchOperatorTaskInbox } from "./atelierApi";
@@ -7,6 +8,7 @@ import { OperatorIdentifyForm } from "./OperatorIdentifyForm";
 import { useOperatorSession } from "./OperatorSessionContext";
 import { startExecutionTask, type TaskMutationFailure } from "./productApi";
 import { EmptyState } from "./ui/EmptyState";
+import { MetricCard } from "./ui/MetricCard";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
@@ -125,13 +127,31 @@ export function AtelierPage() {
       <PageHeader
         title="Atelier"
         lead="Inbox operațional. Nu este hartă de fabrică și nu calculează prețuri."
-        meta={
-          <p className="page-summary">
-            {unavailable ? "Indisponibil temporar pentru taskuri noi · " : null}
-            {`${inbox.summary.availableNeedsProvider} blocate · ${inbox.summary.availableReady} pot porni · ${inbox.summary.inProgressMine} în lucru`}
-          </p>
-        }
       />
+
+      <div className="metric-band">
+        <MetricCard
+          label="Blocate"
+          value={inbox.summary.availableNeedsProvider}
+          icon={<TriangleAlert size={40} strokeWidth={1.5} />}
+          iconTone="warning"
+        />
+        <MetricCard
+          label="Pot porni"
+          value={inbox.summary.availableReady}
+          icon={<PlayCircle size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="În lucru"
+          value={inbox.summary.inProgressMine}
+          icon={<Wrench size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Urmează"
+          value={inbox.summary.waitingDependencies}
+          icon={<Clock3 size={40} strokeWidth={1.5} />}
+        />
+      </div>
 
       {notice ? (
         <Notice tone="warn" compact>

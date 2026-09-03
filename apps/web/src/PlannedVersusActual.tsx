@@ -5,7 +5,7 @@ import { StatusChip } from "./ui/StatusChip";
 export function PlannedVersusActual({ view }: { view: ExecutionPlanView }) {
   const rows = projectPlannedVersusActual(view);
   return (
-    <section className="pva-panel" aria-labelledby="pva-title">
+    <section className="request-section pva-panel" aria-labelledby="pva-title">
       <h2 id="pva-title">Planificat versus realizat</h2>
       <p className="client-current-hint">
         Adevăr operațional. Fără costuri. Necunoscut și nemăsurat sunt stări diferite.
