@@ -221,6 +221,14 @@ This wave writes documentation only. Front-lit LETTERS and ACM cassette source a
 
 ## Next step
 
-Independent ChatGPT Product Batch 1 review of this discovery.
+Independent review accepted this discovery: halo and full aluminium stay `DEFERRED / NO INVENTION`. No ProductTemplate is to be created for either candidate from this record.
 
-After that, Owner construction decisions for halo and/or full aluminium — or an explicit GO naming a different product that already has truth on the current spine.
+```text
+NEXT_UTILITY_BUILD = LETTERS_RETURN_DEPTH_COVERAGE_V1
+NEW_PRODUCT_TEMPLATE_TRACK = HALO / FULL ALUMINIUM WAITING_FOR_PRODUCT_CONSTRUCTION_TRUTH
+PRODUCT_UTILITY_TRACK = ACTIVE
+```
+
+Halo remains blocked by missing construction truth. Full aluminium remains blocked by missing construction truth. This discovery record does not claim those products were implemented.
+
+The next authorized product-utility build is return-depth cost coverage on the existing front-lit LETTERS product. That wave has its own record: `docs/worklog/WORKOS_V1_LETTERS_RETURN_DEPTH_COVERAGE_V1.md`.
