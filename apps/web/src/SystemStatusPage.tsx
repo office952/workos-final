@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { HealthStatus } from "./HealthStatus";
 import { fetchHealth, type HealthState } from "./health";
+import { PageHeader } from "./ui/PageHeader";
 
 export function SystemStatusPage() {
   const [state, setState] = useState<HealthState>({ kind: "loading" });
@@ -20,9 +21,11 @@ export function SystemStatusPage() {
   }, []);
 
   return (
-    <section aria-labelledby="system-status-heading">
-      <h1 id="system-status-heading">Stare sistem</h1>
-      <p className="page-lead">Verificarea conexiunii cu sistemul.</p>
+    <section>
+      <PageHeader
+        title="Stare sistem"
+        lead="Verificarea conexiunii cu sistemul."
+      />
       <div aria-live="polite">
         <HealthStatus state={state} />
       </div>
