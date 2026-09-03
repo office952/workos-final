@@ -1,9 +1,12 @@
-# WorkOS — First Real Letters pre-quote V1 — implemented, local in review
+# WorkOS — First Real Letters pre-quote V1 — integrated on main
 
 ```text
-OWNER_DECISION                         = FIRST_REAL_LETTERS_PREQUOTE_V1
-FIRST_REAL_LETTERS_PREQUOTE_V1         = AUTHORIZED
+OWNER_DECISION                         = ACCEPT FIRST_REAL_LETTERS_PREQUOTE_V1 RUNTIME
+FIRST_REAL_LETTERS_PREQUOTE_V1         = INTEGRATED_ON_MAIN
 SCOPE                                  = OS-S3 + OS-S4 + OS-S5
+OS_S3                                  = INTEGRATED_ON_MAIN
+OS_S4                                  = INTEGRATED_ON_MAIN
+OS_S5                                  = INTEGRATED_ON_MAIN
 SERVICE_MANUAL_PRICE_WRITE_PERMISSION  = OWNER_ONLY
 INSTALLATION_EIC_MODES_TO_IMPLEMENT    = INTERNAL + SUBCONTRACTED
 FIRST_REAL_JOB_PROVIDER_MODE           = NOT_DECIDED_YET / REQUEST_DATA_LATER
@@ -23,23 +26,33 @@ LIVE_V2_REQUEST_LINK                   = NO
 LIVE_V2_ACCEPTANCE                     = DISABLED
 LIVE_V2_PDF                            = DISABLED
 REAL_CLOUD_V2_QUOTE_MUTATION           = NO
-OWNER_ACCEPTED_RUNTIME                 = NO
-INTEGRATED_ON_MAIN                     = NO
-IMPLEMENTED_LOCAL_IN_REVIEW            = YES
-NEXT_GATE                              = INDEPENDENT_SCREENSHOT_REVIEW_THEN_OWNER_INSPECTION
+OWNER_ACCEPTED_RUNTIME                 = YES
+INTEGRATED_ON_MAIN                     = YES
+IMPLEMENTED_LOCAL_IN_REVIEW            = NO
+CURRENT_STEP                           = FIRST_REAL_LETTERS_JOB
+NEXT_STEP                              = REAL_DATA_PREPARATION_BEFORE_QUOTE
+NEXT_GATE                              = FIRST_REAL_LETTERS_JOB / REAL_DATA_PREPARATION_BEFORE_QUOTE / NOT_AUTHORIZED_BY_THIS_GO
 ```
 
-Owner authorized one coherent vertical pre-quote wave so the first real LETTERS job is not blocked by an architectural wall at OS-S3 or OS-S4 alone. This file is the implementation record. It does not accept the runtime, write Cloud, patch a real Cerere, freeze a real Quote, or integrate on `main`.
+Owner accepted First Real LETTERS pre-quote V1 runtime and authorized integration only. Product integration was an exact fast-forward of `origin/main` from `33c2f9fae4402b152f2840c96cf6da98a1c74a03` to `cd15071d0288621e04f67d1f660e42d690d18dc5`. No merge commit, squash, rebase, or force. This file now records that integrated state. It does not authorize Cloud write, a real Cerere patch, live Quote freeze, Order creation, OS-S6, Oferte V3, Lucrări V3, or `UI_V3_COMMERCIAL_PAGE_REORGANIZATION`.
 
 ## Identity
 
 ```text
-REPO              = office952/workos-final
-WORKTREE          = C:/Users/offic/workspace/workos-final-clients-main-ff
-BRANCH            = feat/first-real-letters-prequote-v1
-ORIGIN_MAIN       = 33c2f9fae4402b152f2840c96cf6da98a1c74a03
-CERERI_PRODUCT    = 03f2d747036b5ac219f283f5a969d575a9a707c9
-MIGRATION         = 028_first_real_letters_prequote.sql
+REPO                         = office952/workos-final
+FEATURE_BRANCH               = feat/first-real-letters-prequote-v1
+PR                           = #5
+ORIGIN_MAIN_BEFORE           = 33c2f9fae4402b152f2840c96cf6da98a1c74a03
+ACCEPTED_HEAD                = cd15071d0288621e04f67d1f660e42d690d18dc5
+PREQUOTE_IMPLEMENTATION_SHA  = 5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6
+ORIGIN_MAIN                  = cd15071d0288621e04f67d1f660e42d690d18dc5
+INTEGRATION                  = EXACT_FAST_FORWARD
+MERGE_COMMIT                 = NO
+SQUASH                       = NO
+REBASE                       = NO
+FORCE                        = NO
+CERERI_PRODUCT               = 03f2d747036b5ac219f283f5a969d575a9a707c9
+MIGRATION                    = 028_first_real_letters_prequote.sql
 ```
 
 ## Direction report
@@ -50,8 +63,8 @@ UI_UX_CANON_READ        = YES
 DIRECTION_CONFLICT      = NO_EXECUTION_CONFLICT
 DOC_AMBIGUITY           = DOC-P3 / NON_BLOCKING — living UI still names NEXT_PROGRAM_PRIORITY = UI_V3_COMMERCIAL_PAGE_REORGANIZATION while CURRENT_STEP on this branch is FIRST_REAL_LETTERS_PREQUOTE_V1. Those are concurrent: program UI direction versus the current operational sequence. Resources canon historically said “No hourly costing”; site-install INTERNAL labor is an additive person_hour resource, not LETTERS workshop hourly or pontaj. Cereri Figma UX LOCK still shows historical NEW → ATTENTION / full client-profile create; Owner amend 2026-09-02 remains. Do not reopen Cereri or write Figma.
 CURRENT_MILESTONE       = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP            = FIRST_REAL_LETTERS_PREQUOTE_V1
-NEXT_STEP               = independent ChatGPT technical review + uploaded screenshot graphic review
+CURRENT_STEP            = FIRST_REAL_LETTERS_JOB
+NEXT_STEP               = REAL_DATA_PREPARATION_BEFORE_QUOTE / NOT_AUTHORIZED_BY_THIS_GO
 THEME_IMPACT            = BOTH
 NEW_HARDCODED_CSS       = NO
 BACKEND_DETAILS_EXPOSED = NO
@@ -160,7 +173,8 @@ Cloud member: price write 403, first install evidence create 403.
 ## Still closed
 
 ```text
-OWNER_ACCEPTED_RUNTIME     = NO
+OWNER_ACCEPTED_RUNTIME     = YES
+INTEGRATED_ON_MAIN         = YES
 REAL_CLOUD_WRITE           = NO
 REAL_REQUEST_PATCH         = NO
 QUOTE_CREATE               = NO
@@ -256,6 +270,31 @@ OWNER_ACCEPTED_RUNTIME     = NO
 
 Runtime evidence (synthetic, ignored): `.tmp/review/prequote-v3-lock/`.
 
+## Integrated on main
+
+Owner accepted runtime and authorized `GO INTEGRATE FIRST_REAL_LETTERS_PREQUOTE_V1 ON MAIN`. Exact fast-forward only. This commit is the docs-only status record after that remote proof.
+
+```text
+OWNER_ACCEPTED_RUNTIME         = YES
+FIRST_REAL_LETTERS_PREQUOTE_V1 = INTEGRATED_ON_MAIN
+OS_S3                          = INTEGRATED_ON_MAIN
+OS_S4                          = INTEGRATED_ON_MAIN
+OS_S5                          = INTEGRATED_ON_MAIN
+FIRST_REAL_LETTERS_JOB         = BLOCKED_BEFORE_QUOTE
+BLOCK_REASON                   = prequote is Owner-accepted and integrated; real Cloud write, real Cerere patch, and live Quote creation remain unauthorized
+CURRENT_STEP                   = FIRST_REAL_LETTERS_JOB
+NEXT_STEP                      = REAL_DATA_PREPARATION_BEFORE_QUOTE
+NOT_AUTHORIZED_BY_THIS_GO      = YES
+NEXT_PROGRAM_PRIORITY          = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
+NEXT_PROGRAM_REPLACES_HUB      = NO
+TARGET_MILESTONE               = HUB_MEDIA_CLEAN_PILOT
+CURRENT_MILESTONE              = HUB_MEDIA_CLEAN_PILOT
+ORIGIN_MAIN                    = cd15071d0288621e04f67d1f660e42d690d18dc5
+PREQUOTE_IMPLEMENTATION_SHA    = 5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6
+```
+
+Do not mutate the real HUB MEDIA Request, enter the real 200 EUR price, select provider mode for the real job, create or freeze a Quote, enable live v2, create an Order, start OS-S6, or start Oferte / Lucrări V3 from this record.
+
 ## Next gate
 
-Independent ChatGPT code / runtime / Figma fidelity review. Do not merge `main` and do not mark Owner-accepted from this file.
+`FIRST_REAL_LETTERS_JOB` begins with `REAL_DATA_PREPARATION_BEFORE_QUOTE`. That step is not authorized by this integration.

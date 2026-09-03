@@ -66,7 +66,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = ef4dd73514583bda2754456e2e5730ac96fc5f31
+ORIGIN_MAIN                          = cd15071d0288621e04f67d1f660e42d690d18dc5
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -80,8 +80,10 @@ REAL_HUB_MEDIA_OPERATION             = NOT_PROVEN
 BUSINESS_DATA_CONFIGURATION          = OWNER_ACCEPTED
 HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
 FIRST_REAL_LETTERS_JOB               = BLOCKED_BEFORE_QUOTE
-FIRST_REAL_LETTERS_PREQUOTE_V1       = IMPLEMENTED_LOCAL_IN_REVIEW
-BLOCK_REASON                         = pre-quote wave is local in review; real Cloud write, real Cerere patch, and live quote remain NO
+FIRST_REAL_LETTERS_PREQUOTE_V1       = INTEGRATED_ON_MAIN
+OWNER_ACCEPTED_RUNTIME               = YES
+PREQUOTE_IMPLEMENTATION_SHA          = 5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6
+BLOCK_REASON                         = prequote is Owner-accepted and integrated; real Cloud write, real Cerere patch, and live Quote creation remain unauthorized
 OPTIONAL_SITE_INSTALLATION_V1        = INTEGRATED_ON_MAIN
 OPERATIONAL_SERVICES_ARCHITECTURE    = OWNER_ACCEPTED
 OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE = IMPLEMENTED_CURRENT / BASIC
@@ -91,9 +93,9 @@ OS_S2_DESIGN                         = OWNER_ACCEPTED
 OS_S2_TYPED_FACTS                    = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION                 = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY             = CLOSED
-OS_S3                                = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S4                                = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S5                                = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S3                                = INTEGRATED_ON_MAIN
+OS_S4                                = INTEGRATED_ON_MAIN
+OS_S5                                = INTEGRATED_ON_MAIN
 UI_UX_NAVIGATION_V3_DESIGN           = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION   = INTEGRATED_ON_MAIN
 UI_V3_PAGE_CONTENT_TRANSFORMATION    = IN_PROGRESS
@@ -191,8 +193,8 @@ Do not put passwords, PINs, hashes, personal names, or real Cloud filesystem pat
 ```text
 TARGET_MILESTONE  = HUB_MEDIA_CLEAN_PILOT
 CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
-CURRENT_STEP      = FIRST_REAL_LETTERS_PREQUOTE_V1
-NEXT_STEP         = INDEPENDENT_REVIEW_THEN_SYNTHETIC_RUNTIME_THEN_OWNER_INSPECTION
+CURRENT_STEP      = FIRST_REAL_LETTERS_JOB
+NEXT_STEP         = REAL_DATA_PREPARATION_BEFORE_QUOTE
 HIGH_FIDELITY     = FIRST_LOT_OWNER_ACCEPTED
 FIRST_HF_LOT_SCREEN_DESIGN = OWNER_ACCEPTED
 OWNER_FIRST_HF_LOT_REVIEW = COMPLETE
@@ -237,8 +239,10 @@ ARCHITECTURE_C_UI_WAVE_2 = NOT_STARTED
 FIGMA_LIBRARY_PUBLISHED = NO
 HUB_MEDIA_ORGANIZATION_CONFIGURATION = OWNER_ACCEPTED
 FIRST_REAL_LETTERS_JOB = BLOCKED_BEFORE_QUOTE
-FIRST_REAL_LETTERS_PREQUOTE_V1 = IMPLEMENTED_LOCAL_IN_REVIEW
-BLOCK_REASON = pre-quote wave is local in review; real Cloud write, real Cerere patch, and live quote remain NO
+FIRST_REAL_LETTERS_PREQUOTE_V1 = INTEGRATED_ON_MAIN
+OWNER_ACCEPTED_RUNTIME = YES
+PREQUOTE_IMPLEMENTATION_SHA = 5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6
+BLOCK_REASON = prequote is Owner-accepted and integrated; real Cloud write, real Cerere patch, and live Quote creation remain unauthorized
 OPTIONAL_SITE_INSTALLATION_V1 = INTEGRATED_ON_MAIN
 OPERATIONAL_SERVICES_ARCHITECTURE = OWNER_ACCEPTED
 OS_S1_ORG_CAPABILITY_AND_REQUEST_MODE = IMPLEMENTED_CURRENT / BASIC
@@ -248,9 +252,9 @@ OS_S2_DESIGN = OWNER_ACCEPTED
 OS_S2_TYPED_FACTS = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY = CLOSED
-OS_S3 = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S4 = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S5 = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S3 = INTEGRATED_ON_MAIN
+OS_S4 = INTEGRATED_ON_MAIN
+OS_S5 = INTEGRATED_ON_MAIN
 UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
 UI_V3_PAGE_CONTENT_TRANSFORMATION = IN_PROGRESS
@@ -272,7 +276,7 @@ REQUESTS_INTEGRATED_ON_MAIN = YES
 NEXT_PROGRAM_PRIORITY = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. The next sequence step is `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because installation cost/process evidence is incomplete. This file does not authorize that job.
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. First Real LETTERS pre-quote V1 is Owner-accepted and `INTEGRATED_ON_MAIN`. The next sequence step is `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because real Cloud write, a real Cerere patch, and live Quote creation remain unauthorized. `NEXT_PROGRAM_PRIORITY = UI_V3_COMMERCIAL_PAGE_REORGANIZATION` is program-level only; it does not replace this HUB sequence. This file does not authorize that job or that UI program.
 
 Architecture C is a **parallel UI track**, not a second target milestone and not a replacement for the HUB sequence. The Architecture C final simulation is `OWNER_ACCEPTED_WITH_ADVISORIES`. Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. Wave 2 is not started. The Figma library stays unpublished. Do not flip first-HF `WAVE_*` or `UI_IMPLEMENTATION_COMPLETE` flags for this track.
 
@@ -283,7 +287,7 @@ CURRENT_MILESTONE = HUB_MEDIA_CLEAN_PILOT
 NEXT_STEP         = <current next sequence step>
 ```
 
-`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner acceptance of Step 8, that value is `FIRST_REAL_LETTERS_JOB`. This file does not authorize that job. Contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Wave 2 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR_V1.md`. Wave 3 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_V1.md`. Wave 4 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_V1.md`. Wave 5 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_5_REGRESSION_ACCESSIBILITY_SCREENSHOT_V1.md`. Step 8 record: `docs/worklog/WORKOS_HUB_MEDIA_ORGANIZATION_CONFIGURATION_STEP8.md`.
+`NEXT_STEP` reports the next sequence step inside `HUB_MEDIA_CLEAN_PILOT` only. It is not a second target milestone. After Owner acceptance and integration of First Real LETTERS pre-quote V1, that value is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. This file does not authorize that preparation, a live quote, or `UI_V3_COMMERCIAL_PAGE_REORGANIZATION`. Contracts live in `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md`. Wave 1 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`. Wave 2 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_2_COMMERCIAL_CATALOG_CONFIGURATOR_V1.md`. Wave 3 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_3_CLOUD_LOGIN_ATELIER_IDENTIFICATION_EXECUTION_PVA_V1.md`. Wave 4 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_4_RESOURCES_AND_ADMIN_REUSE_V1.md`. Wave 5 record: `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_5_REGRESSION_ACCESSIBILITY_SCREENSHOT_V1.md`. Step 8 record: `docs/worklog/WORKOS_HUB_MEDIA_ORGANIZATION_CONFIGURATION_STEP8.md`.
 
 Target flow:
 
@@ -342,9 +346,9 @@ Wave 1 of scoped UI implementation is `OWNER_ACCEPTED` with advisories. Wave 2 i
 
 Step 8 configured the recovered HUB MEDIA organization with the existing seller, people, PIN, cost-confirm, and explicit provider/CLI path. It is not universal Machine Admin. Execution detail lives in `docs/worklog/WORKOS_HUB_MEDIA_ORGANIZATION_CONFIGURATION_STEP8.md`.
 
-Step 9 is `BLOCKED_BEFORE_QUOTE` because a live first-job quote is still unauthorized. The pre-quote wave OS-S3 + OS-S4 + OS-S5 is `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/first-real-letters-prequote-v1`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. It does not authorize a live quote, a live Cerere PATCH, OS-S6, or Architecture C UI Wave 2. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
+Step 9 is `BLOCKED_BEFORE_QUOTE` because a live first-job quote is still unauthorized. The pre-quote wave OS-S3 + OS-S4 + OS-S5 is `INTEGRATED_ON_MAIN` at implementation SHA `5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. Integration does not authorize a live quote, a live Cerere PATCH, OS-S6, Architecture C UI Wave 2, or `UI_V3_COMMERCIAL_PAGE_REORGANIZATION`. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
 
-Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. OS-S1 and OS-S2 are on main. OS-S3 + OS-S4 + OS-S5 are `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/first-real-letters-prequote-v1`. They are not Owner-accepted and not integrated on main. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. This file does not authorize Oferte V3 or Lucrări V3.
+Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. This file does not authorize Oferte V3 or Lucrări V3.
 
 ## Operational Services program
 
@@ -361,8 +365,8 @@ OS_S2_TYPED_FACTS                        = IMPLEMENTED_CURRENT / BASIC
 OS_S2_DESIGN                             = OWNER_ACCEPTED
 OS_S2_IMPLEMENTATION                     = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY                 = CLOSED
-OS_S3                                    = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S3_EVIDENCE_AND_EIC                   = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S3                                    = INTEGRATED_ON_MAIN
+OS_S3_EVIDENCE_AND_EIC                   = INTEGRATED_ON_MAIN
 UI_UX_NAVIGATION_V3_DESIGN               = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 UI_V3_PAGE_CONTENT_TRANSFORMATION        = IN_PROGRESS
@@ -382,8 +386,8 @@ CERERI_RUNTIME                           = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN                = YES
 REQUESTS_INTEGRATED_ON_MAIN              = YES
 NEXT_PROGRAM_PRIORITY                    = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
-OS_S4_SERVICE_COMMERCIAL                 = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S5_MULTI_LINE_QUOTE                   = IMPLEMENTED_LOCAL_IN_REVIEW
+OS_S4_SERVICE_COMMERCIAL                 = INTEGRATED_ON_MAIN
+OS_S5_MULTI_LINE_QUOTE                   = INTEGRATED_ON_MAIN
 OS_S6_TRANSPORT                          = NOT_STARTED / NOT_AUTHORIZED
 OS_S7_ORDER_SERVICE_TRUTH                = NOT_STARTED
 OS_S8_FIELD_EXECUTION                    = NOT_STARTED
@@ -396,7 +400,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `IMPLEMENTED_LOCAL_IN_REVIEW`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. They are not Owner-accepted and not on main. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in the local pre-quote wave. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. This file does not authorize Oferte V3, Lucrări V3, real Cloud write, or a live first-job quote. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, PDF, and Order from v2 stay disabled. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. This file does not authorize Oferte V3, Lucrări V3, real Cloud write, a live first-job quote, or `UI_V3_COMMERCIAL_PAGE_REORGANIZATION`. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 
