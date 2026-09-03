@@ -17,7 +17,12 @@ This file records the **implemented** shell. Living navigation direction is the 
 IMPLEMENTED_SHELL                      = STABLE_SIDEBAR_V3
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION     = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION      = IN_PROGRESS
+UI_V3_PAGE_CONTENT_TRANSFORMATION      = COMPLETE
+ALL_EXISTING_PAGES_UI_V3               = INTEGRATED_ON_MAIN
+ALL_EXISTING_PAGES_UI_V3_RUNTIME       = OWNER_ACCEPTED
+UI_V3_GENERAL_FINALIZATION             = COMPLETE
+UI_GENERAL_REDESIGN                    = CLOSED_FOR_V1
+UI_POLISH_MODE                         = INCREMENTAL
 CLIENTS_V3                             = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION                = OWNER_ACCEPTED
 CLIENTS_RUNTIME                        = OWNER_ACCEPTED
@@ -33,10 +38,10 @@ REQUESTS_RUNTIME                       = OWNER_ACCEPTED
 CERERI_RUNTIME                         = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN              = YES
 REQUESTS_INTEGRATED_ON_MAIN            = YES
-NEXT_PROGRAM_PRIORITY                  = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
+NEXT_PROGRAM_PRIORITY                  = PRODUCT_DEVELOPMENT
 ```
 
-Wave 1 implements this sidebar on main. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub is `INTEGRATED_ON_MAIN`. Cereri V3 Figma is `OWNER_ACCEPTED`. Cereri V3 runtime is `OWNER_ACCEPTED` and `INTEGRATED_ON_MAIN`. Oferte and Lucrări page-content transformations remain unaccepted.
+Wave 1 implements this sidebar on main. All existing runtime pages are V3 baseline closed. Page-content transformation is `COMPLETE`. Clients V3 registry, Client Hub, and Cereri remain historically accepted. Future UI work is incremental polish only.
 
 Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
 

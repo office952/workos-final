@@ -7,9 +7,13 @@ PR = #6
 ORIGIN_MAIN = e2dee3c20127cb533ca63e6e13afdb23422541b5
 BASE_HEAD = e2dee3c20127cb533ca63e6e13afdb23422541b5
 HEAD_BEFORE_VERIFY = a574187381cd74363869a17e20adbd49a6af2688
-STATUS = IMPLEMENTED_LOCAL_IN_REVIEW
-OWNER_ACCEPTED_RUNTIME = NO
-MERGE_MAIN = NO
+STATUS = INTEGRATED_ON_MAIN
+OWNER_ACCEPTED_RUNTIME = YES
+MERGE_MAIN = YES
+ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN
+ALL_EXISTING_PAGES_UI_V3_RUNTIME = OWNER_ACCEPTED
+ACCEPTED_HEAD = 122d8693d7a9c6a76e2131dc6555b65bb6537901
+UI_V3_GENERAL_COMPLETION_GATE = CLOSED_FOR_INTEGRATION
 DOMAIN_WRITE = NO
 API_WRITE = NO
 DATABASE_WRITE = NO
@@ -124,8 +128,14 @@ Ignored path: `.tmp/ui-v3-all-pages/final-proof/`
 - No domain/API/database/Cloud writes.
 - No Figma frames or Figma write.
 - No Product Batch 1.
-- No rebase, main merge, or second branch.
+- Implementation worktree did not rewrite commits. Integration was fast-forward only.
+
+## Integration
+
+Owner accepted runtime. `origin/main` fast-forwarded `e2dee3c` → `122d869`. PR #6 merged by containment. No merge commit, rebase, squash, or force.
+
+Advisory backlog remains nonblocking: IdentityMenu focus trap, `/system` “Backend” terminology, admin grouping/class naming, later Atelier metric refinement, micro spacing/copy, React component complexity.
 
 ## Next
 
-Independent ChatGPT final visual/runtime review, then Owner accept. Do not merge main from this record.
+`NEXT_PROGRAM_PRIORITY = PRODUCT_DEVELOPMENT`. Recommended next build is `PRODUCT_BATCH_1_DISCOVERY_AND_IMPLEMENTATION`. Do not start it from this record. First real LETTERS job stays `BLOCKED_BEFORE_QUOTE` on the real-pilot track. No more broad global UI rewrite.

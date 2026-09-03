@@ -30,7 +30,12 @@ HIGH_FIDELITY                     = FIRST_LOT_OWNER_ACCEPTED
 GLOBAL_NAV_STRUCTURE              = STABLE_SIDEBAR
 UI_UX_NAVIGATION_V3_DESIGN        = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION  = IN_PROGRESS
+UI_V3_PAGE_CONTENT_TRANSFORMATION  = COMPLETE
+ALL_EXISTING_PAGES_UI_V3           = INTEGRATED_ON_MAIN
+ALL_EXISTING_PAGES_UI_V3_RUNTIME   = OWNER_ACCEPTED
+UI_V3_GENERAL_FINALIZATION         = COMPLETE
+UI_GENERAL_REDESIGN                = CLOSED_FOR_V1
+UI_POLISH_MODE                     = INCREMENTAL
 CLIENTS_V3                         = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION            = OWNER_ACCEPTED
 CLIENTS_RUNTIME                    = OWNER_ACCEPTED
@@ -47,8 +52,8 @@ CERERI_RUNTIME                     = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN          = YES
 REQUESTS_INTEGRATED_ON_MAIN        = YES
 FIRST_REAL_LETTERS_PREQUOTE_V1     = IMPLEMENTED_LOCAL_IN_REVIEW
-OWNER_ACCEPTED_RUNTIME             = NO
-NEXT_PROGRAM_PRIORITY              = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
+OWNER_ACCEPTED_RUNTIME             = YES
+NEXT_PROGRAM_PRIORITY              = PRODUCT_DEVELOPMENT
 CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = WAVE_1_FOUNDATION
 THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
@@ -56,7 +61,7 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
-On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. Page-content transformation is `IN_PROGRESS`. Clients V3 registry is `INTEGRATED_ON_MAIN`. Client Hub is `INTEGRATED_ON_MAIN`. Cereri V3 Figma is `OWNER_ACCEPTED`. Cereri V3 runtime is `OWNER_ACCEPTED` and `INTEGRATED_ON_MAIN`. Oferte and Lucrări page-content transformations remain unaccepted. Next program priority is `UI_V3_COMMERCIAL_PAGE_REORGANIZATION`.
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. Future UI work is incremental polish only. Next program priority is `PRODUCT_DEVELOPMENT`.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. The implemented shell is the V3 stable sidebar on main. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
@@ -138,7 +143,12 @@ OWNER_DECISION                         = V3_NAVIGATION_DESIGN_ACCEPTED
 GLOBAL_NAVIGATION                      = ONE_STABLE_SIDEBAR
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION     = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION      = IN_PROGRESS
+UI_V3_PAGE_CONTENT_TRANSFORMATION      = COMPLETE
+ALL_EXISTING_PAGES_UI_V3               = INTEGRATED_ON_MAIN
+ALL_EXISTING_PAGES_UI_V3_RUNTIME       = OWNER_ACCEPTED
+UI_V3_GENERAL_FINALIZATION             = COMPLETE
+UI_GENERAL_REDESIGN                    = CLOSED_FOR_V1
+UI_POLISH_MODE                         = INCREMENTAL
 CLIENTS_V3                             = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION                = OWNER_ACCEPTED
 CLIENTS_RUNTIME                        = OWNER_ACCEPTED
@@ -154,7 +164,7 @@ REQUESTS_RUNTIME                       = OWNER_ACCEPTED
 CERERI_RUNTIME                         = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN              = YES
 REQUESTS_INTEGRATED_ON_MAIN            = YES
-NEXT_PROGRAM_PRIORITY                  = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
+NEXT_PROGRAM_PRIORITY                  = PRODUCT_DEVELOPMENT
 PRODUCT_IMPLEMENTATION                 = WAVE_1_SHELL_ON_MAIN
 PACK_SHA256                            = 8cd54c20144d8d1c25c59551f8c1655e163e358fbcee8af0d1d762206166b70e
 PACK_NAME                              = WORKOS_MAP_V3_COLLAPSIBLE_SIDEBAR_REVIEW_PACK
@@ -655,7 +665,12 @@ HIGH_FIDELITY              = FIRST_LOT_OWNER_ACCEPTED
 VISIBLE_RUNTIME            = WAVE_1_FOUNDATION_ROUTES_ACCESS
 UI_IMPLEMENTATION          = IN_REVIEW
 UI_UX_NAVIGATION_V3_IMPLEMENTATION = INTEGRATED_ON_MAIN
-UI_V3_PAGE_CONTENT_TRANSFORMATION = IN_PROGRESS
+UI_V3_PAGE_CONTENT_TRANSFORMATION = COMPLETE
+ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN
+ALL_EXISTING_PAGES_UI_V3_RUNTIME = OWNER_ACCEPTED
+UI_V3_GENERAL_FINALIZATION = COMPLETE
+UI_GENERAL_REDESIGN = CLOSED_FOR_V1
+UI_POLISH_MODE = INCREMENTAL
 CLIENTS_V3                 = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION    = OWNER_ACCEPTED
 CLIENTS_RUNTIME            = OWNER_ACCEPTED
@@ -671,7 +686,7 @@ REQUESTS_RUNTIME           = OWNER_ACCEPTED
 CERERI_RUNTIME             = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN  = YES
 REQUESTS_INTEGRATED_ON_MAIN = YES
-NEXT_PROGRAM_PRIORITY      = UI_V3_COMMERCIAL_PAGE_REORGANIZATION
+NEXT_PROGRAM_PRIORITY      = PRODUCT_DEVELOPMENT
 ```
 
 `OWNER_VISUAL_ACCEPTANCE` for the first lot is closed. It is not the closed IA gate and it is not a scoped UI implementation GO.
