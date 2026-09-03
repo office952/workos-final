@@ -9,6 +9,7 @@ import {
 } from "./workcentersCatalog";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -43,7 +44,7 @@ export function WorkcentersAdminPage() {
           title="Utilaje și zone"
           lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
         />
-        <p>Se încarcă utilajele și zonele…</p>
+        <PageStatus kind="loading">Se încarcă utilajele și zonele…</PageStatus>
       </section>
     );
   }
@@ -54,7 +55,7 @@ export function WorkcentersAdminPage() {
           title="Utilaje și zone"
           lead="Unde și cu ce se poate lucra în atelier. Zonele și utilajele furnizează capabilități pentru procesele operaționale."
         />
-        <p>Nu s-au putut încărca utilajele și zonele.</p>
+        <PageStatus kind="error">Nu s-au putut încărca utilajele și zonele.</PageStatus>
       </section>
     );
   }

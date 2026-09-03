@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import type { PersonRegistryItem, Skill } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
@@ -16,6 +17,7 @@ import {
 import { setOperatorPin } from "./operatorSessionApi";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
@@ -78,7 +80,7 @@ export function PersonAdminPage() {
     return (
       <section className="people-admin">
         <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
-        <p>Se încarcă omul…</p>
+        <PageStatus kind="loading">Se încarcă omul…</PageStatus>
       </section>
     );
   }
@@ -86,7 +88,7 @@ export function PersonAdminPage() {
     return (
       <section className="people-admin">
         <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
-        <p>Persoana cerută nu este disponibilă.</p>
+        <PageStatus kind="missing">Persoana cerută nu este disponibilă.</PageStatus>
       </section>
     );
   }
@@ -94,7 +96,7 @@ export function PersonAdminPage() {
     return (
       <section className="people-admin">
         <PageHeader title="Oameni" lead="Catalog operațional. Nu este HR, pontaj sau salariu." />
-        <p>Persoana nu a putut fi încărcată.</p>
+        <PageStatus kind="error">Persoana nu a putut fi încărcată.</PageStatus>
       </section>
     );
   }
@@ -121,11 +123,10 @@ export function PersonAdminPage() {
 
   return (
     <section className="people-admin">
-      <p>
-        <Link className="button-quiet" to="/admin/people">
-          ← Oameni
-        </Link>
-      </p>
+      <Link className="client-object-back" to="/admin/people" aria-label="Înapoi la Oameni">
+        <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+        Oameni
+      </Link>
       <PeopleAdminNav />
       <header className="client-workspace-header">
         <div>

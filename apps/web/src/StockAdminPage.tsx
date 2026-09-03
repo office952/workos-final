@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Package, TriangleAlert } from "lucide-react";
 import type { InventoryItemDetail, InventoryStockProjection } from "@workos-final/domain";
 import { formatQuantity } from "./formatDisplay";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
@@ -11,8 +12,10 @@ import {
 } from "./inventoryApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
+import { MetricCard } from "./ui/MetricCard";
 import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 export function StockAdminPage() {
@@ -48,30 +51,37 @@ function StockOverviewPage() {
 
   if (page.kind === "loading") {
     return (
-      <section>
+      <section className="requests-overview">
         <PageHeader title="Stoc" lead={stockLead} />
-        <p>Se încarcă stocul…</p>
+        <PageStatus kind="loading">Se încarcă stocul…</PageStatus>
       </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <section>
+      <section className="requests-overview">
         <PageHeader title="Stoc" lead={stockLead} />
-        <p>Nu s-a putut încărca stocul.</p>
+        <PageStatus kind="error">Nu s-a putut încărca stocul.</PageStatus>
       </section>
     );
   }
 
   return (
-    <section>
+    <section className="requests-overview">
       <PageHeader title="Stoc" lead={stockLead} />
-      <p className="page-summary">
-        {page.inventory.materialCount} materiale urmărite
-        {page.inventory.negativeCount > 0
-          ? ` · ${page.inventory.negativeCount} cu sold negativ`
-          : ""}
-      </p>
+      <div className="metric-band">
+        <MetricCard
+          label="Materiale"
+          value={page.inventory.materialCount}
+          icon={<Package size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Sold negativ"
+          value={page.inventory.negativeCount}
+          icon={<TriangleAlert size={40} strokeWidth={1.5} />}
+          iconTone="warning"
+        />
+      </div>
       <Notice compact>
         <p>
           Identitatea materialului rămâne la Resurse. Aici se văd doar soldul și
@@ -79,16 +89,32 @@ function StockOverviewPage() {
         </p>
       </Notice>
       <h2>Materiale în stoc</h2>
-      <ul className="stock-list">
+      <ul className="requests-list">
         {page.inventory.items.map((item) => (
           <li key={item.resourceId}>
-            <Link className="catalog-product-link" to={`/admin/stock/${item.resourceId}`}>
-              {item.label}
-            </Link>
-            <p>
-              Sold curent: {formatQuantity(item.balance)} {item.unitLabel}
-            </p>
-            <StatusChip label={item.statusLabel} tone={stockTone(item.status)} />
+            <div className="registry-row">
+              <div className="registry-row-identity">
+                <Link
+                  className="registry-row-name"
+                  to={`/admin/stock/${item.resourceId}`}
+                >
+                  {item.label}
+                </Link>
+                <span className="registry-row-meta">
+                  Sold curent: {formatQuantity(item.balance)} {item.unitLabel}
+                </span>
+              </div>
+              <div className="requests-row-status">
+                <span>{item.statusLabel}</span>
+              </div>
+              <Link
+                className="registry-row-open"
+                to={`/admin/stock/${item.resourceId}`}
+                aria-label={`Deschide ${item.label}`}
+              >
+                <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+              </Link>
+            </div>
           </li>
         ))}
       </ul>
@@ -148,20 +174,21 @@ function StockItemPage({ resourceId }: { resourceId: string }) {
 
   if (page.kind === "loading") {
     return (
-      <section>
+      <section className="request-object">
         <PageHeader title="Stoc" lead={stockLead} />
-        <p>Se încarcă materialul…</p>
+        <PageStatus kind="loading">Se încarcă materialul…</PageStatus>
       </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <section>
+      <section className="request-object">
+        <Link className="client-object-back" to="/admin/stock" aria-label="Înapoi la stoc">
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          Înapoi la stoc
+        </Link>
         <PageHeader title="Stoc" lead={stockLead} />
-        <p>Materialul nu este urmărit în stoc.</p>
-        <p>
-          <Link to="/admin/stock">Înapoi la stoc</Link>
-        </p>
+        <PageStatus kind="error">Materialul nu este urmărit în stoc.</PageStatus>
       </section>
     );
   }
@@ -170,72 +197,91 @@ function StockItemPage({ resourceId }: { resourceId: string }) {
   const hasMovements = movements.length > 0;
 
   return (
-    <section>
-      <p>
-        <Link to="/admin/stock">Înapoi la stoc</Link>
-      </p>
-      <PageHeader title={item.label} lead={stockLead} />
-      <p className="page-summary">
-        Sold curent: {formatQuantity(item.balance)} {item.unitLabel}
-      </p>
-      <StatusChip label={item.statusLabel} tone={stockTone(item.status)} />
+    <section className="request-object">
+      <Link className="client-object-back" to="/admin/stock" aria-label="Înapoi la stoc">
+        <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+        Înapoi la stoc
+      </Link>
+      <header className="client-object-header">
+        <div className="client-object-titles">
+          <h1>{item.label}</h1>
+          <p className="client-object-identity">{stockLead}</p>
+          <StatusChip label={item.statusLabel} tone={stockTone(item.status)} />
+        </div>
+      </header>
+      <section className="request-section">
+        <h2>Sold</h2>
+        <dl className="request-facts">
+          <div>
+            <dt>Sold curent</dt>
+            <dd>
+              {formatQuantity(item.balance)} {item.unitLabel}
+            </dd>
+          </div>
+        </dl>
+      </section>
       {!canAdminister ? <OwnerWriteHint /> : null}
       {canAdminister ? (
-      <form
-        className="people-create"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submitAdjustment();
-        }}
-      >
-        <Field
-          label={hasMovements ? "Ajustare stoc" : "Înregistrează stoc inițial"}
-          hint={`Unitate: ${item.unitLabel}. Plus adaugă, minus scade.`}
-        >
-          <input
-            type="number"
-            step="any"
-            value={quantity}
-            onChange={(event) => setQuantity(event.target.value)}
-            disabled={busy}
-          />
-        </Field>
-        <Field label="Notă">
-          <input
-            type="text"
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            disabled={busy}
-          />
-        </Field>
-        <button type="submit" disabled={busy || quantity.trim().length === 0}>
-          {hasMovements ? "Ajustare stoc" : "Înregistrează stoc inițial"}
-        </button>
-      </form>
+        <section className="request-section">
+          <form
+            className="people-create"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submitAdjustment();
+            }}
+          >
+            <Field
+              label={hasMovements ? "Ajustare stoc" : "Înregistrează stoc inițial"}
+              hint={`Unitate: ${item.unitLabel}. Plus adaugă, minus scade.`}
+            >
+              <input
+                type="number"
+                step="any"
+                value={quantity}
+                onChange={(event) => setQuantity(event.target.value)}
+                disabled={busy}
+              />
+            </Field>
+            <Field label="Notă">
+              <input
+                type="text"
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                disabled={busy}
+              />
+            </Field>
+            <button type="submit" disabled={busy || quantity.trim().length === 0}>
+              {hasMovements ? "Ajustare stoc" : "Înregistrează stoc inițial"}
+            </button>
+          </form>
+        </section>
       ) : null}
       {notice ? <p className="status-bad">{notice}</p> : null}
-      <h2>Mișcări</h2>
-      {movements.length === 0 ? (
-        <EmptyState title="Nu există mișcări de stoc pentru acest material." />
-      ) : (
-        <ul className="stock-movements">
-          {movements.map((movement) => (
-            <li key={movement.movementId}>
-              <p>
-                {movement.movementTypeLabel} {movement.quantityLabel}
-              </p>
-              {movement.sourceLabel ? <p>Task: {movement.sourceLabel}</p> : null}
-              <p>{new Date(movement.recordedAt).toLocaleString("ro-RO")}</p>
-              {movement.note ? <p>Notă: {movement.note}</p> : null}
-              <details>
-                <summary>Detalii</summary>
-                <p>Referință: {movement.movementId}</p>
-                <p>Sursă: {movement.sourceId}</p>
-              </details>
-            </li>
-          ))}
-        </ul>
-      )}
+      <section className="request-section">
+        <h2>Mișcări</h2>
+        {movements.length === 0 ? (
+          <EmptyState title="Nu există mișcări de stoc pentru acest material." />
+        ) : (
+          <ul className="request-related-list">
+            {movements.map((movement) => (
+              <li key={movement.movementId}>
+                <div className="request-related-row">
+                  <span>
+                    <span>
+                      {movement.movementTypeLabel} {movement.quantityLabel}
+                    </span>
+                    <span>
+                      {movement.sourceLabel ? `Task: ${movement.sourceLabel} · ` : ""}
+                      {new Date(movement.recordedAt).toLocaleString("ro-RO")}
+                      {movement.note ? ` · Notă: ${movement.note}` : ""}
+                    </span>
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <p>
         <button type="button" className="button-quiet" onClick={() => navigate("/admin/resources")}>
           Vezi resursa în catalog

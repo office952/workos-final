@@ -7,6 +7,7 @@ import { createSkill, fetchEligibility, fetchSkills, retireSkill } from "./peopl
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { PageHeader } from "./ui/PageHeader";
+import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 
 export function SkillsAdminPage() {
@@ -38,7 +39,7 @@ export function SkillsAdminPage() {
           title="Calificări"
           lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
         />
-        <p>Calificările nu au putut fi încărcate.</p>
+        <PageStatus kind="error">Calificările nu au putut fi încărcate.</PageStatus>
       </section>
     );
   }
@@ -49,7 +50,7 @@ export function SkillsAdminPage() {
           title="Calificări"
           lead="Calificări operaționale configurabile. Eticheta se poate schimba; codul rămâne stabil. Nu sunt permisiuni de aplicație."
         />
-        <p>Se încarcă calificările…</p>
+        <PageStatus kind="loading">Se încarcă calificările…</PageStatus>
       </section>
     );
   }

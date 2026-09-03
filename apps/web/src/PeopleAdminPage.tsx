@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronRight, UserCheck, UserMinus, Users } from "lucide-react";
 import { appLocation } from "./navigation/routePath";
 import type { PeopleRegistryProjection } from "@workos-final/domain";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
@@ -8,8 +9,9 @@ import { PeopleAdminNav } from "./PeopleAdminNav";
 import { createPerson, fetchPeopleRegistry } from "./peopleApi";
 import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
+import { MetricCard } from "./ui/MetricCard";
 import { PageHeader } from "./ui/PageHeader";
-import { StatusChip } from "./ui/StatusChip";
+import { PageStatus } from "./ui/PageStatus";
 
 type PageState =
   | { kind: "loading" }
@@ -43,23 +45,23 @@ export function PeopleAdminPage() {
 
   if (page.kind === "loading") {
     return (
-      <section className="people-admin">
+      <section className="people-admin requests-overview">
         <PageHeader
           title="Oameni"
           lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
         />
-        <p>Se încarcă oamenii…</p>
+        <PageStatus kind="loading">Se încarcă oamenii…</PageStatus>
       </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <section className="people-admin">
+      <section className="people-admin requests-overview">
         <PageHeader
           title="Oameni"
           lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
         />
-        <p>Nu s-au putut încărca oamenii.</p>
+        <PageStatus kind="error">Nu s-au putut încărca oamenii.</PageStatus>
       </section>
     );
   }
@@ -67,22 +69,28 @@ export function PeopleAdminPage() {
   const { registry } = page;
 
   return (
-    <section className="people-admin">
+    <section className="people-admin requests-overview">
       <PageHeader
         title="Oameni"
         lead="Catalog operațional: cine este în firmă, ce știe și dacă poate fi luat în calcul acum. Nu este HR, pontaj sau salariu."
-        meta={
-          <p className="page-summary">
-            Activi {registry.summary.active}
-            {" · "}
-            Disponibili {registry.summary.available}
-            {" · "}
-            Indisponibili temporar {registry.summary.temporarilyUnavailable}
-            {" · "}
-            Retrasi {registry.summary.retired}
-          </p>
-        }
       />
+      <div className="metric-band">
+        <MetricCard
+          label="Activi"
+          value={registry.summary.active}
+          icon={<Users size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Disponibili"
+          value={registry.summary.available}
+          icon={<UserCheck size={40} strokeWidth={1.5} />}
+        />
+        <MetricCard
+          label="Retrasi"
+          value={registry.summary.retired}
+          icon={<UserMinus size={40} strokeWidth={1.5} />}
+        />
+      </div>
       <PeopleAdminNav />
       {!canAdminister ? <OwnerWriteHint /> : null}
       {canAdminister ? (
@@ -120,31 +128,36 @@ export function PeopleAdminPage() {
           action={canAdminister ? <p>Adaugă prima persoană.</p> : undefined}
         />
       ) : (
-        <ul className="people-list">
+        <ul className="requests-list">
           {registry.people.map((person) => (
             <li key={person.personId}>
-              <div className="jobs-identity">
-                <Link to={appLocation(person.href)}>{person.displayName}</Link>
-                <span>
-                  {person.roleLabel ?? "Fără rol descriptiv"}
-                  {person.skills.length > 0
-                    ? ` · ${person.skills.map((skill) => skill.displayLabel).join(", ")}`
-                    : " · Fără calificări"}
-                </span>
+              <div className="registry-row">
+                <div className="registry-row-identity">
+                  <Link className="registry-row-name" to={appLocation(person.href)}>
+                    {person.displayName}
+                  </Link>
+                  <span className="registry-row-meta">
+                    {person.roleLabel ?? "Fără rol descriptiv"}
+                    {person.skills.length > 0
+                      ? ` · ${person.skills.map((skill) => skill.displayLabel).join(", ")}`
+                      : " · Fără calificări"}
+                  </span>
+                </div>
+                <div className="requests-row-status">
+                  <span>{person.statusLabel}</span>
+                  <span>{person.availabilityLabel}</span>
+                </div>
+                <Link className="requests-row-action" to={appLocation(person.href)}>
+                  Deschide
+                </Link>
+                <Link
+                  className="registry-row-open"
+                  to={appLocation(person.href)}
+                  aria-label={`Deschide ${person.displayName}`}
+                >
+                  <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                </Link>
               </div>
-              <div className="jobs-status">
-                <StatusChip
-                  label={person.statusLabel}
-                  tone={person.status === "ACTIVE" ? "ok" : "neutral"}
-                />
-                <StatusChip
-                  label={person.availabilityLabel}
-                  tone={person.availability === "AVAILABLE" ? "progress" : "neutral"}
-                />
-              </div>
-              <Link className="button-link" to={appLocation(person.href)}>
-                Deschide
-              </Link>
             </li>
           ))}
         </ul>
