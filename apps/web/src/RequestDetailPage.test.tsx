@@ -730,6 +730,9 @@ describe("RequestDetailPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Dovada subcontractantului nu este valabilă.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Actualizează dovada de cost" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Locație" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Măsurători" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Execuție montaj" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Alege produs" })).toBeInTheDocument();
     expect(screen.queryByText("Completă")).not.toBeInTheDocument();
   });

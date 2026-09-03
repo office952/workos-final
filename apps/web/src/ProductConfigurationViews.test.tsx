@@ -17,6 +17,7 @@ import type {
 import {
   AcceptedSnapshotSection,
   CommercialPriceSection,
+  ConfiguratorSummary,
   ConfirmedSummary,
   OrderSnapshotSection,
   QuoteSnapshotSection,
@@ -350,8 +351,26 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Montajul nu are încă un cost complet.")).toBeInTheDocument();
     expect(screen.getByText("Produs: 665,98 EUR")).toBeInTheDocument();
     expect(screen.getByText("Totalul ofertei nu este gata.")).toBeInTheDocument();
+    expect(screen.getByText("Total ofertă indisponibil")).toBeInTheDocument();
     expect(screen.queryByText("Preț final client: 665,98 EUR")).not.toBeInTheDocument();
     expect(screen.queryByText("Total ofertă client")).not.toBeInTheDocument();
+    expect(screen.queryByText("Preț client neconfirmat.")).not.toBeInTheDocument();
+  });
+
+  it("does not call a confirmed install price unconfirmed when the job total is blocked", () => {
+    render(
+      <MemoryRouter>
+        <ConfiguratorSummary
+          statusLabel="Preț client confirmat · Dovadă subcontract expirată"
+          statusTone="warn"
+          facts={["Litere"]}
+          priceUnavailableLabel="Total ofertă indisponibil"
+          catalogHref="/products"
+        />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText("Total ofertă indisponibil")).toBeInTheDocument();
+    expect(screen.queryByText("Preț client neconfirmat.")).not.toBeInTheDocument();
   });
 
   it("shows the projected job total without adding prices in the UI", () => {

@@ -7,6 +7,7 @@ import {
   commercialRequestStatusLabel,
   operationalServiceProviderModeLabel,
   siteInstallationIsPrequoteReady,
+  siteInstallationReadinessLabel,
   type CommercialRequestStatus,
   type OperationalServiceProviderMode,
   type RequestDetailProjection,
@@ -27,7 +28,7 @@ import {
   requestRelatedItems,
   requestSavedModeLabel,
 } from "./requestObjectView";
-import { formatMoney } from "./formatDisplay";
+import { formatMoney, formatQuantity } from "./formatDisplay";
 import { installationCostEvidenceHref } from "./installationPresentation";
 import { formatRequestDate } from "./requestsRegistryView";
 import {
@@ -54,6 +55,7 @@ import { EmptyState } from "./ui/EmptyState";
 import { Field } from "./ui/Field";
 import { Notice } from "./ui/Notice";
 import { PageStatus } from "./ui/PageStatus";
+import { StatusChip } from "./ui/StatusChip";
 
 type PageState =
   | { kind: "loading" }
@@ -531,6 +533,7 @@ export function RequestDetailPage() {
             </Field>
           ) : null}
           <Field
+            variant="choice"
             label="Montaj la locație"
             hint={installationHint(detail, installationMode, installationSelected)}
           >
@@ -824,8 +827,8 @@ function installationHint(
   if (detail.installationOffer.persistedSelectionPreserved) {
     return "Montajul rămâne selectat pe această cerere. Nu poate fi adăugat pe cereri noi până ownerul configurează serviciul.";
   }
-  if (detail.installationScope?.eicCompleteness === "COMPLETE") {
-    return "Montajul este selectat. Costul intern există; prețul client rămâne separat.";
+  if (installationSelected) {
+    return "Montajul este inclus în această cerere.";
   }
   return "Dacă este selectat, montajul rămâne separat și blochează oferta până există un cost complet.";
 }
@@ -845,60 +848,77 @@ function RequestPrequoteReadiness({
   const expired = scope.incompleteReasons.some(
     (reason) => reason.id === "SUBCONTRACT_EVIDENCE_INVALID",
   );
-  const costLabel = ready
-    ? "Pregătit"
+  const costLabel = expired
+    ? "Dovadă subcontract expirată"
+    : scope.eicCompleteness === "COMPLETE"
+      ? "Pregătit"
+      : "Incomplet";
+  const customerNetPrice = scope.commercialNetPrice;
+  const customerGrossPrice = scope.commercialGrossPrice;
+  const priceConfirmed =
+    scope.commercialCompleteness === "COMPLETE" && customerNetPrice != null;
+  const nextStep = ready
+    ? "Pregătit pentru previzualizare. Înghețarea rămâne dezactivată în această etapă."
     : expired
-      ? "Dovadă subcontract expirată"
-      : scope.eicCompleteness === "COMPLETE"
-        ? "Pregătit"
-        : "Incomplet";
+      ? "Dovada subcontractantului nu este valabilă."
+      : scope.eicCompleteness !== "COMPLETE"
+        ? "Costul intern de montaj nu este complet."
+        : "Prețul de montaj pentru client nu este confirmat.";
   return (
-    <dl className="request-prequote-readiness">
-      <div>
-        <dt>Montaj</dt>
-        <dd>Selectat</dd>
-      </div>
-      <div>
-        <dt>Preț client</dt>
-        <dd>
-          {scope.commercialCompleteness === "COMPLETE" && scope.commercialNetPrice != null
-            ? `Confirmat · ${formatMoney(scope.commercialNetPrice)} EUR`
-            : "Neconfirmat"}
-        </dd>
-      </div>
-      <div>
-        <dt>Cost intern</dt>
-        <dd>
-          {scope.ownerInternalCost
-            ? `${scope.ownerInternalCost.label}: ${formatMoney(scope.ownerInternalCost.total)} ${scope.ownerInternalCost.currency}`
-            : costLabel}
-        </dd>
-      </div>
-      {ready ? (
-        <div>
-          <dt>Stare ofertă</dt>
-          <dd>Pregătit pentru previzualizare. Înghețarea rămâne dezactivată în această etapă.</dd>
-        </div>
-      ) : (
-        <div>
-          <dt>Blochează oferta</dt>
+    <div className="request-install-decision">
+      <p className="request-install-decision-status">
+        <StatusChip
+          label={siteInstallationReadinessLabel(scope)}
+          tone={ready ? "ok" : "warn"}
+        />
+      </p>
+      <dl className="request-prequote-readiness">
+        <div className="request-install-decision-price">
+          <dt>Preț client</dt>
           <dd>
-            {expired
-              ? "Dovada subcontractantului nu este valabilă."
-              : scope.eicCompleteness !== "COMPLETE"
-                ? "Costul intern de montaj nu este complet."
-                : "Prețul de montaj pentru client nu este confirmat."}
+            {priceConfirmed && customerNetPrice != null ? (
+              <>
+                <strong>
+                  {formatMoney(customerNetPrice)} EUR fără TVA
+                </strong>
+                {customerGrossPrice != null ? (
+                  <span>{formatMoney(customerGrossPrice)} EUR cu TVA</span>
+                ) : null}
+              </>
+            ) : (
+              "Neconfirmat"
+            )}
           </dd>
         </div>
-      )}
-      {!ready && costHref ? (
+        <div className="request-install-decision-cost">
+          <dt>Cost intern estimat</dt>
+          <dd>
+            {scope.ownerInternalCost ? (
+              <>
+                <strong>
+                  {formatMoney(scope.ownerInternalCost.total)} {scope.ownerInternalCost.currency}
+                </strong>
+                <span>
+                  {formatQuantity(scope.ownerInternalCost.quantity)}{" "}
+                  {scope.ownerInternalCost.unitLabel} ×{" "}
+                  {formatMoney(scope.ownerInternalCost.rate)} {scope.ownerInternalCost.currency}
+                </span>
+              </>
+            ) : (
+              costLabel
+            )}
+          </dd>
+        </div>
         <div>
           <dt>Următorul pas</dt>
           <dd>
-            <Link to={costHref}>Actualizează dovada de cost</Link>
+            <span>{nextStep}</span>
+            {!ready && costHref ? (
+              <Link to={costHref}>Actualizează dovada de cost</Link>
+            ) : null}
           </dd>
         </div>
-      ) : null}
-    </dl>
+      </dl>
+    </div>
   );
 }

@@ -106,23 +106,29 @@ export function ConstructionFacts({ facts }: { facts: readonly ProductIdentityFa
 
 export function ConfiguratorSummary({
   statusLabel,
+  statusTone = "neutral",
   requestLabel,
   facts,
   priceLabel,
+  priceUnavailableLabel,
   catalogHref,
   children,
 }: {
   statusLabel: string;
+  statusTone?: "ok" | "warn" | "neutral";
   requestLabel?: string | null;
   facts: readonly string[];
   priceLabel?: string | null;
+  priceUnavailableLabel?: string | null;
   catalogHref: string;
   children?: ReactNode;
 }) {
   return (
     <aside className="configurator-summary" aria-label="Rezumat">
       <h2>Rezumat</h2>
-      <p className="configurator-summary-status">{statusLabel}</p>
+      <p className="configurator-summary-status" data-tone={statusTone}>
+        {statusLabel}
+      </p>
       {requestLabel ? <p>{requestLabel}</p> : null}
       {facts.length > 0 ? (
         <ul>
@@ -133,8 +139,10 @@ export function ConfiguratorSummary({
       ) : (
         <p>Completează câmpurile din stânga. Prețul apare după confirmare.</p>
       )}
-      {priceLabel ? <p className="commercial-gross">{priceLabel}</p> : (
-        <p>Preț client neconfirmat.</p>
+      {priceLabel ? (
+        <p className="commercial-gross">{priceLabel}</p>
+      ) : (
+        <p>{priceUnavailableLabel ?? "Preț client neconfirmat."}</p>
       )}
       {children ? <div className="configurator-summary-actions">{children}</div> : null}
       <Link className="button-quiet" to={catalogHref}>
@@ -636,9 +644,8 @@ export function QuoteSnapshotSection({
       {installationScope && jobCommercial ? (
         <div className="commercial-job-preview">
           <p className="commercial-gross">
-            Total ofertă client
-            <span>
-              {" "}
+            <span className="commercial-job-total-label">Total ofertă client</span>
+            <span className="commercial-job-total-value">
               {formatMoney(jobCommercial.grossPrice)} {jobCommercial.currency}
             </span>
           </p>
@@ -659,6 +666,7 @@ export function QuoteSnapshotSection({
         </div>
       ) : installationScope ? (
         <div className="commercial-job-preview">
+          <p className="commercial-job-unavailable">Total ofertă indisponibil</p>
           <p>
             Produs: {formatMoney(price.grossPrice ?? 0)} {price.currency}
           </p>
@@ -685,7 +693,7 @@ export function QuoteSnapshotSection({
         />
       ) : null}
       {!selectedCustomerId ? <p className="page-lead">Selectează clientul.</p> : null}
-      <div className="action-row">
+      <div className="action-row quote-create-action">
         <button
           type="button"
           onClick={onFreeze}
@@ -709,9 +717,8 @@ function QuoteJobPrice({ snapshot }: { snapshot: QuoteSnapshot }) {
     return (
       <div className="commercial-job-preview">
         <p className="commercial-gross">
-          Total ofertă client
-          <span>
-            {" "}
+          <span className="commercial-job-total-label">Total ofertă client</span>
+          <span className="commercial-job-total-value">
             {formatMoney(job.grossPrice)} {job.currency}
           </span>
         </p>
@@ -756,24 +763,41 @@ export function InstallationScopeSection({
           tone={ready ? "ok" : "warn"}
         />
       </div>
-      {scope.commercialCompleteness === "COMPLETE" && scope.commercialGrossPrice != null ? (
-        <p>
-          Preț montaj client: {formatMoney(scope.commercialGrossPrice)} EUR
-        </p>
-      ) : (
-        <p>Prețul de montaj pentru client nu este confirmat.</p>
-      )}
-      {scope.ownerInternalCost ? (
-        <p>
-          {scope.ownerInternalCost.label}: {formatMoney(scope.ownerInternalCost.total)}{" "}
-          {scope.ownerInternalCost.currency}
-          <span className="page-lead">
-            {" "}
-            ({formatQuantity(scope.ownerInternalCost.quantity)} {scope.ownerInternalCost.unitLabel}{" "}
-            × {formatMoney(scope.ownerInternalCost.rate)} {scope.ownerInternalCost.currency})
-          </span>
-        </p>
-      ) : null}
+      <dl className="install-scope-decision">
+        <div className="install-scope-decision-price">
+          <dt>Preț client</dt>
+          <dd>
+            {scope.commercialCompleteness === "COMPLETE" &&
+            scope.commercialGrossPrice != null ? (
+              <>
+                <strong>
+                  Preț montaj client: {formatMoney(scope.commercialGrossPrice)} EUR
+                </strong>
+                {scope.commercialNetPrice != null ? (
+                  <span>{formatMoney(scope.commercialNetPrice)} EUR fără TVA</span>
+                ) : null}
+              </>
+            ) : (
+              "Prețul de montaj pentru client nu este confirmat."
+            )}
+          </dd>
+        </div>
+        {scope.ownerInternalCost ? (
+          <div className="install-scope-decision-cost">
+            <dt>Cost intern</dt>
+            <dd>
+              {scope.ownerInternalCost.label}: {formatMoney(scope.ownerInternalCost.total)}{" "}
+              {scope.ownerInternalCost.currency}
+              <span className="page-lead">
+                {" "}
+                ({formatQuantity(scope.ownerInternalCost.quantity)}{" "}
+                {scope.ownerInternalCost.unitLabel} × {formatMoney(scope.ownerInternalCost.rate)}{" "}
+                {scope.ownerInternalCost.currency})
+              </span>
+            </dd>
+          </div>
+        ) : null}
+      </dl>
       {scope.incompleteReasons.length > 0 ? (
         <ul>
           {scope.incompleteReasons.map((reason) => (

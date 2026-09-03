@@ -1050,43 +1050,144 @@ h1 {
 
 .commercial-job-preview {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.75rem;
+  max-width: 28rem;
 }
 
 .commercial-job-preview .commercial-gross {
+  display: grid;
+  gap: 0.2rem;
   margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.commercial-job-total-label {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.commercial-job-total-value {
+  font-size: 2rem;
+  font-weight: 650;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.commercial-job-unavailable {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--text-primary);
 }
 
 .commercial-job-breakdown,
-.owner-internal-costs,
-.request-prequote-readiness {
+.owner-internal-costs {
   display: grid;
-  gap: 0.35rem 1.25rem;
+  gap: 0.35rem;
+  margin: 0;
+  padding-top: 0.55rem;
+  border-top: 1px solid color-mix(in srgb, var(--border-subtle) 80%, transparent);
+}
+
+.request-install-decision {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 28rem;
+}
+
+.request-install-decision-status {
+  margin: 0;
+}
+
+.request-prequote-readiness,
+.install-scope-decision {
+  display: grid;
+  gap: 0.7rem;
   margin: 0;
 }
 
 .commercial-job-breakdown > div,
-.owner-internal-costs > div,
-.request-prequote-readiness > div {
+.owner-internal-costs > div {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   align-items: baseline;
 }
 
+.request-prequote-readiness > div,
+.install-scope-decision > div {
+  display: grid;
+  gap: 0.12rem;
+}
+
 .commercial-job-breakdown dt,
 .owner-internal-costs dt,
-.request-prequote-readiness dt {
+.request-prequote-readiness dt,
+.install-scope-decision dt {
   margin: 0;
-  font-weight: 450;
-  color: var(--muted, #5b6573);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
 }
 
 .commercial-job-breakdown dd,
 .owner-internal-costs dd,
-.request-prequote-readiness dd {
+.request-prequote-readiness dd,
+.install-scope-decision dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
+}
+
+.request-prequote-readiness dd,
+.install-scope-decision dd {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.request-install-decision-price dd strong,
+.install-scope-decision-price dd strong {
+  font-size: 1.25rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.request-install-decision-price dd span,
+.install-scope-decision-price dd span,
+.request-install-decision-cost dd span {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.request-install-decision-cost dd strong {
+  font-weight: 550;
+}
+
+.install-scope-decision-cost {
+  color: var(--text-secondary);
+}
+
+.quote-create-action {
+  align-items: start;
+  max-width: 36rem;
+}
+
+.quote-create-action button:disabled {
+  opacity: 0.42;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.quote-create-action .page-lead {
+  margin: 0;
+  max-width: 22rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
 }
 
 .request-installation-price-actions {
@@ -1415,12 +1516,39 @@ a.button-link.button-secondary {
 .request-installation-facts {
   display: grid;
   gap: var(--space-4);
+  max-width: 40rem;
 }
 
-.request-installation-facts-grid {
+.request-installation-facts-form {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.request-installation-facts-group {
   display: grid;
   gap: var(--space-3);
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0.25rem 0 0.85rem;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--border-subtle) 80%, transparent);
+}
+
+.request-installation-facts-group legend {
+  padding: 0.7rem 0 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.request-installation-facts-group .field:has(textarea) {
+  grid-column: 1 / -1;
+}
+
+.request-installation-facts-submit {
+  margin: 0.25rem 0 0;
 }
 
 .request-installation-facts-reasons {
@@ -1429,9 +1557,47 @@ a.button-link.button-secondary {
 }
 
 @media (max-width: 768px) {
-  .request-installation-facts-grid {
+  .request-installation-facts-group {
     grid-template-columns: 1fr;
   }
+}
+
+.field-choice {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  column-gap: 0.7rem;
+  row-gap: 0.12rem;
+  align-items: start;
+  min-height: 44px;
+  max-width: 36rem;
+}
+
+.field-choice .field-label {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.field-choice input[type="checkbox"] {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 1.15rem;
+  height: 1.15rem;
+  min-width: 1.15rem;
+  min-height: 1.15rem;
+  margin: 0.35rem auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  accent-color: var(--action-primary);
+}
+
+.field-choice .field-hint,
+.field-choice .field-error {
+  grid-column: 2;
 }
 
 .status-chip {
@@ -1732,8 +1898,20 @@ a.button-link.button-secondary {
 
 .configurator-summary-status {
   margin: 0;
-  color: var(--status-success);
+  color: var(--text-secondary);
   font-weight: 650;
+}
+
+.configurator-summary-status[data-tone="ok"] {
+  color: var(--status-success);
+}
+
+.configurator-summary-status[data-tone="warn"] {
+  color: var(--status-warning);
+}
+
+.configurator-summary .commercial-gross {
+  font-size: 1.05rem;
 }
 
 .configurator-summary ul {
@@ -3969,6 +4147,10 @@ a.jobs-customer {
 .request-section {
   display: grid;
   gap: 0.85rem;
+}
+
+#request-installation {
+  max-width: 42rem;
 }
 
 .request-section h2 {

@@ -26,7 +26,7 @@ REAL_CLOUD_V2_QUOTE_MUTATION           = NO
 OWNER_ACCEPTED_RUNTIME                 = NO
 INTEGRATED_ON_MAIN                     = NO
 IMPLEMENTED_LOCAL_IN_REVIEW            = YES
-NEXT_GATE                              = OWNER_INSPECTION_GRAPHIC_REVIEW
+NEXT_GATE                              = INDEPENDENT_SCREENSHOT_REVIEW_THEN_OWNER_INSPECTION
 ```
 
 Owner authorized one coherent vertical pre-quote wave so the first real LETTERS job is not blocked by an architectural wall at OS-S3 or OS-S4 alone. This file is the implementation record. It does not accept the runtime, write Cloud, patch a real Cerere, freeze a real Quote, or integrate on `main`.
@@ -216,6 +216,25 @@ INTEGRATED_ON_MAIN            = NO
 
 Do not declare Owner-accepted runtime or integrate on `main` from this amend.
 
+## Focused graphic composition pass
+
+Owner graphic review of the seven amend screenshots authorized one composition pass. No architecture, EIC, pricing, database, Figma, Resources, or live v2 change.
+
+```text
+GRAPHIC_PASS                      = COMPOSITION_HIERARCHY
+REQUEST_DECISION_STACK            = stare → preț client → cost intern → următorul pas
+MONTAJ_CHECKBOX                   = native field-choice, label + hint, 44×44 hit via wrapping label
+INSTALLATION_FORM_GROUPS          = Locație / Măsurători / Execuție montaj
+COMMERCIAL_TOTAL                  = 866,82 dominant; Produs + Montaj compact
+INTERNAL_COST_SECONDARY           = yes
+DISABLED_QUOTE_STATE              = muted button + supporting reason
+EXPIRED_COPY                      = Total ofertă indisponibil; no Preț client neconfirmat when install price exists
+RESOURCES_REDESIGN                = NO / UX_ADVISORY_FOR_LATER
+SYNTHETIC_CAPTURE                 = .tmp/review/first-real-letters-prequote-v1-composition/screenshots
+OWNER_ACCEPTED_RUNTIME            = NO
+INTEGRATED_ON_MAIN                = NO
+```
+
 ## Next gate
 
-Independent ChatGPT technical review of the Draft PR plus direct uploaded screenshot graphic review. Do not merge `main` and do not mark Owner-accepted from this file.
+Independent ChatGPT screenshot review, then Owner inspection. Do not merge `main` and do not mark Owner-accepted from this file.

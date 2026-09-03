@@ -851,6 +851,16 @@ export function ProductConfigurationPage() {
       : confirmed && confirmed.commercialPrice.completeness === "COMPLETE"
         ? `Preț client ${formatCommercialGross(confirmed.commercialPrice)}`
         : null;
+  const priceUnavailableLabel =
+    confirmed && installationScope && !confirmed.jobCommercial
+      ? "Total ofertă indisponibil"
+      : null;
+  const summaryTone =
+    confirmed && installationScope && !siteInstallationIsPrequoteReady(installationScope)
+      ? "warn"
+      : confirmed
+        ? "ok"
+        : "neutral";
   const catalogHref = requestContext
     ? `/products?request=${encodeURIComponent(requestContext.request.requestId)}`
     : "/products";
@@ -972,6 +982,7 @@ export function ProductConfigurationPage() {
         </div>
         <ConfiguratorSummary
           statusLabel={summaryStatus}
+          statusTone={summaryTone}
           requestLabel={
             requestContext
               ? `Cerere ${requestContext.request.reference}`
@@ -979,6 +990,7 @@ export function ProductConfigurationPage() {
           }
           facts={summaryFacts}
           priceLabel={priceLabel}
+          priceUnavailableLabel={priceUnavailableLabel}
           catalogHref={catalogHref}
         />
       </div>
