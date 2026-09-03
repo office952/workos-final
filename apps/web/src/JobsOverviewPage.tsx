@@ -173,9 +173,9 @@ export function JobsOverviewPage() {
                     <Link className="requests-row-action" to={job.href}>
                       {job.nextActionLabel}
                     </Link>
-                    <Link className="registry-row-open" to={job.href} aria-label={`Deschide ${job.inscription}`}>
-                      <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-                    </Link>
+                    <span className="registry-row-open" aria-hidden="true">
+                      <ChevronRight size={16} strokeWidth={1.75} />
+                    </span>
                   </div>
                 </li>
               ))}

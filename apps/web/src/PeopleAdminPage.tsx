@@ -150,13 +150,9 @@ export function PeopleAdminPage() {
                 <Link className="requests-row-action" to={appLocation(person.href)}>
                   Deschide
                 </Link>
-                <Link
-                  className="registry-row-open"
-                  to={appLocation(person.href)}
-                  aria-label={`Deschide ${person.displayName}`}
-                >
-                  <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-                </Link>
+                <span className="registry-row-open" aria-hidden="true">
+                  <ChevronRight size={16} strokeWidth={1.75} />
+                </span>
               </div>
             </li>
           ))}

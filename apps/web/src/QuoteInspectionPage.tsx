@@ -207,6 +207,14 @@ export function QuoteInspectionPage() {
 
       <section className="request-section" aria-labelledby="quote-price">
         <h2 id="quote-price">Valori comerciale</h2>
+        <div className="commercial-job-preview">
+          <p className="commercial-gross">
+            <span className="commercial-job-total-label">Preț client</span>
+            <span className="commercial-job-total-value">
+              {money(commercial.grossPrice) ?? `${quote.grossDisplay} ${quote.currency}`}
+            </span>
+          </p>
+        </div>
         <dl className="request-facts">
           {money(commercial.netPrice) ? <Fact label="Net">{money(commercial.netPrice)}</Fact> : null}
           {typeof commercial.vatPercent === "number" ? (
@@ -214,15 +222,6 @@ export function QuoteInspectionPage() {
               <span>TVA {commercial.vatPercent}%</span>
             </Fact>
           ) : null}
-          {money(commercial.grossPrice) ? (
-            <Fact label="Preț client">
-              <span className="commercial-gross">Brut: {money(commercial.grossPrice)}</span>
-            </Fact>
-          ) : (
-            <Fact label="Preț client">
-              Brut: {quote.grossDisplay} {quote.currency}
-            </Fact>
-          )}
           {typeof commercial.internalCost === "number" ? (
             <Fact label="Cost intern">{money(commercial.internalCost)}</Fact>
           ) : null}

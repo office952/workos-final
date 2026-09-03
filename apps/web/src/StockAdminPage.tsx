@@ -107,13 +107,9 @@ function StockOverviewPage() {
               <div className="requests-row-status">
                 <span>{item.statusLabel}</span>
               </div>
-              <Link
-                className="registry-row-open"
-                to={`/admin/stock/${item.resourceId}`}
-                aria-label={`Deschide ${item.label}`}
-              >
-                <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-              </Link>
+              <span className="registry-row-open" aria-hidden="true">
+                <ChevronRight size={16} strokeWidth={1.75} />
+              </span>
             </div>
           </li>
         ))}

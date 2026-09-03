@@ -41,13 +41,13 @@ function taskCard(page: Page, processLabel: string, scopeLabel: string) {
 }
 
 async function ensureNamedPerson(page: Page, name: string) {
-  const activeItem = page.locator(".people-list li").filter({ hasText: name }).first();
+  const activeItem = page.locator(".requests-list li").filter({ hasText: name }).first();
   if (await activeItem.isVisible()) {
     return;
   }
   await page.locator(".people-create").getByLabel("Nume").fill(name);
   await page.getByRole("button", { name: "Adaugă persoană" }).click();
-  await expect(page.locator(".people-list li").filter({ hasText: name }).first()).toBeVisible();
+  await expect(page.locator(".requests-list li").filter({ hasText: name }).first()).toBeVisible();
 }
 
 test("assigns an owner-created executor and keeps attribution after complete", async ({
@@ -87,7 +87,7 @@ test("assigns an owner-created executor and keeps attribution after complete", a
     fullPage: true,
   });
 
-  const retiredRow = page.locator(".people-list li").filter({ hasText: RETIRED_NAME }).first();
+  const retiredRow = page.locator(".requests-list li").filter({ hasText: RETIRED_NAME }).first();
   if (!(await retiredRow.getByText("Retras", { exact: true }).isVisible())) {
     await retiredRow.getByRole("link", { name: "Deschide" }).click();
     await expect(page.getByRole("heading", { name: RETIRED_NAME })).toBeVisible();
@@ -96,10 +96,10 @@ test("assigns an owner-created executor and keeps attribution after complete", a
       await retire.click();
     }
     await expect(page.getByText("Retras", { exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "← Oameni" }).click();
+    await page.getByRole("link", { name: "Înapoi la Oameni" }).click();
   }
   await expect(
-    page.locator(".people-list li").filter({ hasText: RETIRED_NAME }).getByText("Retras", { exact: true }),
+    page.locator(".requests-list li").filter({ hasText: RETIRED_NAME }).getByText("Retras", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText(RETIRED_NAME)).toBeVisible();
   await page.screenshot({

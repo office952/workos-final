@@ -164,9 +164,10 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
 
   await page.goto("/admin/stock/MAT-LED-MODULE");
   await expect(page.getByRole("heading", { name: "Modul LED 12V" })).toBeVisible();
-  await expect(
-    page.getByText(`Sold curent: ${formatBalance(expectedLedBalance)} buc`),
-  ).toBeVisible();
+  await expect(page.locator(".request-facts")).toContainText("Sold curent");
+  await expect(page.locator(".request-facts")).toContainText(
+    `${formatBalance(expectedLedBalance)} buc`,
+  );
   await expect(page.getByText("Sold negativ")).toBeVisible();
   await expect(page.getByText("Consum producție −127 buc").first()).toBeVisible();
   await expect(page.getByText("Task: Montare module LED — Iluminare").first()).toBeVisible();

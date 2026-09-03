@@ -26,7 +26,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
   await page.getByRole("link", { name: "Listă" }).click();
   await page.locator(".people-create").getByLabel("Nume").fill(name);
   await page.getByRole("button", { name: "Adaugă persoană" }).click();
-  const row = page.locator(".people-list li").filter({ hasText: name }).first();
+  const row = page.locator(".requests-list li").filter({ hasText: name }).first();
   await expect(row).toBeVisible();
   await row.getByRole("link", { name: "Deschide" }).click();
   await expect(page.getByRole("heading", { name })).toBeVisible();
@@ -52,7 +52,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
   });
 
   await page.getByRole("link", { name: "Listă" }).click();
-  await page.locator(".people-list li").filter({ hasText: name }).getByRole("link", { name: "Deschide" }).click();
+  await page.locator(".requests-list li").filter({ hasText: name }).getByRole("link", { name: "Deschide" }).click();
   await page.getByLabel("Motiv").fill("Concediu");
   await page.getByRole("button", { name: "Marchează indisponibil temporar" }).click();
   await expect(page.getByText("Indisponibil temporar")).toBeVisible();
@@ -72,7 +72,7 @@ test("configures people, skills and current CNC eligibility", async ({ page }) =
   });
 
   await page.getByRole("link", { name: "Listă" }).click();
-  await page.locator(".people-list li").filter({ hasText: name }).getByRole("link", { name: "Deschide" }).click();
+  await page.locator(".requests-list li").filter({ hasText: name }).getByRole("link", { name: "Deschide" }).click();
   await page.getByRole("button", { name: "Revino disponibil" }).click();
   await expect(page.getByText("Disponibil").first()).toBeVisible();
 

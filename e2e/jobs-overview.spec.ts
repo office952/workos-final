@@ -88,7 +88,7 @@ test("operator can scan commercial jobs and open the correct workspace", async (
     name: "Eliberează pentru producție",
   }).click();
   await expect(page).toHaveURL(new RegExp(`/jobs/${encodeURIComponent(orderOnly.orderSnapshotId)}`));
-  await page.locator(".decision-actions").getByRole("link", { name: "Eliberează pentru producție" }).click();
+  await page.locator(".client-object-actions").getByRole("link", { name: "Eliberează pentru producție" }).click();
   await expect(page).toHaveURL(new RegExp(`/products/${orderOnly.productCode}\\?order=`));
   await expect(page.getByText(`${orderOnly.inscription} — continuare lucrare comercială.`)).toBeVisible();
   await expect(page.getByRole("button", { name: "Eliberează pentru producție" })).toBeVisible();
@@ -100,7 +100,7 @@ test("operator can scan commercial jobs and open the correct workspace", async (
 
   await jobRow(page, planned.inscription).getByRole("link", { name: "Deschide execuția" }).click();
   await expect(page).toHaveURL(new RegExp(`/jobs/${encodeURIComponent(planned.orderSnapshotId)}`));
-  await page.locator(".decision-actions").getByRole("link", { name: "Deschide execuția" }).click();
+  await page.locator(".client-object-actions").getByRole("link", { name: "Deschide execuția" }).click();
   await expect(page).toHaveURL(/\/execution\/exp:/);
   await expect(page.getByRole("heading", { name: "Plan de execuție" })).toBeVisible();
   await primaryNavLink(page, "Lucrări").click();

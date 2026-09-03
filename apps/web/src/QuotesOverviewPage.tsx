@@ -182,13 +182,9 @@ export function QuotesOverviewPage() {
                     <Link className="requests-row-action" to={{ pathname: quote.href }}>
                       {quote.nextActionLabel}
                     </Link>
-                    <Link
-                      className="registry-row-open"
-                      to={{ pathname: quote.href }}
-                      aria-label={`Deschide ${quote.reference}`}
-                    >
-                      <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
-                    </Link>
+                    <span className="registry-row-open" aria-hidden="true">
+                      <ChevronRight size={16} strokeWidth={1.75} />
+                    </span>
                   </div>
                 </li>
               ))}

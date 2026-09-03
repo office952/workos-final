@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { useCloudSessionOptional } from "./CloudSessionContext";
 import { isOperationalOperatorRoute } from "./navigation/navigationRegistry";
@@ -26,6 +26,7 @@ export function AppShell({ children }: AppShellProps) {
   const { ready, operator, logout } = useOperatorSession();
   const [identifyOpen, setIdentifyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
   const [collapsed, setCollapsed] = useState(readSidebarCollapsed);
   const [legalName, setLegalName] = useState<string | null>(null);
   const operationalRoute = isOperationalOperatorRoute(pathname);
@@ -180,7 +181,7 @@ export function AppShell({ children }: AppShellProps) {
       </div>
       <MobileNavigationDrawer
         open={menuOpen}
-        onClose={() => setMenuOpen(false)}
+        onClose={closeMenu}
         destinations={visibleDestinations}
       />
       <ActionDrawer title="Identifică operatorul" open={identifyOpen} onClose={() => setIdentifyOpen(false)}>

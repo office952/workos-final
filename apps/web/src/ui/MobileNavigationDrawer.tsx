@@ -62,7 +62,8 @@ export function MobileNavigationDrawer({
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      previouslyFocused.current?.focus();
+      const restore = previouslyFocused.current;
+      queueMicrotask(() => restore?.focus());
     };
   }, [open, onClose]);
 

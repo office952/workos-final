@@ -21,7 +21,8 @@ test("stable job and quote routes refresh, theme and responsive shell", async ({
 
   await page.goto(`/quotes/${encodeURIComponent(quote.quoteSnapshotId)}`);
   await expect(page.getByRole("heading", { name: quote.inscription })).toBeVisible();
-  await expect(page.getByText(/Brut: .* EUR/)).toBeVisible();
+  await expect(page.getByText("Preț client")).toBeVisible();
+  await expect(page.locator(".commercial-job-total-value")).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: quote.inscription })).toBeVisible();
   await expect(page.getByRole("link", { name: "Catalog" })).toBeVisible();

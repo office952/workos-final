@@ -76,7 +76,8 @@ describe("QuoteInspectionPage", () => {
 
     expect(await screen.findByRole("heading", { name: "HUB" })).toBeInTheDocument();
     expect(screen.getAllByText(/OF-ABCDEF01/).length).toBeGreaterThan(0);
-    expect(screen.getByText("Brut: 624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("624,82 EUR")).toBeInTheDocument();
+    expect(screen.getByText("Preț client")).toBeInTheDocument();
     expect(screen.getByText("TVA 21%")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Marchează acceptată" })).toBeInTheDocument();
     expect(screen.queryByText("Cost intern")).not.toBeInTheDocument();

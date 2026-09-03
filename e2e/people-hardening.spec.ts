@@ -34,7 +34,7 @@ test("removed skill stays removed and planned start revalidates availability", a
   await openPeopleAdmin(page);
   await page.locator(".people-create").getByLabel("Nume").fill(removedName);
   await page.getByRole("button", { name: "Adaugă persoană" }).click();
-  const removedRow = page.locator(".people-list li").filter({ hasText: removedName }).first();
+  const removedRow = page.locator(".requests-list li").filter({ hasText: removedName }).first();
   await expect(removedRow).toBeVisible();
   await removedRow.getByRole("link", { name: "Deschide" }).click();
   await page.getByLabel("Adaugă skill").selectOption({ label: "CNC (SK_CNC_OPERATOR)" });
