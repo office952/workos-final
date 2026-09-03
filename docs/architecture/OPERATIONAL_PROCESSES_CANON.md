@@ -159,7 +159,7 @@ CATALOG OF POSSIBLE OPERATIONS
 Steel and aluminium welding stay distinct. Plotter cutting is not vinyl application. Roll lamination is not rigid-plate film application. `CUT_SHEET_CNC` remains the only CNC process. ACM uses the same process with a panel-blank recipe that covers contour plus V-groove on CNC 4020. Manual fold after CNC is `FORM_SHEET_CASSETTE`, not a bending machine.
 
 Letters Lighting calculation is CALCULATED on the confirmed-perimeter path. LETTERS CNC, assembly, vinyl, electrical, paint and packing now have functional recipes. Unrelated shop-floor processes still have no recipes.
-Confirmed manual FACE area and VOLUME perimeter are valid Product Truth. Canonical 60 mm none/none planned EIC is COMPLETE on owner-confirmed workshop rates. Other aluminium depths stay PARTIAL until those rates are confirmed. Analyzer is not the planned-EIC blocker.
+Confirmed manual FACE area and VOLUME perimeter are valid Product Truth. Configured aluminium depths 30 / 60 / 80 / 100 mm are COMPLETE on owner-confirmed workshop rates. Analyzer is not the planned-EIC blocker.
 
 Recipe completeness is owned by `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md`. A new process does not invent a recipe.
 
@@ -167,7 +167,7 @@ Readiness is reported separately:
 
 - TECHNOLOGICAL_PROCESS_COMPLETENESS — process-graph readiness. Independent of cost.
 - LIGHTING_CALCULATION_READINESS — Lighting calculation status.
-- COST_COMPLETENESS — projection of EIC / cost-evidence completeness for the selected configuration. Not a second cost authority. Canonical 60 mm none/none is COMPLETE. 30 / 80 / 100 mm, vinyl and RAL stay PARTIAL while their evidence is unconfirmed.
+- COST_COMPLETENESS — projection of EIC / cost-evidence completeness for the selected configuration. Not a second cost authority. Configured aluminium depths 30 / 60 / 80 / 100 mm are COMPLETE. Vinyl and RAL stay PARTIAL while their evidence is unconfirmed.
 - EXECUTION_READINESS — reserved inspection slot. Still labeled unimplemented on this surface. Execution itself is implemented elsewhere and is not owned by process composition.
 
 ## Persistence and administration

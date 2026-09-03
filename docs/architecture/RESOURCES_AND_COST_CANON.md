@@ -104,8 +104,7 @@ No compatibility aliases.
 ## Cost evidence
 
 One active typed row per live resource: amount, currency, unit, source, classification.
-A row may carry an optional configuration qualifier. Aluminium profile keeps one resource identity; the owner-confirmed 3 EUR/m purchase applies only at 60 mm depth. 30 / 80 / 100 mm have no confirmed profile rate.
-Unqualified lookup must not inherit a qualified rate.
+A row may carry an optional configuration qualifier. Aluminium profile keeps one resource identity. Owner-confirmed purchase rates are 2 / 3 / 4 / 5 EUR/m at 30 / 60 / 80 / 100 mm. Unqualified lookup must not inherit a qualified rate.
 
 Owner-confirmed workshop rates use `OWNER_CONFIRMED_WORKSHOP`. Purchase rates use `OWNER_CONFIRMED_PURCHASE`.
 `AI_DECISION` source/classification may complete planned EIC when every required line has a rate. It is not owner-confirmed truth.
@@ -124,7 +123,7 @@ Resource identity, kind, unit, labels, specifications and recipes remain typed c
 
 SQLite owns the active CostEvidence amount after one-time bootstrap (`RESOURCE_COST_EVIDENCE_V1_APPLIED`). Seed `costEvidence[]` is bootstrap plus pure domain tests. Live compile, freeze and admin projection read active database rows. They do not fall back to seed amounts.
 
-One active row per resource, or per resource plus configuration qualifier. Aluminium 60 mm is a qualified row; unqualified lookup does not inherit it. 30 / 80 / 100 mm stay without a profile rate until that exact row exists.
+One active row per resource, or per resource plus configuration qualifier. Aluminium depths are qualified rows; unqualified lookup does not inherit them. 30 / 60 / 80 / 100 mm each have an owner-confirmed profile rate.
 
 Owner save appends a new row and supersedes the previous active row. Amount is never updated in place. Optimistic concurrency uses `evidenceRowId` of the current active row.
 

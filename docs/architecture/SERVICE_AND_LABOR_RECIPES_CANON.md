@@ -79,7 +79,7 @@ EIC may consume a resolved recipe only when the process is required, quantity ex
 
 EIC is generic. When process composition is supplied, it merges recipe requirements with component resource requirements.
 The forming recipe reuses the same `return_cant_forming` evidence. It does not add a second line.
-Canonical none/none at 60 mm: 382.50 EUR COMPLETE on owner-confirmed workshop rates. Forming is 5 EUR/m. CNC face 3 EUR/m, CNC back 4.5 EUR/m, bonding 5 EUR/m, body closure 2 EUR/m, LED install 0.05 EUR/buc, electrical 2 EUR/product, packing 10 EUR/m². Vinyl / RAL remain development evidence and keep those configurations PARTIAL. Operator-confirmed FACE area and VOLUME perimeter are valid Product Truth.
+Configured depths 30 / 60 / 80 / 100 mm are COMPLETE on owner-confirmed return-profile purchase rates. Canonical none/none at 60 mm remains 382.50 EUR. Forming is 5 EUR/m. CNC face 3 EUR/m, CNC back 4.5 EUR/m, bonding 5 EUR/m, body closure 2 EUR/m, LED install 0.05 EUR/buc, electrical 2 EUR/product, packing 10 EUR/m². Vinyl / RAL remain development evidence and keep those configurations PARTIAL. Operator-confirmed FACE area and VOLUME perimeter are valid Product Truth.
 
 ## Boundaries
 
