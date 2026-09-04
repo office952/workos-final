@@ -153,6 +153,7 @@ export {
   matchMaterialSpecification,
   matchMaterialSpecificationIn,
   materialFamilies,
+  listProductTemplateResourceUsages,
   projectResourcesAdministration,
   resourceCatalog,
   resourceKindLabel,
@@ -173,7 +174,9 @@ export {
   type ResourceKind,
   type ResourceUnit,
   type ResourceRequirement,
+  type ProductTemplateResourceUsage,
   type ResourcesAdminProjection,
+  usageForProductTemplate,
 } from "./resources/index.js";
 export {
   APPLY_SURFACE_FINISH_ID,

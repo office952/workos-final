@@ -82,6 +82,11 @@ export {
   type ResourceUseProjection,
 } from "./projection.js";
 export {
+  listProductTemplateResourceUsages,
+  usageForProductTemplate,
+  type ProductTemplateResourceUsage,
+} from "./productTemplateUsage.js";
+export {
   RCP_ATTACH_INTERNAL_FRAME_ID,
   RCP_CNC_SHEET_PANEL_ID,
   RCP_CUT_METAL_STOCK_ID,

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import type { ProductSystemAdminProjection } from "@workos-final/domain";
 import { DisplayLabelEditor } from "./DisplayLabelEditor";
 import { OwnerCatalogView } from "./OwnerCatalogView";
@@ -70,15 +71,25 @@ export function ProductSystemAdminPage() {
       title="Sistem produs"
       lead="Editează eticheta afișată. Identitatea tehnică, compoziția și setările tehnice rămân neschimbate."
       summary={!canAdminister ? <OwnerWriteHint /> : null}
-      renderItemActions={(item) =>
-        canAdminister && item.editTarget ? (
-          <DisplayLabelEditor
-            key={`${item.editTarget.entityKind}:${item.editTarget.entityId}:${item.editTarget.revision}`}
-            target={item.editTarget}
-            onSaved={load}
-          />
-        ) : null
-      }
+      renderItemActions={(item) => (
+        <>
+          {item.editTarget?.entityKind === "PRODUCT_TEMPLATE" ? (
+            <Link
+              className="button-quiet"
+              to={`/admin/resources?product=${encodeURIComponent(item.editTarget.entityId)}`}
+            >
+              Resurse și costuri
+            </Link>
+          ) : null}
+          {canAdminister && item.editTarget ? (
+            <DisplayLabelEditor
+              key={`${item.editTarget.entityKind}:${item.editTarget.entityId}:${item.editTarget.revision}`}
+              target={item.editTarget}
+              onSaved={load}
+            />
+          ) : null}
+        </>
+      )}
     />
   );
 }

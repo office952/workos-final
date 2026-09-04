@@ -33,6 +33,10 @@ import {
   type CostRecipe,
   type RecipeKind,
 } from "./recipes.js";
+import {
+  listProductTemplateResourceUsages,
+  type ProductTemplateResourceUsage,
+} from "./productTemplateUsage.js";
 import { resourceWhereUsed, type ResourceUse } from "./whereUsed.js";
 import { calendarDateCoversAsOf } from "../calendarDate.js";
 
@@ -126,6 +130,7 @@ export type ResourcesAdminProjection = {
     } | null;
     usedBy: readonly ResourceUseProjection[];
   })[];
+  templateUsages: readonly ProductTemplateResourceUsage[];
   writeState: "READY" | "NOT_IMPLEMENTED";
 };
 
@@ -169,6 +174,7 @@ export function projectResourcesAdministration(
         ...projected,
       };
     }),
+    templateUsages: listProductTemplateResourceUsages(evidenceRows, asOf),
     writeState: writable && evidenceRows.length > 0 ? "READY" : "NOT_IMPLEMENTED",
   };
 }

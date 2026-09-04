@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
@@ -16,6 +16,7 @@ import { PageStatus } from "./ui/PageStatus";
 import { StatusChip } from "./ui/StatusChip";
 import {
   costRowId,
+  costRowsForProduct,
   costStatusDisplay,
   costVariantDisplay,
   isConfirmedCost,
@@ -24,10 +25,15 @@ import {
   filterResourceRows,
   listWorkspaceRecipes,
   listWorkspaceResources,
+  parseProductTemplateFilter,
   parseResourcesKindFilter,
   parseResourcesStatusFilter,
   parseResourcesWorkspaceView,
+  recipeRowsForProduct,
+  resolveProductUsage,
   resolveSelectedCostRow,
+  resourceRowsForProduct,
+  splitCreateTariffResources,
   tariffAmountDisplay,
   type CostWorkspaceRow,
   type RecipeWorkspaceRow,
@@ -55,6 +61,17 @@ export function ResourcesAdminPage() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [createResourceId, setCreateResourceId] = useState("");
 
+  const patchParams = useCallback((mutate: (next: URLSearchParams) => void) => {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        mutate(next);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
+
   useEffect(() => {
     let cancelled = false;
     void fetchResourcesAdministration()
@@ -73,6 +90,36 @@ export function ResourcesAdminPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (page.kind !== "ready") {
+      return;
+    }
+    const rawProduct = searchParams.get("product");
+    const knownProduct = parseProductTemplateFilter(rawProduct, page.admin.templateUsages);
+    if (rawProduct && !knownProduct) {
+      patchParams((params) => {
+        params.delete("product");
+      });
+      return;
+    }
+    const usage = resolveProductUsage(page.admin, knownProduct);
+    const currentSelected = resolveSelectedCostRow(page.admin, selected);
+    if (
+      selected &&
+      (!currentSelected || (usage && !usage.resourceIds.includes(currentSelected.resourceId)))
+    ) {
+      patchParams((params) => {
+        params.delete("selected");
+      });
+      return;
+    }
+    if (inventoryId && usage && !usage.resourceIds.includes(inventoryId)) {
+      patchParams((params) => {
+        params.delete("resursa");
+      });
+    }
+  }, [inventoryId, page, patchParams, searchParams, selected]);
+
   function retryLoad() {
     setPage({ kind: "loading" });
     void fetchResourcesAdministration()
@@ -84,17 +131,6 @@ export function ResourcesAdminPage() {
       });
   }
 
-  function patchParams(mutate: (next: URLSearchParams) => void) {
-    setSearchParams(
-      (current) => {
-        const next = new URLSearchParams(current);
-        mutate(next);
-        return next;
-      },
-      { replace: true },
-    );
-  }
-
   function setView(next: ResourcesWorkspaceView) {
     patchParams((params) => {
       if (next === "costuri") {
@@ -104,6 +140,19 @@ export function ResourcesAdminPage() {
       }
       params.delete("selected");
       params.delete("adauga");
+      params.delete("resursa");
+    });
+  }
+
+  function setProduct(next: string) {
+    setCreateResourceId("");
+    patchParams((params) => {
+      if (next) {
+        params.set("product", next);
+      } else {
+        params.delete("product");
+      }
+      params.delete("selected");
       params.delete("resursa");
     });
   }
@@ -147,13 +196,27 @@ export function ResourcesAdminPage() {
   }
 
   const writable = page.admin.writeState === "READY" && canAdminister;
+  const product = parseProductTemplateFilter(searchParams.get("product"), page.admin.templateUsages);
+  const productUsage = resolveProductUsage(page.admin, product);
   const selectedCost = resolveSelectedCostRow(page.admin, selected);
-  const resources = listWorkspaceResources(page.admin);
-  const recipes = listWorkspaceRecipes(page.admin);
-  const visibleCosts = filterCostRows(page.admin.costEvidence, query, kind, status);
+  const selectedCostVisible =
+    selectedCost &&
+    (!productUsage || productUsage.resourceIds.includes(selectedCost.resourceId))
+      ? selectedCost
+      : undefined;
+  const resources = resourceRowsForProduct(listWorkspaceResources(page.admin), productUsage);
+  const allResources = listWorkspaceResources(page.admin);
+  const recipes = recipeRowsForProduct(listWorkspaceRecipes(page.admin), productUsage);
+  const visibleCosts = filterCostRows(
+    costRowsForProduct(page.admin.costEvidence, productUsage),
+    query,
+    kind,
+    status,
+  );
   const visibleResources = filterResourceRows(resources, query, kind);
   const visibleRecipes = filterRecipeRows(recipes, query, kind);
-  const createResource = resources.find((item) => item.id === createResourceId);
+  const createChoices = splitCreateTariffResources(allResources, productUsage);
+  const createResource = allResources.find((item) => item.id === createResourceId);
   const selectedResource = resources.find((item) => item.id === inventoryId);
 
   return (
@@ -186,6 +249,31 @@ export function ResourcesAdminPage() {
             ? "Un tarif salvat este confirmat pentru calcule noi. Ofertele și lucrările înghețate nu se schimbă."
             : "Tarifele sunt folosite pentru cost intern. Editarea nu este disponibilă în această etapă."}
       </p>
+      <div className="resources-workspace-context">
+        <div className="form-row">
+          <label htmlFor="resources-product-filter">Produs</label>
+          <select
+            id="resources-product-filter"
+            value={product ?? ""}
+            onChange={(event) => setProduct(event.target.value)}
+          >
+            <option value="">Toate produsele</option>
+            {page.admin.templateUsages.map((item) => (
+              <option key={item.templateCode} value={item.templateCode}>
+                {item.templateLabel}
+              </option>
+            ))}
+          </select>
+        </div>
+        {productUsage ? (
+          <p className="resources-workspace-context-summary">
+            {`${productUsage.resourceCount} resurse · ${productUsage.confirmedTariffCount} tarife confirmate`}
+            {productUsage.needsSetupCount > 0
+              ? ` · ${productUsage.needsSetupCount} necesită configurare`
+              : ""}
+          </p>
+        ) : null}
+      </div>
       <nav className="resources-workspace-nav" aria-label="Lucru pe pagină">
         <WorkspaceTab
           current={view}
@@ -270,7 +358,7 @@ export function ResourcesAdminPage() {
       {view === "costuri" ? (
         <CostRegistry
           rows={visibleCosts}
-          selectedId={selectedCost ? costRowId(selectedCost) : null}
+          selectedId={selectedCostVisible ? costRowId(selectedCostVisible) : null}
           onSelect={(row) =>
             patchParams((params) => {
               params.set("selected", costRowId(row));
@@ -309,11 +397,30 @@ export function ResourcesAdminPage() {
               onChange={(event) => setCreateResourceId(event.target.value)}
             >
               <option value="">Alege resursa</option>
-              {resources.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
+              {createChoices.other.length > 0 ? (
+                <>
+                  <optgroup label="Folosite de produs">
+                    {createChoices.preferred.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Toate resursele">
+                    {createChoices.other.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                </>
+              ) : (
+                createChoices.preferred.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))
+              )}
             </select>
           </div>
           {createResource ? (
@@ -345,17 +452,17 @@ export function ResourcesAdminPage() {
         </div>
       </ActionDrawer>
       <ActionDrawer
-        title={selectedCost?.resourceLabel ?? "Tarif intern"}
-        open={Boolean(selectedCost)}
+        title={selectedCostVisible?.resourceLabel ?? "Tarif intern"}
+        open={Boolean(selectedCostVisible)}
         onClose={() =>
           patchParams((params) => {
             params.delete("selected");
           })
         }
       >
-        {selectedCost ? (
+        {selectedCostVisible ? (
           <CostRowDetail
-            row={selectedCost}
+            row={selectedCostVisible}
             writable={writable}
             onSaved={(admin) => {
               setPage({ kind: "ready", admin });

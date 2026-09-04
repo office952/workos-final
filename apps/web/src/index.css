@@ -4560,6 +4560,19 @@ a.jobs-customer {
   line-height: 1.4;
 }
 
+.resources-workspace-context {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 36rem;
+}
+
+.resources-workspace-context-summary {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
 .resources-workspace-nav {
   display: flex;
   flex-wrap: wrap;

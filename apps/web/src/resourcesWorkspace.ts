@@ -1,4 +1,8 @@
-import type { ResourcesAdminProjection } from "@workos-final/domain";
+import {
+  usageForProductTemplate,
+  type ProductTemplateResourceUsage,
+  type ResourcesAdminProjection,
+} from "@workos-final/domain";
 import { formatCalendarDate } from "./formatDisplay";
 import { costEvidenceItemId } from "./resourcesCatalog";
 
@@ -41,6 +45,79 @@ export function parseResourcesStatusFilter(
     return value;
   }
   return "all";
+}
+
+export function parseProductTemplateFilter(
+  value: string | null,
+  usages: readonly ProductTemplateResourceUsage[],
+): string | null {
+  if (!value) {
+    return null;
+  }
+  return usages.some((item) => item.templateCode === value) ? value : null;
+}
+
+export function resolveProductUsage(
+  admin: ResourcesAdminProjection,
+  product: string | null,
+): ProductTemplateResourceUsage | null {
+  return usageForProductTemplate(admin.templateUsages, product);
+}
+
+export function costRowsForProduct(
+  rows: readonly CostWorkspaceRow[],
+  usage: ProductTemplateResourceUsage | null,
+): readonly CostWorkspaceRow[] {
+  if (!usage) {
+    return rows;
+  }
+  const allowed = new Set(usage.resourceIds);
+  return rows.filter((row) => allowed.has(row.resourceId));
+}
+
+export function resourceRowsForProduct(
+  rows: readonly ResourceWorkspaceRow[],
+  usage: ProductTemplateResourceUsage | null,
+): readonly ResourceWorkspaceRow[] {
+  if (!usage) {
+    return rows;
+  }
+  const allowed = new Set(usage.resourceIds);
+  return rows.filter((row) => allowed.has(row.id));
+}
+
+export function recipeRowsForProduct(
+  rows: readonly RecipeWorkspaceRow[],
+  usage: ProductTemplateResourceUsage | null,
+): readonly RecipeWorkspaceRow[] {
+  if (!usage) {
+    return rows;
+  }
+  const recipes = new Set(usage.recipeIds);
+  const processes = new Set(usage.processIds);
+  return rows.filter((row) => {
+    if (row.id.startsWith("missing:")) {
+      return processes.has(row.id.slice("missing:".length));
+    }
+    return recipes.has(row.id);
+  });
+}
+
+export function splitCreateTariffResources(
+  resources: readonly ResourceWorkspaceRow[],
+  usage: ProductTemplateResourceUsage | null,
+): {
+  preferred: readonly ResourceWorkspaceRow[];
+  other: readonly ResourceWorkspaceRow[];
+} {
+  if (!usage) {
+    return { preferred: resources, other: [] };
+  }
+  const allowed = new Set(usage.resourceIds);
+  return {
+    preferred: resources.filter((row) => allowed.has(row.id)),
+    other: resources.filter((row) => !allowed.has(row.id)),
+  };
 }
 
 export function costRowId(row: Pick<CostWorkspaceRow, "resourceId" | "qualifierIdentity">): string {

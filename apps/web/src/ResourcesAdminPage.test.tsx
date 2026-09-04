@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ACM_CASSETTE_NONE_PRODUCT_CODE,
+  CANONICAL_PRODUCT_CODE,
   LAB_SITE_INSTALL_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
@@ -95,6 +97,42 @@ describe("ResourcesAdminPage", () => {
     expect(
       screen.getByText("Tarifele sunt folosite pentru cost intern. Editarea nu este disponibilă în această etapă."),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("Produs")).toHaveDisplayValue("Toate produsele");
+  });
+
+  it("filters the flat workspace by ProductTemplate context", async () => {
+    const user = userEvent.setup();
+    renderResources();
+    const product = await screen.findByLabelText("Produs");
+    expect(product).toHaveDisplayValue("Toate produsele");
+    expect(
+      screen.getByRole("option", {
+        name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Panou ACM casetat" })).toBeInTheDocument();
+
+    await user.selectOptions(product, CANONICAL_PRODUCT_CODE);
+    expect(screen.getByText("30 mm")).toBeInTheDocument();
+    expect(screen.getByText("60 mm")).toBeInTheDocument();
+    expect(screen.getByText("80 mm")).toBeInTheDocument();
+    expect(screen.getByText("100 mm")).toBeInTheDocument();
+    expect(screen.queryByText("ACM 3 mm")).not.toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText("Produs"), ACM_CASSETTE_NONE_PRODUCT_CODE);
+    expect(screen.queryByText("Profil aluminiu 0,6 mm")).not.toBeInTheDocument();
+    expect(screen.getByText("ACM 3 mm")).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText("Produs"), "");
+    expect(screen.getAllByText("Profil aluminiu 0,6 mm").length).toBeGreaterThan(0);
+    expect(screen.getByText("ACM 3 mm")).toBeInTheDocument();
+  });
+
+  it("restores product context from the URL", async () => {
+    renderResources(`/admin/resources?product=${CANONICAL_PRODUCT_CODE}`);
+    expect(await screen.findByLabelText("Produs")).toHaveValue(CANONICAL_PRODUCT_CODE);
+    expect(screen.getByText("30 mm")).toBeInTheDocument();
+    expect(screen.queryByText("ACM 3 mm")).not.toBeInTheDocument();
   });
 
   it("lists resources and recipes as filters, not nested menus", async () => {
@@ -206,6 +244,22 @@ describe("ResourcesAdminPage", () => {
     expect(screen.getByText("2,50 EUR / m")).toBeInTheDocument();
     expect(screen.getByText("40 mm")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Dovezi de cost" })).not.toBeInTheDocument();
+  });
+
+  it("prefers template resources in Adaugă tarif without hiding the catalog", async () => {
+    vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
+    const user = userEvent.setup();
+    renderResources(`/admin/resources?product=${CANONICAL_PRODUCT_CODE}`);
+    await user.click(await screen.findByRole("button", { name: "Adaugă tarif" }));
+    const resource = screen.getByLabelText("Resursă");
+    expect(within(resource).getByRole("group", { name: "Folosite de produs" })).toBeInTheDocument();
+    expect(within(resource).getByRole("group", { name: "Toate resursele" })).toBeInTheDocument();
+    expect(
+      within(resource).getByRole("option", { name: "Profil aluminiu 0,6 mm" }),
+    ).toBeInTheDocument();
+    expect(
+      within(resource).getByRole("option", { name: "Manoperă montaj la locație" }),
+    ).toBeInTheDocument();
   });
 
   it("opens a cost row for edit and keeps the qualifier immutable", async () => {
