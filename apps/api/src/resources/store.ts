@@ -9,6 +9,7 @@ import {
   ownerConfirmedCostSource,
   parseCostEvidenceWhen,
   resourceAllowsCostEvidenceQualifier,
+  sortActiveCostEvidence,
   type CostEvidence,
   type ResourceKind,
   type ResourceUnit,
@@ -172,17 +173,7 @@ export function listActiveCostEvidence(db: SqliteDatabase): CostEvidence[] {
     const evidence = toCostEvidence(row);
     return evidence ? [evidence] : [];
   });
-  const rank = new Map(
-    costEvidence.map((item, index) => [evidenceSortKey(item), index]),
-  );
-  return mapped.sort((left, right) => {
-    const leftRank = rank.get(evidenceSortKey(left)) ?? Number.MAX_SAFE_INTEGER;
-    const rightRank = rank.get(evidenceSortKey(right)) ?? Number.MAX_SAFE_INTEGER;
-    if (leftRank !== rightRank) {
-      return leftRank - rightRank;
-    }
-    return (left.createdAt ?? "").localeCompare(right.createdAt ?? "");
-  });
+  return sortActiveCostEvidence(mapped);
 }
 
 export function supersedeCostEvidence(
@@ -335,10 +326,6 @@ function parseNote(note: unknown): { ok: true; note: string } | { ok: false; err
     return { ok: false, error: "invalid_note" };
   }
   return { ok: true, note: note.trim() };
-}
-
-function evidenceSortKey(evidence: CostEvidence): string {
-  return `${evidence.resourceId}:${evidence.when?.volumeDepthMm ?? ""}`;
 }
 
 function toCostEvidence(row: CostEvidenceRow): CostEvidence | null {

@@ -68,8 +68,11 @@ import {
   type QuoteSnapshot,
   type TaskCompletionInput,
   type TaskMutationResult,
+  projectResourcesAdministration,
   siteInstallationEvidenceFromRows,
   type CostEvidence,
+  type ResourcesAdministrationWriteStats,
+  type ResourcesAdminProjection,
   workcenterRegistry,
   type WorkcenterRegistry,
 } from "@workos-final/domain";
@@ -188,6 +191,7 @@ import {
   attachmentIntegrityMatches,
 } from "../requests/attachmentStorage.js";
 import { createProductSystemPresentationReuse } from "./presentationReuse.js";
+import { createResourcesAdministrationReuse } from "./resourcesAdministrationReuse.js";
 import {
   loadDisplayLabelCatalog,
   updateDisplayLabel,
@@ -298,6 +302,7 @@ export type ProductSystemRuntime = {
     note?: string,
   ): InventoryAdjustmentResult;
   listActiveCostEvidence(): CostEvidence[];
+  resourcesAdministration(): ResourcesAdminProjection;
   supersedeCostEvidence(
     evidenceRowId: string,
     amount: unknown,
@@ -442,6 +447,11 @@ export type ProductSystemRuntimeOptions = {
   providerRegistry?: WorkcenterRegistry;
   observeDisplayLabelCatalogLoad?: () => void;
   observeProductSystemPresentationBuild?: () => void;
+  observeActiveCostEvidenceLoad?: () => void;
+  observeResourcesAdministrationBuild?: () => void;
+  observeResourcesAdministrationDelta?: (
+    stats: ResourcesAdministrationWriteStats,
+  ) => void;
 };
 
 export function createProductSystemRuntime(
@@ -525,6 +535,17 @@ export function createProductSystemRuntimeFromOpenDb(
       options.observeProductSystemPresentationBuild?.();
       return presentProductSystem(labels);
     },
+  });
+  const resourcesReuse = createResourcesAdministrationReuse({
+    loadEvidence() {
+      options.observeActiveCostEvidenceLoad?.();
+      return readActiveCostEvidence(db);
+    },
+    project(rows) {
+      options.observeResourcesAdministrationBuild?.();
+      return projectResourcesAdministration(rows);
+    },
+    observeDelta: options.observeResourcesAdministrationDelta,
   });
   return {
     sqlitePath,
@@ -938,13 +959,30 @@ export function createProductSystemRuntimeFromOpenDb(
       );
     },
     listActiveCostEvidence() {
-      return readActiveCostEvidence(db);
+      return resourcesReuse.evidence();
+    },
+    resourcesAdministration() {
+      return resourcesReuse.admin();
     },
     supersedeCostEvidence(evidenceRowId, amount, note, extras) {
-      return persistSupersededCostEvidence(db, evidenceRowId, amount, note, extras);
+      const result = persistSupersededCostEvidence(
+        db,
+        evidenceRowId,
+        amount,
+        note,
+        extras,
+      );
+      if (result.ok) {
+        resourcesReuse.applySuccessfulWrite(result.evidence, evidenceRowId);
+      }
+      return result;
     },
     createInitialCostEvidence(input) {
-      return persistInitialCostEvidence(db, input);
+      const result = persistInitialCostEvidence(db, input);
+      if (result.ok) {
+        resourcesReuse.applySuccessfulWrite(result.evidence);
+      }
+      return result;
     },
     close() {
       db.close();

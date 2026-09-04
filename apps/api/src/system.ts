@@ -1,7 +1,6 @@
 import {
   omitForbiddenFinancialFields,
   projectOperationalProcessesAdministration,
-  projectResourcesAdministration,
   projectSystemGovernance,
   projectWorkcentersAdministration,
 } from "@workos-final/domain";
@@ -22,7 +21,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
 
   app.get("/api/resources-admin", (c) => {
     const runtime = getProductSystem(c);
-    const projection = projectResourcesAdministration(runtime.listActiveCostEvidence());
+    const projection = runtime.resourcesAdministration();
     if (isOwner(c)) {
       return c.json(projection);
     }
@@ -70,7 +69,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
       }
       return c.json({
         evidence: result.evidence,
-        admin: projectResourcesAdministration(runtime.listActiveCostEvidence()),
+        admin: runtime.resourcesAdministration(),
       });
     },
   );
@@ -123,7 +122,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
       }
       return c.json({
         evidence: result.evidence,
-        admin: projectResourcesAdministration(runtime.listActiveCostEvidence()),
+        admin: runtime.resourcesAdministration(),
       }, 201);
     },
   );

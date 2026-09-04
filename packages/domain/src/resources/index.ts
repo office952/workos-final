@@ -26,6 +26,9 @@ export {
   listCostEvidenceFrom,
   costEvidenceQualifierFieldsFor,
   costEvidenceQualifierIdentity,
+  applyActiveCostEvidenceWrite,
+  sameCostEvidenceSlot,
+  sortActiveCostEvidence,
   parseCostEvidenceWhen,
   resourceAllowsCostEvidenceQualifier,
   ownerConfirmedCostSource,
@@ -73,16 +76,19 @@ export {
   type ResourceRequirement,
 } from "./eic.js";
 export {
+  applyResourcesAdministrationWrite,
   projectResourcesAdministration,
   type MissingRecipeAdminRecord,
   type RecipeAdminRecord,
   type ResourceAdminRecord,
   type ResourceCostProjection,
+  type ResourcesAdministrationWriteStats,
   type ResourcesAdminProjection,
   type ResourceUseProjection,
 } from "./projection.js";
 export {
   listProductTemplateResourceUsages,
+  projectProductTemplateResourceUsage,
   usageForProductTemplate,
   type ProductTemplateResourceUsage,
 } from "./productTemplateUsage.js";

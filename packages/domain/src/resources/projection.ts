@@ -25,6 +25,7 @@ import {
 import { getOperationalProcess } from "../processes/catalog.js";
 import {
   expectedRecipeKindForProcess,
+  getCostRecipe,
   processesMissingRecipe,
   recipeKindLabel,
   recipeLifecycleLabel,
@@ -33,8 +34,10 @@ import {
   type CostRecipe,
   type RecipeKind,
 } from "./recipes.js";
+import { getProductTemplate } from "../product/productRegistry.js";
 import {
   listProductTemplateResourceUsages,
+  projectProductTemplateResourceUsage,
   type ProductTemplateResourceUsage,
 } from "./productTemplateUsage.js";
 import { resourceWhereUsed, type ResourceUse } from "./whereUsed.js";
@@ -158,24 +161,136 @@ export function projectResourcesAdministration(
     laborRecipes: recipesOfKind("LABOR").map((recipe) => toRecipeRecord(recipe, evidenceRows, asOf)),
     missingServiceRecipes: processesMissingRecipe("SERVICE").map(toMissingRecipe),
     missingLaborRecipes: processesMissingRecipe("LABOR").map(toMissingRecipe),
-    costEvidence: evidenceRows.map((item) => {
-      const resource = resourceCatalog.find((entry) => entry.id === item.resourceId);
-      const projected = toCostProjection(item, asOf);
-      return {
-        resourceId: item.resourceId,
-        resourceLabel: resource?.label ?? item.resourceId,
-        kindLabel: resource ? resourceKindLabel(resource.kind) : item.resourceId,
-        evidenceRowId: item.evidenceRowId ?? null,
-        lastChangedAt: item.createdAt ?? null,
-        qualifierIdentity: costEvidenceQualifierIdentity(item.when),
-        qualifierLabel: qualifierLabelFor(item.when),
-        qualifier: qualifierProjection(item.when),
-        usedBy: projectUses(item.resourceId),
-        ...projected,
-      };
-    }),
+    costEvidence: evidenceRows.map((item) => projectCostEvidenceAdminRow(item, asOf)),
     templateUsages: listProductTemplateResourceUsages(evidenceRows, asOf),
     writeState: writable && evidenceRows.length > 0 ? "READY" : "NOT_IMPLEMENTED",
+  };
+}
+
+export type ResourcesAdministrationWriteStats = {
+  costEvidenceRowsRebuilt: number;
+  resourceRecordsRebuilt: number;
+  recipeRecordsRebuilt: number;
+  templateUsagesRebuilt: number;
+};
+
+export function applyResourcesAdministrationWrite(
+  current: ResourcesAdminProjection,
+  nextEvidenceRows: readonly CostEvidence[],
+  mutated: CostEvidence,
+  asOf: string,
+): { admin: ResourcesAdminProjection; stats: ResourcesAdministrationWriteStats } {
+  const resource = getResource(mutated.resourceId);
+  const slot = costEvidenceQualifierIdentity(mutated.when);
+  let costEvidenceRowsRebuilt = 0;
+  const costEvidenceRows = nextEvidenceRows.map((item) => {
+    const identity = costEvidenceQualifierIdentity(item.when);
+    if (item.resourceId === mutated.resourceId && identity === slot) {
+      costEvidenceRowsRebuilt += 1;
+      return projectCostEvidenceAdminRow(item, asOf);
+    }
+    const kept = current.costEvidence.find(
+      (row) => row.resourceId === item.resourceId && row.qualifierIdentity === identity,
+    );
+    return kept ?? projectCostEvidenceAdminRow(item, asOf);
+  });
+
+  let resourceRecordsRebuilt = 0;
+  const rebuildResource = (record: ResourceAdminRecord): ResourceAdminRecord => {
+    if (record.id !== mutated.resourceId || !resource) {
+      return record;
+    }
+    resourceRecordsRebuilt += 1;
+    return toAdminRecord(resource, nextEvidenceRows, asOf);
+  };
+  const materials = current.materials.map(rebuildResource);
+  const services = current.services.map(rebuildResource);
+  const labor = current.labor.map(rebuildResource);
+  const rebuiltResource =
+    materials.find((item) => item.id === mutated.resourceId) ??
+    services.find((item) => item.id === mutated.resourceId) ??
+    labor.find((item) => item.id === mutated.resourceId);
+
+  let recipeRecordsRebuilt = 0;
+  const rebuildRecipe = (record: RecipeAdminRecord): RecipeAdminRecord => {
+    if (record.costEvidenceId !== mutated.resourceId) {
+      return record;
+    }
+    const recipe = getCostRecipe(record.id);
+    if (!recipe) {
+      return record;
+    }
+    recipeRecordsRebuilt += 1;
+    return toRecipeRecord(recipe, nextEvidenceRows, asOf);
+  };
+
+  let templateUsagesRebuilt = 0;
+  const templateUsages = current.templateUsages.map((usage) => {
+    if (!usage.resourceIds.includes(mutated.resourceId)) {
+      return usage;
+    }
+    const template = getProductTemplate(usage.templateCode);
+    if (!template) {
+      return usage;
+    }
+    templateUsagesRebuilt += 1;
+    return projectProductTemplateResourceUsage(template, nextEvidenceRows, asOf);
+  });
+
+  return {
+    admin: {
+      families: current.families.map((family) => {
+        if (!family.specifications.some((item) => item.id === mutated.resourceId)) {
+          return family;
+        }
+        return {
+          ...family,
+          specifications: family.specifications.map((item) =>
+            item.id === mutated.resourceId ? (rebuiltResource ?? item) : item,
+          ),
+        };
+      }),
+      materials,
+      services,
+      labor,
+      serviceRecipes: current.serviceRecipes.map(rebuildRecipe),
+      laborRecipes: current.laborRecipes.map(rebuildRecipe),
+      missingServiceRecipes: current.missingServiceRecipes,
+      missingLaborRecipes: current.missingLaborRecipes,
+      costEvidence: costEvidenceRows,
+      templateUsages,
+      writeState:
+        nextEvidenceRows.length > 0 &&
+        nextEvidenceRows.every((item) => Boolean(item.evidenceRowId))
+          ? "READY"
+          : "NOT_IMPLEMENTED",
+    },
+    stats: {
+      costEvidenceRowsRebuilt,
+      resourceRecordsRebuilt,
+      recipeRecordsRebuilt,
+      templateUsagesRebuilt,
+    },
+  };
+}
+
+function projectCostEvidenceAdminRow(
+  item: CostEvidence,
+  asOf: string,
+): ResourcesAdminProjection["costEvidence"][number] {
+  const resource = resourceCatalog.find((entry) => entry.id === item.resourceId);
+  const projected = toCostProjection(item, asOf);
+  return {
+    resourceId: item.resourceId,
+    resourceLabel: resource?.label ?? item.resourceId,
+    kindLabel: resource ? resourceKindLabel(resource.kind) : item.resourceId,
+    evidenceRowId: item.evidenceRowId ?? null,
+    lastChangedAt: item.createdAt ?? null,
+    qualifierIdentity: costEvidenceQualifierIdentity(item.when),
+    qualifierLabel: qualifierLabelFor(item.when),
+    qualifier: qualifierProjection(item.when),
+    usedBy: projectUses(item.resourceId),
+    ...projected,
   };
 }
 

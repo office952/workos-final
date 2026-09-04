@@ -74,6 +74,47 @@ export function costEvidenceQualifierIdentity(when?: CostEvidenceWhen): string {
   return "unqualified";
 }
 
+function costEvidenceSortKey(evidence: CostEvidence): string {
+  return `${evidence.resourceId}:${evidence.when?.volumeDepthMm ?? ""}`;
+}
+
+export function sameCostEvidenceSlot(left: CostEvidence, right: CostEvidence): boolean {
+  return (
+    left.resourceId === right.resourceId &&
+    costEvidenceQualifierIdentity(left.when) === costEvidenceQualifierIdentity(right.when)
+  );
+}
+
+export function sortActiveCostEvidence(
+  rows: readonly CostEvidence[],
+): CostEvidence[] {
+  const rank = new Map(
+    costEvidence.map((item, index) => [costEvidenceSortKey(item), index]),
+  );
+  return [...rows].sort((left, right) => {
+    const leftRank = rank.get(costEvidenceSortKey(left)) ?? Number.MAX_SAFE_INTEGER;
+    const rightRank = rank.get(costEvidenceSortKey(right)) ?? Number.MAX_SAFE_INTEGER;
+    if (leftRank !== rightRank) {
+      return leftRank - rightRank;
+    }
+    return (left.createdAt ?? "").localeCompare(right.createdAt ?? "");
+  });
+}
+
+export function applyActiveCostEvidenceWrite(
+  current: readonly CostEvidence[],
+  next: CostEvidence,
+  supersededRowId?: string | null,
+): CostEvidence[] {
+  const remaining = current.filter((row) => {
+    if (supersededRowId && row.evidenceRowId === supersededRowId) {
+      return false;
+    }
+    return !sameCostEvidenceSlot(row, next);
+  });
+  return sortActiveCostEvidence([...remaining, next]);
+}
+
 export function costEvidenceQualifierFieldsFor(
   qualifiers: readonly CostEvidenceQualifierKind[] | undefined,
 ): readonly CostEvidenceQualifierField[] {
