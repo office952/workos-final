@@ -25,6 +25,11 @@ import { freezeOrderSnapshot } from "./orderSnapshot.js";
 import { recordQuoteAcceptance } from "./quoteAcceptance.js";
 import {
   freezeQuoteSnapshot,
+  hasValidQuoteSnapshotContentHash,
+  isTrustedFrozenQuoteV2ForOrder,
+  quoteSnapshotContentHash,
+  type FrozenQuoteLine,
+  type FrozenSiteInstallationQuoteLine,
   type QuoteInstallationFreezeInput,
   type QuoteSnapshot,
 } from "./quoteSnapshot.js";
@@ -107,6 +112,7 @@ describe("order snapshot freeze", () => {
     expect(first.snapshot.productionInput.contentHash).toBe(quote.productionInput.contentHash);
     expect(first.snapshot.productionInput.operations).toHaveLength(12);
     expect(first.snapshot.contentHash).toBe(second.snapshot.contentHash);
+    expect(quoteSnapshotContentHash(quote)).toBe(quote.contentHash);
     expect(second.snapshot.createdAt).toBe("2026-08-17T12:00:00.000Z");
     expect(quote.status).toBe("FROZEN");
     expect(JSON.stringify(first.snapshot)).not.toMatch(
@@ -325,6 +331,212 @@ describe("order snapshot freeze", () => {
       }),
     ).toMatchObject({ ok: false, error: "acceptance_mismatch" });
   });
+
+  it("refuses Order v2 when the frozen Quote payload no longer matches its hash", () => {
+    const { quote, acceptance } = frozenAcceptedInstallQuote("INTERNAL");
+    expect(hasValidQuoteSnapshotContentHash(quote)).toBe(true);
+    expect(isTrustedFrozenQuoteV2ForOrder(quote)).toBe(true);
+    const tampered = mapInstallLine(quote, (line) => ({
+      ...line,
+      commercial: { ...line.commercial, netPrice: 1, grossPrice: 1 },
+    }));
+    expect(hasValidQuoteSnapshotContentHash(tampered)).toBe(false);
+    expect(
+      freezeOrderSnapshot(tampered, {
+        ...acceptance,
+        quoteContentHash: tampered.contentHash,
+      }),
+    ).toMatchObject({ ok: false, error: "incompatible_order_source" });
+  });
+
+  it("refuses semantically altered Quote v2 even if the hash is rewritten to match", () => {
+    const { quote } = frozenAcceptedInstallQuote("INTERNAL");
+    const cases: Array<(current: QuoteSnapshot) => QuoteSnapshot> = [
+      (current) =>
+        mapProductLine(current, (line) => ({
+          ...line,
+          commercial: { ...line.commercial, netPrice: 1, grossPrice: 1 },
+        })),
+      (current) =>
+        mapProductLine(current, (line) => ({
+          ...line,
+          eic: { ...line.eic, total: 1 },
+        })),
+      (current) =>
+        mapProductLine(current, (line) => ({
+          ...line,
+          eic: {
+            ...line.eic,
+            lines: line.eic.lines.map((eicLine) => ({ ...eicLine, rate: 1, cost: 1 })),
+          },
+        })),
+      (current) => mapProductLine(current, (line) => ({ ...line, productCode: "PRD-OTHER" })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          commercial: { ...line.commercial, netPrice: 1, grossPrice: 1 },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          eic: { ...line.eic, total: 1 },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          eic: {
+            ...line.eic,
+            lines: line.eic.lines.map((eicLine) => ({ ...eicLine, rate: 1 })),
+          },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          eic: {
+            ...line.eic,
+            lines: line.eic.lines.map((eicLine) => ({ ...eicLine, cost: 1 })),
+          },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          eic: {
+            ...line.eic,
+            lines: line.eic.lines.map((eicLine) => ({
+              ...eicLine,
+              resourceId: "RES-OTHER",
+            })),
+          },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          eic: {
+            ...line.eic,
+            lines: line.eic.lines.map((eicLine) => ({ ...eicLine, quantity: 99 })),
+          },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          providerMode: "SUBCONTRACTED",
+          commercialUnit: "job",
+          quantity: 1,
+        })),
+      (current) => mapInstallLine(current, (line) => ({ ...line, commercialUnit: "job" })),
+      (current) => mapInstallLine(current, (line) => ({ ...line, quantity: 99 })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          technicalConfiguration: {
+            ...line.technicalConfiguration,
+            crewSize: 9,
+          },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          technicalConfiguration: {
+            ...line.technicalConfiguration,
+            plannedDurationHours: 9,
+          },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          evidence: { ...line.evidence, resourceId: "RES-OTHER" },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          evidence: { ...line.evidence, amount: 1 },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          evidence: { ...line.evidence, classification: "ESTIMATED" as never },
+        })),
+      (current) =>
+        mapInstallLine(current, (line) => ({
+          ...line,
+          evidence: { ...line.evidence, perUnit: "job" },
+        })),
+      (current) => ({
+        ...current,
+        jobCommercial: current.jobCommercial
+          ? { ...current.jobCommercial, netPrice: 1 }
+          : undefined,
+      }),
+      (current) => ({
+        ...current,
+        jobCommercial: current.jobCommercial
+          ? { ...current.jobCommercial, vatAmount: 1 }
+          : undefined,
+      }),
+      (current) => ({
+        ...current,
+        jobCommercial: current.jobCommercial
+          ? { ...current.jobCommercial, grossPrice: 1 }
+          : undefined,
+      }),
+    ];
+    for (const mutate of cases) {
+      const rewritten = rehashedQuote(mutate(quote));
+      expect(isTrustedFrozenQuoteV2ForOrder(rewritten)).toBe(false);
+      expect(
+        freezeOrderSnapshot(rewritten, {
+          acceptanceId: `qad:${rewritten.quoteSnapshotId}`,
+          schemaVersion: 1,
+          quoteSnapshotId: rewritten.quoteSnapshotId,
+          quoteContentHash: rewritten.contentHash,
+          acceptedAt: "2026-09-04T01:00:00.000Z",
+        }),
+      ).toMatchObject({ ok: false, error: "incompatible_order_source" });
+    }
+  });
+
+  it("refuses frozen-fact mutations that keep a stale contentHash", () => {
+    const { quote, acceptance } = frozenAcceptedInstallQuote("INTERNAL");
+    const stale = [
+      mapInstallLine(quote, (line) => ({ ...line, sourceRequestId: "req:other" })),
+      mapInstallLine(quote, (line) => ({
+        ...line,
+        technicalConfiguration: {
+          ...line.technicalConfiguration,
+          facadeType: "GLASS",
+        },
+      })),
+      { ...quote, quoteSnapshotId: "qts:other:stale" },
+    ];
+    for (const tampered of stale) {
+      expect(isTrustedFrozenQuoteV2ForOrder(tampered)).toBe(false);
+      expect(
+        freezeOrderSnapshot(tampered, {
+          ...acceptance,
+          quoteSnapshotId: tampered.quoteSnapshotId,
+          quoteContentHash: tampered.contentHash,
+        }),
+      ).toMatchObject({ ok: false, error: "incompatible_order_source" });
+    }
+  });
+
+  it("refuses a subcontract Quote v2 with missing supplier or validity even after rehash", () => {
+    const { quote } = frozenAcceptedInstallQuote("SUBCONTRACTED");
+    const missingSupplier = rehashedQuote(
+      mapInstallLine(quote, (line) => ({
+        ...line,
+        evidence: { ...line.evidence, supplierLabel: "" },
+      })),
+    );
+    const missingValidity = rehashedQuote(
+      mapInstallLine(quote, (line) => ({
+        ...line,
+        evidence: { ...line.evidence, validUntil: "" },
+      })),
+    );
+    expect(isTrustedFrozenQuoteV2ForOrder(missingSupplier)).toBe(false);
+    expect(isTrustedFrozenQuoteV2ForOrder(missingValidity)).toBe(false);
+  });
 });
 
 function frozenAcceptedInstallQuote(mode: "INTERNAL" | "SUBCONTRACTED") {
@@ -470,5 +682,34 @@ function installFreezeInput(
       excludedComponentLabels: [],
     },
     commercial: projectManualFixedServicePrice({ netPrice: 200 }),
+  };
+}
+
+function mapProductLine(
+  quote: QuoteSnapshot,
+  update: (line: Extract<FrozenQuoteLine, { kind: "PRODUCT" }>) => FrozenQuoteLine,
+): QuoteSnapshot {
+  return {
+    ...quote,
+    lines: quote.lines?.map((line) => (line.kind === "PRODUCT" ? update(line) : line)),
+  };
+}
+
+function mapInstallLine(
+  quote: QuoteSnapshot,
+  update: (line: FrozenSiteInstallationQuoteLine) => FrozenQuoteLine,
+): QuoteSnapshot {
+  return {
+    ...quote,
+    lines: quote.lines?.map((line) => (line.kind === "SITE_INSTALLATION" ? update(line) : line)),
+  };
+}
+
+function rehashedQuote(quote: QuoteSnapshot): QuoteSnapshot {
+  const contentHash = quoteSnapshotContentHash(quote);
+  return {
+    ...quote,
+    contentHash,
+    quoteSnapshotId: `qts:${quote.productCode}:${contentHash}`,
   };
 }

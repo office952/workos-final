@@ -411,6 +411,58 @@ export function copyFrozenJobCommercial(
   return { ...jobCommercial };
 }
 
+export function quoteSnapshotHashedPayload(snapshot: QuoteSnapshot): Record<string, unknown> {
+  return {
+    schemaVersion: snapshot.schemaVersion,
+    status: snapshot.status,
+    productCode: snapshot.productCode,
+    productLabel: snapshot.productLabel,
+    inscription: snapshot.inscription,
+    sourceReviewId: snapshot.sourceReviewId,
+    truth: snapshot.truth,
+    quantities: snapshot.quantities,
+    eic: snapshot.eic,
+    productionInput: snapshot.productionInput,
+    commercial: snapshot.commercial,
+    ...(snapshot.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION_V2 &&
+    snapshot.lines &&
+    snapshot.jobCommercial
+      ? { lines: snapshot.lines, jobCommercial: snapshot.jobCommercial }
+      : {}),
+    ...(snapshot.customer ? { customer: snapshot.customer } : {}),
+    ...(snapshot.seller ? { seller: snapshot.seller } : {}),
+  };
+}
+
+export function quoteSnapshotContentHash(snapshot: QuoteSnapshot): string {
+  return sha256Hex(stableStringify(quoteSnapshotHashedPayload(snapshot)));
+}
+
+export function hasValidQuoteSnapshotContentHash(snapshot: QuoteSnapshot): boolean {
+  return (
+    snapshot.contentHash.trim() !== "" &&
+    snapshot.contentHash === quoteSnapshotContentHash(snapshot)
+  );
+}
+
+export function hasValidQuoteSnapshotIdentity(snapshot: QuoteSnapshot): boolean {
+  return (
+    snapshot.quoteSnapshotId ===
+    `qts:${snapshot.productCode}:${snapshot.contentHash}`
+  );
+}
+
+export function isTrustedFrozenQuoteV2ForOrder(snapshot: QuoteSnapshot): boolean {
+  return (
+    snapshot.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION_V2 &&
+    isSupportedQuoteSnapshot(snapshot) &&
+    hasValidQuoteSnapshotContentHash(snapshot) &&
+    hasValidQuoteSnapshotIdentity(snapshot) &&
+    quoteV2ProductLineMirrorsTopLevel(snapshot) &&
+    quoteV2InstallationLineIsCoherent(snapshot)
+  );
+}
+
 export function isSupportedQuoteSnapshot(snapshot: QuoteSnapshot): boolean {
   if (snapshot.status !== "FROZEN") {
     return false;
@@ -647,6 +699,68 @@ function freezeServiceEvidenceProvenance(
     ...(evidence.validFrom ? { validFrom: evidence.validFrom } : {}),
     ...(evidence.validUntil ? { validUntil: evidence.validUntil } : {}),
   };
+}
+
+function quoteV2ProductLineMirrorsTopLevel(snapshot: QuoteSnapshot): boolean {
+  const product = snapshot.lines?.find((line) => line.kind === "PRODUCT");
+  if (!product || product.kind !== "PRODUCT") {
+    return false;
+  }
+  return (
+    product.productCode === snapshot.productCode &&
+    product.label === snapshot.productLabel &&
+    stableStringify(product.eic) === stableStringify(snapshot.eic) &&
+    stableStringify(product.commercial) === stableStringify(snapshot.commercial)
+  );
+}
+
+function quoteV2InstallationLineIsCoherent(snapshot: QuoteSnapshot): boolean {
+  const installation = snapshot.lines?.find((line) => line.kind === "SITE_INSTALLATION");
+  if (!installation || installation.kind !== "SITE_INSTALLATION") {
+    return false;
+  }
+  const facts = installation.technicalConfiguration;
+  const evidence = installation.evidence;
+  const eicTotal = installation.eic.lines.reduce((sum, line) => sum + line.cost, 0);
+  if (installation.eic.total !== eicTotal) {
+    return false;
+  }
+  const matchingLine = installation.eic.lines.find(
+    (line) => line.resourceId === evidence.resourceId,
+  );
+  if (
+    !matchingLine ||
+    matchingLine.quantity !== installation.quantity ||
+    matchingLine.rate !== evidence.amount ||
+    matchingLine.cost !== matchingLine.quantity * matchingLine.rate ||
+    matchingLine.unit !== evidence.perUnit
+  ) {
+    return false;
+  }
+  if (installation.providerMode === "INTERNAL") {
+    const expectedQuantity =
+      (facts.crewSize ?? 0) * (facts.plannedDurationHours ?? 0);
+    return (
+      installation.commercialUnit === "person_hour" &&
+      installation.quantity === expectedQuantity &&
+      expectedQuantity > 0 &&
+      evidence.resourceId === LAB_SITE_INSTALL_ID &&
+      evidence.perUnit === "person_hour" &&
+      evidence.classification === "OWNER_CONFIRMED"
+    );
+  }
+  if (installation.providerMode === "SUBCONTRACTED") {
+    return (
+      installation.commercialUnit === "job" &&
+      installation.quantity === 1 &&
+      evidence.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID &&
+      evidence.perUnit === "job" &&
+      evidence.classification === "OWNER_CONFIRMED" &&
+      Boolean(evidence.supplierLabel?.trim()) &&
+      Boolean(evidence.validUntil?.trim())
+    );
+  }
+  return false;
 }
 
 function isExactQuoteSnapshotV2(snapshot: QuoteSnapshot): boolean {

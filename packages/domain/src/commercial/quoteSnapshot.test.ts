@@ -20,6 +20,7 @@ import {
   PRODUCT_COMMERCIAL_STRATEGY,
   freezeQuoteSnapshot,
   isSupportedQuoteSnapshot,
+  quoteSnapshotContentHash,
 } from "./quoteSnapshot.js";
 import { freezeOrderSnapshot } from "./orderSnapshot.js";
 import { recordQuoteAcceptance } from "./quoteAcceptance.js";
@@ -96,6 +97,7 @@ describe("quote snapshot freeze", () => {
       // Proven equal on origin/main 33c2f9fae4402b152f2840c96cf6da98a1c74a03.
       "35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27",
     );
+    expect(quoteSnapshotContentHash(result.snapshot)).toBe(result.snapshot.contentHash);
     expect(JSON.stringify(result.snapshot)).not.toMatch(
       /ExecutionPlan|ExecutionTask|inventory|actualCost|OrderSnapshot/i,
     );

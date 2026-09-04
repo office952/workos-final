@@ -18,6 +18,7 @@ import {
   copyFrozenJobCommercial,
   copyFrozenQuoteLine,
   isSupportedQuoteSnapshot,
+  isTrustedFrozenQuoteV2ForOrder,
   type FrozenCommercialOffer,
   type FrozenJobCommercial,
   type FrozenQuoteLine,
@@ -156,7 +157,7 @@ function freezeOrderSnapshotV2(
 ): OrderSnapshotResult {
   if (
     quote.schemaVersion !== QUOTE_SNAPSHOT_SCHEMA_VERSION_V2 ||
-    !isSupportedQuoteSnapshot(quote) ||
+    !isTrustedFrozenQuoteV2ForOrder(quote) ||
     !hasCompleteProductOrderSource(quote) ||
     !quote.lines ||
     !quote.jobCommercial
