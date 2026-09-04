@@ -9,6 +9,7 @@ S1_A = STRUCTURAL_BASE_ACCEPTED
 R4_STATUS = PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS_ACCEPTED_WITH_ADVISORIES
 R4A = ACCEPTED
 R5_STATUS = NORTH_STAR_CONTINUITY_IN_REVIEW
+R5A_STATUS = TARGETED_768_IN_REVIEW
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 FIGMA_URL = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
@@ -208,6 +209,11 @@ Personality sources stay on 10 / 20. Connected prototype is clones on 80. Fixtur
 | Lucrare dark | `96:1517` |
 | Exec advanced dark | `96:1576` |
 | Six-up logo/H1/accent off | `99:407` |
+| Ofertă 768 MobileChrome | `105:2` |
+| Config 768 construction parts | `105:6` |
+| Config 768 Înapoi la cerere | `105:15` → `96:1267` |
+| Exec 768 Înapoi la lucrare | `99:4` → `96:1366` |
+| 768 shell comparison | `106:2` |
 
 ## R5 connected verbs (page 80)
 

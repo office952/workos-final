@@ -9,7 +9,8 @@
 | Reduced motion | End-state frames remain readable; MOTION_OFF Ofertă `73:837` / `73:897` |
 | Headings | Object, then current work, then action |
 | Romanian | Diacritics; no poetic meta copy |
-| Overflow / clipping | 768 Meniu chrome kept; Ofertă 768 is a width-adapted 1440 clone and stays dense |
+| Overflow / clipping | 768 compact shell; Ofertă stays dense and wraps the commercial line |
+| 768 menu | Meniu is conceptual open/close. No permanent left nav |
 
 ```text
 FIGMA_MANUAL_MOTION_DEMO_TIMELINES = MAY_LOOP_FOR_RESEARCH_PLAYBACK

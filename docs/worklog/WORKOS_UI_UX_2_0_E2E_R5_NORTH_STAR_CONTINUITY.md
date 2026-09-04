@@ -4,6 +4,7 @@
 PROGRAM = WORKOS_UI_UX_2_0_E2E
 WAVE = UI20_R5_NORTH_STAR_E2E_OBJECT_CONTINUITY
 STATUS = NORTH_STAR_CONTINUITY_IN_REVIEW
+UI20_R5A = TARGETED_768_IN_REVIEW
 UI20_R4 = PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS_ACCEPTED_WITH_ADVISORIES
 UI20_R4A = ACCEPTED
 S1_A = STRUCTURAL_BASE_ACCEPTED
@@ -19,7 +20,7 @@ REACT = HOLD
 MASTER_POLISH = HOLD
 FIGMA_LIBRARY_PUBLISH = NO
 CURSOR_MAY_NOT_OWNER_ACCEPT = YES
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_R5_REVIEW
+NEXT_STEP = CHATGPT_INDEPENDENT_UI20_R5A_REVIEW
 ```
 
 ```text
@@ -84,11 +85,11 @@ Do not manufacture 8.5. Wiring is real. Whether the connected path feels like on
 
 | Criterion | Score | Note |
 | --- | ---: | --- |
-| CROSS_PAGE_CONTINUITY | 8.1 | Same-page NS prototype; object hierarchy holds |
+| CROSS_PAGE_CONTINUITY | 8.2 | Same-page NS prototype; 768 compact shell now matches |
 | WORKOS_SIGNATURE | 8.2 | Family + transformation; not unique if nouns swap |
-| PAGE_PERSONALITY | 8.3 | Instruments not flattened |
+| PAGE_PERSONALITY | 8.3 | Instruments not flattened; Config 768 keeps a part strip |
 | OPERATOR_SPEED | 8.3 | Next action stays local and 44px |
-| NAVIGATION_PLEASURE | 8.1 | Top nav is destination map; journey is not a second nav |
+| NAVIGATION_PLEASURE | 8.2 | Top nav is destination map; 768 uses Meniu, not desktop destinations |
 | GENERIC_SAAS_RISK | 2 | Connected screens, still research |
 | MUSEUM_RISK | 1 | No new motif |
 | DESIGNER_TOOL_RISK | 1 | Bench ≠ CAD; station ≠ HMI |
@@ -96,3 +97,19 @@ Do not manufacture 8.5. Wiring is real. Whether the connected path feels like on
 ## Holds
 
 React, library publish, Master Polish, and Owner accept of final visual direction / IA stay closed.
+
+## R5A — 768 compact shell
+
+Corrected in place. Not a new wave.
+
+| Surface | Node | Shell |
+| --- | --- | --- |
+| Cerere | `96:1267` | Meniu · kept |
+| Config | `96:1285` | Meniu · part strip `105:6` · return `105:15` → `96:1267` |
+| Ofertă | `96:1306` | desktop Destinations hidden · MobileChrome `105:2` |
+| Lucrare | `96:1366` | Meniu · kept |
+| Atelier | `96:1405` | Meniu · kept · row actions 44px |
+| Exec | `96:1431` | Meniu · return `99:4` → `96:1366` |
+| Shell comparison | `106:2` | six compact headers |
+
+Advisory: 768 Ofertă freeze still opens Lucrare (`96:1366`); there is no frozen 768 sibling. Ofertă stays denser than the other instruments. Cerere / Config chrome still say WorkOS; those frames already passed and were not redesigned.
