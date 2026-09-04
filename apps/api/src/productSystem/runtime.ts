@@ -187,6 +187,7 @@ import {
   writeRequestAttachmentBytes,
   attachmentIntegrityMatches,
 } from "../requests/attachmentStorage.js";
+import { createProductSystemPresentationReuse } from "./presentationReuse.js";
 import {
   loadDisplayLabelCatalog,
   updateDisplayLabel,
@@ -439,6 +440,8 @@ export type ProductSystemRuntimeOptions = {
   bindPlaneIdentity?: boolean;
   bootstrapPolicy?: BootstrapPolicy;
   providerRegistry?: WorkcenterRegistry;
+  observeDisplayLabelCatalogLoad?: () => void;
+  observeProductSystemPresentationBuild?: () => void;
 };
 
 export function createProductSystemRuntime(
@@ -513,6 +516,16 @@ export function createProductSystemRuntimeFromOpenDb(
     runtimePeopleEligibilityContext(db, {
       failClosedWhenUnmapped: eligibilityFailClosed,
     });
+  const presentationReuse = createProductSystemPresentationReuse({
+    loadLabels() {
+      options.observeDisplayLabelCatalogLoad?.();
+      return loadDisplayLabelCatalog(db);
+    },
+    present(labels) {
+      options.observeProductSystemPresentationBuild?.();
+      return presentProductSystem(labels);
+    },
+  });
   return {
     sqlitePath,
     documentsRoot,
@@ -523,20 +536,20 @@ export function createProductSystemRuntimeFromOpenDb(
       return currentProviderRegistry();
     },
     providerRegistryKind,
-    labels() {
-      return loadDisplayLabelCatalog(db);
-    },
-    present() {
-      return presentProductSystem(loadDisplayLabelCatalog(db));
-    },
+    labels: presentationReuse.labels,
+    present: presentationReuse.present,
     updateDisplayLabel(entityKind, entityId, displayLabel, expectedRevision) {
-      return updateDisplayLabel(
+      const result = updateDisplayLabel(
         db,
         entityKind,
         entityId,
         displayLabel,
         expectedRevision,
       );
+      if (result.ok) {
+        presentationReuse.invalidate();
+      }
+      return result;
     },
     acceptProductionSnapshot(snapshot) {
       return insertAcceptedProductionSnapshot(db, snapshot);
