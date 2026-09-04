@@ -2,12 +2,13 @@
 
 ```text
 PROGRAM = WORKOS_UI_UX_2_0_E2E
-WAVE = UI20_R4_PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS
+WAVE = UI20_R5_NORTH_STAR_E2E_OBJECT_CONTINUITY
 R3A = ACCEPTED
 R3_SIGNATURE_AMENDMENT = ACCEPTED
 S1_A = STRUCTURAL_BASE_ACCEPTED
 R4_STATUS = PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS_ACCEPTED_WITH_ADVISORIES
 R4A = ACCEPTED
+R5_STATUS = NORTH_STAR_CONTINUITY_IN_REVIEW
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 FIGMA_URL = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
@@ -41,7 +42,7 @@ This table is live-file order, not a documentation-only claim. R4A rechecked and
 
 | PAGE | R3 / R3A CONTENT |
 | --- | --- |
-| 00 — North Star | R3 state `16:2`/`28:2`/`35:120` · R4 direction `73:2` · matrix `73:7` · proof `73:117` |
+| 00 — North Star | R3/R4 kept · R5 decision `96:1775` · journey map `96:1779` only |
 | 01 — Foundations | Density + no-color (R2) |
 | 02 — Core Design System | Candidate primitives `35:123` |
 | 03 — Operational Language | Operational primitives (R2) |
@@ -52,7 +53,7 @@ This table is live-file order, not a documentation-only claim. R4A rechecked and
 | 30 — Resources | R3 ledger · R4 rest/selected `72:1517`/`72:1596` |
 | 40 — People | R4 contracts Utilaje `73:142` · Oameni `73:146` |
 | 50 — Administration | R4 Admin contract `73:150` |
-| 80 — Prototypes | R3 kept · R4 stress `73:161`–`73:897` at y=20000 |
+| 80 — Prototypes | R3/R4 kept · R5 connected North Star at y≥21000 · six-up `99:407` |
 | 90 — Research Transfer | Historical R1 matrix `10:78` + moved R0 leftovers |
 | 99 — Deprecated | Empty |
 
@@ -168,3 +169,60 @@ Phase 1 winner S1-A remains visible. S1-B is hidden.
 | COMPLETE | `72:1311` | `72:1318` | SMART_ANIMATE EASE_IN_AND_OUT | 200 ms |
 
 Video: `docs/worklog/ui20-r4/evidence/enter-work.mp4`, `complete.mp4`.
+
+## R5 North Star connected journey (page 80)
+
+Personality sources stay on 10 / 20. Connected prototype is clones on 80. Fixture: CER-1042 → OFT-221 → LUC-88 · Nord Display SRL.
+
+| ARTIFACT | NODE |
+| --- | --- |
+| R5 decision (page 00) | `96:1775` |
+| R5 journey map (page 00) | `96:1779` |
+| Client context 1440 | `96:767` |
+| Command lineage 1440 | `96:1749` |
+| Cerere missing 1440 | `96:2` |
+| Cerere resolved 1440 | `96:85` |
+| Config Volum 1440 | `96:168` |
+| Config Față 1440 | `96:254` |
+| Ofertă editable 1440 | `96:340` |
+| Ofertă frozen 1440 | `96:400` |
+| Lucrare 1440 | `96:456` |
+| Atelier available 1440 | `96:517` |
+| Atelier in progress 1440 | `96:586` |
+| Exec current 1440 | `96:655` |
+| Exec advanced 1440 | `96:690` |
+| Exec completed 1440 | `96:723` |
+| Cerere 1280 | `96:877` |
+| Config 1280 | `96:960` |
+| Ofertă 1280 | `96:1046` |
+| Lucrare 1280 | `96:1106` |
+| Atelier 1280 | `96:1165` |
+| Exec 1280 | `96:1234` |
+| Cerere 768 | `96:1267` |
+| Config 768 | `96:1285` |
+| Ofertă 768 | `96:1306` |
+| Lucrare 768 | `96:1366` |
+| Atelier 768 | `96:1405` |
+| Exec 768 | `96:1431` |
+| Ofertă frozen dark | `96:1461` |
+| Lucrare dark | `96:1517` |
+| Exec advanced dark | `96:1576` |
+| Six-up logo/H1/accent off | `99:407` |
+
+## R5 connected verbs (page 80)
+
+| Verb | Source | Dest | Transition | Duration |
+| --- | --- | --- | --- | --- |
+| RESOLVE | `96:80` | `96:85` | SMART_ANIMATE EASE_OUT | 180 ms |
+| CERERE → CONFIG | `96:163` | `96:168` | SMART_ANIMATE EASE_OUT | 180 ms |
+| SELECT | `96:202` | `96:254` | SMART_ANIMATE EASE_OUT | 150 ms |
+| CONFIG → OFERTĂ | `96:756` | `96:340` | SMART_ANIMATE EASE_OUT | 180 ms |
+| FREEZE | `96:396` | `96:400` | DISSOLVE EASE_IN | 220 ms |
+| OFERTĂ → LUCRARE | `96:763` | `96:456` | SMART_ANIMATE EASE_OUT | 200 ms |
+| LUCRARE → EXEC | `96:512` | `96:655` | SMART_ANIMATE EASE_OUT | 200 ms |
+| LUCRARE → ATELIER | `96:515` | `96:517` | SMART_ANIMATE EASE_OUT | 200 ms |
+| ENTER_WORK | `96:567` | `96:586` | SMART_ANIMATE EASE_OUT | 200 ms |
+| ATELIER → EXEC | `96:557` | `96:655` | SMART_ANIMATE EASE_OUT | 200 ms |
+| COMPLETE | `96:681` | `96:690` | SMART_ANIMATE EASE_IN_AND_OUT | 200 ms |
+| EXEC ADVANCE | `96:716` | `96:723` | SMART_ANIMATE EASE_IN_AND_OUT | 200 ms |
+| EXEC → LUCRARE | `96:749` | `96:456` | SMART_ANIMATE EASE_OUT | 200 ms |
