@@ -21,10 +21,12 @@ OS_S2_DESIGN               = OWNER_ACCEPTED
 OS_S2_TYPED_FACTS          = IMPLEMENTED_CURRENT / BASIC
 OS_S2_IMPLEMENTATION       = INTEGRATED_ON_MAIN
 OS_S2_TRANSACTION_SAFETY   = CLOSED
-OS_S3                      = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S4                      = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S5                      = IMPLEMENTED_LOCAL_IN_REVIEW
-OS_S6_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
+OS_S3                      = INTEGRATED_ON_MAIN
+OS_S4                      = INTEGRATED_ON_MAIN
+OS_S5                      = INTEGRATED_ON_MAIN
+OS_S6                      = DEFERRED_NO_INVENTION_PENDING_TRANSPORT_QUANTITY_POLICY
+OS_S7                      = INTEGRATED_ON_MAIN
+OS_S8_TO_OS_S11            = NOT_STARTED / NOT_AUTHORIZED
 FIRST_REAL_LETTERS_PREQUOTE_V1 = IMPLEMENTED_LOCAL_IN_REVIEW
 OWNER_ACCEPTED_RUNTIME     = NO
 UI_UX_NAVIGATION_V3_DESIGN = OWNER_ACCEPTED
@@ -382,23 +384,23 @@ Immutable boundaries begin at Quote freeze. Request stays mutable office truth e
 
 ## Implementation program
 
-OS-S1 is implemented on main. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 and later slices still need a separate Owner GO.
+OS-S1 is implemented on main. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3, OS-S4, OS-S5, and OS-S7 are integrated on main. OS-S6 is deferred under no-invention. OS-S8 and later slices still need a separate Owner GO.
 
 | Slice | Purpose | Status |
 | --- | --- | --- |
 | OS-S1 | Org capability, request mode, lock after Quote, remove transport from install reasons, migration-safe missing-config | `IMPLEMENTED_CURRENT / BASIC` |
 | OS-S2 | Typed install facts | `IMPLEMENTED_CURRENT / BASIC` |
-| OS-S3 | Evidence and service EIC | `NOT_STARTED` |
-| OS-S4 | Manual fixed service commercial | `NOT_STARTED` |
-| OS-S5 | Multi-line Quote | `NOT_STARTED` |
-| OS-S6 | Transport capability | `NOT_STARTED` |
-| OS-S7 | Order copies service lines | `NOT_STARTED` |
+| OS-S3 | Evidence and service EIC | `INTEGRATED_ON_MAIN` |
+| OS-S4 | Manual fixed service commercial | `INTEGRATED_ON_MAIN` |
+| OS-S5 | Multi-line Quote | `INTEGRATED_ON_MAIN` |
+| OS-S6 | Transport capability | `DEFERRED_NO_INVENTION` |
+| OS-S7 | Order copies service lines | `INTEGRATED_ON_MAIN` |
 | OS-S8 | Field execution package | `NOT_STARTED` |
 | OS-S9 | Service actuals | `NOT_STARTED` |
 | OS-S10 | Profitability projection | `NOT_STARTED` |
 | OS-S11 | Admin and multi-company readiness | `NOT_STARTED` |
 
-OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented on main. OS-S3 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, CREW_SIZE, PLANNED_DURATION, FIXINGS_CONSUMABLES, SITE_PHOTOS. V3 navigation design is Owner-accepted; implementation is not authorized by this file.
+OS-S1 is implemented on main. It does not invent rates, complete install EIC, add Quote lines, or create teren tasks. Persisted selections and their freeze/link gates stay when org config is missing or later disabled. OS-S2 is implemented on main. OS-S3 through OS-S5 and OS-S7 are integrated on main. OS-S6 remains deferred. OS-S8 and later slices still need a separate Owner GO. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in the integrated pre-quote wave. V3 navigation design is Owner-accepted; this file does not authorize UI implementation.
 
 Every future Owner-facing page for this program requires an old-versus-new UI/UX/code audit before implementation.
 
