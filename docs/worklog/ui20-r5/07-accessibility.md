@@ -6,7 +6,7 @@
 | Focus | Existing ink focus language kept |
 | 44px | Primaries stay 44 high |
 | Color-only | State uses copy + position + structure |
-| Reduced motion | End-state frames remain readable; MOTION_OFF Ofertă `73:837` / `73:897` |
+| Reduced motion | End-state frames remain readable; 768 freeze is DISSOLVE 220 one-shot (`repeat = 0`); MOTION_OFF Ofertă `73:837` / `73:897` |
 | Headings | Object, then current work, then action |
 | Romanian | Diacritics; no poetic meta copy |
 | Overflow / clipping | 768 compact shell; Ofertă stays dense and wraps the commercial line |

@@ -7,7 +7,8 @@ ObjectRegister stays. IDs are not peers.
 | Client | Nord Display SRL | CER-1042 is the open work | relationship, not the job |
 | Cerere | CER-1042 | client name secondary | clarification |
 | Configurator | CER-1042 | same customer | clarification → construction |
-| Ofertă | OFT-221 | din CER-1042 | construction → commercial artifact |
+| Ofertă editable | OFT-221 | din CER-1042 | construction → commercial artifact |
+| Ofertă frozen | OFT-221 | din CER-1042 · freeze ≠ acceptance | mutable → immutable artifact |
 | Lucrare | LUC-88 | OFT-221 → CER-1042 compressed | commercial → production traveler |
 | Atelier | LUC-88 | CER-1042 on the row | traveler → inbox |
 | Execuție | LUC-88 | commercial dossier secondary | inbox → station |

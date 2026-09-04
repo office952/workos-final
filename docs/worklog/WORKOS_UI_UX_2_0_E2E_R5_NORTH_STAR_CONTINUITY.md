@@ -20,15 +20,16 @@ REACT = HOLD
 MASTER_POLISH = HOLD
 FIGMA_LIBRARY_PUBLISH = NO
 CURSOR_MAY_NOT_OWNER_ACCEPT = YES
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_R5A_REVIEW
+NEXT_STEP = CHATGPT_FINAL_UI20_R5_CLOSE_REVIEW
 ```
 
 ```text
 ROADMAP_READ = YES
 UI_UX_CANON_READ = YES
 OWNER_CHARACTER_DIRECTIVE_READ = YES
-ATELIER_CANON_READ = YES
+QUOTE_SNAPSHOT_CANON_READ = YES
 ORDER_SNAPSHOT_CANON_READ = YES
+ATELIER_CANON_READ = YES
 EXECUTION_PLAN_CANON_READ = YES
 DIRECTION_CONFLICT = NO
 ```
@@ -85,7 +86,7 @@ Do not manufacture 8.5. Wiring is real. Whether the connected path feels like on
 
 | Criterion | Score | Note |
 | --- | ---: | --- |
-| CROSS_PAGE_CONTINUITY | 8.2 | Same-page NS prototype; 768 compact shell now matches |
+| CROSS_PAGE_CONTINUITY | 8.3 | Same-page NS prototype; 768 now has the immutable OFT-221 beat |
 | WORKOS_SIGNATURE | 8.2 | Family + transformation; not unique if nouns swap |
 | PAGE_PERSONALITY | 8.3 | Instruments not flattened; Config 768 keeps a part strip |
 | OPERATOR_SPEED | 8.3 | Next action stays local and 44px |
@@ -106,10 +107,47 @@ Corrected in place. Not a new wave.
 | --- | --- | --- |
 | Cerere | `96:1267` | Meniu · kept |
 | Config | `96:1285` | Meniu · part strip `105:6` · return `105:15` → `96:1267` |
-| Ofertă | `96:1306` | desktop Destinations hidden · MobileChrome `105:2` |
+| Ofertă editable | `96:1306` | desktop Destinations hidden · MobileChrome `105:2` |
+| Ofertă frozen | `112:2` | same compact shell · no edit controls · `112:62` → `96:1366` |
 | Lucrare | `96:1366` | Meniu · kept |
 | Atelier | `96:1405` | Meniu · kept · row actions 44px |
 | Exec | `96:1431` | Meniu · return `99:4` → `96:1366` |
 | Shell comparison | `106:2` | six compact headers |
 
-Advisory: 768 Ofertă freeze still opens Lucrare (`96:1366`); there is no frozen 768 sibling. Ofertă stays denser than the other instruments. Cerere / Config chrome still say WorkOS; those frames already passed and were not redesigned.
+768 freeze path (live): `96:1362` Îngheață oferta → `112:2` DISSOLVE EASE_IN 220 ms. Then `112:62` Deschide lucrarea → `96:1366` SMART_ANIMATE EASE_OUT 200 ms. `DIRECT_FREEZE_TO_LUCRARE = NO`.
+
+```text
+QUOTE_FREEZE != ACCEPTANCE
+ACCEPTANCE != ORDER
+FREEZE does not create Lucrare
+```
+
+The synthetic fixture already represents acceptance and Order as quiet provenance on the frozen artifact (`Acceptată. Identitatea trece la LUC-88. OFT-221 rămâne proveniență.`). That is not an `Acceptă oferta` action and not a claim that freeze writes Lucrare.
+
+Advisory: Ofertă stays denser than the other instruments. Cerere / Config chrome still say WorkOS; those frames already passed and were not redesigned. LineHead `Valoare` overflow is inherited 768 density, not a new frozen motif. 1280 leftover remains live: `96:1102` Îngheață oferta → `96:1106` Lucrare 1280; there is no frozen 1280 sibling. This write does not invent one. Atelier 768 (`96:1405`) still has no incoming prototype wire; Lucrare 768 primary goes to Exec.
+
+Evidence: `docs/worklog/ui20-r5/evidence/oferta-frozen-768.png`.
+
+## Post-write independent reviews
+
+Specialist lanes inspected the live file after the 768 write. They did not receive the writer's expected answer.
+
+| Lane | Verdict | Scope |
+| --- | --- | --- |
+| Domain | BLOCKER | 768 path separates freeze / acceptance / Order. Leftover 1280 `96:1102` → `96:1106` still collapses freeze into Lucrare. |
+| Figma | ADVISORY | Frozen 768 keeps commercial-artifact personality. 1280 leftover noted as out of the authorized 768 path. |
+| Responsive / a11y | ADVISORY | editable → frozen → Lucrare usable at 768. Inherited Valoare clip + Destinations leftover. |
+| Continuity | ADVISORY | 768 object continuity holds. Atelier 768 stays off the click path. |
+
+```text
+SPECIALIST_DISAGREEMENTS =
+  DOMAIN_BLOCKER_ON_1280_FREEZE_TO_LUCRARE
+  vs
+  AUTHORIZED_WRITE_768_ONLY
+SYNTHESIS = DO_NOT_EXPAND_THIS_WRITE
+DIRECT_FREEZE_TO_LUCRARE_768 = NO
+QUOTE_FREEZE_ACCEPTANCE_SEPARATION_768 = PASS
+1280_FREEZE_TO_LUCRARE = LEFTOVER_FOR_CHATGPT_CLOSE_REVIEW
+```
+
+Domain canon still forbids freeze creating Lucrare. The Owner GO authorized one 768 sibling, not a 1280 redesign. The leftover is recorded, not averaged away.

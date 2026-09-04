@@ -7,6 +7,7 @@ Top nav remains the destination map. Journey position is not a second global nav
 | Config → Cerere | Înapoi la cerere | resolved CER-1042 | object + known/missing |
 | Config 768 → Cerere 768 | `105:15` | `96:1267` | resolved CER-1042 · Dimensiuni confirmate |
 | Exec → Lucrare | Înapoi la lucrare | LUC-88 | traveler position |
+| Frozen Ofertă 768 → Lucrare 768 | `112:62` | `96:1366` | OFT-221 stays provenance · LUC-88 opens because fixture already has downstream facts |
 | Exec 768 → Lucrare 768 | `99:4` | `96:1366` | LUC-88 traveler |
 | Atelier → Exec → Lucrare | Continuă / back | station then traveler | LUC-88 |
 

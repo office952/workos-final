@@ -4,7 +4,7 @@ Cursor estimates after the connected prototype. Not Owner truth. Do not manufact
 
 | Criterion | Score | Note |
 | --- | ---: | --- |
-| CROSS_PAGE_CONTINUITY | 8.2 | One-page NS prototype; 768 shell now coherent |
+| CROSS_PAGE_CONTINUITY | 8.3 | One-page NS prototype; 768 freeze no longer skips OFT-221 immutable |
 | PAGE_PERSONALITY | 8.3 | Six instruments remain classifiable |
 | WORKOS_SIGNATURE | 8.2 | Object + transformation; noun-swap still partly works |
 | OPERATOR_SPEED | 8.3 | Next action local |
@@ -18,9 +18,11 @@ Six-up `99:407` (wordmark / H1 / accent off): instruments stay classifiable and 
 
 North Star character test: the path is one fixture through dedicated instruments, not six unrelated SaaS pages. It is not yet a finished product OS. Independent review decides.
 
+Post-write independent reviews of the 768 freeze sibling: Domain BLOCKER on leftover 1280 `96:1102` → `96:1106`; Figma / a11y / continuity ADVISORY. Synthesis does not expand this write into a 1280 frozen sibling.
+
 ```text
 G_POST_R5A = LEADING_DIRECTION / NOT_OWNER_ACCEPTED
 IA3_POST_R5A = LEADING_DIRECTION / NOT_OWNER_ACCEPTED
-CURSOR_RECOMMENDATION = HOLD_FOR_INDEPENDENT_R5A_REVIEW
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_R5A_REVIEW
+CURSOR_RECOMMENDATION = HOLD_FOR_CHATGPT_FINAL_UI20_R5_CLOSE_REVIEW
+NEXT_STEP = CHATGPT_FINAL_UI20_R5_CLOSE_REVIEW
 ```
