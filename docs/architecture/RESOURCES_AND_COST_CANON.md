@@ -131,7 +131,7 @@ A saved Admin rate is `OWNER_CONFIRMED` for new calculations. Frozen Quote, Acce
 
 ## Administration
 
-`/admin` → Resurse și cost intern inspects materials, services, labor and cost evidence. Dovezi de cost can save a new amount and note, and can create an initial row for a declared typed qualifier such as volume depth. Resource identity, unit, currency and an existing row's qualifier are not editable here. Bootstrap does not insert missing qualifier rows into an already-marked database.
+`/admin/resources` is the Owner workspace for materials, services, labor and internal rates. Costuri interne is the primary rate registry. Resurse inspects the inventory. Rețete lists service and labor recipes. The Owner creates or supersedes a rate from Adaugă tarif / Editează tarif. Resource identity, unit, currency and an existing row's qualifier are not editable here. Bootstrap does not insert missing qualifier rows into an already-marked database.
 
 Where-used is derived from live type resolution and product composition.
 `/products` does not administer the catalog.
