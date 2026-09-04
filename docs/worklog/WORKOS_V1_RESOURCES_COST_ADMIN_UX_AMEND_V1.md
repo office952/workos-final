@@ -35,4 +35,6 @@ Figma family: `RESOURCES_AND_COSTS_V3_FLAT_OWNER_WORKSPACE` in live file `1ev5lg
 - 768 light `204:7806`
 No library publish.
 
+Follow-up before merge: ProductTemplate context filter. Record: `docs/worklog/WORKOS_V1_RESOURCES_COST_PRODUCT_CONTEXT_V1.md`.
+
 Next step: Independent ChatGPT + Owner runtime review. Do not merge.
