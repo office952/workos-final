@@ -5,8 +5,8 @@ This document is normative for **how UI may evolve**. It is not a frozen mockup,
 
 ```text
 AUTHORITY                         = ACTIVE_UI_UX_DIRECTION
-SOURCE_OF_THIS_REVISION           = OWNER_ACCEPTED_V3_STABLE_NAVIGATION
-PREVIOUS_REVISION_SOURCE          = FIRST_HF_LOT_OWNER_ACCEPTED_PLUS_READINESS_CONTRACTS
+SOURCE_OF_THIS_REVISION           = OWNER_UI20_E2E_RESET
+PREVIOUS_REVISION_SOURCE          = OWNER_ACCEPTED_V3_STABLE_NAVIGATION
 EVIDENCE_PACK                     = docs/worklog/WORKOS_FULL_OLD_NEW_UI_UX_AUDIT_V1.md
 IA_ACCEPTANCE                     = docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md
 HF_LOT_ACCEPTANCE                 = docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md
@@ -34,8 +34,12 @@ UI_V3_PAGE_CONTENT_TRANSFORMATION  = COMPLETE
 ALL_EXISTING_PAGES_UI_V3           = INTEGRATED_ON_MAIN
 ALL_EXISTING_PAGES_UI_V3_RUNTIME   = OWNER_ACCEPTED
 UI_V3_GENERAL_FINALIZATION         = COMPLETE
-UI_GENERAL_REDESIGN                = CLOSED_FOR_V1
-UI_POLISH_MODE                     = INCREMENTAL
+UI_GENERAL_REDESIGN                = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_POLISH_MODE                     = SUPERSEDED_BY_UI20_REFOUNDATION
+UI20_PROGRAM                       = OWNER_AUTHORIZED_REFOUNDATION
+UI20_CURRENT_VISUAL_DIRECTION      = NOT_SELECTED
+UI20_CURRENT_IA                    = NOT_SELECTED
+UI20_IMPLEMENTATION                = NOT_AUTHORIZED
 CLIENTS_V3                         = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION            = OWNER_ACCEPTED
 CLIENTS_RUNTIME                    = OWNER_ACCEPTED
@@ -53,7 +57,7 @@ CERERI_INTEGRATED_ON_MAIN          = YES
 REQUESTS_INTEGRATED_ON_MAIN        = YES
 FIRST_REAL_LETTERS_PREQUOTE_V1     = IMPLEMENTED_LOCAL_IN_REVIEW
 OWNER_ACCEPTED_RUNTIME             = YES
-NEXT_PROGRAM_PRIORITY              = PRODUCT_DEVELOPMENT
+NEXT_PROGRAM_PRIORITY              = WORKOS_UI_UX_2_0_E2E
 CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = WAVE_1_FOUNDATION
 THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
@@ -61,7 +65,7 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
-On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. Future UI work is incremental polish only. Next program priority is `PRODUCT_DEVELOPMENT`.
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure (`UI_GENERAL_REDESIGN = CLOSED_FOR_V1`) remains historical evidence. Living Owner direction is now `WORKOS_UI_UX_2_0_E2E`: clean-sheet experience research, domain/backend/product truth preserved, implementation not authorized.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. The implemented shell is the V3 stable sidebar on main. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
@@ -133,6 +137,28 @@ Still unselected:
 - mobile rewrite
 
 Wave 1 of first-lot UI implementation now shows Level 1 `Catalog` and stable `/jobs/:jobId` plus `/quotes/:quoteSnapshotId` routes. Full first-lot visual implementation is not complete. See `docs/architecture/UI_UX_FOUNDATION_CANON.md` and `docs/worklog/WORKOS_FIRST_HF_LOT_UI_IMPLEMENTATION_WAVE_1_V1.md`.
+
+## OWNER RESET — UI20 E2E
+
+Recorded 2026-09-04. Newer than the V3 “incremental polish only” closure. Does not rewrite historical Owner acceptance of V3, Clients, Client Hub, Cereri, first HF lot, or Architecture C.
+
+```text
+OWNER_DECISION                     = UI20_E2E_CLEAN_SHEET_UX
+NEXT_PROGRAM_PRIORITY              = WORKOS_UI_UX_2_0_E2E
+UI_GENERAL_REDESIGN                = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_GENERAL_REDESIGN_V1_HISTORICAL  = CLOSED_FOR_V1
+UI20_CURRENT_VISUAL_DIRECTION      = NOT_SELECTED
+UI20_CURRENT_IA                    = NOT_SELECTED
+UI20_IMPLEMENTATION                = NOT_AUTHORIZED
+PRODUCT_SYSTEM_FC1B                = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
+A3_1                               = RESEARCH_INPUT_NOT_CANON
+OS_S8                              = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
+MACHINES_FC2                       = HOLD
+NEW_FIGMA_FILE_KEY                 = 0XP0yGa1siWQdTTL7ou8xz
+HISTORICAL_FIGMA_FILE_KEY          = 1ev5lg7m2Ze1h3Vqmax8ho
+```
+
+The implemented runtime remains the V3 sidebar and accepted page contracts until a later implementation GO. UI20 may explore alternative IA and visual systems. It must not invent domain states. Agents must not resume UI-FC1B React from older flags.
 
 ## ACCEPTED OWNER V3 NAVIGATION
 
@@ -669,8 +695,8 @@ UI_V3_PAGE_CONTENT_TRANSFORMATION = COMPLETE
 ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN
 ALL_EXISTING_PAGES_UI_V3_RUNTIME = OWNER_ACCEPTED
 UI_V3_GENERAL_FINALIZATION = COMPLETE
-UI_GENERAL_REDESIGN = CLOSED_FOR_V1
-UI_POLISH_MODE = INCREMENTAL
+UI_GENERAL_REDESIGN = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_POLISH_MODE = SUPERSEDED_BY_UI20_REFOUNDATION
 CLIENTS_V3                 = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION    = OWNER_ACCEPTED
 CLIENTS_RUNTIME            = OWNER_ACCEPTED
@@ -686,7 +712,7 @@ REQUESTS_RUNTIME           = OWNER_ACCEPTED
 CERERI_RUNTIME             = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN  = YES
 REQUESTS_INTEGRATED_ON_MAIN = YES
-NEXT_PROGRAM_PRIORITY      = PRODUCT_DEVELOPMENT
+NEXT_PROGRAM_PRIORITY      = WORKOS_UI_UX_2_0_E2E
 ```
 
 `OWNER_VISUAL_ACCEPTANCE` for the first lot is closed. It is not the closed IA gate and it is not a scoped UI implementation GO.

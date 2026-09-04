@@ -104,8 +104,8 @@ UI_V3_PAGE_CONTENT_TRANSFORMATION    = COMPLETE
 ALL_EXISTING_PAGES_UI_V3             = INTEGRATED_ON_MAIN
 ALL_EXISTING_PAGES_UI_V3_RUNTIME     = OWNER_ACCEPTED
 UI_V3_GENERAL_FINALIZATION           = COMPLETE
-UI_GENERAL_REDESIGN                  = CLOSED_FOR_V1
-UI_POLISH_MODE                       = INCREMENTAL
+UI_GENERAL_REDESIGN                  = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_POLISH_MODE                       = SUPERSEDED_BY_UI20_REFOUNDATION
 LEGACY_PAGE_COUNT                    = 0
 NOT_REVIEWED_UI_PAGE_COUNT           = 0
 CLIENTS_V3                           = INTEGRATED_ON_MAIN
@@ -127,9 +127,14 @@ CERERI_INTEGRATED_ON_MAIN            = YES
 REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
-NEXT_PROGRAM_PRIORITY                = WORKOS_UI_UX_FINAL_CLOSURE_V1
-NEXT_RECOMMENDED_BUILD               = UI_FC1_PRODUCT_SYSTEM_DESIGN
-OS_S8                                = HOLD_UNTIL_UI_UX_FINAL_CLOSURE
+NEXT_PROGRAM_PRIORITY                = WORKOS_UI_UX_2_0_E2E
+NEXT_RECOMMENDED_BUILD               = UI20_R1_DEEP_RESEARCH_AND_SYSTEM_DIRECTION
+UI20_PROGRAM                         = OWNER_AUTHORIZED_REFOUNDATION
+PRODUCT_SYSTEM_FC1B                  = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
+UI20_CURRENT_VISUAL_DIRECTION        = NOT_SELECTED
+UI20_CURRENT_IA                      = NOT_SELECTED
+UI20_IMPLEMENTATION                  = NOT_AUTHORIZED
+OS_S8                                = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 UI_V3_BASELINE                       = HISTORICALLY_COMPLETE
 UI_PAGE_BY_PAGE_FINAL_CLOSURE        = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
 UI_FIGMA_RUNTIME_RECONCILIATION      = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
@@ -308,8 +313,8 @@ UI_V3_PAGE_CONTENT_TRANSFORMATION = COMPLETE
 ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN
 ALL_EXISTING_PAGES_UI_V3_RUNTIME = OWNER_ACCEPTED
 UI_V3_GENERAL_FINALIZATION = COMPLETE
-UI_GENERAL_REDESIGN = CLOSED_FOR_V1
-UI_POLISH_MODE = INCREMENTAL
+UI_GENERAL_REDESIGN = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_POLISH_MODE = SUPERSEDED_BY_UI20_REFOUNDATION
 LEGACY_PAGE_COUNT = 0
 NOT_REVIEWED_UI_PAGE_COUNT = 0
 CLIENTS_V3 = INTEGRATED_ON_MAIN
@@ -327,9 +332,14 @@ REQUESTS_RUNTIME = OWNER_ACCEPTED
 CERERI_RUNTIME = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN = YES
 REQUESTS_INTEGRATED_ON_MAIN = YES
-NEXT_PROGRAM_PRIORITY = WORKOS_UI_UX_FINAL_CLOSURE_V1
-NEXT_RECOMMENDED_BUILD = UI_FC1_PRODUCT_SYSTEM_DESIGN
-OS_S8 = HOLD_UNTIL_UI_UX_FINAL_CLOSURE
+NEXT_PROGRAM_PRIORITY = WORKOS_UI_UX_2_0_E2E
+NEXT_RECOMMENDED_BUILD = UI20_R1_DEEP_RESEARCH_AND_SYSTEM_DIRECTION
+UI20_PROGRAM = OWNER_AUTHORIZED_REFOUNDATION
+PRODUCT_SYSTEM_FC1B = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
+UI20_CURRENT_VISUAL_DIRECTION = NOT_SELECTED
+UI20_CURRENT_IA = NOT_SELECTED
+UI20_IMPLEMENTATION = NOT_AUTHORIZED
+OS_S8 = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 UI_V3_BASELINE = HISTORICALLY_COMPLETE
 UI_PAGE_BY_PAGE_FINAL_CLOSURE = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
 UI_FIGMA_RUNTIME_RECONCILIATION = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
@@ -440,7 +450,7 @@ Step 8 configured the recovered HUB MEDIA organization with the existing seller,
 
 Step 9 is `BLOCKED_BEFORE_QUOTE` because a live first-job quote is still unauthorized. The pre-quote wave OS-S3 + OS-S4 + OS-S5 is `INTEGRATED_ON_MAIN` at implementation SHA `5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. Integration does not authorize a live quote, a live Cerere PATCH, OS-S6, Architecture C UI Wave 2, or invented Batch 1 products. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
 
-Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport is deferred under no-invention. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted. OS-S8 remains `HOLD_UNTIL_UI_UX_FINAL_CLOSURE`. The next living program is `WORKOS_UI_UX_FINAL_CLOSURE_V1`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. Page-by-page final closure and Figma/runtime reconciliation are `FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING`. The next recommended build is `UI_FC1_PRODUCT_SYSTEM_DESIGN`. This file does not authorize Product System React implementation, Oferte V3, Lucrări V3, OS-S8 implementation, or a live first-job quote.
+Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport is deferred under no-invention. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted. OS-S8 remains `HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. FC1 Product System design research remains historical. Product System React (`UI-FC1B`) is `SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION`. The next living program is `WORKOS_UI_UX_2_0_E2E`. The next recommended build is `UI20_R1_DEEP_RESEARCH_AND_SYSTEM_DIRECTION`. This file does not authorize Product System React implementation, Oferte V3, Lucrări V3, OS-S8 implementation, or a live first-job quote.
 
 ## Operational Services program
 
@@ -465,8 +475,8 @@ UI_V3_PAGE_CONTENT_TRANSFORMATION        = COMPLETE
 ALL_EXISTING_PAGES_UI_V3                 = INTEGRATED_ON_MAIN
 ALL_EXISTING_PAGES_UI_V3_RUNTIME         = OWNER_ACCEPTED
 UI_V3_GENERAL_FINALIZATION               = COMPLETE
-UI_GENERAL_REDESIGN                      = CLOSED_FOR_V1
-UI_POLISH_MODE                           = INCREMENTAL
+UI_GENERAL_REDESIGN                      = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_POLISH_MODE                           = SUPERSEDED_BY_UI20_REFOUNDATION
 LEGACY_PAGE_COUNT                        = 0
 NOT_REVIEWED_UI_PAGE_COUNT               = 0
 CLIENTS_V3                               = INTEGRATED_ON_MAIN
@@ -484,9 +494,14 @@ REQUESTS_RUNTIME                         = OWNER_ACCEPTED
 CERERI_RUNTIME                           = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN                = YES
 REQUESTS_INTEGRATED_ON_MAIN              = YES
-NEXT_PROGRAM_PRIORITY                    = WORKOS_UI_UX_FINAL_CLOSURE_V1
-NEXT_RECOMMENDED_BUILD                   = UI_FC1_PRODUCT_SYSTEM_DESIGN
-OS_S8                                    = HOLD_UNTIL_UI_UX_FINAL_CLOSURE
+NEXT_PROGRAM_PRIORITY                    = WORKOS_UI_UX_2_0_E2E
+NEXT_RECOMMENDED_BUILD                   = UI20_R1_DEEP_RESEARCH_AND_SYSTEM_DIRECTION
+UI20_PROGRAM                             = OWNER_AUTHORIZED_REFOUNDATION
+PRODUCT_SYSTEM_FC1B                      = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
+UI20_CURRENT_VISUAL_DIRECTION            = NOT_SELECTED
+UI20_CURRENT_IA                          = NOT_SELECTED
+UI20_IMPLEMENTATION                      = NOT_AUTHORIZED
+OS_S8                                    = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 UI_V3_BASELINE                           = HISTORICALLY_COMPLETE
 UI_PAGE_BY_PAGE_FINAL_CLOSURE            = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
 UI_FIGMA_RUNTIME_RECONCILIATION          = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
@@ -539,7 +554,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, and PDF stay disabled. Order v2 copies a valid frozen Quote v2 only when a matching acceptance decision is already present; the live acceptance route remains refused. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport is deferred under no-invention until EUR_PER_TRIP versus EUR_PER_KM is selected. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted at `49948e16a2b1c90e28c787b4c8305b9ece278ace`. Live v2 freeze, acceptance, PDF, and Production Release stay refused. OS-S8 remains `HOLD_UNTIL_UI_UX_FINAL_CLOSURE`. The next living program is `WORKOS_UI_UX_FINAL_CLOSURE_V1`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. Page-by-page final closure and Figma/runtime reconciliation are `FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING`. The next recommended build is `UI_FC1_PRODUCT_SYSTEM_DESIGN`. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, OS-S8 implementation, Product System React implementation, or another PERF slice. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. PERF_1, PERF_2, and PERF_3 are `INTEGRATED_ON_MAIN`. No further PERF slice is currently defined. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, and PDF stay disabled. Order v2 copies a valid frozen Quote v2 only when a matching acceptance decision is already present; the live acceptance route remains refused. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport is deferred under no-invention until EUR_PER_TRIP versus EUR_PER_KM is selected. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted at `49948e16a2b1c90e28c787b4c8305b9ece278ace`. Live v2 freeze, acceptance, PDF, and Production Release stay refused. OS-S8 remains `HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE`. The next living program is `WORKOS_UI_UX_2_0_E2E`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. FC1 Product System design remains historical research. Product System React is `SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION`. The next recommended build is `UI20_R1_DEEP_RESEARCH_AND_SYSTEM_DIRECTION`. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, OS-S8 implementation, Product System React implementation, or another PERF slice. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. PERF_1, PERF_2, and PERF_3 are `INTEGRATED_ON_MAIN`. No further PERF slice is currently defined. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 
@@ -652,6 +667,31 @@ PONTAJ / PLĂȚI INTERNE / FURNIZORI / ACHIZIȚII / RAPOARTE
 ```
 
 Those destinations stay on the accepted V3 map. They are not eliminated from the product. They may stay deferred or optional. This file does not authorize building them. Rapoarte stay a shortcut on Acasă, not a new menu page. Internal leave/absence (`OUT-EMP-REQUESTS`) maps to Oameni → Angajați, not Comercial → Cereri.
+
+## WorkOS UI/UX 2.0 E2E
+
+Owner-authorized experience refoundation. Not a domain/backend rebuild. Not Product System React.
+
+```text
+UI20_PROGRAM                      = OWNER_AUTHORIZED_REFOUNDATION
+NEXT_PROGRAM_PRIORITY             = WORKOS_UI_UX_2_0_E2E
+NEXT_RECOMMENDED_BUILD            = UI20_R1_DEEP_RESEARCH_AND_SYSTEM_DIRECTION
+UI_GENERAL_REDESIGN_FOR_V1        = CLOSED_FOR_V1
+UI_GENERAL_REDESIGN_LIVING        = REOPENED_BY_OWNER_FOR_UI20_E2E
+PRODUCT_SYSTEM_FC1B               = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
+A3_1                              = RESEARCH_INPUT_NOT_CANON
+UI20_CURRENT_VISUAL_DIRECTION     = NOT_SELECTED
+UI20_CURRENT_IA                   = NOT_SELECTED
+UI20_IMPLEMENTATION               = NOT_AUTHORIZED
+OS_S8                             = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
+MACHINES_FC2                      = HOLD
+NEW_FIGMA                         = 0XP0yGa1siWQdTTL7ou8xz
+HISTORICAL_FIGMA                  = 1ev5lg7m2Ze1h3Vqmax8ho
+```
+
+`UI_GENERAL_REDESIGN = CLOSED_FOR_V1` remains the historical V3 closure. Living direction is the Owner UI20 reset. FC0/FC1 records stay evidence. Agents must not resume UI-FC1B React from older flags.
+
+Research record: `docs/worklog/WORKOS_UI_UX_2_0_E2E_R0_REFOUNDATION.md` and `docs/worklog/WORKOS_UI_UX_2_0_E2E_R1_DEEP_RESEARCH.md`.
 
 ## Update policy
 
