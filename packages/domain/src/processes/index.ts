@@ -54,6 +54,8 @@ export {
 } from "./catalog.js";
 export {
   LIGHTING_CALCULATION_READINESS,
+  applyCompositionCostCompleteness,
+  composeProductProcessTopology,
   composeProductProcesses,
   composeProductProcessesFromTruth,
   composeTypeProcessNodes,

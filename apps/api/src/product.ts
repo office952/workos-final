@@ -1,8 +1,9 @@
 import {
-  compileAggregate,
+  compileAcceptedProductEvaluation,
   compileDefinition,
-  compileEic,
-  compileExecutionPlanPreview,
+  noteListActiveCostEvidence,
+  noteRuntimeLabels,
+  noteRuntimePresent,
   freezeOrderSnapshot,
   freezeQuoteSnapshot,
   projectQuoteDocument,
@@ -17,8 +18,8 @@ import {
   scopeQuoteSnapshot,
   recordQuoteAcceptance,
   composeProductProcesses,
-  composeProductProcessesFromTruth,
   confirmReviewedDefinition,
+  projectExecutionPlanPreview,
   assertOrderReleaseReadyForExecution,
   freezeAcceptedProductionSnapshot,
   freezeProductionReleaseFromOrder,
@@ -251,10 +252,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       })(),
       jobCommercial: access === "workshop" ? null : jobCommercial,
       executionPlanPreview: scopeExecutionPlanPreview(
-        compileExecutionPlanPreview(
+        projectExecutionPlanPreview(
           compiled.truth,
           compiled.aggregate,
-          compiled.template,
+          compiled.composition,
           compiled.eic,
         ),
         access,
@@ -789,6 +790,7 @@ function compileAcceptedProduct(
   productCode: string,
   body: unknown,
 ) {
+  noteRuntimePresent();
   const presented = runtime.present();
   const template = presented.template(productCode);
   const formSchema = presented.formSchema(productCode);
@@ -814,27 +816,18 @@ function compileAcceptedProduct(
     };
   }
 
-  const aggregate = compileAggregate(
-    confirmed,
+  noteRuntimeLabels();
+  noteListActiveCostEvidence();
+  const compiled = compileAcceptedProductEvaluation({
+    truth: confirmed,
     template,
     formSchema,
-    runtime.labels(),
-  );
-  const costEvidenceRows = runtime.listActiveCostEvidence();
-  const composition = composeProductProcessesFromTruth(
-    confirmed,
-    template,
-    costEvidenceRows,
-  );
-  const eic = compileEic(aggregate, composition, costEvidenceRows);
+    labels: runtime.labels(),
+    costEvidenceRows: runtime.listActiveCostEvidence(),
+  });
   return {
     ok: true as const,
-    template,
-    truth: confirmed,
-    aggregate,
-    composition,
-    eic,
-    costEvidenceRows,
+    ...compiled,
   };
 }
 

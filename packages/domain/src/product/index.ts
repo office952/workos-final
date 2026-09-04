@@ -31,13 +31,28 @@ export {
 } from "./displayMetadata.js";
 export { presentProductSystem } from "./productSystemPresentation.js";
 export {
+  compileAcceptedProductEvaluation,
+  type AcceptedProductEvaluation,
+} from "./acceptedEvaluation.js";
+export {
   compileAggregate,
   compileDefinition,
   confirmReviewedDefinition,
   definitionReviewId,
   isFieldVisible,
   selectedComponentIds,
+  type CompileAggregateOptions,
 } from "./compiler.js";
+export {
+  noteCompileEic,
+  noteEvaluateProductComponents,
+  noteListActiveCostEvidence,
+  noteRuntimeLabels,
+  noteRuntimePresent,
+  runWithProductEvaluationTrace,
+  runWithProductEvaluationTraceAsync,
+  type ProductEvaluationTrace,
+} from "./evaluationTrace.js";
 export {
   collectComponentMeasurements,
   evaluateProductComponents,

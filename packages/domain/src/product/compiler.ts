@@ -1,6 +1,7 @@
 import {
   collectComponentMeasurements,
   evaluateProductComponents,
+  type ComponentEvaluation,
 } from "./componentEvaluation.js";
 import type { DisplayLabelCatalog } from "./displayMetadata.js";
 import type {
@@ -213,11 +214,16 @@ function optionLabel(schema: FormSchema, fieldId: string, value: DraftValue): st
   return field.options.find((option) => option.value === value)?.label ?? value;
 }
 
+export type CompileAggregateOptions = {
+  readonly evaluations?: readonly ComponentEvaluation[];
+};
+
 export function compileAggregate(
   truth: ProductTruth,
   template: ProductTemplate,
   schema: FormSchema,
   labels: DisplayLabelCatalog,
+  options: CompileAggregateOptions = {},
 ): ProductAggregate {
   const inscription =
     typeof truth.values["root.inscription"] === "string"
@@ -259,12 +265,14 @@ export function compileAggregate(
       }),
   ];
 
-  const calculations = evaluateProductComponents({
-    template,
-    selectedComponentIds: truth.selectedComponentIds,
-    values: truth.values,
-    measurements: truth.measurements,
-  });
+  const calculations =
+    options.evaluations ??
+    evaluateProductComponents({
+      template,
+      selectedComponentIds: truth.selectedComponentIds,
+      values: truth.values,
+      measurements: truth.measurements,
+    });
 
   return {
     derivedFrom: "ProductTruth",

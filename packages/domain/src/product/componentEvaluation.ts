@@ -3,6 +3,7 @@ import type {
   SharedCalculationContext,
 } from "./componentContract.js";
 import { getComponentContract } from "./componentRegistry.js";
+import { noteEvaluateProductComponents } from "./evaluationTrace.js";
 import { listTypeTechnicalSettings } from "./technicalSettings.js";
 import type {
   DraftValues,
@@ -34,6 +35,7 @@ export function evaluateProductComponents(input: {
   values: DraftValues;
   measurements: readonly TechnicalMeasurement[];
 }): readonly ComponentEvaluation[] {
+  noteEvaluateProductComponents();
   return input.template.components
     .filter((component) => input.selectedComponentIds.includes(component.id))
     .map((component) => ({

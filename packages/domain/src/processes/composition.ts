@@ -23,7 +23,7 @@ import type {
   ProductTruth,
   TechnicalMeasurement,
 } from "../product/types.js";
-import { compileEic, costCompletenessLabel } from "../resources/eic.js";
+import { compileEic, costCompletenessLabel, type EicResult } from "../resources/eic.js";
 import type { CostEvidence } from "../resources/catalog.js";
 import {
   APPLY_SURFACE_FINISH_ID,
@@ -174,76 +174,39 @@ export function composeTypeProcessNodes(
   );
 }
 
-export function composeProductProcesses(
+export function composeProductProcessTopology(
   template: ProductTemplate,
   values: DraftValues,
   options: ProcessCompositionOptions = {},
 ): ProductProcessComposition {
-  const merged: DraftValues = { ...template.fixedValues, ...values };
-  const selectedIds = selectedComponentIds(template, merged);
-  const measurements =
-    options.measurements ??
-    collectComponentMeasurements(template, selectedIds, merged);
-  const evaluations =
-    options.evaluations ??
-    evaluateProductComponents({
-      template,
-      selectedComponentIds: selectedIds,
-      values: merged,
-      measurements,
-    });
-  const lightingResult = lightingEvaluationFrom(evaluations);
-  const selectedComponents = template.components.filter((component) =>
-    selectedIds.includes(component.id),
-  );
-  const nodes = selectedComponents.flatMap((component) =>
-    composeTypeProcessNodes(
-      component.id as ComponentRole,
-      component.typeId,
-      merged,
-      lightingResult,
-    ),
-  );
-  const withProduct = addProductComposition(
-    nodes,
-    selectedComponents.map((item) => item.typeId),
-    lightingResult,
-  );
-  const connected = applyProductDependencies(withProduct);
-  const derivedOrder = topologicalOrder(connected);
-  const missingProcesses = missingProcessesFor();
-  const { completeness, completenessReasons, technological } =
-    compositionCompleteness(connected, missingProcesses);
-  const composition: ProductProcessComposition = {
-    productCode: template.code,
-    productLabel: template.label,
-    completeness,
-    completenessLabel: completenessLabel(completeness),
-    completenessReasons,
-    technologicalProcessCompleteness: technological,
-    technologicalProcessCompletenessLabel: completenessLabel(technological),
-    lightingCalculationReadiness: lightingReadinessFrom(lightingResult),
-    lightingCalculationReadinessLabel: lightingReadinessLabel(
-      lightingReadinessFrom(lightingResult),
-    ),
-    costCompleteness: "PARTIAL",
-    costCompletenessLabel: costCompletenessLabel("PARTIAL"),
-    executionReadiness: "NOT_IMPLEMENTED",
-    executionReadinessLabel: "Neimplementat",
-    nodes: sortNodes(connected),
-    derivedOrder,
-    missingProcesses,
-  };
-  const eic = compileEic(
-    costAggregateFromEvaluations(template, merged, evaluations),
-    composition,
-    options.costEvidenceRows,
-  );
+  const resolved = resolveProcessCompositionInputs(template, values, options);
+  return composeProductProcessTopologyFromResolved(template, resolved);
+}
+
+export function applyCompositionCostCompleteness(
+  composition: ProductProcessComposition,
+  eic: Pick<EicResult, "completeness">,
+): ProductProcessComposition {
   return {
     ...composition,
     costCompleteness: eic.completeness,
     costCompletenessLabel: costCompletenessLabel(eic.completeness),
   };
+}
+
+export function composeProductProcesses(
+  template: ProductTemplate,
+  values: DraftValues,
+  options: ProcessCompositionOptions = {},
+): ProductProcessComposition {
+  const resolved = resolveProcessCompositionInputs(template, values, options);
+  const topology = composeProductProcessTopologyFromResolved(template, resolved);
+  const eic = compileEic(
+    costAggregateFromEvaluations(template, resolved.merged, resolved.evaluations),
+    topology,
+    options.costEvidenceRows,
+  );
+  return applyCompositionCostCompleteness(topology, eic);
 }
 
 export function composeProductProcessesFromTruth(
@@ -265,6 +228,81 @@ export function composeProductProcessesFromTruth(
     evaluations,
     costEvidenceRows,
   });
+}
+
+type ResolvedProcessCompositionInputs = {
+  merged: DraftValues;
+  selectedIds: readonly string[];
+  evaluations: readonly ComponentEvaluation[];
+};
+
+function resolveProcessCompositionInputs(
+  template: ProductTemplate,
+  values: DraftValues,
+  options: ProcessCompositionOptions,
+): ResolvedProcessCompositionInputs {
+  const merged: DraftValues = { ...template.fixedValues, ...values };
+  const selectedIds = selectedComponentIds(template, merged);
+  const measurements =
+    options.measurements ??
+    collectComponentMeasurements(template, selectedIds, merged);
+  const evaluations =
+    options.evaluations ??
+    evaluateProductComponents({
+      template,
+      selectedComponentIds: selectedIds,
+      values: merged,
+      measurements,
+    });
+  return { merged, selectedIds, evaluations };
+}
+
+function composeProductProcessTopologyFromResolved(
+  template: ProductTemplate,
+  resolved: ResolvedProcessCompositionInputs,
+): ProductProcessComposition {
+  const lightingResult = lightingEvaluationFrom(resolved.evaluations);
+  const selectedComponents = template.components.filter((component) =>
+    resolved.selectedIds.includes(component.id),
+  );
+  const nodes = selectedComponents.flatMap((component) =>
+    composeTypeProcessNodes(
+      component.id as ComponentRole,
+      component.typeId,
+      resolved.merged,
+      lightingResult,
+    ),
+  );
+  const withProduct = addProductComposition(
+    nodes,
+    selectedComponents.map((item) => item.typeId),
+    lightingResult,
+  );
+  const connected = applyProductDependencies(withProduct);
+  const derivedOrder = topologicalOrder(connected);
+  const missingProcesses = missingProcessesFor();
+  const { completeness, completenessReasons, technological } =
+    compositionCompleteness(connected, missingProcesses);
+  return {
+    productCode: template.code,
+    productLabel: template.label,
+    completeness,
+    completenessLabel: completenessLabel(completeness),
+    completenessReasons,
+    technologicalProcessCompleteness: technological,
+    technologicalProcessCompletenessLabel: completenessLabel(technological),
+    lightingCalculationReadiness: lightingReadinessFrom(lightingResult),
+    lightingCalculationReadinessLabel: lightingReadinessLabel(
+      lightingReadinessFrom(lightingResult),
+    ),
+    costCompleteness: "PARTIAL",
+    costCompletenessLabel: costCompletenessLabel("PARTIAL"),
+    executionReadiness: "NOT_IMPLEMENTED",
+    executionReadinessLabel: "Neimplementat",
+    nodes: sortNodes(connected),
+    derivedOrder,
+    missingProcesses,
+  };
 }
 
 function costAggregateFromEvaluations(

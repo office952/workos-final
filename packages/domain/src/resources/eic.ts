@@ -1,4 +1,5 @@
 import type { ProductProcessComposition } from "../processes/composition.js";
+import { noteCompileEic } from "../product/evaluationTrace.js";
 import type { ProductAggregate } from "../product/types.js";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
@@ -101,6 +102,7 @@ export function compileEic(
   composition?: ProductProcessComposition,
   evidenceRows: readonly CostEvidence[] = costEvidence,
 ): EicResult {
+  noteCompileEic();
   const requirements = resourceRequirements(aggregate, composition);
   const missingEvidenceReasons: string[] = [];
   const lines: EicLine[] = [];
