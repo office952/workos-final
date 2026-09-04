@@ -8,7 +8,7 @@ Law: Meniu + object identity + current work + next action.
 
 No desktop-long relation lines. No command palette as only navigation. No tiny technical type. Primary controls minHeight 44.
 
-Atelier 768 is the current-operator inbox, not a dispatch card. Evidence: `evidence/r3a-atelier-768.png`.
+Atelier 768 is the current-operator inbox, not a dispatch card. Ready work has an explicit 44px **Pornește**. Evidence: `evidence/r3b-atelier-768.png`.
 
 ## Light / Dark
 

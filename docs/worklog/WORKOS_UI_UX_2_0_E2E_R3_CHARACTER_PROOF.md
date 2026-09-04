@@ -4,7 +4,8 @@
 PROGRAM = WORKOS_UI_UX_2_0_E2E
 WAVE = UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF
 STATUS = CHARACTER_PROOF_IN_REVIEW
-R3A = TARGETED_AMENDMENT_COMPLETE
+R3A = ACCEPTED
+R3_SIGNATURE_AMENDMENT = COMPLETE
 UI20_R2 = RESEARCH_ACCEPTED_WITH_ADVISORIES
 UI20_LEADING_VISUAL_HYPOTHESIS = G_LIVING_FABRICATION_INSTRUMENT
 UI20_LEADING_IA_HYPOTHESIS = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
@@ -25,7 +26,7 @@ OS_S8 = HOLD
 UI_CODE_WRITE = NO
 FIGMA_LIBRARY_PUBLISH = NO
 CURSOR_MAY_NOT_OWNER_ACCEPT = YES
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_R3A_REVIEW
+NEXT_STEP = CHATGPT_INDEPENDENT_UI20_R3_SIGNATURE_REVIEW
 ```
 
 ```text
@@ -47,6 +48,7 @@ R3_BRANCH = design/ui20-r3-character-proof
 R3_BASE_HEAD = 58bd8279fedfdf549d0e68c884a369768b9ab282
 R3_PR = 15
 R3_HEAD_BEFORE_R3A = f07a31f3ca73fbd5ffc34aba21ee89bd311b05d1
+R3_HEAD_BEFORE_SIGNATURE = d36168689c326848b2620b81be88b7446268206c
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 ```
@@ -79,6 +81,30 @@ Independent R3 review required a targeted amendment. R3 did not fail as a charac
 4. Stress tests were written as if they had passed; R3 had not produced controlled evidence.
 5. Actual Figma page order differed from `FRAMES.md`.
 6. WorkOS signature improved but stayed below the research 8.5 bar. R3A refined G1 only. No H.
+
+R3A is accepted for those closures. Signature remains the open character question.
+
+## R3 targeted signature amendment
+
+Not a new research wave. Not H. Two Phase 1 candidates on Cerere + Atelier only, then one winner propagated.
+
+| Candidate | DNA | Result |
+| --- | --- | --- |
+| S1-A | Object register (mono work-object ID) + one work surface (no inspector rail) | Winner |
+| S1-B | Alignment jig + exception incision only | Hidden. Still reads as inspector+canvas / selected-row SaaS |
+
+S1-A wins because LOGO_OFF and TITLE_OFF still show the same family: the work object is the first structural fact, the surface is one sheet, the next action stays a 44px ink control. S1-B does not beat generic B2B ops chrome once the wordmark and H1 are gone.
+
+Selected rules (only these two):
+
+1. **Object register** — current work object is IBM Plex Mono in the identity strip (`CER-1042` / `OFT-221` / `LUC-88`). Chrome 3px brand bars are off. Page title is not the hero.
+2. **One work surface** — Cerere no longer uses a redundant inspector rail. Configurator keeps the construction stack (that is the bench). Atelier stays an inbox list. Actions stay 44px ink.
+
+768 Atelier: `Pornește` is now an explicit 44px control. Canon says that row is startable. Decision A, not invented behavior.
+
+S1-B frames on page 80 are hidden. Current nodes stay the R3A IDs, structurally amended.
+
+Evidence: `docs/worklog/ui20-r3/evidence/r3b-*.png`.
 
 ## Proof screens
 
@@ -118,7 +144,7 @@ Removed: “Alege un operator eligibil sau amână montajul.”, “Dispecerizar
 
 Kept: one scan list (not a three-column dashboard), quiet normal rows, local blocker, disclaimer *Ordinea de afișare nu reprezintă programare sau prioritate de producție.*, lead **Munca mea**.
 
-Evidence: `docs/worklog/ui20-r3/evidence/r3a-atelier-1440.png`, `r3a-atelier-768.png`.
+Evidence: `docs/worklog/ui20-r3/evidence/r3b-atelier-1440.png`, `r3b-atelier-768.png`. R3A inbox canon is unchanged.
 
 ## Dark — real compositions
 
@@ -136,21 +162,26 @@ Command search is `Caută în WorkOS…` with `Ctrl+K / ⌘K`. Frozen Ofertă st
 
 Carry the six-page family in **G1 Calm Precision**. Keep G2 as a local-energy reference around current work only. Do not create H. Do not Owner-accept G or IA-3. Do not implement React.
 
-Independent Cursor WORKOS_SIGNATURE estimate after R3A: **7.6**. Not 8.5. Not Owner truth. The identity edge, inbox model, and operational copy raise recognizability; they do not yet make the family automatic without the wordmark.
+Independent Cursor estimates after the signature amendment, not Owner truth:
 
-## Stress / speed — factual evidence
+- WORKOS_SIGNATURE_STRUCTURAL ≈ **7.9** — object register + one work surface survive logo/title/container-off better than R3A.
+- WORKOS_SIGNATURE_BRAND_DEPENDENT remains material — Romanian fabrication nouns, destination words, Ofertă serif still carry a lot of recognition.
+- Not 8.5. Signature is not closed.
 
-R3 docs previously described these as if they had passed. That was too strong. R3A created controlled clones on page 80 and scored only what was inspected.
+Generic-SaaS test (replace wordmark and nouns): a polished B2B operations product could still own these screenshots. **GENERIC_SAAS_RISK = 3**. Not ≤ 2.
+
+## Stress / speed — factual evidence after signature amendment
+
+Inspected exported clones, not token names.
 
 | Test | Status | Evidence | Note |
 | --- | --- | --- | --- |
-| LOGO_OFF | PASS | `49:2` · `r3a-cerere-logo-off.png` | Cerere still reads as a clarification sheet: known/missing, local block, object id. |
-| TITLE_OFF | PASS | `49:324` · `r3a-atelier-title-off.png` | Atelier still reads as the current-operator inbox via lanes and actions. `MUNCA MEA` hidden. |
-| GRAYSCALE | PASS | `49:624` · `r3a-resurse-grayscale.png` | Resurse clone has 0 chromatic fills. Ledger columns and selected material identity survive. |
-| MOTION_OFF | PASS | `49:704` / `49:764` · live + frozen PNGs | Freeze remains a structural state without animation: controls retreat, Înghețată, no edit. |
-| ANONYMITY | PASS | judged from LOGO_OFF | Distinguishable as this instrument family, not a CRM. Residual generic industrial-SaaS risk remains. |
-| CONTAINER_OFF | NOT_TESTED | — | No controlled containerless variant was built. |
-| ROMANIAN_LENGTH | PASS | 1440 + 768 proofs | Long verbs wrap. |
+| LOGO_OFF | PASS | `59:2` / `59:450` · `r3b-cerere-logo-off.png` · `r3b-atelier-logo-off.png` | Register + instrument floorplan remain. |
+| TITLE_OFF | PASS | `59:85` / `59:519` · `r3b-*-title-off.png` | Cerere known/missing + dock. Atelier lanes + LUC-88. |
+| GRAYSCALE | PASS | `59:168` / `59:588` / `59:726` · `r3b-*-grayscale.png` | Structure survives without chroma. |
+| CONTAINER_OFF | PASS | `59:251` / `59:657` · `r3b-*-container-off.png` | Sheet/list remain without wells. |
+| MOTION_OFF | PASS | `59:334` / `59:394` | Freeze still structural. |
+| ROMANIAN_LENGTH | PASS | 1440 + 768 | Long verbs wrap. |
 | FABRICATION_AUTHENTICITY | PASS | fixture-safe LETTERS facts | No invented stock, selling price, or named machine. |
 
 Additional stress clones exist (`49:86` Cerere TITLE_OFF, `49:170` Cerere GRAYSCALE, Atelier LOGO_OFF/GRAYSCALE, Resurse LOGO_OFF/TITLE_OFF). They were created for completeness. Scores above use the inspected representative set required by R3A.
@@ -172,4 +203,4 @@ Re-checked after the Atelier correction:
 
 ## Pack
 
-`docs/worklog/ui20-r3/` plus evidence under `docs/worklog/ui20-r3/evidence/`. R3A files are prefixed `r3a-`.
+`docs/worklog/ui20-r3/` plus evidence under `docs/worklog/ui20-r3/evidence/`. R3A files are prefixed `r3a-`. Signature-amendment files are prefixed `r3b-`.

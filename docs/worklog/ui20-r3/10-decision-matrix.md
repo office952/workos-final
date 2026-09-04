@@ -10,7 +10,7 @@ Scores 1–10 unless noted. Lower is better on risk rows.
 
 | Criterion | G1 | G2 | Notes |
 | --- | --- | ---: | --- |
-| WORKOS_SIGNATURE | 7.6 | 7.8 | Family clearer after identity edge + inbox canon. Still not automatic 8.5 |
+| WORKOS_SIGNATURE | 7.9 | 7.8 | Structural register helps. Still not 8.5. Brand-dependent recognition remains |
 | FIRST_3_SECONDS | 8.4 | 8.1 | G1 quieter parse; Atelier now reads as my work |
 | NAVIGATION_PLEASURE | 8.3 | 8.1 | IA-3 chrome is calm |
 | OPERATOR_SPEED | 8.5 | 8.0 | G2 extra chroma |
@@ -28,7 +28,7 @@ Scores 1–10 unless noted. Lower is better on risk rows.
 | LIGHT_DARK | PASS | — | R3 dark FAIL; R3A dark rebuilt and readable |
 | ACCESSIBILITY | 8.1 | 7.6 | 44px; dark contrast rebuilt |
 | IMPLEMENTATION_REALISM | 7.5 | 7.3 | Figma only; plausible |
-| GENERIC_SAAS_RISK | 2 | 2 | Target ≤ 2. Residual industrial-SaaS anonymity remains |
+| GENERIC_SAAS_RISK | 3 | 3 | After logo+noun swap these still could be another ops SaaS. Not ≤ 2 |
 | MUSEUM_RISK | 2 | 3 | G2 heat |
 | DESIGNER_TOOL_RISK | 2 | 3 | G2 geometry |
 
@@ -44,8 +44,8 @@ Do not average a winner. Cursor recommendation: G1 for the family. Not Owner-acc
 
 Research target, not automatic acceptance:
 
-- WORKOS_SIGNATURE: G1 7.6 — below 8.5. Do not game the score.
-- GENERIC_SAAS_RISK: 2 — meets, with residual anonymity
+- WORKOS_SIGNATURE structural: G1 7.9 — below 8.5. Do not game the score.
+- GENERIC_SAAS_RISK: 3 — does not meet ≤ 2
 - MUSEUM_RISK G1: 2 — meets; G2: 3 — miss if chosen as default
 - DESIGNER_TOOL_RISK G1: 2 — meets
 - FABRICATION_AUTHENTICITY: 8.2 — meets

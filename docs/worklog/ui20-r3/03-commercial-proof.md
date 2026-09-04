@@ -4,7 +4,9 @@
 
 Node `29:2` (G1), comparison `30:2` (G2), 768 `34:2`.
 
-Shows object identity, client, known construction, missing geometry/inscription/depth, one blocker, next valid action, journey, supporting context.
+Shows object identity, client, known construction, missing geometry/inscription/depth, one blocker, next valid action, journey.
+
+R3 signature amendment: the redundant left inspector rail is hidden. `CER-1042` is the object register (IBM Plex Mono). Clarification is the full work surface.
 
 Not a form stack. Not a status dashboard.
 

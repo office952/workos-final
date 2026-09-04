@@ -3,7 +3,8 @@
 ```text
 PROGRAM = WORKOS_UI_UX_2_0_E2E
 WAVE = UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF
-R3A = TARGETED_AMENDMENT_COMPLETE
+R3A = ACCEPTED
+R3_SIGNATURE_AMENDMENT = COMPLETE
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 FIGMA_URL = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
@@ -48,7 +49,7 @@ Independent R3 Plugin API had `40` before `20`/`30` and `99` before `90`. The li
 | 30 — Resources | Ledger + 768 |
 | 40 — People | Empty of R3 HF |
 | 50 — Administration | Empty of R3 HF |
-| 80 — Prototypes | IA-3 + Command `35:29` + flows `35:51` + R3A stress clones |
+| 80 — Prototypes | IA-3 + Command `35:29` + flows `35:51` + R3A stress + R3 signature Phase 1 / PROP clones |
 | 90 — Research Transfer | Historical R1 matrix `10:78` + moved R0 leftovers |
 | 99 — Deprecated | Empty |
 
@@ -89,6 +90,26 @@ Independent R3 Plugin API had `40` before `20`/`30` and `99` before `90`. The li
 | RESURSE GRAYSCALE | `49:624` |
 | OFERTA MOTION_OFF live | `49:704` |
 | OFERTA MOTION_OFF frozen | `49:764` |
+
+## R3 signature amendment (page 80)
+
+Phase 1 winner S1-A remains visible. S1-B is hidden.
+
+| ARTIFACT | NODE |
+| --- | --- |
+| S1-A Cerere | `56:2` |
+| S1-A Atelier | `56:168` |
+| PROP Cerere LOGO_OFF | `59:2` |
+| PROP Cerere TITLE_OFF | `59:85` |
+| PROP Cerere GRAYSCALE | `59:168` |
+| PROP Cerere CONTAINER_OFF | `59:251` |
+| PROP Ofertă MOTION_OFF live | `59:334` |
+| PROP Ofertă MOTION_OFF frozen | `59:394` |
+| PROP Atelier LOGO_OFF | `59:450` |
+| PROP Atelier TITLE_OFF | `59:519` |
+| PROP Atelier GRAYSCALE | `59:588` |
+| PROP Atelier CONTAINER_OFF | `59:657` |
+| PROP Resurse GRAYSCALE | `59:726` |
 
 ## Research systems (unchanged IDs)
 

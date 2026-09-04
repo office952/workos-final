@@ -25,7 +25,9 @@ Blocked Montare LED uses the canonical local cause: **Necesită utilaj dedicat**
 
 Disclaimer: *Ordinea de afișare nu reprezintă programare sau prioritate de producție.*
 
-Lead: **Munca mea**. One scan list. Not a three-column dashboard. Not a manager staffing screen.
+Lead destination remains **Munca mea** (mute). The object register is **LUC-88** (IBM Plex Mono), with lineage `CER-1042 · Cant aluminiu · în lucru`. Row status ticks are off. One scan list. Not a three-column dashboard. Not a manager staffing screen.
+
+768: ready work is an explicit 44px **Pornește** control, not “Debitare CNC față · Pornește” as a text line. Current work keeps **Continuă**.
 
 Normal rows stay quiet. The local block is the only raised energy (G2 borrowed only there).
 
