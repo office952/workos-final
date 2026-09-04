@@ -43,6 +43,7 @@ test("resources admin is a flat rate workspace, not a catalog cascade", async ({
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/admin/resources");
   await expect(page.getByRole("heading", { name: "Resurse și costuri" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Costuri interne" })).toBeVisible();
   await page.screenshot({
     path: `${EVIDENCE_DIR}/01-costuri-interne-1440-light.png`,
     fullPage: true,
@@ -62,6 +63,7 @@ test("resources admin is a flat rate workspace, not a catalog cascade", async ({
   await expect(page.getByRole("button", { name: "Adaugă tarif" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Alege elementul" })).toHaveCount(0);
   await expect(page.getByText("16,00 EUR / m²").first()).toBeVisible();
+  await expect(page.getByRole("table", { name: "Costuri interne" })).toBeVisible();
   await page.screenshot({
     path: `${EVIDENCE_DIR}/03-costuri-interne-768-light.png`,
     fullPage: true,
@@ -71,6 +73,7 @@ test("resources admin is a flat rate workspace, not a catalog cascade", async ({
   await setTheme(page, "Întunecată");
   await page.goto("/admin/resources");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("table", { name: "Costuri interne" })).toBeVisible();
   await page.screenshot({
     path: `${EVIDENCE_DIR}/04-costuri-interne-1440-dark.png`,
     fullPage: true,
