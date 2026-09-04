@@ -452,6 +452,7 @@ export type ProductSystemRuntimeOptions = {
   observeResourcesAdministrationDelta?: (
     stats: ResourcesAdministrationWriteStats,
   ) => void;
+  now?: () => string;
 };
 
 export function createProductSystemRuntime(
@@ -541,10 +542,11 @@ export function createProductSystemRuntimeFromOpenDb(
       options.observeActiveCostEvidenceLoad?.();
       return readActiveCostEvidence(db);
     },
-    project(rows) {
+    project(rows, asOf) {
       options.observeResourcesAdministrationBuild?.();
-      return projectResourcesAdministration(rows);
+      return projectResourcesAdministration(rows, asOf);
     },
+    now: options.now,
     observeDelta: options.observeResourcesAdministrationDelta,
   });
   return {

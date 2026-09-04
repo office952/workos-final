@@ -7,6 +7,7 @@ import {
   ALUMINIUM_RETURN_PROFILE_ID,
   CANONICAL_PRODUCT_CODE,
   PLEXIGLAS_3MM_OPAL_ID,
+  projectResourcesAdministration,
   runWithProductEvaluationTraceAsync,
   type ResourcesAdministrationWriteStats,
 } from "@workos-final/domain";
@@ -57,7 +58,10 @@ async function readBody(response: Response): Promise<JsonObject> {
   return (await response.json()) as JsonObject;
 }
 
-function countedRuntime(sqlitePath = ":memory:") {
+function countedRuntime(
+  sqlitePath = ":memory:",
+  extras: { now?: () => string } = {},
+) {
   const counts = {
     labelLoads: 0,
     presentationBuilds: 0,
@@ -66,6 +70,7 @@ function countedRuntime(sqlitePath = ":memory:") {
     deltas: [] as ResourcesAdministrationWriteStats[],
   };
   const runtime = createProductSystemRuntime(sqlitePath, {
+    now: extras.now,
     observeDisplayLabelCatalogLoad() {
       counts.labelLoads += 1;
     },
@@ -182,7 +187,8 @@ describe("resources administration reuse helper", () => {
         counts.loads += 1;
         return rows;
       },
-      project(evidence) {
+      project(evidence, asOf) {
+        void asOf;
         counts.builds += 1;
         return {
           families: [],
@@ -221,6 +227,98 @@ describe("resources administration reuse helper", () => {
     });
     expect(reuse.admin()).toBe(reuse.admin());
     expect(counts).toEqual({ loads: 1, builds: 1, deltas: 0 });
+  });
+
+  it("rebuilds admin from cached evidence when the UTC calendar date rolls over", () => {
+    const counts = { loads: 0, builds: 0 };
+    let now = "2026-09-04T23:59:00.000Z";
+    const rows = [
+      {
+        resourceId: PLEXIGLAS_3MM_OPAL_ID,
+        amount: 16,
+        currency: "EUR" as const,
+        perUnit: "m2" as const,
+        source: "OWNER_CONFIRMED_PURCHASE" as const,
+        classification: "OWNER_CONFIRMED" as const,
+        note: "seed",
+        validUntil: "2026-09-04",
+        evidenceRowId: "cev:plexi-until",
+        createdAt: "2026-08-18T00:00:00.000Z",
+      },
+    ];
+    const reuse = createResourcesAdministrationReuse({
+      loadEvidence() {
+        counts.loads += 1;
+        return rows;
+      },
+      project(evidence, asOf) {
+        counts.builds += 1;
+        return projectResourcesAdministration(evidence, asOf);
+      },
+      now: () => now,
+    });
+
+    const before = reuse.admin();
+    expect(
+      before.costEvidence.find((item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID)
+        ?.validityState,
+    ).toBe("current");
+    expect(counts).toEqual({ loads: 1, builds: 1 });
+
+    now = "2026-09-05T00:01:00.000Z";
+    const after = reuse.admin();
+    expect(
+      after.costEvidence.find((item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID)
+        ?.validityState,
+    ).toBe("expired");
+    expect(counts).toEqual({ loads: 1, builds: 2 });
+    expect(reuse.admin()).toBe(after);
+    expect(counts).toEqual({ loads: 1, builds: 2 });
+  });
+
+  it("treats a validFrom boundary as current only after the UTC date rolls over", () => {
+    const counts = { loads: 0, builds: 0 };
+    let now = "2026-09-04T23:59:00.000Z";
+    const rows = [
+      {
+        resourceId: PLEXIGLAS_3MM_OPAL_ID,
+        amount: 16,
+        currency: "EUR" as const,
+        perUnit: "m2" as const,
+        source: "OWNER_CONFIRMED_PURCHASE" as const,
+        classification: "OWNER_CONFIRMED" as const,
+        note: "seed",
+        validFrom: "2026-09-05",
+        evidenceRowId: "cev:plexi-from",
+        createdAt: "2026-08-18T00:00:00.000Z",
+      },
+    ];
+    const reuse = createResourcesAdministrationReuse({
+      loadEvidence() {
+        counts.loads += 1;
+        return rows;
+      },
+      project(evidence, asOf) {
+        counts.builds += 1;
+        return projectResourcesAdministration(evidence, asOf);
+      },
+      now: () => now,
+    });
+
+    const before = reuse.admin();
+    const lettersBefore = before.templateUsages.find(
+      (item) => item.templateCode === CANONICAL_PRODUCT_CODE,
+    );
+    expect(lettersBefore?.confirmedTariffCount).toBe(0);
+    expect(counts).toEqual({ loads: 1, builds: 1 });
+
+    now = "2026-09-05T00:01:00.000Z";
+    const after = reuse.admin();
+    const lettersAfter = after.templateUsages.find(
+      (item) => item.templateCode === CANONICAL_PRODUCT_CODE,
+    );
+    expect(lettersAfter?.confirmedTariffCount).toBeGreaterThan(0);
+    expect(counts).toEqual({ loads: 1, builds: 2 });
   });
 });
 
@@ -491,6 +589,38 @@ describe("PERF_3 resources mutation delta", () => {
       frozen.contentHash,
     );
     expect(counts.presentationBuilds).toBeGreaterThanOrEqual(1);
+    runtime.close();
+  });
+
+  it("rebuilds a coherent day-B admin when a write happens after UTC rollover", async () => {
+    let now = "2026-09-04T23:59:00.000Z";
+    const { runtime, counts } = countedRuntime(":memory:", { now: () => now });
+    const app = createApp({ productSystem: runtime });
+    const before = await readBody(await app.request("/api/resources-admin"));
+    const plexi = findCost(before, PLEXIGLAS_3MM_OPAL_ID);
+    expect(counts).toMatchObject({ evidenceLoads: 1, fullAdminBuilds: 1 });
+
+    now = "2026-09-05T00:01:00.000Z";
+    const saved = await app.request(
+      `/api/resources-admin/cost-evidence/${plexi?.evidenceRowId as string}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ amount: 18, note: "după rollover" }),
+      },
+    );
+    expect(saved.status).toBe(200);
+    const body = await readBody(saved);
+    const expected = JSON.parse(
+      JSON.stringify(
+        projectResourcesAdministration(runtime.listActiveCostEvidence(), now),
+      ),
+    );
+    expect(body.admin).toEqual(expected);
+    expect(findCost(body.admin as JsonObject, PLEXIGLAS_3MM_OPAL_ID)?.amount).toBe(18);
+    expect(counts.evidenceLoads).toBe(1);
+    expect(counts.fullAdminBuilds).toBe(2);
+    expect(counts.deltas).toEqual([]);
     runtime.close();
   });
 });

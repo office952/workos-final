@@ -147,6 +147,30 @@ BROWSERSTACK = NOT_USED
 SUBTEXT = NOT_USED
 ```
 
+## DATE_SENSITIVE_GENERATION
+
+```text
+RESOURCES_ADMIN_PROJECTION_DEPENDS_ON_UTC_CALENDAR_DATE = YES
+ACTIVE_COST_EVIDENCE_CACHE_LAW = ROWS_ARE_PERSISTED_FACTS
+RESOURCES_ADMIN_CACHE_LAW = REUSABLE_ONLY_ON_SAME_UTC_CALENDAR_DATE
+UTC_DATE_ROLLOVER = ONE_ADMIN_REBUILD_FROM_CACHED_EVIDENCE
+EVIDENCE_DB_RELOAD_ON_DATE_CHANGE = NO
+TIMER / TTL / REDIS / EVENT_BUS = NO
+MUTATION_AFTER_ROLLOVER = COHERENT_DAY_B_PROJECTION_NO_MIXED_SLICES
+```
+
+`validUntil=YYYY-MM-DD` is inclusive for that whole UTC calendar date and expires the next UTC day. The admin generation stores that date. A later GET or write on a new UTC date rebuilds the full projection once from the already-cached evidence list, then reuses it for the rest of that date.
+
+Deterministic rollover evidence:
+
+```text
+GET at 2026-09-04T23:59:00Z  validityState=current   loads=1 builds=1
+GET at 2026-09-05T00:01:00Z  validityState=expired   loads=1 builds=2
+GET again on 2026-09-05      reuse                   loads=1 builds=2
+validFrom=2026-09-05         not current before UTC date, current after
+mutation after rollover      full day-B rebuild from cached evidence, no mixed slices
+```
+
 ## Architecture
 
 Chosen: a small runtime-local accessor with injected loader / projector, plus a domain delta that patches only affected administration slices.
