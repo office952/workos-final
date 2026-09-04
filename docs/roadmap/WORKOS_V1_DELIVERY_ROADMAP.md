@@ -128,9 +128,13 @@ REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
 NEXT_PROGRAM_PRIORITY                = WORKOS_UI_UX_2_0_E2E
-NEXT_RECOMMENDED_BUILD               = UI20_R2_ART_FABRICATION_ROMANIAN_SYNTHESIS
+NEXT_RECOMMENDED_BUILD               = UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF
 UI20_PROGRAM                         = OWNER_AUTHORIZED_REFOUNDATION
 UI20_R1                              = RESEARCH_ACCEPTED_WITH_ADVISORIES
+UI20_R2                              = RESEARCH_ACCEPTED_WITH_ADVISORIES
+UI20_R2_DOCUMENTATION                = DOCUMENTATION_READY
+UI20_LEADING_VISUAL_HYPOTHESIS       = G_LIVING_FABRICATION_INSTRUMENT
+UI20_LEADING_IA_HYPOTHESIS           = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 PRODUCT_SYSTEM_FC1B                  = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 UI20_CURRENT_VISUAL_DIRECTION        = NOT_SELECTED
 UI20_CURRENT_IA                      = NOT_SELECTED
@@ -334,7 +338,7 @@ CERERI_RUNTIME = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN = YES
 REQUESTS_INTEGRATED_ON_MAIN = YES
 NEXT_PROGRAM_PRIORITY = WORKOS_UI_UX_2_0_E2E
-NEXT_RECOMMENDED_BUILD = UI20_R2_ART_FABRICATION_ROMANIAN_SYNTHESIS
+NEXT_RECOMMENDED_BUILD = UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF
 UI20_PROGRAM = OWNER_AUTHORIZED_REFOUNDATION
 PRODUCT_SYSTEM_FC1B = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 UI20_CURRENT_VISUAL_DIRECTION = NOT_SELECTED
@@ -451,7 +455,7 @@ Step 8 configured the recovered HUB MEDIA organization with the existing seller,
 
 Step 9 is `BLOCKED_BEFORE_QUOTE` because a live first-job quote is still unauthorized. The pre-quote wave OS-S3 + OS-S4 + OS-S5 is `INTEGRATED_ON_MAIN` at implementation SHA `5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. Integration does not authorize a live quote, a live Cerere PATCH, OS-S6, Architecture C UI Wave 2, or invented Batch 1 products. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
 
-Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport is deferred under no-invention. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted. OS-S8 remains `HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. FC1 Product System design research remains historical. Product System React (`UI-FC1B`) is `SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION`. The next living program is `WORKOS_UI_UX_2_0_E2E`. UI20-R1 is `RESEARCH_ACCEPTED_WITH_ADVISORIES`. Visual direction and IA remain `NOT_SELECTED`. The next recommended build is `UI20_R2_ART_FABRICATION_ROMANIAN_SYNTHESIS`. This file does not authorize Product System React implementation, Oferte V3, Lucrări V3, OS-S8 implementation, or a live first-job quote.
+Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport is deferred under no-invention. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted. OS-S8 remains `HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. FC1 Product System design research remains historical. Product System React (`UI-FC1B`) is `SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION`. The next living program is `WORKOS_UI_UX_2_0_E2E`. UI20-R1 and UI20-R2 are `RESEARCH_ACCEPTED_WITH_ADVISORIES`. G and IA-3 are leading research hypotheses, not Owner-accepted. Visual direction and IA remain `NOT_SELECTED`. The next recommended build is `UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF`. This file does not authorize Product System React implementation, Oferte V3, Lucrări V3, OS-S8 implementation, or a live first-job quote.
 
 ## Operational Services program
 
@@ -496,9 +500,10 @@ CERERI_RUNTIME                           = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN                = YES
 REQUESTS_INTEGRATED_ON_MAIN              = YES
 NEXT_PROGRAM_PRIORITY                    = WORKOS_UI_UX_2_0_E2E
-NEXT_RECOMMENDED_BUILD                   = UI20_R2_ART_FABRICATION_ROMANIAN_SYNTHESIS
+NEXT_RECOMMENDED_BUILD                   = UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF
 UI20_PROGRAM                             = OWNER_AUTHORIZED_REFOUNDATION
 UI20_R1                                  = RESEARCH_ACCEPTED_WITH_ADVISORIES
+UI20_R2                                  = RESEARCH_ACCEPTED_WITH_ADVISORIES
 PRODUCT_SYSTEM_FC1B                      = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 UI20_CURRENT_VISUAL_DIRECTION            = NOT_SELECTED
 UI20_CURRENT_IA                          = NOT_SELECTED
@@ -556,7 +561,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, and PDF stay disabled. Order v2 copies a valid frozen Quote v2 only when a matching acceptance decision is already present; the live acceptance route remains refused. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport is deferred under no-invention until EUR_PER_TRIP versus EUR_PER_KM is selected. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted at `49948e16a2b1c90e28c787b4c8305b9ece278ace`. Live v2 freeze, acceptance, PDF, and Production Release stay refused. OS-S8 remains `HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE`. The next living program is `WORKOS_UI_UX_2_0_E2E`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. FC1 Product System design remains historical research. Product System React is `SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION`. UI20-R1 is `RESEARCH_ACCEPTED_WITH_ADVISORIES`. Visual direction and IA remain `NOT_SELECTED`. The next recommended build is `UI20_R2_ART_FABRICATION_ROMANIAN_SYNTHESIS`. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, OS-S8 implementation, Product System React implementation, or another PERF slice. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. PERF_1, PERF_2, and PERF_3 are `INTEGRATED_ON_MAIN`. No further PERF slice is currently defined. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, and PDF stay disabled. Order v2 copies a valid frozen Quote v2 only when a matching acceptance decision is already present; the live acceptance route remains refused. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport is deferred under no-invention until EUR_PER_TRIP versus EUR_PER_KM is selected. OS-S7 Order service truth is `INTEGRATED_ON_MAIN` and Owner-accepted at `49948e16a2b1c90e28c787b4c8305b9ece278ace`. Live v2 freeze, acceptance, PDF, and Production Release stay refused. OS-S8 remains `HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE`. The next living program is `WORKOS_UI_UX_2_0_E2E`. Historical V3 baseline remains complete; that is not dedicated page-by-page implementation. The FC0 forensic audit is `INTEGRATED_ON_MAIN` at `f4ff1b903b40d88ac8a3e75f33e97fbf7f998623`, direction accepted, documentation Owner-accepted with ChatGPT independent `PASS_WITH_ADVISORIES`. FC1 Product System design remains historical research. Product System React is `SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION`. UI20-R1 and UI20-R2 are `RESEARCH_ACCEPTED_WITH_ADVISORIES`. G and IA-3 are leading research hypotheses, not Owner-accepted. Visual direction and IA remain `NOT_SELECTED`. The next recommended build is `UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF`. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, OS-S8 implementation, Product System React implementation, or another PERF slice. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. PERF_1, PERF_2, and PERF_3 are `INTEGRATED_ON_MAIN`. No further PERF slice is currently defined. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 
@@ -677,8 +682,12 @@ Owner-authorized experience refoundation. Not a domain/backend rebuild. Not Prod
 ```text
 UI20_PROGRAM                      = OWNER_AUTHORIZED_REFOUNDATION
 NEXT_PROGRAM_PRIORITY             = WORKOS_UI_UX_2_0_E2E
-NEXT_RECOMMENDED_BUILD            = UI20_R2_ART_FABRICATION_ROMANIAN_SYNTHESIS
+NEXT_RECOMMENDED_BUILD            = UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF
 UI20_R1                           = RESEARCH_ACCEPTED_WITH_ADVISORIES
+UI20_R2                           = RESEARCH_ACCEPTED_WITH_ADVISORIES
+UI20_R2_DOCUMENTATION             = DOCUMENTATION_READY
+UI20_LEADING_VISUAL_HYPOTHESIS    = G_LIVING_FABRICATION_INSTRUMENT
+UI20_LEADING_IA_HYPOTHESIS        = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI_GENERAL_REDESIGN_FOR_V1        = CLOSED_FOR_V1
 UI_GENERAL_REDESIGN_LIVING        = REOPENED_BY_OWNER_FOR_UI20_E2E
 PRODUCT_SYSTEM_FC1B               = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
@@ -694,7 +703,9 @@ HISTORICAL_FIGMA                  = 1ev5lg7m2Ze1h3Vqmax8ho
 
 `UI_GENERAL_REDESIGN = CLOSED_FOR_V1` remains the historical V3 closure. Living direction is the Owner UI20 reset. FC0/FC1 records stay evidence. Agents must not resume UI-FC1B React from older flags. R1 did not select a visual direction or IA.
 
-Research record: `docs/worklog/WORKOS_UI_UX_2_0_E2E_R0_REFOUNDATION.md` and `docs/worklog/WORKOS_UI_UX_2_0_E2E_R1_DEEP_RESEARCH.md`. Next wave: `docs/worklog/WORKOS_UI_UX_2_0_E2E_R2_ART_FABRICATION_SYNTHESIS.md`.
+R2 is `RESEARCH_ACCEPTED_WITH_ADVISORIES`. G and IA-3 are leading research hypotheses, not Owner-accepted directions. Next recommended build is `UI20_R3_HIGH_FIDELITY_CHARACTER_PROOF`.
+
+Research record: `docs/worklog/WORKOS_UI_UX_2_0_E2E_R0_REFOUNDATION.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R1_DEEP_RESEARCH.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R2_ART_FABRICATION_SYNTHESIS.md`.
 
 ## Update policy
 
