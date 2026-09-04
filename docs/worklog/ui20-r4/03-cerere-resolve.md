@@ -17,6 +17,19 @@ After resolve:
 - `Blocat: lipsesc dimensiunile finale` becomes `Blocajul de geometrie a dispărut`
 - primary action becomes **Confirmă adâncimea**
 - object strip shows `1000 × 500 mm`
+- heading is **Dimensiuni confirmate** (R4A; former poetic line removed)
 - AttentionEdge quiets; no confetti
 
-Reaction: `72:82` → `72:87`, 180 ms dissolve (RESOLVE).
+| | |
+| --- | --- |
+| Source | `72:4` via trigger `72:82` |
+| Destination | `72:87` |
+| Trigger | ON_CLICK Completează dimensiunile |
+| Transition | SMART_ANIMATE EASE_OUT |
+| Duration | 180 ms |
+| Stays | CER identity, CUNOSCUT / LIPSEȘTE structure |
+| Changes | resolved item, blocker retreat, next action |
+
+Meaning: informația a fost rezolvată. Not a new page load.
+
+Grammar card: `73:122`. Resolved-item track `80:19`; blocker fade `80:21`.

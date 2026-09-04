@@ -9,6 +9,16 @@ Mental model: construction bench. Canonical stack stays: Față / Volum / Spate 
 
 Volum keeps depth chips and `Confirmă adâncimea`. Față keeps the stack, changes the lens to Plexiglas opal 3 mm, hides depth chips, and labels context `CONTEXT STABIL`. The user should feel they are working on this part, not opening another form section.
 
-Reactions: Față `72:489` → `72:541` (150 ms); Volum `72:581` → `72:455` (150 ms).
+| | SELECT | SELECT back |
+| --- | --- | --- |
+| Source | `72:455` via `72:489` Față | `72:541` via `72:581` Volum |
+| Destination | `72:541` | `72:455` |
+| Trigger | ON_CLICK | ON_CLICK |
+| Transition | SMART_ANIMATE EASE_OUT | SMART_ANIMATE EASE_OUT |
+| Duration | 150 ms | 150 ms |
+| Stays | construction stack | construction stack |
+| Changes | selected part + contextual panel | selected part + contextual panel |
 
-No CAD. No generic accordion. A3.1 is not the OS.
+Quietest verb. The page does not move as a whole.
+
+Grammar card: `35:99`.
