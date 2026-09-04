@@ -66,7 +66,7 @@ Related living authority:
 Recorded against merged `origin/main`:
 
 ```text
-ORIGIN_MAIN                          = 122d8693d7a9c6a76e2131dc6555b65bb6537901
+ORIGIN_MAIN                          = 7c69107bfdc01a5b0a68cdab92851ad144a56142
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE
@@ -128,16 +128,22 @@ REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
 NEXT_PROGRAM_PRIORITY                = PRODUCT_DEVELOPMENT
-NEXT_RECOMMENDED_BUILD               = LETTERS_RETURN_DEPTH_COVERAGE_V1
+NEXT_RECOMMENDED_BUILD               = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+POST_INTEGRATION_RECOMMENDED_PROGRAM = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+FIRST_RECOMMENDED_PERF_SLICE         = PERF_1_SINGLE_PRODUCT_EVALUATION
+PERFORMANCE_IMPLEMENTATION           = NOT_STARTED
 PRODUCT_BATCH_1                      = PARTIAL_NO_INVENTION
-PRODUCT_BATCH_1_DISCOVERY            = COMPLETE_LOCAL_IN_REVIEW
+PRODUCT_BATCH_1_DISCOVERY            = INTEGRATED_ON_MAIN
 PRODUCT_BATCH_1_IMPLEMENTATION       = NO
 NEW_PRODUCT_TEMPLATE_TRACK           = HALO / FULL ALUMINIUM WAITING_FOR_PRODUCT_CONSTRUCTION_TRUTH
-PRODUCT_UTILITY_TRACK                = ACTIVE
-LETTERS_RETURN_DEPTH_COVERAGE_V1     = IMPLEMENTED_LOCAL_IN_REVIEW
-QUALIFIED_COST_EVIDENCE_ADMIN_PATH   = IMPLEMENTED_LOCAL_IN_REVIEW
-RESOURCES_COST_ADMIN_UX_AMEND        = IMPLEMENTED_LOCAL_IN_REVIEW
-RESOURCES_COST_PRODUCT_CONTEXT       = IMPLEMENTED_LOCAL_IN_REVIEW
+PRODUCT_UTILITY_TRACK                = INTEGRATED_ON_MAIN
+LETTERS_RETURN_DEPTH_COVERAGE_V1     = INTEGRATED_ON_MAIN
+QUALIFIED_COST_EVIDENCE_ADMIN_PATH   = INTEGRATED_ON_MAIN
+RESOURCES_COST_ADMIN_UX_AMEND        = INTEGRATED_ON_MAIN
+RESOURCES_COST_PRODUCT_CONTEXT       = INTEGRATED_ON_MAIN
+PR7_RUNTIME                          = OWNER_ACCEPTED
+PR7_INTEGRATED_HEAD                  = 7c69107bfdc01a5b0a68cdab92851ad144a56142
+PR7_INTEGRATION                      = INTEGRATED_ON_MAIN
 CUSTOMER_OPERABLE_WITHOUT_CURSOR     = YES
 FULL_OLD_AND_NEW_UI_UX_AUDIT         = COMPLETE
 EVIDENCE_PACK                        = ACCEPTED
@@ -301,20 +307,26 @@ CERERI_RUNTIME = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN = YES
 REQUESTS_INTEGRATED_ON_MAIN = YES
 NEXT_PROGRAM_PRIORITY = PRODUCT_DEVELOPMENT
-NEXT_RECOMMENDED_BUILD = LETTERS_RETURN_DEPTH_COVERAGE_V1
+NEXT_RECOMMENDED_BUILD = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+POST_INTEGRATION_RECOMMENDED_PROGRAM = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+FIRST_RECOMMENDED_PERF_SLICE = PERF_1_SINGLE_PRODUCT_EVALUATION
+PERFORMANCE_IMPLEMENTATION = NOT_STARTED
 PRODUCT_BATCH_1 = PARTIAL_NO_INVENTION
-PRODUCT_BATCH_1_DISCOVERY = COMPLETE_LOCAL_IN_REVIEW
+PRODUCT_BATCH_1_DISCOVERY = INTEGRATED_ON_MAIN
 PRODUCT_BATCH_1_IMPLEMENTATION = NO
 NEW_PRODUCT_TEMPLATE_TRACK = HALO / FULL ALUMINIUM WAITING_FOR_PRODUCT_CONSTRUCTION_TRUTH
-PRODUCT_UTILITY_TRACK = ACTIVE
-LETTERS_RETURN_DEPTH_COVERAGE_V1 = IMPLEMENTED_LOCAL_IN_REVIEW
-QUALIFIED_COST_EVIDENCE_ADMIN_PATH = IMPLEMENTED_LOCAL_IN_REVIEW
-RESOURCES_COST_ADMIN_UX_AMEND = IMPLEMENTED_LOCAL_IN_REVIEW
-RESOURCES_COST_PRODUCT_CONTEXT = IMPLEMENTED_LOCAL_IN_REVIEW
+PRODUCT_UTILITY_TRACK = INTEGRATED_ON_MAIN
+LETTERS_RETURN_DEPTH_COVERAGE_V1 = INTEGRATED_ON_MAIN
+QUALIFIED_COST_EVIDENCE_ADMIN_PATH = INTEGRATED_ON_MAIN
+RESOURCES_COST_ADMIN_UX_AMEND = INTEGRATED_ON_MAIN
+RESOURCES_COST_PRODUCT_CONTEXT = INTEGRATED_ON_MAIN
+PR7_RUNTIME = OWNER_ACCEPTED
+PR7_INTEGRATED_HEAD = 7c69107bfdc01a5b0a68cdab92851ad144a56142
+PR7_INTEGRATION = INTEGRATED_ON_MAIN
 CUSTOMER_OPERABLE_WITHOUT_CURSOR = YES
 ```
 
-`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. First Real LETTERS pre-quote V1 is Owner-accepted and `INTEGRATED_ON_MAIN`. The HUB sequence step remains `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because real Cloud write, a real Cerere patch, and live Quote creation remain unauthorized. That real-data gate is the `REAL_PILOT_TRACK`. It no longer blocks product-development progress. `NEXT_PROGRAM_PRIORITY = PRODUCT_DEVELOPMENT` is the primary build track. Owner GO authorized Product Batch 1 discovery. Discovery remains `PARTIAL_NO_INVENTION`: halo-lit and full-aluminium stay deferred until Owner construction truth exists. That new-template track is not a serial blocker for all product development. The active product-utility track is LETTERS return-depth coverage on the existing front-lit ProductTemplate: owner-confirmed profile rates 2 / 3 / 4 / 5 EUR/m at 30 / 60 / 80 / 100 mm, forming 5 EUR/m. `LETTERS_RETURN_DEPTH_COVERAGE_V1` is `IMPLEMENTED_LOCAL_IN_REVIEW`. Owner runtime rejected the `/admin/resources` catalog cascade as UX-S1. `RESOURCES_COST_ADMIN_UX_AMEND` is `IMPLEMENTED_LOCAL_IN_REVIEW`: Costuri interne / Resurse / Rețete, flat rate registry, Adaugă tarif. Owner then required ProductTemplate as a context filter, not a cost owner. `RESOURCES_COST_PRODUCT_CONTEXT` is `IMPLEMENTED_LOCAL_IN_REVIEW`: `/admin/resources?product=<templateCode>`, generic usage projection, default All products, Product System deeplink. Visible product-context copy stays resource-level (`resurse relevante` / `tarife confirmate` / `resurse fără tarif confirmat`); it does not claim qualifier coverage or EIC. The cost-row status filter is Confirmate / Neconfirmate. `UI_GENERAL_REDESIGN` stays `CLOSED_FOR_V1`. Records: `docs/worklog/WORKOS_V1_PRODUCT_BATCH_1_PARTIAL_NO_INVENTION.md`, `docs/worklog/WORKOS_V1_LETTERS_RETURN_DEPTH_COVERAGE_V1.md`, `docs/worklog/WORKOS_V1_RESOURCES_COST_ADMIN_UX_AMEND_V1.md`, and `docs/worklog/WORKOS_V1_RESOURCES_COST_PRODUCT_CONTEXT_V1.md`. All existing runtime pages stay V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`). This file does not authorize inventing halo or aluminium-face formulas, a live first-job quote, or another global UI rewrite.
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. It includes the first real LETTERS job and closes only after planned-vs-actual Owner sign-off (step 10). Wave 1 of first-lot UI implementation is `OWNER_ACCEPTED` with advisories: financial access `ALT_B_SCOPED`, stable `/jobs/:jobId` and `/quotes/:quoteSnapshotId`, Industrial Clarity theme foundation, composed job detail and quote inspection. Wave 2 is `OWNER_ACCEPTED` with advisories: Comercial Level 2, client/request/quote lists, Client nou / Cerere nouă drawers, Catalog, configurator, and the synthetic Client → Cerere → Catalog → Configurator → Ofertă → Lucrare path. Wave 3 is `OWNER_ACCEPTED` with advisories: Cloud login gate, Atelier identification, operational inbox, `/execution/:planId`, operational planned-versus-actual, and the final accessibility closure. Wave 4 is `OWNER_ACCEPTED` with advisories: domain-aware Resurse plus admin reuse of Utilaje/zone and Oameni, without a parallel catalog or commercial pricing. Wave 5 is `OWNER_ACCEPTED` with advisories: first-lot regression, accessibility, and screenshot closure, including recaptured Planned-versus-Actual, machine-blocked, dependency-blocked, and manual-task proofs. Independent visual review scored 96/100 with no P0/P1. A non-blocking P3 notes that `manifest.json` lists 22 names in `captured` while `required` and the archive contain 24 PNGs. The first HF lot UI is Owner-accepted. Step 8 `HUB_MEDIA_ORGANIZATION_CONFIGURATION` is `OWNER_ACCEPTED`. First Real LETTERS pre-quote V1 is Owner-accepted and `INTEGRATED_ON_MAIN`. The HUB sequence step remains `FIRST_REAL_LETTERS_JOB`, currently `BLOCKED_BEFORE_QUOTE` because real Cloud write, a real Cerere patch, and live Quote creation remain unauthorized. That real-data gate is the `REAL_PILOT_TRACK`. It no longer blocks product-development progress. `NEXT_PROGRAM_PRIORITY = PRODUCT_DEVELOPMENT` is the primary build track. Owner GO authorized Product Batch 1 discovery. Discovery remains `PARTIAL_NO_INVENTION`: halo-lit and full-aluminium stay deferred until Owner construction truth exists. That new-template track is not a serial blocker for all product development. PR #7 product utility is `INTEGRATED_ON_MAIN` at `7c69107bfdc01a5b0a68cdab92851ad144a56142`: LETTERS return-depth coverage (owner-confirmed profile rates 2 / 3 / 4 / 5 EUR/m at 30 / 60 / 80 / 100 mm, forming 5 EUR/m), qualified CostEvidence admin, flat Resources & Costs workspace, and ProductTemplate as a context filter only. Runtime is `OWNER_ACCEPTED`. Visible product-context copy stays resource-level (`resurse relevante` / `tarife confirmate` / `resurse fără tarif confirmat`); it does not claim qualifier coverage or EIC. The recommended next technical program is `WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1`, first slice `PERF_1_SINGLE_PRODUCT_EVALUATION`. Compile canonical truth once; freeze it when required; downstream layers project it instead of rebuilding it. That program is not started and is not authorized by this documentation close. It does not replace `HUB_MEDIA_CLEAN_PILOT`. `UI_GENERAL_REDESIGN` stays `CLOSED_FOR_V1`. Closure record: `docs/worklog/WORKOS_V1_PR7_INTEGRATION_CLOSURE_V1.md`. Implementation-time records stay historical: `docs/worklog/WORKOS_V1_PRODUCT_BATCH_1_PARTIAL_NO_INVENTION.md`, `docs/worklog/WORKOS_V1_LETTERS_RETURN_DEPTH_COVERAGE_V1.md`, `docs/worklog/WORKOS_V1_RESOURCES_COST_ADMIN_UX_AMEND_V1.md`, and `docs/worklog/WORKOS_V1_RESOURCES_COST_PRODUCT_CONTEXT_V1.md`. All existing runtime pages stay V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`). This file does not authorize inventing halo or aluminium-face formulas, a live first-job quote, performance implementation, or another global UI rewrite.
 
 Architecture C is a **parallel UI track**, not a second target milestone and not a replacement for the HUB sequence. The Architecture C final simulation is `OWNER_ACCEPTED_WITH_ADVISORIES`. Wave 1 is `OWNER_ACCEPTED_WITH_ADVISORIES` and integrated on `origin/main`. Wave 2 is not started. The Figma library stays unpublished. Do not flip first-HF `WAVE_*` or `UI_IMPLEMENTATION_COMPLETE` flags for this track.
 
@@ -431,16 +443,22 @@ CERERI_RUNTIME                           = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN                = YES
 REQUESTS_INTEGRATED_ON_MAIN              = YES
 NEXT_PROGRAM_PRIORITY                    = PRODUCT_DEVELOPMENT
-NEXT_RECOMMENDED_BUILD                   = LETTERS_RETURN_DEPTH_COVERAGE_V1
+NEXT_RECOMMENDED_BUILD                   = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+POST_INTEGRATION_RECOMMENDED_PROGRAM     = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+FIRST_RECOMMENDED_PERF_SLICE             = PERF_1_SINGLE_PRODUCT_EVALUATION
+PERFORMANCE_IMPLEMENTATION               = NOT_STARTED
 PRODUCT_BATCH_1                          = PARTIAL_NO_INVENTION
-PRODUCT_BATCH_1_DISCOVERY                = COMPLETE_LOCAL_IN_REVIEW
+PRODUCT_BATCH_1_DISCOVERY                = INTEGRATED_ON_MAIN
 PRODUCT_BATCH_1_IMPLEMENTATION           = NO
 NEW_PRODUCT_TEMPLATE_TRACK               = HALO / FULL ALUMINIUM WAITING_FOR_PRODUCT_CONSTRUCTION_TRUTH
-PRODUCT_UTILITY_TRACK                    = ACTIVE
-LETTERS_RETURN_DEPTH_COVERAGE_V1         = IMPLEMENTED_LOCAL_IN_REVIEW
-QUALIFIED_COST_EVIDENCE_ADMIN_PATH       = IMPLEMENTED_LOCAL_IN_REVIEW
-RESOURCES_COST_ADMIN_UX_AMEND            = IMPLEMENTED_LOCAL_IN_REVIEW
-RESOURCES_COST_PRODUCT_CONTEXT           = IMPLEMENTED_LOCAL_IN_REVIEW
+PRODUCT_UTILITY_TRACK                    = INTEGRATED_ON_MAIN
+LETTERS_RETURN_DEPTH_COVERAGE_V1         = INTEGRATED_ON_MAIN
+QUALIFIED_COST_EVIDENCE_ADMIN_PATH       = INTEGRATED_ON_MAIN
+RESOURCES_COST_ADMIN_UX_AMEND            = INTEGRATED_ON_MAIN
+RESOURCES_COST_PRODUCT_CONTEXT           = INTEGRATED_ON_MAIN
+PR7_RUNTIME                              = OWNER_ACCEPTED
+PR7_INTEGRATED_HEAD                      = 7c69107bfdc01a5b0a68cdab92851ad144a56142
+PR7_INTEGRATION                          = INTEGRATED_ON_MAIN
 CUSTOMER_OPERABLE_WITHOUT_CURSOR         = YES
 OS_S4_SERVICE_COMMERCIAL                 = INTEGRATED_ON_MAIN
 OS_S5_MULTI_LINE_QUOTE                   = INTEGRATED_ON_MAIN
@@ -456,7 +474,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, PDF, and Order from v2 stay disabled. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. All existing runtime pages are V3 baseline closed. This file does not authorize real Cloud write, a live first-job quote, or invented Batch 1 products. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. Product utility continues on the live front-lit LETTERS product; return-depth coverage is `IMPLEMENTED_LOCAL_IN_REVIEW`. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, PDF, and Order from v2 stay disabled. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. All existing runtime pages are V3 baseline closed. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, or performance implementation. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. The next technical program is `WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1` / `PERF_1_SINGLE_PRODUCT_EVALUATION` and is `NOT_STARTED`. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 
