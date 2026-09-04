@@ -64,6 +64,19 @@ export function resolveProductUsage(
   return usageForProductTemplate(admin.templateUsages, product);
 }
 
+export function formatProductUsageSummary(usage: ProductTemplateResourceUsage): string {
+  const parts = [
+    `${usage.resourceCount} resurse relevante`,
+    `${usage.confirmedTariffCount} tarife confirmate`,
+  ];
+  if (usage.resourcesWithoutConfirmedTariffCount > 0) {
+    parts.push(
+      `${usage.resourcesWithoutConfirmedTariffCount} resurse fără tarif confirmat`,
+    );
+  }
+  return parts.join(" · ");
+}
+
 export function costRowsForProduct(
   rows: readonly CostWorkspaceRow[],
   usage: ProductTemplateResourceUsage | null,

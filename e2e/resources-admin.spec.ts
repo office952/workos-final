@@ -119,6 +119,12 @@ test("resources workspace filters by ProductTemplate context", async ({ page }) 
 
   await page.getByLabel("Produs").selectOption({ label: LETTERS_LABEL });
   await expect(page).toHaveURL(new RegExp(`product=${CANONICAL_PRODUCT_CODE}`));
+  await expect(page.getByText(/resurse relevante/)).toBeVisible();
+  await expect(page.getByText(/tarife confirmate/)).toBeVisible();
+  await expect(page.getByText(/necesită configurare/i)).toHaveCount(0);
+  await expect(page.getByText(/EIC/i)).toHaveCount(0);
+  await expect(page.getByRole("option", { name: "Neconfirmate" })).toHaveCount(1);
+  await expect(page.getByRole("option", { name: "Necesită configurare" })).toHaveCount(0);
   await expect(page.getByText("30 mm").first()).toBeVisible();
   await expect(page.getByText("60 mm").first()).toBeVisible();
   await expect(page.getByText("80 mm").first()).toBeVisible();

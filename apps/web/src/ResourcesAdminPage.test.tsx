@@ -113,6 +113,12 @@ describe("ResourcesAdminPage", () => {
     expect(screen.getByRole("option", { name: "Panou ACM casetat" })).toBeInTheDocument();
 
     await user.selectOptions(product, CANONICAL_PRODUCT_CODE);
+    expect(screen.getByText(/resurse relevante/)).toBeInTheDocument();
+    expect(screen.getByText(/tarife confirmate/)).toBeInTheDocument();
+    expect(screen.queryByText(/necesită configurare/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/EIC/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Neconfirmate" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Necesită configurare" })).not.toBeInTheDocument();
     expect(screen.getByText("30 mm")).toBeInTheDocument();
     expect(screen.getByText("60 mm")).toBeInTheDocument();
     expect(screen.getByText("80 mm")).toBeInTheDocument();

@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   ACM_CASSETTE_NONE_PRODUCT_CODE,
+  ALUMINIUM_RETURN_PROFILE_ID,
   CANONICAL_PRODUCT_CODE,
+  LAB_SITE_INSTALL_ID,
+  costEvidence,
+  listProductTemplateResourceUsages,
   projectResourcesAdministration,
+  usageForProductTemplate,
 } from "@workos-final/domain";
 import {
   costRowsForProduct,
@@ -10,6 +15,8 @@ import {
   costVariantDisplay,
   filterCostRows,
   filterRecipeRows,
+  formatProductUsageSummary,
+  isConfirmedCost,
   listWorkspaceRecipes,
   listWorkspaceResources,
   parseProductTemplateFilter,
@@ -85,6 +92,48 @@ describe("resourcesWorkspace", () => {
     expect(lettersRecipes.some((row) => row.label === "Formare profil aluminiu")).toBe(true);
     expect(acmRecipes.some((row) => row.label === "Formare profil aluminiu")).toBe(false);
     expect(acmRecipes.some((row) => row.label === "Debitare CNC foaie panou")).toBe(true);
+  });
+
+  it("filters existing cost rows as confirmed or unconfirmed, not missing resources", () => {
+    const confirmed = filterCostRows(admin.costEvidence, "", "all", "confirmed");
+    const unconfirmed = filterCostRows(admin.costEvidence, "", "all", "needs_setup");
+    expect(confirmed.length).toBeGreaterThan(0);
+    expect(unconfirmed.length).toBeGreaterThan(0);
+    expect(confirmed.every((row) => isConfirmedCost(row))).toBe(true);
+    expect(unconfirmed.every((row) => !isConfirmedCost(row))).toBe(true);
+    expect(admin.costEvidence.some((row) => row.resourceId === LAB_SITE_INSTALL_ID)).toBe(
+      false,
+    );
+    expect(confirmed.some((row) => row.resourceId === LAB_SITE_INSTALL_ID)).toBe(false);
+    expect(unconfirmed.some((row) => row.resourceId === LAB_SITE_INSTALL_ID)).toBe(false);
+  });
+
+  it("summarizes resource-level coverage without claiming product readiness", () => {
+    const partial = costEvidence.filter(
+      (row) =>
+        row.resourceId !== ALUMINIUM_RETURN_PROFILE_ID || row.when?.volumeDepthMm === 60,
+    );
+    const letters = usageForProductTemplate(
+      listProductTemplateResourceUsages(partial),
+      CANONICAL_PRODUCT_CODE,
+    );
+    expect(letters).toBeTruthy();
+    const summary = formatProductUsageSummary(letters!);
+    expect(summary).toContain("resurse relevante");
+    expect(summary).toContain("tarife confirmate");
+    expect(summary).not.toMatch(/necesită configurare/i);
+    expect(summary).not.toMatch(/EIC/i);
+    expect(summary).not.toMatch(/produs configurat/i);
+    expect(summary).not.toMatch(/complet/i);
+    expect(letters!.resourceIds).toContain(ALUMINIUM_RETURN_PROFILE_ID);
+    expect(
+      letters!.resourceIds.filter((resourceId) =>
+        partial.some(
+          (row) =>
+            row.resourceId === resourceId && row.classification === "OWNER_CONFIRMED",
+        ),
+      ),
+    ).toContain(ALUMINIUM_RETURN_PROFILE_ID);
   });
 
   it("prefers template resources for Adaugă tarif without hiding the rest", () => {

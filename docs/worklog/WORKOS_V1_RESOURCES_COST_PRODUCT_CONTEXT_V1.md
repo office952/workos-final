@@ -23,6 +23,6 @@ The flat Resources & Costs workspace stayed. Owner asked for product context bef
 
 Usage is a generic read projection: ProductTemplate → component types → live resources → process composition / where-used → recipes → shared CostEvidence. Shared resources keep one rate. Unused catalog rows remain under Toate produsele. `/admin/resources?product=<templateCode>` preselects the template. Product System template inspection has a quiet Resurse și costuri link.
 
-Compact counts (resources / confirmed tariffs / needs setup) come from that projection. EIC is omitted; it is configuration-specific, not a template-level fact.
+Compact counts stay resource-level: relevant resources, confirmed tariff rows, and resources without a confirmed tariff. They do not claim qualifier coverage, EIC, or product readiness. The Costuri interne status filter labels existing rows Confirmate / Neconfirmate.
 
-Next step: Independent ChatGPT + Owner runtime review. Do not merge.
+Next step: Owner runtime review. Do not merge.

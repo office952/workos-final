@@ -20,7 +20,7 @@ export type ProductTemplateResourceUsage = {
   processIds: readonly string[];
   resourceCount: number;
   confirmedTariffCount: number;
-  needsSetupCount: number;
+  resourcesWithoutConfirmedTariffCount: number;
 };
 
 export function listProductTemplateResourceUsages(
@@ -103,8 +103,9 @@ export function listProductTemplateResourceUsages(
       processIds: [...processIds].sort(),
       resourceCount: sortedResourceIds.length,
       confirmedTariffCount: confirmedRows.length,
-      needsSetupCount: sortedResourceIds.filter((resourceId) => !confirmedResourceIds.has(resourceId))
-        .length,
+      resourcesWithoutConfirmedTariffCount: sortedResourceIds.filter(
+        (resourceId) => !confirmedResourceIds.has(resourceId),
+      ).length,
     };
   });
 }

@@ -13,6 +13,7 @@ import {
   SVC_CNC_FACE_ID,
   SVC_PACK_PRODUCT_ID,
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
+  costEvidence,
 } from "./catalog.js";
 import {
   listProductTemplateResourceUsages,
@@ -91,6 +92,38 @@ describe("product template resource usage", () => {
     const letters = usageForProductTemplate(usages, CANONICAL_PRODUCT_CODE);
     expect(letters?.resourceCount).toBe(letters?.resourceIds.length);
     expect(letters?.confirmedTariffCount).toBeGreaterThan(0);
-    expect(letters?.needsSetupCount).toBeGreaterThanOrEqual(0);
+    expect(letters?.resourcesWithoutConfirmedTariffCount).toBeGreaterThanOrEqual(0);
+  });
+
+  it("treats a resource as confirmed when only one qualifier has evidence", () => {
+    const partial = costEvidence.filter(
+      (row) =>
+        row.resourceId !== ALUMINIUM_RETURN_PROFILE_ID || row.when?.volumeDepthMm === 60,
+    );
+    const letters = usageForProductTemplate(
+      listProductTemplateResourceUsages(partial),
+      CANONICAL_PRODUCT_CODE,
+    );
+    expect(letters?.resourceIds).toContain(ALUMINIUM_RETURN_PROFILE_ID);
+    expect(
+      partial.filter(
+        (row) =>
+          row.resourceId === ALUMINIUM_RETURN_PROFILE_ID &&
+          row.classification === "OWNER_CONFIRMED",
+      ),
+    ).toHaveLength(1);
+    expect(letters?.resourcesWithoutConfirmedTariffCount).toBe(
+      letters!.resourceIds.filter(
+        (resourceId) =>
+          !partial.some(
+            (row) =>
+              row.resourceId === resourceId && row.classification === "OWNER_CONFIRMED",
+          ),
+      ).length,
+    );
+    expect(letters).not.toHaveProperty("needsSetupCount");
+    expect(letters).not.toHaveProperty("eicCompleteness");
+    expect(letters).not.toHaveProperty("productConfigured");
+    expect(letters).not.toHaveProperty("allVariantsConfigured");
   });
 });

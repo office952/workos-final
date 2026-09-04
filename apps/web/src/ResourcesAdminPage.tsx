@@ -23,6 +23,7 @@ import {
   filterCostRows,
   filterRecipeRows,
   filterResourceRows,
+  formatProductUsageSummary,
   listWorkspaceRecipes,
   listWorkspaceResources,
   parseProductTemplateFilter,
@@ -267,10 +268,7 @@ export function ResourcesAdminPage() {
         </div>
         {productUsage ? (
           <p className="resources-workspace-context-summary">
-            {`${productUsage.resourceCount} resurse · ${productUsage.confirmedTariffCount} tarife confirmate`}
-            {productUsage.needsSetupCount > 0
-              ? ` · ${productUsage.needsSetupCount} necesită configurare`
-              : ""}
+            {formatProductUsageSummary(productUsage)}
           </p>
         ) : null}
       </div>
@@ -350,7 +348,7 @@ export function ResourcesAdminPage() {
             >
               <option value="all">Toate</option>
               <option value="confirmed">Confirmate</option>
-              <option value="needs_setup">Necesită configurare</option>
+              <option value="needs_setup">Neconfirmate</option>
             </select>
           </div>
         ) : null}
