@@ -8,7 +8,7 @@ Same information. Same IA-3 chrome. Same CER-1042. One desktop: Cerere.
 | Rest energy | Low. Paper, hairlines, type. | Higher only around current work. |
 | Missing column | Quiet plane | Warm well labelled LIPSEȘTE ACUM |
 | State | Outline badge | Filled energy badge |
-| Object bar | No edge | 4px energy edge |
+| Object bar | 3px ink identity edge (R3A; job = you are in this object) | 4px energy edge |
 | CTA | Forest action | Copper/energy action |
 
 ## Evaluation

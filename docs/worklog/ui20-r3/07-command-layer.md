@@ -2,18 +2,20 @@
 
 Node `35:29` on page 80.
 
-Credible overlay, not a philosophy card.
+Credible overlay, not a philosophy card. Optional acceleration only.
 
-Romanian rows:
+Placeholder is truthful and global: **Caută în WorkOS…**
 
-- Deschide cererea CER-1042 (selected)
-- Deschide lucrarea LUC-88
-- Configurează produsul
-- Mergi la Atelier
-- Creează client
+Shortcut is platform-aware in chrome and overlay: **Ctrl+K / ⌘K**. Not ⌘K alone.
 
-Shows selection, primary action, category/context, keyboard discoverability (⌘K, esc, ↵).
+Result categories shown:
 
-Law on the overlay: accelerează; nu înlocuiește meniul; nicio acțiune distructivă fără consecință.
+- Cerere — Deschide cererea CER-1042 (selected)
+- Lucrare — Deschide lucrarea LUC-88
+- Acțiune — Configurează produsul
+- Destinație — Mergi la Atelier
+- Client — Creează client
 
-Every critical task remains visible on the page (Cerere CTA, Configurator confirm, Atelier station, Ofertă freeze).
+Footer: `Opțional. Meniul rămâne disponibil. Fără acțiuni distructive.`
+
+Every critical task remains visible on the page (Cerere CTA, Configurator confirm, Atelier Continuă/Pornește, Ofertă freeze).

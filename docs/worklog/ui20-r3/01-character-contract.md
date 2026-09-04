@@ -26,7 +26,7 @@ Screens refuse ERP clone, MES clone, CAD, sign-shop website, developer tool, mus
 
 ## Content law
 
-User-facing copy is Romanian with diacritics. Long strings were designed: Configurează produsul, Necesită informații, Pregătește pentru producție, Lipsește operator eligibil, Iluminare frontală, Resurse și costuri.
+User-facing copy is Romanian with diacritics. Long strings were designed: Configurează produsul, Necesită informații, Pregătește pentru producție, Necesită utilaj dedicat, Iluminare frontală, Resurse și costuri. Atelier does not show assignment language.
 
 Avoided in visible UI: workflow, job, stage, ready, needs input, finish, return, frontlit, backlit.
 

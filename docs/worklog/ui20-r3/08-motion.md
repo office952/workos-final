@@ -11,3 +11,5 @@ Semantic only. One shot. No loop. Meaning survives reduced motion.
 Prototype dissolves use EASE_OUT, 180–200 ms.
 
 Nothing important depends on animation. Frozen Ofertă is a real structural state, not only a fade.
+
+MOTION_OFF evidence (R3A, page 80): live `49:704` vs frozen `49:764`. Freeze remains readable with motion ignored: controls gone, Înghețată, no-edit line. This is the factual MOTION_OFF result. R3 had no controlled clone.
