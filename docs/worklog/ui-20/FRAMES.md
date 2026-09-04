@@ -2,11 +2,11 @@
 
 ```text
 PROGRAM = WORKOS_UI_UX_2_0_E2E
-WAVE = UI20_R3_CHARACTER_PROOF_ACCEPTED_WITH_ADVISORIES
+WAVE = UI20_R4_PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS
 R3A = ACCEPTED
 R3_SIGNATURE_AMENDMENT = ACCEPTED
 S1_A = STRUCTURAL_BASE_ACCEPTED
-NEXT_WAVE = UI20_R4_PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS
+R4_STATUS = PAGE_PERSONALITY_IN_REVIEW
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 FIGMA_URL = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
@@ -40,18 +40,18 @@ Independent R3 Plugin API had `40` before `20`/`30` and `99` before `90`. The li
 
 | PAGE | R3 / R3A CONTENT |
 | --- | --- |
-| 00 — North Star | Program state `16:2` · current matrix `28:2` · proof links `35:120` |
+| 00 — North Star | R3 state `16:2`/`28:2`/`35:120` · R4 direction `73:2` · matrix `73:7` · proof `73:117` |
 | 01 — Foundations | Density + no-color (R2) |
 | 02 — Core Design System | Candidate primitives `35:123` |
 | 03 — Operational Language | Operational primitives (R2) |
-| 04 — Interaction + Motion | R1/R2 + R3 SELECT `35:99` FREEZE `35:105` shift `35:111` |
+| 04 — Interaction + Motion | R3 SELECT/FREEZE/shift · R4 RESOLVE `73:122` ENTER_WORK `73:126` ADVANCE `73:130` COMPLETE `73:134` COMPRESS `73:138` |
 | 05 — Floorplan Lab | A–G research specimens |
-| 10 — E2E Commercial | G1/G2 Cerere · Configurator · Ofertă live/frozen · R3A dark `46:135` · 768 |
-| 20 — E2E Production | R3A Atelier `46:2`/`46:72` · Execuție light `30:86` · R3A dark `46:101` |
-| 30 — Resources | Ledger + 768 |
-| 40 — People | Empty of R3 HF |
-| 50 — Administration | Empty of R3 HF |
-| 80 — Prototypes | IA-3 + Command `35:29` + flows `35:51` + R3A stress + R3 signature Phase 1 / PROP clones |
+| 10 — E2E Commercial | R3 kept · R4 Cerere/Configurator/Ofertă state pairs at x≥6400 |
+| 20 — E2E Production | R3A kept · R4 Lucrare + Atelier/Execuție dynamics at x≥3200 |
+| 30 — Resources | R3 ledger · R4 rest/selected `72:1517`/`72:1596` |
+| 40 — People | R4 contracts Utilaje `73:142` · Oameni `73:146` |
+| 50 — Administration | R4 Admin contract `73:150` |
+| 80 — Prototypes | R3 kept · R4 stress `73:161`–`73:897` at y=20000 |
 | 90 — Research Transfer | Historical R1 matrix `10:78` + moved R0 leftovers |
 | 99 — Deprecated | Empty |
 
@@ -125,3 +125,32 @@ Phase 1 winner S1-A remains visible. S1-B is hidden.
 | F | `16:64` |
 | G | `16:110` |
 | IA-3 desktop | `16:157` |
+
+## R4 personality + dynamics
+
+| ARTIFACT | NODE |
+| --- | --- |
+| Page personality matrix | `73:7` |
+| Cerere missing 1440 | `72:4` |
+| Cerere resolved 1440 | `72:87` |
+| Cerere resolved dark | `72:372` |
+| Configurator Volum 1440 | `72:455` |
+| Configurator Față 1440 | `72:541` |
+| Ofertă editable | `72:841` |
+| Ofertă frozen | `72:901` |
+| Lucrare 1440 | `72:1700` |
+| Lucrare 1280 | `72:1798` |
+| Lucrare 768 | `72:1857` |
+| Lucrare dark | `72:1916` |
+| Atelier available 1440 | `72:957` |
+| Atelier in progress 1440 | `72:1026` |
+| Execuție current 1440 | `72:1285` |
+| Execuție advanced 1440 | `72:1318` |
+| Execuție advanced dark | `72:1483` |
+| Resurse rest | `72:1517` |
+| Resurse selected | `72:1596` |
+| RESOLVE motion | `73:122` |
+| ENTER_WORK motion | `73:126` |
+| ADVANCE motion | `73:130` |
+| COMPLETE motion | `73:134` |
+| COMPRESS motion | `73:138` |
