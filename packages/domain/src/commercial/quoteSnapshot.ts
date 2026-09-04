@@ -350,6 +350,67 @@ export function freezeQuoteSnapshot(
   };
 }
 
+function copyFrozenEicReference(eic: FrozenEicReference): FrozenEicReference {
+  return {
+    total: eic.total,
+    currency: eic.currency,
+    completeness: eic.completeness,
+    lines: eic.lines.map((line) => ({ ...line })),
+  };
+}
+
+export function copyFrozenQuoteLine(line: FrozenQuoteLine): FrozenQuoteLine {
+  switch (line.kind) {
+    case "PRODUCT":
+      return {
+        kind: "PRODUCT",
+        lineVersion: line.lineVersion,
+        commercialStrategy: line.commercialStrategy,
+        label: line.label,
+        productCode: line.productCode,
+        eic: copyFrozenEicReference(line.eic),
+        commercial: { ...line.commercial },
+      };
+    case "SITE_INSTALLATION":
+      return {
+        kind: "SITE_INSTALLATION",
+        lineVersion: line.lineVersion,
+        scopeId: line.scopeId,
+        commercialStrategy: line.commercialStrategy,
+        providerMode: line.providerMode,
+        label: line.label,
+        sourceRequestId: line.sourceRequestId,
+        quantity: line.quantity,
+        commercialUnit: line.commercialUnit,
+        eic: copyFrozenEicReference(line.eic),
+        commercial: { ...line.commercial },
+        technicalConfiguration: { ...line.technicalConfiguration },
+        evidence: {
+          resourceId: line.evidence.resourceId,
+          classification: line.evidence.classification,
+          amount: line.evidence.amount,
+          currency: line.evidence.currency,
+          perUnit: line.evidence.perUnit,
+          ...(line.evidence.supplierLabel
+            ? { supplierLabel: line.evidence.supplierLabel }
+            : {}),
+          ...(line.evidence.validFrom ? { validFrom: line.evidence.validFrom } : {}),
+          ...(line.evidence.validUntil ? { validUntil: line.evidence.validUntil } : {}),
+        },
+      };
+    default: {
+      const _exhaustive: never = line;
+      return _exhaustive;
+    }
+  }
+}
+
+export function copyFrozenJobCommercial(
+  jobCommercial: FrozenJobCommercial,
+): FrozenJobCommercial {
+  return { ...jobCommercial };
+}
+
 export function isSupportedQuoteSnapshot(snapshot: QuoteSnapshot): boolean {
   if (snapshot.status !== "FROZEN") {
     return false;

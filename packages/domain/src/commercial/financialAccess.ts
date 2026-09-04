@@ -261,6 +261,18 @@ export function scopeOrderSnapshot(
   if (eic) {
     scoped.eic = eic;
   }
+  if (snapshot.lines) {
+    scoped.lines = snapshot.lines.map((line) => scopeFrozenQuoteLine(line, access));
+  }
+  if (snapshot.jobCommercial && access !== "workshop") {
+    scoped.jobCommercial = {
+      netPrice: snapshot.jobCommercial.netPrice,
+      vatAmount: snapshot.jobCommercial.vatAmount,
+      grossPrice: snapshot.jobCommercial.grossPrice,
+      currency: snapshot.jobCommercial.currency,
+      completeness: snapshot.jobCommercial.completeness,
+    };
+  }
   return omitForbiddenFinancialFields(scoped, access) as Record<string, unknown>;
 }
 

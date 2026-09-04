@@ -128,7 +128,7 @@ REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
 NEXT_PROGRAM_PRIORITY                = PRODUCT_DEVELOPMENT
-NEXT_RECOMMENDED_BUILD               = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+NEXT_RECOMMENDED_BUILD               = OS_S7_ORDER_SERVICE_TRUTH_V1
 POST_INTEGRATION_RECOMMENDED_PROGRAM = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
 FIRST_RECOMMENDED_PERF_SLICE         = PERF_1_SINGLE_PRODUCT_EVALUATION
 PERF_1_SINGLE_PRODUCT_EVALUATION     = INTEGRATED_ON_MAIN
@@ -317,7 +317,7 @@ CERERI_RUNTIME = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN = YES
 REQUESTS_INTEGRATED_ON_MAIN = YES
 NEXT_PROGRAM_PRIORITY = PRODUCT_DEVELOPMENT
-NEXT_RECOMMENDED_BUILD = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+NEXT_RECOMMENDED_BUILD = OS_S7_ORDER_SERVICE_TRUTH_V1
 POST_INTEGRATION_RECOMMENDED_PROGRAM = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
 FIRST_RECOMMENDED_PERF_SLICE = PERF_1_SINGLE_PRODUCT_EVALUATION
 PERF_1_SINGLE_PRODUCT_EVALUATION = INTEGRATED_ON_MAIN
@@ -418,7 +418,7 @@ Step 8 configured the recovered HUB MEDIA organization with the existing seller,
 
 Step 9 is `BLOCKED_BEFORE_QUOTE` because a live first-job quote is still unauthorized. The pre-quote wave OS-S3 + OS-S4 + OS-S5 is `INTEGRATED_ON_MAIN` at implementation SHA `5e0083a932cb5b9744d2cbb58c2f043a93d5e6c6`. `200 EUR + TVA` is the first-real-job manual fixed customer price, not an organization default and not installation EIC. Integration does not authorize a live quote, a live Cerere PATCH, OS-S6, Architecture C UI Wave 2, or invented Batch 1 products. The old-versus-new Cerere and Configurator audit is `CLOSED_WITH_ADVISORIES`. The orphan-link gate is `CLOSED`. Neither reopens Phase 1.
 
-Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. This file does not authorize Oferte V3 or Lucrări V3.
+Do not start a live first LETTERS quote from this document. The named HUB step remains `FIRST_REAL_LETTERS_JOB`, still blocked before a real quote. The next unauthorized sequence step is `REAL_DATA_PREPARATION_BEFORE_QUOTE`. OS-S1 through OS-S5 are on main. OS-S6 transport is deferred under no-invention. OS-S7 Order service truth is `IMPLEMENTED_LOCAL_IN_REVIEW`. OS-S8 and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. This file does not authorize Oferte V3 or Lucrări V3.
 
 ## Operational Services program
 
@@ -463,7 +463,7 @@ CERERI_RUNTIME                           = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN                = YES
 REQUESTS_INTEGRATED_ON_MAIN              = YES
 NEXT_PROGRAM_PRIORITY                    = PRODUCT_DEVELOPMENT
-NEXT_RECOMMENDED_BUILD                   = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
+NEXT_RECOMMENDED_BUILD                   = OS_S7_ORDER_SERVICE_TRUTH_V1
 POST_INTEGRATION_RECOMMENDED_PROGRAM     = WORKOS_PERFORMANCE_AND_LOGIC_EFFICIENCY_V1
 FIRST_RECOMMENDED_PERF_SLICE             = PERF_1_SINGLE_PRODUCT_EVALUATION
 PERF_1_SINGLE_PRODUCT_EVALUATION         = INTEGRATED_ON_MAIN
@@ -492,8 +492,8 @@ PR7_INTEGRATION                          = INTEGRATED_ON_MAIN
 CUSTOMER_OPERABLE_WITHOUT_CURSOR         = YES
 OS_S4_SERVICE_COMMERCIAL                 = INTEGRATED_ON_MAIN
 OS_S5_MULTI_LINE_QUOTE                   = INTEGRATED_ON_MAIN
-OS_S6_TRANSPORT                          = NOT_STARTED / NOT_AUTHORIZED
-OS_S7_ORDER_SERVICE_TRUTH                = NOT_STARTED
+OS_S6_TRANSPORT                          = DEFERRED_NO_INVENTION_PENDING_TRANSPORT_QUANTITY_POLICY
+OS_S7_ORDER_SERVICE_TRUTH                = IMPLEMENTED_LOCAL_IN_REVIEW
 OS_S8_FIELD_EXECUTION                    = NOT_STARTED
 OS_S9_SERVICE_ACTUALS                    = NOT_STARTED
 OS_S10_PROFITABILITY                     = NOT_STARTED
@@ -504,7 +504,7 @@ QUOTE_CREATE                             = NO
 FIRST_REAL_LETTERS_JOB                   = BLOCKED_BEFORE_QUOTE
 ```
 
-OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, PDF, and Order from v2 stay disabled. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. All existing runtime pages are V3 baseline closed. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, or another PERF slice. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. PERF_1, PERF_2, and PERF_3 are `INTEGRATED_ON_MAIN`. No further PERF slice is currently defined. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
+OS-S1 is implemented on main. OS-S2 design is Owner-accepted: structured Request-owned site address; site-only measurements; typed facade/fixing plus OTHER; electrical UNCONFIRMED plus the four accepted outcomes; one typed row per Request/capability, deleted on deselect with confirmation. OS-S2 typed facts are implemented on main. Transaction safety is closed. OS-S3 + OS-S4 + OS-S5 are `INTEGRATED_ON_MAIN`: INTERNAL and SUBCONTRACTED install EIC, Owner-only manual fixed service price, additive Quote v2. Owner accepted that runtime. Live v2 freeze, acceptance, and PDF stay disabled. Order v2 copies a valid frozen Quote v2 only when a matching acceptance decision is already present; the live acceptance route remains refused. Follow-up facts remain unimplemented: ACCESS_METHOD_AND_EQUIPMENT, FIXINGS_CONSUMABLES, SITE_PHOTOS. CREW_SIZE and PLANNED_DURATION are in this integrated pre-quote wave. OS-S6 transport is deferred under no-invention until EUR_PER_TRIP versus EUR_PER_KM is selected. OS-S7 Order service truth is `IMPLEMENTED_LOCAL_IN_REVIEW` and is not Owner-accepted. OS-S8 and later slices still need a separate Owner GO. V3 navigation design is Owner-accepted. All existing runtime pages are V3 baseline closed. This file does not authorize real Cloud write, a live first-job quote, invented Batch 1 products, or another PERF slice. Product Batch 1 discovery remains `PARTIAL_NO_INVENTION`. Halo / full aluminium wait for construction truth. PR #7 LETTERS return-depth coverage and Resources/Cost product context are `INTEGRATED_ON_MAIN`. PERF_1, PERF_2, and PERF_3 are `INTEGRATED_ON_MAIN`. No further PERF slice is currently defined. Missing org configuration does not hide a persisted service selection or remove its freeze/link gates.
 
 Gates: org default `SERVICE_DISABLED` for new orgs and for existing orgs with no selected Requests; persisted selections stay visible and fail-closed until Owner configuration; later org disable is prospective only; lock selection/mode after first linked Quote; transport remains a separate capability; service commercial is `MANUAL_FIXED_PER_REQUEST`, not cost-plus; service price write authority is deferred until OS-S4; internal labor EIC is person-hour based when later implemented; orphan-link gate `CLOSED`; old-versus-new Cerere/Configurator audit `CLOSED_WITH_ADVISORIES`; explicit QUOTE_CREATE GO before the first real multi-line offer; frozen Order/Release before field tasks.
 

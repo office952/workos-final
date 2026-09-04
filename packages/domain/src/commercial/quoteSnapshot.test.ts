@@ -467,17 +467,19 @@ describe("quote snapshot freeze", () => {
       ok: false,
       error: "service_quote_not_acceptable",
     });
-    expect(
-      freezeOrderSnapshot(withInstall.snapshot, {
-        acceptanceId: "qad:blocked",
-        schemaVersion: 1,
-        quoteSnapshotId: withInstall.snapshot.quoteSnapshotId,
-        quoteContentHash: withInstall.snapshot.contentHash,
-        acceptedAt: "2026-09-02T00:00:00.000Z",
-      }),
-    ).toMatchObject({
-      ok: false,
-      error: "service_lines_not_orderable",
+    const ordered = freezeOrderSnapshot(withInstall.snapshot, {
+      acceptanceId: "qad:os-s7",
+      schemaVersion: 1,
+      quoteSnapshotId: withInstall.snapshot.quoteSnapshotId,
+      quoteContentHash: withInstall.snapshot.contentHash,
+      acceptedAt: "2026-09-02T00:00:00.000Z",
     });
+    expect(ordered.ok).toBe(true);
+    if (!ordered.ok) {
+      return;
+    }
+    expect(ordered.snapshot.schemaVersion).toBe(2);
+    expect(ordered.snapshot.lines).toEqual(withInstall.snapshot.lines);
+    expect(ordered.snapshot.jobCommercial).toEqual(withInstall.snapshot.jobCommercial);
   });
 });

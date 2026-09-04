@@ -14,11 +14,21 @@ import { copyFrozenCustomerIdentity } from "../customers/identity.js";
 import { copyFrozenSellerIdentity } from "../seller/identity.js";
 import {
   QUOTE_SNAPSHOT_SCHEMA_VERSION,
+  QUOTE_SNAPSHOT_SCHEMA_VERSION_V2,
+  copyFrozenJobCommercial,
+  copyFrozenQuoteLine,
+  isSupportedQuoteSnapshot,
   type FrozenCommercialOffer,
+  type FrozenJobCommercial,
+  type FrozenQuoteLine,
   type QuoteSnapshot,
 } from "./quoteSnapshot.js";
 
 export const ORDER_SNAPSHOT_SCHEMA_VERSION = 1 as const;
+export const ORDER_SNAPSHOT_SCHEMA_VERSION_V2 = 2 as const;
+export type OrderSnapshotSchemaVersion =
+  | typeof ORDER_SNAPSHOT_SCHEMA_VERSION
+  | typeof ORDER_SNAPSHOT_SCHEMA_VERSION_V2;
 export const ORDER_SNAPSHOT_STATUSES = ["FROZEN"] as const;
 export type OrderSnapshotStatus = (typeof ORDER_SNAPSHOT_STATUSES)[number];
 
@@ -32,7 +42,7 @@ export type OrderSnapshotError = (typeof ORDER_SNAPSHOT_ERRORS)[number];
 
 export type OrderSnapshot = {
   orderSnapshotId: string;
-  schemaVersion: typeof ORDER_SNAPSHOT_SCHEMA_VERSION;
+  schemaVersion: OrderSnapshotSchemaVersion;
   status: OrderSnapshotStatus;
   createdAt: string;
   sourceQuoteSnapshotId: string;
@@ -51,6 +61,8 @@ export type OrderSnapshot = {
   productionInput: FrozenProductionInput;
   customer?: QuoteSnapshot["customer"];
   seller?: QuoteSnapshot["seller"];
+  lines?: readonly FrozenQuoteLine[];
+  jobCommercial?: FrozenJobCommercial;
 };
 
 export type OrderSnapshotResult =
@@ -63,28 +75,66 @@ const INCOMPATIBLE_REASON = "Oferta acceptată nu poate fi transformată în com
 const SERVICE_LINES_REASON =
   "Oferta cu montaj nu poate fi transformată în comandă în această etapă.";
 
+type CopiedOrderCore = {
+  status: "FROZEN";
+  sourceQuoteSnapshotId: string;
+  sourceQuoteContentHash: string;
+  sourceAcceptanceId: string;
+  sourceAcceptedAt: string;
+  productCode: string;
+  productLabel: string;
+  inscription: string;
+  sourceReviewId: string;
+  truth: QuoteSnapshot["truth"];
+  quantities: FrozenQuantity[];
+  eic: FrozenEicReference;
+  commercial: FrozenCommercialOffer;
+  productionInput: FrozenProductionInput;
+  customer?: QuoteSnapshot["customer"];
+  seller?: QuoteSnapshot["seller"];
+};
+
 export function freezeOrderSnapshot(
   quote: QuoteSnapshot,
   acceptance: QuoteAcceptanceDecision,
   options?: { createdAt?: string },
 ): OrderSnapshotResult {
-  if (quote.schemaVersion === 2) {
-    return {
-      ok: false,
-      error: "service_lines_not_orderable",
-      reasons: [SERVICE_LINES_REASON],
-    };
+  const accepted = assertAcceptedQuote(quote, acceptance);
+  if (accepted) {
+    return accepted;
   }
+  if (quote.schemaVersion === QUOTE_SNAPSHOT_SCHEMA_VERSION_V2) {
+    return freezeOrderSnapshotV2(quote, acceptance, options);
+  }
+  return freezeOrderSnapshotV1(quote, acceptance, options);
+}
+
+export function orderSnapshotErrorLabel(error: OrderSnapshotError): string {
+  switch (error) {
+    case "quote_not_accepted":
+      return NOT_ACCEPTED_REASON;
+    case "acceptance_mismatch":
+      return MISMATCH_REASON;
+    case "incompatible_order_source":
+      return INCOMPATIBLE_REASON;
+    case "service_lines_not_orderable":
+      return SERVICE_LINES_REASON;
+    default: {
+      const _exhaustive: never = error;
+      return _exhaustive;
+    }
+  }
+}
+
+function freezeOrderSnapshotV1(
+  quote: QuoteSnapshot,
+  acceptance: QuoteAcceptanceDecision,
+  options?: { createdAt?: string },
+): OrderSnapshotResult {
   if (
     quote.schemaVersion !== QUOTE_SNAPSHOT_SCHEMA_VERSION ||
-    quote.status !== "FROZEN" ||
-    quote.quoteSnapshotId.trim() === "" ||
-    quote.contentHash.trim() === "" ||
-    quote.eic.completeness !== "COMPLETE" ||
-    quote.commercial.completeness !== "COMPLETE" ||
-    quote.productionInput.schemaVersion !== FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION ||
-    quote.productionInput.contentHash.trim() === "" ||
-    quote.productionInput.operations.length === 0
+    !isSupportedQuoteSnapshot(quote) ||
+    !hasCompleteProductOrderSource(quote)
   ) {
     return {
       ok: false,
@@ -92,6 +142,44 @@ export function freezeOrderSnapshot(
       reasons: [INCOMPATIBLE_REASON],
     };
   }
+  const hashedContent = {
+    schemaVersion: ORDER_SNAPSHOT_SCHEMA_VERSION,
+    ...copyOrderCore(quote, acceptance),
+  };
+  return finishOrderSnapshot(hashedContent, acceptance.acceptanceId, options?.createdAt);
+}
+
+function freezeOrderSnapshotV2(
+  quote: QuoteSnapshot,
+  acceptance: QuoteAcceptanceDecision,
+  options?: { createdAt?: string },
+): OrderSnapshotResult {
+  if (
+    quote.schemaVersion !== QUOTE_SNAPSHOT_SCHEMA_VERSION_V2 ||
+    !isSupportedQuoteSnapshot(quote) ||
+    !hasCompleteProductOrderSource(quote) ||
+    !quote.lines ||
+    !quote.jobCommercial
+  ) {
+    return {
+      ok: false,
+      error: "incompatible_order_source",
+      reasons: [INCOMPATIBLE_REASON],
+    };
+  }
+  const hashedContent = {
+    schemaVersion: ORDER_SNAPSHOT_SCHEMA_VERSION_V2,
+    ...copyOrderCore(quote, acceptance),
+    lines: quote.lines.map((line) => copyFrozenQuoteLine(line)),
+    jobCommercial: copyFrozenJobCommercial(quote.jobCommercial),
+  };
+  return finishOrderSnapshot(hashedContent, acceptance.acceptanceId, options?.createdAt);
+}
+
+function assertAcceptedQuote(
+  quote: QuoteSnapshot,
+  acceptance: QuoteAcceptanceDecision,
+): OrderSnapshotResult | null {
   if (
     acceptance.schemaVersion !== QUOTE_ACCEPTANCE_SCHEMA_VERSION ||
     acceptance.acceptanceId.trim() === "" ||
@@ -110,11 +198,29 @@ export function freezeOrderSnapshot(
       reasons: [MISMATCH_REASON],
     };
   }
+  return null;
+}
 
+function hasCompleteProductOrderSource(quote: QuoteSnapshot): boolean {
+  return (
+    quote.status === "FROZEN" &&
+    quote.quoteSnapshotId.trim() !== "" &&
+    quote.contentHash.trim() !== "" &&
+    quote.eic.completeness === "COMPLETE" &&
+    quote.commercial.completeness === "COMPLETE" &&
+    quote.productionInput.schemaVersion === FROZEN_PRODUCTION_INPUT_SCHEMA_VERSION &&
+    quote.productionInput.contentHash.trim() !== "" &&
+    quote.productionInput.operations.length > 0
+  );
+}
+
+function copyOrderCore(
+  quote: QuoteSnapshot,
+  acceptance: QuoteAcceptanceDecision,
+): CopiedOrderCore {
   const seller = copyFrozenSellerIdentity(quote.seller);
-  const hashedContent = {
-    schemaVersion: ORDER_SNAPSHOT_SCHEMA_VERSION,
-    status: "FROZEN" as const,
+  return {
+    status: "FROZEN",
     sourceQuoteSnapshotId: quote.quoteSnapshotId,
     sourceQuoteContentHash: quote.contentHash,
     sourceAcceptanceId: acceptance.acceptanceId,
@@ -145,33 +251,27 @@ export function freezeOrderSnapshot(
       : {}),
     ...(seller ? { seller } : {}),
   };
+}
+
+function finishOrderSnapshot(
+  hashedContent: CopiedOrderCore & {
+    schemaVersion: OrderSnapshotSchemaVersion;
+    lines?: readonly FrozenQuoteLine[];
+    jobCommercial?: FrozenJobCommercial;
+  },
+  acceptanceId: string,
+  createdAt?: string,
+): OrderSnapshotResult {
   const contentHash = sha256Hex(stableStringify(hashedContent));
   return {
     ok: true,
     snapshot: deepFreeze({
-      orderSnapshotId: `ord:${acceptance.acceptanceId}:${contentHash}`,
+      orderSnapshotId: `ord:${acceptanceId}:${contentHash}`,
       ...hashedContent,
-      createdAt: options?.createdAt ?? new Date().toISOString(),
+      createdAt: createdAt ?? new Date().toISOString(),
       contentHash,
     }),
   };
-}
-
-export function orderSnapshotErrorLabel(error: OrderSnapshotError): string {
-  switch (error) {
-    case "quote_not_accepted":
-      return NOT_ACCEPTED_REASON;
-    case "acceptance_mismatch":
-      return MISMATCH_REASON;
-    case "incompatible_order_source":
-      return INCOMPATIBLE_REASON;
-    case "service_lines_not_orderable":
-      return SERVICE_LINES_REASON;
-    default: {
-      const _exhaustive: never = error;
-      return _exhaustive;
-    }
-  }
 }
 
 function stableStringify(value: unknown): string {

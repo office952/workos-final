@@ -350,6 +350,108 @@ describe("ALT_B_SCOPED financial access", () => {
     });
     fixture.close();
   });
+
+  it("does not expose persisted Order v2 evidence to a commercial member", async () => {
+    const fixture = createCloudFixture();
+    const org = await addOrganization(fixture, "Acces Order V2");
+    await addUser(fixture, {
+      email: "owner-order-v2@test",
+      password: OWNER_PASSWORD,
+      organizationId: org.organization.organizationId,
+      role: "owner",
+    });
+    await addUser(fixture, {
+      email: "member-order-v2@test",
+      password: MEMBER_PASSWORD,
+      organizationId: org.organization.organizationId,
+      role: "member",
+    });
+    const owner = await loginCloud(
+      fixture.app,
+      "owner-order-v2@test",
+      OWNER_PASSWORD,
+      org.organization.organizationId,
+    );
+    const member = await loginCloud(
+      fixture.app,
+      "member-order-v2@test",
+      MEMBER_PASSWORD,
+      org.organization.organizationId,
+    );
+    expect(
+      (
+        await fixture.app.request(`/api/products/${CANONICAL_PRODUCT_CODE}`, {
+          headers: { cookie: owner.cookie ?? "" },
+        })
+      ).status,
+    ).toBe(200);
+    const runtime = fixture.registry.getOrOpen(org.plane, fixture.cloudRoot);
+    const quote = syntheticPersistedQuoteV2();
+    runtime.persistQuoteSnapshot(quote);
+    runtime.persistQuoteAcceptance({
+      acceptanceId: "qad:v2-subcontract",
+      schemaVersion: 1,
+      quoteSnapshotId: quote.quoteSnapshotId,
+      quoteContentHash: quote.contentHash,
+      acceptedAt: "2026-09-04T01:00:00.000Z",
+    });
+    runtime.persistOrderSnapshot({
+      orderSnapshotId: "ord:v2-subcontract",
+      schemaVersion: 2,
+      status: "FROZEN",
+      createdAt: "2026-09-04T00:00:00.000Z",
+      sourceQuoteSnapshotId: quote.quoteSnapshotId,
+      sourceQuoteContentHash: quote.contentHash,
+      sourceAcceptanceId: "qad:v2-subcontract",
+      sourceAcceptedAt: "2026-09-04T01:00:00.000Z",
+      productCode: quote.productCode,
+      productLabel: quote.productLabel,
+      inscription: quote.inscription,
+      sourceReviewId: quote.sourceReviewId,
+      contentHash: "hash-order-v2-subcontract-api",
+      truth: quote.truth,
+      quantities: quote.quantities,
+      eic: quote.eic,
+      commercial: quote.commercial,
+      productionInput: quote.productionInput,
+      lines: quote.lines,
+      jobCommercial: quote.jobCommercial,
+    });
+
+    const memberResponse = await fixture.app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/ord:v2-subcontract`,
+      { headers: { cookie: member.cookie ?? "" } },
+    );
+    expect(memberResponse.status).toBe(200);
+    const memberBody = await json(memberResponse);
+    const memberOrder = memberBody.orderSnapshot as Record<string, unknown>;
+    const memberInstall = (
+      (memberOrder.lines as Array<Record<string, unknown>>) ?? []
+    ).find((line) => line.kind === "SITE_INSTALLATION");
+    expect(memberOrder.jobCommercial).toMatchObject({ grossPrice: 866.82 });
+    expect(memberInstall?.commercial).toMatchObject({ netPrice: 200, grossPrice: 242 });
+    expect(memberInstall).not.toHaveProperty("evidence");
+    expect(memberInstall).not.toHaveProperty("eic");
+    expect(JSON.stringify(memberBody)).not.toContain("Montaj Rapid SRL");
+    expect(collectFinancialKeys(memberBody).has("eic")).toBe(false);
+
+    const ownerResponse = await fixture.app.request(
+      `/api/products/${CANONICAL_PRODUCT_CODE}/orders/ord:v2-subcontract`,
+      { headers: { cookie: owner.cookie ?? "" } },
+    );
+    expect(ownerResponse.status).toBe(200);
+    const ownerBody = await json(ownerResponse);
+    const ownerInstall = (
+      (((ownerBody.orderSnapshot as Record<string, unknown>).lines as Array<
+        Record<string, unknown>
+      >) ?? [])
+    ).find((line) => line.kind === "SITE_INSTALLATION");
+    expect(ownerInstall?.evidence).toMatchObject({
+      amount: 180,
+      supplierLabel: "Montaj Rapid SRL",
+    });
+    fixture.close();
+  });
 });
 
 function syntheticPersistedQuoteV2() {

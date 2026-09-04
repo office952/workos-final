@@ -4,10 +4,12 @@ import {
   resolveFinancialAccess,
   scopeCommercialPrice,
   scopeExecutionPlanView,
+  scopeOrderSnapshot,
   scopeQuoteSnapshot,
   scopeSiteInstallationOperatorView,
 } from "./financialAccess.js";
 import { projectCommercialPrice } from "./price.js";
+import type { OrderSnapshot } from "./orderSnapshot.js";
 import type { QuoteSnapshot } from "./quoteSnapshot.js";
 
 const price = projectCommercialPrice({
@@ -286,6 +288,38 @@ describe("financial access", () => {
     expect(collectFinancialKeys(commercial).has("rate")).toBe(false);
     expect(collectFinancialKeys(workshop).has("rate")).toBe(false);
   });
+
+  it("scopes nested Order v2 service money with the same quote-v2 law", () => {
+    const order = syntheticSubcontractOrderV2();
+    const owner = scopeOrderSnapshot(order, "owner");
+    const commercial = scopeOrderSnapshot(order, "commercial");
+    const workshop = scopeOrderSnapshot(order, "workshop");
+    const ownerInstall = findInstallLine(owner);
+    const commercialInstall = findInstallLine(commercial);
+    const workshopInstall = findInstallLine(workshop);
+
+    expect(owner.jobCommercial).toMatchObject({ grossPrice: 866.82 });
+    expect(ownerInstall?.evidence).toMatchObject({
+      amount: 180,
+      supplierLabel: "Montaj Rapid SRL",
+    });
+    expect(ownerInstall?.eic).toMatchObject({ total: 180 });
+    expect(collectFinancialKeys(owner).has("eic")).toBe(true);
+
+    expect(commercial.jobCommercial).toMatchObject({ grossPrice: 866.82 });
+    expect(commercialInstall?.commercial).toMatchObject({ netPrice: 200, grossPrice: 242 });
+    expect(commercialInstall).not.toHaveProperty("evidence");
+    expect(commercialInstall).not.toHaveProperty("eic");
+    expect(collectFinancialKeys(commercial).has("eic")).toBe(false);
+    expect(JSON.stringify(commercial)).not.toContain("Montaj Rapid SRL");
+
+    expect(workshop.jobCommercial).toBeUndefined();
+    expect(workshop.commercial).toBeUndefined();
+    expect(workshop.eic).toBeUndefined();
+    expect(workshopInstall).not.toHaveProperty("commercial");
+    expect(collectFinancialKeys(workshop).has("grossPrice")).toBe(false);
+    expect(collectFinancialKeys(workshop).has("eic")).toBe(false);
+  });
 });
 
 function findInstallLine(snapshot: Record<string, unknown>) {
@@ -429,4 +463,30 @@ function syntheticSubcontractQuoteV2(): QuoteSnapshot {
       completeness: "COMPLETE",
     },
   } as unknown as QuoteSnapshot;
+}
+
+function syntheticSubcontractOrderV2(): OrderSnapshot {
+  const quote = syntheticSubcontractQuoteV2();
+  return {
+    orderSnapshotId: "ord:v2-subcontract",
+    schemaVersion: 2,
+    status: "FROZEN",
+    createdAt: "2026-09-04T00:00:00.000Z",
+    sourceQuoteSnapshotId: quote.quoteSnapshotId,
+    sourceQuoteContentHash: quote.contentHash,
+    sourceAcceptanceId: "qad:v2-subcontract",
+    sourceAcceptedAt: "2026-09-04T01:00:00.000Z",
+    productCode: quote.productCode,
+    productLabel: quote.productLabel,
+    inscription: quote.inscription,
+    sourceReviewId: quote.sourceReviewId,
+    contentHash: "hash-order-v2-subcontract",
+    truth: quote.truth,
+    quantities: quote.quantities,
+    eic: quote.eic,
+    commercial: quote.commercial,
+    productionInput: quote.productionInput,
+    lines: quote.lines,
+    jobCommercial: quote.jobCommercial,
+  };
 }

@@ -605,8 +605,8 @@ describe("product configuration API", () => {
     const end = source.indexOf('"/api/products/:productCode/orders/:orderSnapshotId"');
     const createPath = source.slice(start, end);
     expect(createPath).toContain("freezeOrderSnapshot");
-    expect(createPath).not.toMatch(/compileDefinition|compileAggregate|compileEic/);
-    expect(createPath).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
+    expect(createPath).not.toMatch(/compileDefinition|compileAggregate|compileEic|compileAcceptedProduct/);
+    expect(createPath).not.toMatch(/projectCommercialPrice|composeProductProcesses|listActiveCostEvidence/);
   });
 
   it("releases production from a frozen order without live compile or side effects", async () => {

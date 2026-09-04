@@ -13,7 +13,9 @@ import {
   freezeOrderSnapshot,
   freezeProductionReleaseFromOrder,
   freezeQuoteSnapshot,
+  LAB_SITE_INSTALL_ID,
   projectCommercialPrice,
+  projectManualFixedServicePrice,
   recordQuoteAcceptance,
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
@@ -479,6 +481,125 @@ describe("product system persistence", () => {
       movements: 0,
       actuals: 0,
     });
+    second.close();
+  });
+
+  it("round-trips Order v2 lines and jobCommercial through the existing store", () => {
+    const sqlitePath = tempSqlitePath();
+    const first = createProductSystemRuntime(sqlitePath);
+    const definition = compileDefinition(
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: {
+          "root.inscription": "WORKOS",
+          "face.finish": "none",
+          "face.confirmedAreaMm2": 250000,
+          "volume.depthMm": "60",
+          "volume.finish": "none",
+          "volume.confirmedPerimeterMm": 12500,
+        },
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed truth");
+    }
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      first.labels(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+    const eic = compileEic(aggregate, composition);
+    const frozen = freezeQuoteSnapshot(
+      truth,
+      aggregate,
+      composition,
+      eic,
+      projectCommercialPrice(eic),
+      {
+        createdAt: "2026-09-04T00:00:00.000Z",
+        installation: {
+          label: "Montaj la locație",
+          providerMode: "INTERNAL",
+          requestId: "req:os-s7-persist",
+          technicalConfiguration: {
+            measurementStatus: "OFFICE_MEASURED",
+            facadeType: "CONCRETE",
+            fixingMethod: "MECHANICAL_ANCHOR",
+            siteElectrical: "NOT_APPLICABLE",
+            crewSize: 3,
+            plannedDurationHours: 4,
+          },
+          evidence: {
+            resourceId: LAB_SITE_INSTALL_ID,
+            amount: 25,
+            currency: "EUR",
+            perUnit: "person_hour",
+            source: "OWNER_CONFIRMED_WORKSHOP",
+            classification: "OWNER_CONFIRMED",
+            note: "Tarif intern sintetic.",
+          },
+          eic: {
+            completeness: "COMPLETE",
+            completenessReasons: [],
+            geometryLabel: null,
+            currency: "EUR",
+            lines: [
+              {
+                resourceId: LAB_SITE_INSTALL_ID,
+                label: "Manoperă montaj la locație",
+                quantity: 12,
+                unit: "person_hour",
+                rate: 25,
+                currency: "EUR",
+                cost: 300,
+                kind: "LABOR",
+                group: "labor",
+              },
+            ],
+            total: 300,
+            excludedComponentLabels: [],
+          },
+          commercial: projectManualFixedServicePrice({ netPrice: 200 }),
+        },
+      },
+    );
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    const acceptance = {
+      acceptanceId: `qad:${frozen.snapshot.quoteSnapshotId}`,
+      schemaVersion: 1 as const,
+      quoteSnapshotId: frozen.snapshot.quoteSnapshotId,
+      quoteContentHash: frozen.snapshot.contentHash,
+      acceptedAt: "2026-09-04T01:00:00.000Z",
+    };
+    const order = freezeOrderSnapshot(frozen.snapshot, acceptance, {
+      createdAt: "2026-09-04T02:00:00.000Z",
+    });
+    expect(order.ok).toBe(true);
+    if (!order.ok) {
+      return;
+    }
+    first.persistQuoteSnapshot(frozen.snapshot);
+    first.persistQuoteAcceptance(acceptance);
+    first.persistOrderSnapshot(order.snapshot);
+    first.close();
+
+    const second = createProductSystemRuntime(sqlitePath);
+    const stored = second.readOrderSnapshot(order.snapshot.orderSnapshotId);
+    const byQuote = second.readOrderSnapshotByQuote(frozen.snapshot.quoteSnapshotId);
+    expect(stored?.schemaVersion).toBe(2);
+    expect(stored?.contentHash).toBe(order.snapshot.contentHash);
+    expect(stored?.lines).toEqual(order.snapshot.lines);
+    expect(stored?.jobCommercial).toEqual(order.snapshot.jobCommercial);
+    expect(byQuote?.orderSnapshotId).toBe(order.snapshot.orderSnapshotId);
+    expect(second.readQuoteSnapshot(frozen.snapshot.quoteSnapshotId)?.schemaVersion).toBe(2);
     second.close();
   });
 

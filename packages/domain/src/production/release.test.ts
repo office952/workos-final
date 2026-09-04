@@ -232,6 +232,18 @@ describe("production release from order", () => {
     expect(record.tasks.every((task) => task.status === "PLANNED")).toBe(true);
   });
 
+  it("refuses Production Release from Order v2", () => {
+    const { order } = goldenOrder();
+    const refused = freezeProductionReleaseFromOrder({
+      ...order,
+      schemaVersion: 2,
+    });
+    expect(refused).toMatchObject({
+      ok: false,
+      error: "incompatible_order_source",
+    });
+  });
+
   it("does not know LETTERS internals and does not import live compilers", () => {
     const source = readFileSync(new URL("./release.ts", import.meta.url), "utf8");
     expect(source).not.toMatch(/LETTERS|FACE|VOLUME|ACM|Logo/);

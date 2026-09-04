@@ -13,12 +13,21 @@ import {
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
 import type { DraftValues } from "../product/types.js";
+import {
+  LAB_SITE_INSTALL_ID,
+  SVC_SITE_INSTALL_SUBCONTRACT_ID,
+} from "../resources/catalog.js";
 import { compileEic } from "../resources/eic.js";
 import { DEFAULT_COMMERCIAL_POLICY, type CommercialPolicy } from "./policy.js";
 import { projectCommercialPrice } from "./price.js";
+import { projectManualFixedServicePrice } from "./servicePrice.js";
 import { freezeOrderSnapshot } from "./orderSnapshot.js";
 import { recordQuoteAcceptance } from "./quoteAcceptance.js";
-import { freezeQuoteSnapshot, type QuoteSnapshot } from "./quoteSnapshot.js";
+import {
+  freezeQuoteSnapshot,
+  type QuoteInstallationFreezeInput,
+  type QuoteSnapshot,
+} from "./quoteSnapshot.js";
 
 const readyValues: DraftValues = {
   "root.inscription": "WORKOS",
@@ -218,5 +227,248 @@ describe("order snapshot freeze", () => {
     const source = readFileSync(new URL("./orderSnapshot.ts", import.meta.url), "utf8");
     expect(source).not.toMatch(/compileDefinition|compileAggregate|compileEic/);
     expect(source).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
+    expect(source).not.toMatch(/listActiveCostEvidence/);
+  });
+
+  it("copies a valid INTERNAL Quote v2 into an immutable Order v2", () => {
+    const { quote, acceptance } = frozenAcceptedInstallQuote("INTERNAL");
+    const first = freezeOrderSnapshot(quote, acceptance, {
+      createdAt: "2026-09-04T10:00:00.000Z",
+    });
+    const second = freezeOrderSnapshot(quote, acceptance, {
+      createdAt: "2026-09-04T18:00:00.000Z",
+    });
+    expect(first.ok && second.ok).toBe(true);
+    if (!first.ok || !second.ok) {
+      return;
+    }
+    expect(first.snapshot.schemaVersion).toBe(2);
+    expect(first.snapshot.lines).toHaveLength(2);
+    expect(first.snapshot.jobCommercial?.grossPrice).toBe(quote.jobCommercial?.grossPrice);
+    expect(first.snapshot.lines).toEqual(quote.lines);
+    expect(first.snapshot.jobCommercial).toEqual(quote.jobCommercial);
+    expect(first.snapshot.eic.total).toBe(382.5);
+    expect(first.snapshot.commercial.grossPrice).toBe(624.82);
+    expect(first.snapshot.contentHash).toBe(second.snapshot.contentHash);
+    expect(Object.isFrozen(first.snapshot.lines)).toBe(true);
+    expect(Object.isFrozen(first.snapshot.jobCommercial)).toBe(true);
+    const laterRate = projectCommercialPrice(quote.eic, {
+      ...DEFAULT_COMMERCIAL_POLICY,
+      version: 2,
+      markupPercent: 70,
+    } satisfies CommercialPolicy);
+    expect(laterRate.grossPrice).not.toBe(first.snapshot.commercial.grossPrice);
+    const mutatedQuote: QuoteSnapshot = {
+      ...quote,
+      jobCommercial: quote.jobCommercial
+        ? { ...quote.jobCommercial, grossPrice: 1 }
+        : undefined,
+    };
+    expect(first.snapshot.jobCommercial?.grossPrice).toBe(quote.jobCommercial?.grossPrice);
+    expect(mutatedQuote.jobCommercial?.grossPrice).toBe(1);
+  });
+
+  it("copies a valid SUBCONTRACTED Quote v2 without recalculating", () => {
+    const { quote, acceptance } = frozenAcceptedInstallQuote("SUBCONTRACTED");
+    const frozen = freezeOrderSnapshot(quote, acceptance);
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    const install = frozen.snapshot.lines?.find((line) => line.kind === "SITE_INSTALLATION");
+    expect(frozen.snapshot.schemaVersion).toBe(2);
+    expect(install).toMatchObject({
+      providerMode: "SUBCONTRACTED",
+      commercialUnit: "job",
+      quantity: 1,
+      sourceRequestId: "req:os-s7-subcontract",
+    });
+    expect(frozen.snapshot.jobCommercial).toEqual(quote.jobCommercial);
+  });
+
+  it("refuses a tampered Quote v2 instead of repairing it", () => {
+    const { quote, acceptance } = frozenAcceptedInstallQuote("INTERNAL");
+    expect(
+      freezeOrderSnapshot(
+        {
+          ...quote,
+          jobCommercial: quote.jobCommercial
+            ? { ...quote.jobCommercial, grossPrice: 1 }
+            : undefined,
+        },
+        acceptance,
+      ),
+    ).toMatchObject({ ok: false, error: "incompatible_order_source" });
+    expect(
+      freezeOrderSnapshot(
+        {
+          ...quote,
+          lines: quote.lines?.map((line) =>
+            line.kind === "SITE_INSTALLATION"
+              ? { ...line, providerMode: "SUBCONTRACTED", commercialUnit: "job" }
+              : line,
+          ),
+        },
+        acceptance,
+      ),
+    ).toMatchObject({ ok: false, error: "incompatible_order_source" });
+    expect(
+      freezeOrderSnapshot(quote, {
+        ...acceptance,
+        quoteSnapshotId: "qts:other",
+      }),
+    ).toMatchObject({ ok: false, error: "quote_not_accepted" });
+    expect(
+      freezeOrderSnapshot(quote, {
+        ...acceptance,
+        quoteContentHash: "0".repeat(64),
+      }),
+    ).toMatchObject({ ok: false, error: "acceptance_mismatch" });
   });
 });
+
+function frozenAcceptedInstallQuote(mode: "INTERNAL" | "SUBCONTRACTED") {
+  const definition = compileDefinition(
+    frontlitPlexiAl06Template,
+    frontlitPlexiAl06FormSchema,
+    {
+      templateCode: CANONICAL_PRODUCT_CODE,
+      values: readyValues,
+    },
+  );
+  const truth = confirmReviewedDefinition(definition, definition.reviewId);
+  if ("ok" in truth) {
+    throw new Error("expected confirmed truth");
+  }
+  const aggregate = compileAggregate(
+    truth,
+    frontlitPlexiAl06Template,
+    frontlitPlexiAl06FormSchema,
+    seededDisplayLabelCatalog(),
+  );
+  const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06Template);
+  const eic = compileEic(aggregate, composition);
+  const installation = installFreezeInput(mode);
+  const frozen = freezeQuoteSnapshot(
+    truth,
+    aggregate,
+    composition,
+    eic,
+    projectCommercialPrice(eic),
+    { createdAt: "2026-09-04T00:00:00.000Z", installation },
+  );
+  if (!frozen.ok) {
+    throw new Error("expected frozen install quote");
+  }
+  const liveAcceptance = recordQuoteAcceptance(frozen.snapshot);
+  if (liveAcceptance.ok) {
+    throw new Error("live v2 acceptance must stay refused");
+  }
+  return {
+    quote: frozen.snapshot,
+    acceptance: {
+      acceptanceId: `qad:${frozen.snapshot.quoteSnapshotId}`,
+      schemaVersion: 1 as const,
+      quoteSnapshotId: frozen.snapshot.quoteSnapshotId,
+      quoteContentHash: frozen.snapshot.contentHash,
+      acceptedAt: "2026-09-04T01:00:00.000Z",
+    },
+  };
+}
+
+function installFreezeInput(
+  mode: "INTERNAL" | "SUBCONTRACTED",
+): QuoteInstallationFreezeInput {
+  if (mode === "INTERNAL") {
+    return {
+      label: "Montaj la locație",
+      providerMode: "INTERNAL",
+      requestId: "req:os-s7-internal",
+      technicalConfiguration: {
+        measurementStatus: "OFFICE_MEASURED",
+        facadeType: "CONCRETE",
+        fixingMethod: "MECHANICAL_ANCHOR",
+        siteElectrical: "NOT_APPLICABLE",
+        crewSize: 3,
+        plannedDurationHours: 4,
+      },
+      evidence: {
+        resourceId: LAB_SITE_INSTALL_ID,
+        amount: 25,
+        currency: "EUR",
+        perUnit: "person_hour",
+        source: "OWNER_CONFIRMED_WORKSHOP",
+        classification: "OWNER_CONFIRMED",
+        note: "Tarif intern sintetic.",
+      },
+      eic: {
+        completeness: "COMPLETE",
+        completenessReasons: [],
+        geometryLabel: null,
+        currency: "EUR",
+        lines: [
+          {
+            resourceId: LAB_SITE_INSTALL_ID,
+            label: "Manoperă montaj la locație",
+            quantity: 12,
+            unit: "person_hour",
+            rate: 25,
+            currency: "EUR",
+            cost: 300,
+            kind: "LABOR",
+            group: "labor",
+          },
+        ],
+        total: 300,
+        excludedComponentLabels: [],
+      },
+      commercial: projectManualFixedServicePrice({ netPrice: 200 }),
+    };
+  }
+  return {
+    label: "Montaj la locație",
+    providerMode: "SUBCONTRACTED",
+    requestId: "req:os-s7-subcontract",
+    technicalConfiguration: {
+      measurementStatus: "OFFICE_MEASURED",
+      facadeType: "CONCRETE",
+      fixingMethod: "MECHANICAL_ANCHOR",
+      siteElectrical: "NOT_APPLICABLE",
+      crewSize: null,
+      plannedDurationHours: null,
+    },
+    evidence: {
+      resourceId: SVC_SITE_INSTALL_SUBCONTRACT_ID,
+      amount: 180,
+      currency: "EUR",
+      perUnit: "job",
+      source: "OWNER_CONFIRMED_WORKSHOP",
+      classification: "OWNER_CONFIRMED",
+      note: "Cost subcontractant sintetic.",
+      supplierLabel: "Montaj Rapid SRL",
+      validUntil: "2027-12-31",
+    },
+    eic: {
+      completeness: "COMPLETE",
+      completenessReasons: [],
+      geometryLabel: null,
+      currency: "EUR",
+      lines: [
+        {
+          resourceId: SVC_SITE_INSTALL_SUBCONTRACT_ID,
+          label: "Montaj la locație subcontractat",
+          quantity: 1,
+          unit: "job",
+          rate: 180,
+          currency: "EUR",
+          cost: 180,
+          kind: "SERVICE",
+          group: "services",
+        },
+      ],
+      total: 180,
+      excludedComponentLabels: [],
+    },
+    commercial: projectManualFixedServicePrice({ netPrice: 200 }),
+  };
+}

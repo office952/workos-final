@@ -75,6 +75,8 @@ export {
   QUOTE_SNAPSHOT_ERRORS,
   QUOTE_SNAPSHOT_SCHEMA_VERSION,
   QUOTE_SNAPSHOT_SCHEMA_VERSION_V2,
+  copyFrozenJobCommercial,
+  copyFrozenQuoteLine,
   SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED,
   SERVICE_QUOTE_DOCUMENT_NOT_AUTHORIZED_REASON,
   SERVICE_QUOTE_FREEZE_NOT_AUTHORIZED,
@@ -122,11 +124,13 @@ export {
 export {
   ORDER_SNAPSHOT_ERRORS,
   ORDER_SNAPSHOT_SCHEMA_VERSION,
+  ORDER_SNAPSHOT_SCHEMA_VERSION_V2,
   ORDER_SNAPSHOT_STATUSES,
   freezeOrderSnapshot,
   orderSnapshotErrorLabel,
   type OrderSnapshot,
   type OrderSnapshotError,
   type OrderSnapshotResult,
+  type OrderSnapshotSchemaVersion,
   type OrderSnapshotStatus,
 } from "./orderSnapshot.js";
