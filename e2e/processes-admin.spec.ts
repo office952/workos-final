@@ -249,10 +249,9 @@ test("processes admin inspects capability-bound operational processes", async ({
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/admin/resources");
   await expect(
-    page.getByRole("heading", { name: "Resurse și cost intern" }),
+    page.getByRole("heading", { name: "Resurse și costuri" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Familie\s+Plexiglas/ }).click();
-  await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toBeVisible();
+  await expect(page.getByText("Plexiglas 3 mm opal").first()).toBeVisible();
 
   await page.goto("/components");
   await page.getByRole("button", { name: "Componente de produs" }).click();

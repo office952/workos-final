@@ -151,7 +151,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
 
   await page.goto("/admin/resources");
   await expect(
-    page.getByRole("heading", { name: "Resurse și cost intern" }),
+    page.getByRole("heading", { name: "Resurse și costuri" }),
   ).toBeVisible();
 
   await page.goto("/components");

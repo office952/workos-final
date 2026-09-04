@@ -78,7 +78,7 @@ test("shows stock identity, empty history, adjustment and execution OUT", async 
   });
 
   await adminHomeLink(page, "Resurse și cost intern").click();
-  await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resurse și costuri" })).toBeVisible();
   await page.goto("/admin");
   await adminHomeLink(page, "Procese operaționale").click();
   await expect(page.getByRole("heading", { name: "Procese operaționale" })).toBeVisible();

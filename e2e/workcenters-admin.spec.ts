@@ -250,10 +250,9 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
 
   await page.goto("/admin/resources");
   await expect(
-    page.getByRole("heading", { name: "Resurse și cost intern" }),
+    page.getByRole("heading", { name: "Resurse și costuri" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Familie\s+Plexiglas/ }).click();
-  await expect(page.getByRole("heading", { name: "Plexiglas", exact: true })).toBeVisible();
+  await expect(page.getByText("Plexiglas 3 mm opal").first()).toBeVisible();
 
   await page.goto("/components");
   await page.getByRole("button", { name: "Componente de produs" }).click();

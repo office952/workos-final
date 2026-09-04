@@ -324,14 +324,14 @@ test("expired subcontract evidence can be renewed through Resurse și costuri", 
   await page.goto(
     "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",
   );
-  await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resurse și costuri" })).toBeVisible();
   await expect(page.getByText("Montaj Rapid SRL").first()).toBeVisible();
   await expect(page.getByText("2020-06-01").first()).toBeVisible();
-  await page.getByRole("button", { name: "Confirmă tarif" }).click();
+  await page.getByRole("button", { name: "Editează tarif" }).click();
   await expect(page.getByLabel("Furnizor")).toHaveValue("Montaj Rapid SRL");
   await page.getByLabel("Valid de la").fill("2026-01-01");
   await page.getByLabel("Valid până la").fill("2027-12-31");
-  await page.getByRole("button", { name: "Confirmă tarif" }).click();
+  await page.getByRole("button", { name: "Salvează tarif" }).click();
   await expect(page.getByText("2027-12-31").first()).toBeVisible();
 
   await configureCanonicalLettersForRequest(page, requestId);

@@ -4546,3 +4546,195 @@ a.jobs-customer {
 .catalog-product-detail {
   border-color: var(--border-subtle);
 }
+
+.resources-workspace {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.resources-workspace-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.resources-workspace-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.resources-workspace-nav button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+  color: inherit;
+  font-weight: 550;
+}
+
+.resources-workspace-nav button[aria-current="page"] {
+  border-color: var(--accent);
+  font-weight: 650;
+}
+
+.resources-workspace-toolbar {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto auto;
+  gap: 0.75rem 1rem;
+  align-items: end;
+}
+
+.resources-rate-table {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.resources-rate-table thead,
+.resources-rate-table tbody {
+  display: contents;
+}
+
+.resources-rate-head,
+.resources-rate-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 2fr) minmax(4.5rem, 0.8fr) minmax(6.5rem, 1fr) minmax(6rem, 0.95fr);
+  gap: 0.65rem 1rem;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.resources-rate-head {
+  padding: 0 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.resources-rate-head th {
+  font: inherit;
+  text-align: left;
+}
+
+.resources-rate-row {
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.resources-rate-row td {
+  min-width: 0;
+}
+
+.resources-rate-row[aria-current="true"] {
+  border-color: var(--accent);
+}
+
+.resources-rate-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.resources-workspace-empty {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.resources-inventory-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.resources-inventory-row {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-s);
+  background: var(--surface-raised);
+  color: inherit;
+  text-align: left;
+}
+
+.resources-inventory-name {
+  margin: 0;
+  font-weight: 650;
+}
+
+.resources-inventory-meta {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.resources-tariff-input {
+  display: grid;
+  grid-template-columns: minmax(6rem, 10rem) auto;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.resources-tariff-unit {
+  margin: 0;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .resources-workspace-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .resources-rate-head {
+    display: none;
+  }
+
+  .resources-rate-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name status"
+      "variant amount";
+  }
+
+  .resources-rate-row > :nth-child(1) {
+    grid-area: name;
+  }
+
+  .resources-rate-row > :nth-child(2) {
+    grid-area: variant;
+    color: var(--text-secondary);
+  }
+
+  .resources-rate-row > :nth-child(3) {
+    grid-area: amount;
+    justify-self: end;
+  }
+
+  .resources-rate-row > :nth-child(4) {
+    grid-area: status;
+    justify-self: end;
+  }
+
+  .resources-tariff-input {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

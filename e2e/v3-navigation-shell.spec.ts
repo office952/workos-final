@@ -160,7 +160,7 @@ test("visible sibling pages keep the same menu from Stoc to Utilaje and Resurse"
 
   await primaryNavLink(page, "Resurse și costuri").click();
   await expect(page).toHaveURL(/\/admin\/resources$/);
-  await expectActiveVisiblePage(page, "Resurse și costuri", "Resurse și cost intern");
+  await expectActiveVisiblePage(page, "Resurse și costuri", "Resurse și costuri");
 
   await primaryNavLink(page, "Stoc").click();
   await expect(page).toHaveURL(/\/admin\/stock$/);

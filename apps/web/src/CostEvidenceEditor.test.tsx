@@ -44,11 +44,11 @@ describe("CostEvidenceEditor", () => {
     render(<CostEvidenceEditor evidence={evidence} onSaved={onSaved} />);
     expect(screen.getByText("m²")).toBeInTheDocument();
     expect(screen.getByText("EUR")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    await user.click(screen.getByRole("button", { name: "Editează tarif" }));
     const amount = screen.getByLabelText("Tarif");
     await user.clear(amount);
     await user.type(amount, "18");
-    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(onSaved).toHaveBeenCalledWith({ writeState: "READY" });
     expect(fetch).toHaveBeenCalledWith(
@@ -69,10 +69,10 @@ describe("CostEvidenceEditor", () => {
     render(
       <CostEvidenceEditor evidence={evidence} onSaved={vi.fn()} />,
     );
-    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    await user.click(screen.getByRole("button", { name: "Editează tarif" }));
     await user.clear(screen.getByLabelText("Tarif"));
     await user.type(screen.getByLabelText("Tarif"), "18");
-    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
     expect(
       screen.getByText("Tariful a fost schimbat între timp. Reîncarcă și încearcă din nou."),
     ).toBeInTheDocument();
@@ -95,15 +95,15 @@ describe("CostEvidenceEditor", () => {
       }),
     );
     render(<CostEvidenceEditor evidence={evidence} onSaved={onSaved} />);
-    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    await user.click(screen.getByRole("button", { name: "Editează tarif" }));
     await user.clear(screen.getByLabelText("Tarif"));
     await user.type(screen.getByLabelText("Tarif"), "18");
-    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
     expect(onSaved).toHaveBeenCalledWith({ writeState: "READY" });
     expect(
       screen.queryByText("Salvarea a eșuat. Tariful curent nu a fost schimbat."),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Confirmă tarif" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Editează tarif" })).toBeInTheDocument();
   });
 
   it("renews existing subcontract evidence with supplier and validity extras", async () => {
@@ -139,13 +139,13 @@ describe("CostEvidenceEditor", () => {
     expect(screen.getByText("Montaj Rapid SRL")).toBeInTheDocument();
     expect(screen.getByText("2020-01-01")).toBeInTheDocument();
     expect(screen.getByText("2020-06-01")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    await user.click(screen.getByRole("button", { name: "Editează tarif" }));
     expect(screen.getByLabelText("Furnizor")).toHaveValue("Montaj Rapid SRL");
     expect(screen.getByLabelText("Valid de la")).toHaveValue("2020-01-01");
     expect(screen.getByLabelText("Valid până la")).toHaveValue("2020-06-01");
     await user.clear(screen.getByLabelText("Valid până la"));
     await user.type(screen.getByLabelText("Valid până la"), "2027-12-31");
-    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
     expect(onSaved).toHaveBeenCalledTimes(1);
     const [, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [
       string,
@@ -193,7 +193,7 @@ describe("CostEvidenceEditor", () => {
     await user.type(screen.getByLabelText("Tarif"), "2");
     expect(screen.getByText("mm")).toBeInTheDocument();
     expect(screen.queryByText("volumeDepthMm")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
     expect(onSaved).toHaveBeenCalledTimes(1);
     const [, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [
       string,

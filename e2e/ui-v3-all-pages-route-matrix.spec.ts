@@ -88,7 +88,7 @@ function routesFor(ids: SyntheticIds): RouteVisit[] {
       path: "/admin/product-system",
       expectHeading: "Sistem produs",
     },
-    { id: "/admin/resources", path: "/admin/resources", expectHeading: "Resurse și cost intern" },
+    { id: "/admin/resources", path: "/admin/resources", expectHeading: "Resurse și costuri" },
     { id: "/admin/stock", path: "/admin/stock", expectHeading: "Stoc" },
     {
       id: "/admin/stock/:resourceId",
@@ -329,7 +329,7 @@ test.describe("UI V3 all existing routes matrix", () => {
         path: "/admin/resources",
         width: 1440,
         theme: "light",
-        heading: "Resurse și cost intern",
+        heading: "Resurse și costuri",
         settle: "resources",
       },
       {
@@ -394,7 +394,8 @@ test.describe("UI V3 all existing routes matrix", () => {
           await expect(page.getByRole("heading", { name: "Plan de execuție" })).toBeVisible();
           break;
         case "resources":
-          await expect(page.getByPlaceholder(/Nume, tip sau stare/)).toBeVisible();
+          await expect(page.getByRole("button", { name: "Costuri interne" })).toBeVisible();
+          await expect(page.getByPlaceholder("Caută...")).toBeVisible();
           break;
         case "catalog768":
           await expect(page.locator(".catalog-product-detail")).toBeHidden();

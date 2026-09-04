@@ -12,7 +12,11 @@ import {
 import { CloudSessionTestProvider } from "./CloudSessionContext";
 import { OWNER_WRITE_HINT } from "./organizationAccess";
 import { ResourcesAdminPage } from "./ResourcesAdminPage";
-import { fetchResourcesAdministration, patchCostEvidence } from "./systemApi";
+import {
+  createCostEvidence,
+  fetchResourcesAdministration,
+  patchCostEvidence,
+} from "./systemApi";
 import type { CloudSessionSnapshot } from "./cloudSessionApi";
 
 function cloudSnapshot(role: "owner" | "member"): CloudSessionSnapshot {
@@ -40,6 +44,7 @@ function cloudSnapshot(role: "owner" | "member"): CloudSessionSnapshot {
 vi.mock("./systemApi", () => ({
   fetchResourcesAdministration: vi.fn(),
   patchCostEvidence: vi.fn(),
+  createCostEvidence: vi.fn(),
 }));
 
 const seedAdmin = projectResourcesAdministration();
@@ -51,7 +56,7 @@ const writableAdmin = projectResourcesAdministration(
   })),
 );
 
-function renderResources(path = "/admin/resources?selected=family:PLEXIGLAS") {
+function renderResources(path = "/admin/resources") {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <ResourcesAdminPage />
@@ -64,101 +69,58 @@ describe("ResourcesAdminPage", () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(seedAdmin);
   });
 
-  it("shows owner hierarchy materials services labor and provenance without writes", async () => {
-    const user = userEvent.setup();
+  it("opens Costuri interne as a flat registry without catalog menus", async () => {
     renderResources();
 
-    expect(await screen.findByRole("button", { name: "Materiale" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Resurse și cost intern" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Resurse și costuri" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Context" })).toHaveTextContent("Administrare");
-    expect(screen.queryByRole("navigation", { name: "Secțiuni administrative" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Utilaje și zone" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Atelier — execuție" })).not.toBeInTheDocument();
-    expect(screen.getByText(/Materiale \d+ · Servicii \d+ · Manoperă \d+ · Dovezi de cost \d+/)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este disponibilă în această etapă.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Materiale" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Costuri interne" })).toHaveAttribute(
       "aria-current",
-      "true",
+      "page",
     );
-    expect(screen.getByRole("button", { name: "Servicii" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Manoperă" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Dovezi de cost" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Editează" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Confirmă tarif" })).not.toBeInTheDocument();
-
-    expect(screen.getByRole("heading", { name: /^Plexiglas$/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Plexiglas 3 mm opal" })).toBeInTheDocument();
-    expect(screen.getByText("16,00 EUR / m²")).toBeInTheDocument();
-    expect(screen.getAllByText("Confirmat de owner").length).toBeGreaterThan(0);
-    expect(screen.getByText("Achiziție confirmată de owner")).toBeInTheDocument();
-    expect(screen.getByText("plexiglas_3mm_opal").closest("details")).toBeTruthy();
-    expect(screen.queryByText("PLEXIGLAS")).not.toBeInTheDocument();
-    expect(screen.queryByText("4,25 EUR/m")).not.toBeInTheDocument();
-
-    await user.click(screen.getByText("Detalii"));
-    expect(screen.getByText("plexiglas_3mm_opal").closest("details")).toHaveAttribute(
-      "open",
-    );
-
-    await user.click(screen.getByRole("button", { name: "Servicii" }));
-    await user.click(screen.getByRole("button", { name: /Formare profil aluminiu/ }));
-    expect(screen.getByRole("heading", { name: "Formare profil aluminiu" })).toBeInTheDocument();
-    expect(screen.getAllByText("Rețetă serviciu").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("5,00 EUR / m").length).toBeGreaterThan(0);
-    expect(screen.getByText("Perimetru volum (m)")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /Îmbinare sudură oțel/ }));
-    expect(screen.getAllByText("Lipsă").length).toBeGreaterThan(0);
-
-    await user.click(screen.getByRole("button", { name: "Manoperă" }));
-    await user.click(screen.getByRole("button", { name: /Aplicare folie față/ }));
-    expect(screen.getByRole("heading", { name: "Aplicare folie față" })).toBeInTheDocument();
-    expect(screen.getAllByText("Rețetă manoperă").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("5,00 EUR / m²").length).toBeGreaterThan(0);
-
-    await user.click(screen.getByRole("button", { name: /Lipire față-volum/ }));
-    expect(screen.getByRole("heading", { name: "Lipire față-volum" })).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
-    await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
-    const evidence = screen.getByRole("article");
-    expect(within(evidence).getByText("Dovadă de cost intern")).toBeInTheDocument();
-    expect(screen.queryByText("Preț client")).not.toBeInTheDocument();
-    expect(screen.queryByText("ofertă")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Resurse" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Rețete" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Costuri interne" })).toBeInTheDocument();
+    expect(screen.getAllByText("Profil aluminiu 0,6 mm").length).toBeGreaterThan(0);
+    expect(screen.getByText("30 mm")).toBeInTheDocument();
+    expect(screen.getAllByText("Plexiglas 3 mm opal").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("16,00 EUR / m²").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Confirmat").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Alege un element")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Alege elementul" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Dovezi de cost" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Adaugă dovadă" })).not.toBeInTheDocument();
+    expect(screen.queryByText("volumeDepthMm")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Adaugă tarif" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Tarifele sunt folosite pentru cost intern. Editarea nu este disponibilă în această etapă."),
+    ).toBeInTheDocument();
   });
 
-  it("asks the owner to choose an item when selected is missing", async () => {
-    renderResources("/admin/resources");
-    expect(await screen.findByText("Alege un element")).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: /^Plexiglas$/ })).not.toBeInTheDocument();
-  });
-
-  it("shows a missing status for an unknown selected id", async () => {
-    renderResources("/admin/resources?selected=nu-exista");
-    expect(await screen.findByText("Element inexistent")).toBeInTheDocument();
-  });
-
-  it("opens the catalog picker without a second administrative menu", async () => {
+  it("lists resources and recipes as filters, not nested menus", async () => {
     const user = userEvent.setup();
-    renderResources("/admin/resources");
-    expect(await screen.findByRole("button", { name: "Alege elementul" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Secțiuni" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Alege elementul" }));
-    expect(screen.getByRole("dialog", { name: "Alege elementul" })).toBeInTheDocument();
-    expect(screen.queryByRole("dialog", { name: "Secțiuni" })).not.toBeInTheDocument();
-    await user.keyboard("{Escape}");
-    expect(screen.queryByRole("dialog", { name: "Alege elementul" })).not.toBeInTheDocument();
+    renderResources();
+    await user.click(await screen.findByRole("button", { name: "Resurse" }));
+    expect(screen.getByText("Plexiglas 3 mm opal")).toBeInTheDocument();
+    expect(screen.getByText(/Material · Plexiglas/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Materiale" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Rețete" }));
+    expect(screen.getByText("Formare profil aluminiu")).toBeInTheDocument();
+    expect(screen.getAllByText(/Rețetă serviciu/).length).toBeGreaterThan(0);
+    expect(screen.getByText("Aplicare folie față")).toBeInTheDocument();
+    expect(screen.getByText("Îmbinare sudură oțel")).toBeInTheDocument();
+    expect(screen.getAllByText(/Lipsă/).length).toBeGreaterThan(0);
   });
 
-  it("ignores nav=basic and keeps the resources catalog", async () => {
+  it("ignores nav=basic and keeps the workspace", async () => {
     renderResources("/admin/resources?nav=basic");
-    expect(await screen.findByRole("heading", { name: "Resurse și cost intern" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Resurse și costuri" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Costuri interne" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(screen.queryByRole("navigation", { name: "Secțiuni administrative" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Materiale" })).toBeInTheDocument();
   });
 
   it("announces loading with a polite live status", async () => {
@@ -169,16 +131,15 @@ describe("ResourcesAdminPage", () => {
           release = resolve;
         }),
     );
-    renderResources("/admin/resources");
+    renderResources();
     const loading = await screen.findByRole("status");
     expect(loading).toHaveAttribute("aria-live", "polite");
     expect(loading).toHaveTextContent("Se încarcă catalogul de resurse…");
-    expect(screen.queryByRole("button", { name: "Reîncearcă" })).not.toBeInTheDocument();
     release?.(seedAdmin);
-    expect(await screen.findByText("Alege un element")).toBeInTheDocument();
+    expect(await screen.findByRole("table", { name: "Costuri interne" })).toBeInTheDocument();
   });
 
-  it("announces catalog errors and retries the same GET without losing selected", async () => {
+  it("announces catalog errors and retries the same GET", async () => {
     let releaseRetry: ((admin: typeof seedAdmin) => void) | undefined;
     vi.mocked(fetchResourcesAdministration).mockReset();
     vi.mocked(fetchResourcesAdministration)
@@ -190,36 +151,64 @@ describe("ResourcesAdminPage", () => {
           }),
       );
     const user = userEvent.setup();
-    renderResources("/admin/resources?selected=family:PLEXIGLAS");
+    renderResources();
     const error = await screen.findByRole("alert");
     expect(error).toHaveTextContent("Nu s-a putut încărca catalogul de resurse.");
-    expect(error).not.toHaveAttribute("aria-live");
     await user.click(screen.getByRole("button", { name: "Reîncearcă" }));
     expect(await screen.findByRole("status")).toHaveAttribute("aria-live", "polite");
-    expect(screen.queryByRole("button", { name: "Confirmă tarif" })).not.toBeInTheDocument();
     expect(vi.mocked(patchCostEvidence)).not.toHaveBeenCalled();
     releaseRetry?.(seedAdmin);
-    expect(await screen.findByRole("heading", { name: /^Plexiglas$/ })).toBeInTheDocument();
+    expect(await screen.findByRole("table", { name: "Costuri interne" })).toBeInTheDocument();
     expect(vi.mocked(fetchResourcesAdministration)).toHaveBeenCalledTimes(2);
   });
 
-  it("offers owner write on persisted cost evidence", async () => {
+  it("lets the owner add a qualified tariff in one drawer", async () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
+    const createdAdmin = projectResourcesAdministration([
+      ...costEvidence.map((item, index) => ({
+        ...item,
+        evidenceRowId: `cev:test:${index}`,
+        createdAt: "2026-08-18T00:00:00.000Z",
+      })),
+      {
+        resourceId: "aluminium_return_profile",
+        amount: 2.5,
+        currency: "EUR" as const,
+        perUnit: "m" as const,
+        source: "OWNER_CONFIRMED_WORKSHOP" as const,
+        classification: "OWNER_CONFIRMED" as const,
+        note: "",
+        when: { volumeDepthMm: 40 },
+        evidenceRowId: "cev:alu-40",
+        createdAt: "2026-09-04T00:00:00.000Z",
+      },
+    ]);
+    vi.mocked(createCostEvidence).mockResolvedValue(createdAdmin);
     const user = userEvent.setup();
-    renderResources("/admin/resources");
-    expect(
-      await screen.findByText(
-        /Valorile implicite de platformă nu sunt cost confirmat/,
-      ),
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
-    await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
-    expect(screen.getByRole("button", { name: "Confirmă tarif" })).toBeInTheDocument();
-    expect(screen.queryByText("Editarea tarifelor nu este disponibilă în această etapă.")).not.toBeInTheDocument();
-    expect(screen.getByText("Ultima modificare")).toBeInTheDocument();
+    renderResources();
+    await user.click(await screen.findByRole("button", { name: "Adaugă tarif" }));
+    expect(screen.getByRole("dialog", { name: "Adaugă tarif" })).toBeInTheDocument();
+    await user.selectOptions(
+      screen.getByLabelText("Resursă"),
+      "aluminium_return_profile",
+    );
+    await user.type(screen.getByLabelText("Adâncime volum"), "40");
+    await user.type(screen.getByLabelText("Tarif"), "2.50");
+    expect(screen.queryByText("volumeDepthMm")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
+    expect(createCostEvidence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resourceId: "aluminium_return_profile",
+        amount: 2.5,
+        when: { volumeDepthMm: 40 },
+      }),
+    );
+    expect(screen.getByText("2,50 EUR / m")).toBeInTheDocument();
+    expect(screen.getByText("40 mm")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Dovezi de cost" })).not.toBeInTheDocument();
   });
 
-  it("keeps Plexiglas selected after save even when the version token changes", async () => {
+  it("opens a cost row for edit and keeps the qualifier immutable", async () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
     const savedAdmin = projectResourcesAdministration(
       costEvidence.map((item, index) => ({
@@ -234,80 +223,21 @@ describe("ResourcesAdminPage", () => {
     );
     vi.mocked(patchCostEvidence).mockResolvedValue(savedAdmin);
     const user = userEvent.setup();
-    renderResources("/admin/resources");
-    await user.click(await screen.findByRole("button", { name: "Dovezi de cost" }));
-    await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
-    expect(
-      screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }),
-    ).toHaveAttribute("aria-current", "true");
-    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    renderResources();
+    await user.click(await screen.findByRole("row", { name: /Plexiglas 3 mm opal/ }));
+    const detail = screen.getByRole("dialog", { name: "Plexiglas 3 mm opal" });
+    expect(within(detail).getByText("Achiziție confirmată de owner")).toBeInTheDocument();
+    await user.click(within(detail).getByRole("button", { name: "Editează tarif" }));
     const amount = screen.getByLabelText("Tarif");
     await user.clear(amount);
     await user.type(amount, "18");
-    const fetchesBeforeSave = vi.mocked(fetchResourcesAdministration).mock.calls.length;
-    await user.click(screen.getAllByRole("button", { name: "Confirmă tarif" })[0]);
+    await user.click(screen.getByRole("button", { name: "Salvează tarif" }));
     expect(patchCostEvidence).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(fetchResourcesAdministration).mock.calls.length).toBe(
-      fetchesBeforeSave,
-    );
-    const selected = screen.getByRole("article");
-    expect(
-      screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }),
-    ).toHaveAttribute("aria-current", "true");
-    expect(
-      within(selected).getByRole("heading", { name: "Plexiglas 3 mm opal" }),
-    ).toBeInTheDocument();
-    expect(within(selected).getAllByText("18,00 EUR / m²").length).toBeGreaterThan(0);
-    for (const button of screen.getAllByRole("button", { name: /Profil aluminiu/ })) {
-      expect(button).not.toHaveAttribute("aria-current");
-    }
+    expect(within(screen.getByRole("dialog")).getAllByText("18,00 EUR / m²").length).toBeGreaterThan(0);
   });
 
-  it("shows platform-default cost provenance as not owner-confirmed", async () => {
-    vi.mocked(fetchResourcesAdministration).mockResolvedValue(
-      projectResourcesAdministration(
-        costEvidence.map((item, index) => ({
-          ...item,
-          source: "PLATFORM_DEFAULT",
-          classification: "DEVELOPMENT_DEFAULT",
-          evidenceRowId: `cev:default:${index}`,
-          createdAt: "2026-08-19T00:00:00.000Z",
-        })),
-      ),
-    );
-    const user = userEvent.setup();
-    render(
-      <MemoryRouter initialEntries={["/admin/resources"]}>
-        <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
-          <ResourcesAdminPage />
-        </CloudSessionTestProvider>
-      </MemoryRouter>,
-    );
-    expect(
-      await screen.findByText(/Valorile implicite de platformă nu sunt cost confirmat/),
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Dovezi de cost" }));
-    await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
-    expect(screen.getAllByText("Valoare implicită de platformă").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Default de dezvoltare").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Confirmat de owner")).not.toBeInTheDocument();
-  });
-
-  it("shows cost-evidence edit for a Cloud owner and hides it for a Cloud member", async () => {
+  it("hides write actions for a Cloud member", async () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(writableAdmin);
-    const user = userEvent.setup();
-    const ownerView = render(
-      <MemoryRouter initialEntries={["/admin/resources"]}>
-        <CloudSessionTestProvider snapshot={cloudSnapshot("owner")}>
-          <ResourcesAdminPage />
-        </CloudSessionTestProvider>
-      </MemoryRouter>,
-    );
-    await user.click(await screen.findByRole("button", { name: "Dovezi de cost" }));
-    await user.click(screen.getByRole("button", { name: /Plexiglas 3 mm opal/ }));
-    expect(screen.getByRole("button", { name: "Confirmă tarif" })).toBeInTheDocument();
-    ownerView.unmount();
-
     render(
       <MemoryRouter initialEntries={["/admin/resources"]}>
         <CloudSessionTestProvider snapshot={cloudSnapshot("member")}>
@@ -316,10 +246,11 @@ describe("ResourcesAdminPage", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText(OWNER_WRITE_HINT)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Confirmă tarif" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Adaugă tarif" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Editează tarif" })).not.toBeInTheDocument();
   });
 
-  it("opens the created LAB-SITE-INSTALL evidence instead of Element inexistent", async () => {
+  it("opens the created LAB-SITE-INSTALL evidence from a resource deep link", async () => {
     const admin = projectResourcesAdministration(
       [
         ...costEvidence.map((item, index) => ({
@@ -344,9 +275,8 @@ describe("ResourcesAdminPage", () => {
     vi.mocked(fetchResourcesAdministration).mockResolvedValue(admin);
     renderResources(`/admin/resources?selected=resource:${LAB_SITE_INSTALL_ID}`);
     expect(
-      await screen.findByRole("heading", { name: "Manoperă montaj la locație" }),
+      await screen.findByRole("dialog", { name: "Manoperă montaj la locație" }),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Element inexistent")).not.toBeInTheDocument();
     expect(screen.getAllByText("25,00 EUR / ore-persoană").length).toBeGreaterThan(0);
   });
 
@@ -374,9 +304,8 @@ describe("ResourcesAdminPage", () => {
     renderResources(
       "/admin/resources?selected=cost%3ASVC-SITE-INSTALL-SUBCONTRACT%3Aunqualified",
     );
-    expect(
-      await screen.findByText("Expirat · 1 iun. 2020", { selector: ".status-chip" }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText("Montaj Demo SRL").length).toBeGreaterThan(0);
+    const detail = await screen.findByRole("dialog", { name: "Montaj la locație subcontractat" });
+    expect(within(detail).getByText("Expirat · 1 iun. 2020")).toBeInTheDocument();
+    expect(within(detail).getAllByText("Montaj Demo SRL").length).toBeGreaterThan(0);
   });
 });

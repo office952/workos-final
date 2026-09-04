@@ -4,38 +4,56 @@ import {
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
   type ResourcesAdminProjection,
 } from "@workos-final/domain";
-import { findCatalogItem } from "./catalogQuery";
-import { CostEvidenceEditor } from "./CostEvidenceEditor";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
-import { OwnerWriteHint } from "./OwnerWriteHint";
-import {
-  buildResourcesCatalog,
-  costEvidenceItemId,
-  formatResourcesAdminSummary,
-  resourcesAdminSummary,
-} from "./resourcesCatalog";
+import { CostEvidenceEditor } from "./CostEvidenceEditor";
+import { formatDateTime } from "./formatDisplay";
+import { OWNER_WRITE_HINT } from "./organizationAccess";
+import { RegistrySearchField } from "./RegistrySearchField";
 import { fetchResourcesAdministration } from "./systemApi";
 import { ActionDrawer } from "./ui/ActionDrawer";
-import { CatalogItemDetail } from "./ui/CatalogItemDetail";
-import { EmptyState } from "./ui/EmptyState";
-import { MasterSelector } from "./ui/MasterSelector";
-import { Notice } from "./ui/Notice";
 import { PageHeader } from "./ui/PageHeader";
 import { PageStatus } from "./ui/PageStatus";
+import { StatusChip } from "./ui/StatusChip";
+import {
+  costRowId,
+  costStatusDisplay,
+  costVariantDisplay,
+  isConfirmedCost,
+  filterCostRows,
+  filterRecipeRows,
+  filterResourceRows,
+  listWorkspaceRecipes,
+  listWorkspaceResources,
+  parseResourcesKindFilter,
+  parseResourcesStatusFilter,
+  parseResourcesWorkspaceView,
+  resolveSelectedCostRow,
+  tariffAmountDisplay,
+  type CostWorkspaceRow,
+  type RecipeWorkspaceRow,
+  type ResourceWorkspaceRow,
+  type ResourcesKindFilter,
+  type ResourcesStatusFilter,
+  type ResourcesWorkspaceView,
+} from "./resourcesWorkspace";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "ready"; admin: ResourcesAdminProjection };
 
-type DrawerId = "picker";
-
 export function ResourcesAdminPage() {
   const canAdminister = useCanAdministerOrganization();
   const [searchParams, setSearchParams] = useSearchParams();
+  const view = parseResourcesWorkspaceView(searchParams.get("view"));
+  const query = searchParams.get("q") ?? "";
+  const kind = parseResourcesKindFilter(searchParams.get("tip"));
+  const status = parseResourcesStatusFilter(searchParams.get("stare"));
   const selected = searchParams.get("selected");
+  const adding = searchParams.get("adauga") === "1";
+  const inventoryId = searchParams.get("resursa");
   const [page, setPage] = useState<PageState>({ kind: "loading" });
-  const [drawer, setDrawer] = useState<DrawerId | null>(null);
+  const [createResourceId, setCreateResourceId] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -55,25 +73,6 @@ export function ResourcesAdminPage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (page.kind !== "ready") {
-      return;
-    }
-    const catalog = buildResourcesCatalog(page.admin);
-    const resolved = resolveResourcesSelection(catalog, page.admin, selected);
-    if (!resolved.redirectTo || resolved.redirectTo === selected) {
-      return;
-    }
-    setSearchParams(
-      (current) => {
-        const next = new URLSearchParams(current);
-        next.set("selected", resolved.redirectTo ?? "");
-        return next;
-      },
-      { replace: true },
-    );
-  }, [page, selected, setSearchParams]);
-
   function retryLoad() {
     setPage({ kind: "loading" });
     void fetchResourcesAdministration()
@@ -85,20 +84,28 @@ export function ResourcesAdminPage() {
       });
   }
 
-  function selectItem(itemId: string) {
+  function patchParams(mutate: (next: URLSearchParams) => void) {
     setSearchParams(
       (current) => {
         const next = new URLSearchParams(current);
-        next.set("selected", itemId);
+        mutate(next);
         return next;
       },
-      { replace: false },
+      { replace: true },
     );
-    setDrawer(null);
   }
 
-  function openDrawer(next: DrawerId) {
-    setDrawer(next);
+  function setView(next: ResourcesWorkspaceView) {
+    patchParams((params) => {
+      if (next === "costuri") {
+        params.delete("view");
+      } else {
+        params.set("view", next);
+      }
+      params.delete("selected");
+      params.delete("adauga");
+      params.delete("resursa");
+    });
   }
 
   const chrome = (
@@ -106,27 +113,31 @@ export function ResourcesAdminPage() {
       <nav className="admin-breadcrumb" aria-label="Context">
         <Link to="/admin">Administrare</Link>
         <span aria-hidden="true"> › </span>
-        <span>Resurse și cost intern</span>
+        <span>Resurse și costuri</span>
       </nav>
-      <PageHeader
-        title="Resurse și cost intern"
-        lead="Ce materiale, servicii și manoperă folosim acum la costul intern. Nu este stoc și nu este preț client."
-      />
     </>
   );
 
   if (page.kind === "loading") {
     return (
-      <section>
+      <section className="resources-workspace">
         {chrome}
+        <PageHeader
+          title="Resurse și costuri"
+          lead="Materiale, servicii, manoperă și tarifele folosite în calculul costului intern."
+        />
         <PageStatus kind="loading">Se încarcă catalogul de resurse…</PageStatus>
       </section>
     );
   }
   if (page.kind === "error") {
     return (
-      <section>
+      <section className="resources-workspace">
         {chrome}
+        <PageHeader
+          title="Resurse și costuri"
+          lead="Materiale, servicii, manoperă și tarifele folosite în calculul costului intern."
+        />
         <PageStatus kind="error">Nu s-a putut încărca catalogul de resurse.</PageStatus>
         <button type="button" className="page-status-retry" onClick={retryLoad}>
           Reîncearcă
@@ -135,157 +146,464 @@ export function ResourcesAdminPage() {
     );
   }
 
-  const summary = resourcesAdminSummary(page.admin);
   const writable = page.admin.writeState === "READY" && canAdminister;
-  const catalog = buildResourcesCatalog(page.admin);
-  const resolved = resolveResourcesSelection(catalog, page.admin, selected);
-  const selectedItem = resolved.item;
+  const selectedCost = resolveSelectedCostRow(page.admin, selected);
+  const resources = listWorkspaceResources(page.admin);
+  const recipes = listWorkspaceRecipes(page.admin);
+  const visibleCosts = filterCostRows(page.admin.costEvidence, query, kind, status);
+  const visibleResources = filterResourceRows(resources, query, kind);
+  const visibleRecipes = filterRecipeRows(recipes, query, kind);
+  const createResource = resources.find((item) => item.id === createResourceId);
+  const selectedResource = resources.find((item) => item.id === inventoryId);
 
   return (
-    <section>
+    <section className="resources-workspace">
       {chrome}
-      <p className="page-summary">{formatResourcesAdminSummary(summary)}</p>
-      <Notice compact>
-        {!canAdminister ? (
-          <OwnerWriteHint />
-        ) : writable ? (
-          <p>
-            Valorile implicite de platformă nu sunt cost confirmat. Salvezi un
-            tarif = confirmat de owner pentru calcule noi. Ofertele și lucrările
-            înghețate nu se schimbă.
-          </p>
-        ) : (
-          <p>
-            Valorile sunt folosite pentru cost intern. Editarea tarifelor nu este
-            disponibilă în această etapă.
-          </p>
-        )}
-      </Notice>
-      <div className="admin-compact-triggers">
-        <button type="button" onClick={() => openDrawer("picker")}>
-          Alege elementul
-        </button>
-      </div>
-      <div className="admin-master-detail">
-        <div className="admin-master-detail-selector">
-          <MasterSelector
-            catalog={catalog}
-            selectedItemId={selected}
-            onSelect={selectItem}
-          />
-        </div>
-        <div className="admin-master-detail-panel">
-          {!selected ? (
-            <EmptyState title="Alege un element" />
-          ) : !selectedItem ? (
-            <PageStatus kind="missing">Element inexistent</PageStatus>
-          ) : (
-            <CatalogItemDetail
-              item={selectedItem}
-              actions={
-                writable
-                  ? renderCostAction(page.admin, selectedItem.id, (admin) => {
-                      const previousIds = new Set(
-                        page.admin.costEvidence.map((row) => costEvidenceItemId(row)),
-                      );
-                      setPage({ kind: "ready", admin });
-                      if (selectedItem.id.startsWith("resource:")) {
-                        const resourceId = selectedItem.id.slice("resource:".length);
-                        const created = admin.costEvidence.find(
-                          (row) =>
-                            row.resourceId === resourceId &&
-                            !previousIds.has(costEvidenceItemId(row)),
-                        );
-                        if (created) {
-                          selectItem(costEvidenceItemId(created));
-                        }
-                      }
-                    })
-                  : null
-              }
-            />
-          )}
-        </div>
-      </div>
-      <ActionDrawer
-        title="Alege elementul"
-        open={drawer === "picker"}
-        onClose={() => setDrawer(null)}
-      >
-        <MasterSelector
-          catalog={catalog}
-          selectedItemId={selected}
-          onSelect={selectItem}
+      <PageHeader
+        title="Resurse și costuri"
+        lead="Materiale, servicii, manoperă și tarifele folosite în calculul costului intern."
+        actions={
+          view === "costuri" && writable ? (
+            <button
+              type="button"
+              onClick={() => {
+                setCreateResourceId("");
+                patchParams((params) => {
+                  params.set("adauga", "1");
+                  params.delete("selected");
+                });
+              }}
+            >
+              Adaugă tarif
+            </button>
+          ) : null
+        }
+      />
+      <p className="resources-workspace-hint">
+        {!canAdminister
+          ? OWNER_WRITE_HINT
+          : writable
+            ? "Un tarif salvat este confirmat pentru calcule noi. Ofertele și lucrările înghețate nu se schimbă."
+            : "Tarifele sunt folosite pentru cost intern. Editarea nu este disponibilă în această etapă."}
+      </p>
+      <nav className="resources-workspace-nav" aria-label="Lucru pe pagină">
+        <WorkspaceTab
+          current={view}
+          id="costuri"
+          label="Costuri interne"
+          onSelect={setView}
         />
+        <WorkspaceTab
+          current={view}
+          id="resurse"
+          label="Resurse"
+          onSelect={setView}
+        />
+        <WorkspaceTab
+          current={view}
+          id="retete"
+          label="Rețete"
+          onSelect={setView}
+        />
+      </nav>
+      <div className="resources-workspace-toolbar">
+        <RegistrySearchField
+          label="Caută"
+          placeholder="Caută..."
+          value={query}
+          onChange={(value) =>
+            patchParams((params) => {
+              if (value) {
+                params.set("q", value);
+              } else {
+                params.delete("q");
+              }
+            })
+          }
+        />
+        <div className="form-row">
+          <label htmlFor="resources-kind-filter">Tip</label>
+          <select
+            id="resources-kind-filter"
+            value={kind}
+            onChange={(event) =>
+              patchParams((params) => {
+                const next = event.target.value as ResourcesKindFilter;
+                if (next === "all") {
+                  params.delete("tip");
+                } else {
+                  params.set("tip", next);
+                }
+              })
+            }
+          >
+            <option value="all">Toate</option>
+            <option value="Material">Materiale</option>
+            <option value="Serviciu">Servicii</option>
+            <option value="Manoperă">Manoperă</option>
+          </select>
+        </div>
+        {view === "costuri" ? (
+          <div className="form-row">
+            <label htmlFor="resources-status-filter">Stare</label>
+            <select
+              id="resources-status-filter"
+              value={status}
+              onChange={(event) =>
+                patchParams((params) => {
+                  const next = event.target.value as ResourcesStatusFilter;
+                  if (next === "all") {
+                    params.delete("stare");
+                  } else {
+                    params.set("stare", next);
+                  }
+                })
+              }
+            >
+              <option value="all">Toate</option>
+              <option value="confirmed">Confirmate</option>
+              <option value="needs_setup">Necesită configurare</option>
+            </select>
+          </div>
+        ) : null}
+      </div>
+      {view === "costuri" ? (
+        <CostRegistry
+          rows={visibleCosts}
+          selectedId={selectedCost ? costRowId(selectedCost) : null}
+          onSelect={(row) =>
+            patchParams((params) => {
+              params.set("selected", costRowId(row));
+              params.delete("adauga");
+            })
+          }
+        />
+      ) : null}
+      {view === "resurse" ? (
+        <ResourceRegistry
+          rows={visibleResources}
+          selectedId={selectedResource?.id ?? null}
+          onSelect={(row) =>
+            patchParams((params) => {
+              params.set("resursa", row.id);
+            })
+          }
+        />
+      ) : null}
+      {view === "retete" ? <RecipeRegistry rows={visibleRecipes} /> : null}
+      <ActionDrawer
+        title="Adaugă tarif"
+        open={adding && writable}
+        onClose={() =>
+          patchParams((params) => {
+            params.delete("adauga");
+          })
+        }
+      >
+        <div className="form-stack">
+          <div className="form-row">
+            <label htmlFor="add-tariff-resource">Resursă</label>
+            <select
+              id="add-tariff-resource"
+              value={createResourceId}
+              onChange={(event) => setCreateResourceId(event.target.value)}
+            >
+              <option value="">Alege resursa</option>
+              {resources.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {createResource ? (
+            <CostEvidenceEditor
+              createFor={{
+                resourceId: createResource.id,
+                unitLabel: createResource.unitLabel,
+                requiresSupplier: createResource.id === SVC_SITE_INSTALL_SUBCONTRACT_ID,
+                qualifierFields: createResource.costEvidenceQualifiers ?? [],
+              }}
+              onCancel={() =>
+                patchParams((params) => {
+                  params.delete("adauga");
+                })
+              }
+              onSaved={(admin) => {
+                const previous = new Set(page.admin.costEvidence.map((row) => costRowId(row)));
+                const created = admin.costEvidence.find((row) => !previous.has(costRowId(row)));
+                setPage({ kind: "ready", admin });
+                patchParams((params) => {
+                  params.delete("adauga");
+                  if (created) {
+                    params.set("selected", costRowId(created));
+                  }
+                });
+              }}
+            />
+          ) : null}
+        </div>
+      </ActionDrawer>
+      <ActionDrawer
+        title={selectedCost?.resourceLabel ?? "Tarif intern"}
+        open={Boolean(selectedCost)}
+        onClose={() =>
+          patchParams((params) => {
+            params.delete("selected");
+          })
+        }
+      >
+        {selectedCost ? (
+          <CostRowDetail
+            row={selectedCost}
+            writable={writable}
+            onSaved={(admin) => {
+              setPage({ kind: "ready", admin });
+            }}
+          />
+        ) : null}
+      </ActionDrawer>
+      <ActionDrawer
+        title={selectedResource?.label ?? "Resursă"}
+        open={Boolean(selectedResource) && view === "resurse"}
+        onClose={() =>
+          patchParams((params) => {
+            params.delete("resursa");
+          })
+        }
+      >
+        {selectedResource ? <ResourceRowDetail row={selectedResource} /> : null}
       </ActionDrawer>
     </section>
   );
 }
 
-function renderCostAction(
-  admin: ResourcesAdminProjection,
-  itemId: string,
-  onSaved: (admin: ResourcesAdminProjection) => void,
-) {
-  if (itemId.startsWith("resource:")) {
-    const resourceId = itemId.slice("resource:".length);
-    const resource =
-      admin.labor.find((item) => item.id === resourceId) ??
-      admin.services.find((item) => item.id === resourceId) ??
-      admin.materials.find((item) => item.id === resourceId);
-    if (!resource) {
-      return null;
-    }
-    return (
-      <CostEvidenceEditor
-        key={itemId}
-        createFor={{
-          resourceId: resource.id,
-          unitLabel: resource.unitLabel,
-          requiresSupplier: resource.id === SVC_SITE_INSTALL_SUBCONTRACT_ID,
-          qualifierFields: resource.costEvidenceQualifiers ?? [],
-        }}
-        onSaved={onSaved}
-      />
-    );
-  }
-  const evidence = admin.costEvidence.find(
-    (row) => costEvidenceItemId(row) === itemId,
-  );
-  if (!evidence?.evidenceRowId) {
-    return null;
-  }
+function WorkspaceTab({
+  current,
+  id,
+  label,
+  onSelect,
+}: {
+  current: ResourcesWorkspaceView;
+  id: ResourcesWorkspaceView;
+  label: string;
+  onSelect: (view: ResourcesWorkspaceView) => void;
+}) {
   return (
-    <CostEvidenceEditor
-      key={costEvidenceItemId(evidence)}
-      evidence={evidence}
-      onSaved={onSaved}
-    />
+    <button
+      type="button"
+      aria-current={current === id ? "page" : undefined}
+      onClick={() => onSelect(id)}
+    >
+      {label}
+    </button>
   );
 }
 
-function resolveResourcesSelection(
-  catalog: ReturnType<typeof buildResourcesCatalog>,
-  admin: ResourcesAdminProjection,
-  selected: string | null,
-): { item: ReturnType<typeof findCatalogItem>; redirectTo: string | null } {
-  if (!selected) {
-    return { item: undefined, redirectTo: null };
+function CostRegistry({
+  rows,
+  selectedId,
+  onSelect,
+}: {
+  rows: readonly CostWorkspaceRow[];
+  selectedId: string | null;
+  onSelect: (row: CostWorkspaceRow) => void;
+}) {
+  if (rows.length === 0) {
+    return <p className="resources-workspace-empty">Niciun tarif intern nu corespunde filtrelor.</p>;
   }
-  const item = findCatalogItem(catalog, selected);
-  if (item) {
-    return { item, redirectTo: null };
+  return (
+    <table className="resources-rate-table" aria-label="Costuri interne">
+      <thead>
+        <tr className="resources-rate-head">
+          <th>Resursă</th>
+          <th>Variantă</th>
+          <th>Tarif</th>
+          <th>Stare</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => {
+          const id = costRowId(row);
+          return (
+            <tr
+              key={id}
+              className="resources-rate-row"
+              tabIndex={0}
+              aria-current={selectedId === id ? "true" : undefined}
+              onClick={() => onSelect(row)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelect(row);
+                }
+              }}
+            >
+              <td>{row.resourceLabel}</td>
+              <td>{costVariantDisplay(row)}</td>
+              <td className="resources-rate-amount">{tariffAmountDisplay(row)}</td>
+              <td>
+                <StatusChip
+                  label={costStatusDisplay(row)}
+                  tone={
+                    row.validityState === "expired" ? "warn" : isConfirmedCost(row) ? "ok" : "warn"
+                  }
+                />
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+function ResourceRegistry({
+  rows,
+  selectedId,
+  onSelect,
+}: {
+  rows: readonly ResourceWorkspaceRow[];
+  selectedId: string | null;
+  onSelect: (row: ResourceWorkspaceRow) => void;
+}) {
+  if (rows.length === 0) {
+    return <p className="resources-workspace-empty">Nicio resursă nu corespunde filtrelor.</p>;
   }
-  if (selected.startsWith("resource:")) {
-    const resourceId = selected.slice("resource:".length);
-    const evidence = admin.costEvidence.find((row) => row.resourceId === resourceId);
-    if (evidence) {
-      const redirectTo = costEvidenceItemId(evidence);
-      return {
-        item: findCatalogItem(catalog, redirectTo),
-        redirectTo,
-      };
-    }
+  return (
+    <ul className="resources-inventory-list">
+      {rows.map((row) => (
+        <li key={row.id}>
+          <button
+            type="button"
+            className="resources-inventory-row"
+            aria-current={selectedId === row.id ? "true" : undefined}
+            onClick={() => onSelect(row)}
+          >
+            <p className="resources-inventory-name">{row.label}</p>
+            <p className="resources-inventory-meta">
+              {row.kindLabel}
+              {row.familyLabel ? ` · ${row.familyLabel}` : ""}
+              {row.thicknessLabel ? ` · ${row.thicknessLabel}` : ""}
+              {` · ${row.unitLabel}`}
+            </p>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function RecipeRegistry({ rows }: { rows: readonly RecipeWorkspaceRow[] }) {
+  if (rows.length === 0) {
+    return <p className="resources-workspace-empty">Nicio rețetă nu corespunde filtrelor.</p>;
   }
-  return { item: undefined, redirectTo: null };
+  return (
+    <ul className="resources-inventory-list">
+      {rows.map((row) => (
+        <li key={row.id} className="resources-inventory-row">
+          <p className="resources-inventory-name">{row.label}</p>
+          <p className="resources-inventory-meta">
+            {row.kindLabel}
+            {` · ${row.quantityBasisLabel}`}
+            {` · ${row.completenessLabel}`}
+            {row.usedWhere ? ` · ${row.usedWhere}` : ""}
+            {row.costAmountDisplay ? ` · ${row.costAmountDisplay}` : ""}
+          </p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CostRowDetail({
+  row,
+  writable,
+  onSaved,
+}: {
+  row: CostWorkspaceRow;
+  writable: boolean;
+  onSaved: (admin: ResourcesAdminProjection) => void;
+}) {
+  return (
+    <div className="form-stack">
+      <dl className="owner-catalog-facts">
+        <div>
+          <dt>Resursă</dt>
+          <dd>{row.resourceLabel}</dd>
+        </div>
+        <div>
+          <dt>Variantă</dt>
+          <dd>{costVariantDisplay(row)}</dd>
+        </div>
+        <div>
+          <dt>Sursă</dt>
+          <dd>{row.sourceLabel}</dd>
+        </div>
+        <div>
+          <dt>Stare</dt>
+          <dd>
+            <StatusChip
+              label={costStatusDisplay(row)}
+              tone={row.validityState === "expired" ? "warn" : isConfirmedCost(row) ? "ok" : "warn"}
+            />
+          </dd>
+        </div>
+        {row.lastChangedAt ? (
+          <div>
+            <dt>Ultima modificare</dt>
+            <dd>{formatDateTime(row.lastChangedAt)}</dd>
+          </div>
+        ) : null}
+        {row.supplierLabel ? (
+          <div>
+            <dt>Furnizor</dt>
+            <dd>{row.supplierLabel}</dd>
+          </div>
+        ) : null}
+        {row.validUntil ? (
+          <div>
+            <dt>Valid până la</dt>
+            <dd>{row.validUntil}</dd>
+          </div>
+        ) : null}
+      </dl>
+      {writable && row.evidenceRowId ? (
+        <CostEvidenceEditor evidence={row} onSaved={onSaved} />
+      ) : null}
+    </div>
+  );
+}
+
+function ResourceRowDetail({ row }: { row: ResourceWorkspaceRow }) {
+  return (
+    <dl className="owner-catalog-facts">
+      <div>
+        <dt>Tip</dt>
+        <dd>{row.kindLabel}</dd>
+      </div>
+      {row.familyLabel ? (
+        <div>
+          <dt>Familie</dt>
+          <dd>{row.familyLabel}</dd>
+        </div>
+      ) : null}
+      {row.thicknessLabel ? (
+        <div>
+          <dt>Grosime</dt>
+          <dd>{row.thicknessLabel}</dd>
+        </div>
+      ) : null}
+      <div>
+        <dt>Unitate</dt>
+        <dd>{row.unitLabel}</dd>
+      </div>
+      {row.cost ? (
+        <div>
+          <dt>Tarif intern</dt>
+          <dd>{row.cost.amountDisplay}</dd>
+        </div>
+      ) : null}
+    </dl>
+  );
 }

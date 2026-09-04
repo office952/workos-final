@@ -17,12 +17,14 @@ type CostEvidenceEditorProps = {
     qualifierFields?: readonly CostEvidenceQualifierField[];
   };
   onSaved: (admin: ResourcesAdminProjection) => void;
+  onCancel?: () => void;
 };
 
 export function CostEvidenceEditor({
   evidence,
   createFor,
   onSaved,
+  onCancel,
 }: CostEvidenceEditorProps) {
   const creating = Boolean(createFor) && !evidence;
   const [editing, setEditing] = useState(creating);
@@ -53,19 +55,14 @@ export function CostEvidenceEditor({
 
   function cancel() {
     if (creating) {
-      setDraft("");
-      setNote("");
-      setSupplierLabel("");
-      setValidFrom("");
-      setValidUntil("");
-      setVolumeDepthMm("");
-    } else {
-      setDraft(evidence ? String(evidence.amount) : "");
-      setNote(evidence?.note ?? "");
-      setSupplierLabel(evidence?.supplierLabel ?? "");
-      setValidFrom(evidence?.validFrom ?? "");
-      setValidUntil(evidence?.validUntil ?? "");
+      onCancel?.();
+      return;
     }
+    setDraft(evidence ? String(evidence.amount) : "");
+    setNote(evidence?.note ?? "");
+    setSupplierLabel(evidence?.supplierLabel ?? "");
+    setValidFrom(evidence?.validFrom ?? "");
+    setValidUntil(evidence?.validUntil ?? "");
     setError(null);
     setEditing(false);
   }
@@ -138,13 +135,18 @@ export function CostEvidenceEditor({
         <div className="form-stack">
           <div className="form-row">
             <label htmlFor="cost-evidence-amount">Tarif</label>
-            <input
-              id="cost-evidence-amount"
-              inputMode="decimal"
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              disabled={saving}
-            />
+            <div className="resources-tariff-input">
+              <input
+                id="cost-evidence-amount"
+                inputMode="decimal"
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                disabled={saving}
+              />
+              <p className="resources-tariff-unit">
+                {evidence?.currency ?? "EUR"} / {unitLabel}
+              </p>
+            </div>
           </div>
           <div className="form-row">
             <label htmlFor="cost-evidence-note">Notă</label>
@@ -234,7 +236,7 @@ export function CostEvidenceEditor({
           {error ? <p className="status-bad">{error}</p> : null}
           <div className="action-row">
             <button type="button" onClick={() => void save()} disabled={saving}>
-              Confirmă tarif
+              Salvează tarif
             </button>
             <button
               type="button"
@@ -242,7 +244,7 @@ export function CostEvidenceEditor({
               onClick={cancel}
               disabled={saving}
             >
-              Renunță
+              Anulează
             </button>
           </div>
         </div>
@@ -290,7 +292,7 @@ export function CostEvidenceEditor({
           {error ? <p className="status-bad">{error}</p> : null}
           <div className="action-row">
             <button type="button" onClick={startEdit}>
-              {creating ? "Adaugă evidență" : "Confirmă tarif"}
+              {creating ? "Adaugă tarif" : "Editează tarif"}
             </button>
           </div>
         </>

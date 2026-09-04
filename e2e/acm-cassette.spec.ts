@@ -127,10 +127,9 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
 
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/admin/resources");
-  await expect(page.getByRole("heading", { name: "Resurse și cost intern" })).toBeVisible();
-  await page.getByRole("button", { name: "ACM" }).click();
-  await expect(page.getByRole("heading", { name: "ACM 3 mm" })).toBeVisible();
-  await expect(page.getByText("32,00 EUR / m²")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resurse și costuri" })).toBeVisible();
+  await expect(page.getByText("ACM 3 mm").first()).toBeVisible();
+  await expect(page.getByText("32,00 EUR / m²").first()).toBeVisible();
   await expect(page.getByText("Decizie AI / pilot").first()).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-admin-cost-evidence.png",
