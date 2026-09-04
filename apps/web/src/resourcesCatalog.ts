@@ -111,25 +111,72 @@ export function buildResourcesCatalog(
         id: "cost-evidence",
         label: "Dovezi de cost",
         kindLabel: "Categorie",
-        items: admin.costEvidence.map((item) => ({
-          id: costEvidenceItemId(item),
-          label: item.resourceLabel,
-          kindLabel: "Dovadă de cost intern",
-          summary: item.amountDisplay,
-          listHint: item.amountDisplay,
-          chips: costChips(item),
-          groups: [
-            {
-              id: costEvidenceItemId(item),
-              kindLabel: "Dovadă de cost intern",
-              title: item.resourceLabel,
-              sections: costEvidenceSections(item),
-            },
-          ],
-        })),
+        items: [
+          ...admin.costEvidence.map((item) => ({
+            id: costEvidenceItemId(item),
+            label: item.resourceLabel,
+            kindLabel: "Dovadă de cost intern",
+            summary: item.amountDisplay,
+            listHint: item.amountDisplay,
+            chips: costChips(item),
+            groups: [
+              {
+                id: costEvidenceItemId(item),
+                kindLabel: "Dovadă de cost intern",
+                title: item.resourceLabel,
+                sections: costEvidenceSections(item),
+              },
+            ],
+          })),
+          ...qualifiedCreateItems(admin),
+        ],
       },
     ].filter((category) => category.items.length > 0),
   };
+}
+
+function qualifiedCreateItems(
+  admin: ResourcesAdminProjection,
+): OwnerCatalog["categories"][number]["items"] {
+  return [...admin.materials, ...admin.services, ...admin.labor]
+    .filter((item) => (item.costEvidenceQualifiers ?? []).length > 0)
+    .map((item) => {
+      const qualifierFields = item.costEvidenceQualifiers ?? [];
+      const qualifierSummary = qualifierFields
+        .map((field) => field.label)
+        .join(", ");
+      return {
+        id: `resource:${item.id}`,
+        label: `Adaugă dovadă — ${item.label}`,
+        kindLabel: "Dovadă nouă",
+        summary: qualifierSummary
+          ? `Setează ${qualifierSummary.toLowerCase()} și tariful intern.`
+          : "Adaugă o dovadă de cost intern.",
+        listHint: "dovadă nouă",
+        chips: [{ label: "Dovadă nouă" }],
+        groups: [
+          {
+            id: item.id,
+            kindLabel: "Dovadă nouă",
+            title: item.label,
+            sections: [
+              {
+                id: "create",
+                title: "Dovadă nouă",
+                facts: [
+                  { label: "Resursă", value: item.label },
+                  { label: "Unitate", value: item.unitLabel },
+                  ...qualifierFields.map((field) => ({
+                    label: field.label,
+                    value: field.unitLabel,
+                  })),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    });
 }
 
 export function costEvidenceItemId(
@@ -330,6 +377,14 @@ function costEvidenceSections(
           emphasize: true,
         },
         { label: "Resursă", value: item.resourceLabel },
+        ...(item.qualifier
+          ? [
+              {
+                label: item.qualifier.label,
+                value: `${item.qualifier.value} ${item.qualifier.unitLabel}`,
+              },
+            ]
+          : []),
         { label: "Fel", value: item.kindLabel },
         { label: "Sursă", value: item.sourceLabel },
         ...(item.supplierLabel

@@ -7,6 +7,7 @@ import {
   ALUMINIUM_RETURN_PROFILE_ID,
   CANONICAL_PRODUCT_CODE,
   PLEXIGLAS_3MM_OPAL_ID,
+  costEvidence,
 } from "@workos-final/domain";
 
 const SVC_CNC_FACE_ID = "SVC-CNC-FACE";
@@ -275,7 +276,7 @@ describe("resource cost evidence live compile and freeze", () => {
     const aluminium = (admin.costEvidence as JsonObject[]).find(
       (item) =>
         item.resourceId === ALUMINIUM_RETURN_PROFILE_ID &&
-        item.qualifierLabel === "adâncime 60 mm",
+        item.qualifierIdentity === "volumeDepthMm=60",
     );
     expect(aluminium?.amount).toBe(3);
     const saved = await app.request(
@@ -490,6 +491,199 @@ describe("resource cost evidence live compile and freeze", () => {
     expect(
       runtime.readQuoteSnapshot(quoteId)?.eic.total,
     ).toBe(382.5);
+    runtime.close();
+  });
+});
+
+function seedHistoricalSixtyOnly(sqlitePath: string): void {
+  const db = openSqliteDatabase(sqlitePath);
+  const createdAt = new Date().toISOString();
+  const insert = db.prepare(
+    `
+    INSERT INTO resource_cost_evidence (
+      evidence_row_id, resource_id, volume_depth_mm, amount, currency,
+      per_unit, source, classification, note, supplier_label, valid_from,
+      valid_until, created_at, superseded_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+  `,
+  );
+  const historical = costEvidence.filter(
+    (item) =>
+      item.resourceId !== ALUMINIUM_RETURN_PROFILE_ID || item.when?.volumeDepthMm === 60,
+  );
+  for (const [index, seed] of historical.entries()) {
+    insert.run(
+      `cev:hist:${index}`,
+      seed.resourceId,
+      seed.when?.volumeDepthMm ?? null,
+      seed.amount,
+      seed.currency,
+      seed.perUnit,
+      seed.source,
+      seed.classification,
+      seed.note,
+      seed.supplierLabel ?? null,
+      seed.validFrom ?? null,
+      seed.validUntil ?? null,
+      createdAt,
+    );
+  }
+  db.prepare(
+    `
+    INSERT INTO runtime_bootstrap_markers (marker_id, applied_at)
+    VALUES (?, ?)
+  `,
+  ).run(RESOURCE_COST_EVIDENCE_MARKER, createdAt);
+  db.close();
+}
+
+function aluminiumRows(admin: JsonObject): JsonObject[] {
+  return ((admin.costEvidence as JsonObject[]) ?? []).filter(
+    (item) => item.resourceId === ALUMINIUM_RETURN_PROFILE_ID,
+  );
+}
+
+describe("qualified cost evidence owner path", () => {
+  it("lets an existing 60 mm-only organization add 30/80/100 without reseeding", async () => {
+    const sqlitePath = tempSqlitePath();
+    seedHistoricalSixtyOnly(sqlitePath);
+    const runtime = createProductSystemRuntime(sqlitePath);
+    const app = createApp({ productSystem: runtime });
+
+    const before = await readBody(await app.request("/api/resources-admin"));
+    const beforeAluminium = aluminiumRows(before);
+    expect(beforeAluminium).toHaveLength(1);
+    expect(beforeAluminium[0]?.qualifierIdentity).toBe("volumeDepthMm=60");
+    expect(beforeAluminium[0]?.amount).toBe(3);
+
+    const missing30 = await confirmProduct(app, CANONICAL_PRODUCT_CODE, {
+      ...lettersValues,
+      "volume.depthMm": "30",
+    });
+    expect((missing30.body.eic as JsonObject).completeness).toBe("PARTIAL");
+
+    const created30 = await app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        resourceId: ALUMINIUM_RETURN_PROFILE_ID,
+        amount: 2,
+        note: "Owner 30 mm",
+        when: { volumeDepthMm: 30 },
+      }),
+    });
+    expect(created30.status).toBe(201);
+    const created80 = await app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        resourceId: ALUMINIUM_RETURN_PROFILE_ID,
+        amount: 4,
+        note: "Owner 80 mm",
+        when: { volumeDepthMm: 80 },
+      }),
+    });
+    expect(created80.status).toBe(201);
+    const created100 = await app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        resourceId: ALUMINIUM_RETURN_PROFILE_ID,
+        amount: 5,
+        note: "Owner 100 mm",
+        when: { volumeDepthMm: 100 },
+      }),
+    });
+    expect(created100.status).toBe(201);
+
+    const after = await readBody(await app.request("/api/resources-admin"));
+    const afterAluminium = aluminiumRows(after);
+    expect(afterAluminium).toHaveLength(4);
+    expect(
+      afterAluminium.map((item) => [item.qualifierIdentity, item.amount]).sort(),
+    ).toEqual(
+      [
+        ["volumeDepthMm=100", 5],
+        ["volumeDepthMm=30", 2],
+        ["volumeDepthMm=60", 3],
+        ["volumeDepthMm=80", 4],
+      ].sort(),
+    );
+
+    const depth30 = await confirmProduct(app, CANONICAL_PRODUCT_CODE, {
+      ...lettersValues,
+      "volume.depthMm": "30",
+    });
+    const depth60 = await confirmProduct(app, CANONICAL_PRODUCT_CODE, lettersValues);
+    const depth80 = await confirmProduct(app, CANONICAL_PRODUCT_CODE, {
+      ...lettersValues,
+      "volume.depthMm": "80",
+    });
+    const depth100 = await confirmProduct(app, CANONICAL_PRODUCT_CODE, {
+      ...lettersValues,
+      "volume.depthMm": "100",
+    });
+    expect((depth30.body.eic as JsonObject).completeness).toBe("COMPLETE");
+    expect((depth30.body.eic as JsonObject).total).toBe(370);
+    expect((depth30.body.commercialPrice as JsonObject).grossPrice).toBe(604.4);
+    expect((depth60.body.eic as JsonObject).total).toBe(382.5);
+    expect((depth60.body.commercialPrice as JsonObject).grossPrice).toBe(624.82);
+    expect((depth80.body.eic as JsonObject).total).toBe(395);
+    expect((depth80.body.commercialPrice as JsonObject).grossPrice).toBe(645.23);
+    expect((depth100.body.eic as JsonObject).total).toBe(407.5);
+    expect((depth100.body.commercialPrice as JsonObject).grossPrice).toBe(665.66);
+
+    const quote30 = await freezeQuote(
+      app,
+      CANONICAL_PRODUCT_CODE,
+      { ...lettersValues, "volume.depthMm": "30" },
+      "Client 30",
+    );
+    expect(quote30.status).toBe(200);
+    expect(((quote30.body.quoteSnapshot as JsonObject).eic as JsonObject).total).toBe(370);
+
+    const duplicate80 = await app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        resourceId: ALUMINIUM_RETURN_PROFILE_ID,
+        amount: 9,
+        when: { volumeDepthMm: 80 },
+      }),
+    });
+    expect(duplicate80.status).toBe(409);
+    expect((await readBody(duplicate80)).error).toBe("already_exists");
+
+    const plexiQualified = await app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        resourceId: PLEXIGLAS_3MM_OPAL_ID,
+        amount: 17,
+        when: { volumeDepthMm: 30 },
+      }),
+    });
+    expect(plexiQualified.status).toBe(400);
+    expect((await readBody(plexiQualified)).error).toBe("invalid_qualifier");
+
+    const edited80 = afterAluminium.find(
+      (item) => item.qualifierIdentity === "volumeDepthMm=80",
+    );
+    const superseded = await app.request(
+      `/api/resources-admin/cost-evidence/${edited80?.evidenceRowId as string}`,
+      {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ amount: 4.5, note: "Reconfirmat 80" }),
+      },
+    );
+    expect(superseded.status).toBe(200);
+    const supersededBody = await readBody(superseded);
+    expect((supersededBody.evidence as JsonObject).when).toEqual({ volumeDepthMm: 80 });
+    const sixtyAfterEdit = aluminiumRows(supersededBody.admin as JsonObject).find(
+      (item) => item.qualifierIdentity === "volumeDepthMm=60",
+    );
+    expect(sixtyAfterEdit?.amount).toBe(3);
     runtime.close();
   });
 });

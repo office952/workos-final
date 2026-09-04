@@ -79,6 +79,7 @@ export async function createCostEvidence(input: {
   resourceId: string;
   amount: number;
   note: string;
+  when?: { volumeDepthMm?: number };
   supplierLabel?: string;
   validFrom?: string;
   validUntil?: string;
@@ -92,6 +93,9 @@ export async function createCostEvidence(input: {
   const body = (await response.json()) as {
     error?: string;
     admin?: ResourcesAdminProjection;
+    evidence?: ResourcesAdminProjection["costEvidence"][number] & {
+      when?: { volumeDepthMm?: number };
+    };
   };
   if (!response.ok) {
     throw new Error(body.error ?? "cost_evidence_write_failed");

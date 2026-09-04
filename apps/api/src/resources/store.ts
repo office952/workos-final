@@ -7,6 +7,8 @@ import {
   getResource,
   isValidCostAmount,
   ownerConfirmedCostSource,
+  parseCostEvidenceWhen,
+  resourceAllowsCostEvidenceQualifier,
   type CostEvidence,
   type ResourceKind,
   type ResourceUnit,
@@ -62,6 +64,7 @@ export type CostEvidenceWriteError =
   | "invalid_note"
   | "unknown_resource"
   | "already_exists"
+  | "invalid_qualifier"
   | "invalid_supplier"
   | "invalid_validity";
 
@@ -377,6 +380,7 @@ export function createInitialCostEvidence(
     resourceId: string;
     amount: unknown;
     note?: unknown;
+    when?: unknown;
     supplierLabel?: unknown;
     validFrom?: unknown;
     validUntil?: unknown;
@@ -392,6 +396,16 @@ export function createInitialCostEvidence(
   const resource = getResource(input.resourceId);
   if (!resource) {
     return { ok: false, error: "unknown_resource" };
+  }
+  const parsedWhen = parseCostEvidenceWhen(input.when);
+  if (!parsedWhen.ok) {
+    return parsedWhen;
+  }
+  if (
+    parsedWhen.when?.volumeDepthMm !== undefined &&
+    !resourceAllowsCostEvidenceQualifier(resource, "volumeDepthMm")
+  ) {
+    return { ok: false, error: "invalid_qualifier" };
   }
   const supplier = parseOptionalText(input.supplierLabel, 200);
   if (!supplier.ok) {
@@ -414,16 +428,30 @@ export function createInitialCostEvidence(
     return { ok: false, error: "invalid_validity" };
   }
 
+  const volumeDepthMm = parsedWhen.when?.volumeDepthMm ?? null;
   const write = db.transaction((): CostEvidenceWriteResult => {
-    const existing = db
-      .prepare(
-        `
-        SELECT evidence_row_id
-        FROM resource_cost_evidence
-        WHERE resource_id = ? AND superseded_at IS NULL AND volume_depth_mm IS NULL
-      `,
-      )
-      .get(input.resourceId) as { evidence_row_id: string } | undefined;
+    const existing =
+      volumeDepthMm === null
+        ? (db
+            .prepare(
+              `
+              SELECT evidence_row_id
+              FROM resource_cost_evidence
+              WHERE resource_id = ? AND superseded_at IS NULL AND volume_depth_mm IS NULL
+            `,
+            )
+            .get(input.resourceId) as { evidence_row_id: string } | undefined)
+        : (db
+            .prepare(
+              `
+              SELECT evidence_row_id
+              FROM resource_cost_evidence
+              WHERE resource_id = ? AND superseded_at IS NULL AND volume_depth_mm = ?
+            `,
+            )
+            .get(input.resourceId, volumeDepthMm) as
+            | { evidence_row_id: string }
+            | undefined);
     if (existing) {
       return { ok: false, error: "already_exists" };
     }
@@ -446,11 +474,12 @@ export function createInitialCostEvidence(
         valid_until,
         created_at,
         superseded_at
-      ) VALUES (?, ?, NULL, ?, 'EUR', ?, ?, 'OWNER_CONFIRMED', ?, ?, ?, ?, ?, NULL)
+      ) VALUES (?, ?, ?, ?, 'EUR', ?, ?, 'OWNER_CONFIRMED', ?, ?, ?, ?, ?, NULL)
     `,
     ).run(
       nextId,
       resource.id,
+      volumeDepthMm,
       input.amount,
       resource.unit,
       ownerConfirmedSourceForResource(resource.id, resource.kind),

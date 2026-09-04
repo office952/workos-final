@@ -311,6 +311,7 @@ export type ProductSystemRuntime = {
     resourceId: string;
     amount: unknown;
     note?: unknown;
+    when?: unknown;
     supplierLabel?: unknown;
     validFrom?: unknown;
     validUntil?: unknown;

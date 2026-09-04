@@ -57,6 +57,15 @@ Profile line = rate × 12.5 m. Other confirmed lines stay 345.00 EUR. Forming st
 
 60 mm golden arithmetic and the existing 60 mm quote content-hash pin stay unchanged.
 
+## Qualified admin path
+
+```text
+QUALIFIED_COST_EVIDENCE_ADMIN_PATH = IMPLEMENTED_LOCAL_IN_REVIEW
+CUSTOMER_OPERABLE_WITHOUT_CURSOR = YES
+```
+
+An already-bootstrapped organization that has only the 60 mm aluminium row does not receive 30 / 80 / 100 by restart or marker reset. The Owner creates those qualified rows from Resurse și costuri, using the generic `when.volumeDepthMm` write on the existing cost-evidence API. Supersede keeps the active qualifier. Members cannot write.
+
 ## Outside this wave
 
 Vinyl / RAL stay PARTIAL. No new geometry, Analyzer, ProductTemplate, constructive type, frontend productCode branch, commercial formula, or live Quote.

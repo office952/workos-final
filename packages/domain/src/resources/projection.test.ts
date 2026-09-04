@@ -136,6 +136,26 @@ describe("resources administration projection", () => {
     expect(admin.costEvidence[0]?.lastChangedAt).toBe("2026-08-18T00:00:00.000Z");
     const plexi = admin.costEvidence.find((item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID);
     expect(plexi?.qualifierIdentity).toBe("unqualified");
+    expect(
+      admin.materials.find((item) => item.id === PLEXIGLAS_3MM_OPAL_ID)
+        ?.costEvidenceQualifiers,
+    ).toEqual([]);
+    expect(
+      admin.materials.find((item) => item.id === ALUMINIUM_RETURN_PROFILE_ID)
+        ?.costEvidenceQualifiers,
+    ).toEqual([
+      {
+        kind: "volumeDepthMm",
+        label: "Adâncime volum",
+        unitLabel: "mm",
+      },
+    ]);
+    expect(admin.costEvidence[0]?.qualifier).toEqual({
+      kind: "volumeDepthMm",
+      label: "Adâncime volum",
+      unitLabel: "mm",
+      value: 60,
+    });
   });
 
   it("marks subcontract evidence expired when validUntil is before asOf", () => {

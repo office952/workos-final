@@ -364,6 +364,12 @@ describe("resources catalog presentation", () => {
       ]),
     );
     expect(catalog.categories[4]?.items.map((item) => item.id)).toContain(
+      "resource:aluminium_return_profile",
+    );
+    expect(catalog.categories[4]?.items.map((item) => item.label)).toContain(
+      "Adaugă dovadă — Profil aluminiu 0,6 mm",
+    );
+    expect(catalog.categories[4]?.items.map((item) => item.id)).toContain(
       "cost:plexiglas_3mm_opal:unqualified",
     );
     expect(catalog.categories[4]?.items.map((item) => item.label)).toContain(

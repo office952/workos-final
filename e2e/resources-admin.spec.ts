@@ -213,7 +213,7 @@ test("resources admin inspects material family specification and cost", async ({
   await page.getByRole("button", { name: "Dovezi de cost" }).click();
   await page.getByRole("button", { name: /Plexiglas 3 mm opal/ }).click();
   await expect(page.getByText("Dovadă de cost intern").first()).toBeVisible();
-  await expect(page.getByText("3,00 EUR / m · adâncime 60 mm").first()).toBeVisible();
+  await expect(page.getByText("3,00 EUR / m · Adâncime volum: 60 mm").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Confirmă tarif" })).toBeVisible();
   await expect(page.getByText("16,00 EUR / m²").first()).toBeVisible();
   await expect(page.getByText("Achiziție confirmată de owner").first()).toBeVisible();

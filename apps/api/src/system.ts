@@ -52,6 +52,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
         switch (result.error) {
           case "invalid_amount":
           case "invalid_note":
+          case "invalid_qualifier":
           case "invalid_supplier":
           case "invalid_validity":
             return c.json({ error: result.error }, 400);
@@ -83,6 +84,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
         resourceId?: unknown;
         amount?: unknown;
         note?: unknown;
+        when?: unknown;
         supplierLabel?: unknown;
         validFrom?: unknown;
         validUntil?: unknown;
@@ -94,6 +96,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
         resourceId: body.resourceId,
         amount: body.amount,
         note: body.note,
+        when: body.when,
         supplierLabel: body.supplierLabel,
         validFrom: body.validFrom,
         validUntil: body.validUntil,
@@ -102,6 +105,7 @@ export function registerSystemProjectionRoutes(app: Hono<ApiEnv>): void {
         switch (result.error) {
           case "invalid_amount":
           case "invalid_note":
+          case "invalid_qualifier":
           case "invalid_supplier":
           case "invalid_validity":
             return c.json({ error: result.error }, 400);

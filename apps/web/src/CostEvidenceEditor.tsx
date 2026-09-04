@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   SVC_SITE_INSTALL_SUBCONTRACT_ID,
+  type CostEvidenceQualifierField,
   type ResourcesAdminProjection,
 } from "@workos-final/domain";
 import { createCostEvidence, patchCostEvidence } from "./systemApi";
@@ -13,6 +14,7 @@ type CostEvidenceEditorProps = {
     resourceId: string;
     unitLabel: string;
     requiresSupplier: boolean;
+    qualifierFields?: readonly CostEvidenceQualifierField[];
   };
   onSaved: (admin: ResourcesAdminProjection) => void;
 };
@@ -29,9 +31,11 @@ export function CostEvidenceEditor({
   const [supplierLabel, setSupplierLabel] = useState(evidence?.supplierLabel ?? "");
   const [validFrom, setValidFrom] = useState(evidence?.validFrom ?? "");
   const [validUntil, setValidUntil] = useState(evidence?.validUntil ?? "");
+  const [volumeDepthMm, setVolumeDepthMm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const unitLabel = createFor?.unitLabel ?? evidence?.unitLabel ?? "";
+  const qualifierFields = createFor?.qualifierFields ?? [];
   const requiresSupplier =
     createFor?.requiresSupplier ??
     evidence?.resourceId === SVC_SITE_INSTALL_SUBCONTRACT_ID;
@@ -42,6 +46,7 @@ export function CostEvidenceEditor({
     setSupplierLabel(evidence?.supplierLabel ?? "");
     setValidFrom(evidence?.validFrom ?? "");
     setValidUntil(evidence?.validUntil ?? "");
+    setVolumeDepthMm("");
     setError(null);
     setEditing(true);
   }
@@ -53,6 +58,7 @@ export function CostEvidenceEditor({
       setSupplierLabel("");
       setValidFrom("");
       setValidUntil("");
+      setVolumeDepthMm("");
     } else {
       setDraft(evidence ? String(evidence.amount) : "");
       setNote(evidence?.note ?? "");
@@ -74,6 +80,11 @@ export function CostEvidenceEditor({
       setError("Subcontractul cere furnizor și dată de valabilitate.");
       return;
     }
+    const when = parseQualifierWhen(qualifierFields, volumeDepthMm);
+    if (!when.ok) {
+      setError(when.error);
+      return;
+    }
     if (!creating && !evidence?.evidenceRowId) {
       setError("Salvarea a eșuat. Tariful curent nu a fost schimbat.");
       return;
@@ -86,6 +97,7 @@ export function CostEvidenceEditor({
             resourceId: createFor?.resourceId ?? "",
             amount,
             note,
+            ...(when.value ? { when: when.value } : {}),
             ...(requiresSupplier
               ? {
                   supplierLabel: supplierLabel.trim(),
@@ -143,6 +155,31 @@ export function CostEvidenceEditor({
               disabled={saving}
             />
           </div>
+          {creating
+            ? qualifierFields.map((field) => {
+                switch (field.kind) {
+                  case "volumeDepthMm":
+                    return (
+                      <div className="form-row" key={field.kind}>
+                        <label htmlFor="cost-evidence-volume-depth">{field.label}</label>
+                        <input
+                          id="cost-evidence-volume-depth"
+                          inputMode="numeric"
+                          value={volumeDepthMm}
+                          onChange={(event) => setVolumeDepthMm(event.target.value)}
+                          disabled={saving}
+                          aria-describedby="cost-evidence-volume-depth-unit"
+                        />
+                        <p id="cost-evidence-volume-depth-unit">{field.unitLabel}</p>
+                      </div>
+                    );
+                  default: {
+                    const _exhaustive: never = field.kind;
+                    return _exhaustive;
+                  }
+                }
+              })
+            : null}
           {requiresSupplier ? (
             <>
               <div className="form-row">
@@ -185,10 +222,12 @@ export function CostEvidenceEditor({
               <dt>Monedă</dt>
               <dd>{evidence?.currency ?? "EUR"}</dd>
             </div>
-            {evidence?.qualifierLabel ? (
+            {evidence?.qualifier ? (
               <div>
-                <dt>Calificativ</dt>
-                <dd>{evidence.qualifierLabel}</dd>
+                <dt>{evidence.qualifier.label}</dt>
+                <dd>
+                  {evidence.qualifier.value} {evidence.qualifier.unitLabel}
+                </dd>
               </div>
             ) : null}
           </dl>
@@ -221,10 +260,12 @@ export function CostEvidenceEditor({
               <dt>Monedă</dt>
               <dd>{evidence?.currency ?? "EUR"}</dd>
             </div>
-            {evidence?.qualifierLabel ? (
+            {evidence?.qualifier ? (
               <div>
-                <dt>Calificativ</dt>
-                <dd>{evidence.qualifierLabel}</dd>
+                <dt>{evidence.qualifier.label}</dt>
+                <dd>
+                  {evidence.qualifier.value} {evidence.qualifier.unitLabel}
+                </dd>
               </div>
             ) : null}
             {requiresSupplier && evidence?.supplierLabel ? (
@@ -258,6 +299,41 @@ export function CostEvidenceEditor({
   );
 }
 
+function parseQualifierWhen(
+  fields: readonly CostEvidenceQualifierField[],
+  volumeDepthMm: string,
+):
+  | { ok: true; value?: { volumeDepthMm: number } }
+  | { ok: false; error: string } {
+  if (fields.length === 0) {
+    return { ok: true };
+  }
+  const when: { volumeDepthMm?: number } = {};
+  for (const field of fields) {
+    switch (field.kind) {
+      case "volumeDepthMm": {
+        const parsed = Number(volumeDepthMm.trim());
+        if (!Number.isInteger(parsed) || parsed <= 0) {
+          return {
+            ok: false,
+            error: `${field.label} trebuie să fie un număr întreg mai mare decât zero.`,
+          };
+        }
+        when.volumeDepthMm = parsed;
+        break;
+      }
+      default: {
+        const _exhaustive: never = field.kind;
+        return _exhaustive;
+      }
+    }
+  }
+  if (when.volumeDepthMm === undefined) {
+    return { ok: true };
+  }
+  return { ok: true, value: { volumeDepthMm: when.volumeDepthMm } };
+}
+
 function messageForWriteError(cause: unknown): string {
   const code = cause instanceof Error ? cause.message : "";
   switch (code) {
@@ -271,7 +347,9 @@ function messageForWriteError(cause: unknown): string {
     case "stale_cost_evidence":
       return "Tariful a fost schimbat între timp. Reîncarcă și încearcă din nou.";
     case "already_exists":
-      return "Există deja o dovadă activă pentru această resursă.";
+      return "Există deja o dovadă activă pentru această resursă și acest calificativ.";
+    case "invalid_qualifier":
+      return "Adâncimea volum trebuie să fie un număr întreg mai mare decât zero.";
     case "invalid_supplier":
       return "Furnizorul sau valabilitatea nu sunt complete.";
     case "invalid_validity":

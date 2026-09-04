@@ -2,7 +2,9 @@ import type { ComponentRole } from "../product/types.js";
 import { getComponentType } from "../product/componentTypes.js";
 import {
   costClassificationLabel,
+  VOLUME_DEPTH_COST_EVIDENCE_QUALIFIER,
   costEvidence,
+  costEvidenceQualifierFieldsFor,
   costEvidenceQualifierIdentity,
   costSourceLabel,
   getMaterialFamily,
@@ -16,6 +18,7 @@ import {
   resourceKindLabel,
   resourceUnitLabel,
   type CostEvidence,
+  type CostEvidenceQualifierField,
   type MaterialFamily,
   type ResourceDefinition,
 } from "./catalog.js";
@@ -69,6 +72,7 @@ export type ResourceAdminRecord = {
   capacityLabel: string | null;
   usedBy: readonly ResourceUseProjection[];
   cost: ResourceCostProjection | null;
+  costEvidenceQualifiers: readonly CostEvidenceQualifierField[];
 };
 
 export type RecipeAdminRecord = {
@@ -114,6 +118,12 @@ export type ResourcesAdminProjection = {
     lastChangedAt: string | null;
     qualifierIdentity: string;
     qualifierLabel: string | null;
+    qualifier: {
+      kind: CostEvidenceQualifierField["kind"];
+      label: string;
+      unitLabel: string;
+      value: number;
+    } | null;
     usedBy: readonly ResourceUseProjection[];
   })[];
   writeState: "READY" | "NOT_IMPLEMENTED";
@@ -153,10 +163,8 @@ export function projectResourcesAdministration(
         evidenceRowId: item.evidenceRowId ?? null,
         lastChangedAt: item.createdAt ?? null,
         qualifierIdentity: costEvidenceQualifierIdentity(item.when),
-        qualifierLabel:
-          item.when?.volumeDepthMm !== undefined
-            ? `adâncime ${item.when.volumeDepthMm} mm`
-            : null,
+        qualifierLabel: qualifierLabelFor(item.when),
+        qualifier: qualifierProjection(item.when),
         usedBy: projectUses(item.resourceId),
         ...projected,
       };
@@ -235,15 +243,13 @@ function toAdminRecord(
         : null,
     usedBy: projectUses(resource.id),
     cost: evidence ? toCostProjection(evidence, asOf) : null,
+    costEvidenceQualifiers: costEvidenceQualifierFieldsFor(resource.costEvidenceQualifiers),
   };
 }
 
 function toCostProjection(evidence: CostEvidence, asOf: string): ResourceCostProjection {
   const unitLabel = resourceUnitLabel(evidence.perUnit);
-  const qualifier =
-    evidence.when?.volumeDepthMm !== undefined
-      ? `adâncime ${evidence.when.volumeDepthMm} mm`
-      : null;
+  const qualifier = qualifierLabelFor(evidence.when);
   return {
     amount: evidence.amount,
     currency: evidence.currency,
@@ -312,6 +318,31 @@ function formLabel(form: "sheet" | "profile"): string {
       return _exhaustive;
     }
   }
+}
+
+function qualifierProjection(when: CostEvidence["when"]): {
+  kind: CostEvidenceQualifierField["kind"];
+  label: string;
+  unitLabel: string;
+  value: number;
+} | null {
+  if (when?.volumeDepthMm === undefined) {
+    return null;
+  }
+  return {
+    kind: VOLUME_DEPTH_COST_EVIDENCE_QUALIFIER.kind,
+    label: VOLUME_DEPTH_COST_EVIDENCE_QUALIFIER.label,
+    unitLabel: VOLUME_DEPTH_COST_EVIDENCE_QUALIFIER.unitLabel,
+    value: when.volumeDepthMm,
+  };
+}
+
+function qualifierLabelFor(when: CostEvidence["when"]): string | null {
+  const qualifier = qualifierProjection(when);
+  if (!qualifier) {
+    return null;
+  }
+  return `${qualifier.label}: ${qualifier.value} ${qualifier.unitLabel}`;
 }
 
 function formatAmount(amount: number): string {

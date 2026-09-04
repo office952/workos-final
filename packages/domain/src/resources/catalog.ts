@@ -38,6 +38,20 @@ export type MaterialSpecification = {
   opticalType?: "opal";
 };
 
+export type CostEvidenceQualifierKind = "volumeDepthMm";
+
+export type CostEvidenceQualifierField = {
+  kind: CostEvidenceQualifierKind;
+  label: string;
+  unitLabel: string;
+};
+
+export const VOLUME_DEPTH_COST_EVIDENCE_QUALIFIER: CostEvidenceQualifierField = {
+  kind: "volumeDepthMm",
+  label: "Adâncime volum",
+  unitLabel: "mm",
+};
+
 export type ResourceDefinition = {
   id: string;
   label: string;
@@ -46,6 +60,7 @@ export type ResourceDefinition = {
   familyId?: MaterialFamilyId;
   specification?: MaterialSpecification;
   electrical?: ElectricalSpecification;
+  costEvidenceQualifiers?: readonly CostEvidenceQualifierKind[];
 };
 
 export type CostEvidenceWhen = {
@@ -57,6 +72,55 @@ export function costEvidenceQualifierIdentity(when?: CostEvidenceWhen): string {
     return `volumeDepthMm=${when.volumeDepthMm}`;
   }
   return "unqualified";
+}
+
+export function costEvidenceQualifierFieldsFor(
+  qualifiers: readonly CostEvidenceQualifierKind[] | undefined,
+): readonly CostEvidenceQualifierField[] {
+  return (qualifiers ?? []).map((kind) => {
+    switch (kind) {
+      case "volumeDepthMm":
+        return VOLUME_DEPTH_COST_EVIDENCE_QUALIFIER;
+      default: {
+        const _exhaustive: never = kind;
+        return _exhaustive;
+      }
+    }
+  });
+}
+
+export function resourceAllowsCostEvidenceQualifier(
+  resource: ResourceDefinition,
+  kind: CostEvidenceQualifierKind,
+): boolean {
+  return (resource.costEvidenceQualifiers ?? []).includes(kind);
+}
+
+export function parseCostEvidenceWhen(
+  input: unknown,
+): { ok: true; when?: CostEvidenceWhen } | { ok: false; error: "invalid_qualifier" } {
+  if (input === undefined || input === null) {
+    return { ok: true };
+  }
+  if (typeof input !== "object" || Array.isArray(input)) {
+    return { ok: false, error: "invalid_qualifier" };
+  }
+  const record = input as Record<string, unknown>;
+  const keys = Object.keys(record);
+  if (keys.some((key) => key !== "volumeDepthMm")) {
+    return { ok: false, error: "invalid_qualifier" };
+  }
+  if (!Object.prototype.hasOwnProperty.call(record, "volumeDepthMm")) {
+    return { ok: true };
+  }
+  const value = record.volumeDepthMm;
+  if (value === undefined || value === null || value === "") {
+    return { ok: true };
+  }
+  if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
+    return { ok: false, error: "invalid_qualifier" };
+  }
+  return { ok: true, when: { volumeDepthMm: value } };
 }
 
 export type CostEvidence = {
@@ -193,6 +257,7 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
       form: "profile",
       thicknessMm: 0.6,
     },
+    costEvidenceQualifiers: ["volumeDepthMm"],
   },
   {
     id: RETURN_CANT_FORMING_ID,

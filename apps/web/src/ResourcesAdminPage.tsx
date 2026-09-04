@@ -185,11 +185,16 @@ export function ResourcesAdminPage() {
               actions={
                 writable
                   ? renderCostAction(page.admin, selectedItem.id, (admin) => {
+                      const previousIds = new Set(
+                        page.admin.costEvidence.map((row) => costEvidenceItemId(row)),
+                      );
                       setPage({ kind: "ready", admin });
                       if (selectedItem.id.startsWith("resource:")) {
                         const resourceId = selectedItem.id.slice("resource:".length);
                         const created = admin.costEvidence.find(
-                          (row) => row.resourceId === resourceId,
+                          (row) =>
+                            row.resourceId === resourceId &&
+                            !previousIds.has(costEvidenceItemId(row)),
                         );
                         if (created) {
                           selectItem(costEvidenceItemId(created));
@@ -226,7 +231,8 @@ function renderCostAction(
     const resourceId = itemId.slice("resource:".length);
     const resource =
       admin.labor.find((item) => item.id === resourceId) ??
-      admin.services.find((item) => item.id === resourceId);
+      admin.services.find((item) => item.id === resourceId) ??
+      admin.materials.find((item) => item.id === resourceId);
     if (!resource) {
       return null;
     }
@@ -237,6 +243,7 @@ function renderCostAction(
           resourceId: resource.id,
           unitLabel: resource.unitLabel,
           requiresSupplier: resource.id === SVC_SITE_INSTALL_SUBCONTRACT_ID,
+          qualifierFields: resource.costEvidenceQualifiers ?? [],
         }}
         onSaved={onSaved}
       />

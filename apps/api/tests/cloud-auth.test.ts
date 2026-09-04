@@ -163,6 +163,19 @@ describe("Cloud auth and authorization", () => {
       },
     );
     expect(memberWrite.status).toBe(403);
+    const memberCreate = await fixture.app.request("/api/resources-admin/cost-evidence", {
+      method: "POST",
+      headers: {
+        cookie: memberLogin.cookie ?? "",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        resourceId: "aluminium_return_profile",
+        amount: 2,
+        when: { volumeDepthMm: 30 },
+      }),
+    });
+    expect(memberCreate.status).toBe(403);
     fixture.close();
   });
 

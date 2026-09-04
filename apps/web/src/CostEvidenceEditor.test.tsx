@@ -11,6 +11,7 @@ const evidence = {
   lastChangedAt: "2026-08-18T00:00:00.000Z",
   qualifierIdentity: "unqualified",
   qualifierLabel: null,
+  qualifier: null,
   usedBy: [],
   amount: 16,
   currency: "EUR" as const,
@@ -156,6 +157,53 @@ describe("CostEvidenceEditor", () => {
       supplierLabel: "Montaj Rapid SRL",
       validFrom: "2020-01-01",
       validUntil: "2027-12-31",
+    });
+  });
+
+  it("creates qualified evidence from declared qualifier fields without resource-id branches", async () => {
+    const user = userEvent.setup();
+    const onSaved = vi.fn();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          evidence: {
+            resourceId: "aluminium_return_profile",
+            when: { volumeDepthMm: 30 },
+          },
+          admin: { writeState: "READY" },
+        }),
+      }),
+    );
+    render(
+      <CostEvidenceEditor
+        createFor={{
+          resourceId: "aluminium_return_profile",
+          unitLabel: "m",
+          requiresSupplier: false,
+          qualifierFields: [
+            { kind: "volumeDepthMm", label: "Adâncime volum", unitLabel: "mm" },
+          ],
+        }}
+        onSaved={onSaved}
+      />,
+    );
+    await user.type(screen.getByLabelText("Adâncime volum"), "30");
+    await user.type(screen.getByLabelText("Tarif"), "2");
+    expect(screen.getByText("mm")).toBeInTheDocument();
+    expect(screen.queryByText("volumeDepthMm")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Confirmă tarif" }));
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    const [, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [
+      string,
+      { method?: string; body?: string },
+    ];
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body ?? "{}")).toMatchObject({
+      resourceId: "aluminium_return_profile",
+      amount: 2,
+      when: { volumeDepthMm: 30 },
     });
   });
 

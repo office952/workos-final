@@ -10,8 +10,10 @@ import {
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
   costEvidence,
+  costEvidenceQualifierFieldsFor,
   costEvidenceQualifierIdentity,
   getCostEvidence,
+  parseCostEvidenceWhen,
   getResource,
   lookupCostEvidence,
   ownerConfirmedCostSource,
@@ -138,6 +140,10 @@ describe("resource catalog", () => {
       form: "profile",
       thicknessMm: 0.6,
     });
+    expect(getResource(ALUMINIUM_RETURN_PROFILE_ID)?.costEvidenceQualifiers).toEqual([
+      "volumeDepthMm",
+    ]);
+    expect(getResource(PLEXIGLAS_3MM_OPAL_ID)?.costEvidenceQualifiers).toBeUndefined();
     expect(getResource(RETURN_CANT_FORMING_ID)?.familyId).toBeUndefined();
     expect(getResource(RETURN_CANT_FORMING_ID)?.specification).toBeUndefined();
   });
@@ -281,5 +287,20 @@ describe("resource catalog", () => {
     expect(costEvidenceQualifierIdentity({ volumeDepthMm: 60 })).toBe(
       "volumeDepthMm=60",
     );
+    expect(costEvidenceQualifierFieldsFor(["volumeDepthMm"])).toEqual([
+      {
+        kind: "volumeDepthMm",
+        label: "Adâncime volum",
+        unitLabel: "mm",
+      },
+    ]);
+    expect(parseCostEvidenceWhen(undefined).ok).toBe(true);
+    expect(parseCostEvidenceWhen({ volumeDepthMm: 30 })).toEqual({
+      ok: true,
+      when: { volumeDepthMm: 30 },
+    });
+    expect(parseCostEvidenceWhen({ volumeDepthMm: 0 }).ok).toBe(false);
+    expect(parseCostEvidenceWhen({ volumeDepthMm: 30.5 }).ok).toBe(false);
+    expect(parseCostEvidenceWhen({ productCode: "LETTERS" }).ok).toBe(false);
   });
 });
