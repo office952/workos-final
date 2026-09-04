@@ -2,7 +2,7 @@
 
 ```text
 PROGRAM = WORKOS_UI_UX_FINAL_CLOSURE_V1
-WAVE = UI_FC0
+WAVE = UI_FC0_CORRECTION
 WAVE_NAME = FORENSIC_PAGE_INVENTORY_USER_FIRST_UX_FIGMA_RUNTIME_RECONCILIATION
 STATUS = LOCAL_IN_REVIEW
 IMPLEMENTATION = NO
@@ -13,7 +13,8 @@ FIGMA_READ = YES
 MERGE_MAIN = NO
 REAL_CLOUD_WRITE = NO
 OS_S8 = HOLD
-NEXT_STEP = CHATGPT_INDEPENDENT_UI_FC0_REVIEW
+NEXT_STEP = CHATGPT_INDEPENDENT_UI_FC0_CORRECTION_REVIEW
+HEAD_BEFORE_CORRECTION = 2578b77b8aff0878bf9c4abd8a063a11c179d8cf
 ```
 
 ```text
@@ -36,6 +37,15 @@ AVERAGED_AWAY = NO
 ```
 
 Supporting lane files live under `docs/worklog/ui-fc0/`.
+
+Correction after independent CHANGES_REQUIRED:
+
+- Complete page records: `docs/worklog/ui-fc0/PAGE_RECORDS.md` (29)
+- Product System 3 IAs: `docs/worklog/ui-fc0/PRODUCT_SYSTEM_DIRECTIONS.md`
+- Machines 3 IAs: `docs/worklog/ui-fc0/MACHINES_DIRECTIONS.md`
+- Live Figma: `docs/worklog/ui-fc0/FIGMA_LIVE.md`
+- Fresh runtime: `docs/worklog/ui-fc0/EVIDENCE_MANIFEST.md`
+- Journey / forms / width: `JOURNEY.md`, `DYNAMIC_FORMS.md`, `FULL_WIDTH_LAYOUT.md`
 
 ## Authority read
 
@@ -245,14 +255,14 @@ See `docs/worklog/ui-fc0/LANE_DISAGREEMENTS.md`.
 ## Visual / accessibility this wave
 
 ```text
-VISUAL_A11Y_PASS = NOT_FRESHLY_CAPTURED_THIS_WAVE
-FRESH_1440_1280_768 = NO
-FRESH_LIGHT_DARK = NO
-FRESH_KEYBOARD_FOCUS = NO
+VISUAL_A11Y_PASS = FRESH_LOCAL_SYNTHETIC_PARTIAL
+FRESH_1440_1280_768 = YES
+FRESH_LIGHT_DARK = PARTIAL_DARK_ON_FOUR_PAGES
+FRESH_KEYBOARD_FOCUS = SMOKE_ONLY
 HISTORICAL_V3_PACKS_EXIST = YES
 ```
 
-Historical evidence remains in prior V3 / HF worklogs and `docs/worklog/screenshots/`. FC0 does not claim new viewport or focus proof. Do not treat old V3 screenshots as this audit’s runtime capture.
+Fresh captures: `docs/worklog/ui-fc0/evidence/`. Historical V3 packs are not this wave. Login and commercial object pages were not available on the empty single-plane fixture.
 
 ## Roadmap contradiction resolution
 
@@ -295,5 +305,5 @@ UI_FC1 = NOT_STARTED
 FIGMA_WRITE = NO
 OS_S8 = HOLD_UNTIL_UI_UX_FINAL_CLOSURE
 REAL_CLOUD = NO
-NEXT_STEP = CHATGPT_INDEPENDENT_UI_FC0_REVIEW
+NEXT_STEP = CHATGPT_INDEPENDENT_UI_FC0_CORRECTION_REVIEW
 ```

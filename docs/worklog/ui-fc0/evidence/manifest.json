@@ -1,0 +1,535 @@
+{
+  "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+  "REAL_CLOUD": "NO",
+  "REAL_DATA": "NO",
+  "ORIGIN": "http://127.0.0.1:5181",
+  "FRESH_RUNTIME_ROUTES_OPENED": 21,
+  "ROWS": [
+    {
+      "ROUTE": "/jobs",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/jobs_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/jobs",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/jobs_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/jobs",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/jobs_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/atelier",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/atelier_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/atelier",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/atelier_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/atelier",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/atelier_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/clients",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/clients_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/clients",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/clients_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/clients",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/clients_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/requests",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/requests_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/requests",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/requests_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/requests",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/requests_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/quotes",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/quotes_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/quotes",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/quotes_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/quotes",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/quotes_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/products",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/products_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/products",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/products_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/products",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/products_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/configurator_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/configurator_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/configurator_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/components",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/components_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/components",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/components_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/components",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/components_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/governance",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/governance_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/admin_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/product-system",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/product-system_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/product-system",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/product-system_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/product-system",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/product-system_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/resources",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/resources_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/resources",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/resources_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/resources",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/resources_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/stock",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/stock_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/processes",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/processes_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/workcenters",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/workcenters_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/workcenters",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/workcenters_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/workcenters",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/workcenters_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/people",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/people_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/people",
+      "STATE": "default",
+      "VIEWPORT": "1280",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/people_1280_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/people",
+      "STATE": "default",
+      "VIEWPORT": "768",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/people_768_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/people/skills",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/skills_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/customers",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/customers-admin_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/seller",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/seller_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/operational-services",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/operational-services_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/system",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/system_1440_light_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/product-system",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "dark",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/product-system_1440_dark_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/clients",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "dark",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/clients_1440_dark_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/atelier",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "dark",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/atelier_1440_dark_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/admin/resources",
+      "STATE": "default",
+      "VIEWPORT": "1440",
+      "THEME": "dark",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/resources_1440_dark_default.png",
+      "RESULT": "OPENED",
+      "H_OVERFLOW": false
+    },
+    {
+      "ROUTE": "/clients",
+      "STATE": "keyboard",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/clients_1440_light_keyboard.png",
+      "RESULT": "KEYBOARD_SMOKE"
+    },
+    {
+      "ROUTE": "/clients/:id",
+      "STATE": "empty",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "",
+      "RESULT": "NO_OBJECT_IN_FIXTURE"
+    },
+    {
+      "ROUTE": "/requests",
+      "STATE": "drawer",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "docs/worklog/ui-fc0/evidence/requests_1440_light_drawer.png",
+      "RESULT": "DRAWER_OPENED"
+    },
+    {
+      "ROUTE": "Login",
+      "STATE": "not_mounted",
+      "VIEWPORT": "1440",
+      "THEME": "light",
+      "FIXTURE_CLASSIFICATION": "LOCAL_SYNTHETIC_SINGLE_PLANE",
+      "SCREENSHOT": "",
+      "RESULT": "NOT_MOUNTED_SINGLE_PLANE"
+    }
+  ]
+}
