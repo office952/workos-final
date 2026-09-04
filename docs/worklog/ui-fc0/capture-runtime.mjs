@@ -1,10 +1,12 @@
+/* global document, localStorage */
+
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "evidence");
-const origin = process.env.WORKOS_FC0_ORIGIN ?? "http://127.0.0.1:5181";
+const origin = globalThis.process?.env?.WORKOS_FC0_ORIGIN ?? "http://127.0.0.1:5181";
 mkdirSync(root, { recursive: true });
 
 const listRoutes = [
@@ -199,4 +201,4 @@ const manifest = {
   ROWS: rows,
 };
 writeFileSync(join(root, "manifest.json"), JSON.stringify(manifest, null, 2));
-console.log(JSON.stringify({ opened, rows: rows.length }, null, 2));
+globalThis.console.log(JSON.stringify({ opened, rows: rows.length }, null, 2));
