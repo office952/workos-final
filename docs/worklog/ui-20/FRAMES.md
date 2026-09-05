@@ -2,7 +2,7 @@
 
 ```text
 PROGRAM = WORKOS_UI_UX_2_0_E2E
-WAVE = UI20_DL1_DESIGN_LANGUAGE_FOUNDATIONS
+WAVE = UI20_C1_APPLICATION_COVERAGE
 R3A = ACCEPTED
 R3_SIGNATURE_AMENDMENT = ACCEPTED
 S1_A = STRUCTURAL_BASE_ACCEPTED
@@ -301,4 +301,43 @@ Raw DL1 extracts above are historical visual comparison. They are not an applied
 ```text
 COMMERCIAL_LINE_CLASSIFICATION = INSTRUMENT_SCOPED_PRIMITIVE / OFERTA
 GRAMMAR_PROOF = PASS
+```
+
+## C1 application coverage (not published)
+
+North Star stays concise. New proofs live on 10 / 20 / 30 / 40 / 50 / 80.
+
+| ARTIFACT | NODE | PAGE |
+| --- | --- | --- |
+| Clienți registry 1440 | `166:15` | 10 |
+| Cereri registry 1440 | `166:60` | 10 |
+| Oferte registry 1440 | `166:107` | 10 |
+| Catalog registry 1440 | `166:337` | 10 |
+| Client Hub 1440 | `166:375` | 10 |
+| Cereri 768 | `166:523` | 10 |
+| Client Hub 768 | `166:540` | 10 |
+| Lucrări registry 1440 | `166:153` | 20 |
+| Lucrări 1440 dark | `166:742` | 20 |
+| Stoc 1440 | `166:420` | 30 |
+| Material 1440 | `166:445` | 30 |
+| Procese 1440 | `166:457` | 30 |
+| Stoc 768 | `166:628` | 30 |
+| Oameni 1440 | `166:259` | 40 |
+| Persoană 1440 | `166:288` | 40 |
+| Calificări 1440 | `166:561` | 40 |
+| Oameni 768 | `166:582` | 40 |
+| Admin home 1440 | `166:305` | 50 |
+| Login quiet 1440 | `166:325` | 50 |
+| Product System 1440 | `166:474` | 50 |
+| Utilaje 1440 | `166:501` | 50 |
+| Admin home 768 | `166:595` | 50 |
+| Guvernanță quiet 1440 | `166:612` | 50 |
+| Design Reserve | `166:645` | 80 |
+
+```text
+OBJECTREGISTER_INSTANCES = Client Hub 166:391 · Persoană 166:292
+ATTENTIONEDGE_INSTANCE = Client Hub 166:395
+MATERIALIDENTITY_INSTANCE = Material 166:449
+COMMERCIALLINE_ON_NEW_PAGES = 0
+ACTIONDOCK_ON_NEW_PAGES = 0
 ```
