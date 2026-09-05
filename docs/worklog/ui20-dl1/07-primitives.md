@@ -16,6 +16,8 @@ Promotion gate: more than one cognitive job, or the continuity spine. If promoti
 
 CommercialLine is promoted because the clip bug is a shared track law, not because every page needs a quote line. Allowed usage remains Ofertă only.
 
+Lane G (late) recommended promoting only ObjectRegister and AttentionEdge, and rejecting CommercialLine and ActionDock as one-job chrome. That gate is recorded, not averaged. Accessibility + the inherited Valoare clip required a shared column-track law. The 44px primary is a shared hit-target law. Both stay Ofertă-scoped / verb-scoped components, not page templates.
+
 ## PRIMITIVES_REJECTED
 
 Card. MetricCard. ClientRegistryCard. SemanticSpine / SemanticAnchor as library cores.
@@ -31,3 +33,13 @@ Card. MetricCard. ClientRegistryCard. SemanticSpine / SemanticAnchor as library 
 ## ANTI_CARD_RULE
 
 Several rectangles are not a Card. Promote structure that carries a semantic job.
+
+## LANE_G_VS_SYNTHESIS
+
+```text
+LANE_G_PROMOTE = ObjectRegister AttentionEdge
+LANE_G_REJECT = CommercialLine ActionDock WorkRow ConstructionPart
+LANE_G_HOLD = JourneyPosition ContextAction MaterialIdentity StateCause
+SYNTHESIS_KEPT = ObjectRegister JourneyPosition AttentionEdge ActionDock StateCause MaterialIdentity CommercialLine
+AUTHORITY = accessibility + R5 clip evidence > specialist one-job gate
+```

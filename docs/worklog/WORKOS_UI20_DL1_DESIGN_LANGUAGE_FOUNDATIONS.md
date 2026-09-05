@@ -65,6 +65,8 @@ AUTHORITY =
 
 Live Plugin API samples from R5 North Star frames on page 80 beat documentation memory. The file had no variable collections and no local styles before this wave.
 
+Nine specialist lanes finished after that live-API write. Their disagreements are recorded in `docs/worklog/ui20-dl1/10-decision-matrix.md`. Synthesis kept scoped CommercialLine + ActionDock because accessibility and the Valoare clip law outrank Lane G’s one-job gate. Live Exec station size stays 40. Ofertă dark keeps warm-white paper; only chrome is the contrast flag. Source R5 freeze remains historical DISSOLVE; the extract proves instant meaning.
+
 ## Carried advisories — closed here
 
 | Advisory | Close |
@@ -81,7 +83,7 @@ R5_REDUCED_MOTION_ADVISORY = CLOSED
 
 Minimum type: IBM Plex Sans + IBM Plex Mono. Source Serif 4 only on the Ofertă artifact (title + consequence). Object IDs are Mono 20. Line values are Mono 16. Ledger rates are Mono 14.
 
-Color is role, not brand. Light paper `#f4f3f0` / ink `#141619` / muted `#616369` / primary `#1f332e`. Dark charcoal `#1c1d1f` / cream ink `#ede8e0` / inverted primary `#c7c2b5`. Dark Ofertă chrome `96:1461` still carries light ink on charcoal — contrast risk, not a second aesthetic.
+Color is role, not brand. Light paper `#f4f3f0` / ink `#141619` / muted `#616369` / primary `#1f332e`. Dark charcoal `#1c1d1f` / cream ink `#ede8e0` / inverted primary `#c7c2b5`. Ofertă dark `96:1461` keeps warm-white artifact paper. Destinations / object IDs on that page still use `#141619` on charcoal — contrast risk, not a reason to invert the quote.
 
 768 is a compact shell (Meniu), not a scaled desktop. Desktop x-offsets must not survive contraction.
 

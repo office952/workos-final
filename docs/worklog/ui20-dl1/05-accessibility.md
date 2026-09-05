@@ -24,7 +24,7 @@ Romanian operator language. Object ID spoken. Cause spoken. No DTO names, hashes
 
 ## CONTRAST_LAW
 
-Light ink on paper. Dark cream on charcoal. Primary inverts in dark. Flag: Ofertă dark chrome `96:1461` still uses `#141619` on `#1c1d1f`.
+Light ink on paper. Dark cream on charcoal. Primary inverts in dark. Ofertă dark keeps warm-white artifact paper. Flag: Destinations / object IDs on `96:1461` still use `#141619` on `#1c1d1f`.
 
 ## OVERFLOW_CLIP_LAW
 

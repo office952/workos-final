@@ -39,3 +39,5 @@ MOTION never creates freeze, acceptance, or Lucrare
 ```
 
 Page 04 board `129:157`. Instant proof `130:588` → `130:897`.
+
+Lane F (late): the connected source R5 freeze path still uses DISSOLVE 220. That source stays historical. DL1 closes the advisory on the extract, not by rewriting R5.

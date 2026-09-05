@@ -19,13 +19,15 @@ Color is not identity. No brand rainbow.
 
 Frozen Ofertă paper is slightly cooler `#f2f2f0`. Same role as canvas. Not a new token.
 
+Lane B (late): Ofertă dark `96:1461` is still a warm-white artifact, not a charcoal page. The paper stays `#f4f3f0`. Only Destinations / object-register chrome sits on `#1c1d1f`. Do not restyle the quote into charcoal to “complete” dark.
+
 ## LIGHT_DARK_MAPPING
 
-Dark preserves hierarchy: canvas recedes, ink reads, primary remains the strongest control by inverting to cream (R4A Lucrare `72:1972` / R5 `96:1573`). No neon. No glow.
+Dark preserves hierarchy: canvas recedes, ink reads, primary remains the strongest control by inverting to cream (R4A Lucrare `72:1972` / R5 `96:1573`). No neon. No glow. Ofertă is the exception that keeps commercial paper in dark.
 
 ## CONTRAST_RISKS
 
-R5 dark Ofertă `96:1461` still paints chrome/object IDs with light-theme `#141619` on `#1c1d1f`. Lucrare / Exec dark already use cream ink. Treat Ofertă dark chrome as an inherited restyle gap, not a second look.
+R5 dark Ofertă `96:1461` still paints Destinations / object IDs with light-theme `#141619` on charcoal `#1c1d1f`. The artifact body is warm white and already readable. Lucrare / Exec dark already use cream ink on charcoal. Treat Ofertă dark chrome as an inherited restyle gap, not a second look and not a reason to invert the quote paper.
 
 Do not invent status greens/reds. State is copy + position + structure.
 

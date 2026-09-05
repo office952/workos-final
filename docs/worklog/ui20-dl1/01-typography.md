@@ -41,3 +41,5 @@ Text styles `DL1/object-id` … `DL1/shortcut` on page 01 board `129:79`.
 ## WHAT_NOT_TO_SYSTEMIZE
 
 Station 40 and artifact 36 are page-specific styles with prohibited-usage notes. Do not create a display ramp that every page must climb.
+
+Lane A (late) proposed Exec station 44. Live R5 Exec `96:1405` / extract `130:755` measure IBM Plex Sans SemiBold 40. Keep 40. Do not invent a fourth display size to split the difference.
