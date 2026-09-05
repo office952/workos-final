@@ -41,7 +41,9 @@ REQUESTS_INTEGRATED_ON_MAIN            = YES
 NEXT_PROGRAM_PRIORITY                  = PRODUCT_DEVELOPMENT
 ```
 
-Wave 1 implements this sidebar on main. All existing runtime pages are V3 baseline closed. Page-content transformation is `COMPLETE`. Clients V3 registry, Client Hub, and Cereri remain historically accepted. Future UI work is incremental polish only.
+`UI_GENERAL_REDESIGN = CLOSED_FOR_V1` and `UI_POLISH_MODE = INCREMENTAL` describe the **historical** V3 / V1 closure of the implemented shell. They do not govern future UI evolution. Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` (`OWNER RESET — UI20 E2E`: `UI_GENERAL_REDESIGN = REOPENED_BY_OWNER_FOR_UI20_E2E`, `UI_POLISH_MODE = SUPERSEDED_BY_UI20_REFOUNDATION`, `NEXT_PROGRAM_PRIORITY = WORKOS_UI_UX_2_0_E2E`). Final UI20 visual direction and final IA remain not Owner-accepted. `UI20_IMPLEMENTATION = NOT_AUTHORIZED`. This file remains the current **implemented** V3 presentation baseline until a later explicit implementation GO.
+
+Wave 1 implements this sidebar on main. All existing runtime pages are V3 baseline closed. Page-content transformation is `COMPLETE`. Clients V3 registry, Client Hub, and Cereri remain historically accepted.
 
 Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
 
