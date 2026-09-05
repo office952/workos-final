@@ -340,4 +340,9 @@ ATTENTIONEDGE_INSTANCE = Client Hub 166:395
 MATERIALIDENTITY_INSTANCE = Material 166:449
 COMMERCIALLINE_ON_NEW_PAGES = 0
 ACTIONDOCK_ON_NEW_PAGES = 0
+C1A_768 = RESPONSIVE_TEXT_INTEGRITY_CORRECTED
+C1A_NODES = 166:523 166:540 166:582 166:595 166:628
+ACCIDENTAL_TEXT_CLIP_COUNT = 0
 ```
+
+C1A did not add frames. It corrected the five existing 768 proofs: copy containers hug/fill, normal copy does not clip, mobile leads wrap or are omitted. 1440 proofs are unchanged.

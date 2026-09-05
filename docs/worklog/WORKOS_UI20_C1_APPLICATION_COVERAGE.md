@@ -18,7 +18,8 @@ C1_MERGE = NO
 CURSOR_MAY_NOT_OWNER_ACCEPT = YES
 CARRY_ADVISORY = ATTENTIONEDGE_BLOCKED_ENERGY_IS_QUIETER_THAN_R5_TERRACOTTA
 ATTENTIONEDGE_DECISION = TERRACOTTA_RETURNS_FOR_BLOCKED_CURRENT_ONLY
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_C1_REVIEW
+C1A_768 = RESPONSIVE_TEXT_INTEGRITY_CORRECTED
+NEXT_STEP = CHATGPT_FINAL_UI20_C1_CLOSE_REVIEW
 ```
 
 ```text
@@ -39,7 +40,9 @@ DL1_STRICT_FF = YES
 DL1_INTEGRATED_HEAD = 4fd260c10a63aa877abf40b296b7a4dd00baf7cf
 DL1_CLOSURE_HEAD = 463497906d5b0bb9a2cb7a211f6753d25ce4cd2d
 C1_BRANCH = design/ui20-c1-application-coverage
+C1_PR = 19
 C1_BASE_HEAD = 463497906d5b0bb9a2cb7a211f6753d25ce4cd2d
+C1_HEAD_BEFORE_C1A = 206291fce1aa24845a9a27392d15cac45356fdce
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 ```
@@ -98,6 +101,26 @@ ATTENTIONEDGE_PRIMITIVE = BANNER_ON_OBJECT_WORKSPACE_ONLY
 
 The carried advisory is closed for C1 coverage by returning terracotta energy on blocker/current only. It is not a DL1B. Master Polish may still calibrate exact saturation.
 
+## C1A — 768 text integrity
+
+Independent C1 review accepted coverage, inventory, families, Design Reserve, and 1440. It did not accept the first 768 pass.
+
+```text
+ROOT_CAUSE = FIXED_HEIGHT_TEXT_ROWS + CLIPS_CONTENT + FIXED_WIDTH_COPY
+CERERI_COPY_CONTAINER_BEFORE = 166:532 w=100 clips=true / child CER-1042 · Nord Display w=182
+CERERI_COPY_CONTAINER_AFTER = 166:532 w=713 clips=false
+MOBILE_LEAD_RULE = wrap at readable line-height, or omit; never keep a sliced sentence
+ACCIDENTAL_TEXT_CLIP_COUNT = 0
+RESPONSIVE_A11Y_REVIEW = PASS
+PERSONALITY_REVIEW = PASS
+1440_UNCHANGED = YES
+1280_POLICY_UNCHANGED = YES
+DESIGN_RESERVE_UNCHANGED = YES
+COVERAGE_MODEL_UNCHANGED = YES
+```
+
+Corrected live proofs only: Cereri `166:523`, Client Hub `166:540`, Oameni `166:582`, Admin `166:595`, Stoc `166:628`. Stoc keeps `-2,1 m` on its own row.
+
 ## Holds
 
 React, Master Polish, library publish, Owner accept of final visual / IA, C1 merge stay closed.
@@ -110,7 +133,7 @@ React, Master Polish, library publish, Owner accept of final visual / IA, C1 mer
 | WORKOS_SIGNATURE | 8.3 | Object IDs + quiet destinations + local blocker |
 | GENERIC_SAAS_RISK | 2.0 | MetricCard / Card kit still rejected |
 | COVERAGE_HONESTY | 8.5 | Holds are named; mapped pages are not counted as designed |
-| A11Y_FOUNDATION | 8.2 | 44px Meniu / primary; wrap law; 768 is compact shell |
+| A11Y_FOUNDATION | 8.6 | 44px Meniu / primary; C1A 768 clip count 0 |
 | SMART_MODULARITY | 8.1 | People / Stock / Machines / services stay optional |
 | DESIGN_TO_CODE | 7.7 | Still contract only |
 
