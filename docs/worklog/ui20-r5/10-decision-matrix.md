@@ -18,7 +18,7 @@ Six-up `99:407` (wordmark / H1 / accent off): instruments stay classifiable and 
 
 North Star character test: the path is one fixture through dedicated instruments, not six unrelated SaaS pages. It is not yet a finished product OS. Independent review decides.
 
-Post-write independent reviews of the 768 freeze sibling: Domain BLOCKER on leftover 1280 `96:1102` → `96:1106`; Figma / a11y / continuity ADVISORY. Synthesis does not expand this write into a 1280 frozen sibling.
+R5A.2 closed the leftover 1280 freeze → Lucrare hop. Frozen sibling is `124:2`. Known advisories carried forward, not opened as R5A.3: Ofertă 768 LineHead `Valoare` clip; prototype freeze hop has no reduced-motion instant equivalent.
 
 ```text
 G_POST_R5A = LEADING_DIRECTION / NOT_OWNER_ACCEPTED

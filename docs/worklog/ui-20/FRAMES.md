@@ -195,7 +195,8 @@ Personality sources stay on 10 / 20. Connected prototype is clones on 80. Fixtur
 | Exec completed 1440 | `96:723` |
 | Cerere 1280 | `96:877` |
 | Config 1280 | `96:960` |
-| Ofertă 1280 | `96:1046` |
+| Ofertă 1280 editable | `96:1046` |
+| Ofertă 1280 frozen | `124:2` |
 | Lucrare 1280 | `96:1106` |
 | Atelier 1280 | `96:1165` |
 | Exec 1280 | `96:1234` |
@@ -213,6 +214,8 @@ Personality sources stay on 10 / 20. Connected prototype is clones on 80. Fixtur
 | Ofertă 768 MobileChrome | `105:2` |
 | Ofertă 768 freeze | `96:1362` → `112:2` DISSOLVE EASE_IN 220 |
 | Ofertă 768 Deschide lucrarea | `112:62` → `96:1366` SMART_ANIMATE EASE_OUT 200 |
+| Ofertă 1280 freeze | `96:1102` → `124:2` DISSOLVE EASE_IN 220 |
+| Ofertă 1280 Deschide lucrarea | `124:58` → `96:1106` SMART_ANIMATE EASE_OUT 200 |
 | Config 768 construction parts | `105:6` |
 | Config 768 Înapoi la cerere | `105:15` → `96:1267` |
 | Exec 768 Înapoi la lucrare | `99:4` → `96:1366` |
@@ -228,8 +231,10 @@ Personality sources stay on 10 / 20. Connected prototype is clones on 80. Fixtur
 | CONFIG → OFERTĂ | `96:756` | `96:340` | SMART_ANIMATE EASE_OUT | 180 ms |
 | FREEZE | `96:396` | `96:400` | DISSOLVE EASE_IN | 220 ms |
 | FREEZE 768 | `96:1362` | `112:2` | DISSOLVE EASE_IN | 220 ms |
+| FREEZE 1280 | `96:1102` | `124:2` | DISSOLVE EASE_IN | 220 ms |
 | OFERTĂ → LUCRARE | `96:763` | `96:456` | SMART_ANIMATE EASE_OUT | 200 ms |
 | OFERTĂ 768 → LUCRARE | `112:62` | `96:1366` | SMART_ANIMATE EASE_OUT | 200 ms |
+| OFERTĂ 1280 → LUCRARE | `124:58` | `96:1106` | SMART_ANIMATE EASE_OUT | 200 ms |
 | LUCRARE → EXEC | `96:512` | `96:655` | SMART_ANIMATE EASE_OUT | 200 ms |
 | LUCRARE → ATELIER | `96:515` | `96:517` | SMART_ANIMATE EASE_OUT | 200 ms |
 | ENTER_WORK | `96:567` | `96:586` | SMART_ANIMATE EASE_OUT | 200 ms |

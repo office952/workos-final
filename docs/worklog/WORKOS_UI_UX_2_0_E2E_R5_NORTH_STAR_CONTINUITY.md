@@ -124,7 +124,14 @@ FREEZE does not create Lucrare
 
 The synthetic fixture already represents acceptance and Order as quiet provenance on the frozen artifact (`Acceptată. Identitatea trece la LUC-88. OFT-221 rămâne proveniență.`). That is not an `Acceptă oferta` action and not a claim that freeze writes Lucrare.
 
-Advisory: Ofertă stays denser than the other instruments. Cerere / Config chrome still say WorkOS; those frames already passed and were not redesigned. LineHead `Valoare` overflow is inherited 768 density, not a new frozen motif. 1280 leftover remains live: `96:1102` Îngheață oferta → `96:1106` Lucrare 1280; there is no frozen 1280 sibling. This write does not invent one. Atelier 768 (`96:1405`) still has no incoming prototype wire; Lucrare 768 primary goes to Exec.
+Advisory: Ofertă stays denser than the other instruments. Cerere / Config chrome still say WorkOS; those frames already passed and were not redesigned. LineHead `Valoare` overflow is inherited 768 density, not a new frozen motif. Atelier 768 (`96:1405`) still has no incoming prototype wire; Lucrare 768 primary goes to Exec.
+
+```text
+OFERTA_768_LINEHEAD_VALUE_CLIP = ADVISORY
+R5_PROTOTYPE_REDUCED_MOTION_INSTANT_HOP = ADVISORY
+```
+
+These stay for Design Language / Foundations / Core Design System. No R5A.3.
 
 Evidence: `docs/worklog/ui20-r5/evidence/oferta-frozen-768.png`.
 
@@ -150,4 +157,24 @@ QUOTE_FREEZE_ACCEPTANCE_SEPARATION_768 = PASS
 1280_FREEZE_TO_LUCRARE = LEFTOVER_FOR_CHATGPT_CLOSE_REVIEW
 ```
 
-Domain canon still forbids freeze creating Lucrare. The Owner GO authorized one 768 sibling, not a 1280 redesign. The leftover is recorded, not averaged away.
+Domain canon still forbids freeze creating Lucrare. The Owner then authorized R5A.2: one 1280 frozen sibling. That leftover is closed below.
+
+## R5A.2 — Ofertă 1280 freeze parity
+
+Not a new wave. Same FREEZE dialect as 1440 and 768.
+
+| Surface | Node |
+| --- | --- |
+| Ofertă editable 1280 | `96:1046` |
+| Freeze action | `96:1102` |
+| Ofertă frozen 1280 | `124:2` |
+| Deschide lucrarea | `124:58` |
+| Lucrare 1280 | `96:1106` |
+
+Live path: `96:1102` Îngheață oferta → `124:2` DISSOLVE EASE_IN 220 ms. Then `124:58` Deschide lucrarea → `96:1106` SMART_ANIMATE EASE_OUT 200 ms. `DIRECT_FREEZE_TO_LUCRARE_1280 = NO`. No `Acceptă oferta`. Quiet synthetic provenance only.
+
+768 remains `96:1362` → `112:2` → `96:1366`. 1440 remains `96:396` → `96:400` → `96:456`.
+
+Evidence: `docs/worklog/ui20-r5/evidence/oferta-frozen-1280.png`.
+
+R5A.2 post-write (two lanes only): Domain PASS. Figma / continuity PASS. `BLOCKER_COUNT = 0`.

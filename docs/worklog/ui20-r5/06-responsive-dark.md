@@ -3,7 +3,7 @@
 | Width | Cerere | Config | Ofertă | Lucrare | Atelier | Exec |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1440 | `96:85` | `96:168` | `96:400` | `96:456` | `96:517` | `96:655` |
-| 1280 | `96:877` | `96:960` | `96:1046` | `96:1106` | `96:1165` | `96:1234` |
+| 1280 | `96:877` | `96:960` | editable `96:1046` · frozen `124:2` | `96:1106` | `96:1165` | `96:1234` |
 | 768 | `96:1267` | `96:1285` | editable `96:1306` · frozen `112:2` | `96:1366` | `96:1405` | `96:1431` |
 
 R5A: all six 768 instruments use a compact shell. Live proof, not a documentation claim.
@@ -21,7 +21,7 @@ R5A: all six 768 instruments use a compact shell. Live proof, not a documentatio
 | Ofertă density | denser than siblings; line wraps; value stays dominant |
 | Ofertă 768 freeze | `96:1362` → `112:2` DISSOLVE EASE_IN 220 · then `112:62` → `96:1366` |
 
-Ofertă 1280 remains a width-adapted editable clone (`96:1046`). Leftover: `96:1102` still navigates to Lucrare `96:1106`. This correction adds frozen 768 only. Exec 768 is 900 tall and shows LUC-88 in MobileChrome. Shell comparison: `106:2`.
+Ofertă 1280 freeze path: `96:1102` → `124:2` DISSOLVE EASE_IN 220 · then `124:58` → `96:1106`. Direct freeze → Lucrare removed. Exec 768 is 900 tall and shows LUC-88 in MobileChrome. Shell comparison: `106:2`.
 
 Dark continuity trio:
 
