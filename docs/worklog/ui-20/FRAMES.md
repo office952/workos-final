@@ -13,6 +13,7 @@ R5A_STATUS = ACCEPTED
 R5A_1_STATUS = ACCEPTED
 R5A_2_STATUS = ACCEPTED
 DL1_STATUS = DESIGN_LANGUAGE_FOUNDATIONS_IN_REVIEW
+DL1A_STATUS = REAL_EXTRACTION_PROOF_IN_REVIEW
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 FIGMA_URL = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
@@ -281,3 +282,22 @@ Variables: COLOR `VariableCollectionId:129:31` Light/Dark · SPACING · RADIUS �
 | Extract Ofertă frozen 768 | `130:897` |
 | Extract anonymity six-up | `130:961` |
 | Reduced-motion instant freeze | `130:588` → `130:897` INSTANT |
+
+Raw DL1 extracts above are historical visual comparison. They are not an applied-component test (`INSTANCE_COUNT = 0`).
+
+## DL1A recomposed proofs (applied-component test)
+
+| ARTIFACT | NODE | INSTANCES |
+| --- | --- | --- |
+| Recomposed Cerere 1440 | `141:3` | ObjectRegister `141:192` · JourneyPosition `141:196` · AttentionEdge `141:198` · ActionDock `141:203` |
+| Recomposed Ofertă 1440 | `141:86` | ObjectRegister `141:209` · JourneyPosition `141:213` · CommercialLine `141:215` · ActionDock `141:224` |
+| Recomposed Execuție 1440 | `141:146` | ActionDock `141:229` |
+| Anonymity Cerere | `141:234` | — |
+| Anonymity Ofertă | `141:317` | — |
+| Anonymity Execuție | `141:378` | — |
+| DL1A label | `141:2` | — |
+
+```text
+COMMERCIAL_LINE_CLASSIFICATION = INSTRUMENT_SCOPED_PRIMITIVE / OFERTA
+GRAMMAR_PROOF = PASS
+```

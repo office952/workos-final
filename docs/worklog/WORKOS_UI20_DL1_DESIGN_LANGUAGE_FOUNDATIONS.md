@@ -18,7 +18,8 @@ FIGMA_LIBRARY_PUBLISH = NO
 UI_CODE_WRITE = NO
 DL1_MERGE = NO
 CURSOR_MAY_NOT_OWNER_ACCEPT = YES
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_DL1_REVIEW
+NEXT_STEP = CHATGPT_FINAL_UI20_DL1_CLOSE_REVIEW
+DL1A = REAL_EXTRACTION_PROOF_IN_REVIEW
 ```
 
 ```text
@@ -65,7 +66,9 @@ AUTHORITY =
 
 Live Plugin API samples from R5 North Star frames on page 80 beat documentation memory. The file had no variable collections and no local styles before this wave.
 
-Nine specialist lanes finished after that live-API write. Their disagreements are recorded in `docs/worklog/ui20-dl1/10-decision-matrix.md`. Synthesis kept scoped CommercialLine + ActionDock because accessibility and the Valoare clip law outrank Lane G’s one-job gate. Live Exec station size stays 40. Ofertă dark keeps warm-white paper; only chrome is the contrast flag. Source R5 freeze remains historical DISSOLVE; the extract proves instant meaning.
+Nine specialist lanes finished after that live-API write. Their disagreements are recorded in `docs/worklog/ui20-dl1/10-decision-matrix.md`. Synthesis kept scoped CommercialLine + ActionDock because accessibility and the Valoare clip law outrank Lane G’s one-job gate. Live Exec station size stays 40. Ofertă dark children are light surfaces; no live text sits on charcoal. Source R5 freeze remains historical DISSOLVE; the extract proves instant meaning.
+
+DL1A added three recomposed proofs that instantiate the promoted primitives. It did not overwrite historical R5 sources or raw DL1 extracts.
 
 ## Carried advisories — closed here
 
@@ -83,15 +86,29 @@ R5_REDUCED_MOTION_ADVISORY = CLOSED
 
 Minimum type: IBM Plex Sans + IBM Plex Mono. Source Serif 4 only on the Ofertă artifact (title + consequence). Object IDs are Mono 20. Line values are Mono 16. Ledger rates are Mono 14.
 
-Color is role, not brand. Light paper `#f4f3f0` / ink `#141619` / muted `#616369` / primary `#1f332e`. Dark charcoal `#1c1d1f` / cream ink `#ede8e0` / inverted primary `#c7c2b5`. Ofertă dark `96:1461` keeps warm-white artifact paper. Destinations / object IDs on that page still use `#141619` on charcoal — contrast risk, not a reason to invert the quote.
+Color is role, not brand. Light paper `#f4f3f0` / ink `#141619` / muted `#616369` / primary `#1f332e`. Dark charcoal `#1c1d1f` / cream ink `#ede8e0` / inverted primary `#c7c2b5`. Ofertă dark `96:1461` root is charcoal, but Destinations `#ffffff`, ObjectIdentity `#faf9f8`, and Artifact `#ffffff` carry `#141619` text. No live text sits on charcoal. `OFERTA_DARK_REAL_CONTRAST_RISK = NO`.
 
 768 is a compact shell (Meniu), not a scaled desktop. Desktop x-offsets must not survive contraction.
 
-Promoted: ObjectRegister, JourneyPosition, AttentionEdge, ActionDock, StateCause, MaterialIdentity, CommercialLine.
+Shared: ObjectRegister, ActionDock, AttentionEdge, JourneyPosition, StateCause, MaterialIdentity.
+
+Instrument-scoped: CommercialLine / Ofertă.
 
 Not yet: WorkRow, ConstructionPart. ContextAction folds into ActionDock.
 
 Rejected: Card, MetricCard, ClientRegistryCard.
+
+Raw DL1 extracts (`130:53` …) are historical visual comparison. They have `INSTANCE_COUNT = 0`. DL1A recomposed proofs are the applied-component test: Cerere `141:3` (4 instances), Ofertă `141:86` (4), Execuție `141:146` (1 — ActionDock only).
+
+```text
+ABSTRACTION_REJECTED_ON =
+  EXEC_OBJECTREGISTER
+  EXEC_JOURNEYPOSITION
+  EXEC_COMMERCIALLINE
+  EXEC_ATTENTIONEDGE
+  CERERE_STATECAUSE_REPLACES_TWO_COLUMN
+  OFERTA_MATERIALIDENTITY
+```
 
 ## Holds
 
@@ -110,4 +127,7 @@ React, Master Polish, library publish, Owner accept of final visual / IA stay cl
 ```text
 PAGE_PERSONALITY_BEFORE = 8.3
 PAGE_PERSONALITY_AFTER = 8.3
+GRAMMAR_PROOF = PASS
 ```
+
+DL1A did not change page personality. It proved the grammar can be instantiated without flattening the three instruments.

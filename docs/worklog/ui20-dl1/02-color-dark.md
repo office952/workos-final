@@ -19,15 +19,33 @@ Color is not identity. No brand rainbow.
 
 Frozen Ofertă paper is slightly cooler `#f2f2f0`. Same role as canvas. Not a new token.
 
-Lane B (late): Ofertă dark `96:1461` is still a warm-white artifact, not a charcoal page. The paper stays `#f4f3f0`. Only Destinations / object-register chrome sits on `#1c1d1f`. Do not restyle the quote into charcoal to “complete” dark.
+## OFERTA_DARK_LIVE_GEOMETRY
+
+Independent DL1A inspection of `96:1461` and extract `130:838`:
+
+| Layer | Fill | Text |
+| --- | --- | --- |
+| Root | `#1c1d1f` | none |
+| Destinations | `#ffffff` | `#141619` / `#616369` |
+| ObjectIdentity | `#faf9f8` | `#141619` / `#616369` |
+| Artifact | `#ffffff` | `#141619` / `#616369` |
+
+The three children cover the 900px page. Ink does not sit on charcoal.
+
+```text
+DARK_MODEL_DESCRIPTION = charcoal root, light commercial paper children, dark text inside those children
+OFERTA_DARK_REAL_CONTRAST_RISK = NO
+```
+
+Do not restyle the quote into charcoal to “complete” dark. Do not carry a false chrome-on-charcoal advisory.
 
 ## LIGHT_DARK_MAPPING
 
-Dark preserves hierarchy: canvas recedes, ink reads, primary remains the strongest control by inverting to cream (R4A Lucrare `72:1972` / R5 `96:1573`). No neon. No glow. Ofertă is the exception that keeps commercial paper in dark.
+Dark preserves hierarchy: canvas recedes, ink reads, primary remains the strongest control by inverting to cream (R4A Lucrare `72:1972` / R5 `96:1573`). No neon. No glow. Ofertă keeps commercial paper in dark.
 
 ## CONTRAST_RISKS
 
-R5 dark Ofertă `96:1461` still paints Destinations / object IDs with light-theme `#141619` on charcoal `#1c1d1f`. The artifact body is warm white and already readable. Lucrare / Exec dark already use cream ink on charcoal. Treat Ofertă dark chrome as an inherited restyle gap, not a second look and not a reason to invert the quote paper.
+None on live Ofertă dark children. Lucrare / Exec dark already use cream ink on charcoal pages that are actually charcoal.
 
 Do not invent status greens/reds. State is copy + position + structure.
 

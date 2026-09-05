@@ -11,21 +11,37 @@ If a token makes instruments identical, the abstraction is wrong. Fix the abstra
 | Ofertă | Serif artifact, line, revision, provenance | Cerere with serif |
 | Lucrare | Current position; rest compressed | PM timeline |
 | Atelier | În lucru / Disponibile / Urmează | Kanban |
-| Execuție | One operation at 40px | HMI / telemetry |
+| Execuție | One operation at 40px; ReducedChrome | HMI / telemetry / ObjectRegister strip |
 | Resources | Ledger scan | Stock dashboard |
 
 ## CROSS_PAGE_FAMILY_SIGNALS
 
-ObjectRegister. Paper canvas. IBM Plex. 44px ActionDock. Romanian operator copy. Destination map or Meniu. Quiet G1 rest.
+ObjectRegister on commercial/production object pages. Paper canvas. IBM Plex. 44px ActionDock. Romanian operator copy. Destination map or Meniu. Quiet G1 rest.
 
 ## FLATTENING_TRIGGERS
 
-Global H1 style. Serif on every title. Card grid. Shared 28px work title on Exec. Ledger density on Config. Journey rail on Atelier.
-
-## ANONYMITY_TEST_EXPECTATIONS
-
-Logo / H1 / accent off: still classifiable and one family. Source six-up `99:407`. Extract clone `130:961`.
+Global H1 style. Serif on every title. Card grid. Shared 28px work title on Exec. Ledger density on Config. Journey rail on Atelier. Forcing ObjectRegister onto Exec ReducedChrome.
 
 ## EXTRACTION_TEST_RULE
 
-Clones on page 80 apply grammar without redesign. Personality must not decrease. Ofertă 768 extract keeps serif title and commercial line after the track fix.
+Raw DL1 clones on page 80 (`130:53` …) are historical visual comparison. They do not instantiate promoted components.
+
+DL1A recomposed proofs are the applied-component test:
+
+| Proof | Node | Personality loss |
+| --- | --- | --- |
+| Cerere | `141:3` | MINOR — AttentionEdge instance uses ink `#141619` instead of R5 blocked `#9e470f`; two-column clarification kept |
+| Ofertă | `141:86` | NONE — serif title + consequence stay page-specific |
+| Execuție | `141:146` | NONE — station title stays page-specific; ActionDock is 44px |
+
+## ANONYMITY_TEST
+
+Logo / H1 / accent neutralized on sibling clones, not on the proofs:
+
+| Anonymity | Node | Still reads as |
+| --- | --- | --- |
+| Cerere | `141:234` | Clarification instrument |
+| Ofertă | `141:317` | Commercial artifact |
+| Execuție | `141:378` | Active station |
+
+Source six-up `99:407`. Historical extract six-up `130:961`.
