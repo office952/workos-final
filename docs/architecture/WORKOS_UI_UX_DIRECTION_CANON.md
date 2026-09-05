@@ -38,8 +38,13 @@ UI_GENERAL_REDESIGN                = REOPENED_BY_OWNER_FOR_UI20_E2E
 UI_POLISH_MODE                     = SUPERSEDED_BY_UI20_REFOUNDATION
 UI20_PROGRAM                       = OWNER_AUTHORIZED_REFOUNDATION
 UI20_CURRENT_VISUAL_DIRECTION      = NOT_SELECTED
-UI20_CURRENT_IA                    = NOT_SELECTED
+UI20_CURRENT_IA                    = OWNER_ACCEPTED
+UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
+UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
+GLOBAL_L1_SIDEBAR                  = NO
 UI20_IMPLEMENTATION                = NOT_AUTHORIZED
+FINAL_IA                           = OWNER_ACCEPTED
+FINAL_VISUAL_DIRECTION_UI20        = NOT_OWNER_ACCEPTED
 CLIENTS_V3                         = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION            = OWNER_ACCEPTED
 CLIENTS_RUNTIME                    = OWNER_ACCEPTED
@@ -69,6 +74,8 @@ On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. The implemented shell is the V3 stable sidebar on main. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
+
+**UI20 Final IA (Owner-accepted 2026-09-06):** living future implementation direction is `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell. `GLOBAL_L1_SIDEBAR = NO`. V3 remains the implemented baseline until an explicit UI20 implementation GO. Final visual direction remains not Owner-accepted. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`.
 
 Related living authority:
 
@@ -148,7 +155,10 @@ NEXT_PROGRAM_PRIORITY              = WORKOS_UI_UX_2_0_E2E
 UI_GENERAL_REDESIGN                = REOPENED_BY_OWNER_FOR_UI20_E2E
 UI_GENERAL_REDESIGN_V1_HISTORICAL  = CLOSED_FOR_V1
 UI20_CURRENT_VISUAL_DIRECTION      = NOT_SELECTED
-UI20_CURRENT_IA                    = NOT_SELECTED
+UI20_CURRENT_IA                    = OWNER_ACCEPTED
+UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
+UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
+GLOBAL_L1_SIDEBAR                  = NO
 UI20_IMPLEMENTATION                = NOT_AUTHORIZED
 UI20_R1                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
 UI20_R2                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
@@ -166,16 +176,20 @@ UI20_R5A                           = ACCEPTED
 UI20_R5A_1                         = ACCEPTED
 UI20_R5A_2                         = ACCEPTED
 G                                  = ACCEPTED_AS_UI20_LEADING_DIRECTION
-IA3                                = ACCEPTED_AS_UI20_LEADING_IA
+IA3                                = OWNER_ACCEPTED_AS_FINAL_UI20_IA
 FINAL_VISUAL_DIRECTION             = NOT_OWNER_ACCEPTED
-FINAL_IA                           = NOT_OWNER_ACCEPTED
+FINAL_IA                           = OWNER_ACCEPTED
 UI20_DL1                           = DESIGN_LANGUAGE_DIRECTION_ACCEPTED_WITH_ADVISORY
 UI20_DL1A                          = REAL_EXTRACTION_PROOF_ACCEPTED
 UI20_C1                            = APPLICATION_COVERAGE_ACCEPTED
 UI20_C1A                           = RESPONSIVE_TEXT_INTEGRITY_ACCEPTED
-UI20_H1                            = IN_REVIEW
-UI20_SIG1                          = IN_REVIEW
-NEXT_RECOMMENDED_BUILD             = UI20_H1_DESIGN_HYGIENE_EVIDENCE_CONSOLIDATION
+UI20_H1                            = INTEGRATED_ON_MAIN
+UI20_SIG1                          = DIRECTION_ACCEPTED_WITH_ADVISORIES
+UI20_SIG1A                         = ACCEPTED
+UI20_SIG1B                         = ACCEPTED
+UI20_IAF1                          = DIRECTION_ACCEPTED
+UI20_IAF1A                         = OWNER_ACCEPTED
+NEXT_RECOMMENDED_BUILD             = UI20_SIG1_IA_ACCEPTANCE_INTEGRATION
 CARRY_ADVISORY                     = ATTENTIONEDGE_BLOCKED_ENERGY_IS_QUIETER_THAN_R5_TERRACOTTA
 PRODUCT_SYSTEM_FC1B                = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 A3_1                               = RESEARCH_INPUT_NOT_CANON
@@ -185,7 +199,7 @@ NEW_FIGMA_FILE_KEY                 = 0XP0yGa1siWQdTTL7ou8xz
 HISTORICAL_FIGMA_FILE_KEY          = 1ev5lg7m2Ze1h3Vqmax8ho
 ```
 
-The implemented runtime remains the V3 sidebar and accepted page contracts until a later implementation GO. UI20 may explore alternative IA and visual systems. It must not invent domain states. Agents must not resume UI-FC1B React from older flags.
+The implemented runtime remains the V3 sidebar and accepted page contracts until a later implementation GO. UI20 Final IA is Owner-accepted as future implementation direction; it does not authorize React/CSS, promote CURRENT, or accept final visual polish. Agents must not resume UI-FC1B React from older flags.
 
 ## ACCEPTED OWNER V3 NAVIGATION
 
