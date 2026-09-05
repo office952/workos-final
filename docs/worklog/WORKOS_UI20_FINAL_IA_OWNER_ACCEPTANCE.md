@@ -197,6 +197,12 @@ LIBRARY_PUBLISH = NO
 
 IAF1A proved architecture, not production-perfect visual polish.
 
+## Figma
+
+```text
+FIGMA_FILE = 0XP0yGa1siWQdTTL7ou8xz
+IAF1A_FINAL_NAV_BOARD = 226:138
+FIGMA_WRITE_SCOPE = acceptance annotation only
 FIGMA_ACCEPTANCE_ANNOTATION = ADDED
 FIGMA_NODE_TOUCHED = 226:138 (+ strip 229:66)
 ```
