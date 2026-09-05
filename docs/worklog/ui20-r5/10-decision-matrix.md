@@ -21,8 +21,10 @@ North Star character test: the path is one fixture through dedicated instruments
 R5A.2 closed the leftover 1280 freeze → Lucrare hop. Frozen sibling is `124:2`. Known advisories carried forward, not opened as R5A.3: Ofertă 768 LineHead `Valoare` clip; prototype freeze hop has no reduced-motion instant equivalent.
 
 ```text
-G_POST_R5A = LEADING_DIRECTION / NOT_OWNER_ACCEPTED
-IA3_POST_R5A = LEADING_DIRECTION / NOT_OWNER_ACCEPTED
-CURSOR_RECOMMENDATION = HOLD_FOR_CHATGPT_FINAL_UI20_R5_CLOSE_REVIEW
-NEXT_STEP = CHATGPT_FINAL_UI20_R5_CLOSE_REVIEW
+CURSOR_RECOMMENDATION = CLOSED_TO_UI20_DL1
+NEXT_STEP = UI20_DL1_DESIGN_LANGUAGE_FOUNDATIONS
+G_POST_R5 = ACCEPTED_AS_UI20_LEADING_DIRECTION
+IA3_POST_R5 = ACCEPTED_AS_UI20_LEADING_IA
+FINAL_VISUAL_DIRECTION = NOT_OWNER_ACCEPTED
+FINAL_IA = NOT_OWNER_ACCEPTED
 ```
