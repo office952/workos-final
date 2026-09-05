@@ -36,7 +36,7 @@ Verified Plugin API order after R4A live reorder (`figma.root.insertChild(9, 1:1
 | 2 | 02 — Core Design System | `1:3` |
 | 3 | 03 — Operational Language | `1:4` |
 | 4 | 04 — Interaction + Motion | `1:5` |
-| 5 | 05 — Floorplan Lab | `1:6` |
+| 5 | 05 — Floorplan / Design Reserve | `1:6` |
 | 6 | 10 — E2E Commercial | `1:7` |
 | 7 | 20 — E2E Production | `1:8` |
 | 8 | 30 — Resources | `1:9` |
@@ -44,28 +44,85 @@ Verified Plugin API order after R4A live reorder (`figma.root.insertChild(9, 1:1
 | 10 | 50 — Administration | `1:11` |
 | 11 | 80 — Prototypes | `1:12` |
 | 12 | 90 — Research Transfer | `1:13` |
-| 13 | 99 — Deprecated | `1:14` |
+| 13 | 99 — Archive | `1:14` |
 
-This table is live-file order, not a documentation-only claim. R4A rechecked and corrected `40` before `50`.
+This table is live-file order, not a documentation-only claim. R4A rechecked and corrected `40` before `50`. H1 renamed `05` and `99` and restored `90` after `80`.
 
-| PAGE | R3 / R3A CONTENT |
+## CURRENT UI20 MAP
+
+Authoritative current nodes: `docs/worklog/ui20-h1/03-current-ui20-map.md` and Figma board `181:79` (body `181:81`) on page 00.
+
+Do not label archived or research nodes CURRENT.
+
+| SURFACE | 1440 | 1280 | 768 | DARK |
+| --- | --- | --- | --- | --- |
+| CURRENT NORTH STAR | `96:1775` `96:1779` `181:79` | — | — | — |
+| CURRENT FOUNDATIONS | `129:79` | — | — | — |
+| CURRENT CORE PRIMITIVES | `129:153` | — | — | — |
+| CURRENT OPERATIONAL LANGUAGE | `130:41` | — | — | — |
+| CURRENT MOTION LAW | `129:157` | — | `130:897` | — |
+| CURRENT DESIGN RESERVE | `166:645` | — | — | held |
+| CURRENT CERERI REGISTRY | `166:60` | — | `166:523` | — |
+| CURRENT CERERE DETAIL | `96:2` / `96:85` | `96:877` | `96:1267` | — |
+| CURRENT CLIENTI REGISTRY | `166:15` | — | — | — |
+| CURRENT CLIENT HUB | `166:375` | — | `166:540` | — |
+| CURRENT OFERTE REGISTRY | `166:107` | — | — | — |
+| CURRENT OFERTA EDITABLE | `96:340` | `96:1046` | `96:1306` | — |
+| CURRENT OFERTA FROZEN | `96:400` | `124:2` | `112:2` | `96:1461` |
+| CURRENT CATALOG | `166:337` | — | — | — |
+| CURRENT CONFIGURATOR | `96:168` / `96:254` | `96:960` | `96:1285` | — |
+| CURRENT LUCRARI REGISTRY | `166:153` | — | — | `166:742` |
+| CURRENT LUCRARE | `96:456` | `96:1106` | `96:1366` | `96:1517` |
+| CURRENT ATELIER | `96:517` / `96:586` | `96:1165` / `96:1621` | `96:1405` | — |
+| CURRENT EXECUTION | `96:655` / `96:690` / `96:723` | `96:1234` / `96:1690` | `96:1431` | `96:1576` |
+| CURRENT RESOURCES | `72:1517` / `72:1596` | — | `72:1675` | — |
+| CURRENT STOCK | `166:420` | — | `166:628` | — |
+| CURRENT MATERIAL | `166:445` | — | — | — |
+| CURRENT PEOPLE | `166:259` | — | `166:582` | — |
+| CURRENT PERSON | `166:288` | — | — | — |
+| CURRENT SKILLS | `166:561` | — | — | — |
+| CURRENT ADMIN | `166:305` | — | `166:595` | — |
+| CURRENT PRODUCT SYSTEM | `166:474` | — | — | — |
+| CURRENT MACHINES | `166:501` | — | — | — |
+| CURRENT GOVERNANCE | `166:612` | — | — | — |
+| CURRENT LOGIN | `166:325` | — | — | — |
+
+Product holds (no screens): Acasă, Furnizori, Achiziții, Pontaj, Plăți și avansuri, Politici.
+
+Grammar proof: DL1A `141:3` `141:86` `141:146`.
+
+## CURRENT EVIDENCE
+
+| KIND | WHERE | EXAMPLES |
+| --- | --- | --- |
+| R4 personality / dynamics | 10 / 20 / 30 / 40 / 50 | `72:4` … `72:1916`, `72:1517`, `73:142` |
+| R5 connected journey | 80 | `96:2` … `96:1749`, `112:2`, `124:2` |
+| DL1A anonymity / six-up / 768 shell | 80 | `141:234` `99:407` `106:2` |
+| Design Reserve (held) | 05 | `166:645` |
+| Leading research (not daily screens) | 90 | G `16:110`, IA-3 `16:157`, R1 matrix `10:78` |
+
+## HISTORICAL INDEX
+
+Node IDs below remain valid. Most now live on page 90 or 99 with prefix `ARCHIVE /`. Worklogs may still cite them.
+
+| PAGE | H1 CONTENT |
 | --- | --- |
-| 00 — North Star | R3/R4 kept · R5 decision `96:1775` · journey map `96:1779` only |
-| 01 — Foundations | R0/R1 kept · DL1 board `129:79` |
-| 02 — Core Design System | R0/R3 candidates kept · DL1 board `129:153` · promoted components |
-| 03 — Operational Language | R0/R1 kept · DL1 board `130:41` |
-| 04 — Interaction + Motion | R3/R4 verbs kept · DL1 motion law `129:157` |
-| 05 — Floorplan Lab | A–G research specimens |
-| 10 — E2E Commercial | R3 kept · R4 Cerere/Configurator/Ofertă state pairs at x≥6400 |
-| 20 — E2E Production | R3A kept · R4 Lucrare + Atelier/Execuție dynamics at x≥3200 |
-| 30 — Resources | R3 ledger · R4 rest/selected `72:1517`/`72:1596` |
-| 40 — People | R4 contracts Utilaje `73:142` · Oameni `73:146` |
-| 50 — Administration | R4 Admin contract `73:150` |
-| 80 — Prototypes | R3/R4 kept · R5 connected North Star at y≥21000 · six-up `99:407` |
-| 90 — Research Transfer | Historical R1 matrix `10:78` + moved R0 leftovers |
-| 99 — Deprecated | Empty |
+| 00 — North Star | Current decision `96:1775` · journey `96:1779` · map `181:79` |
+| 01 — Foundations | DL1 board `129:79` |
+| 02 — Core Design System | DL1 board `129:153` |
+| 03 — Operational Language | DL1 board `130:41` |
+| 04 — Interaction + Motion | DL1 motion law `129:157` |
+| 05 — Floorplan / Design Reserve | Design Reserve `166:645` only |
+| 10 — E2E Commercial | C1 current · R4 evidence at x≥6400 |
+| 20 — E2E Production | C1 Lucrări current · R4 evidence at x≥3200 |
+| 30 — Resources | C1 Stoc/Material/Procese · R4 ledger evidence |
+| 40 — People | C1 Oameni family · R4 contracts evidence |
+| 50 — Administration | C1 Admin family · R4 contract evidence |
+| 80 — Prototypes | Current North Star + DL1A + reduced-motion |
+| 90 — Research Transfer | A–G, IA, R0/R1 teaching history |
+| 99 — Archive | R3/R4/DL1 raw / stress. Prefix `ARCHIVE /` |
 
-## Current high-fidelity nodes
+## Historical high-fidelity nodes (R3)
 
 | ARTIFACT | NODE | SUPERSEDED |
 | --- | --- | --- |
@@ -87,7 +144,7 @@ This table is live-file order, not a documentation-only claim. R4A rechecked and
 | Current matrix | `28:2` | — |
 | Historical R1 matrix | `10:78` | — |
 
-## R3A stress evidence (page 80)
+## R3A stress evidence (now page 99)
 
 | TEST | NODE |
 | --- | --- |
@@ -103,7 +160,7 @@ This table is live-file order, not a documentation-only claim. R4A rechecked and
 | OFERTA MOTION_OFF live | `49:704` |
 | OFERTA MOTION_OFF frozen | `49:764` |
 
-## R3 signature amendment (page 80)
+## R3 signature amendment (now page 99)
 
 Phase 1 winner S1-A remains visible. S1-B is hidden.
 
@@ -307,7 +364,7 @@ GRAMMAR_PROOF = PASS
 
 ## C1 application coverage (not published)
 
-North Star stays concise. New proofs live on 10 / 20 / 30 / 40 / 50 / 80.
+North Star stays concise. C1 coverage proofs live on 10 / 20 / 30 / 40 / 50. Design Reserve lives on 05. Connected journey lives on 80.
 
 | ARTIFACT | NODE | PAGE |
 | --- | --- | --- |
@@ -334,7 +391,7 @@ North Star stays concise. New proofs live on 10 / 20 / 30 / 40 / 50 / 80.
 | Utilaje 1440 | `166:501` | 50 |
 | Admin home 768 | `166:595` | 50 |
 | Guvernanță quiet 1440 | `166:612` | 50 |
-| Design Reserve | `166:645` | 80 |
+| Design Reserve | `166:645` | 05 |
 
 ```text
 OBJECTREGISTER_INSTANCES = Client Hub 166:391 · Persoană 166:292
