@@ -2,7 +2,7 @@
 
 ```text
 PROGRAM = WORKOS_UI_UX_2_0_E2E
-WAVE = UI20_R5_NORTH_STAR_E2E_OBJECT_CONTINUITY
+WAVE = UI20_DL1_DESIGN_LANGUAGE_FOUNDATIONS
 R3A = ACCEPTED
 R3_SIGNATURE_AMENDMENT = ACCEPTED
 S1_A = STRUCTURAL_BASE_ACCEPTED
@@ -12,6 +12,7 @@ R5_STATUS = DIRECTION_ACCEPTED_WITH_ADVISORIES
 R5A_STATUS = ACCEPTED
 R5A_1_STATUS = ACCEPTED
 R5A_2_STATUS = ACCEPTED
+DL1_STATUS = DESIGN_LANGUAGE_FOUNDATIONS_IN_REVIEW
 FIGMA_FILE = WorkOS UI UX 2.0 — E2E
 FIGMA_FILE_KEY = 0XP0yGa1siWQdTTL7ou8xz
 FIGMA_URL = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
@@ -46,10 +47,10 @@ This table is live-file order, not a documentation-only claim. R4A rechecked and
 | PAGE | R3 / R3A CONTENT |
 | --- | --- |
 | 00 — North Star | R3/R4 kept · R5 decision `96:1775` · journey map `96:1779` only |
-| 01 — Foundations | Density + no-color (R2) |
-| 02 — Core Design System | Candidate primitives `35:123` |
-| 03 — Operational Language | Operational primitives (R2) |
-| 04 — Interaction + Motion | R3 SELECT/FREEZE · R4A inspectable dialect: RESOLVE `73:122` ENTER_WORK `73:126` ADVANCE `73:130` COMPLETE `73:134` COMPRESS `73:138` · SELECT `35:99` FREEZE `35:105` |
+| 01 — Foundations | R0/R1 kept · DL1 board `129:79` |
+| 02 — Core Design System | R0/R3 candidates kept · DL1 board `129:153` · promoted components |
+| 03 — Operational Language | R0/R1 kept · DL1 board `130:41` |
+| 04 — Interaction + Motion | R3/R4 verbs kept · DL1 motion law `129:157` |
 | 05 — Floorplan Lab | A–G research specimens |
 | 10 — E2E Commercial | R3 kept · R4 Cerere/Configurator/Ofertă state pairs at x≥6400 |
 | 20 — E2E Production | R3A kept · R4 Lucrare + Atelier/Execuție dynamics at x≥3200 |
@@ -244,3 +245,39 @@ Personality sources stay on 10 / 20. Connected prototype is clones on 80. Fixtur
 | COMPLETE | `96:681` | `96:690` | SMART_ANIMATE EASE_IN_AND_OUT | 200 ms |
 | EXEC ADVANCE | `96:716` | `96:723` | SMART_ANIMATE EASE_IN_AND_OUT | 200 ms |
 | EXEC → LUCRARE | `96:749` | `96:456` | SMART_ANIMATE EASE_OUT | 200 ms |
+
+## DL1 foundations + extraction (not published)
+
+Variables: COLOR `VariableCollectionId:129:31` Light/Dark · SPACING · RADIUS · TYPOGRAPHY_REFERENCE · MOTION_DURATION. No library publish.
+
+| ARTIFACT | NODE |
+| --- | --- |
+| Foundations board | `129:79` |
+| Proven primitives board | `129:153` |
+| Operational language board | `130:41` |
+| Motion law board | `129:157` |
+| ObjectRegister | `130:6` |
+| ActionDock | `130:12` |
+| CommercialLine | `130:22` |
+| StateCause | `130:27` |
+| AttentionEdge | `130:33` |
+| JourneyPosition | `130:36` |
+| MaterialIdentity | `130:40` |
+| Extract Cerere 1440 | `130:53` |
+| Extract Config 1440 | `130:136` |
+| Extract Ofertă 1440 | `130:224` |
+| Extract Lucrare 1440 | `130:284` |
+| Extract Atelier 1440 | `130:345` |
+| Extract Exec 1440 | `130:414` |
+| Extract Resources 1440 | `130:449` |
+| Extract Ofertă 768 | `130:528` |
+| Extract Config 768 | `130:592` |
+| Extract Atelier 768 | `130:626` |
+| Extract Exec 768 | `130:652` |
+| Extract Ofertă 1280 | `130:685` |
+| Extract Lucrare dark 1440 | `130:745` |
+| Extract Exec dark 1440 | `130:804` |
+| Extract Ofertă dark 1440 | `130:838` |
+| Extract Ofertă frozen 768 | `130:897` |
+| Extract anonymity six-up | `130:961` |
+| Reduced-motion instant freeze | `130:588` → `130:897` INSTANT |
