@@ -1,0 +1,30 @@
+{
+  "package": "WORKOS_UI20_OPERATIONAL_KIT_HANDOFF",
+  "figmaFile": "0XP0yGa1siWQdTTL7ou8xz",
+  "baseHead": "8c168dc6417af040eff0f79f033e287fbd9b807c",
+  "items": [
+    {"figma": "GlobalShellTop", "node": "224:96", "react": "apps/web/src/ui/GlobalShellTop.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "GlobalNavigation", "node": "224:96", "react": "apps/web/src/ui/GlobalNavigation.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "ComercialPanel", "node": "224:115", "react": "apps/web/src/ui/GlobalNavigation.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "MaiMultePanel", "node": "225:66", "react": "apps/web/src/ui/GlobalNavigation.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "IdentityMenu", "node": "225:90", "react": "apps/web/src/ui/IdentityMenu.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "MobileNavigation", "node": "224:96", "react": "apps/web/src/ui/MobileNavigationDrawer.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "ObjectContextStrip", "node": "239:81", "react": "apps/web/src/ui/ObjectContextStrip.tsx", "status": "RUNTIME_NEEDS_CALIBRATION"},
+    {"figma": "Search", "node": "224:107", "react": null, "status": "NOT_GENERALIZABLE"},
+    {"figma": "ResolutionField", "node": "239:69", "react": "apps/web/src/RequestDetailPage.tsx", "status": "UI20_NEW"},
+    {"figma": "ConstructionComposition", "node": "234:103", "react": "apps/web/src/ProductConfigurationPage.tsx", "status": "UI20_NEW"},
+    {"figma": "ContextLens", "node": "234:138", "react": "apps/web/src/ProductConfigurationViews.tsx", "status": "UI20_NEW"},
+    {"figma": "CommercialSheet", "node": "235:66", "react": "apps/web/src/QuoteInspectionPage.tsx", "status": "PAGE_SPECIFIC"},
+    {"figma": "ProductionTraveler", "node": "240:115", "react": "apps/web/src/JobDetailPage.tsx", "status": "PAGE_SPECIFIC"},
+    {"figma": "DispatchFloor", "node": "240:198", "react": "apps/web/src/AtelierPage.tsx", "status": "PAGE_SPECIFIC"},
+    {"figma": "Workstation", "node": "241:202", "react": "apps/web/src/ExecutionWorkspacePage.tsx", "status": "PAGE_SPECIFIC"},
+    {"figma": "RelationshipWorkspace", "node": "240:160", "react": "apps/web/src/ClientWorkspacePage.tsx", "status": "RUNTIME_NEEDS_CALIBRATION"},
+    {"figma": "EvidenceLedger", "node": "VIS1-resources", "react": "apps/web/src/ResourcesAdminPage.tsx", "status": "PAGE_SPECIFIC"},
+    {"figma": "QuietControl", "node": "225:90", "react": "apps/web/src/AdminHomePage.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "Field", "node": null, "react": "apps/web/src/ui/Field.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "ActionDrawer", "node": null, "react": "apps/web/src/ui/ActionDrawer.tsx", "status": "RUNTIME_EXISTING"},
+    {"figma": "AttentionEdge", "node": "239:100", "react": "apps/web/src/index.css", "status": "RUNTIME_NEEDS_CALIBRATION"},
+    {"figma": "LettersRoleTiles", "node": "234:121", "react": null, "status": "NOT_GENERALIZABLE"},
+    {"figma": "StableSidebar", "node": "242:946", "react": "apps/web/src/ui/StableSidebar.tsx", "status": "DEPRECATED_LATER"}
+  ]
+}
