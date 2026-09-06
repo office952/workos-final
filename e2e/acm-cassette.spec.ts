@@ -32,6 +32,7 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
 
   await page.getByLabel("Denumire lucrare").fill("PANOU ACM");
   await page.getByLabel("Sistem de prindere").selectOption("steel_angle");
+  await page.getByRole("tab", { name: /Corp casetă ACM/ }).click();
   await page.getByLabel("Lățime exterioară (mm)").fill("1000");
   await page.getByLabel("Înălțime exterioară (mm)").fill("500");
   await page.getByLabel("Adâncime casetă (mm)").selectOption("40");

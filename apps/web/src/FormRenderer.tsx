@@ -14,6 +14,7 @@ type FormRendererProps = {
   schema: FormSchema;
   values: DraftValues;
   onChange: (fieldId: string, value: DraftValue) => void;
+  focusComponentId?: string | null;
 };
 
 function FieldControl({
@@ -91,12 +92,16 @@ export function FormRenderer({
   schema,
   values,
   onChange,
+  focusComponentId = null,
 }: FormRendererProps) {
   const selectedIds = selectedComponentIds(template, values);
+  const visibleSections = focusComponentId
+    ? schema.sections.filter((section) => section.componentId === focusComponentId)
+    : schema.sections;
 
   return (
     <div className="form-stack">
-      {schema.sections.map((section) => {
+      {visibleSections.map((section) => {
         const visibleFields = section.fields.filter((field) =>
           isFieldVisible(field, values, selectedIds),
         );
@@ -135,12 +140,12 @@ export function FormRenderer({
                         <button
                           key={option.value}
                           type="button"
+                          tabIndex={-1}
                           className={
                             values[field.id] === option.value
                               ? "choice-chip is-selected"
                               : "choice-chip"
                           }
-                          aria-pressed={values[field.id] === option.value}
                           onClick={() => onChange(field.id, option.value)}
                         >
                           {option.label}

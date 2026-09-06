@@ -104,4 +104,18 @@ describe("FormRenderer", () => {
     );
     expect(screen.getByLabelText("Detaliu opțional")).toBeInTheDocument();
   });
+
+  it("limits the lens to the selected construction role", () => {
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{ "extra.selected": true }}
+        onChange={vi.fn()}
+        focusComponentId="FACE"
+      />,
+    );
+    expect(screen.getByLabelText("Nume față")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Include opțional")).not.toBeInTheDocument();
+  });
 });

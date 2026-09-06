@@ -13,23 +13,18 @@ import {
   type RequestDetailProjection,
   type SiteInstallationFactsPatch,
 } from "@workos-final/domain";
-import { ClientLink } from "./ClientLink";
 import { pageErrorKind } from "./fetchAccess";
 import { usePathIdAfter } from "./navigation/usePathIdAfter";
 import {
   requestEditareValue,
-  requestFilesValue,
   requestInstallationHeadline,
-  requestMontajValue,
   requestObjectMeta,
-  requestObjectPrimaryAction,
   requestOperatorIncompleteReasons,
   requestOwnerIncompleteReasons,
   requestRelatedItems,
   requestSavedModeLabel,
 } from "./requestObjectView";
 import { formatMoney, formatQuantity } from "./formatDisplay";
-import { installationCostEvidenceHref } from "./installationPresentation";
 import { formatRequestDate } from "./requestsRegistryView";
 import {
   consumeRequestsWorkspaceSession,
@@ -40,7 +35,9 @@ import {
   type RequestsWorkspaceOrigin,
 } from "./requestsWorkspaceOrigin";
 import { useCanAdministerOrganization } from "./CloudSessionContext";
+import { useObjectWorkbench } from "./objectWorkbenchContext";
 import { RequestInstallationFactsForm } from "./RequestInstallationFactsForm";
+import { RequestResolutionField } from "./RequestResolutionField";
 import {
   readRequestDetail,
   requestAttachmentErrorMessage,
@@ -160,6 +157,19 @@ export function RequestDetailPage() {
       cancelled = true;
     };
   }, [requestId]);
+
+  const readyDetail = page.kind === "ready" ? page.detail : null;
+  const contextBack = requestObjectBack(origin);
+  useObjectWorkbench(
+    readyDetail
+      ? {
+          objectType: "Cerere",
+          displayId: readyDetail.request.reference,
+          displayName: readyDetail.customerDisplayName,
+          returnTarget: { label: contextBack.label, href: contextBack.href },
+        }
+      : {},
+  );
 
   function applyDetail(detail: RequestDetailProjection) {
     setTitle(detail.request.title);
@@ -363,7 +373,6 @@ export function RequestDetailPage() {
   const { detail } = page;
   const { request } = detail;
   const back = requestObjectBack(origin);
-  const primary = requestObjectPrimaryAction(detail);
   const related = requestRelatedItems(detail);
   const headline = requestInstallationHeadline(detail);
   const incompleteReasons = detail.installationScope?.incompleteReasons ?? [];
@@ -404,21 +413,10 @@ export function RequestDetailPage() {
           >
             Editează cererea
           </button>
-          {primary?.kind === "href" ? (
-            <Link
-              className={primary.label === "Deschide oferta" ? "button-link" : "button-quiet"}
-              to={primary.href}
-            >
-              {primary.label}
-            </Link>
-          ) : null}
-          {primary?.kind === "focus" ? (
-            <button type="button" onClick={() => focusTarget(primary.targetId)}>
-              {primary.label}
-            </button>
-          ) : null}
         </div>
       </header>
+
+      <RequestResolutionField detail={detail} onFocusTarget={focusTarget} />
 
       {notice ? (
         <Notice tone="warn" compact>
@@ -438,47 +436,13 @@ export function RequestDetailPage() {
               {headline}
             </p>
           ) : null}
-          <RequestPrequoteReadiness
-            detail={detail}
-            costHref={installationCostEvidenceHref({
-              providerMode: detail.installationOffer.mode,
-              incompleteReasons: incompleteReasons,
-            })}
-          />
+          <RequestPrequoteReadiness detail={detail} />
         </section>
       ) : null}
 
       <section className="request-section">
         <h2>Ce a cerut</h2>
         <RequestDescription text={request.description} />
-        <dl className="request-facts">
-          <div>
-            <dt>Client</dt>
-            <dd>
-              <ClientLink
-                customerId={request.customerId}
-                displayName={detail.customerDisplayName}
-                prefix=""
-              />
-            </dd>
-          </div>
-          <div>
-            <dt>Stare</dt>
-            <dd>{detail.statusLabel}</dd>
-          </div>
-          <div>
-            <dt>Progres</dt>
-            <dd>{detail.commercialProgressLabel ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>Montaj</dt>
-            <dd>{requestMontajValue(detail)}</dd>
-          </div>
-          <div>
-            <dt>Fișiere</dt>
-            <dd>{requestFilesValue(detail)}</dd>
-          </div>
-        </dl>
       </section>
 
       {showInstallation ? (
@@ -852,10 +816,8 @@ function installationHint(
 
 function RequestPrequoteReadiness({
   detail,
-  costHref,
 }: {
   detail: RequestDetailProjection;
-  costHref: string | null;
 }) {
   const scope = detail.installationScope;
   if (!scope) {
@@ -912,13 +874,6 @@ function RequestPrequoteReadiness({
         </p>
       ) : null}
       <p className="request-install-next">{nextStep}</p>
-      {!ready && costHref ? (
-        <p>
-          <Link className="button-link request-repair-cta" to={costHref}>
-            Actualizează dovada de cost
-          </Link>
-        </p>
-      ) : null}
     </div>
   );
 }

@@ -52,8 +52,14 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
     page.getByRole("checkbox", { name: /Montaj la locație/ }).click(),
   ]);
   await expect(page.getByRole("button", { name: "Salvează datele de montaj" })).toBeVisible();
-  await expect(page.getByText("Adresa locului de execuție este incompletă.")).toBeVisible();
-  await expect(page.getByText("Numărul de persoane pentru montajul intern lipsește.")).toBeVisible();
+  await expect(
+    page.locator(".request-installation-reasons").getByText("Adresa locului de execuție este incompletă."),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator(".request-installation-reasons")
+      .getByText("Numărul de persoane pentru montajul intern lipsește."),
+  ).toBeVisible();
 
   await page.getByLabel("Stradă").fill("Strada Fabricii 10");
   await page.getByLabel("Localitate").fill("București");
@@ -73,7 +79,11 @@ test("OS-S2 typed installation facts stay on Cerere and leave Configurator uncha
   await page.reload();
   await expect(page.getByLabel("Stradă")).toHaveValue("Strada Fabricii 10");
   await expect(page.getByLabel("Localitate")).toHaveValue("București");
-  await expect(page.getByText("Numărul de persoane pentru montajul intern lipsește.")).toBeVisible();
+  await expect(
+    page
+      .locator(".request-installation-reasons")
+      .getByText("Numărul de persoane pentru montajul intern lipsește."),
+  ).toBeVisible();
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.screenshot({ path: ".tmp/os-s2-evidence/cerere-facts-1440.png", fullPage: true });

@@ -15,7 +15,8 @@ import { ActionDrawer } from "./ui/ActionDrawer";
 import { GlobalShellTop } from "./ui/GlobalShellTop";
 import { IdentityMenu } from "./ui/IdentityMenu";
 import { MobileNavigationDrawer } from "./ui/MobileNavigationDrawer";
-import { ObjectContextStrip } from "./ui/ObjectContextStrip";
+import { ObjectWorkbenchSetContext } from "./objectWorkbenchContext";
+import { ObjectContextStrip, type ObjectContextStripProps } from "./ui/ObjectContextStrip";
 
 type AppShellProps = {
   children: ReactNode;
@@ -30,6 +31,7 @@ export function AppShell({ children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const [legalName, setLegalName] = useState<string | null>(null);
+  const [objectContext, setObjectContext] = useState<ObjectContextStripProps>({});
   const operationalRoute = isOperationalOperatorRoute(pathname);
   const visibilityContext = useMemo(
     () => visibilityContextFromSession(cloud),
@@ -145,28 +147,29 @@ export function AppShell({ children }: AppShellProps) {
   );
 
   return (
-    <div className={operationalRoute ? "app-shell is-ui20-top is-reduced-chrome" : "app-shell is-ui20-top"}>
-      <a className="skip-link" href="#continut-principal" onClick={skipToContent}>
-        Sari la conținut
-      </a>
-      <div className="app-shell-frame is-top-shell" inert={menuOpen || undefined}>
-        <GlobalShellTop
-          model={presentation}
-          reducedChrome={operationalRoute}
-          onOpenMenu={() => setMenuOpen(true)}
-          utilities={utilities}
-        />
-        {/* Presentational primitive mounted for RW2+ population; empty until truthful props. */}
-        <ObjectContextStrip />
-        <main id="continut-principal" className="app-content" tabIndex={-1}>
-          {children}
-        </main>
+    <ObjectWorkbenchSetContext.Provider value={setObjectContext}>
+      <div className={operationalRoute ? "app-shell is-ui20-top is-reduced-chrome" : "app-shell is-ui20-top"}>
+        <a className="skip-link" href="#continut-principal" onClick={skipToContent}>
+          Sari la conținut
+        </a>
+        <div className="app-shell-frame is-top-shell" inert={menuOpen || undefined}>
+          <GlobalShellTop
+            model={presentation}
+            reducedChrome={operationalRoute}
+            onOpenMenu={() => setMenuOpen(true)}
+            utilities={utilities}
+          />
+          <ObjectContextStrip {...objectContext} />
+          <main id="continut-principal" className="app-content" tabIndex={-1}>
+            {children}
+          </main>
+        </div>
+        <MobileNavigationDrawer open={menuOpen} onClose={closeMenu} model={presentation} />
+        <ActionDrawer title="Identifică operatorul" open={identifyOpen} onClose={() => setIdentifyOpen(false)}>
+          <OperatorIdentifyForm onIdentified={() => setIdentifyOpen(false)} />
+        </ActionDrawer>
       </div>
-      <MobileNavigationDrawer open={menuOpen} onClose={closeMenu} model={presentation} />
-      <ActionDrawer title="Identifică operatorul" open={identifyOpen} onClose={() => setIdentifyOpen(false)}>
-        <OperatorIdentifyForm onIdentified={() => setIdentifyOpen(false)} />
-      </ActionDrawer>
-    </div>
+    </ObjectWorkbenchSetContext.Provider>
   );
 }
 

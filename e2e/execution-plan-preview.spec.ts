@@ -17,11 +17,13 @@ async function confirmLetters(
     })
     .click();
   await page.getByLabel("Textul literelor").fill("WORKOS");
+  await page.getByRole("tab", { name: /^Față/ }).click();
   await page.getByLabel("Finisaj față").selectOption(values.faceFinish);
   if (values.faceColor) {
     await page.getByLabel("Culoare față").fill(values.faceColor);
   }
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+  await page.getByRole("tab", { name: /^Volum/ }).click();
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
   await page.getByLabel("Finisaj volum").selectOption(values.volumeFinish);
   if (values.volumeColor) {

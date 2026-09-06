@@ -134,6 +134,9 @@ describe("RequestDetailPage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Litere exterior" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Cunoscut" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Nerezolvat" })).toBeInTheDocument();
+    expect(screen.getByText("Nimic de rezolvat pe această cerere.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Înapoi la Cereri" })).toHaveAttribute(
       "href",
       "/requests",
@@ -223,6 +226,11 @@ describe("RequestDetailPage", () => {
       </MemoryRouter>,
     );
 
+    expect(await screen.findByText("Produsul nu este ales")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Alege produs" })).toHaveAttribute(
+      "href",
+      "/products?request=crq%3A11111111-2222-3333-4444-555555555555",
+    );
     const checkbox = await screen.findByRole("checkbox", { name: /Montaj la locație/ });
     expect(checkbox).not.toBeChecked();
     await userEvent.click(checkbox);

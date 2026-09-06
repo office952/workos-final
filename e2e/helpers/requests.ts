@@ -90,16 +90,40 @@ export async function configureCanonicalLettersForRequest(page: Page, requestId:
     .click();
 }
 
+export async function selectConstructionNode(page: Page, name: string | RegExp) {
+  const tab = page.getByRole("tab", { name });
+  if ((await tab.count()) > 0) {
+    await tab.click();
+  }
+}
+
+export async function fillCanonicalLettersConfiguration(
+  page: Page,
+  inscription: string,
+  options?: {
+    depth?: string;
+    faceFinish?: string;
+    volumeFinish?: string;
+    area?: string;
+    perimeter?: string;
+  },
+) {
+  await selectConstructionNode(page, /^Produs/);
+  await page.getByLabel("Textul literelor").fill(inscription);
+  await selectConstructionNode(page, /^Față/);
+  await page.getByLabel("Finisaj față").selectOption(options?.faceFinish ?? "none");
+  await page.getByLabel("Suprafață confirmată (mm²)").fill(options?.area ?? "250000");
+  await selectConstructionNode(page, /^Volum/);
+  await page.getByLabel("Adâncime volum (mm)").selectOption(options?.depth ?? "60");
+  await page.getByLabel("Finisaj volum").selectOption(options?.volumeFinish ?? "none");
+  await page.getByLabel("Perimetru confirmat (mm)").fill(options?.perimeter ?? "12500");
+}
+
 export async function confirmCanonicalLettersOnPage(
   page: Page,
   inscription: string,
 ) {
-  await page.getByLabel("Textul literelor").fill(inscription);
-  await page.locator('select[name="face.finish"]').selectOption("none");
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.locator('select[name="volume.depthMm"]').selectOption("60");
-  await page.locator('select[name="volume.finish"]').selectOption("none");
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
+  await fillCanonicalLettersConfiguration(page, inscription);
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
 }

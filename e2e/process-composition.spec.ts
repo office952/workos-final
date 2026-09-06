@@ -166,8 +166,10 @@ test("letters critical processes complete vinyl paint and electrical routes", as
     })
     .click();
   await page.getByLabel("Textul literelor").fill("WORKOS");
+  await page.getByRole("tab", { name: /^Față/ }).click();
   await page.getByLabel("Finisaj față").selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+  await page.getByRole("tab", { name: /^Volum/ }).click();
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
   await page.getByLabel("Finisaj volum").selectOption("painted");
   await page.getByLabel("Culoare volum").fill("RAL 9010");

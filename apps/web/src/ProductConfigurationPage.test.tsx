@@ -100,6 +100,10 @@ describe("ProductConfigurationPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Material față: Plexiglas 3 mm opal")).toBeInTheDocument();
     expect(screen.getByLabelText("Textul literelor")).toBeInTheDocument();
+    expect(screen.getByRole("tablist", { name: "Compoziție constructivă" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Produs/ })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: /Față/ })).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /Volum/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Verifică configurația" })).toBeInTheDocument();
     expect(screen.queryByText("PRD-LETTERS-FRONTLIT-PLEXI-AL06")).not.toBeInTheDocument();
     expect(screen.queryByText("ProductTruth")).not.toBeInTheDocument();

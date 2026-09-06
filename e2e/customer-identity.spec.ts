@@ -14,8 +14,10 @@ async function confirmLetters(page: Page, inscription: string) {
   await page.getByRole("link", { name: lettersName }).click();
   await expect(page.getByRole("heading", { name: lettersName })).toBeVisible();
   await page.getByLabel("Textul literelor").fill(inscription);
+  await page.getByRole("tab", { name: /^Față/ }).click();
   await page.getByLabel("Finisaj față").selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+  await page.getByRole("tab", { name: /^Volum/ }).click();
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
   await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
@@ -86,6 +88,7 @@ test("ACM quote freezes a different customer", async ({ page }) => {
   await page.getByRole("link", { name: "Panou ACM casetat" }).click();
   await page.getByLabel("Denumire lucrare").fill("PANOU ACM");
   await page.getByLabel("Sistem de prindere").selectOption("steel_angle");
+  await page.getByRole("tab", { name: /Corp casetă ACM/ }).click();
   await page.getByLabel("Lățime exterioară (mm)").fill("1000");
   await page.getByLabel("Înălțime exterioară (mm)").fill("500");
   await page.getByLabel("Adâncime casetă (mm)").selectOption("40");

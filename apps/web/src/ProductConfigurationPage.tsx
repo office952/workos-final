@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   projectCommercialExperience,
@@ -24,8 +24,12 @@ import {
   type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
+import { ConstructionComposition } from "./ConstructionComposition";
+import { ContextLens } from "./ContextLens";
+import { projectConstructionComposition } from "./constructionCompositionModel";
 import { createCustomer, fetchCustomers } from "./customerApi";
 import { FormRenderer } from "./FormRenderer";
+import { useObjectWorkbench } from "./objectWorkbenchContext";
 import {
   AcceptedSnapshotSection,
   CommercialProgress,
@@ -141,6 +145,7 @@ export function ProductConfigurationPage() {
   const [busy, setBusy] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -294,6 +299,44 @@ export function ProductConfigurationPage() {
       cancelled = true;
     };
   }, [orderId, page.kind, quoteId, requestId]);
+
+  const readyProjection = page.kind === "ready" ? page.projection : null;
+  const composition = useMemo(
+    () =>
+      readyProjection
+        ? projectConstructionComposition(
+            readyProjection.template,
+            readyProjection.formSchema,
+            values,
+          )
+        : [],
+    [readyProjection, values],
+  );
+  const activeNodeId =
+    selectedNodeId && composition.some((node) => node.id === selectedNodeId)
+      ? selectedNodeId
+      : (composition[0]?.id ?? null);
+  const activeNode = composition.find((node) => node.id === activeNodeId) ?? null;
+  const requestWorkbench =
+    restoredRequest.kind === "ready" ? restoredRequest.detail : null;
+  useObjectWorkbench(
+    requestWorkbench
+      ? {
+          objectType: "Configurare",
+          displayId: requestWorkbench.request.reference,
+          displayName: requestWorkbench.customerDisplayName,
+          returnTarget: {
+            label: "Cerere",
+            href: `/requests/${encodeURIComponent(requestWorkbench.request.requestId)}`,
+          },
+        }
+      : readyProjection
+        ? {
+            objectType: "Configurare",
+            displayName: readyProjection.template.label,
+          }
+        : {},
+  );
 
   if (page.kind === "loading") {
     return <PageStatus kind="loading">Se încarcă produsul…</PageStatus>;
@@ -947,17 +990,33 @@ export function ProductConfigurationPage() {
 
       {editing ? (
         <>
-          <FormRenderer
-            template={template}
-            schema={formSchema}
-            values={values}
-            onChange={(fieldId, value) => {
-              setValues((current) => ({ ...current, [fieldId]: value }));
-              setDefinition(null);
-              setConfirmed(null);
-              setConfirmNotice(null);
-            }}
-          />
+          <div className="construction-stage">
+            <ConstructionComposition
+              nodes={composition}
+              selectedId={activeNodeId}
+              onSelect={setSelectedNodeId}
+            />
+            <ContextLens node={activeNode}>
+              <FormRenderer
+                template={template}
+                schema={formSchema}
+                values={values}
+                focusComponentId={activeNodeId}
+                onChange={(fieldId, value) => {
+                  setValues((current) => ({ ...current, [fieldId]: value }));
+                  setDefinition(null);
+                  setConfirmed(null);
+                  setConfirmNotice(null);
+                }}
+              />
+              {activeNode &&
+              !formSchema.sections.some((section) => section.componentId === activeNode.id) ? (
+                <p className="context-lens-empty">
+                  Nicio configurație de operator pe acest rol.
+                </p>
+              ) : null}
+            </ContextLens>
+          </div>
           <div className="action-row">
             <button type="button" onClick={() => void handleCompile()} disabled={busy}>
               Verifică configurația

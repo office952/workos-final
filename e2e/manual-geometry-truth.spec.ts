@@ -11,8 +11,10 @@ test("accepts confirmed manual geometry and shows owner-confirmed 60 mm EIC", as
     })
     .click();
   await page.getByLabel("Textul literelor").fill("GEO");
+  await page.getByRole("tab", { name: /^Față/ }).click();
   await page.getByLabel("Finisaj față").selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+  await page.getByRole("tab", { name: /^Volum/ }).click();
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
   await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
@@ -62,8 +64,10 @@ test("confirms 30 mm aluminium profile cost as complete", async ({ page }) => {
     })
     .click();
   await page.getByLabel("Textul literelor").fill("AD30");
+  await page.getByRole("tab", { name: /^Față/ }).click();
   await page.getByLabel("Finisaj față").selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+  await page.getByRole("tab", { name: /^Volum/ }).click();
   await page.getByLabel("Adâncime volum (mm)").selectOption("30");
   await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
@@ -86,7 +90,9 @@ test("blocks missing face area without inventing Analyzer geometry", async ({ pa
     })
     .click();
   await page.getByLabel("Textul literelor").fill("LIPSA");
+  await page.getByRole("tab", { name: /^Față/ }).click();
   await page.getByLabel("Finisaj față").selectOption("none");
+  await page.getByRole("tab", { name: /^Volum/ }).click();
   await page.getByLabel("Adâncime volum (mm)").selectOption("60");
   await page.getByLabel("Finisaj volum").selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
