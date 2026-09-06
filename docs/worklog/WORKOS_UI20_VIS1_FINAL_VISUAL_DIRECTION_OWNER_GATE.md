@@ -269,10 +269,71 @@ MAIN_MERGE / PR_CREATE = NO
 OWNER_ACCEPTED_FINAL_VISUAL = NO
 ```
 
-## STOP
+## STOP (VIS1)
 
 Exact identity + VIS1 DNA + flagship + coverage + light/dark + 1280 + 768 + a11y + boards + worklog + roadmap hygiene + commit + branch push.
 
 ```text
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_VIS1_LIVE_FIGMA_REVIEW_AND_OWNER_VISUAL_GATE
+NEXT_STEP_AFTER_VIS1 = CHATGPT_INDEPENDENT_UI20_VIS1_LIVE_FIGMA_REVIEW_AND_OWNER_VISUAL_GATE
+```
+
+---
+
+## VIS1A — targeted correction (ChatGPT live)
+
+```text
+CHATGPT_INDEPENDENT_UI20_VIS1_LIVE_REVIEW = COMPLETE
+VERDICT_CHATGPT = TARGETED_VIS1A_REQUIRED_BEFORE_OWNER_VISUAL_ACCEPT
+G_LIVING_FABRICATION_INSTRUMENT = DIRECTION_ACCEPTED (KEEP)
+VISUAL_DNA = ACCEPTED (KEEP)
+NO_NEW_ART_DIRECTION = YES
+NO_VIS2 = YES
+VIS1_ORIGINALS = PRESERVED
+VIS1A_SECTION = 239:66
+HEAD_BEFORE_VIS1A = b814108dd514d2af0d1c8335e4db65219ddf0570
+```
+
+### Exact issues addressed
+
+| Issue | Correction |
+|---|---|
+| Owner board text-index | `242:66` real scaled previews of candidates |
+| Control board placeholders | `242:941` SIG1A/SIG1B → VIS1/VIS1A real previews |
+| Cerere twin bordered panels | `239:69` plane + AttentionEdge |
+| Config 1280 signature loss | `240:66` ANCHOR→RELATION→LENS |
+| Lucrare 1280 empty CURRENT | `240:115` operation substructure |
+| Client Hub 1280 empty panel | `240:160` chronology + related + actions |
+| Atelier 1280 acceptance | `240:198` |
+| Config 768 accordion risk | `241:66` mini composition map + lens |
+| Ofertă 768 over-compressed | `241:100` lines + provenance + frozen |
+| Atelier 768 card drift | `241:126` single ledger plane |
+| 768 final set | Cerere `241:161` · Lucrare `241:183` · Exec `241:202` |
+
+### Gates (Cursor recommendation; ChatGPT re-verifies live)
+
+```text
+CERERE_1440_GENERIC_PANEL_RISK = LOW
+CONFIG_1280_SIGNATURE_PRESERVED = YES
+LUCRARE_1280_INTENTIONAL_SPACE = YES
+CLIENT_HUB_1280_RELATIONSHIP_IDENTITY = YES
+CONFIG_768_CONSTRUCTION_IDENTITY = YES
+OFERTA_768_ARTIFACT_IDENTITY = YES
+ATELIER_768_CARD_RISK = LOW
+OWNER_BOARD_VISUAL = YES
+OWNER_BOARD_NODE_HUNTING_REQUIRED = NO
+CONTROL_BOARD_VISUAL = YES
+1280_FINAL_VISUAL_GATE = PASS (recommended)
+768_FINAL_VISUAL_GATE = PASS (recommended)
+FINAL_VISUAL_DIRECTION_UI20 = NOT_OWNER_ACCEPTED
+OWNER_ACCEPTED_FINAL_VISUAL = NO
+```
+
+### Evidence
+
+`docs/worklog/ui20-vis1/evidence/vis1a-*.png`
+
+### STOP (VIS1A)
+
+```text
+NEXT_STEP = CHATGPT_FINAL_UI20_VISUAL_OWNER_GATE_LIVE_REVIEW
 ```
