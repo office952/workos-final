@@ -42,7 +42,8 @@ UI20_CURRENT_IA                    = OWNER_ACCEPTED
 UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
-UI20_IMPLEMENTATION                = NOT_AUTHORIZED
+UI20_IMPLEMENTATION                = AUTHORIZED_RW1_ONLY
+UI20_RW1                           = IMPLEMENTED_LOCAL_IN_REVIEW
 FINAL_IA                           = OWNER_ACCEPTED
 FINAL_VISUAL_DIRECTION_UI20        = OWNER_ACCEPTED
 UI20_FINAL_VISUAL_DIRECTION        = G_LIVING_FABRICATION_INSTRUMENT
@@ -74,14 +75,14 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
-On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure (`UI_GENERAL_REDESIGN = CLOSED_FOR_V1`) remains historical evidence. Living Owner direction is now `WORKOS_UI_UX_2_0_E2E`: clean-sheet experience research, domain/backend/product truth preserved, implementation not authorized.
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure (`UI_GENERAL_REDESIGN = CLOSED_FOR_V1`) remains historical evidence. Living Owner direction is now `WORKOS_UI_UX_2_0_E2E`: clean-sheet experience research, domain/backend/product truth preserved. RW1 quiet top shell is authorized and implemented locally in review; Foundation Canon still records the V3 sidebar as the implemented shell on main until RW1 is independently accepted and integrated.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. The implemented shell is the V3 stable sidebar on main. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
+`docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. The implemented shell on main is the V3 stable sidebar. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
 
-**UI20 Final IA (Owner-accepted 2026-09-06):** living future implementation direction is `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell. `GLOBAL_L1_SIDEBAR = NO`. V3 remains the implemented baseline until an explicit UI20 implementation GO. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`.
+**UI20 Final IA (Owner-accepted 2026-09-06):** living future implementation direction is `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell. `GLOBAL_L1_SIDEBAR = NO`. V3 remains the implemented baseline on main until RW1 is accepted and integrated. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`.
 
-**UI20 Final Visual (Owner-accepted 2026-09-06 via Owner-delegate ChatGPT):** `FINAL_VISUAL_DIRECTION_UI20 = OWNER_ACCEPTED`. Living direction is `G_LIVING_FABRICATION_INSTRUMENT` (`CALM_PRECISION + SELECTIVE_FABRICATION_ENERGY`). `ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`. Historical `FINAL_VISUAL_DIRECTION = A_INDUSTRIAL_CLARITY` remains closed HF-lot truth only. `UI20_IMPLEMENTATION = NOT_AUTHORIZED`. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`.
+**UI20 Final Visual (Owner-accepted 2026-09-06 via Owner-delegate ChatGPT):** `FINAL_VISUAL_DIRECTION_UI20 = OWNER_ACCEPTED`. Living direction is `G_LIVING_FABRICATION_INSTRUMENT` (`CALM_PRECISION + SELECTIVE_FABRICATION_ENERGY`). `ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`. Historical `FINAL_VISUAL_DIRECTION = A_INDUSTRIAL_CLARITY` remains closed HF-lot truth only. `UI20_IMPLEMENTATION = AUTHORIZED_RW1_ONLY` (branch `design/ui20-rw1-quiet-top-shell`). Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`.
 
 Related living authority:
 
@@ -165,7 +166,8 @@ UI20_CURRENT_IA                    = OWNER_ACCEPTED
 UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
-UI20_IMPLEMENTATION                = NOT_AUTHORIZED
+UI20_IMPLEMENTATION                = AUTHORIZED_RW1_ONLY
+UI20_RW1                           = IMPLEMENTED_LOCAL_IN_REVIEW
 UI20_R1                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
 UI20_R2                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
 UI20_R2_DOCUMENTATION              = DOCUMENTATION_READY

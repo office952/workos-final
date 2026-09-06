@@ -1,0 +1,2402 @@
+Am verificat independent și închid CP-MIG1 + IR1A PASS. main este exact 4e2a8363…, iar parentul direct este 4f72bfd…, deci stack-ul a ajuns liniar pe main. Fixul din sursă este cel corect: busy_timeout=5000, un singur BEGIN IMMEDIATE care acoperă bootstrap → citirea ledgerului → DDL → înregistrarea migrărilor și close-on-failure; nu s-au „iertat” erori SQLite prin test.
+
+Branch CI și, mai important, main exact-head CI sunt SUCCESS pe același 4e2a836…. Roadmap-ul de pe main confirmă deja UI20_IR1 = OWNER_ACCEPTED, UI20_IMPLEMENTATION_READINESS = OWNER_ACCEPTED, iar NEXT_RECOMMENDED_BUILD = UI20_RW1_QUIET_TOP_SHELL.
+
+Am reinspectat și Figma live pentru RW1: Candidate A 224:96, Comercial 224:115, Mai multe 225:66, Cont/Admin 225:90, operator reduction 222:66, responsive 226:66 / 226:91 / 226:114 și Visual DNA 233:69.
+
+Decizia mea
+CHATGPT_CP_MIG1_REVIEW = COMPLETE
+
+CP_MIG1 = ACCEPTED
+CP_MIG1 = INTEGRATED_ON_MAIN
+
+IR1A = ACCEPTED
+IR1A = INTEGRATED_ON_MAIN
+
+UI20_IMPLEMENTATION_READINESS = OWNER_ACCEPTED
+
+OWNER_DELEGATED_RW1_DECISION = GO
+
+FIRST_REACT_WAVE =
+UI20_RW1_QUIET_TOP_SHELL
+
+RW1_EXECUTION = AUTHORIZED
+
+REACT = YES_RW1_ONLY
+CSS = YES_RW1_ONLY
+
+PER_WAVE_POLISH = REQUIRED
+MASTER_POLISH = NO
+
+FIGMA_WRITE = NO
+BACKEND_WRITE = NO
+CLOUD_WRITE = NO
+REAL_DATA = NO
+
+MAIN_MERGE = NO_IN_THIS_GO
+
+Un singur advisory P3: worklog-ul CP-MIG1 încă are placeholder-ele CI <pending push>/<pending FF>, deși GitHub dovedește acum ambele run-uri verzi. Nu deschid micro-wave pentru asta.
+
+Și acum începe efectiv React.
+
+Cursor GO — UI20 RW1 Quiet Top Shell
+OWNER-DELEGATED GO
+
+WORKOS UI/UX 2.0 E2E
+
+UI20-RW1
+QUIET TOP SHELL IMPLEMENTATION
++
+PER-WAVE POLISH
+
+==================================================
+0. OWNER-DELEGATED DECISION
+==================================================
+
+ChatGPT independently verified:
+
+CP-MIG1 =
+ACCEPTED + INTEGRATED_ON_MAIN
+
+UI20_IR1 =
+OWNER_ACCEPTED
+
+UI20_IMPLEMENTATION_READINESS =
+OWNER_ACCEPTED
+
+Final IA =
+OWNER_ACCEPTED
+
+Final visual direction =
+OWNER_ACCEPTED
+
+FIRST_REACT_WAVE =
+UI20_RW1_QUIET_TOP_SHELL
+
+DECISION:
+
+RW1_EXECUTION =
+AUTHORIZED
+
+This is the FIRST UI20 React implementation wave.
+
+Authorization is strictly limited to RW1.
+
+==================================================
+1. CURRENT EXACT IDENTITY
+==================================================
+
+REPO =
+office952/workos-final
+
+EXPECTED_ORIGIN_MAIN =
+4e2a8363ce249b65148bb2950a3d4ec24364d791
+
+EXPECTED_PARENT =
+4f72bfdc36c6769dbc9e02d3e04895ed615c6252
+
+KNOWN MAIN EXACT-HEAD CI =
+
+RUN =
+34005978367
+
+RESULT =
+SUCCESS
+
+Before any mutation:
+
+verify:
+
+repo
+worktree
+origin/main
+HEAD
+dirty state
+CI
+
+Required:
+
+origin/main =
+4e2a8363ce249b65148bb2950a3d4ec24364d791
+
+If main moved:
+
+STOP.
+
+No rebase.
+No force.
+No merge commit.
+
+==================================================
+2. CREATE IMPLEMENTATION BRANCH
+==================================================
+
+Create:
+
+design/ui20-rw1-quiet-top-shell
+
+FROM EXACT:
+
+4e2a8363ce249b65148bb2950a3d4ec24364d791
+
+Do not branch from:
+
+VIS1
+VIS1A
+IR1
+IR1A
+CP-MIG1 historical branch
+
+BASE =
+current exact main only
+
+==================================================
+3. CLOSED DECISIONS
+==================================================
+
+Do NOT reopen:
+
+FINAL_IA =
+IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
+
+FINAL_SHELL =
+CANDIDATE_A_QUIET_TOP_SHELL
+
+GLOBAL_L1_SIDEBAR =
+NO
+
+FINAL_VISUAL_DIRECTION =
+G_LIVING_FABRICATION_INSTRUMENT
+
+VISUAL_SYNTHESIS =
+CALM_PRECISION
++
+SELECTIVE_FABRICATION_ENERGY
+
+SHELL_MIGRATION_STRATEGY =
+STRATEGY_A_GLOBAL_SHELL_FIRST
+
+ACASA_ROUTE_CONTRACT =
+OWNER_DELEGATE_ACCEPTED
+
+CAPABILITY_GAP_POLICY =
+ACCEPTED_CARRY_NONBLOCKING_FOR_RW1
+
+No IA research.
+No visual research.
+No A/B.
+
+==================================================
+4. SOURCES OF TRUTH
+==================================================
+
+Read before write:
+
+AGENTS.md
+
+docs/roadmap/
+WORKOS_V1_DELIVERY_ROADMAP.md
+
+docs/architecture/
+WORKOS_UI_UX_DIRECTION_CANON.md
+
+docs/architecture/
+UI_UX_FOUNDATION_CANON.md
+
+docs/architecture/
+WORKOS_UI20_IMPLEMENTATION_READINESS_CONTRACT.md
+
+docs/worklog/
+WORKOS_UI20_IR1_IMPLEMENTATION_READINESS.md
+
+docs/worklog/
+WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md
+
+docs/worklog/
+WORKOS_UI20_VIS1_FINAL_VISUAL_DIRECTION_OWNER_GATE.md
+
+Relevant IAF1 / IAF1A / SIG1B / DL1 worklogs.
+
+Current React source.
+
+Runtime truth > historical worklogs.
+
+Business/domain truth > UI convenience.
+
+==================================================
+5. FIGMA READ SOURCES
+==================================================
+
+FIGMA FILE =
+0XP0yGa1siWQdTTL7ou8xz
+
+FIGMA_READ =
+YES
+
+FIGMA_WRITE =
+NO
+
+Primary implementation references:
+
+CANDIDATE A FINAL SHELL =
+224:96
+
+COMERCIAL L2 =
+224:115
+
+MAI MULTE =
+225:66
+
+CONT + ADMIN =
+225:90
+
+OPERATOR REDUCED CHROME =
+222:66
+
+768 COMERCIAL =
+226:66
+
+768 RESOURCES =
+226:91
+
+768 ADMIN =
+226:114
+
+FINAL NAV BOARD =
+226:138
+
+VISUAL DNA =
+233:69
+
+FINAL VISUAL OWNER BOARD =
+242:66
+
+IMPORTANT:
+
+IAF1A proves GEOMETRY + BEHAVIOR.
+
+VIS1 / VIS1A visual DNA wins for:
+
+color
+typography
+surface
+border
+radius
+state energy
+
+Do NOT blindly copy the older IAF1A
+brown/terracotta active-navigation accent.
+
+Terracotta in final visual DNA is
+exception / blocked-current energy,
+not generic navigation branding.
+
+==================================================
+6. CURRENT RUNTIME TRUTH
+==================================================
+
+Current runtime uses:
+
+AppShell
++
+StableSidebar
++
+MobileNavigationDrawer
++
+IdentityMenu
+
+Current:
+
+`/`
+=
+JobsOverviewPage
+
+`/jobs`
+=
+JobsOverviewPage
+
+Acasă =
+not implemented
+
+Current visibility layer:
+
+navigationRegistry.ts
++
+visibleNavigation.ts
+
+Capabilities infrastructure exists,
+but AppShell does not currently receive
+organization capability truth and registry destinations
+have requiredCapability = null.
+
+Do NOT solve this gap in RW1.
+
+==================================================
+7. PRIMARY RW1 OBJECTIVE
+==================================================
+
+Replace V3 GLOBAL SIDEBAR PRESENTATION
+with the accepted UI20 quiet global shell.
+
+RW1 must establish:
+
+ONE quiet global top shell
++
+correct destination ownership
++
+Comercial L2
++
+one secondary "Mai multe" mechanism
++
+Cont / organization / Admin access
++
+Candidate A mobile navigation
++
+ObjectContextStrip primitive
++
+operator reduced-chrome behavior
++
+initial UI20 shell/token calibration
+
+while leaving existing page bodies operational.
+
+This is shell-first migration.
+
+Do NOT redesign page floorplans yet.
+
+==================================================
+8. NO MIXED IA
+==================================================
+
+When RW1 is running:
+
+normal office routes must NOT render:
+
+new top shell
++
+old persistent global sidebar.
+
+Required:
+
+GLOBAL_SIDEBAR_RENDERED =
+NO
+
+GLOBAL_TOP_SHELL_RENDERED =
+YES
+
+StableSidebar source may remain temporarily
+for rollback/history until RW1 is accepted.
+
+Do NOT delete legacy sidebar files merely
+because they become unused.
+
+Do NOT perform dead-CSS mass cleanup yet.
+
+DEPRECATE_LATER.
+
+==================================================
+9. RW1 ACTUAL DESKTOP NAV
+==================================================
+
+Because Acasă is not implemented until RW6,
+the ACTUAL RW1 desktop shell is:
+
+WorkOS
+
+Cereri
+
+Comercial ▾
+
+Lucrări
+
+Atelier
+
+Mai multe ▾
+
+[flex / quiet utility space]
+
+Cont ▾
+
+ACASĂ =
+NOT RENDERED
+
+SEARCH =
+NOT RENDERED
+
+Why SEARCH is omitted:
+
+search is supplemental in accepted IA
+and no functional global search currently exists.
+
+DO NOT render a dead magnifying-glass control
+only because the Figma IA proof contains one.
+
+No Coming Soon.
+
+==================================================
+10. ACASĂ / ROOT — STRICT
+==================================================
+
+RW1 through RW5:
+
+`/`
+=
+Lucrări
+
+`/jobs`
+=
+Lucrări
+
+Acasă =
+hidden
+
+`/home`
+=
+DO NOT CREATE
+
+No redirect.
+No placeholder.
+No disabled Home item.
+
+Brand may preserve current safe root behavior.
+
+RW6 owns:
+
+real Acasă
++
+atomic `/` cutover.
+
+RW1 must not touch that.
+
+==================================================
+11. GLOBAL NAVIGATION MODEL
+==================================================
+
+Do NOT create a second route registry.
+
+Continue to use:
+
+NAVIGATION_DESTINATIONS
++
+resolveVisibleDestinations()
+
+as destination / href / availability truth.
+
+Create only the thinnest UI20
+PRESENTATION GROUPING layer necessary.
+
+Recommended conceptual grouping:
+
+L1_HOME =
+home
+(render only if visible — currently false)
+
+L1_REQUESTS =
+requests
+
+L1_COMMERCIAL =
+clients
+quotes
+catalog
+
+L1_JOBS =
+jobs
+
+L1_ATELIER =
+atelier
+
+SECONDARY_RESOURCES =
+costs
+stock
+machines
+
+SECONDARY_PEOPLE =
+people
+
+ADMIN_ONLY / NOT GLOBAL =
+firm
+operational-services
+product-system
+governance
++
+AdminHome destinations outside global registry
+
+The grouping model owns IA placement.
+
+It does NOT own:
+
+availability
+href
+business capability
+role truth
+route semantics.
+
+==================================================
+12. CERERI — IMPORTANT
+==================================================
+
+Cereri is a GLOBAL L1 destination.
+
+It is NOT repeated under Comercial.
+
+Required:
+
+CERERI_DUPLICATED_IN_COMMERCIAL_L2 =
+NO
+
+Request continuation:
+
+/products/:code?request=...
+
+must continue to activate:
+
+CERERI
+
+not Catalog
+not Comercial.
+
+Preserve current continuation semantics.
+
+==================================================
+13. COMERCIAL
+==================================================
+
+Desktop:
+
+Comercial is ONE quiet trigger.
+
+When opened, it shows exactly:
+
+Clienți
+Oferte
+Catalog
+
+No Cereri.
+
+No CRM mega-menu.
+
+No cards.
+
+No icons required.
+
+The active child must be clear
+through more than color alone.
+
+Route behavior remains:
+
+/clients*
+→ Comercial / Clienți
+
+/quotes*
+→ Comercial / Oferte
+
+/products
+→ Comercial / Catalog
+
+/products/:code
+without continuation
+→ Comercial / Catalog
+
+/products/:code?quote=...
+→ Comercial / Oferte
+
+Do not change URLs.
+
+`/commercial` existing redirect may remain.
+
+==================================================
+14. LUCRĂRI
+==================================================
+
+Lucrări remains direct L1.
+
+Required active states:
+
+/
+→ Lucrări
+
+/jobs
+→ Lucrări
+
+/jobs/*
+→ Lucrări
+
+/products/:code?order=...
+→ Lucrări
+
+Do not change root ownership.
+
+==================================================
+15. ATELIER
+==================================================
+
+Atelier remains direct L1.
+
+Routes:
+
+/atelier
+/execution/*
+
+belong to the operational family.
+
+Normal Atelier entry is clear.
+
+Execution may use reduced chrome,
+but route family remains operationally connected.
+
+Do not create Execution as another global destination.
+
+==================================================
+16. MAI MULTE — DESKTOP
+==================================================
+
+Use ONE secondary navigation mechanism.
+
+Not:
+
+second rail
+mega menu
+dashboard
+card panel.
+
+Desktop popover may use
+small semantic group headings.
+
+Current RW1 truthful contents:
+
+RESURSE
+
+- Resurse și costuri
+  → /admin/resources
+
+- Stoc
+  → /admin/stock
+
+- Utilaje
+  → /admin/workcenters
+
+OAMENI
+
+- Angajați / Oameni
+  → /admin/people
+
+Do not show:
+
+Furnizori
+Achiziții
+Pontaj
+Plăți și avansuri
+Politici
+
+because they are not implemented.
+
+No Coming Soon.
+
+If a group has no visible descendants:
+
+do not render the empty group.
+
+==================================================
+17. ADMIN-ONLY DESTINATIONS
+==================================================
+
+The following are NOT global L1
+and NOT required inside Mai multe:
+
+Firmă
+Servicii operaționale
+Sistem produs
+Guvernanță
+Procese
+Module și componente
+Stare sistem
+Admin clienți
+
+Reachability in RW1 is:
+
+Cont
+→ Administrare
+→ /admin
+→ existing AdminHome destination map
+
+Do NOT redesign the full Admin floorplan in RW1.
+
+FULL_ADMIN_LOCAL_NAV_VISUAL_EMBODIMENT =
+DEFER_TO_RW5
+
+This is an intentional shell-first transition,
+not a forgotten IA requirement.
+
+Admin routes must remain reachable
+without typing URLs.
+
+==================================================
+18. CONT / ORGANIZATION
+==================================================
+
+Preserve current IdentityMenu functionality:
+
+short organization name
+legal name where available
+authenticated account
+organization switch
+theme
+logout
+
+Add one clear action:
+
+Administrare
+→ /admin
+
+Do not invent an "Organizație" settings route
+that does not exist.
+
+Organization context and
+editable administration remain conceptually separate.
+
+Long organization names must wrap safely.
+
+==================================================
+19. ACTIVE STATE MODEL
+==================================================
+
+Required semantic active ownership:
+
+REQUEST FAMILY
+→ Cereri
+
+CLIENT / QUOTE / CATALOG FAMILY
+→ Comercial
+
+JOBS / ORDER FAMILY
+→ Lucrări
+
+ATELIER / EXECUTION
+→ Atelier / operational context
+
+RESOURCES / STOCK / WORKCENTERS
+→ Mai multe / Resurse
+
+PEOPLE
+→ Mai multe / Oameni
+
+ADMIN-ONLY ROUTES
+→ quiet Cont/Admin context
+
+No page should accidentally appear
+to belong to two L1 destinations.
+
+Use current findActiveDestination/productContinuation
+semantics rather than duplicating pathname logic
+where reuse is honest.
+
+==================================================
+20. DESKTOP SHELL VISUAL LAW
+==================================================
+
+The shell must be visually quieter
+than the page work surface.
+
+Required character:
+
+precise
+thin
+calm
+low visual mass
+no large marketing header
+no floating pill nav
+no giant rounded container
+no gradient
+no glow
+
+WorkOS brand:
+
+reuse existing product branding assets
+where appropriate.
+
+Do NOT invent a new logo.
+
+Top shell should visually disappear
+after orientation.
+
+==================================================
+21. FULL-WIDTH SHELL LAW
+==================================================
+
+Removing the sidebar must remove
+the persistent sidebar width reservation.
+
+Required:
+
+NO_256PX_LEFT_GAP =
+YES
+
+NO_COLLAPSED_72PX_GAP =
+YES
+
+APP_SHELL_COLUMN =
+FULL AVAILABLE WIDTH
+
+Do NOT globally stretch every page body.
+
+Page floorplans remain page-specific
+and are transformed in RW2–RW5.
+
+This wave fixes the shell canvas,
+not every legacy content width.
+
+==================================================
+22. OBJECT CONTEXT STRIP
+==================================================
+
+Implement:
+
+ObjectContextStrip
+
+as a small reusable PRESENTATIONAL primitive.
+
+It may receive explicit props for:
+
+objectType
+displayId
+displayName
+returnTarget
+explicitParent
+
+It may format.
+
+It may NOT calculate:
+
+lineage
+readiness
+status
+commercial state
+execution state
+eligibility
+next action
+
+If information does not exist:
+
+omit it.
+
+Do NOT create fake object context
+on current legacy bodies just to showcase the primitive.
+
+ROUTE_POPULATION =
+DEFERRED_TO_PAGE_WAVES
+
+The primitive itself must be tested
+and ready for RW2+.
+
+==================================================
+23. OPERATOR REDUCED CHROME
+==================================================
+
+For:
+
+/atelier
+/execution/*
+
+preserve WorkOS operational identity
+but reduce global chrome.
+
+Do not build HMI/SCADA chrome.
+
+Required retained signals:
+
+WorkOS identity
+operational destination/context
+operator identity when applicable
+global menu recovery
+safe non-dead-end navigation
+
+Hide or reduce:
+
+commercial navigation noise
+admin noise
+unnecessary global visual mass
+
+Do NOT invent dynamic job lineage
+or return paths the source does not provide.
+
+Browser Back remains valid.
+
+No fake "înapoi la lucrare X"
+without truthful source.
+
+==================================================
+24. MOBILE / 768
+==================================================
+
+At 768:
+
+top bar should be compact.
+
+Expected:
+
+WorkOS
+
+Cont
+
+Menu trigger / hamburger
+
+No desktop L1 squeeze.
+
+Opening Meniu:
+
+main destinations:
+
+Cereri
+Comercial >
+Lucrări
+Atelier
+Mai multe >
+
+Acasă omitted in RW1.
+
+COMERCIAL nested view:
+
+Clienți
+Oferte
+Catalog
+
+MAI MULTE nested view:
+
+Resurse
+Oameni
+
+and then truthful implemented descendants
+without an empty catalog wall.
+
+When opening on an active nested route:
+
+the correct parent context must be obvious.
+
+Examples:
+
+/clients
+→ Comercial context / Clienți
+
+/admin/resources
+→ Mai multe / Resurse
+
+/admin/people
+→ Mai multe / Oameni
+
+Do not simply scale desktop nav.
+
+==================================================
+25. MOBILE ACCESSIBILITY
+==================================================
+
+Preserve or improve current drawer behavior:
+
+role/dialog semantics where appropriate
+Escape closes
+focus enters menu
+focus does not escape modal drawer
+focus returns to trigger
+body scroll lock
+background inert
+44×44 targets
+
+Nested navigation must remain keyboard-operable.
+
+Do not introduce inaccessible hover-only submenus.
+
+==================================================
+26. DESKTOP DROPDOWN ACCESSIBILITY
+==================================================
+
+Comercial
+Mai multe
+Cont
+
+must be usable by:
+
+mouse
+keyboard
+
+Required:
+
+real button trigger
+aria-expanded
+aria-controls or equivalent relationship
+Escape close
+outside-click close
+logical Tab order
+visible focus
+focus return when appropriate
+
+Do not use ARIA menu roles
+unless full menu keyboard behavior is implemented.
+
+A simple navigation popover with links
+is acceptable and often preferable.
+
+==================================================
+27. SKIP LINK / LANDMARKS
+==================================================
+
+Preserve:
+
+Sari la conținut
+
+main#continut-principal
+
+focus transfer
+
+logical landmark structure.
+
+Do not regress current accessibility
+while replacing shell geometry.
+
+==================================================
+28. THEME
+==================================================
+
+LIGHT =
+required
+
+DARK =
+required
+
+SYSTEM =
+required
+
+Shell hierarchy must remain equivalent.
+
+No second dark brand.
+
+No color-only active state.
+
+No gradient.
+
+No shadow as default hierarchy.
+
+Popovers may use restrained temporary layering.
+
+==================================================
+29. TYPOGRAPHY
+==================================================
+
+IBM Plex Sans / Mono are already
+part of current runtime infrastructure.
+
+Audit before changing font loading.
+
+Do NOT add a duplicate font loader.
+
+RW1 may calibrate:
+
+nav typography
+brand
+utility labels
+object-context technical IDs
+
+Source Serif 4 is NOT needed for shell.
+
+Do not spread Mono through global navigation.
+
+==================================================
+30. TOKEN BRIDGE
+==================================================
+
+Reuse current semantic CSS custom properties
+where honest.
+
+Add only the minimum UI20 shell tokens
+where existing tokens cannot express the accepted law.
+
+No Figma-hex dumping.
+
+No hardcoded color scattered through components.
+
+No new design-system framework.
+
+No shadcn migration.
+
+No Tailwind migration.
+
+No CSS-in-JS migration.
+
+==================================================
+31. LEGACY SIDEBAR BOUNDARY
+==================================================
+
+After RW1 implementation:
+
+AppShell must NOT import/render StableSidebar
+for normal runtime navigation.
+
+Mobile navigation must NOT depend on
+StableSidebar's old grouped-sidebar presentation.
+
+But do NOT delete:
+
+StableSidebar.tsx
+sidebarCollapse.ts
+old sidebar CSS
+
+in this implementation wave
+unless deletion is required for correctness.
+
+Mark:
+
+DEPRECATE_AFTER_RW1_ACCEPTANCE
+
+This keeps rollback cheap
+and avoids cleanup scope drift.
+
+==================================================
+32. EXISTING PAGE BODIES
+==================================================
+
+RW1 is NOT:
+
+Cerere redesign
+Config redesign
+Ofertă redesign
+Lucrare redesign
+Atelier floorplan redesign
+Resources redesign
+Admin redesign
+
+Existing bodies must remain functional
+under the new shell.
+
+Allowed:
+
+minimal shell accommodation
+needed to prevent:
+
+clipping
+double chrome
+bad width reservation
+overlap
+unreachable actions
+
+Do not cosmetically redesign every page.
+
+==================================================
+33. CURRENT ROUTES — FREEZE
+==================================================
+
+DO NOT CHANGE ROUTE OWNERSHIP.
+
+Required unchanged:
+
+/
+ /jobs
+ /jobs/*
+ /atelier
+ /commercial
+ /requests
+ /requests/*
+ /quotes
+ /quotes/*
+ /clients
+ /clients/*
+ /products
+ /products/:productCode
+ /execution/*
+ /components
+ /governance
+ /system
+ /admin
+ /admin/*
+
+NO `/home`.
+
+If implementation appears to require
+a new route:
+
+STOP
+and report why.
+
+==================================================
+34. BUSINESS TRUTH BOUNDARY
+==================================================
+
+UI may own:
+
+shell geometry
+navigation presentation
+popover state
+mobile drawer state
+responsive behavior
+focus behavior
+visual tokens
+local transient UI state
+
+UI may NOT own:
+
+capability adoption
+business status
+quote status
+job status
+readiness
+pricing
+cost
+operator eligibility
+machine eligibility
+lineage
+commercial totals
+
+No backend/domain changes.
+
+==================================================
+35. CAPABILITY GAP — STRICT
+==================================================
+
+Known carry:
+
+AppShell does not receive a complete
+organization capability projection.
+
+Registry requiredCapability is currently null.
+
+RW1 policy:
+
+PRESERVE_EXISTING_VISIBILITY_TRUTH
+
+Do not:
+
+invent capabilities
+hardcode HUB MEDIA modules
+hide Stock because "a small company might not need it"
+show fake capability switches
+create frontend module config
+create client-specific code forks
+
+RW1 only reorganizes the destinations
+already considered visible.
+
+Capability-aware finalization remains later work.
+
+==================================================
+36. SMART MODULARITY CHECK
+==================================================
+
+Even though capability projection is not fixed here,
+prove RW1 does not make future modularity harder.
+
+Review:
+
+A.
+advanced company
+
+B.
+small commercial company
+
+C.
+Machines eventually disabled
+
+D.
+Stock eventually disabled
+
+E.
+Execution eventually disabled
+
+F.
+module enabled later
+
+Required finding:
+
+navigation presentation can consume
+future visibility results without rewrite.
+
+NO_CLIENT_CODE_FORK =
+YES
+
+No fake frontend capability truth.
+
+==================================================
+37. TEST CONTRACT — EXISTING
+==================================================
+
+Preserve and adapt current tests rather than deleting them.
+
+At minimum inspect/update:
+
+apps/web/src/AppShell.test.tsx
+
+apps/web/src/ui/
+MobileNavigationDrawer.test.tsx
+
+apps/web/src/navigation/
+visibleNavigation.test.ts
+
+navigation registry tests if present
+
+route/e2e shell tests
+
+Current behavior tests that encode V3 sidebar
+must be replaced with UI20 assertions,
+not simply removed.
+
+==================================================
+38. NEW NAVIGATION TEST MATRIX
+==================================================
+
+Required automated coverage:
+
+1.
+Acasă absent in RW1
+
+2.
+No `/home`
+
+3.
+Cereri direct L1
+
+4.
+Cereri absent from Comercial L2
+
+5.
+Comercial →
+Clienți / Oferte / Catalog
+
+6.
+Lucrări active on `/` and `/jobs/*`
+
+7.
+request continuation →
+Cereri
+
+8.
+quote continuation →
+Comercial / Oferte
+
+9.
+order continuation →
+Lucrări
+
+10.
+Mai multe →
+Resources group + People group
+
+11.
+not-implemented destinations absent
+
+12.
+no dead visible links
+
+13.
+Cont opens
+
+14.
+Administrare reachable from Cont
+
+15.
+organization switching preserved
+
+16.
+theme switching preserved
+
+17.
+skip-link preserved
+
+18.
+Atelier / Execution reduced chrome
+
+19.
+global sidebar not rendered
+
+20.
+768 mobile nested navigation
+
+21.
+Escape / focus return
+
+22.
+empty secondary groups do not render
+
+==================================================
+39. REACHABILITY GATE
+==================================================
+
+Without search and without typing a URL,
+prove every currently supported destination
+remains reachable.
+
+Direct/global paths:
+
+Requests
+Clients
+Quotes
+Catalog
+Jobs
+Atelier
+
+Secondary:
+
+Resources
+Stock
+Machines
+People
+
+Administration path:
+
+Cont
+→ Administrare
+→ existing AdminHome
+
+From AdminHome prove reachability of:
+
+Seller / Firmă
+Admin Customers
+People
+Operational Services
+Resources
+Stock
+Processes
+Workcenters
+Product System
+Components
+Governance
+System
+
+No current supported route becomes orphaned.
+
+==================================================
+40. PER-WAVE POLISH — REQUIRED
+==================================================
+
+This is NOT optional.
+
+After functional implementation:
+
+PASS 1 =
+1440 visual compare
+
+PASS 2 =
+1280 shell-pressure compare
+
+PASS 3 =
+768 responsive compare
+
+PASS 4 =
+light/dark/system
+
+PASS 5 =
+keyboard/focus/44px
+
+PASS 6 =
+long Romanian labels + long org name
+
+PASS 7 =
+overflow/clipping/200% zoom
+
+PASS 8 =
+final Figma reconciliation
+
+Do not stop at:
+"feature works."
+
+RW1 must look implementation-ready.
+
+MASTER_POLISH is later.
+
+RW1 polish is NOW.
+
+==================================================
+41. REQUIRED VIEWPORT PROOFS
+==================================================
+
+1440:
+
+/jobs
+normal shell
+
+/requests
+Cereri active
+
+/clients
+Comercial active + open L2
+
+/admin/resources
+Mai multe / Resurse
+
+/admin
+Cont/Admin
+
+/atelier
+operator/reduced shell
+
+1280:
+
+/jobs
+
+/clients
+
+/admin/resources
+
+/atelier
+
+768:
+
+/jobs
+closed shell
+
+/clients
+Meniu + Comercial nested
+
+/admin/resources
+Meniu + Mai multe / Resurse
+
+/admin
+Cont + Administrare path
+
+/atelier
+operator route
+
+Where a safe synthetic execution fixture exists:
+
+/execution/*
+reduced shell proof
+
+Do not use real business data.
+
+==================================================
+42. THEME PROOFS
+==================================================
+
+At minimum:
+
+1440 /jobs LIGHT
+
+1440 /jobs DARK
+
+768 /clients LIGHT
+
+Atelier or Execution reduced chrome
+in the theme most representative
+of current runtime.
+
+SYSTEM:
+
+verify behavior,
+no duplicate theme source.
+
+==================================================
+43. LONG COPY / STRESS
+==================================================
+
+Use synthetic long Romanian content.
+
+At minimum test:
+
+long organization display name
+
+long legal company name
+
+navigation at 1280
+
+Cont dropdown
+
+No clipping.
+
+No one-line fixed-width identity bug.
+
+==================================================
+44. VISUAL ACCEPTANCE CRITERIA
+==================================================
+
+Before reporting READY:
+
+SHELL_QUIETNESS =
+PASS
+
+WORK_SURFACE_DOMINANCE =
+PASS
+
+GLOBAL_SIDEBAR_VISIBLE =
+NO
+
+GENERIC_SAAS_NAV_RISK <= LOW
+
+PILL_NAV_RISK <= LOW
+
+SHELL_DOMINANCE_RISK <= LOW
+
+DROPDOWN_THEATRE_RISK <= LOW
+
+CARD_WALL_ADDED =
+NO
+
+NO_GRADIENT =
+YES
+
+NO_DEAD_SEARCH =
+YES
+
+ACASA_HIDDEN =
+YES
+
+COMERCIAL_L2_CORRECT =
+YES
+
+MAI_MULTE_CORRECT =
+YES
+
+CONT_ADMIN_CORRECT =
+YES
+
+==================================================
+45. RESPONSIVE ACCEPTANCE
+==================================================
+
+Required:
+
+1440 = PASS
+1280 = PASS
+768 = PASS
+
+NO_HORIZONTAL_OVERFLOW = YES
+NO_CLIPPING = YES
+44PX = PASS
+KEYBOARD = PASS
+VISIBLE_FOCUS = PASS
+
+Responsive shell must transform,
+not merely shrink.
+
+==================================================
+46. RUNTIME HEALTH
+==================================================
+
+Use repository-supported local runtime.
+
+Required:
+
+WEB_HEALTH =
+PASS
+
+API_HEALTH =
+PASS where API is needed
+
+No production Cloud.
+
+No HUB MEDIA real data.
+
+Use:
+
+synthetic/test/local isolated state.
+
+==================================================
+47. EVIDENCE LOOP
+==================================================
+
+Required:
+
+IMPLEMENT
+→ TEST
+→ RUN
+→ SCREENSHOT
+→ COMPARE WITH FIGMA
+→ CORRECT
+→ REPEAT
+
+Do not implement the whole wave
+and inspect visuals only once at the end.
+
+At least three visual correction loops:
+
+A.
+desktop shell
+
+B.
+dropdown/account states
+
+C.
+768 mobile + reduced chrome
+
+==================================================
+48. EVIDENCE PACK
+==================================================
+
+Create:
+
+docs/worklog/ui20-rw1/evidence/
+
+Keep it focused.
+
+Include:
+
+manifest
+viewport
+theme
+route
+state
+fixture classification
+screenshot filename
+Figma reference node
+known intentional difference
+
+Synthetic only.
+
+No customer data.
+
+Required intentional-difference list:
+
+ACASĂ_HIDDEN_UNTIL_RW6
+
+SEARCH_OMITTED_UNTIL_FUNCTIONAL
+
+OBJECT_CONTEXT_ROUTE_POPULATION_DEFERRED
+
+FULL_ADMIN_LOCAL_NAV_FLOORPLAN_DEFERRED_RW5
+
+CAPABILITY_AWARE_VISIBILITY_DEFERRED
+
+LEGACY_PAGE_BODIES_TEMPORARILY_RETAINED
+
+==================================================
+49. PRIVACY
+==================================================
+
+REAL_DATA =
+NO
+
+REAL_CLOUD_WRITE =
+NO
+
+Evidence must contain synthetic data only.
+
+Do not expose:
+
+emails from real accounts
+tokens
+cookies
+passwords
+real client information
+
+If authenticated Cloud UI is needed for a proof,
+use controlled synthetic test fixture only.
+
+==================================================
+50. DOCUMENTATION
+==================================================
+
+Create:
+
+docs/worklog/
+WORKOS_UI20_RW1_QUIET_TOP_SHELL.md
+
+Status while returning to ChatGPT:
+
+UI20_RW1 =
+IMPLEMENTED_LOCAL_IN_REVIEW
+
+Record:
+
+GO authority
+identity
+Figma sources
+old/new audit
+implementation shape
+navigation model
+Acasă boundary
+capability carry
+ObjectContext boundary
+responsive behavior
+a11y
+polish passes
+tests
+runtime
+screenshots
+intentional differences
+files changed
+CI
+permissions
+
+==================================================
+51. ROADMAP — BRANCH ONLY
+==================================================
+
+Update minimally:
+
+UI20_RW1 =
+IMPLEMENTED_LOCAL_IN_REVIEW
+
+UI20_IMPLEMENTATION =
+AUTHORIZED_RW1_ONLY
+
+NEXT_RECOMMENDED_BUILD =
+UI20_RW1_CHATGPT_RUNTIME_REVIEW
+
+Keep:
+
+UI20_IR1 =
+OWNER_ACCEPTED
+
+UI20_IMPLEMENTATION_READINESS =
+OWNER_ACCEPTED
+
+FINAL_IA =
+OWNER_ACCEPTED
+
+FINAL_VISUAL_DIRECTION_UI20 =
+OWNER_ACCEPTED
+
+PER_WAVE_POLISH =
+REQUIRED
+
+MASTER_POLISH =
+NOT_STARTED
+
+Do NOT set:
+
+RW2 authorized
+
+MASTER_POLISH started
+
+UI20 complete
+
+==================================================
+52. DIRECTION CANON STATUS
+==================================================
+
+Because this GO explicitly authorizes RW1,
+update only the living implementation-status field
+if required for branch consistency:
+
+UI20_IMPLEMENTATION =
+AUTHORIZED_RW1_ONLY
+
+Do NOT modify:
+
+IA
+visual direction
+shell direction
+historical V3 records.
+
+Foundation Canon continues to describe:
+
+IMPLEMENTED_SHELL =
+STABLE_SIDEBAR_V3
+
+until RW1 is independently accepted
+and integrated on main.
+
+Do NOT prematurely rewrite Foundation Canon.
+
+==================================================
+53. IMPLEMENTATION FILE SCOPE
+==================================================
+
+Expected primary scope:
+
+apps/web/src/AppShell.tsx
+
+apps/web/src/index.css
+
+apps/web/src/navigation/*
+
+apps/web/src/ui/*
+only relevant shell/navigation components
+
+apps/web/src/AppShell.test.tsx
+
+apps/web/src/ui/MobileNavigationDrawer.test.tsx
+
+relevant navigation tests
+
+apps/web/index.html
+ONLY IF evidence proves required
+— current IBM Plex loading already exists,
+so duplicate font loading is forbidden
+
+Possible new focused components:
+
+GlobalShellTop
+GlobalNavigation
+ObjectContextStrip
+UI20 navigation presentation model
+
+Names are not mandatory.
+
+Do not manufacture abstractions.
+
+==================================================
+54. PRODUCT CODE NO-GO
+==================================================
+
+Do NOT change:
+
+pricing
+
+CostEngine
+
+Product System calculation
+
+backend API contracts
+
+database
+
+migrations
+
+Cloud provisioning
+
+resources business logic
+
+people logic
+
+machine eligibility
+
+execution transitions
+
+quote/order truth
+
+request truth
+
+No business logic changes.
+
+==================================================
+55. READ-ONLY SPECIALIST LANES
+==================================================
+
+If useful, use independent read-only lanes:
+
+LANE A =
+Shell / navigation architecture
+
+LANE B =
+Responsive / accessibility
+
+LANE C =
+Figma visual reconciliation / fatigue
+
+LANE D =
+Routes / reachability / smart modularity
+
+LANE E =
+Tests / regression risk
+
+ONE IMPLEMENTATION WRITER.
+
+ONE FINAL SYNTHESIS.
+
+No parallel React writers.
+
+==================================================
+56. LOCAL VALIDATION
+==================================================
+
+Required before commit:
+
+targeted shell/navigation tests
+
+then:
+
+pnpm lint
+
+pnpm typecheck
+
+pnpm test
+
+pnpm build
+
+pnpm e2e
+
+or exact repository-supported equivalents.
+
+Do not reduce assertions merely
+to achieve green.
+
+==================================================
+57. COMMIT
+==================================================
+
+Commit/push branch only.
+
+Recommended max:
+
+2 commits.
+
+Commit 1:
+
+feat(ui20): implement quiet top shell
+
+Commit 2 if genuinely useful:
+
+docs(ui20-rw1): record runtime and visual evidence
+
+Do not create empty commits.
+
+COMMIT =
+YES
+
+PUSH =
+YES_BRANCH_ONLY
+
+MAIN =
+NO
+
+PR =
+NO
+
+==================================================
+58. CI EXACT HEAD
+==================================================
+
+After final branch push:
+
+wait for exact FINAL_HEAD CI.
+
+Required:
+
+CI_EXACT_RW1_HEAD =
+SUCCESS
+
+Required relevant steps:
+
+lint
+typecheck
+test
+build
+e2e
+
+If CI fails:
+
+STOP.
+
+Do not rerun blindly.
+
+Inspect exact failure.
+
+==================================================
+59. NO MAIN INTEGRATION YET
+==================================================
+
+Even with green CI:
+
+DO NOT FAST-FORWARD MAIN.
+
+Reason:
+
+RW1 changes the visible global product shell.
+
+ChatGPT must independently review
+runtime evidence before integration.
+
+Required end state:
+
+IMPLEMENTED_LOCAL_IN_REVIEW
+
+not:
+
+OWNER_ACCEPTED
+
+not:
+
+INTEGRATED_ON_MAIN
+
+==================================================
+60. ACCEPTANCE EVIDENCE FOR CHATGPT
+==================================================
+
+Return enough evidence so ChatGPT can independently judge:
+
+desktop shell
+
+Comercial
+
+Mai multe
+
+Cont/Admin
+
+mobile nested navigation
+
+operator reduced chrome
+
+light/dark
+
+1440/1280/768
+
+keyboard/focus
+
+route continuity
+
+no dead destination
+
+no capability invention
+
+Provide exact evidence paths.
+
+Do not self-accept.
+
+==================================================
+61. AUTHORIZATION
+==================================================
+
+OWNER_DELEGATE =
+CHATGPT
+
+IMPLEMENTATION =
+YES_RW1_ONLY
+
+REACT =
+YES_RW1_ONLY
+
+UI_CODE_WRITE =
+YES_RW1_ONLY
+
+CSS_WRITE =
+YES_RW1_ONLY
+
+ROUTE_OWNERSHIP_CHANGE =
+NO
+
+HOME_ROUTE_CREATE =
+NO
+
+BACKEND_WRITE =
+NO
+
+DOMAIN_WRITE =
+NO
+
+DATABASE_WRITE =
+NO
+
+MIGRATION_WRITE =
+NO
+
+CLOUD_WRITE =
+NO
+
+REAL_DATA =
+NO
+
+FIGMA_READ =
+YES
+
+FIGMA_WRITE =
+NO
+
+CURRENT_PROMOTION =
+NO
+
+LIBRARY_PUBLISH =
+NO
+
+CODE_CONNECT_PUBLISH =
+NO
+
+PER_WAVE_POLISH =
+YES_REQUIRED
+
+MASTER_POLISH =
+NO
+
+COMMIT =
+YES
+
+PUSH =
+YES_BRANCH_ONLY
+
+PR_CREATE =
+NO
+
+MAIN_MERGE =
+NO
+
+NEXT_WAVE =
+NO
+
+OWNER_ACCEPTED_RUNTIME =
+NO
+
+==================================================
+62. FINAL REPORT
+==================================================
+
+Return:
+
+ROADMAP_READ
+UI_UX_CANON_READ
+FOUNDATION_CANON_READ
+IR1_CONTRACT_READ
+DIRECTION_CONFLICT
+
+VERDICT
+
+REPO
+BRANCH
+WORKTREE_STATUS
+
+BASE_HEAD
+HEAD_BEFORE
+FINAL_HEAD
+ORIGIN_MAIN
+
+CI_MAIN_BASE
+CI_EXACT_RW1_HEAD
+
+OWNER_DELEGATED_RW1_DECISION
+
+UI20_RW1
+UI20_IMPLEMENTATION
+
+CURRENT_RUNTIME_SHELL_BEFORE
+RW1_RUNTIME_SHELL_AFTER
+
+GLOBAL_SIDEBAR_RENDERED
+GLOBAL_TOP_SHELL_RENDERED
+
+ACASA_RENDERED
+HOME_ROUTE_CREATED
+ROOT_ROUTE_CHANGED
+
+SEARCH_RENDERED
+
+GLOBAL_L1_ACTUAL
+
+COMMERCIAL_L2_ACTUAL
+
+SECONDARY_NAV_ACTUAL
+
+CONT_ADMIN_PATH
+
+ADMIN_REACHABILITY
+
+OBJECT_CONTEXT_COMPONENT
+OBJECT_CONTEXT_ROUTE_POPULATION
+
+OPERATOR_REDUCED_CHROME
+
+CAPABILITY_POLICY
+CAPABILITY_CODE_INVENTED
+
+SMART_MODULARITY_REVIEW
+OTHER_COMPANY_SCENARIOS
+
+ROUTE_REACHABILITY
+ORPHAN_ROUTE_COUNT
+
+1440_PROOFS
+1280_PROOFS
+768_PROOFS
+
+LIGHT
+DARK
+SYSTEM
+
+SKIP_LINK
+KEYBOARD
+VISIBLE_FOCUS
+44PX_TARGETS
+200_PERCENT_ZOOM
+OVERFLOW
+CLIPPING
+LONG_ORG_NAME
+
+FIGMA_COMPARE
+POLISH_LOOPS_COMPLETED
+
+GENERIC_SAAS_NAV_RISK
+SHELL_DOMINANCE_RISK
+CARD_WALL_ADDED
+GRADIENT_ADDED
+
+WEB_HEALTH
+API_HEALTH
+
+TARGETED_TESTS
+LINT
+TYPECHECK
+TEST
+BUILD
+E2E
+
+REAL_DATA
+CLOUD_WRITE
+
+FILES_CHANGED
+
+FIGMA_WRITE
+BACKEND_WRITE
+ROUTE_WRITE
+MASTER_POLISH
+
+COMMIT
+PUSH
+PR_CREATE
+MAIN_MERGE
+
+EVIDENCE_MANIFEST
+SCREENSHOT_PATHS
+
+INTENTIONAL_TRANSITIONAL_DIFFERENCES
+
+INDEPENDENT_OPINION
+
+METODA_DE_LUCRU_SI_LOGICA_ABORDARII
+
+Cât sunt în direcția stabilită: X/100%
+
+NEXT_STEP =
+CHATGPT_INDEPENDENT_UI20_RW1_RUNTIME_VISUAL_REVIEW_AND_INTEGRATION_DECISION
+
+==================================================
+63. STOP
+==================================================
+
+STOP after:
+
+RW1 React implementation
++
+per-wave polish
++
+tests
++
+runtime verification
++
+Figma reconciliation
++
+1440/1280/768 evidence
++
+light/dark/system
++
+a11y proof
++
+worklog
++
+roadmap branch state
++
+commit
++
+branch push
++
+exact-head CI success
++
+final report.
+
+Do NOT:
+
+merge main
+fast-forward main
+create PR
+start RW2
+create Acasă
+create /home
+change root route
+implement capability backend
+invent frontend capability truth
+modify Figma
+start Master Polish
+touch real Cloud
+touch real data
+redesign page floorplans.
+
+Return to ChatGPT.
+
+Aici este schimbarea de fază: de acum nu mai proiectăm shell-ul; îl implementăm și îl finisăm în browser.
+
+Un detaliu important pe care l-am blocat intenționat în GO: nu vreau ca Cursor să copieze mecanic Figma. Figma IAF1A este sursa pentru geometrie și comportament, dar Visual DNA final este sursa pentru culoare și caracter. Contractul actual spune explicit că RW1 trebuie să fie shell + nav ownership + ObjectContext + token bridge și că page bodies pot rămâne temporar legacy.
+
+De asemenea, nu reconstruim infrastructura de fonturi: IBM Plex Sans/Mono sunt deja încărcate în runtime. Iar vizibilitatea actuală rămâne sursa de adevăr — Acasă este încă not_implemented, iar filtrele de capability există, dar nu au încă proiecția completă.
+
+Următorul raport trebuie să fie primul raport cu UI20 React real în browser. După el fac auditul vizual/runtime independent și decid eu dacă RW1 intră pe main sau dacă îi dau o singură corecție țintită.

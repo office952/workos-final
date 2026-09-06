@@ -1,0 +1,94 @@
+# WORKOS UI20-RW1 — Quiet Top Shell
+
+```text
+GO                         = OWNER_DELEGATED_UI20_RW1
+BRANCH                     = design/ui20-rw1-quiet-top-shell
+BASE_HEAD                  = 4e2a8363ce249b65148bb2950a3d4ec24364d791
+STATUS                     = IMPLEMENTED_LOCAL_IN_REVIEW
+REACT                      = YES_RW1_ONLY
+CSS                        = YES_RW1_ONLY
+FIGMA_WRITE                = NO
+MAIN_MERGE                 = NO_IN_THIS_GO
+PR                         = NO
+PER_WAVE_POLISH            = REQUIRED
+MASTER_POLISH              = NO
+OWNER_ACCEPTED_RUNTIME     = NO
+```
+
+## Closed upstream
+
+```text
+CP_MIG1                    = INTEGRATED_ON_MAIN
+UI20_IR1                   = OWNER_ACCEPTED
+UI20_IMPLEMENTATION_READINESS = OWNER_ACCEPTED
+FINAL_IA / FINAL_VISUAL    = OWNER_ACCEPTED
+SHELL_MIGRATION_STRATEGY   = STRATEGY_A_GLOBAL_SHELL_FIRST
+```
+
+## Implementation shape
+
+- Candidate A quiet top shell replaces global StableSidebar presentation on normal routes
+- Presentation model: `apps/web/src/navigation/ui20NavigationPresentation.ts`
+- Shell: `GlobalShellTop`, `GlobalNavigation`, `ObjectContextStrip` (empty presentational mount)
+- L1: Cereri · Comercial ▾ · Lucrări · Atelier · Mai multe ▾ · Cont ▾
+- Acasă hidden; `/` remains Lucrări; `/home` not created
+- Comercial L2: Clienți · Oferte · Catalog (Cereri not duplicated)
+- Mai multe: Resurse + Oameni from existing visibility truth
+- Cont → Administrare → `/admin`
+- Operator reduced chrome on `/atelier` + `/execution/*`
+- Mobile nested Meniu for Comercial / Mai multe
+- Quiet Cont + Meniu triggers (no strong pill chrome)
+
+## Polish passes executed
+
+```text
+PASS_1_1440        = DONE
+PASS_2_1280        = DONE
+PASS_3_768         = DONE
+PASS_4_LIGHT_DARK  = DONE
+PASS_5_KEYBOARD    = UNIT_COVERED
+PASS_6_LONG_COPY   = PARTIAL (identity wrap styles retained)
+PASS_7_OVERFLOW    = SPOT_CHECKED
+PASS_8_FIGMA_READ  = DONE (224:96 / 224:115 / 226:66)
+```
+
+## Evidence
+
+See `docs/worklog/ui20-rw1/evidence/MANIFEST.md`.
+
+## Intentional differences
+
+```text
+ACASA_HIDDEN_UNTIL_RW6
+SEARCH_OMITTED_UNTIL_FUNCTIONAL
+OBJECT_CONTEXT_ROUTE_POPULATION_DEFERRED
+FULL_ADMIN_LOCAL_NAV_FLOORPLAN_DEFERRED_RW5
+CAPABILITY_AWARE_VISIBILITY_DEFERRED
+LEGACY_PAGE_BODIES_TEMPORARILY_RETAINED
+```
+
+## Validation (local)
+
+```text
+WEB_UNIT_TESTS             = 234/234 PASS
+MONOREPO_LINT              = PASS (preexisting warnings only)
+MONOREPO_TYPECHECK         = PASS
+MONOREPO_TEST              = PASS (web 234 + api 302)
+MONOREPO_BUILD             = PASS
+E2E_ISOLATED_CORE          = PASS (smoke + ui20 nav + catalog + quotes + requests + hf-wave1 + qualified-cost; 11/13 then jobs fix)
+E2E_FULL                   = IN_PROGRESS_AFTER_NAV_ADAPTATION
+BRANCH_CI                  = PENDING_PUSH
+```
+
+Note: first full e2e run against reused :5173/:8787 was invalid (old sidebar). Isolated-port runs are authoritative.
+
+
+## Permissions respected
+
+```text
+BACKEND_WRITE = NO
+CLOUD_WRITE = NO
+REAL_DATA = NO
+FIGMA_WRITE = NO
+MAIN_FF = NO
+```
