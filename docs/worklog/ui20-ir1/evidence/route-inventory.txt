@@ -1,0 +1,33 @@
+﻿# UI20-IR1 route inventory (from apps/web/src/App.tsx)
+
+/ -> JobsOverviewPage
+/jobs -> JobsOverviewPage
+/jobs/* -> JobDetailPage
+/atelier -> AtelierPage
+/commercial -> Navigate /requests
+/requests -> RequestsOverviewPage
+/requests/* -> RequestDetailPage
+/quotes -> QuotesOverviewPage
+/quotes/* -> QuoteInspectionPage
+/clients -> ClientsOverviewPage
+/clients/* -> ClientWorkspacePage
+/system -> SystemStatusPage
+/products -> ProductCatalogPage
+/products/:productCode -> ProductConfigurationPage
+/execution/* -> ExecutionWorkspacePage
+/components -> ComponentsPage
+/governance -> GovernancePage
+/admin -> AdminHomePage
+/admin/product-system -> ProductSystemAdminPage
+/admin/resources -> ResourcesAdminPage
+/admin/stock -> StockAdminPage
+/admin/stock/:resourceId -> StockAdminPage
+/admin/processes -> ProcessesAdminPage
+/admin/workcenters -> WorkcentersAdminPage
+/admin/people -> PeopleAdminPage
+/admin/people/skills -> SkillsAdminPage
+/admin/people/* -> PersonAdminPage
+/admin/customers -> CustomerAdminPage
+/admin/seller -> SellerAdminPage
+/admin/operational-services -> OperationalServicesAdminPage
+* -> Navigate /
