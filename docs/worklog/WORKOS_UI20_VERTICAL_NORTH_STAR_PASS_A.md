@@ -14,6 +14,9 @@ CLOUD_WRITE                       = NO
 FIGMA_WRITE                       = NO
 DOMAIN_WRITE                      = NO
 API_WRITE                         = NO
+THEME_IMPACT                      = LIGHT + DARK (ui20 tokens only)
+NEW_HARDCODED_CSS                 = NO
+BACKEND_DETAILS_EXPOSED           = NO
 ```
 
 Isolated clean-sheet preview for the North Star journey:
@@ -24,19 +27,19 @@ Cerere → Product Pick → Configurator → Ofertă
 → Lucrare → Execution Plan → Atelier → Execuție
 ```
 
-Shared bootstrap (`SessionedApp`) is extracted from the current `App.tsx` so Ui20 and the living runtime share auth / session / ThemeProvider / APIs. Default routes and current page bodies stay unchanged. `/` remains Lucrări.
+Shared bootstrap (`SessionedApp`) is extracted from the current `App.tsx` so Ui20 and the living runtime share auth / session / ThemeProvider / APIs. Default routes and current page bodies stay unchanged. Current `/` remains Lucrări. Isolated preview `/` is a quiet PreviewRoot, not Acasă and not Lucrări.
 
 RW2 selective extraction: `requestResolutionView.ts` and `constructionCompositionModel.ts` only. No RW2 CSS, page tree, or cherry-pick of `69ecd7b`.
 
 ```text
-VERTICAL_E2E              = PASS
-CURRENT_RUNTIME_TESTS     = PASS requests-overview
-WEB_TESTS                 = PASS
-DOMAIN_TESTS              = PASS
-API_TESTS                 = PASS
+VERTICAL_E2E              = PASS  (playwright.ui20.config.ts)
+CURRENT_RUNTIME_TESTS     = PASS  quote-acceptance + requests-overview
+WEB_TESTS                 = PASS  62 files / 244
+DOMAIN_TESTS              = PASS  72 files / 453
+API_TESTS                 = PASS  48 files / 302
 TYPECHECK                 = PASS
-LINT                      = PASS warnings only, pre-existing plus ObjectContinuity export
-BUILD                     = PASS web
+LINT                      = PASS  warnings only; pre-existing plus ObjectContinuity export
+BUILD                     = PASS  current vite index.html bundle
 BUSINESS_FACT_PARITY      = PASS
 ```
 

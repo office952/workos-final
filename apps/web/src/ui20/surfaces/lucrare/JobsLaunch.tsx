@@ -54,7 +54,8 @@ export function JobsLaunch() {
     <article className="ui20-surface" data-surface="lucrari">
       <h1>Lucrări</h1>
       <p className="ui20-kicker">
-        Rădăcina rămâne Lucrări. Acasă nu este în această verticală.
+        Listă de lucrări pe același motor. Nu este Acasă și nu înlocuiește runtime-ul
+        curent.
       </p>
       {jobs.length === 0 ? <p>Nicio lucrare încă.</p> : null}
       {jobs.map((job) => (

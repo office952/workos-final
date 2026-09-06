@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useCloudSession } from "../../CloudSessionContext";
 import { ProductPickBridge } from "../bridges/productPick/ProductPickBridge";
+import { PreviewRoot } from "../shell/PreviewRoot";
 import { DispatchFloor } from "../surfaces/atelier/DispatchFloor";
 import { ResolutionField } from "../surfaces/cerere/ResolutionField";
 import { ConstructionWorkspace } from "../surfaces/configurator/ConstructionWorkspace";
@@ -13,7 +14,7 @@ export function Ui20Routes() {
   const { organization } = useCloudSession();
   return (
     <Routes key={organization?.organizationId ?? "single-plane"}>
-      <Route path="/" element={<JobsLaunch />} />
+      <Route path="/" element={<PreviewRoot />} />
       <Route path="/jobs" element={<JobsLaunch />} />
       <Route path="/jobs/*" element={<ProductionTraveler />} />
       <Route path="/requests/*" element={<ResolutionField />} />
