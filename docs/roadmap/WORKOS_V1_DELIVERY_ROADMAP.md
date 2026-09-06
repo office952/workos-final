@@ -48,6 +48,7 @@ Related living authority:
 - `docs/architecture/WORKOS_FIRST_HF_LOT_IMPLEMENTATION_READINESS_CONTRACTS.md` — accepted first-lot route, access, mapping, and wave contracts
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain and administration map
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation law
+- `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md` — accepted vertical clean-sheet presentation architecture (not implemented runtime)
 - `docs/plans/WORKOS_ARCHITECTURE_C_UI_IMPLEMENTATION_WAVE_1_PLAN.md` — Architecture C UI Wave 1 plan
 - `docs/worklog/WORKOS_ARCHITECTURE_C_FINAL_SIMULATION_ACCEPTED_WAVE_1_PLAN_V1.md` — Owner accept of the Architecture C simulation with advisories
 - `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md` — Architecture C UI Wave 1 local implementation record
@@ -128,11 +129,24 @@ REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
 NEXT_PROGRAM_PRIORITY                = WORKOS_UI_UX_2_0_E2E
-NEXT_RECOMMENDED_BUILD               = UI20_RW2_CERERE_RESOLUTION_FIELD_CONFIG_COMPOSITION_LENS
+NEXT_RECOMMENDED_BUILD               = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+UI20_IMPLEMENTATION_STRATEGY         = VERTICAL_CLEAN_SHEET
+UI_DESIGN                            = CLEAN_SHEET_PRESENTATION
+DOMAIN_REBUILD                       = NO
+BACKEND_REBUILD                      = NO
+API_REBUILD                          = NO
+PRODUCT_TRUTH_REBUILD                = NO
+CURRENT_RUNTIME                      = REFERENCE_AND_CONSTRAINT
+CURRENT_UI_PRESENTATION              = REFERENCE_ONLY_NOT_MIGRATION_BASE
+PARTIAL_MAIN_UI_INTEGRATION          = FORBIDDEN
 FIRST_REACT_WAVE                     = INTEGRATED_ON_MAIN
 UI20_RW1                             = INTEGRATED_ON_MAIN
 UI20_RW1A                            = ACCEPTED
-UI20_RW2                             = NOT_STARTED_NOT_AUTHORIZED
+UI20_RW2                             = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_IMPLEMENTATION_PATH         = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_BRANCH                      = HISTORICAL_IMPLEMENTATION_EVIDENCE
+UI20_RW2_OWNER_ACCEPTED              = NO
+UI20_RW2_INTEGRATE                   = NO
 CURRENT_RUNTIME_SHELL                = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                    = NO
 RW1_RUNTIME                          = RUNTIME_VERIFIED
@@ -182,13 +196,13 @@ FINAL_VISUAL_DIRECTION_UI20          = OWNER_ACCEPTED
 UI20_FINAL_VISUAL_DIRECTION          = G_LIVING_FABRICATION_INSTRUMENT
 OWNER_ACCEPTED_FINAL_VISUAL          = YES
 ACCEPTANCE_AUTHORITY                 = OWNER_DELEGATE_CHATGPT
-UI20_IMPLEMENTATION                  = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
+UI20_IMPLEMENTATION                  = RW1_INTEGRATED_VERTICAL_CLEAN_SHEET_NEXT
 UI20_IMPLEMENTATION_READINESS        = OWNER_ACCEPTED
 UI20_IR1                             = OWNER_ACCEPTED
 UI20_RW1                             = INTEGRATED_ON_MAIN
 UI20_RW1A                            = ACCEPTED
-NEXT_RECOMMENDED_BUILD               = UI20_RW2_CERERE_RESOLUTION_FIELD_CONFIG_COMPOSITION_LENS
-UI20_RW2                             = NOT_STARTED_NOT_AUTHORIZED
+NEXT_RECOMMENDED_BUILD               = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+UI20_RW2                             = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
 OS_S8                                = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 UI_V3_BASELINE                       = HISTORICALLY_COMPLETE
 UI_PAGE_BY_PAGE_FINAL_CLOSURE        = FC0_BASELINE_ESTABLISHED_IMPLEMENTATION_PENDING
@@ -282,6 +296,8 @@ ARCHITECTURE_C_UI_WAVE_1             = OWNER_ACCEPTED_WITH_ADVISORIES
 ARCHITECTURE_C_UI_WAVE_2             = NOT_STARTED
 FIGMA_LIBRARY_PUBLISHED              = NO
 ```
+
+Living UI20 implementation sequence in this file is `VERTICAL_CLEAN_SHEET`. Later duplicate flag blocks below that still name `UI20_H1_DESIGN_HYGIENE_EVIDENCE_CONSOLIDATION` or other closed next-builds are historical snapshots. They are not the living next implementation path. Do not start RW2.
 
 `OWNER_GATE = COMPLETE` means the Cloud initial-Owner product law is closed: fail-closed activation, exactly one initial Owner, explicit resume. It does not mean later operational Owner GOs are already granted.
 
@@ -732,11 +748,24 @@ Owner-authorized experience refoundation. Not a domain/backend rebuild. Not Prod
 ```text
 UI20_PROGRAM                      = OWNER_AUTHORIZED_REFOUNDATION
 NEXT_PROGRAM_PRIORITY             = WORKOS_UI_UX_2_0_E2E
-NEXT_RECOMMENDED_BUILD            = UI20_RW2_CERERE_RESOLUTION_FIELD_CONFIG_COMPOSITION_LENS
+NEXT_RECOMMENDED_BUILD            = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+UI20_IMPLEMENTATION_STRATEGY      = VERTICAL_CLEAN_SHEET
+UI_DESIGN                         = CLEAN_SHEET_PRESENTATION
+DOMAIN_REBUILD                    = NO
+BACKEND_REBUILD                   = NO
+API_REBUILD                       = NO
+PRODUCT_TRUTH_REBUILD             = NO
+CURRENT_RUNTIME                   = REFERENCE_AND_CONSTRAINT
+CURRENT_UI_PRESENTATION           = REFERENCE_ONLY_NOT_MIGRATION_BASE
+PARTIAL_MAIN_UI_INTEGRATION       = FORBIDDEN
 FIRST_REACT_WAVE                  = INTEGRATED_ON_MAIN
 UI20_RW1                          = INTEGRATED_ON_MAIN
 UI20_RW1A                         = ACCEPTED
-UI20_RW2                          = NOT_STARTED_NOT_AUTHORIZED
+UI20_RW2                          = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_IMPLEMENTATION_PATH      = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_BRANCH                   = HISTORICAL_IMPLEMENTATION_EVIDENCE
+UI20_RW2_OWNER_ACCEPTED           = NO
+UI20_RW2_INTEGRATE                = NO
 CURRENT_RUNTIME_SHELL             = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                 = NO
 RW1_RUNTIME                       = RUNTIME_VERIFIED
@@ -763,7 +792,7 @@ FINAL_VISUAL_DIRECTION_UI20       = OWNER_ACCEPTED
 UI20_FINAL_VISUAL_DIRECTION       = G_LIVING_FABRICATION_INSTRUMENT
 OWNER_ACCEPTED_FINAL_VISUAL       = YES
 ACCEPTANCE_AUTHORITY              = OWNER_DELEGATE_CHATGPT
-UI20_IMPLEMENTATION               = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
+UI20_IMPLEMENTATION               = RW1_INTEGRATED_VERTICAL_CLEAN_SHEET_NEXT
 UI20_RW1                          = INTEGRATED_ON_MAIN
 UI20_RW1A                         = ACCEPTED
 UI20_R1                           = RESEARCH_ACCEPTED_WITH_ADVISORIES
@@ -789,12 +818,12 @@ PRODUCT_SYSTEM_FC1B               = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 A3_1                              = RESEARCH_INPUT_NOT_CANON
 UI20_CURRENT_VISUAL_DIRECTION     = OWNER_ACCEPTED
 UI20_CURRENT_IA                   = OWNER_ACCEPTED
-UI20_IMPLEMENTATION               = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
+UI20_IMPLEMENTATION               = RW1_INTEGRATED_VERTICAL_CLEAN_SHEET_NEXT
 UI20_IMPLEMENTATION_READINESS     = OWNER_ACCEPTED
 UI20_IR1                          = OWNER_ACCEPTED
 UI20_RW1                          = INTEGRATED_ON_MAIN
 UI20_RW1A                         = ACCEPTED
-UI20_RW2                          = NOT_STARTED_NOT_AUTHORIZED
+UI20_RW2                          = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
 OS_S8                             = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 MACHINES_FC2                      = HOLD
 NEW_FIGMA                         = 0XP0yGa1siWQdTTL7ou8xz
@@ -803,9 +832,9 @@ HISTORICAL_FIGMA                  = 1ev5lg7m2Ze1h3Vqmax8ho
 
 `UI_GENERAL_REDESIGN = CLOSED_FOR_V1` remains the historical V3 closure. Living direction is the Owner UI20 reset. FC0/FC1 records stay evidence. Agents must not resume UI-FC1B React from older flags. R1 did not select a visual direction or IA.
 
-R2 is `RESEARCH_ACCEPTED_WITH_ADVISORIES`. UI20-R3 is `CHARACTER_PROOF_ACCEPTED_WITH_ADVISORIES`. S1-A is the accepted structural base. UI20-R4 is `PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS_ACCEPTED_WITH_ADVISORIES`. UI20-R4A is `ACCEPTED`. UI20-R5 is `DIRECTION_ACCEPTED_WITH_ADVISORIES`. UI20-DL1 is `DESIGN_LANGUAGE_DIRECTION_ACCEPTED_WITH_ADVISORY`. G is `ACCEPTED_AS_UI20_LEADING_DIRECTION`. IA-3 is `OWNER_ACCEPTED_AS_FINAL_UI20_IA`. Final IA is Owner-accepted. Final visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). UI20 implementation readiness is Owner-accepted (`UI20_IR1 = OWNER_ACCEPTED`). First React wave `UI20_RW1_QUIET_TOP_SHELL` is `INTEGRATED_ON_MAIN` (`UI20_RW1A = ACCEPTED`; ChatGPT runtime verified); Foundation Canon records Candidate A as the implemented shell upon integration; RW2 is not authorized yet. SIG1 + Final IA + VIS1/VIS1A acceptance are on the accepted path. C1 is `APPLICATION_COVERAGE_ACCEPTED`. C1A is `RESPONSIVE_TEXT_INTEGRITY_ACCEPTED`.
+R2 is `RESEARCH_ACCEPTED_WITH_ADVISORIES`. UI20-R3 is `CHARACTER_PROOF_ACCEPTED_WITH_ADVISORIES`. S1-A is the accepted structural base. UI20-R4 is `PAGE_PERSONALITY_AND_SEMANTIC_DYNAMICS_ACCEPTED_WITH_ADVISORIES`. UI20-R4A is `ACCEPTED`. UI20-R5 is `DIRECTION_ACCEPTED_WITH_ADVISORIES`. UI20-DL1 is `DESIGN_LANGUAGE_DIRECTION_ACCEPTED_WITH_ADVISORY`. G is `ACCEPTED_AS_UI20_LEADING_DIRECTION`. IA-3 is `OWNER_ACCEPTED_AS_FINAL_UI20_IA`. Final IA is Owner-accepted. Final visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). UI20 implementation readiness is Owner-accepted (`UI20_IR1 = OWNER_ACCEPTED`). First React wave `UI20_RW1_QUIET_TOP_SHELL` is `INTEGRATED_ON_MAIN` (`UI20_RW1A = ACCEPTED`; ChatGPT runtime verified). Foundation Canon still records Candidate A over existing page bodies as the **current implemented** presentation. Horizontal RW2 / RW3 page-by-page continuation is `SUPERSEDED_BY_VERTICAL_CLEAN_SHEET`. RW2 branch and PR remain historical implementation evidence only (`UI20_RW2_OWNER_ACCEPTED = NO`, `UI20_RW2_INTEGRATE = NO`). Living implementation sequence is `VERTICAL_CLEAN_SHEET`: one isolated North Star preview over the existing domain/API, then one cutover GO. Do not migrate live main routes one page at a time. R0 already recorded `UI_DESIGN = CLEAN_SHEET` with `DOMAIN_REBUILD = NO`; this decision restores that implementation sequence after the RW1 shell and the RW2 experiment. Architecture: `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md`. SIG1 + Final IA + VIS1/VIS1A acceptance remain on the accepted path. C1 is `APPLICATION_COVERAGE_ACCEPTED`. C1A is `RESPONSIVE_TEXT_INTEGRITY_ACCEPTED`.
 
-Research record: `docs/worklog/WORKOS_UI_UX_2_0_E2E_R0_REFOUNDATION.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R1_DEEP_RESEARCH.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R2_ART_FABRICATION_SYNTHESIS.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R3_CHARACTER_PROOF.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R4_PAGE_PERSONALITY_DYNAMICS.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R5_NORTH_STAR_CONTINUITY.md`, `docs/worklog/WORKOS_UI20_DL1_DESIGN_LANGUAGE_FOUNDATIONS.md`, `docs/worklog/WORKOS_UI20_C1_APPLICATION_COVERAGE.md`, `docs/worklog/WORKOS_UI20_H1_DESIGN_HYGIENE.md`, `docs/worklog/WORKOS_UI20_SIG1_SIGNATURE_OPERATIONAL_INSTRUMENTS.md`, `docs/worklog/WORKOS_UI20_SIG1A_CHARACTER_EMBODIMENT.md`, `docs/worklog/WORKOS_UI20_SIG1B_FINAL_CHARACTER_LOCK.md`, `docs/worklog/WORKOS_UI20_IAF1_QUIET_GLOBAL_SHELL_DECISION_PROOF.md`, `docs/worklog/WORKOS_UI20_IAF1A_NAVIGATION_COMPLETENESS.md`, `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`, `docs/worklog/WORKOS_UI20_VIS1_FINAL_VISUAL_DIRECTION_OWNER_GATE.md`, `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`, `docs/worklog/WORKOS_UI20_IR1_IMPLEMENTATION_READINESS.md`, `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`, `docs/architecture/WORKOS_UI20_IMPLEMENTATION_READINESS_CONTRACT.md`. Current Figma map: `docs/worklog/ui20-h1/03-current-ui20-map.md`.
+Research record: `docs/worklog/WORKOS_UI_UX_2_0_E2E_R0_REFOUNDATION.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R1_DEEP_RESEARCH.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R2_ART_FABRICATION_SYNTHESIS.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R3_CHARACTER_PROOF.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R4_PAGE_PERSONALITY_DYNAMICS.md`, `docs/worklog/WORKOS_UI_UX_2_0_E2E_R5_NORTH_STAR_CONTINUITY.md`, `docs/worklog/WORKOS_UI20_DL1_DESIGN_LANGUAGE_FOUNDATIONS.md`, `docs/worklog/WORKOS_UI20_C1_APPLICATION_COVERAGE.md`, `docs/worklog/WORKOS_UI20_H1_DESIGN_HYGIENE.md`, `docs/worklog/WORKOS_UI20_SIG1_SIGNATURE_OPERATIONAL_INSTRUMENTS.md`, `docs/worklog/WORKOS_UI20_SIG1A_CHARACTER_EMBODIMENT.md`, `docs/worklog/WORKOS_UI20_SIG1B_FINAL_CHARACTER_LOCK.md`, `docs/worklog/WORKOS_UI20_IAF1_QUIET_GLOBAL_SHELL_DECISION_PROOF.md`, `docs/worklog/WORKOS_UI20_IAF1A_NAVIGATION_COMPLETENESS.md`, `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`, `docs/worklog/WORKOS_UI20_VIS1_FINAL_VISUAL_DIRECTION_OWNER_GATE.md`, `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`, `docs/worklog/WORKOS_UI20_IR1_IMPLEMENTATION_READINESS.md`, `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`, `docs/architecture/WORKOS_UI20_IMPLEMENTATION_READINESS_CONTRACT.md`, `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md`. Current Figma map: `docs/worklog/ui20-h1/03-current-ui20-map.md`. The IR1 contract remains the Figma→React readiness record; its horizontal RW2–RW6 wave table is historical and is not the living implementation sequence.
 
 ## Update policy
 

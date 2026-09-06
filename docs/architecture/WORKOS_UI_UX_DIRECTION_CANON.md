@@ -42,9 +42,23 @@ UI20_CURRENT_IA                    = OWNER_ACCEPTED
 UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
-UI20_IMPLEMENTATION                = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
+UI20_IMPLEMENTATION                = RW1_INTEGRATED_VERTICAL_CLEAN_SHEET_NEXT
+UI20_IMPLEMENTATION_STRATEGY       = VERTICAL_CLEAN_SHEET
+UI_DESIGN                          = CLEAN_SHEET_PRESENTATION
+DOMAIN_REBUILD                     = NO
+BACKEND_REBUILD                    = NO
+API_REBUILD                        = NO
+PRODUCT_TRUTH_REBUILD              = NO
+CURRENT_RUNTIME                    = REFERENCE_AND_CONSTRAINT
+CURRENT_UI_PRESENTATION            = REFERENCE_ONLY_NOT_MIGRATION_BASE
+PARTIAL_MAIN_UI_INTEGRATION        = FORBIDDEN
+NEXT_RECOMMENDED_BUILD             = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
 UI20_RW1                           = INTEGRATED_ON_MAIN
 UI20_RW1A                          = ACCEPTED
+UI20_RW2                           = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_IMPLEMENTATION_PATH       = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_OWNER_ACCEPTED            = NO
+UI20_RW2_INTEGRATE                 = NO
 FINAL_IA                           = OWNER_ACCEPTED
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
@@ -78,7 +92,7 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
-On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure remains historical evidence. Living Owner direction is `WORKOS_UI_UX_2_0_E2E`. UI20-RW1 quiet top shell is `INTEGRATED_ON_MAIN` (`UI20_RW1A = ACCEPTED`; runtime verified). Foundation Canon records Candidate A as the current implemented shell. RW2 is not authorized by this document.
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure remains historical evidence. Living Owner direction is `WORKOS_UI_UX_2_0_E2E`. UI20-RW1 quiet top shell is `INTEGRATED_ON_MAIN` (`UI20_RW1A = ACCEPTED`; runtime verified). Foundation Canon records Candidate A as the current implemented shell over existing page bodies. Horizontal RW2 / RW3 continuation is superseded by `VERTICAL_CLEAN_SHEET`. RW2 is historical implementation evidence only and is not an integration path.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` is the **current implemented presentation law**. After RW1 integration it records `IMPLEMENTED_SHELL = UI20_CANDIDATE_A_QUIET_TOP_SHELL` with `GLOBAL_L1_SIDEBAR = NO`. This direction canon governs later Owner decisions and later UI change.
@@ -92,6 +106,7 @@ Related living authority:
 - `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery sequence
 - `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain ownership
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation
+- `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md` — accepted next presentation architecture; not implemented runtime
 - `docs/worklog/WORKOS_UI_UX_CANON_UPDATE_FROM_EVIDENCE_V1.md` — evidence citations for the previous direction revision
 - `docs/worklog/WORKOS_ACCEPTED_FIGMA_INFORMATION_ARCHITECTURE_V1.md` — Owner IA acceptance record
 - `docs/worklog/WORKOS_FIRST_HIGH_FIDELITY_LOT_SCREEN_DESIGN_V1.md` — accepted first HF lot
@@ -169,7 +184,7 @@ UI20_CURRENT_IA                    = OWNER_ACCEPTED
 UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
-UI20_IMPLEMENTATION                = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
+UI20_IMPLEMENTATION                = RW1_INTEGRATED_VERTICAL_CLEAN_SHEET_NEXT
 UI20_RW1                           = INTEGRATED_ON_MAIN
 UI20_RW1A                          = ACCEPTED
 UI20_R1                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
@@ -201,7 +216,10 @@ UI20_SIG1A                         = ACCEPTED
 UI20_SIG1B                         = ACCEPTED
 UI20_IAF1                          = DIRECTION_ACCEPTED
 UI20_IAF1A                         = OWNER_ACCEPTED
-NEXT_RECOMMENDED_BUILD             = UI20_RW2_CERERE_RESOLUTION_FIELD_CONFIG_COMPOSITION_LENS
+NEXT_RECOMMENDED_BUILD             = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+UI20_IMPLEMENTATION_STRATEGY       = VERTICAL_CLEAN_SHEET
+PARTIAL_MAIN_UI_INTEGRATION        = FORBIDDEN
+UI20_RW2                           = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
 CARRY_ADVISORY                     = ATTENTIONEDGE_BLOCKED_ENERGY_IS_QUIETER_THAN_R5_TERRACOTTA
 PRODUCT_SYSTEM_FC1B                = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 A3_1                               = RESEARCH_INPUT_NOT_CANON
@@ -211,7 +229,51 @@ NEW_FIGMA_FILE_KEY                 = 0XP0yGa1siWQdTTL7ou8xz
 HISTORICAL_FIGMA_FILE_KEY          = 1ev5lg7m2Ze1h3Vqmax8ho
 ```
 
-The implemented runtime remains the V3 sidebar and accepted page contracts until a later implementation GO. UI20 Final IA is Owner-accepted as future implementation direction; it does not authorize React/CSS, promote CURRENT, or accept final visual polish. Agents must not resume UI-FC1B React from older flags.
+The current implemented presentation is the UI20-RW1 Candidate A quiet top shell over existing page bodies. Foundation Canon is that implemented-presentation law. UI20 Final IA and Final Visual remain accepted direction. They do not mean the clean-sheet North Star runtime is already implemented. Agents must not resume UI-FC1B React from older flags. Agents must not resume horizontal RW2 / RW3 page-by-page main integration.
+
+## OWNER DECISION — VERTICAL CLEAN-SHEET (2026-09-06)
+
+Recorded 2026-09-06. Newer than the horizontal RW2–RW6 implementation sequence. Does not rewrite historical RW1 integration, accepted IA, accepted visual direction, or R0–IR1 research.
+
+Chronology, honestly:
+
+```text
+R0                         = CLEAN_SHEET_UX / DOMAIN_REBUILD_NO
+RESEARCH                   = ACCEPTED_IA_AND_VISUAL
+RW1                        = INTEGRATED_ON_MAIN (Candidate A shell)
+RW2                        = HORIZONTAL_PAGE_EXPERIMENT / NOT_OWNER_ACCEPTED / NOT_INTEGRATED
+OWNER_CORRECTION           = HORIZONTAL_MIGRATION_RISK
+LIVING_SEQUENCE            = VERTICAL_CLEAN_SHEET
+```
+
+```text
+OWNER_DECISION                     = UI20_VERTICAL_CLEAN_SHEET
+UI20_IMPLEMENTATION_STRATEGY       = VERTICAL_CLEAN_SHEET
+UI_DESIGN                          = CLEAN_SHEET_PRESENTATION
+DOMAIN_REBUILD                     = NO
+BACKEND_REBUILD                    = NO
+API_REBUILD                        = NO
+PRODUCT_TRUTH_REBUILD              = NO
+CURRENT_RUNTIME                    = REFERENCE_AND_CONSTRAINT
+CURRENT_UI_PRESENTATION            = REFERENCE_ONLY_NOT_MIGRATION_BASE
+ACCEPTED_FIGMA                     = DESIGN_DIRECTION
+FINAL_IA                           = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
+FINAL_SHELL_DIRECTION              = CANDIDATE_A_QUIET_TOP_SHELL
+FINAL_VISUAL                       = G_LIVING_FABRICATION_INSTRUMENT
+GLOBAL_L1_SIDEBAR                  = NO
+PARTIAL_MAIN_UI_INTEGRATION        = FORBIDDEN
+NO_PARTIAL_ROUTE_CUTOVER           = YES
+NEXT_RECOMMENDED_BUILD             = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+UI20_RW2_IMPLEMENTATION_PATH       = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+UI20_RW2_BRANCH                    = HISTORICAL_IMPLEMENTATION_EVIDENCE
+UI20_RW2_OWNER_ACCEPTED            = NO
+UI20_RW2_INTEGRATE                 = NO
+ACASA_ROOT                         = NOT_AUTHORIZED
+```
+
+Build the isolated North Star as one coherent commercial→production journey before any main route swap. Home / Acasă is launchpad proof after that spine, not first. `/` stays Lucrări.
+
+Architecture record: `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md`.
 
 ## ACCEPTED OWNER V3 NAVIGATION
 

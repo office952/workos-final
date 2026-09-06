@@ -6,8 +6,11 @@ UI20_IMPLEMENTATION_READINESS     = OWNER_ACCEPTED
 UI20_IR1                          = OWNER_ACCEPTED
 AUTHORITY                         = IMPLEMENTATION_CONTRACT_UNDER_ACCEPTED_UI20_CANON
 NOT_A_NEW_UI_CANON                = YES
-UI20_IMPLEMENTATION               = NOT_YET_EXECUTED
-REACT                             = NOT_AUTHORIZED
+UI20_IMPLEMENTATION               = RW1_INTEGRATED_VERTICAL_CLEAN_SHEET_NEXT
+HORIZONTAL_RW_SEQUENCE            = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+NEXT_RECOMMENDED_BUILD            = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+PARTIAL_MAIN_UI_INTEGRATION       = FORBIDDEN
+REACT                             = NOT_AUTHORIZED_BY_THIS_CONTRACT
 ACCEPTANCE_AUTHORITY              = OWNER_DELEGATE_CHATGPT
 BASE_HEAD                         = 7c79ae2f3fe5701a177a9859fca3b67cd5f8706f
 FIGMA_FILE                        = 0XP0yGa1siWQdTTL7ou8xz
@@ -19,8 +22,10 @@ RW1_EXECUTION_GO                  = NOT_THIS_GO
 
 This contract answers how to implement accepted UI20 in the existing React product without losing business truth, route continuity, page personality, responsive/a11y behavior, or modularity. It does not authorize React execution.
 
+Owner later superseded the horizontal RW2–RW6 execution path. IA, visual, shell strategy, and no-business-truth rules in this file remain valid. The living implementation sequence is `VERTICAL_CLEAN_SHEET`: `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` and `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md`. Do not start RW2 from this contract.
+
 Living UI direction: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.  
-Implemented presentation baseline remains V3: `docs/architecture/UI_UX_FOUNDATION_CANON.md`.  
+Implemented presentation baseline: `docs/architecture/UI_UX_FOUNDATION_CANON.md` (RW1 Candidate A over existing page bodies).  
 Evidence worklog: `docs/worklog/WORKOS_UI20_IR1_IMPLEMENTATION_READINESS.md`.
 
 ---
@@ -53,6 +58,8 @@ Each React wave must include: screenshot comparison; 1440 / 1280 / 768 where app
 ---
 
 ## 1. Current runtime inventory (source truth)
+
+IR1-time inventory. After RW1 integration the implemented shell is Candidate A quiet top (`docs/architecture/UI_UX_FOUNDATION_CANON.md`). Do not treat the table below as today's runtime.
 
 | Fact | Value |
 |---|---|
@@ -333,6 +340,8 @@ Synthetic fixtures only; classify privacy; map expected Figma node IDs from VIS1
 
 ## 11. Implementation wave plan
 
+**Historical IR1 table.** This horizontal RW1–RW6 sequence is not the living implementation path. RW1 happened. RW2+ is superseded by vertical clean-sheet North Star. Keep the table as the original contract record.
+
 | Wave | Objective | Main safety |
 |---|---|---|
 | **RW1** | Candidate A shell + nav ownership + ObjectContextStrip + theme font bridge; legacy bodies adapted | No mixed sidebar/top on normal routes |
@@ -405,7 +414,8 @@ Accepted nodes include VIS1 `233:66`, VIS1A `239:66`, Owner board `242:66`, Cont
 
 **Still required before claiming complete UI20 runtime:**
 
-- Separate RW1…RW6 execution GOs  
+- Horizontal RW2…RW6 execution GOs — superseded  
+- Isolated vertical North Star construction — later Owner GO, not this contract  
 - Capability-aware nav finalization (backend/product projection contract)  
 - Master Polish after coherent runtime  
 
@@ -419,11 +429,23 @@ Accepted nodes include VIS1 `233:66`, VIS1A `239:66`, Owner board `242:66`, Cont
 
 ## 14. STOP
 
+Original IR1 close (historical; RW1 later integrated on main):
+
 ```text
+HISTORICAL_IR1_CLOSE
 UI20_IR1                          = OWNER_ACCEPTED
 UI20_IMPLEMENTATION_READINESS     = OWNER_ACCEPTED
-UI20_IMPLEMENTATION               = NOT_YET_EXECUTED
-REACT                             = NOT_AUTHORIZED
-RW1_EXECUTION                     = NOT_STARTED
-NEXT_STEP                         = CHATGPT_VERIFY_IR1_ACCEPTED_ON_MAIN_AND_ISSUE_UI20_RW1_EXECUTION_GO
+UI20_IMPLEMENTATION               = NOT_YET_EXECUTED_AT_IR1_TIME
+REACT                             = NOT_AUTHORIZED_BY_IR1
+RW1_EXECUTION                     = LATER_INTEGRATED_ON_MAIN
+```
+
+Living close after vertical clean-sheet reconciliation:
+
+```text
+UI20_IR1                          = OWNER_ACCEPTED
+HORIZONTAL_RW_SEQUENCE            = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
+NEXT_RECOMMENDED_BUILD            = UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET
+PARTIAL_MAIN_UI_INTEGRATION       = FORBIDDEN
+DO_NOT_ISSUE_RW2_EXECUTION_GO     = YES
 ```

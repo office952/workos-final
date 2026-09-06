@@ -65,10 +65,11 @@ Read live delivery flags, next build, Cloud/pilot gates, and UI closure from the
 - Do not create operational-service tasks before a frozen Order / Production Release.
 - Do not implement full ACM, illuminated ACM, Analyzer runtime, or a new product template without an explicit Owner GO.
 - Every future Owner-facing page requires an old-versus-new UI/UX/code audit before implementation.
+- UI20 presentation rebuild is a vertical clean-sheet North Star over the existing domain/API. Do not resume horizontal RW2/RW3 page-by-page main integration. Do not treat current page composition as the required visual foundation. Live sequence flags live only in the roadmap.
 
 ## Bootstrap proof
 
-The app has the UI20 Candidate A quiet top shell over existing routes, with legacy page bodies transitioning in later RW waves, a hierarchical catalog, schema-driven product configuration, Product System / Resources / Processes / Workcenters inspection, and the generic commercial spine: confirm → EIC → Commercial → Quote Snapshot → Acceptance → Order → Release → ExecutionPlan.
+The app has the UI20 Candidate A quiet top shell over existing routes and existing page bodies. That current presentation is reference and constraint, not the required visual migration base. The next presentation program is an isolated vertical North Star (Cerere → Configurator → Ofertă → Order continuity → Lucrare → Atelier → Execuție) over the same commercial spine: confirm → EIC → Commercial → Quote Snapshot → Acceptance → Order → Release → ExecutionPlan. No partial live-route cutover. `/` stays Lucrări until an explicit Acasă contract.
 
 LETTERS none/none at 60 mm is the regression anchor through that spine. ACM cassette is the second Quote-ready product on the same engines. Unselected roles stay silent. Historical snapshots stay immutable. Analyzer stays outside WorkOS.
 

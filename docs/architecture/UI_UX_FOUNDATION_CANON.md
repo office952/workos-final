@@ -18,6 +18,11 @@ IMPLEMENTED_SHELL                      = UI20_CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                      = NO
 UI20_RW1                               = OWNER_ACCEPTED_INTEGRATION_CANDIDATE
 UI20_RW1A                              = ACCEPTED
+CURRENT_RUNTIME_PRESENTATION           = RW1 / existing bodies
+NEXT_PRESENTATION_PROGRAM              = VERTICAL_CLEAN_SHEET_NORTH_STAR
+UI20_CLEAN_SHEET_RUNTIME               = NOT_IMPLEMENTED
+NO_PARTIAL_ROUTE_CUTOVER               = YES
+PARTIAL_MAIN_UI_INTEGRATION            = FORBIDDEN
 HISTORICAL_SHELL_V3                    = STABLE_SIDEBAR_V3
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION     = INTEGRATED_ON_MAIN
@@ -47,13 +52,15 @@ NEXT_PROGRAM_PRIORITY                  = WORKOS_UI_UX_2_0_E2E
 
 `HISTORICAL_SHELL_V3 = STABLE_SIDEBAR_V3` and the V3 navigation acceptance remain historical evidence. They do not describe the current runtime shell after UI20-RW1.
 
-Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` (`OWNER RESET — UI20 E2E`). Final UI20 IA is Owner-accepted as `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell and `GLOBAL_L1_SIDEBAR = NO`. Final UI20 visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). IA acceptance: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`. Visual acceptance: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`. RW1/RW1A worklog: `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`.
+This file describes **current implemented presentation only**. It does not claim that the UI20 vertical clean-sheet North Star is already the runtime. That next presentation program is isolated until one cutover GO. See `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` and `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md`.
 
-Current global navigation is the UI20 Candidate A quiet top shell. There is no global L1 sidebar. During RW1–RW5 the rendered normal L1 is:
+Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. Final UI20 IA is Owner-accepted as `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell and `GLOBAL_L1_SIDEBAR = NO`. Final UI20 visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). IA acceptance: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`. Visual acceptance: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`. RW1/RW1A worklog: `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`.
+
+Current global navigation is the UI20 Candidate A quiet top shell. There is no global L1 sidebar. The rendered normal L1 in the **current** runtime is:
 
 ```text
 L1            Cereri · Comercial · Lucrări · Atelier · Mai multe · Cont
-ACASA         hidden until RW6
+ACASA         hidden; `/` stays Lucrări; `ACASA_ROOT = NOT_AUTHORIZED`
 ROOT `/`      Lucrări
 `/jobs`       Lucrări
 COMERCIAL L2  Clienți · Oferte · Catalog
@@ -61,8 +68,10 @@ MAI MULTE     Resurse / Oameni / existing supported secondary destinations from 
 CONT          Administrare → /admin → local Admin navigation
 OPERATOR      Atelier + Execution may use reduced chrome
 SEARCH        not rendered until functional
-OBJECT_CONTEXT presentational primitive only; route population deferred to later page waves
+OBJECT_CONTEXT presentational primitive only; not a completed North Star continuity instrument
 ```
+
+Horizontal RW2–RW6 page-by-page main integration is superseded. Do not treat “later RW waves” as the living presentation program.
 
 Capability / destination registry truth is unchanged. Hidden destinations stay in the registry and are not rendered. Historical V3 category layout (for audit only):
 
@@ -197,9 +206,11 @@ Do not add empty Documents / Notes / Timeline tabs.
 
 ## Future migration
 
-New pages prefer these primitives. Existing pages migrate one surface at a time.
+These primitives remain the **current-runtime** law. They are not the North Star visual system.
 
-This file remains the **currently implemented** presentation law for the first HF lot. On `feat/architecture-c-ui-wave1-shell-resources-v1`, Architecture C Wave 1 is **implemented locally in review** for the global shell plus `/admin/resources` only. Sibling admin catalogs still use the first-HF `OwnerCatalogView` / `AdminDomainLinks` presentation. Owner has not accepted Wave 1. Wave 2 is not started.
+Do not migrate live `App.tsx` routes to UI20 one surface at a time. `NO_PARTIAL_ROUTE_CUTOVER = YES`. The next presentation program is an isolated vertical clean-sheet North Star over the same domain/API. After whole-spine Owner acceptance, one cutover GO may replace the presentation root.
+
+This file remains the **currently implemented** presentation law. On `feat/architecture-c-ui-wave1-shell-resources-v1`, Architecture C Wave 1 is **implemented locally in review** for the global shell plus `/admin/resources` only. Sibling admin catalogs still use the first-HF `OwnerCatalogView` / `AdminDomainLinks` presentation. Owner has not accepted Wave 1. Wave 2 is not started.
 
 Implemented Wave 1 facts, not a direction rewrite:
 
