@@ -44,7 +44,11 @@ UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
 UI20_IMPLEMENTATION                = NOT_AUTHORIZED
 FINAL_IA                           = OWNER_ACCEPTED
-FINAL_VISUAL_DIRECTION_UI20        = NOT_OWNER_ACCEPTED
+FINAL_VISUAL_DIRECTION_UI20        = OWNER_ACCEPTED
+UI20_FINAL_VISUAL_DIRECTION        = G_LIVING_FABRICATION_INSTRUMENT
+UI20_VISUAL_SYNTHESIS              = CALM_PRECISION_PLUS_SELECTIVE_FABRICATION_ENERGY
+OWNER_ACCEPTED_FINAL_VISUAL        = YES
+ACCEPTANCE_AUTHORITY               = OWNER_DELEGATE_CHATGPT
 CLIENTS_V3                         = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION            = OWNER_ACCEPTED
 CLIENTS_RUNTIME                    = OWNER_ACCEPTED
@@ -75,7 +79,9 @@ On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` remains the **current implemented presentation law**. The implemented shell is the V3 stable sidebar on main. This direction canon does not replace that record. It governs later Owner decisions and later UI change.
 
-**UI20 Final IA (Owner-accepted 2026-09-06):** living future implementation direction is `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell. `GLOBAL_L1_SIDEBAR = NO`. V3 remains the implemented baseline until an explicit UI20 implementation GO. Final visual direction remains not Owner-accepted. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`.
+**UI20 Final IA (Owner-accepted 2026-09-06):** living future implementation direction is `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell. `GLOBAL_L1_SIDEBAR = NO`. V3 remains the implemented baseline until an explicit UI20 implementation GO. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`.
+
+**UI20 Final Visual (Owner-accepted 2026-09-06 via Owner-delegate ChatGPT):** `FINAL_VISUAL_DIRECTION_UI20 = OWNER_ACCEPTED`. Living direction is `G_LIVING_FABRICATION_INSTRUMENT` (`CALM_PRECISION + SELECTIVE_FABRICATION_ENERGY`). `ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`. Historical `FINAL_VISUAL_DIRECTION = A_INDUSTRIAL_CLARITY` remains closed HF-lot truth only. `UI20_IMPLEMENTATION = NOT_AUTHORIZED`. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`.
 
 Related living authority:
 
