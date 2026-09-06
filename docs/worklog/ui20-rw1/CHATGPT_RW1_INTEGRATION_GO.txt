@@ -1,0 +1,17 @@
+OWNER-DELEGATED GO
+
+WORKOS UI/UX 2.0 E2E
+
+UI20-RW1
+FINAL ACCEPTANCE + CANONICAL RECONCILIATION + STRICT-FF INTEGRATION
+
+Source: ChatGPT RW1A independent review — RW1A ACCEPTED; DOC_BLOCKER before FF.
+
+EXPECTED_RW1_HEAD = 23ad126209163cfee2c8cba44f2889a41ae4579a
+EXPECTED_ORIGIN_MAIN = 4e2a8363ce249b65148bb2950a3d4ec24364d791
+CI_ACCEPTED_RUN = 34017485584 SUCCESS
+
+Phase A: documentation-only reconciliation on design/ui20-rw1-quiet-top-shell
+Then FF-ONLY main.
+Then docs/ui20-rw1-integration-close living status + FF-ONLY.
+NO RW2 / NO Master Polish / NO product code.

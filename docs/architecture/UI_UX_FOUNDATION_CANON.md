@@ -11,18 +11,22 @@ React must not own product truth, pricing, provider eligibility, executor eligib
 
 ## Shell
 
-This file records the **implemented** V3 shell (`IMPLEMENTED_SHELL = STABLE_SIDEBAR_V3`). Living future UI20 direction is governed by `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
+This file records the **current implemented** presentation shell. Living UI20 evolution authority remains `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
 
 ```text
-IMPLEMENTED_SHELL                      = STABLE_SIDEBAR_V3
+IMPLEMENTED_SHELL                      = UI20_CANDIDATE_A_QUIET_TOP_SHELL
+GLOBAL_L1_SIDEBAR                      = NO
+UI20_RW1                               = OWNER_ACCEPTED_INTEGRATION_CANDIDATE
+UI20_RW1A                              = ACCEPTED
+HISTORICAL_SHELL_V3                    = STABLE_SIDEBAR_V3
 UI_UX_NAVIGATION_V3_DESIGN             = OWNER_ACCEPTED
 UI_UX_NAVIGATION_V3_IMPLEMENTATION     = INTEGRATED_ON_MAIN
 UI_V3_PAGE_CONTENT_TRANSFORMATION      = COMPLETE
 ALL_EXISTING_PAGES_UI_V3               = INTEGRATED_ON_MAIN
 ALL_EXISTING_PAGES_UI_V3_RUNTIME       = OWNER_ACCEPTED
 UI_V3_GENERAL_FINALIZATION             = COMPLETE
-UI_GENERAL_REDESIGN                    = CLOSED_FOR_V1
-UI_POLISH_MODE                         = INCREMENTAL
+UI_GENERAL_REDESIGN                    = REOPENED_BY_OWNER_FOR_UI20_E2E
+UI_POLISH_MODE                         = SUPERSEDED_BY_UI20_REFOUNDATION
 CLIENTS_V3                             = INTEGRATED_ON_MAIN
 CLIENTS_FIGMA_DIRECTION                = OWNER_ACCEPTED
 CLIENTS_RUNTIME                        = OWNER_ACCEPTED
@@ -38,22 +42,37 @@ REQUESTS_RUNTIME                       = OWNER_ACCEPTED
 CERERI_RUNTIME                         = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN              = YES
 REQUESTS_INTEGRATED_ON_MAIN            = YES
-NEXT_PROGRAM_PRIORITY                  = PRODUCT_DEVELOPMENT
+NEXT_PROGRAM_PRIORITY                  = WORKOS_UI_UX_2_0_E2E
 ```
 
-`UI_GENERAL_REDESIGN = CLOSED_FOR_V1` and `UI_POLISH_MODE = INCREMENTAL` describe the **historical** V3 / V1 closure of the implemented shell. They do not govern future UI evolution. Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` (`OWNER RESET — UI20 E2E`: `UI_GENERAL_REDESIGN = REOPENED_BY_OWNER_FOR_UI20_E2E`, `UI_POLISH_MODE = SUPERSEDED_BY_UI20_REFOUNDATION`, `NEXT_PROGRAM_PRIORITY = WORKOS_UI_UX_2_0_E2E`). Final UI20 IA is Owner-accepted as `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell and `GLOBAL_L1_SIDEBAR = NO`. Final UI20 visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). `UI20_IMPLEMENTATION = NOT_AUTHORIZED`. This file remains the current **implemented** V3 presentation baseline until a later explicit implementation GO. IA acceptance: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`. Visual acceptance: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`.
+`HISTORICAL_SHELL_V3 = STABLE_SIDEBAR_V3` and the V3 navigation acceptance remain historical evidence. They do not describe the current runtime shell after UI20-RW1.
 
-Wave 1 implements this sidebar on main. All existing runtime pages are V3 baseline closed. Page-content transformation is `COMPLETE`. Clients V3 registry, Client Hub, and Cereri remain historically accepted.
+Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` (`OWNER RESET — UI20 E2E`). Final UI20 IA is Owner-accepted as `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell and `GLOBAL_L1_SIDEBAR = NO`. Final UI20 visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). IA acceptance: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`. Visual acceptance: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`. RW1/RW1A worklog: `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`.
 
-Primary navigation is one stable sidebar. Categories are labels. Hidden destinations stay in the registry and are not rendered:
+Current global navigation is the UI20 Candidate A quiet top shell. There is no global L1 sidebar. During RW1–RW5 the rendered normal L1 is:
 
 ```text
-COMERCIAL     Clienți → /clients · Cereri → /requests · Oferte → /quotes · Catalog → /products
-PRODUCȚIE     Lucrări → /jobs and / · Atelier → /atelier
-RESURSE       Resurse și costuri → /admin/resources · Stoc → /admin/stock · Utilaje → /admin/workcenters
-OAMENI        Angajați → /admin/people
-ADMINISTRARE  Firmă → /admin/seller · Servicii operaționale → /admin/operational-services · Sistem produs → /admin/product-system · Guvernanță → /governance
-HIDDEN        Acasă · Furnizori · Achiziții · Pontaj · Plăți și avansuri · Politici
+L1            Cereri · Comercial · Lucrări · Atelier · Mai multe · Cont
+ACASA         hidden until RW6
+ROOT `/`      Lucrări
+`/jobs`       Lucrări
+COMERCIAL L2  Clienți · Oferte · Catalog
+MAI MULTE     Resurse / Oameni / existing supported secondary destinations from visibility truth
+CONT          Administrare → /admin → local Admin navigation
+OPERATOR      Atelier + Execution may use reduced chrome
+SEARCH        not rendered until functional
+OBJECT_CONTEXT presentational primitive only; route population deferred to later page waves
+```
+
+Capability / destination registry truth is unchanged. Hidden destinations stay in the registry and are not rendered. Historical V3 category layout (for audit only):
+
+```text
+HISTORICAL_V3_COMERCIAL     Clienți → /clients · Cereri → /requests · Oferte → /quotes · Catalog → /products
+HISTORICAL_V3_PRODUCȚIE     Lucrări → /jobs and / · Atelier → /atelier
+HISTORICAL_V3_RESURSE       Resurse și costuri → /admin/resources · Stoc → /admin/stock · Utilaje → /admin/workcenters
+HISTORICAL_V3_OAMENI        Angajați → /admin/people
+HISTORICAL_V3_ADMINISTRARE  Firmă → /admin/seller · Servicii operaționale → /admin/operational-services · Sistem produs → /admin/product-system · Guvernanță → /governance
+HIDDEN                      Acasă · Furnizori · Achiziții · Pontaj · Plăți și avansuri · Politici
 ```
 
 Stable detail routes:

@@ -68,7 +68,7 @@ Read live delivery flags, next build, Cloud/pilot gates, and UI closure from the
 
 ## Bootstrap proof
 
-The app has a V3 stable sidebar on existing routes, a hierarchical catalog, schema-driven product configuration, Product System / Resources / Processes / Workcenters inspection, and the generic commercial spine: confirm → EIC → Commercial → Quote Snapshot → Acceptance → Order → Release → ExecutionPlan.
+The app has the UI20 Candidate A quiet top shell over existing routes, with legacy page bodies transitioning in later RW waves, a hierarchical catalog, schema-driven product configuration, Product System / Resources / Processes / Workcenters inspection, and the generic commercial spine: confirm → EIC → Commercial → Quote Snapshot → Acceptance → Order → Release → ExecutionPlan.
 
 LETTERS none/none at 60 mm is the regression anchor through that spine. ACM cassette is the second Quote-ready product on the same engines. Unselected roles stay silent. Historical snapshots stay immutable. Analyzer stays outside WorkOS.
 

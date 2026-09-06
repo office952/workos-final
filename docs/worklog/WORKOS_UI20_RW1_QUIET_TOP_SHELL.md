@@ -4,15 +4,22 @@
 GO                         = OWNER_DELEGATED_UI20_RW1
 BRANCH                     = design/ui20-rw1-quiet-top-shell
 BASE_HEAD                  = 4e2a8363ce249b65148bb2950a3d4ec24364d791
-STATUS                     = IMPLEMENTED_LOCAL_IN_REVIEW
+STATUS                     = OWNER_ACCEPTED_INTEGRATION_CANDIDATE
 REACT                      = YES_RW1_ONLY
 CSS                        = YES_RW1_ONLY
 FIGMA_WRITE                = NO
-MAIN_MERGE                 = NO_IN_THIS_GO
+MAIN_MERGE                 = AUTHORIZED_AFTER_CANON_RECONCILIATION
 PR                         = NO
 PER_WAVE_POLISH            = REQUIRED
 MASTER_POLISH              = NO
-OWNER_ACCEPTED_RUNTIME     = NO
+OWNER_ACCEPTED_RUNTIME     = YES
+CHATGPT_RW1A_REVIEW        = COMPLETE
+RW1_RUNTIME                = RUNTIME_VERIFIED
+RW1A                       = ACCEPTED
+CI_EXACT_ACCEPTED_HEAD     = 23ad126209163cfee2c8cba44f2889a41ae4579a
+CI_RUN                     = 34017485584 SUCCESS
+RW1B                       = NOT_REQUIRED
+INTEGRATION                = AUTHORIZED_AFTER_CANON_RECONCILIATION
 ```
 
 ## Closed upstream
@@ -38,6 +45,7 @@ SHELL_MIGRATION_STRATEGY   = STRATEGY_A_GLOBAL_SHELL_FIRST
 - Operator reduced chrome on `/atelier` + `/execution/*`
 - Mobile nested Meniu for Comercial / Mai multe
 - Quiet Cont + Meniu triggers (no strong pill chrome)
+- RW1A: brand accessible name `WorkOS`; Escape focus restore; nested mobile focus; scoped `--ui20-shell-accent`
 
 ## Polish passes executed
 
@@ -76,24 +84,24 @@ MONOREPO_TYPECHECK         = PASS
 MONOREPO_TEST              = PASS (web 239 + api 302)
 MONOREPO_BUILD             = PASS
 E2E_FULL                   = PASS (110 passed / 5 skipped / isolated ports)
-BRANCH_CI                  = PENDING_RW1A_PUSH
+BRANCH_CI                  = 34017485584 SUCCESS on 23ad126
 ```
 
 ## RW1A targeted closure
 
 ```text
 GO                         = OWNER_DELEGATED_UI20_RW1A
-STATUS                     = IMPLEMENTED_LOCAL_IN_REVIEW
+STATUS                     = ACCEPTED
 BRAND_ACCESSIBLE_NAME      = WorkOS
 DESKTOP_POPOVER_ESCAPE_FOCUS = RESTORES_TRIGGER
 MOBILE_NESTED_INITIAL_FOCUS = DETERMINISTIC
 SHELL_ACCENT               = --ui20-shell-accent (#1f332e / #8fb5a4 dark)
 GLOBAL_ACTION_PRIMARY      = UNCHANGED_V3_BLUE
 TERRACOTTA_NAV_ACCENT      = NO
-MAIN_MERGE                 = NO
+MAIN_MERGE                 = AUTHORIZED_AFTER_CANON_RECONCILIATION
 ```
 
-See `docs/worklog/ui20-rw1/CHATGPT_RW1A_EXECUTION_GO.txt`.
+See `docs/worklog/ui20-rw1/CHATGPT_RW1A_EXECUTION_GO.txt` and `docs/worklog/ui20-rw1/CHATGPT_RW1_INTEGRATION_GO.txt`.
 
 
 ## Permissions respected
@@ -103,5 +111,5 @@ BACKEND_WRITE = NO
 CLOUD_WRITE = NO
 REAL_DATA = NO
 FIGMA_WRITE = NO
-MAIN_FF = NO
+MAIN_FF = PENDING_PHASE_A_DOC_CI
 ```
