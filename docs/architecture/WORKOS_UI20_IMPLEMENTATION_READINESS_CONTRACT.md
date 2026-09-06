@@ -1,18 +1,23 @@
 # WorkOS UI20 — Implementation Readiness Contract (Figma → React)
 
 ```text
-STATUS                            = IN_REVIEW
+STATUS                            = OWNER_ACCEPTED
+UI20_IMPLEMENTATION_READINESS     = OWNER_ACCEPTED
+UI20_IR1                          = OWNER_ACCEPTED
 AUTHORITY                         = IMPLEMENTATION_CONTRACT_UNDER_ACCEPTED_UI20_CANON
 NOT_A_NEW_UI_CANON                = YES
-UI20_IMPLEMENTATION               = NOT_AUTHORIZED
+UI20_IMPLEMENTATION               = NOT_YET_EXECUTED
 REACT                             = NOT_AUTHORIZED
-MASTER_POLISH                     = NOT_AUTHORIZED
 ACCEPTANCE_AUTHORITY              = OWNER_DELEGATE_CHATGPT
 BASE_HEAD                         = 7c79ae2f3fe5701a177a9859fca3b67cd5f8706f
 FIGMA_FILE                        = 0XP0yGa1siWQdTTL7ou8xz
+SHELL_MIGRATION_STRATEGY          = STRATEGY_A_GLOBAL_SHELL_FIRST
+FIRST_REACT_WAVE_ID               = UI20_RW1_QUIET_TOP_SHELL
+FIRST_REACT_WAVE                  = OWNER_DELEGATE_APPROVED_AS_NEXT_WAVE
+RW1_EXECUTION_GO                  = NOT_THIS_GO
 ```
 
-This contract answers how to implement accepted UI20 in the existing React product without losing business truth, route continuity, page personality, responsive/a11y behavior, or modularity. It does not authorize React.
+This contract answers how to implement accepted UI20 in the existing React product without losing business truth, route continuity, page personality, responsive/a11y behavior, or modularity. It does not authorize React execution.
 
 Living UI direction: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.  
 Implemented presentation baseline remains V3: `docs/architecture/UI_UX_FOUNDATION_CANON.md`.  
@@ -34,13 +39,16 @@ VIS1 / VIS1A                      = ACCEPTED
 VIS1B                             = NOT_REQUIRED
 ```
 
-Polish policy (Owner-delegate clarification 2026-09-06):
+Polish policy (Owner-delegate clarification 2026-09-06; locked in IR1A):
 
 ```text
 PER_WAVE_POLISH                   = REQUIRED_FOR_INTEGRATION
 MASTER_POLISH                     = AFTER_UI20_RUNTIME_COHERENT
 MASTER_POLISH_NOW                 = NO
+MASTER_POLISH_STATUS              = NOT_STARTED
 ```
+
+Each React wave must include: screenshot comparison; 1440 / 1280 / 768 where applicable; spacing / hierarchy correction; theme verification; focus / keyboard; overflow / clipping; long Romanian copy; relevant Figma reconciliation.
 
 ---
 
@@ -74,13 +82,13 @@ Candidate A quiet top:
 - Local sidebar = Admin + true master-detail only  
 - Reduced chrome on Atelier / Execution
 
-### Recommended migration strategy
+### Accepted migration strategy
 
 ```text
 SHELL_MIGRATION_STRATEGY = STRATEGY_A_GLOBAL_SHELL_FIRST
 ```
 
-**STRATEGY A (recommended):** Replace global shell first; temporarily adapt legacy page bodies under the new shell until floorplan waves catch up.
+**STRATEGY A (accepted):** Replace global shell first; temporarily adapt legacy page bodies under the new shell until floorplan waves catch up.
 
 Why not B (accumulate off-main until shell+family ready): delays operator-visible IA coherence and prolongs dual-system risk.  
 Why not C: no superior source-grounded alternative found.
@@ -97,33 +105,43 @@ Integration unit for Wave 1 must ship shell + nav ownership + object-context pri
 
 ---
 
-## 3. Acasă / root route recommendation
+## 3. Acasă / root route contract (Owner-delegate final)
 
 ```text
-ACASA_ROUTE_RECOMMENDATION =
-  Introduce Acasă as real L1 destination at `/home`
-  Keep `/` as temporary alias to Lucrări ONLY until Acasă content exists
-  OR (preferred when Acasă content is ready in same wave):
-  Move `/` → Acasă hub; keep `/jobs` as Lucrări canonical list
+ACASA_ROUTE_CONTRACT              = OWNER_DELEGATE_ACCEPTED
+HOME_ROUTE_CREATED                = NO
+/home                             = DO_NOT_CREATE
 
-ROOT_ROUTE_MIGRATION_CONTRACT =
-  Wave that introduces Acasă must also redefine `/` ownership in one coherent commit set.
-  Prefer: `/` = Acasă hub; `/jobs` = Lucrări; redirects from old bookmarks documented.
-  Unknown routes continue Navigate → `/` (then meaning of `/` changes with Acasă wave).
+RW1 through RW5:
+  `/`                             = LUCRĂRI = JobsOverviewPage
+  `/jobs`                         = LUCRĂRI canonical list
+  ACASĂ                           = NOT RENDERED WHILE NOT IMPLEMENTED
+    (destination availability: hidden, no dead L1 link, no Coming Soon)
 
-BACKWARD_COMPATIBILITY =
-  Preserve `/jobs` and `/jobs/*` deep links.
-  Preserve auth intended-return to previous path.
-  Update e2e that assert `/` = Lucrări in the same wave.
+RW6 only (atomic cutover):
+  implement real Acasă hub
+  AND change `/`                  = ACASĂ
+  while `/jobs`                   = LUCRĂRI
 
-DEEP_LINK_SAFETY =
-  Job/request/quote/client/execution deep links unchanged.
-  Only root semantics change when Acasă lands.
+DEEP_LINKS_UNCHANGED =
+  /jobs/* /requests/* /quotes/* /clients/* /products/* /execution/*
 
-CHATGPT_MUST_ACCEPT_BEFORE_ROUTE_MUTATION = YES
+Unknown-route fallback may remain `/` and therefore changes semantic
+destination only in the same RW6 atomic cutover.
+
+RATIONALE =
+  no transient route debt
+  no duplicate Home canon
+  no dead L1 link
+  preserves current bookmarks during RW1–RW5
+  final accepted IA reached atomically in RW6
+
+TRANSITIONAL_L1_BEHAVIOR =
+  Use destination availability. Acasă hidden until RW6.
+  When RW6 lands, route + destination availability change together.
 ```
 
-IR1 does **not** mutate routes.
+IR1 / IR1A do **not** mutate routes.
 
 ---
 
@@ -150,21 +168,49 @@ NAVIGATION_CAPABILITY_CONTRACT =
   No Coming Soon furniture.
   No client-specific fork.
 
-CAPABILITY_PROJECTION_GAPS =
+CAPABILITY_PROJECTION_GAP         = ACCEPTED_CARRY
+CAPABILITY_GAP_DOES_NOT_BLOCK     = RW1_PRESENTATION_SHELL_MIGRATION
+CAPABILITY_GAP_BLOCKS             =
+  CAPABILITY_AWARE_NAV_FINALIZATION
+  + FINAL_UI20_RUNTIME_ACCEPTANCE
+
+Current facts (unchanged):
   1. AppShell does not pass organization capabilities into visibility context.
   2. Registry destinations all have requiredCapability = null.
   3. Org projection capability set for UI20 module toggles not confirmed as complete for:
      Machines / Stock / Execution / People / optional operational modules.
-  DO NOT invent frontend-only capability truth.
+
+RW1_CAPABILITY_POLICY             = PRESERVE_EXISTING_VISIBILITY_TRUTH
+FRONTEND_CAPABILITY_INVENTION     = FORBIDDEN
+
+RW1 may reorganize destinations already considered visible by current supported logic.
+RW1 may NOT invent module adoption, hardcode HUB MEDIA capability choices,
+add frontend-only module flags, infer Stock/Machines/Execution/People adoption,
+or create client-specific forks.
+
+A later product/backend projection contract must resolve the gap before
+capability-aware visibility is claimed complete.
 ```
 
-Scenarios to prove in implementation tests: advanced company; small company (Clients/Requests/Quotes/Jobs); Machines off; Stock off; Execution off; module enabled later.
+Scenarios to prove in later capability-aware waves: advanced company; small company (Clients/Requests/Quotes/Jobs); Machines off; Stock off; Execution off; module enabled later.
 
 ---
 
 ## 5. Object context contract
 
 Quiet semantic strip. UI formats; UI does not invent lineage/status/readiness.
+
+```text
+OBJECT_CONTEXT_IMPLEMENTATION     = PURE PRESENTATIONAL PRIMITIVE (RW1)
+OBJECT_CONTEXT_RW1_BOUNDARY       =
+  UI may receive explicit truthful props and format:
+    object type / display id / display name / return target / explicit parent data
+  UI may NOT derive:
+    business lineage / readiness / commercial state / execution state / eligibility
+  If a truthful projection is absent: DO NOT FABRICATE CONTENT.
+  No DATA_PROJECTION_GAP may be silently solved in React.
+  Route-level population occurs in the relevant page waves.
+```
 
 | Route family | Object type | Display sources (projection) | Return target | Gap |
 |---|---|---|---|---|
@@ -179,7 +225,7 @@ Quiet semantic strip. UI formats; UI does not invent lineage/status/readiness.
 ```text
 DATA_PROJECTION_GAPS =
   - Explicit “parent lineage” fields for ObjectContextStrip may need a thin read DTO
-    if current pages assemble lineage ad hoc in UI (audit per page in Wave 1).
+    if current pages assemble lineage ad hoc in UI (audit per page wave).
   - Do not invent commercial/execution state in the strip.
 ```
 
@@ -285,7 +331,7 @@ Synthetic fixtures only; classify privacy; map expected Figma node IDs from VIS1
 
 ---
 
-## 11. Implementation wave plan (not authorized)
+## 11. Implementation wave plan
 
 | Wave | Objective | Main safety |
 |---|---|---|
@@ -294,23 +340,28 @@ Synthetic fixtures only; classify privacy; map expected Figma node IDs from VIS1
 | **RW3** | Comercial: Client Hub + Ofertă sheet | Artifact + relationship |
 | **RW4** | Lucrare traveler + Atelier dispatch + Execution workstation | Operator chrome rules |
 | **RW5** | Resources ledger + Admin quiet control + secondary Mai multe | Density survival |
-| **RW6** | Acasă hub + root ownership cutover | Deep-link safety |
+| **RW6** | Acasă hub + root ownership cutover (`/` → Acasă; `/jobs` stays Lucrări) | Deep-link safety; no `/home` |
 | **POST** | Figma↔runtime reconciliation → Master Polish V1 | Cross-product only |
 
 Each wave: PER_WAVE_POLISH required; screenshots; a11y; no business-truth invention.
 
-### First React wave recommendation (not authorized)
+### First React wave (approved as next; not executed here)
 
 ```text
-FIRST_REACT_WAVE_ID     = UI20_RW1_QUIET_TOP_SHELL
+FIRST_REACT_WAVE_ID               = UI20_RW1_QUIET_TOP_SHELL
+FIRST_REACT_WAVE                  = OWNER_DELEGATE_APPROVED_AS_NEXT_WAVE
+RW1_EXECUTION_GO                  = NOT_THIS_GO
+
 FIRST_REACT_WAVE_SCOPE  =
   GlobalShellTop + GlobalNavigation (L1/L2/Mai multe/Cont)
-  + ObjectContextStrip primitive
+  + ObjectContextStrip primitive (truthful props only)
   + MobileNavigation Candidate A
   + remove StableSidebar from normal office routes
   + adapt existing page bodies under new chrome
   + preserve Atelier/Execution reduced-chrome rules
   + font/token bridge start (Plex)
+  + preserve existing visibility truth (no capability invention)
+  + per-wave polish
   + tests: nav visibility, skip-link, 768 menu, no mixed IA
 
 WHY_THIS_FIRST =
@@ -327,8 +378,8 @@ WHY_NOT_LARGER =
 
 ```text
 BRANCH_TOPOLOGY =
-  docs/ui20-ir1-implementation-readiness (this gate)
-  then design/ui20-rw1-* for first React wave after ChatGPT GO
+  docs/ui20-ir1-implementation-readiness (this gate; accepted)
+  then design/ui20-rw1-* for first React wave after separate ChatGPT RW1 execution GO
 
 V3 StableSidebar remains runtime authority until RW1 merges.
 Remove dead sidebar CSS only after RW1+ verification.
@@ -343,13 +394,20 @@ Accepted nodes include VIS1 `233:66`, VIS1A `239:66`, Owner board `242:66`, Cont
 
 ---
 
-## 13. Implementation blockers / advisories
+## 13. Closed readiness gates / remaining advisories
 
-**Blockers before React GO:**
+**Closed by IR1A (Owner-delegate):**
 
-1. ChatGPT accept/reject this contract  
-2. ChatGPT accept Acasă/root recommendation (or alternative)  
-3. Capability projection plan for modularity (gap explicit — may be parallel backend GO)
+1. Contract accepted with required amendments  
+2. Acasă / root contract finalized (no temporary `/home`)  
+3. Capability gap accepted as carry; nonblocking for RW1 presentation shell  
+4. First React wave approved as next wave (execution GO separate)
+
+**Still required before claiming complete UI20 runtime:**
+
+- Separate RW1…RW6 execution GOs  
+- Capability-aware nav finalization (backend/product projection contract)  
+- Master Polish after coherent runtime  
 
 **Nonblocking advisories:**
 
@@ -362,7 +420,10 @@ Accepted nodes include VIS1 `233:66`, VIS1A `239:66`, Owner board `242:66`, Cont
 ## 14. STOP
 
 ```text
-UI20_IMPLEMENTATION = NOT_AUTHORIZED
-REACT = NOT_AUTHORIZED
-NEXT_STEP = CHATGPT_INDEPENDENT_UI20_IMPLEMENTATION_READINESS_REVIEW_AND_FIRST_REACT_WAVE_DECISION
+UI20_IR1                          = OWNER_ACCEPTED
+UI20_IMPLEMENTATION_READINESS     = OWNER_ACCEPTED
+UI20_IMPLEMENTATION               = NOT_YET_EXECUTED
+REACT                             = NOT_AUTHORIZED
+RW1_EXECUTION                     = NOT_STARTED
+NEXT_STEP                         = CHATGPT_VERIFY_IR1_ACCEPTED_ON_MAIN_AND_ISSUE_UI20_RW1_EXECUTION_GO
 ```
