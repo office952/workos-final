@@ -15,6 +15,8 @@ export function GlobalNavigation({ model, reducedChrome = false }: GlobalNavigat
   const commercialId = useId();
   const moreId = useId();
   const rootRef = useRef<HTMLElement | null>(null);
+  const commercialTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const moreTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -26,9 +28,18 @@ export function GlobalNavigation({ model, reducedChrome = false }: GlobalNavigat
       }
     }
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setOpen(null);
+      if (event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      const closing = open;
+      setOpen(null);
+      if (closing === "commercial") {
+        commercialTriggerRef.current?.focus();
+        return;
+      }
+      if (closing === "more") {
+        moreTriggerRef.current?.focus();
       }
     }
     document.addEventListener("mousedown", onDocumentMouseDown);
@@ -69,6 +80,7 @@ export function GlobalNavigation({ model, reducedChrome = false }: GlobalNavigat
       {showCommercial ? (
         <div className="global-nav-popover">
           <button
+            ref={commercialTriggerRef}
             type="button"
             className={navClass(model.activeSlot === "commercial", true)}
             aria-expanded={open === "commercial"}
@@ -120,6 +132,7 @@ export function GlobalNavigation({ model, reducedChrome = false }: GlobalNavigat
       {showMore ? (
         <div className="global-nav-popover">
           <button
+            ref={moreTriggerRef}
             type="button"
             className={navClass(model.activeSlot === "more", true)}
             aria-expanded={open === "more"}
@@ -157,11 +170,7 @@ export function GlobalNavigation({ model, reducedChrome = false }: GlobalNavigat
 }
 
 function navClass(active: boolean, isTrigger = false): string {
-  return [
-    "global-nav-item",
-    isTrigger ? "is-trigger" : "",
-    active ? "is-active" : "",
-  ]
+  return ["global-nav-item", isTrigger ? "is-trigger" : "", active ? "is-active" : ""]
     .filter(Boolean)
     .join(" ");
 }

@@ -149,13 +149,15 @@ test("resources workspace filters by ProductTemplate context", async ({ page }) 
   await expect(addTariff.getByRole("option", { name: "Profil aluminiu 0,6 mm" })).toHaveCount(1);
   await expect(addTariff.getByRole("option", { name: "Manoperă montaj la locație" })).toHaveCount(1);
   await page.keyboard.press("Escape");
+  await expect(addTariff).toHaveCount(0);
 
+  const costTable = page.getByRole("table", { name: "Costuri interne" });
   await page.getByLabel("Produs").selectOption({ label: "Panou ACM casetat" });
   await expect(page).toHaveURL(new RegExp(`product=${ACM_PRODUCT_CODE}`));
-  await expect(page.getByText("ACM 3 mm").first()).toBeVisible();
-  await expect(page.getByText("Ambalare").first()).toBeVisible();
-  await expect(page.getByText("Profil aluminiu 0,6 mm")).toHaveCount(0);
-  await expect(page.getByText("Plexiglas 3 mm opal")).toHaveCount(0);
+  await expect(costTable.getByText("ACM 3 mm").first()).toBeVisible();
+  await expect(costTable.getByText("Ambalare").first()).toBeVisible();
+  await expect(costTable.getByText("Profil aluminiu 0,6 mm")).toHaveCount(0);
+  await expect(costTable.getByText("Plexiglas 3 mm opal")).toHaveCount(0);
 
   await page.getByLabel("Produs").selectOption({ label: "Toate produsele" });
   await expect(page).not.toHaveURL(/[?&]product=/);

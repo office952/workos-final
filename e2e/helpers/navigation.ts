@@ -13,7 +13,7 @@ export function primaryNav(page: Page) {
 }
 
 export function brandLink(page: Page) {
-  return page.getByRole("link", { name: /WorkOS/ });
+  return page.getByRole("link", { name: "WorkOS", exact: true });
 }
 
 export function primaryNavLink(page: Page, name: string) {

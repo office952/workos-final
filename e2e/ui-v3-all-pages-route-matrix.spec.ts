@@ -445,8 +445,9 @@ test.describe("UI V3 all existing routes matrix", () => {
     const menuBox = await menu.boundingBox();
     expect(menuBox && menuBox.height >= 44 && menuBox.width >= 44).toBeTruthy();
     await menu.click();
-    await expect(page.getByRole("dialog", { name: "Meniu" })).toBeVisible();
+    // /products is Comercial — nested Meniu opens on active L2 context, not root.
+    await expect(page.getByRole("dialog", { name: "Comercial" })).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog", { name: "Meniu" })).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 });

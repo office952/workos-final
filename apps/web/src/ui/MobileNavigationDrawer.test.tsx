@@ -53,13 +53,46 @@ describe("MobileNavigationDrawer", () => {
     expect(opener).toHaveFocus();
   });
 
-  it("opens nested Comercial from Mai multe-style drill-in and closes from scrim", async () => {
+  it("opens nested Comercial with Clienți focused on /clients", async () => {
     const user = userEvent.setup();
     renderDrawer("/clients");
     const opener = screen.getByRole("button", { name: "Meniu" });
     await user.click(opener);
     expect(screen.getByRole("dialog", { name: "Comercial" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Clienți" })).toHaveAttribute("aria-current", "page");
+    const clients = screen.getByRole("link", { name: "Clienți" });
+    expect(clients).toHaveAttribute("aria-current", "page");
+    expect(clients).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+  });
+
+  it("opens nested Mai multe with Resurse focused on /admin/resources", async () => {
+    const user = userEvent.setup();
+    renderDrawer("/admin/resources");
+    const opener = screen.getByRole("button", { name: "Meniu" });
+    await user.click(opener);
+    expect(screen.getByRole("dialog", { name: "Mai multe" })).toBeInTheDocument();
+    const resources = screen.getByRole("link", { name: "Resurse și costuri" });
+    expect(resources).toHaveAttribute("aria-current", "page");
+    expect(resources).toHaveFocus();
+  });
+
+  it("opens nested Mai multe with Angajați focused on /admin/people", async () => {
+    const user = userEvent.setup();
+    renderDrawer("/admin/people");
+    await user.click(screen.getByRole("button", { name: "Meniu" }));
+    expect(screen.getByRole("dialog", { name: "Mai multe" })).toBeInTheDocument();
+    const people = screen.getByRole("link", { name: "Angajați" });
+    expect(people).toHaveAttribute("aria-current", "page");
+    expect(people).toHaveFocus();
+  });
+
+  it("closes from scrim and restores Meniu focus", async () => {
+    const user = userEvent.setup();
+    renderDrawer("/clients");
+    const opener = screen.getByRole("button", { name: "Meniu" });
+    await user.click(opener);
     await user.click(screen.getAllByRole("button", { name: "Închide" })[0]);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(opener).toHaveFocus();

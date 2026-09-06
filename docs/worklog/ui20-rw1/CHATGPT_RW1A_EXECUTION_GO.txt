@@ -1,0 +1,26 @@
+OWNER-DELEGATED GO
+
+WORKOS UI/UX 2.0 E2E
+
+UI20-RW1A
+QUIET TOP SHELL TARGETED CLOSURE
+
+NO NEW DESIGN
+NO IA REOPEN
+NO MAIN FF
+
+(Source: ChatGPT independent RW1 review — TARGETED_CORRECTION_REQUIRED_BEFORE_RW1_ACCEPTANCE)
+
+Required corrections:
+1. exact-head E2E failures (brand accessible name; stale OS-S1 nav)
+2. WorkOS accessible brand name = exact "WorkOS" (no route semantic coupling)
+3. stale V3 admin-navigation E2E → Cont → Administrare
+4. desktop popover Escape focus restoration
+5. mobile nested initial focus (deterministic)
+6. scoped --ui20-shell-accent (deep green); do NOT remap global --action-primary
+
+Identity note at execution start:
+EXPECTED_HEAD in GO = 90d3446 (AHEAD 2)
+ACTUAL_HEAD at start = 9ad0c39 (AHEAD 3) — interim E2E adaptation push;
+CI 34016093899 SUCCESS on 9ad0c39, but brand helper was weakened vs GO §3.
+RW1A corrects product brand name and remaining a11y/visual items on same branch.

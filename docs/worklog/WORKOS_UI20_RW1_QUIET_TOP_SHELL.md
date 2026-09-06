@@ -70,17 +70,30 @@ LEGACY_PAGE_BODIES_TEMPORARILY_RETAINED
 ## Validation (local)
 
 ```text
-WEB_UNIT_TESTS             = 234/234 PASS
+WEB_UNIT_TESTS             = 239/239 PASS
 MONOREPO_LINT              = PASS (preexisting warnings only)
 MONOREPO_TYPECHECK         = PASS
-MONOREPO_TEST              = PASS (web 234 + api 302)
+MONOREPO_TEST              = PASS (web 239 + api 302)
 MONOREPO_BUILD             = PASS
-E2E_ISOLATED_CORE          = PASS (smoke + ui20 nav + catalog + quotes + requests + hf-wave1 + qualified-cost; 11/13 then jobs fix)
-E2E_FULL                   = IN_PROGRESS_AFTER_NAV_ADAPTATION
-BRANCH_CI                  = PENDING_PUSH
+E2E_FULL                   = PASS (110 passed / 5 skipped / isolated ports)
+BRANCH_CI                  = PENDING_RW1A_PUSH
 ```
 
-Note: first full e2e run against reused :5173/:8787 was invalid (old sidebar). Isolated-port runs are authoritative.
+## RW1A targeted closure
+
+```text
+GO                         = OWNER_DELEGATED_UI20_RW1A
+STATUS                     = IMPLEMENTED_LOCAL_IN_REVIEW
+BRAND_ACCESSIBLE_NAME      = WorkOS
+DESKTOP_POPOVER_ESCAPE_FOCUS = RESTORES_TRIGGER
+MOBILE_NESTED_INITIAL_FOCUS = DETERMINISTIC
+SHELL_ACCENT               = --ui20-shell-accent (#1f332e / #8fb5a4 dark)
+GLOBAL_ACTION_PRIMARY      = UNCHANGED_V3_BLUE
+TERRACOTTA_NAV_ACCENT      = NO
+MAIN_MERGE                 = NO
+```
+
+See `docs/worklog/ui20-rw1/CHATGPT_RW1A_EXECUTION_GO.txt`.
 
 
 ## Permissions respected

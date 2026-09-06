@@ -20,7 +20,7 @@ export function GlobalShellTop({
     <header className={reducedChrome ? "global-shell-top is-reduced" : "global-shell-top"}>
       <div className="global-shell-top-inner">
         <div className="global-shell-brand-row">
-          <Link to="/" className="global-shell-brand" aria-label="WorkOS — Lucrări">
+          <Link to="/" className="global-shell-brand" aria-label="WorkOS">
             WorkOS
           </Link>
           <button type="button" className="app-meniu-trigger" onClick={onOpenMenu}>

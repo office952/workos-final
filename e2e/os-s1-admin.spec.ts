@@ -40,6 +40,13 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
   await expect(
     page.getByRole("dialog", { name: "Datele contului" }).getByRole("link", { name: "Administrare" }),
   ).toBeVisible();
+  await page
+    .getByRole("dialog", { name: "Datele contului" })
+    .getByRole("link", { name: "Administrare" })
+    .click();
+  await expect(page.getByRole("heading", { name: "Administrare" })).toBeVisible();
+  await page.getByRole("link", { name: "Servicii operaționale" }).click();
+  await expect(page.getByRole("heading", { name: "Servicii operaționale" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Alege elementul" })).toHaveCount(0);
   await expect(page.getByLabel("Caută")).toHaveCount(0);
 

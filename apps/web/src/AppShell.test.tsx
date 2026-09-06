@@ -74,7 +74,7 @@ describe("AppShell", () => {
       </AppShell>,
     );
 
-    expect(screen.getByRole("link", { name: /WorkOS/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "WorkOS" })).toBeInTheDocument();
     expect(document.querySelector(".app-sidebar-desktop")).toBeNull();
     expect(document.querySelector(".app-shell")).toHaveClass("is-ui20-top");
     expect(primaryNav()).toBeInTheDocument();

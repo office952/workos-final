@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Ui20PresentationModel } from "../navigation/ui20NavigationPresentation";
 import { hasMaiMulte } from "../navigation/ui20NavigationPresentation";
@@ -7,6 +7,16 @@ const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 type MobileView = "root" | "commercial" | "more";
+
+function deriveMobileView(activeSlot: Ui20PresentationModel["activeSlot"]): MobileView {
+  if (activeSlot === "commercial") {
+    return "commercial";
+  }
+  if (activeSlot === "more") {
+    return "more";
+  }
+  return "root";
+}
 
 export function MobileNavigationDrawer({
   open,
@@ -19,26 +29,41 @@ export function MobileNavigationDrawer({
 }) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const previouslyFocused = useRef<HTMLElement | null>(null);
-  const [view, setView] = useState<MobileView>("root");
+  const restoreTargetRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
+  const [overrideView, setOverrideView] = useState<MobileView | null>(null);
+  const view = overrideView ?? deriveMobileView(model.activeSlot);
+
+  useEffect(() => {
+    if (!open) {
+      setOverrideView(null);
+    }
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (open && !wasOpenRef.current) {
+      restoreTargetRef.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    wasOpenRef.current = open;
+
+    if (!open) {
+      return;
+    }
+    const panel = panelRef.current;
+    if (!panel) {
+      return;
+    }
+    const active = panel.querySelector<HTMLElement>("[aria-current='page']");
+    const closeButton = panel.querySelector<HTMLElement>(".app-nav-drawer-close");
+    (active ?? closeButton)?.focus();
+  }, [open, view, model.activeDestination?.id, model.activeSlot]);
 
   useEffect(() => {
     if (!open) {
       return;
     }
-    const initial: MobileView =
-      model.activeSlot === "commercial"
-        ? "commercial"
-        : model.activeSlot === "more"
-          ? "more"
-          : "root";
-    setView(initial);
-    previouslyFocused.current =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const panel = panelRef.current;
-    const active = panel?.querySelector<HTMLElement>("[aria-current='page']");
-    const closeButton = panel?.querySelector<HTMLElement>(".app-nav-drawer-close");
-    queueMicrotask(() => (active ?? closeButton)?.focus());
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -73,10 +98,11 @@ export function MobileNavigationDrawer({
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      const restore = previouslyFocused.current;
-      queueMicrotask(() => restore?.focus());
+      const restore = restoreTargetRef.current;
+      restoreTargetRef.current = null;
+      restore?.focus();
     };
-  }, [open, onClose, model.activeSlot]);
+  }, [open, onClose]);
 
   if (!open) {
     return null;
@@ -105,7 +131,7 @@ export function MobileNavigationDrawer({
             <button
               type="button"
               className="button-quiet"
-              onClick={() => setView("root")}
+              onClick={() => setOverrideView("root")}
             >
               Înapoi
             </button>
@@ -145,7 +171,7 @@ export function MobileNavigationDrawer({
               <button
                 type="button"
                 className={mobileItemClass(model.activeSlot === "commercial")}
-                onClick={() => setView("commercial")}
+                onClick={() => setOverrideView("commercial")}
               >
                 Comercial
               </button>
@@ -170,7 +196,7 @@ export function MobileNavigationDrawer({
               <button
                 type="button"
                 className={mobileItemClass(model.activeSlot === "more")}
-                onClick={() => setView("more")}
+                onClick={() => setOverrideView("more")}
               >
                 Mai multe
               </button>

@@ -14,6 +14,8 @@
   --action-secondary: #e8eef4;
   --action-on-primary: #ffffff;
   --focus-ring: #1e4d73;
+  /* UI20 shell only — DL1 deep green; do not remap global --action-primary */
+  --ui20-shell-accent: #1f332e;
   --status-info: #1e4d73;
   --status-success: #2c6b45;
   --status-warning: #9a3412;
@@ -63,6 +65,7 @@
   --action-secondary: #2a3442;
   --action-on-primary: #0f1216;
   --focus-ring: #6fa3d0;
+  --ui20-shell-accent: #8fb5a4;
   --status-info: #6fa3d0;
   --status-success: #7dbe96;
   --status-warning: #f0a06a;
@@ -455,12 +458,12 @@ body {
 }
 
 .global-nav-item.is-active {
-  border-bottom-color: var(--action-primary);
+  border-bottom-color: var(--ui20-shell-accent);
   font-weight: 650;
 }
 
 .global-nav-item:focus-visible {
-  outline: 2px solid var(--action-primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -491,7 +494,7 @@ body {
 
 .global-nav-panel-link.is-active {
   font-weight: 650;
-  box-shadow: inset 3px 0 0 var(--action-primary);
+  box-shadow: inset 3px 0 0 var(--ui20-shell-accent);
 }
 
 .global-nav-group + .global-nav-group {
@@ -597,7 +600,7 @@ body {
 
 .ui20-mobile-item.is-active {
   font-weight: 650;
-  box-shadow: inset 3px 0 0 var(--action-primary);
+  box-shadow: inset 3px 0 0 var(--ui20-shell-accent);
 }
 
 .ui20-mobile-group {
@@ -619,7 +622,7 @@ body {
 }
 
 .app-shell.is-ui20-top .app-meniu-trigger:focus-visible {
-  outline: 2px solid var(--action-primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -2414,12 +2417,12 @@ a.button-link.button-secondary {
 }
 
 .identity-menu-trigger:focus-visible {
-  outline: 2px solid var(--action-primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .app-shell.is-ui20-top .identity-menu-trigger[aria-expanded="true"] {
-  border-bottom-color: var(--action-primary);
+  border-bottom-color: var(--ui20-shell-accent);
   font-weight: 650;
 }
 
