@@ -43,7 +43,7 @@ UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
 UI20_IMPLEMENTATION                = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
-UI20_RW1                           = OWNER_ACCEPTED_INTEGRATION_CANDIDATE
+UI20_RW1                           = INTEGRATED_ON_MAIN
 UI20_RW1A                          = ACCEPTED
 FINAL_IA                           = OWNER_ACCEPTED
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
@@ -78,7 +78,7 @@ THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
 
-On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure remains historical evidence. Living Owner direction is `WORKOS_UI_UX_2_0_E2E`. UI20-RW1 quiet top shell is Owner-accepted as the integration candidate (`UI20_RW1A = ACCEPTED`); Foundation Canon records Candidate A as the current implemented shell upon RW1 integration. RW2 is not authorized by this document.
+On 2026-08-30 Owner accepted V3 as the living navigation map: one stable sidebar, six discrete categories, twenty pages. Wave 1 implementation is `INTEGRATED_ON_MAIN`. All existing runtime pages are now V3 baseline closed (`ALL_EXISTING_PAGES_UI_V3 = INTEGRATED_ON_MAIN`, `OWNER_ACCEPTED`). Page-content transformation is `COMPLETE`. Clients, Client Hub, Cereri, and Product Configuration remain historically accepted. That V3 closure remains historical evidence. Living Owner direction is `WORKOS_UI_UX_2_0_E2E`. UI20-RW1 quiet top shell is `INTEGRATED_ON_MAIN` (`UI20_RW1A = ACCEPTED`; runtime verified). Foundation Canon records Candidate A as the current implemented shell. RW2 is not authorized by this document.
 
 Runtime and domain contracts win if this document disagrees with implemented business behavior.
 `docs/architecture/UI_UX_FOUNDATION_CANON.md` is the **current implemented presentation law**. After RW1 integration it records `IMPLEMENTED_SHELL = UI20_CANDIDATE_A_QUIET_TOP_SHELL` with `GLOBAL_L1_SIDEBAR = NO`. This direction canon governs later Owner decisions and later UI change.
@@ -170,7 +170,7 @@ UI20_FINAL_IA                      = IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY
 UI20_FINAL_SHELL                   = CANDIDATE_A_QUIET_TOP_SHELL
 GLOBAL_L1_SIDEBAR                  = NO
 UI20_IMPLEMENTATION                = RW1_COMPLETE_NEXT_WAVE_NOT_AUTHORIZED
-UI20_RW1                           = OWNER_ACCEPTED_INTEGRATION_CANDIDATE
+UI20_RW1                           = INTEGRATED_ON_MAIN
 UI20_RW1A                          = ACCEPTED
 UI20_R1                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
 UI20_R2                            = RESEARCH_ACCEPTED_WITH_ADVISORIES
@@ -201,7 +201,7 @@ UI20_SIG1A                         = ACCEPTED
 UI20_SIG1B                         = ACCEPTED
 UI20_IAF1                          = DIRECTION_ACCEPTED
 UI20_IAF1A                         = OWNER_ACCEPTED
-NEXT_RECOMMENDED_BUILD             = UI20_RW1_STRICT_FF_INTEGRATION
+NEXT_RECOMMENDED_BUILD             = UI20_RW2_CERERE_RESOLUTION_FIELD_CONFIG_COMPOSITION_LENS
 CARRY_ADVISORY                     = ATTENTIONEDGE_BLOCKED_ENERGY_IS_QUIETER_THAN_R5_TERRACOTTA
 PRODUCT_SYSTEM_FC1B                = SUPERSEDED_BEFORE_RUNTIME_IMPLEMENTATION
 A3_1                               = RESEARCH_INPUT_NOT_CANON

@@ -4,11 +4,11 @@
 GO                         = OWNER_DELEGATED_UI20_RW1
 BRANCH                     = design/ui20-rw1-quiet-top-shell
 BASE_HEAD                  = 4e2a8363ce249b65148bb2950a3d4ec24364d791
-STATUS                     = OWNER_ACCEPTED_INTEGRATION_CANDIDATE
+STATUS                     = INTEGRATED_ON_MAIN
 REACT                      = YES_RW1_ONLY
 CSS                        = YES_RW1_ONLY
 FIGMA_WRITE                = NO
-MAIN_MERGE                 = AUTHORIZED_AFTER_CANON_RECONCILIATION
+MAIN_MERGE                 = YES_STRICT_FF_DONE
 PR                         = NO
 PER_WAVE_POLISH            = REQUIRED
 MASTER_POLISH              = NO
@@ -18,8 +18,11 @@ RW1_RUNTIME                = RUNTIME_VERIFIED
 RW1A                       = ACCEPTED
 CI_EXACT_ACCEPTED_HEAD     = 23ad126209163cfee2c8cba44f2889a41ae4579a
 CI_RUN                     = 34017485584 SUCCESS
+PHASE_A_DOC_HEAD           = 61f7721001603bde03414b3e9e3d680f4a78310d
+PHASE_A_CI_RUN             = 34018226703 SUCCESS
+INTEGRATED_ORIGIN_MAIN     = 61f7721001603bde03414b3e9e3d680f4a78310d
 RW1B                       = NOT_REQUIRED
-INTEGRATION                = AUTHORIZED_AFTER_CANON_RECONCILIATION
+INTEGRATION                = INTEGRATED_ON_MAIN
 ```
 
 ## Closed upstream
@@ -111,5 +114,5 @@ BACKEND_WRITE = NO
 CLOUD_WRITE = NO
 REAL_DATA = NO
 FIGMA_WRITE = NO
-MAIN_FF = PENDING_PHASE_A_DOC_CI
+MAIN_FF = YES_STRICT_FF_DONE
 ```
