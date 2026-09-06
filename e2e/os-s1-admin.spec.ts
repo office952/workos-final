@@ -2,6 +2,12 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { APIRequestContext } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import {
+  destinationLink,
+  openContMenu,
+  openMobileMenu,
+  primaryNav,
+} from "./helpers/navigation";
 
 const SHOT_DIR = join(".tmp", "os-s1-ui");
 
@@ -24,13 +30,16 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
   await expect(page.getByRole("navigation", { name: "Context" })).toContainText(
     "Administrare",
   );
-  const sidebar = page.getByRole("navigation", { name: "Navigare principală" });
-  await expect(sidebar.getByRole("link", { name: "Servicii operaționale" })).toHaveAttribute(
-    "aria-current",
-    "page",
+  await expect(primaryNav(page).getByRole("link", { name: "Servicii operaționale" })).toHaveCount(
+    0,
   );
-  await expect(sidebar.getByRole("link", { name: "Angajați" })).toBeVisible();
-  await expect(sidebar.getByRole("link", { name: "Resurse și costuri" })).toBeVisible();
+  await expect(await destinationLink(page, "Angajați")).toBeVisible();
+  await expect(await destinationLink(page, "Resurse și costuri")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await openContMenu(page);
+  await expect(
+    page.getByRole("dialog", { name: "Datele contului" }).getByRole("link", { name: "Administrare" }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Alege elementul" })).toHaveCount(0);
   await expect(page.getByLabel("Caută")).toHaveCount(0);
 
@@ -70,10 +79,10 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/admin/operational-services");
   await expect(page.getByRole("heading", { name: "Servicii operaționale" })).toBeVisible();
-  await expect(sidebar.getByRole("link", { name: "Servicii operaționale" })).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+  await openContMenu(page);
+  await expect(
+    page.getByRole("dialog", { name: "Datele contului" }).getByRole("link", { name: "Administrare" }),
+  ).toBeVisible();
   await page.screenshot({
     path: join(SHOT_DIR, "owner-internal-1280.png"),
     fullPage: true,
@@ -82,18 +91,19 @@ test("OS-S1 admin sits in Admin L2 and saves organization offer mode", async ({
   await page.setViewportSize({ width: 768, height: 900 });
   await expect(page.getByRole("heading", { name: "Servicii operaționale" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
-  await page.getByRole("button", { name: "Meniu" }).click();
-  const drawer = page.getByRole("dialog", { name: "Meniu" });
+  const drawer = await openMobileMenu(page);
   await expect(drawer).toBeVisible();
-  await expect(
-    drawer.getByRole("link", { name: "Servicii operaționale" }),
-  ).toHaveAttribute("aria-current", "page");
+  await expect(drawer.getByRole("link", { name: "Servicii operaționale" })).toHaveCount(0);
   await page.screenshot({
     path: join(SHOT_DIR, "owner-internal-768.png"),
     fullPage: true,
   });
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog", { name: "Meniu" })).toHaveCount(0);
+  await expect(page.locator(".app-nav-drawer-panel[role='dialog']")).toHaveCount(0);
+  await openContMenu(page);
+  await expect(
+    page.getByRole("dialog", { name: "Datele contului" }).getByRole("link", { name: "Administrare" }),
+  ).toBeVisible();
 });
 
 async function readInstallation(request: APIRequestContext): Promise<CapabilityView> {

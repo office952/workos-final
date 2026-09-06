@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "./fixtures";
 import { createCustomer } from "./helpers/customers";
-import { clickPrimaryDestination } from "./helpers/navigation";
+import { brandLink, clickPrimaryDestination } from "./helpers/navigation";
 import { createRequestNeedingAction, uniqueRequestToken } from "./helpers/requests";
 
 const EVIDENCE_DIR = join(
@@ -79,7 +79,7 @@ test("clients registry matches the accepted Figma interaction contract", async (
   await clearRegistryScroll(page);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "WorkOS", exact: true })).toBeVisible();
+  await expect(brandLink(page)).toBeVisible();
   await expect(page.getByText("WorkOS Final", { exact: true })).toHaveCount(0);
   await expect(page.locator(".app-context-title")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
@@ -257,7 +257,7 @@ test("clients runtime viewports and sibling shell stay fluid", async ({ page, re
   for (const path of ["/requests", "/quotes", "/", "/atelier", "/admin"]) {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByRole("link", { name: "WorkOS", exact: true })).toBeVisible();
+    await expect(brandLink(page)).toBeVisible();
     await expect(page.getByText("WorkOS Final", { exact: true })).toHaveCount(0);
     await expect(page.locator(".app-context-title")).toHaveCount(0);
     if (path === "/atelier") {
