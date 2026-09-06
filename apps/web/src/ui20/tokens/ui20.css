@@ -1,0 +1,555 @@
+:root,
+:root[data-theme="light"] {
+  --surface-canvas: #f4f2ee;
+  --surface-primary: #fbfaf6;
+  --surface-elevated: #ffffff;
+  --surface-selected: #ebe6dc;
+  --text-primary: #1c1a16;
+  --text-secondary: #3f3b34;
+  --text-muted: #6b655b;
+  --border-subtle: #d7d0c4;
+  --border-strong: #b7ae9f;
+  --action-primary: #1f332e;
+  --action-primary-hover: #162520;
+  --action-on-primary: #fbfaf6;
+  --focus-ring: #1f332e;
+  --status-success: #2c6b45;
+  --status-warning: #9a3412;
+  --status-danger: #8a3b2e;
+  --status-blocked: #9a3412;
+  --energy-blocked: #9a3412;
+  --energy-open: #1f332e;
+  color: var(--text-primary);
+  background: var(--surface-canvas);
+  font-family: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  line-height: 1.45;
+}
+
+:root[data-theme="dark"] {
+  --surface-canvas: #10130f;
+  --surface-primary: #171b17;
+  --surface-elevated: #1e241e;
+  --surface-selected: #2a322a;
+  --text-primary: #f3f0e8;
+  --text-secondary: #c8c3b6;
+  --text-muted: #8f897c;
+  --border-subtle: #31382f;
+  --border-strong: #4a5247;
+  --action-primary: #8fb5a4;
+  --action-primary-hover: #a8c8b8;
+  --action-on-primary: #10130f;
+  --focus-ring: #8fb5a4;
+  --status-success: #7dbe96;
+  --status-warning: #f0a06a;
+  --status-danger: #e08b7d;
+  --status-blocked: #f0a06a;
+  --energy-blocked: #f0a06a;
+  --energy-open: #8fb5a4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  max-width: 100%;
+}
+
+.ui20-top,
+.ui20-continuity,
+.ui20-main,
+.ui20-surface,
+.ui20-fact dd,
+.ui20-task {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.skip-link,
+.ui20-skip {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 60;
+  transform: translateY(-220%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.65rem 0.9rem;
+  background: var(--action-primary);
+  color: var(--action-on-primary);
+  text-decoration: none;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible,
+.ui20-skip:focus,
+.ui20-skip:focus-visible {
+  transform: none;
+}
+
+.ui20-app,
+.ui20-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ui20-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 56px;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+}
+
+.ui20-brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: inherit;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ui20-continuity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  min-width: 0;
+  color: var(--text-secondary);
+}
+
+.ui20-continuity strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ui20-top-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ui20-main {
+  flex: 1;
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+}
+
+.ui20-main:focus {
+  outline: none;
+}
+
+.ui20-main:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.ui20-surface h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.ui20-kicker {
+  margin: 0 0 1.25rem;
+  color: var(--text-muted);
+}
+
+.ui20-clusters {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .ui20-clusters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ui20-cluster h2,
+.ui20-panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ui20-fact,
+.ui20-unresolved,
+.ui20-row,
+.ui20-pick,
+.ui20-node,
+.ui20-task {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: transparent;
+  color: inherit;
+  padding: 0.85rem 0;
+}
+
+.ui20-fact dt,
+.ui20-k {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.ui20-fact dd,
+.ui20-v {
+  margin: 0.15rem 0 0;
+}
+
+.ui20-unresolved[data-energy="blocked"] {
+  box-shadow: inset 3px 0 0 var(--energy-blocked);
+  padding-left: 0.85rem;
+}
+
+.ui20-unresolved[data-energy="open"] {
+  box-shadow: inset 3px 0 0 var(--energy-open);
+  padding-left: 0.85rem;
+}
+
+.ui20-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.ui20-button,
+.ui20-link-button,
+.ui20-node,
+.ui20-pick,
+.ui20-theme {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-elevated);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ui20-button[data-primary="true"],
+.ui20-link-button[data-primary="true"] {
+  background: var(--action-primary);
+  color: var(--action-on-primary);
+  border-color: var(--action-primary);
+}
+
+.ui20-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ui20-button:focus-visible,
+.ui20-link-button:focus-visible,
+.ui20-node:focus-visible,
+.ui20-pick:focus-visible,
+.ui20-theme:focus-visible,
+.ui20-field input:focus-visible,
+.ui20-field select:focus-visible,
+.ui20-field textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.ui20-node[data-selected="true"],
+.ui20-pick[data-selected="true"] {
+  background: var(--surface-selected);
+}
+
+.ui20-composition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ui20-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.85rem 0;
+}
+
+.ui20-field input,
+.ui20-field select,
+.ui20-field textarea {
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-elevated);
+  color: inherit;
+  font: inherit;
+}
+
+.ui20-notice {
+  margin: 1rem 0;
+  color: var(--status-warning);
+}
+
+.ui20-status {
+  margin: 2rem 0;
+}
+
+.ui20-sheet-value {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.ui20-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1.25rem;
+  color: var(--text-secondary);
+}
+
+.ui20-chain [data-done="true"] {
+  color: var(--status-success);
+}
+
+.ui20-chain [data-current="true"] {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ui20-item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ui20-item[data-energy="blocked"] {
+  box-shadow: inset 3px 0 0 var(--energy-blocked);
+  padding-left: 0.85rem;
+}
+
+.ui20-item[data-energy="open"] {
+  box-shadow: inset 3px 0 0 var(--energy-open);
+  padding-left: 0.85rem;
+}
+
+.ui20-meta,
+.ui20-error {
+  color: var(--text-muted);
+}
+
+.ui20-error {
+  color: var(--status-danger);
+}
+
+.ui20-form fieldset {
+  border: 0;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.ui20-form legend {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.ui20-pick {
+  display: grid;
+  gap: 0;
+}
+
+.ui20-pick a,
+.ui20-actions a,
+.ui20-actions button,
+.ui20-composition button,
+.ui20-task button,
+.ui20-task select,
+.ui20-form button,
+.ui20-form input,
+.ui20-form select,
+.field input,
+.field select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.ui20-pick a,
+.ui20-actions a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ui20-actions button,
+.ui20-form button,
+.ui20-task button,
+.operator-identify-form button[type="submit"] {
+  border: 1px solid var(--action-primary);
+  background: var(--action-primary);
+  color: var(--action-on-primary);
+  padding: 0.6rem 1rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ui20-composition button {
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: inherit;
+  padding: 0.55rem 0.85rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ui20-composition button[aria-current="true"] {
+  background: var(--surface-selected);
+}
+
+.ui20-form input,
+.ui20-form select,
+.ui20-task select,
+.field input,
+.field select,
+.operator-identify-form input,
+.operator-identify-form select {
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-elevated);
+  color: inherit;
+}
+
+.ui20-task h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.ui20-task[data-active="true"] {
+  box-shadow: inset 3px 0 0 var(--action-primary);
+  padding-left: 0.85rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.65rem 0;
+}
+
+.theme-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.theme-switcher button,
+.ui20-top button,
+.ui20-top > a {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.theme-switcher button[aria-pressed="true"] {
+  border-color: var(--action-primary);
+}
+
+.choice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.choice-chip {
+  min-height: 44px;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: inherit;
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+}
+
+.choice-chip.is-selected {
+  border-color: var(--action-primary);
+}
+
+.login-page {
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.login-card {
+  width: min(28rem, 100%);
+}
+
+.login-card button[type="submit"] {
+  min-height: 44px;
+  margin-top: 0.75rem;
+  border: 1px solid var(--action-primary);
+  background: var(--action-primary);
+  color: var(--action-on-primary);
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .ui20-top {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+  }
+
+  .ui20-top-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .ui20-main {
+    width: calc(100% - 1.5rem);
+  }
+
+  .ui20-surface h1 {
+    font-size: 1.45rem;
+  }
+}

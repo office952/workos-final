@@ -1,0 +1,271 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
+import {
+  confirmCanonicalLettersOnPage,
+  createNamedCustomer,
+  createRequestNeedingAction,
+} from "./helpers/requests";
+import {
+  configureTestExecutorPin,
+  ensureTestExecutor,
+  identifyTestExecutorOnPage,
+} from "./helpers/people";
+
+const LETTERS_NAME =
+  "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
+function currentRuntimeOrigin(): string {
+  if (process.env.WORKOS_E2E_CURRENT_ORIGIN) {
+    return process.env.WORKOS_E2E_CURRENT_ORIGIN;
+  }
+  return `http://127.0.0.1:${process.env.WORKOS_E2E_WEB_PORT ?? "5173"}`;
+}
+const EVIDENCE_DIR = join(process.cwd(), ".tmp", "ui20-vertical-pass-a");
+
+type JsonObject = Record<string, unknown>;
+
+async function noHorizontalOverflow(page: Page) {
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  );
+  expect(overflow).toBe(false);
+}
+
+async function minTarget(page: Page, locator: ReturnType<Page["getByRole"]>) {
+  const box = await locator.boundingBox();
+  expect(box).toBeTruthy();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+}
+
+async function screenshotAt(page: Page, width: number, name: string) {
+  await page.setViewportSize({ width, height: width >= 1280 ? 900 : 1024 });
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: join(EVIDENCE_DIR, `${name}-${width}.png`),
+    fullPage: true,
+  });
+}
+
+test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engine", async ({
+  page,
+  request,
+  browser,
+}) => {
+  await mkdir(EVIDENCE_DIR, { recursive: true });
+  const person = await ensureTestExecutor(request);
+  await configureTestExecutorPin(request, person.personId);
+  const customerName = `Client UI20 ${Date.now()}`;
+  const customer = await createNamedCustomer(request, customerName);
+  expect(customer.ok).toBeTruthy();
+  expect(customer.customerId).toBeTruthy();
+  const created = await createRequestNeedingAction(
+    request,
+    customer.customerId as string,
+    `Cerere UI20 ${Date.now()}`,
+  );
+  expect(created.ok).toBeTruthy();
+  expect(created.requestId).toBeTruthy();
+  const requestId = created.requestId as string;
+  const inscription = `NS${Date.now().toString().slice(-6)}`;
+
+  await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await expect(page.locator('[data-surface="cerere"]')).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole("heading", { name: created.title as string })).toBeVisible();
+  await expect(page.getByText(customerName).first()).toBeVisible();
+  const requestDetail = (await (
+    await request.get(`/api/requests/${encodeURIComponent(requestId)}`)
+  ).json()) as {
+    detail?: { request?: { reference?: string } };
+  };
+  const requestReference = requestDetail.detail?.request?.reference ?? "";
+  expect(requestReference).toMatch(/^CER-/);
+  await expect(page.getByText(requestReference).first()).toBeVisible();
+  await expect(page.getByText("Produsul nu este ales")).toBeVisible();
+  const pick = page.getByRole("link", { name: "Alege produs" }).first();
+  await expect(pick).toBeVisible();
+  await minTarget(page, pick);
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Sari la conținut" })).toBeFocused();
+  await screenshotAt(page, 1440, "cerere");
+  await screenshotAt(page, 1280, "cerere");
+  await screenshotAt(page, 768, "cerere");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await pick.click();
+
+  await expect(page).toHaveURL(new RegExp(`/products\\?request=`));
+  await expect(page.getByRole("heading", { name: "Alege produsul" })).toBeVisible();
+  await page.getByRole("link", { name: LETTERS_NAME }).click();
+
+  await expect(page).toHaveURL(new RegExp(`/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06\\?request=`));
+  await expect(page.getByText(requestReference).first()).toBeVisible();
+  await confirmCanonicalLettersOnPage(page, inscription);
+  await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await expect(page.getByText(/624,82/)).toBeVisible();
+  await screenshotAt(page, 1440, "configurator");
+  await screenshotAt(page, 1280, "configurator");
+  await screenshotAt(page, 768, "configurator");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "Creează oferta" }).click();
+
+  await expect(page).toHaveURL(/\/quotes\//);
+  await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
+  await expect(page.locator("[data-quote-value]")).toContainText("624,82");
+  await expect(page.locator("[data-quote-state]")).toHaveText("Creată");
+  await expect(page.getByText(customerName).first()).toBeVisible();
+  await expect(page.getByText(requestReference).first()).toBeVisible();
+  await screenshotAt(page, 1440, "oferta");
+  await screenshotAt(page, 1280, "oferta");
+  await screenshotAt(page, 768, "oferta");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "Marchează acceptată" }).click();
+  await expect(page.locator("[data-quote-state]")).toHaveText("Acceptată");
+  await expect(page).toHaveURL(/\/quotes\//);
+  await page.getByRole("button", { name: "Creează comanda" }).click();
+  await expect(page.locator("[data-quote-state]")).toHaveText("Cu comandă");
+  await expect(page).toHaveURL(/\/quotes\//);
+  await expect(page.getByRole("link", { name: "Deschide lucrarea" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Eliberează pentru producție" }).click();
+  await expect(page.getByRole("link", { name: "Deschide lucrarea" })).toBeVisible();
+  const quoteSnapshotId = decodeURIComponent(new URL(page.url()).pathname.replace("/quotes/", ""));
+
+  await page.getByRole("link", { name: "Deschide lucrarea" }).click();
+  await expect(page).toHaveURL(/\/jobs\//);
+  await expect(page.locator("[data-job-state]")).toContainText("Eliberată");
+  await expect(page.locator("[data-job-next]")).toContainText("Creează planul de execuție");
+  await screenshotAt(page, 1440, "lucrare");
+  await screenshotAt(page, 1280, "lucrare");
+  await screenshotAt(page, 768, "lucrare");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "Creează planul de execuție" }).click();
+  await expect(page.getByRole("link", { name: "Deschide execuția" })).toBeVisible();
+  const jobId = decodeURIComponent(new URL(page.url()).pathname.replace("/jobs/", ""));
+
+  await page.getByRole("link", { name: "Deschide execuția" }).click();
+  await expect(page).toHaveURL(/\/execution\//);
+  await identifyTestExecutorOnPage(page);
+  const planId = decodeURIComponent(new URL(page.url()).pathname.replace("/execution/", ""));
+  const startable = page
+    .locator(".ui20-task")
+    .filter({ hasText: "Debitare foaie CNC" })
+    .filter({ hasText: "Față" })
+    .first();
+  await expect(startable.getByRole("button", { name: "Alocă utilaj" })).toBeVisible({ timeout: 15000 });
+  await startable.getByLabel("Utilaj dedicat").selectOption({ label: "CNC 4020" });
+  await startable.getByRole("button", { name: "Alocă utilaj" }).click();
+  await expect(startable.getByRole("button", { name: /Pornește|Alocă executant/ })).toBeVisible({
+    timeout: 15000,
+  });
+  const assignExecutor = startable.getByRole("button", { name: "Alocă executant" });
+  if ((await assignExecutor.count()) > 0) {
+    await assignExecutor.click();
+  }
+  await expect(startable.getByRole("button", { name: "Pornește" })).toBeVisible({ timeout: 15000 });
+  await startable.getByRole("button", { name: "Pornește" }).click();
+  await expect(startable.getByText("În lucru")).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("În lucru").first()).toBeVisible();
+  await screenshotAt(page, 1440, "executie");
+  await screenshotAt(page, 1280, "executie");
+  await screenshotAt(page, 768, "executie");
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  await page.goto("/atelier");
+  await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
+  if ((await page.locator("form.operator-identify-form").count()) > 0) {
+    await identifyTestExecutorOnPage(page);
+  }
+  await expect(page.getByText(inscription).first()).toBeVisible();
+  await screenshotAt(page, 1440, "atelier");
+  await screenshotAt(page, 1280, "atelier");
+  await screenshotAt(page, 768, "atelier");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "Întunecată" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.screenshot({ path: join(EVIDENCE_DIR, "atelier-1440-dark.png"), fullPage: true });
+  await page.getByRole("button", { name: "Deschisă" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+  const quoteApi = (await (
+    await request.get(`/api/quotes/${encodeURIComponent(quoteSnapshotId)}`)
+  ).json()) as {
+    quote?: JsonObject;
+    order?: { orderSnapshotId?: string } | null;
+    request?: { reference?: string | null } | null;
+  };
+  const jobApi = (await (
+    await request.get(`/api/jobs/${encodeURIComponent(jobId)}`)
+  ).json()) as {
+    job?: JsonObject;
+    request?: { reference?: string | null } | null;
+    quote?: { reference?: string | null };
+    release?: { releaseSnapshotId?: string } | null;
+    execution?: { planId?: string } | null;
+  };
+  expect(quoteApi.quote?.inscription).toBe(inscription);
+  expect(String(quoteApi.quote?.grossDisplay)).toContain("624,82");
+  expect(quoteApi.quote?.customerDisplayName).toBe(customerName);
+  expect(quoteApi.request?.reference).toBe(requestReference);
+  expect(quoteApi.order?.orderSnapshotId).toBe(jobId);
+  expect(jobApi.job?.inscription).toBe(inscription);
+  expect(jobApi.job?.customerDisplayName).toBe(customerName);
+  expect(jobApi.request?.reference).toBe(requestReference);
+  expect(jobApi.release?.releaseSnapshotId).toBeTruthy();
+  expect(jobApi.execution?.planId).toBe(planId);
+
+  const current = await browser.newPage();
+  const currentOrigin = currentRuntimeOrigin();
+  await current.goto(`${currentOrigin}/requests/${encodeURIComponent(requestId)}`);
+  await expect(current.getByRole("heading", { name: created.title as string })).toBeVisible({
+    timeout: 15000,
+  });
+  await expect(current.getByText(customerName).first()).toBeVisible();
+  await expect(current.getByText(requestReference).first()).toBeVisible();
+  await current.goto(`${currentOrigin}/quotes/${encodeURIComponent(quoteSnapshotId)}`);
+  await expect(current.getByRole("heading", { name: inscription })).toBeVisible();
+  await expect(current.getByText(/624,82/)).toBeVisible();
+  await expect(current.getByText(customerName).first()).toBeVisible();
+  await expect(current.getByText(requestReference).first()).toBeVisible();
+  await current.goto(`${currentOrigin}/jobs/${encodeURIComponent(jobId)}`);
+  await expect(current.getByRole("heading", { name: inscription })).toBeVisible();
+  await expect(current.getByText(customerName).first()).toBeVisible();
+  await expect(current.getByText(requestReference).first()).toBeVisible();
+  await expect(current.getByText(String(jobApi.quote?.reference ?? "")).first()).toBeVisible();
+  await current.close();
+
+  await writeFile(
+    join(EVIDENCE_DIR, "manifest.json"),
+    JSON.stringify(
+      {
+        classification: "LOCAL_SYNTHETIC_ISOLATED",
+        realData: false,
+        cloudWrite: false,
+        fixture: {
+          customerName,
+          requestId,
+          requestReference,
+          inscription,
+          productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+          quoteSnapshotId,
+          jobId,
+          planId,
+        },
+        routes: {
+          cerere: `/requests/${requestId}`,
+          productPick: `/products?request=${requestId}`,
+          configurator: `/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=${requestId}`,
+          oferta: `/quotes/${quoteSnapshotId}`,
+          lucrare: `/jobs/${jobId}`,
+          atelier: "/atelier",
+          execution: `/execution/${planId}`,
+        },
+        businessFactParity: "PASS",
+        sameApi: true,
+        sameIds: true,
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+});

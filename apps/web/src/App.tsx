@@ -27,77 +27,54 @@ import { ResourcesAdminPage } from "./ResourcesAdminPage";
 import { StockAdminPage } from "./StockAdminPage";
 import { SystemStatusPage } from "./SystemStatusPage";
 import { WorkcentersAdminPage } from "./WorkcentersAdminPage";
-import { CloudSessionProvider, useCloudSession } from "./CloudSessionContext";
-import { LoginPage } from "./LoginPage";
-import { OperatorSessionProvider } from "./OperatorSessionContext";
+import { useCloudSession } from "./CloudSessionContext";
+import { SessionedApp } from "./runtime/SessionedApp";
 
 export function App() {
   return (
-    <CloudSessionProvider>
-      <AppGate />
-    </CloudSessionProvider>
+    <SessionedApp>
+      <CurrentRuntimeRoutes />
+    </SessionedApp>
   );
 }
 
-function AppGate() {
-  const {
-    ready,
-    unavailable,
-    mode,
-    user,
-    organization,
-    authConfigured,
-    sessionExpired,
-  } = useCloudSession();
-  if (!ready) {
-    return <LoginPage gate="boot" />;
-  }
-  if (unavailable) {
-    return <LoginPage gate="network" />;
-  }
-  if (mode === "cloud" && authConfigured === false) {
-    return <LoginPage gate="auth_config_missing" />;
-  }
-  if (mode === "cloud" && (!user || !organization)) {
-    return <LoginPage gate={sessionExpired ? "session_expired" : "unauthenticated"} />;
-  }
+function CurrentRuntimeRoutes() {
+  const { organization } = useCloudSession();
   return (
-    <OperatorSessionProvider key={organization?.organizationId ?? "single-plane"}>
-      <AppShell>
-        <Routes key={organization?.organizationId ?? "single-plane"}>
-          <Route path="/" element={<JobsOverviewPage />} />
-          <Route path="/jobs" element={<JobsOverviewPage />} />
-          <Route path="/jobs/*" element={<JobDetailPage />} />
-          <Route path="/atelier" element={<AtelierPage />} />
-          <Route path="/commercial" element={<Navigate to="/requests" replace />} />
-          <Route path="/requests" element={<RequestsOverviewPage />} />
-          <Route path="/requests/*" element={<RequestDetailPage />} />
-          <Route path="/quotes" element={<QuotesOverviewPage />} />
-          <Route path="/quotes/*" element={<QuoteInspectionPage />} />
-          <Route path="/clients" element={<ClientsOverviewPage />} />
-          <Route path="/clients/*" element={<ClientWorkspacePage />} />
-          <Route path="/system" element={<SystemStatusPage />} />
-          <Route path="/products" element={<ProductCatalogPage />} />
-          <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
-          <Route path="/execution/*" element={<ExecutionWorkspacePage />} />
-          <Route path="/components" element={<ComponentsPage />} />
-          <Route path="/governance" element={<GovernancePage />} />
-          <Route path="/admin" element={<AdminHomePage />} />
-          <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
-          <Route path="/admin/resources" element={<ResourcesAdminPage />} />
-          <Route path="/admin/stock" element={<StockAdminPage />} />
-          <Route path="/admin/stock/:resourceId" element={<StockAdminPage />} />
-          <Route path="/admin/processes" element={<ProcessesAdminPage />} />
-          <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
-          <Route path="/admin/people" element={<PeopleAdminPage />} />
-          <Route path="/admin/people/skills" element={<SkillsAdminPage />} />
-          <Route path="/admin/people/*" element={<PersonAdminPage />} />
-          <Route path="/admin/customers" element={<CustomerAdminPage />} />
-          <Route path="/admin/seller" element={<SellerAdminPage />} />
-          <Route path="/admin/operational-services" element={<OperationalServicesAdminPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AppShell>
-    </OperatorSessionProvider>
+    <AppShell>
+      <Routes key={organization?.organizationId ?? "single-plane"}>
+        <Route path="/" element={<JobsOverviewPage />} />
+        <Route path="/jobs" element={<JobsOverviewPage />} />
+        <Route path="/jobs/*" element={<JobDetailPage />} />
+        <Route path="/atelier" element={<AtelierPage />} />
+        <Route path="/commercial" element={<Navigate to="/requests" replace />} />
+        <Route path="/requests" element={<RequestsOverviewPage />} />
+        <Route path="/requests/*" element={<RequestDetailPage />} />
+        <Route path="/quotes" element={<QuotesOverviewPage />} />
+        <Route path="/quotes/*" element={<QuoteInspectionPage />} />
+        <Route path="/clients" element={<ClientsOverviewPage />} />
+        <Route path="/clients/*" element={<ClientWorkspacePage />} />
+        <Route path="/system" element={<SystemStatusPage />} />
+        <Route path="/products" element={<ProductCatalogPage />} />
+        <Route path="/products/:productCode" element={<ProductConfigurationPage />} />
+        <Route path="/execution/*" element={<ExecutionWorkspacePage />} />
+        <Route path="/components" element={<ComponentsPage />} />
+        <Route path="/governance" element={<GovernancePage />} />
+        <Route path="/admin" element={<AdminHomePage />} />
+        <Route path="/admin/product-system" element={<ProductSystemAdminPage />} />
+        <Route path="/admin/resources" element={<ResourcesAdminPage />} />
+        <Route path="/admin/stock" element={<StockAdminPage />} />
+        <Route path="/admin/stock/:resourceId" element={<StockAdminPage />} />
+        <Route path="/admin/processes" element={<ProcessesAdminPage />} />
+        <Route path="/admin/workcenters" element={<WorkcentersAdminPage />} />
+        <Route path="/admin/people" element={<PeopleAdminPage />} />
+        <Route path="/admin/people/skills" element={<SkillsAdminPage />} />
+        <Route path="/admin/people/*" element={<PersonAdminPage />} />
+        <Route path="/admin/customers" element={<CustomerAdminPage />} />
+        <Route path="/admin/seller" element={<SellerAdminPage />} />
+        <Route path="/admin/operational-services" element={<OperationalServicesAdminPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AppShell>
   );
 }

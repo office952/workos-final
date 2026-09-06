@@ -104,4 +104,20 @@ describe("FormRenderer", () => {
     );
     expect(screen.getByLabelText("Detaliu opțional")).toBeInTheDocument();
   });
+
+  it("limits fields to the focused component without changing default rendering", () => {
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{ "extra.selected": true }}
+        onChange={() => undefined}
+        focusComponentId="FACE"
+      />,
+    );
+
+    expect(screen.getByLabelText("Nume față")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Include opțional")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Detaliu opțional")).not.toBeInTheDocument();
+  });
 });
