@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures";
 import { expectAccountOrganization, switchOrganization } from "./helpers/account";
+import { clickPrimaryDestination } from "./helpers/navigation";
 
 function requiredEnv(name: string): string | undefined {
   const value = process.env[name];
@@ -34,7 +35,7 @@ test.describe("Cloud two-organization isolation", () => {
     await page.getByRole("button", { name: "Intră" }).click();
     await expectAccountOrganization(page, orgA);
     await expect(page.getByLabel("Schimbă organizația")).toHaveCount(0);
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }).click();
+    await clickPrimaryDestination(page, "Clienți");
     await expect(page.getByText("Client Alpha")).toBeVisible();
     await expect(page.getByText("Client Test")).toHaveCount(0);
     await page.screenshot({
@@ -50,10 +51,10 @@ test.describe("Cloud two-organization isolation", () => {
     await page.getByRole("button", { name: "Intră" }).click();
     await expectAccountOrganization(page, orgB);
     await expect(page.getByLabel("Schimbă organizația")).toHaveCount(0);
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }).click();
+    await clickPrimaryDestination(page, "Clienți");
     await expect(page.getByText("Client Test")).toBeVisible();
     await expect(page.getByText("Client Alpha")).toHaveCount(0);
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Utilaje" }).click();
+    await clickPrimaryDestination(page, "Utilaje");
     await expect(page.getByText("MCH-CNC-4020")).toHaveCount(0);
     await page.screenshot({
       path: "docs/worklog/screenshots/slice4-user-b.png",
@@ -72,7 +73,7 @@ test.describe("Cloud two-organization isolation", () => {
     await page.getByLabel("Organizație").selectOption({ label: orgA });
     await page.getByRole("button", { name: "Intră" }).click();
     await expectAccountOrganization(page, orgA);
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }).click();
+    await clickPrimaryDestination(page, "Clienți");
     await expect(page.getByText("Client Alpha")).toBeVisible();
     await page.screenshot({
       path: "docs/worklog/screenshots/slice4-switch-a.png",
@@ -83,9 +84,9 @@ test.describe("Cloud two-organization isolation", () => {
     await expectAccountOrganization(page, orgB);
     await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Cont" })).toBeVisible();
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Atelier" }).click();
+    await clickPrimaryDestination(page, "Atelier");
     await expect(page.getByRole("button", { name: "Identifică-te" })).toBeVisible();
-    await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }).click();
+    await clickPrimaryDestination(page, "Clienți");
     await expect(page.getByText("Client Alpha")).toHaveCount(0);
     await expect(page.getByText("Client Test")).toBeVisible();
     await page.screenshot({

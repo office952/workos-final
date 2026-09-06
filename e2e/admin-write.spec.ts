@@ -1,6 +1,6 @@
 import { type APIRequestContext, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { adminHomeLink, primaryNavLink } from "./helpers/navigation";
+import { adminHomeLink, clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 const FAMILY_ID = "LIGHTED_VOLUMETRIC_SIGNS";
@@ -121,7 +121,7 @@ test("admin display-label write persists and propagates", async ({
     await page.getByRole("button", { name: "Salvează" }).click();
     await expectSelectedCatalogLabel(page, RENAMED.type);
 
-    await primaryNavLink(page, "Catalog").click();
+    await clickPrimaryDestination(page, "Catalog");
     await expect(page.getByRole("link", { name: RENAMED.product })).toBeVisible();
     await expect(page.getByRole("heading", { name: RENAMED.family })).toBeVisible();
     await page.screenshot({

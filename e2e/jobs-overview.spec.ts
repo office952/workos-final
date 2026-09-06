@@ -50,7 +50,7 @@ test("operator can scan commercial jobs and open the correct workspace", async (
 
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Lucrări" })).toBeVisible();
+  await expect(primaryNavLink(page, "Lucrări")).toBeVisible();
   await expect(jobRow(page, orderOnly.inscription)).toBeVisible();
   await expect(jobRow(page, orderOnly.inscription)).toContainText(
     `Client: Client ${orderOnly.inscription}`,
@@ -103,7 +103,7 @@ test("operator can scan commercial jobs and open the correct workspace", async (
   await page.locator(".client-object-actions").getByRole("link", { name: "Deschide execuția" }).click();
   await expect(page).toHaveURL(/\/execution\/exp:/);
   await expect(page.getByRole("heading", { name: "Plan de execuție" })).toBeVisible();
-  await primaryNavLink(page, "Lucrări").click();
+  await page.goto("/jobs");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(jobRow(page, planned.inscription)).toContainText("0 / 12 finalizate");
 

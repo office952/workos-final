@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import { setTheme } from "./helpers/account";
 import { createCommercialOrder, createCommercialPlan, releaseCommercialOrder, uniqueJobInscription } from "./helpers/jobs";
+import { destinationLink } from "./helpers/navigation";
 import { createCommercialQuote, uniqueQuoteInscription } from "./helpers/quotes";
 
 const shot = (name: string) => `docs/worklog/screenshots/hf-wave1-${name}.png`;
@@ -25,7 +26,7 @@ test("stable job and quote routes refresh, theme and responsive shell", async ({
   await expect(page.locator(".commercial-job-total-value")).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { name: quote.inscription })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Catalog" })).toBeVisible();
+  await expect(await destinationLink(page, "Catalog")).toBeVisible();
   await expect(page.getByRole("link", { name: "Sari la conținut" })).toHaveAttribute(
     "href",
     "#continut-principal",

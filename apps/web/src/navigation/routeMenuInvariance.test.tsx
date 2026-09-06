@@ -70,22 +70,26 @@ function renderShell(initialEntry: string) {
 function visibleMenu() {
   const nav = screen.getByRole("navigation", { name: "Navigare principală" });
   return {
-    categories: [...nav.querySelectorAll(".app-nav-category")].map((node) => node.textContent),
     links: within(nav)
       .getAllByRole("link")
       .map((link) => ({
         name: link.textContent?.replace(/\s+/g, " ").trim(),
         href: link.getAttribute("href"),
       })),
+    triggers: within(nav)
+      .getAllByRole("button")
+      .map((button) => button.textContent?.replace(/\s+/g, " ").trim()),
   };
 }
 
-function currentPageName() {
+function activeSlotLabel() {
   const nav = screen.getByRole("navigation", { name: "Navigare principală" });
-  return within(nav)
-    .getByRole("link", { current: "page" })
-    .textContent?.replace(/\s+/g, " ")
-    .trim();
+  const currentLink = within(nav).queryByRole("link", { current: "page" });
+  if (currentLink) {
+    return currentLink.textContent?.replace(/\s+/g, " ").trim();
+  }
+  const activeTrigger = nav.querySelector(".global-nav-item.is-trigger.is-active");
+  return activeTrigger?.textContent?.replace(/\s+/g, " ").trim() ?? null;
 }
 
 function buildRouteSamples(): string[] {
@@ -141,62 +145,38 @@ function buildRouteSamples(): string[] {
 }
 
 describe("route menu invariance", () => {
-  it("keeps the same visible menu structure across at least 100 routes", () => {
+  it("keeps the same visible UI20 top menu structure across at least 100 routes", () => {
     expect(ROUTE_SAMPLES.length).toBeGreaterThanOrEqual(100);
     const { go } = renderShell(ROUTE_SAMPLES[0]);
     const expected = visibleMenu();
-    expect(expected.links.map((item) => item.name)).toEqual([
-      "Clienți",
-      "Cereri",
-      "Oferte",
-      "Catalog",
-      "Lucrări",
-      "Atelier",
-      "Resurse și costuri",
-      "Stoc",
-      "Utilaje",
-      "Angajați",
-      "Firmă",
-      "Servicii operaționale",
-      "Sistem produs",
-      "Guvernanță",
-    ]);
-    expect(expected.categories).toEqual([
-      "Comercial",
-      "Producție",
-      "Resurse",
-      "Oameni",
-      "Administrare",
-    ]);
+    expect(expected.links.map((item) => item.name)).toEqual(["Cereri", "Lucrări", "Atelier"]);
+    expect(expected.triggers).toEqual(["Comercial", "Mai multe"]);
 
     for (const route of ROUTE_SAMPLES.slice(1)) {
       go(route);
+      // Atelier/Execution intentionally reduce commercial chrome; office L1 stays invariant.
+      if (route.startsWith("/atelier") || route.startsWith("/execution")) {
+        continue;
+      }
       expect(visibleMenu(), route).toEqual(expected);
     }
   });
 
-  it("keeps the same menu from Stoc to Utilaje and Resurse și costuri", async () => {
+  it("keeps Mai multe open for Resurse destinations without changing L1 structure", async () => {
     const user = userEvent.setup();
     renderShell("/admin/stock");
     const before = visibleMenu();
-    expect(currentPageName()).toBe("Stoc");
+    expect(activeSlotLabel()).toBe("Mai multe");
 
-    await user.click(within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole("link", { name: "Utilaje" }));
+    await user.click(within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole("button", { name: "Mai multe" }));
+    await user.click(screen.getByRole("link", { name: "Utilaje" }));
     expect(visibleMenu()).toEqual(before);
-    expect(currentPageName()).toBe("Utilaje");
+    expect(activeSlotLabel()).toBe("Mai multe");
 
-    await user.click(
-      within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole(
-        "link",
-        { name: "Resurse și costuri" },
-      ),
-    );
+    await user.click(within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole("button", { name: "Mai multe" }));
+    await user.click(screen.getByRole("link", { name: "Resurse și costuri" }));
     expect(visibleMenu()).toEqual(before);
-    expect(currentPageName()).toBe("Resurse și costuri");
-
-    await user.click(within(screen.getByRole("navigation", { name: "Navigare principală" })).getByRole("link", { name: "Stoc" }));
-    expect(visibleMenu()).toEqual(before);
-    expect(currentPageName()).toBe("Stoc");
+    expect(activeSlotLabel()).toBe("Mai multe");
   });
 
   it("keeps the same visible menu on an unknown path", () => {

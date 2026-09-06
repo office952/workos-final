@@ -1,12 +1,12 @@
 import { expect, test } from "./fixtures";
-import { primaryNavLink } from "./helpers/navigation";
+import { clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 test("catalog leads to canonical product confirm and partial EIC", async ({
   page,
 }) => {
   await page.goto("/");
-  await primaryNavLink(page, "Catalog").click();
+  await clickPrimaryDestination(page, "Catalog");
 
   await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await expect(page.getByText("Produsele din catalog. Alege un produs, apoi configurează.")).toBeVisible();

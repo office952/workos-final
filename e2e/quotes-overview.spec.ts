@@ -5,6 +5,7 @@ import {
   createOrderFromQuote,
   uniqueQuoteInscription,
 } from "./helpers/quotes";
+import { clickPrimaryDestination, destinationLink } from "./helpers/navigation";
 
 function quoteRow(page: import("@playwright/test").Page, inscription: string) {
   return page.locator(".requests-list li").filter({ hasText: inscription });
@@ -29,7 +30,7 @@ test("operator can find frozen quotes and continue the commercial path", async (
 
   await page.goto("/quotes");
   await expect(page.getByRole("heading", { name: "Oferte" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Oferte" })).toBeVisible();
+  await expect(await destinationLink(page, "Oferte")).toBeVisible();
   await expect(quoteRow(page, created.inscription)).toBeVisible();
   await expect(quoteRow(page, created.inscription)).toContainText(
     `Client: Client ${created.inscription}`,
@@ -62,7 +63,7 @@ test("operator can find frozen quotes and continue the commercial path", async (
     fullPage: true,
   });
 
-  await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Oferte" }).click();
+  await clickPrimaryDestination(page, "Oferte");
   await expect(quoteRow(page, created.inscription)).toContainText("Acceptată");
   await expect(quoteRow(page, created.inscription)).toContainText("Creează comanda");
 
@@ -73,7 +74,7 @@ test("operator can find frozen quotes and continue the commercial path", async (
   await page.getByRole("link", { name: "Deschide lucrarea" }).click();
   await expect(page).toHaveURL(/\/jobs\//);
 
-  await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Oferte" }).click();
+  await clickPrimaryDestination(page, "Oferte");
   await page.getByRole("button", { name: "Cu comandă" }).click();
   await expect(quoteRow(page, ordered.inscription)).toBeVisible();
   await expect(quoteRow(page, created.inscription)).toHaveCount(0);

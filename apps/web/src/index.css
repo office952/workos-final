@@ -362,6 +362,8 @@ body {
   --sidebar-expanded: 256px;
   --sidebar-collapsed: 72px;
   --sidebar-drawer: min(88vw, 384px);
+  --ui20-shell-height: 3rem;
+  --ui20-shell-gap: 0.75rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -372,6 +374,271 @@ body {
   align-items: stretch;
   min-height: 100vh;
   min-width: 0;
+}
+
+.app-shell.is-ui20-top .app-shell-frame.is-top-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+}
+
+.app-shell.is-ui20-top .app-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.global-shell-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex: 0 0 auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.global-shell-top-inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ui20-shell-gap);
+  min-height: var(--ui20-shell-height);
+  padding: 0.35rem 1rem;
+}
+
+.global-shell-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.global-shell-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.25rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.global-shell-nav-desktop {
+  min-width: 0;
+}
+
+.global-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.35rem;
+}
+
+.global-nav-item {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.65rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.global-nav-item.is-active {
+  border-bottom-color: var(--action-primary);
+  font-weight: 650;
+}
+
+.global-nav-item:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+
+.global-nav-popover {
+  position: relative;
+}
+
+.global-nav-panel {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 40;
+  min-width: 12rem;
+  padding: 0.45rem 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.global-nav-panel-link {
+  display: block;
+  min-height: 44px;
+  padding: 0.65rem 0.9rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.global-nav-panel-link.is-active {
+  font-weight: 650;
+  box-shadow: inset 3px 0 0 var(--action-primary);
+}
+
+.global-nav-group + .global-nav-group {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+}
+
+.global-nav-group-label {
+  margin: 0;
+  padding: 0.35rem 0.9rem 0.15rem;
+  color: var(--text-muted, var(--text));
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.global-shell-utilities {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.object-context-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.85rem;
+  padding: 0.35rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 92%, var(--canvas, var(--surface)));
+  font-size: 0.9rem;
+}
+
+.object-context-primary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.object-context-type {
+  color: var(--text-muted, var(--text));
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.object-context-id {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.object-context-return,
+.object-context-parent {
+  color: inherit;
+  text-decoration: none;
+}
+
+.object-context-return:hover,
+.object-context-parent:hover {
+  text-decoration: underline;
+}
+
+.identity-menu-admin {
+  display: block;
+  min-height: 44px;
+  padding: 0.65rem 0;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.ui20-mobile-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem 0.65rem 1rem;
+}
+
+.ui20-mobile-item {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ui20-mobile-item.is-active {
+  font-weight: 650;
+  box-shadow: inset 3px 0 0 var(--action-primary);
+}
+
+.ui20-mobile-group {
+  margin-top: 0.5rem;
+}
+
+.app-shell.is-ui20-top .app-meniu-trigger {
+  display: none;
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0 0.85rem;
+  cursor: pointer;
+}
+
+.app-shell.is-ui20-top .app-meniu-trigger:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .app-shell.is-ui20-top .global-shell-top-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .app-shell.is-ui20-top .global-shell-nav-desktop {
+    display: none;
+  }
+
+  .app-shell.is-ui20-top .app-meniu-trigger {
+    display: inline-flex;
+  }
+
+  .app-shell.is-ui20-top .global-shell-utilities {
+    grid-column: 2;
+  }
 }
 
 .app-sidebar-desktop {
@@ -2131,9 +2398,29 @@ a.button-link.button-secondary {
 }
 
 .identity-menu-trigger {
+  appearance: none;
   min-height: 44px;
   min-width: 44px;
   padding: 0 0.75rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.identity-menu-trigger:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+
+.app-shell.is-ui20-top .identity-menu-trigger[aria-expanded="true"] {
+  border-bottom-color: var(--action-primary);
+  font-weight: 650;
 }
 
 .identity-menu-panel {

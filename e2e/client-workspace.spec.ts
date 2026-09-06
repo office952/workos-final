@@ -4,6 +4,7 @@ import {
   confirmCanonicalLettersOnPage,
   uniqueRequestToken,
 } from "./helpers/requests";
+import { destinationLink } from "./helpers/navigation";
 
 function clientRow(page: import("@playwright/test").Page, name: string) {
   return page.locator(".clients-list li").filter({ hasText: name });
@@ -33,9 +34,7 @@ test("office can open one client and see requests, offers and works", async ({
 
   await page.goto("/clients");
   await expect(page.getByRole("heading", { name: "Clienți" })).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Clienți" }),
-  ).toBeVisible();
+  await expect(await destinationLink(page, "Clienți")).toBeVisible();
   await expect(
     page.getByRole("navigation", { name: "Navigare comercială" }),
   ).toHaveCount(0);

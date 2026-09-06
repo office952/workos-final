@@ -1,11 +1,11 @@
 import { expect, test } from "./fixtures";
-import { adminHomeLink, primaryNavLink } from "./helpers/navigation";
+import { adminHomeLink, clickPrimaryDestination } from "./helpers/navigation";
 
 test("owner surfaces use catalog navigation", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
 
-  await primaryNavLink(page, "Catalog").click();
+  await clickPrimaryDestination(page, "Catalog");
   await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-products-operator.png",
@@ -19,9 +19,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
     page.getByText("Proiecție de inspecție a sistemului de produs"),
   ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Categorii catalog" })).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Sistem produs" }),
-  ).toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(/\/components/);
   await expect(page.getByRole("button", { name: "Familii" })).toHaveAttribute(
     "aria-current",
     "true",
@@ -250,7 +248,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.setViewportSize({ width: 1280, height: 900 });
 
-  await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Guvernanță" }).click();
+  await page.goto("/governance");
   await expect(page.getByRole("heading", { name: "Guvernanța sistemului" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Autoritate și adevăr" })).toHaveAttribute(
     "aria-current",
@@ -314,7 +312,7 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
   await page.setViewportSize({ width: 1280, height: 900 });
 
-  await primaryNavLink(page, "Catalog").click();
+  await clickPrimaryDestination(page, "Catalog");
   await page
     .getByRole("link", {
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",

@@ -2,6 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "./fixtures";
 import { createCustomer } from "./helpers/customers";
+import { clickPrimaryDestination } from "./helpers/navigation";
 import { createRequestNeedingAction, uniqueRequestToken } from "./helpers/requests";
 
 const EVIDENCE_DIR = join(
@@ -206,10 +207,7 @@ test("a fresh Clients sidebar visit does not restore a previous scroll", async (
     .click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-  await page
-    .getByRole("navigation", { name: "Navigare principală" })
-    .getByRole("link", { name: "Clienți" })
-    .click();
+  await clickPrimaryDestination(page, "Clienți");
   await expect(page.getByRole("heading", { name: "Clienți", exact: true })).toBeVisible();
   await expect.poll(async () => registryScrollY(page)).toBeLessThan(20);
 });

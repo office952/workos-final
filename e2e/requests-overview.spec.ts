@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { clickPrimaryDestination, primaryNavLink } from "./helpers/navigation";
 import { createCommercialQuote, uniqueQuoteInscription } from "./helpers/quotes";
 import {
   CANONICAL_LETTERS_PRODUCT_CODE,
@@ -42,7 +43,7 @@ test("office can record a request, configure a product, and find the linked quot
 
   await page.goto("/requests");
   await expect(page.getByRole("heading", { name: "Cereri de ofertă" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Cereri" })).toBeVisible();
+  await expect(primaryNavLink(page, "Cereri")).toBeVisible();
   await page.getByRole("button", { name: "Cerere nouă" }).click();
   const createForm = page.locator("form.people-create");
   await createForm.getByRole("button", { name: "Clientul nu e în listă" }).click();
@@ -150,17 +151,17 @@ test("office can record a request, configure a product, and find the linked quot
   await page.goto(requestUrl);
   await expect(page.getByText("Comandă creată")).toBeVisible();
 
-  await page.getByRole("link", { name: "Oferte" }).click();
+  await clickPrimaryDestination(page, "Oferte");
   await expect(page.getByRole("heading", { name: "Oferte" })).toBeVisible();
   await expect(page.locator(".requests-list li").filter({ hasText: inscription })).toContainText(
     "Cu comandă",
   );
 
-  await page.getByRole("link", { name: "Lucrări" }).click();
+  await clickPrimaryDestination(page, "Lucrări");
   await expect(page.getByRole("heading", { name: "Lucrări" })).toBeVisible();
   await expect(page.locator(".requests-list li").filter({ hasText: inscription })).toBeVisible();
 
-  await page.getByRole("navigation", { name: "Navigare principală" }).getByRole("link", { name: "Cereri" }).click();
+  await clickPrimaryDestination(page, "Cereri");
   await expect(requestRow(page, title).getByRole("link", { name: title })).toHaveAttribute(
     "href",
     /\/requests\//,

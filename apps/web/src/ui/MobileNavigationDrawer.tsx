@@ -1,33 +1,44 @@
-import { useEffect, useId, useRef } from "react";
-import type { NavigationDestination } from "../navigation/navigationRegistry";
-import { StableSidebar } from "./StableSidebar";
+import { useEffect, useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import type { Ui20PresentationModel } from "../navigation/ui20NavigationPresentation";
+import { hasMaiMulte } from "../navigation/ui20NavigationPresentation";
 
 const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
+type MobileView = "root" | "commercial" | "more";
+
 export function MobileNavigationDrawer({
   open,
   onClose,
-  destinations,
+  model,
 }: {
   open: boolean;
   onClose: () => void;
-  destinations: readonly NavigationDestination[];
+  model: Ui20PresentationModel;
 }) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const [view, setView] = useState<MobileView>("root");
 
   useEffect(() => {
     if (!open) {
       return;
     }
+    const initial: MobileView =
+      model.activeSlot === "commercial"
+        ? "commercial"
+        : model.activeSlot === "more"
+          ? "more"
+          : "root";
+    setView(initial);
     previouslyFocused.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const panel = panelRef.current;
     const active = panel?.querySelector<HTMLElement>("[aria-current='page']");
     const closeButton = panel?.querySelector<HTMLElement>(".app-nav-drawer-close");
-    (active ?? closeButton)?.focus();
+    queueMicrotask(() => (active ?? closeButton)?.focus());
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -65,11 +76,14 @@ export function MobileNavigationDrawer({
       const restore = previouslyFocused.current;
       queueMicrotask(() => restore?.focus());
     };
-  }, [open, onClose]);
+  }, [open, onClose, model.activeSlot]);
 
   if (!open) {
     return null;
   }
+
+  const title =
+    view === "commercial" ? "Comercial" : view === "more" ? "Mai multe" : "Meniu";
 
   return (
     <div className="app-nav-drawer-root">
@@ -81,13 +95,24 @@ export function MobileNavigationDrawer({
       />
       <div
         ref={panelRef}
-        className="app-nav-drawer-panel"
+        className="app-nav-drawer-panel ui20-mobile-nav"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
         <header className="app-nav-drawer-header">
-          <h2 id={titleId}>Meniu</h2>
+          {view !== "root" ? (
+            <button
+              type="button"
+              className="button-quiet"
+              onClick={() => setView("root")}
+            >
+              Înapoi
+            </button>
+          ) : (
+            <span />
+          )}
+          <h2 id={titleId}>{title}</h2>
           <button
             type="button"
             className="button-quiet app-nav-drawer-close"
@@ -97,13 +122,122 @@ export function MobileNavigationDrawer({
             <span aria-hidden="true">×</span>
           </button>
         </header>
-        <StableSidebar
-          destinations={destinations}
-          collapsed={false}
-          variant="drawer"
-          onNavigate={onClose}
-        />
+
+        {view === "root" ? (
+          <nav className="ui20-mobile-list" aria-label="Destinații">
+            {model.home ? (
+              <MobileLink
+                href={model.home.href}
+                label={model.home.destination.label}
+                active={model.activeSlot === "home"}
+                onNavigate={onClose}
+              />
+            ) : null}
+            {model.requests ? (
+              <MobileLink
+                href={model.requests.href}
+                label={model.requests.destination.label}
+                active={model.activeSlot === "requests"}
+                onNavigate={onClose}
+              />
+            ) : null}
+            {model.commercial.length > 0 ? (
+              <button
+                type="button"
+                className={mobileItemClass(model.activeSlot === "commercial")}
+                onClick={() => setView("commercial")}
+              >
+                Comercial
+              </button>
+            ) : null}
+            {model.jobs ? (
+              <MobileLink
+                href={model.jobs.href}
+                label={model.jobs.destination.label}
+                active={model.activeSlot === "jobs"}
+                onNavigate={onClose}
+              />
+            ) : null}
+            {model.atelier ? (
+              <MobileLink
+                href={model.atelier.href}
+                label={model.atelier.destination.label}
+                active={model.activeSlot === "atelier"}
+                onNavigate={onClose}
+              />
+            ) : null}
+            {hasMaiMulte(model) ? (
+              <button
+                type="button"
+                className={mobileItemClass(model.activeSlot === "more")}
+                onClick={() => setView("more")}
+              >
+                Mai multe
+              </button>
+            ) : null}
+          </nav>
+        ) : null}
+
+        {view === "commercial" ? (
+          <nav className="ui20-mobile-list" aria-label="Comercial">
+            {model.commercial.map((item) => (
+              <MobileLink
+                key={item.destination.id}
+                href={item.href}
+                label={item.destination.label}
+                active={model.activeDestination?.id === item.destination.id}
+                onNavigate={onClose}
+              />
+            ))}
+          </nav>
+        ) : null}
+
+        {view === "more" ? (
+          <nav className="ui20-mobile-list" aria-label="Mai multe">
+            {model.moreGroups.map((group) => (
+              <div key={group.id} className="ui20-mobile-group">
+                <p className="global-nav-group-label">{group.label}</p>
+                {group.items.map((item) => (
+                  <MobileLink
+                    key={item.destination.id}
+                    href={item.href}
+                    label={item.destination.label}
+                    active={model.activeDestination?.id === item.destination.id}
+                    onNavigate={onClose}
+                  />
+                ))}
+              </div>
+            ))}
+          </nav>
+        ) : null}
       </div>
     </div>
   );
+}
+
+function MobileLink({
+  href,
+  label,
+  active,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  onNavigate: () => void;
+}) {
+  return (
+    <Link
+      to={href}
+      className={mobileItemClass(active)}
+      aria-current={active ? "page" : undefined}
+      onClick={onNavigate}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function mobileItemClass(active: boolean): string {
+  return ["ui20-mobile-item", active ? "is-active" : ""].filter(Boolean).join(" ");
 }

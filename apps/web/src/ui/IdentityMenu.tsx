@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import type { CloudSessionMembership } from "../cloudSessionApi";
 
@@ -97,6 +98,9 @@ export function IdentityMenu({
               </select>
             </label>
           ) : null}
+          <Link to="/admin" className="identity-menu-admin" onClick={() => setOpen(false)}>
+            Administrare
+          </Link>
           <ThemeSwitcher />
           {onLogout ? (
             <button type="button" className="button-quiet" onClick={onLogout}>
