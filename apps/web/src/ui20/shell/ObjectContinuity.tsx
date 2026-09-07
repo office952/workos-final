@@ -96,7 +96,7 @@ export function ObjectContinuity() {
   }
 
   return (
-    <p className="ui20-continuity" data-testid="ui20-continuity">
+    <p className="ui20-continuity" data-testid="ui20-continuity" aria-label="Obiect curent">
       {facts.customerName ? <span>{facts.customerName}</span> : null}
       {items.map((item) => (
         <Link key={item.key} to={item.href}>

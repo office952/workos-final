@@ -42,14 +42,14 @@ export function Ui20Shell({ children }: { children: ReactNode }) {
         </a>
         <header className="ui20-top">
           <p className="ui20-brand">WorkOS</p>
+          <p className="ui20-destination">{destinationLabel(pathname)}</p>
           <nav className="visually-hidden" aria-label="Previzualizare izolată">
             <span>{destinationLabel(pathname)}</span>
           </nav>
-          <p className="ui20-status">{destinationLabel(pathname)}</p>
           <ObjectContinuity />
           {operational && operator ? (
-            <p>
-              <span>{operator.displayName}</span>{" "}
+            <p className="ui20-operator">
+              <span>{operator.displayName}</span>
               <button type="button" onClick={() => void logout()}>
                 Ieși
               </button>

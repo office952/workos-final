@@ -121,11 +121,10 @@ export function CommercialSheet() {
   }
 
   return (
-    <article className="ui20-surface" data-surface="oferta">
+    <article className="ui20-surface ui20-sheet" data-surface="oferta" data-instrument="sheet">
       <h1>{item.inscription}</h1>
       <p className="ui20-kicker">
-        {item.reference} · Foaie comercială. Snapshot înghețat. Acceptare, comandă și
-        eliberare rămân pași expliciți. Nu sărim la lucrare înainte de eliberare.
+        {item.reference} · {item.stageLabel}. Valoare înghețată.
       </p>
       <ol className="ui20-chain" aria-label="Continuitate comercială">
         <li data-done="true" data-current={item.stage === "QUOTE_CREATED" ? "true" : "false"}>
@@ -147,46 +146,33 @@ export function CommercialSheet() {
           Eliberare
         </li>
       </ol>
-      <section className="ui20-cluster" aria-labelledby="quote-identity">
-        <h2 id="quote-identity">Identitate</h2>
-        <dl>
-          <div className="ui20-fact">
-            <dt>Client</dt>
-            <dd>{item.customerDisplayName ?? "—"}</dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Produs</dt>
-            <dd>{item.productLabel}</dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Valoare</dt>
-            <dd data-quote-value>
-              {item.grossDisplay} {item.currency}
-            </dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Stare</dt>
-            <dd data-quote-state>{item.stageLabel}</dd>
-          </div>
-          {request ? (
-            <div className="ui20-fact">
-              <dt>Cerere</dt>
-              <dd>
-                <Link to={request.href}>{request.reference ?? "Deschide cererea"}</Link>
-              </dd>
-            </div>
-          ) : null}
-          {order ? (
-            <div className="ui20-fact">
-              <dt>Comandă / lucrare</dt>
-              <dd>
-                <Link to={order.href}>{order.orderSnapshotId}</Link>
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-      </section>
-      <section className="ui20-cluster" aria-labelledby="quote-next">
+      <p>
+        Client: {item.customerDisplayName ?? "—"}
+        {request ? (
+          <>
+            {" · "}
+            <Link to={request.href}>{request.reference ?? "Cerere"}</Link>
+          </>
+        ) : null}
+      </p>
+      <p>{item.productLabel}</p>
+      <div className="ui20-sheet-line">
+        <span>{item.inscription}</span>
+        <strong>
+          {item.grossDisplay} {item.currency}
+        </strong>
+      </div>
+      <p className="ui20-sheet-value" data-quote-value>
+        {item.grossDisplay} {item.currency}
+      </p>
+      <p data-quote-state>{item.stageLabel}</p>
+      <p className="ui20-frozen">Înghețată — valoare comercială neschimbabilă</p>
+      {order ? (
+        <p>
+          <Link to={order.href}>Comandă / lucrare</Link>
+        </p>
+      ) : null}
+      <section aria-labelledby="quote-next">
         <h2 id="quote-next">Următoarea acțiune</h2>
         <p>{item.nextActionLabel}</p>
         <p className="ui20-actions">

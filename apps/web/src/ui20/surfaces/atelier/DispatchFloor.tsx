@@ -1,50 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import type { OperatorInboxTaskItem, OperatorTaskInboxProjection } from "@workos-final/domain";
+import type { OperatorTaskInboxProjection } from "@workos-final/domain";
 import { fetchOperatorTaskInbox } from "../../../atelierApi";
 import { OperatorIdentifyForm } from "../../../OperatorIdentifyForm";
 import { useOperatorSession } from "../../../OperatorSessionContext";
 import { startExecutionTask } from "../../../productApi";
 import { useContinuityFacts } from "../../shell/ObjectContinuity";
+import { projectAtelierWorklist } from "./atelierWorklist";
 
 type PageState =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "no_session" }
   | { kind: "ready"; inbox: OperatorTaskInboxProjection };
-
-function TaskRow({
-  item,
-  action,
-  busy,
-}: {
-  item: OperatorInboxTaskItem;
-  action?: { label: string; onClick: () => void };
-  busy: boolean;
-}) {
-  return (
-    <article className="ui20-task" data-task-id={item.taskId}>
-      <h3>
-        {item.seqLabel}. {item.processLabel}
-      </h3>
-      <p className="ui20-meta">
-        {item.inscription} · {item.scopeLabel} · {item.statusLabel}
-      </p>
-      {item.providerLabel ? <p>Utilaj: {item.providerLabel}</p> : null}
-      {item.waitingForLabels.length > 0 ? (
-        <p>Așteaptă: {item.waitingForLabels.join(", ")}</p>
-      ) : null}
-      <p className="ui20-actions">
-        {action ? (
-          <button type="button" onClick={action.onClick} disabled={busy}>
-            {action.label}
-          </button>
-        ) : null}
-        <Link to={item.workspaceHref}>Deschide execuția</Link>
-      </p>
-    </article>
-  );
-}
 
 export function DispatchFloor() {
   const { ready, operator, expired } = useOperatorSession();
@@ -108,11 +76,9 @@ export function DispatchFloor() {
   }
   if (page.kind === "no_session") {
     return (
-      <article className="ui20-surface" data-surface="atelier">
+      <article className="ui20-surface" data-surface="atelier" data-instrument="dispatch">
         <h1>Atelier</h1>
-        <p className="ui20-kicker">
-          Podea de dispecerat. Identifică operatorul. Nu inventăm telemetrie.
-        </p>
+        <p className="ui20-kicker">Podea de dispecerat. Identifică operatorul.</p>
         {expired ? <p>Sesiunea operatorului a expirat.</p> : null}
         <OperatorIdentifyForm onIdentified={() => setReloadToken((value) => value + 1)} />
       </article>
@@ -122,54 +88,63 @@ export function DispatchFloor() {
     return <p className="ui20-error">Atelierul nu a putut fi încărcat.</p>;
   }
 
-  const { inbox } = page;
+  const rows = projectAtelierWorklist(page.inbox);
 
   return (
-    <article className="ui20-surface" data-surface="atelier">
+    <article className="ui20-surface" data-surface="atelier" data-instrument="dispatch">
       <h1>Atelier</h1>
       <p className="ui20-kicker">
-        {inbox.operator.displayName}. Ce poate porni acum, din starea reală a taskurilor.
+        {page.inbox.operator.displayName}. Listă operațională, nu carduri.
       </p>
       {notice ? <p className="ui20-error">{notice}</p> : null}
-      <section className="ui20-cluster" aria-labelledby="atelier-ready">
-        <h2 id="atelier-ready">Pot porni ({inbox.summary.availableReady})</h2>
-        {inbox.availableReady.length === 0 ? (
-          <p>Niciun task gata de pornire.</p>
-        ) : (
-          inbox.availableReady.map((item) => (
-            <TaskRow
-              key={item.taskId}
-              item={item}
-              busy={busyTaskId === item.taskId}
-              action={
-                item.canClaimStart
-                  ? { label: "Pornește", onClick: () => void claimStart(item.taskId) }
-                  : undefined
-              }
-            />
-          ))
-        )}
-      </section>
-      <section className="ui20-cluster" aria-labelledby="atelier-mine">
-        <h2 id="atelier-mine">În lucru ({inbox.summary.inProgressMine})</h2>
-        {inbox.inProgressMine.length === 0 ? (
-          <p>Niciun task pornit de tine.</p>
-        ) : (
-          inbox.inProgressMine.map((item) => (
-            <TaskRow key={item.taskId} item={item} busy={false} />
-          ))
-        )}
-      </section>
-      <section className="ui20-cluster" aria-labelledby="atelier-blocked">
-        <h2 id="atelier-blocked">Blocate ({inbox.summary.availableNeedsProvider})</h2>
-        {inbox.availableNeedsProvider.length === 0 ? (
-          <p>Niciun task blocat de utilaj.</p>
-        ) : (
-          inbox.availableNeedsProvider.map((item) => (
-            <TaskRow key={item.taskId} item={item} busy={false} />
-          ))
-        )}
-      </section>
+      {rows.length === 0 ? (
+        <p>Niciun task disponibil.</p>
+      ) : (
+        <table className="ui20-worklist">
+          <caption className="visually-hidden">Taskuri atelier</caption>
+          <thead>
+            <tr>
+              <th scope="col">Lucrare</th>
+              <th scope="col">Operație</th>
+              <th scope="col">Utilaj</th>
+              <th scope="col">Stare</th>
+              <th scope="col">Acțiune</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                key={row.item.taskId}
+                className="ui20-task ui20-work-row"
+                data-task-id={row.item.taskId}
+                data-energy={row.energy}
+              >
+                <td>{row.item.inscription}</td>
+                <td>
+                  {row.item.seqLabel}. {row.item.processLabel}
+                  {row.item.scopeLabel ? ` · ${row.item.scopeLabel}` : ""}
+                </td>
+                <td>{row.item.providerLabel ?? "—"}</td>
+                <td>{row.item.statusLabel}</td>
+                <td>
+                  <p className="ui20-actions">
+                    {row.actionLabel ? (
+                      <button
+                        type="button"
+                        onClick={() => void claimStart(row.item.taskId)}
+                        disabled={busyTaskId === row.item.taskId}
+                      >
+                        {row.actionLabel}
+                      </button>
+                    ) : null}
+                    <Link to={row.item.workspaceHref}>Deschide execuția</Link>
+                  </p>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </article>
   );
 }

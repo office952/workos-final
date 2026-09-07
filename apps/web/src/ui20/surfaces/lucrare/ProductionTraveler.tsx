@@ -5,6 +5,7 @@ import { fetchJobDetail, type JobDetailResponse } from "../../../jobsApi";
 import { usePathIdAfter } from "../../../navigation/usePathIdAfter";
 import { createExecutionPlan, createProductionRelease } from "../../../productApi";
 import { useContinuityFacts } from "../../shell/ObjectContinuity";
+import { projectJobTraveler } from "./jobTravelerView";
 
 type PageState =
   | { kind: "loading" }
@@ -69,6 +70,7 @@ export function ProductionTraveler() {
 
   const { detail } = page;
   const { job: item, quote, request, release, execution } = detail;
+  const traveler = projectJobTraveler(detail);
 
   async function refresh() {
     const result = await fetchJobDetail(item.jobId);
@@ -107,92 +109,92 @@ export function ProductionTraveler() {
     }
   }
 
-  const executionHref = execution?.href ?? (item.planId ? `/execution/${encodeURIComponent(item.planId)}` : null);
+  const executionHref =
+    execution?.href ?? (item.planId ? `/execution/${encodeURIComponent(item.planId)}` : null);
 
   return (
-    <article className="ui20-surface" data-surface="lucrare">
+    <article className="ui20-surface" data-surface="lucrare" data-instrument="traveler">
       <h1>{item.inscription}</h1>
       <p className="ui20-kicker">
-        Traveler de producție. Comanda, eliberarea și planul rămân pași expliciți. După plan,
-        continuarea verticală este atelierul.
+        {item.customerDisplayName ?? "—"} · Unde este lucrarea acum, ce s-a întâmplat, ce urmează.
       </p>
-      <section className="ui20-cluster" aria-labelledby="job-now">
-        <h2 id="job-now">Unde este lucrarea</h2>
-        <dl>
-          <div className="ui20-fact">
-            <dt>Client</dt>
-            <dd>{item.customerDisplayName ?? "—"}</dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Stare</dt>
-            <dd data-job-state>{item.stageLabel}</dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Comandă</dt>
-            <dd>{item.orderSnapshotId}</dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Eliberare</dt>
-            <dd>{item.releaseSnapshotId ?? release?.releaseSnapshotId ?? "Nu există încă"}</dd>
-          </div>
-          <div className="ui20-fact">
-            <dt>Plan de execuție</dt>
-            <dd>{item.planId ?? execution?.planId ?? "Nu există încă"}</dd>
-          </div>
+      <div className="ui20-traveler">
+        <section className="ui20-lane" data-lane="past" aria-labelledby="job-past">
+          <h2 id="job-past">Trecut</h2>
+          <ul>
+            {traveler.past.map((entry) => (
+              <li key={entry.id}>
+                {entry.href ? <Link to={entry.href}>{entry.label}</Link> : entry.label}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="ui20-lane" data-lane="current" aria-labelledby="job-now">
+          <h2 id="job-now">Current</h2>
+          <p>
+            <strong>{traveler.current.title}</strong>
+          </p>
+          <p data-job-state>{traveler.current.stateLabel}</p>
+          <p data-job-next>Următorul pas: {traveler.current.nextLabel}</p>
+          {traveler.current.attention ? <p>{traveler.current.attention}</p> : null}
+          <p className="ui20-actions">
+            {item.nextAction === "RELEASE_TO_PRODUCTION" ? (
+              <button
+                type="button"
+                data-next-action={item.nextAction}
+                onClick={() => void releaseProduction()}
+                disabled={busy}
+              >
+                {commercialPrimaryActionLabel("RELEASE_PRODUCTION")}
+              </button>
+            ) : null}
+            {item.nextAction === "CREATE_EXECUTION_PLAN" ? (
+              <button
+                type="button"
+                data-next-action={item.nextAction}
+                onClick={() => void createPlan()}
+                disabled={busy}
+              >
+                {commercialPrimaryActionLabel("CREATE_EXECUTION_PLAN")}
+              </button>
+            ) : null}
+            {item.planId ? (
+              <Link to="/atelier" data-next-action="OPEN_ATELIER">
+                Deschide atelierul
+              </Link>
+            ) : null}
+            {executionHref &&
+            (item.nextAction === "OPEN_EXECUTION" ||
+              item.nextAction === "CONTINUE_EXECUTION" ||
+              item.nextAction === "VIEW_COMPLETED") ? (
+              <Link to={executionHref}>{commercialPrimaryActionLabel("OPEN_EXECUTION")}</Link>
+            ) : null}
+          </p>
+        </section>
+        <section className="ui20-lane" data-lane="next" aria-labelledby="job-next">
+          <h2 id="job-next">Următor</h2>
+          {traveler.next.length === 0 ? (
+            <p>Nimic după poziția curentă.</p>
+          ) : (
+            <ul>
+              {traveler.next.map((entry) => (
+                <li key={entry.id}>{entry.label}</li>
+              ))}
+            </ul>
+          )}
           {request ? (
-            <div className="ui20-fact">
-              <dt>Cerere</dt>
-              <dd>
-                <Link to={request.href}>{request.reference ?? "Deschide cererea"}</Link>
-              </dd>
-            </div>
-          ) : null}
-          <div className="ui20-fact">
-            <dt>Ofertă</dt>
-            <dd>
-              <Link to={quote.href}>{quote.reference ?? "Deschide oferta"}</Link>
-            </dd>
-          </div>
-        </dl>
-      </section>
-      <section className="ui20-cluster" aria-labelledby="job-next">
-        <h2 id="job-next">Următoarea acțiune</h2>
-        <p data-job-next>Următorul pas: {item.nextActionLabel}</p>
-        {item.attentionLabel ? <p>{item.attentionLabel}</p> : null}
-        <p className="ui20-actions">
-          {item.nextAction === "RELEASE_TO_PRODUCTION" ? (
-            <button
-              type="button"
-              data-next-action={item.nextAction}
-              onClick={() => void releaseProduction()}
-              disabled={busy}
-            >
-              {commercialPrimaryActionLabel("RELEASE_PRODUCTION")}
-            </button>
-          ) : null}
-          {item.nextAction === "CREATE_EXECUTION_PLAN" ? (
-            <button
-              type="button"
-              data-next-action={item.nextAction}
-              onClick={() => void createPlan()}
-              disabled={busy}
-            >
-              {commercialPrimaryActionLabel("CREATE_EXECUTION_PLAN")}
-            </button>
-          ) : null}
-          {item.planId ? (
-            <Link to="/atelier" data-next-action="OPEN_ATELIER">
-              Deschide atelierul
-            </Link>
-          ) : null}
-          {executionHref &&
-          (item.nextAction === "OPEN_EXECUTION" ||
-            item.nextAction === "CONTINUE_EXECUTION" ||
-            item.nextAction === "VIEW_COMPLETED") ? (
-            <Link to={executionHref}>{commercialPrimaryActionLabel("OPEN_EXECUTION")}</Link>
-          ) : null}
-        </p>
-      </section>
+            <p>
+              <Link to={request.href}>{request.reference ?? "Cerere"}</Link>
+              {" · "}
+              <Link to={quote.href}>{quote.reference ?? "Ofertă"}</Link>
+            </p>
+          ) : (
+            <p>
+              <Link to={quote.href}>{quote.reference ?? "Ofertă"}</Link>
+            </p>
+          )}
+        </section>
+      </div>
       {notice ? <p className="ui20-error">{notice}</p> : null}
     </article>
   );

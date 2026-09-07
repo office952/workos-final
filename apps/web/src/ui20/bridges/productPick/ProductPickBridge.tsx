@@ -79,9 +79,9 @@ export function ProductPickBridge() {
     <article className="ui20-surface" data-surface="product-pick">
       <h1>Alege produsul</h1>
       <p className="ui20-kicker">
-        Puncte de continuitate, nu un Catalog nou. Alege un produs disponibil și deschide
-        configuratorul canonic
-        {requestId ? " pe această cerere." : "."}
+        {page.requestReference ?? "Cerere"}
+        {page.customerName ? ` · ${page.customerName}` : ""}. Doar produsele disponibile, fără
+        recomandare.
       </p>
       {page.products.length === 0 ? (
         <p>Nu există produse disponibile.</p>

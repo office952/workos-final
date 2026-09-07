@@ -7,7 +7,11 @@ import {
   type ProductDefinition,
   type RequestDetailProjection,
 } from "@workos-final/domain";
-import { projectConstructionComposition } from "../../../constructionCompositionModel";
+import {
+  constructionRowNodes,
+  projectConstructionComposition,
+  type ConstructionCompositionNode,
+} from "../../../constructionCompositionModel";
 import { FormRenderer } from "../../../FormRenderer";
 import {
   compileConfiguration,
@@ -30,6 +34,10 @@ type ConfirmedState = {
   aggregate: ProductAggregate;
 };
 
+function nodeName(node: ConstructionCompositionNode): string {
+  return node.roleLabel ?? node.label;
+}
+
 export function ConstructionWorkspace() {
   const { productCode = "" } = useParams();
   const [searchParams] = useSearchParams();
@@ -38,7 +46,7 @@ export function ConstructionWorkspace() {
   const [page, setPage] = useState<PageState>({ kind: "loading" });
   const [request, setRequest] = useState<RequestDetailProjection | null>(null);
   const [values, setValues] = useState<DraftValues>({});
-  const [focusComponentId, setFocusComponentId] = useState<string | undefined>(undefined);
+  const [focusComponentId, setFocusComponentId] = useState<string>("ROOT");
   const [definition, setDefinition] = useState<ProductDefinition | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmedState | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -49,6 +57,7 @@ export function ConstructionWorkspace() {
     setPage({ kind: "loading" });
     setDefinition(null);
     setConfirmed(null);
+    setFocusComponentId("ROOT");
     void fetchTemplateProjection(productCode)
       .then((projection) => {
         if (!cancelled) {
@@ -105,6 +114,8 @@ export function ConstructionWorkspace() {
 
   const { template, formSchema } = page.projection;
   const nodes = projectConstructionComposition(template, formSchema, values);
+  const row = constructionRowNodes(nodes);
+  const selected = nodes.find((node) => node.id === focusComponentId) ?? nodes[0];
   const reviewing = definition?.readiness === "ready" && !confirmed;
 
   async function handleCompile() {
@@ -187,85 +198,123 @@ export function ConstructionWorkspace() {
   }
 
   return (
-    <article className="ui20-surface" data-surface="configurator">
+    <article className="ui20-surface" data-surface="configurator" data-instrument="construction">
       <h1>{template.label}</h1>
       <p className="ui20-kicker">
-        Compoziție constructivă și lentilă de context. Schema existentă decide câmpurile.
+        Compoziție, nu pași. Lentila arată doar contextul selectat
         {request
-          ? ` Cerere ${request.request.reference}${
+          ? `. Cerere ${request.request.reference}${
               request.customerDisplayName ? ` · ${request.customerDisplayName}` : ""
             }.`
-          : ""}
+          : "."}
       </p>
-      <div className="ui20-composition" role="toolbar" aria-label="Roluri selectate">
-        {nodes.map((node) => (
-          <button
-            key={node.id}
-            type="button"
-            aria-current={focusComponentId === node.id}
-            onClick={() => setFocusComponentId(node.id)}
+      <div className="ui20-instrument-config">
+        <section aria-labelledby="composition-heading">
+          <h2 id="composition-heading">Compoziție</h2>
+          <div
+            className="ui20-composition-map"
+            data-composition
+            role="toolbar"
+            aria-label="Roluri selectate"
           >
-            {node.roleLabel ?? node.label}
-          </button>
-        ))}
-      </div>
-      {!confirmed ? (
-        <div className="ui20-form">
-          <FormRenderer
-            template={template}
-            schema={formSchema}
-            values={values}
-            focusComponentId={focusComponentId}
-            onChange={(fieldId, value) => {
-              setValues((current) => ({ ...current, [fieldId]: value }));
-              setDefinition(null);
-              setConfirmed(null);
-              setNotice(null);
-            }}
-          />
-          <p className="ui20-actions">
-            <button type="button" onClick={() => void handleCompile()} disabled={busy}>
-              Verifică configurația
-            </button>
-          </p>
-        </div>
-      ) : null}
-      {definition?.readiness === "blocked" ? (
-        <section className="ui20-cluster">
-          <h2>Blocată</h2>
-          <p>Probleme de rezolvat: {definition.missing.length}</p>
-          <ul>
-            {definition.missing.map((item) => (
-              <li key={item.fieldId}>{item.label}</li>
+            {row.map((node, index) => (
+              <span key={node.id} className="ui20-comp-item">
+                {index > 0 ? (
+                  <span className="ui20-comp-rel" aria-hidden="true">
+                    —
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  className="ui20-comp-node"
+                  aria-pressed={focusComponentId === node.id}
+                  onClick={() => setFocusComponentId(node.id)}
+                >
+                  {nodeName(node)}
+                </button>
+              </span>
             ))}
-          </ul>
+            {nodes
+              .filter((node) => node.role === "LIGHTING")
+              .map((node) => (
+                <span key={node.id} className="ui20-comp-item">
+                  <span className="ui20-comp-rel" aria-hidden="true">
+                    ↓
+                  </span>
+                  <button
+                    type="button"
+                    className="ui20-comp-node"
+                    aria-pressed={focusComponentId === node.id}
+                    onClick={() => setFocusComponentId(node.id)}
+                  >
+                    {nodeName(node)}
+                  </button>
+                </span>
+              ))}
+          </div>
         </section>
-      ) : null}
-      {reviewing && definition ? (
-        <section className="ui20-cluster">
-          <h2>Gata de confirmare</h2>
-          <p className="ui20-actions">
-            <button type="button" onClick={() => void handleConfirm()} disabled={busy}>
-              Confirmă configurația
-            </button>
-            <button type="button" onClick={() => setDefinition(null)} disabled={busy}>
-              Editează
-            </button>
-          </p>
+        <section className="ui20-lens" aria-labelledby="lens-heading">
+          <h2 id="lens-heading">Lentilă — {selected ? nodeName(selected) : "context"}</h2>
+          {!confirmed ? (
+            <div className="ui20-form">
+              <FormRenderer
+                template={template}
+                schema={formSchema}
+                values={values}
+                focusComponentId={focusComponentId}
+                onChange={(fieldId, value) => {
+                  setValues((current) => ({ ...current, [fieldId]: value }));
+                  setDefinition(null);
+                  setConfirmed(null);
+                  setNotice(null);
+                }}
+              />
+              <p className="ui20-actions">
+                <button type="button" onClick={() => void handleCompile()} disabled={busy}>
+                  Verifică configurația
+                </button>
+              </p>
+            </div>
+          ) : null}
+          {definition?.readiness === "blocked" ? (
+            <div className="ui20-blocked-note">
+              <p>Probleme de rezolvat: {definition.missing.length}</p>
+              <ul>
+                {definition.missing.map((item) => (
+                  <li key={item.fieldId}>{item.label}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {reviewing && definition ? (
+            <p className="ui20-actions">
+              <button type="button" onClick={() => void handleConfirm()} disabled={busy}>
+                Confirmă configurația
+              </button>
+              <button
+                type="button"
+                className="ui20-ghost"
+                onClick={() => setDefinition(null)}
+                disabled={busy}
+              >
+                Editează
+              </button>
+            </p>
+          ) : null}
+          {confirmed ? (
+            <div>
+              <h3>Configurație confirmată</h3>
+              <p>{confirmed.aggregate.inscription}</p>
+              <p className="ui20-actions">
+                <button type="button" onClick={() => void handleCreateQuote()} disabled={busy}>
+                  {commercialPrimaryActionLabel("CREATE_QUOTE")}
+                </button>
+              </p>
+            </div>
+          ) : null}
+          {notice ? <p className="ui20-error">{notice}</p> : null}
         </section>
-      ) : null}
-      {confirmed ? (
-        <section className="ui20-cluster">
-          <h2>Configurație confirmată</h2>
-          <p>{confirmed.aggregate.inscription}</p>
-          <p className="ui20-actions">
-            <button type="button" onClick={() => void handleCreateQuote()} disabled={busy}>
-              {commercialPrimaryActionLabel("CREATE_QUOTE")}
-            </button>
-          </p>
-        </section>
-      ) : null}
-      {notice ? <p className="ui20-error">{notice}</p> : null}
+      </div>
     </article>
   );
 }

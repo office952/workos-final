@@ -41,20 +41,25 @@ function TaskStation({
 
   return (
     <article
-      className="ui20-task"
+      className="ui20-task ui20-station-active"
       id={`task-${task.taskId}`}
       data-task-id={task.taskId}
       data-active={active}
     >
-      <h3>
+      <p className="ui20-station-kicker">Operație curentă</p>
+      <h2>
         {task.seqLabel}. {task.processLabel}
-      </h3>
+      </h2>
       <p className="ui20-meta">
         {task.scopeLabel} · {task.statusLabel}
       </p>
       <p>{task.assignmentLabel}</p>
       {task.waitingFor.length > 0 ? <p>Așteaptă: {task.waitingFor.join(", ")}</p> : null}
-      {task.startBlockReason ? <p>Blocat: {task.startBlockReason}</p> : null}
+      {task.startBlockReason ? (
+        <p className="ui20-blocked-note">Blocat: {task.startBlockReason}</p>
+      ) : task.canStart ? (
+        <p className="ui20-clear">Poți porni</p>
+      ) : null}
       {task.canAssign && task.eligibleProviders.length > 0 ? (
         <p className="ui20-actions">
           <label>
@@ -189,7 +194,11 @@ export function Workstation() {
   }
 
   return (
-    <article className="ui20-surface" data-surface="execution">
+    <article
+      className="ui20-surface ui20-station"
+      data-surface="execution"
+      data-instrument="workstation"
+    >
       <h1>{plan.plan.inscription}</h1>
       <p className="ui20-kicker">
         {plan.plan.productLabel}. {plan.statusLabel}. {plan.progress.completed} /{" "}
@@ -197,46 +206,39 @@ export function Workstation() {
       </p>
       {plan.jobHref ? <Link to={plan.jobHref}>Înapoi la lucrare</Link> : null}
       {!operator ? (
-        <section className="ui20-cluster">
+        <section>
           <h2>Identificare</h2>
           <OperatorIdentifyForm />
         </section>
       ) : null}
       {active ? (
-        <section className="ui20-cluster" aria-labelledby="active-task">
-          <h2 id="active-task">Task activ</h2>
-          <TaskStation
-            task={active}
-            active
-            busy={busy}
-            onAssignProvider={(taskId, providerId) =>
-              void mutate(() => assignExecutionTaskProvider(taskId, providerId))
-            }
-            onAssignExecutor={(taskId, personId) =>
-              void mutate(() => assignExecutionTaskExecutor(taskId, personId))
-            }
-            onStart={(taskId) => void mutate(() => startExecutionTask(taskId))}
-            onComplete={(taskId) => void mutate(() => completeExecutionTask(taskId, {}))}
-          />
-        </section>
+        <TaskStation
+          task={active}
+          active
+          busy={busy}
+          onAssignProvider={(taskId, providerId) =>
+            void mutate(() => assignExecutionTaskProvider(taskId, providerId))
+          }
+          onAssignExecutor={(taskId, personId) =>
+            void mutate(() => assignExecutionTaskExecutor(taskId, personId))
+          }
+          onStart={(taskId) => void mutate(() => startExecutionTask(taskId))}
+          onComplete={(taskId) => void mutate(() => completeExecutionTask(taskId, {}))}
+        />
       ) : null}
-      <section className="ui20-cluster" aria-labelledby="all-tasks">
+      <section className="ui20-plan-quiet" aria-labelledby="all-tasks">
         <h2 id="all-tasks">Plan</h2>
         {plan.tasks.map((task) => (
-          <TaskStation
+          <article
             key={task.taskId}
-            task={task}
-            active={task.taskId === active?.taskId}
-            busy={busy}
-            onAssignProvider={(taskId, providerId) =>
-              void mutate(() => assignExecutionTaskProvider(taskId, providerId))
-            }
-            onAssignExecutor={(taskId, personId) =>
-              void mutate(() => assignExecutionTaskExecutor(taskId, personId))
-            }
-            onStart={(taskId) => void mutate(() => startExecutionTask(taskId))}
-            onComplete={(taskId) => void mutate(() => completeExecutionTask(taskId, {}))}
-          />
+            className="ui20-task"
+            data-task-id={task.taskId}
+            data-active={task.taskId === active?.taskId}
+          >
+            <p>
+              {task.seqLabel}. {task.processLabel} · {task.scopeLabel} · {task.statusLabel}
+            </p>
+          </article>
         ))}
       </section>
       {notice ? <p className="ui20-error">{notice}</p> : null}

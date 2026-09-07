@@ -22,6 +22,7 @@ function currentRuntimeOrigin(): string {
   return `http://127.0.0.1:${process.env.WORKOS_E2E_WEB_PORT ?? "5173"}`;
 }
 const EVIDENCE_DIR = join(process.cwd(), ".tmp", "ui20-vertical-pass-a");
+const EVIDENCE_B_DIR = join(process.cwd(), ".tmp", "ui20-vertical-pass-b");
 
 type JsonObject = Record<string, unknown>;
 
@@ -45,6 +46,22 @@ async function screenshotAt(page: Page, width: number, name: string) {
     path: join(EVIDENCE_DIR, `${name}-${width}.png`),
     fullPage: true,
   });
+  await page.screenshot({
+    path: join(EVIDENCE_B_DIR, `${name}-${width}.png`),
+    fullPage: true,
+  });
+}
+
+async function screenshotDark(page: Page, name: string) {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "Întunecată" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.screenshot({
+    path: join(EVIDENCE_B_DIR, `${name}-1440-dark.png`),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Deschisă" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 }
 
 test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engine", async ({
@@ -53,6 +70,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   browser,
 }) => {
   await mkdir(EVIDENCE_DIR, { recursive: true });
+  await mkdir(EVIDENCE_B_DIR, { recursive: true });
   const person = await ensureTestExecutor(request);
   await configureTestExecutorPin(request, person.personId);
   const customerName = `Client UI20 ${Date.now()}`;
@@ -83,6 +101,11 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page.getByText(requestReference).first()).toBeVisible();
   await expect(page.getByText("Nu există încă o ofertă legată")).toBeVisible();
   await expect(page.getByText("Produsul nu este ales")).toHaveCount(0);
+  await expect(page.locator('[data-plane="known"]')).toBeVisible();
+  await expect(page.locator('[data-plane="unresolved"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Cunoscut" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nerezolvat" })).toBeVisible();
+  await expect(page.locator(".ui20-top").getByRole("link", { name: "Atelier" })).toHaveCount(0);
   const pick = page.getByRole("link", { name: "Alege produs" }).first();
   await expect(pick).toBeVisible();
   await minTarget(page, pick);
@@ -91,6 +114,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await screenshotAt(page, 1440, "cerere");
   await screenshotAt(page, 1280, "cerere");
   await screenshotAt(page, 768, "cerere");
+  await screenshotDark(page, "cerere");
   await page.setViewportSize({ width: 1440, height: 900 });
   await pick.click();
 
@@ -104,9 +128,12 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await expect(page.getByText("Preț final client")).toHaveCount(0);
   await expect(page.getByText(/624,82/)).toHaveCount(0);
+  await expect(page.locator("[data-composition]")).toBeVisible();
+  await expect(page.locator("[data-composition] [aria-pressed='true']")).toHaveCount(1);
   await screenshotAt(page, 1440, "configurator");
   await screenshotAt(page, 1280, "configurator");
   await screenshotAt(page, 768, "configurator");
+  await screenshotDark(page, "configurator");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "Creează oferta" }).click();
 
@@ -117,9 +144,11 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page.locator("[data-quote-state]")).toHaveText("Creată");
   await expect(page.getByText(customerName).first()).toBeVisible();
   await expect(page.getByText(requestReference).first()).toBeVisible();
+  await expect(page.locator('[data-instrument="sheet"]')).toBeVisible();
   await screenshotAt(page, 1440, "oferta");
   await screenshotAt(page, 1280, "oferta");
   await screenshotAt(page, 768, "oferta");
+  await screenshotDark(page, "oferta");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "Marchează acceptată" }).click();
   await expect(page.locator("[data-quote-state]")).toHaveText("Acceptată");
@@ -136,9 +165,13 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page).toHaveURL(/\/jobs\//);
   await expect(page.locator("[data-job-state]")).toContainText("Eliberată");
   await expect(page.locator("[data-job-next]")).toContainText("Creează planul de execuție");
+  await expect(page.getByRole("heading", { name: "Trecut" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Current" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Următor" })).toBeVisible();
   await screenshotAt(page, 1440, "lucrare");
   await screenshotAt(page, 1280, "lucrare");
   await screenshotAt(page, 768, "lucrare");
+  await screenshotDark(page, "lucrare");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await expect(page.getByRole("link", { name: "Deschide atelierul" })).toBeVisible();
@@ -160,6 +193,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   expect(atelierTaskId).toBeTruthy();
   const atelierExecution = atelierRow.getByRole("link", { name: "Deschide execuția" });
   await expect(atelierExecution).toBeVisible();
+  await expect(page.locator("table.ui20-worklist")).toBeVisible();
   await screenshotAt(page, 1440, "atelier");
   await screenshotAt(page, 1280, "atelier");
   await screenshotAt(page, 768, "atelier");
@@ -167,6 +201,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await page.getByRole("button", { name: "Întunecată" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.screenshot({ path: join(EVIDENCE_DIR, "atelier-1440-dark.png"), fullPage: true });
+  await page.screenshot({ path: join(EVIDENCE_B_DIR, "atelier-1440-dark.png"), fullPage: true });
   await page.getByRole("button", { name: "Deschisă" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await atelierExecution.click();
@@ -203,9 +238,12 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
     .first();
   await expect(persisted).toHaveAttribute("data-task-id", atelierTaskId as string);
   await expect(persisted.getByText("În lucru")).toBeVisible();
+  await expect(page.locator('[data-instrument="workstation"]')).toBeVisible();
+  await expect(page.getByText("Operație curentă")).toBeVisible();
   await screenshotAt(page, 1440, "executie");
   await screenshotAt(page, 1280, "executie");
   await screenshotAt(page, 768, "executie");
+  await screenshotDark(page, "executie");
   await page.setViewportSize({ width: 1440, height: 900 });
 
   const quoteApi = (await (
@@ -341,6 +379,90 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
       `taskId: ${atelierTaskId}`,
       "grossDisplay: 624,82 (Ofertă + API only; Configurator hidden)",
       "BUSINESS_FACT_PARITY = PASS",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_B_DIR, "manifest.json"),
+    JSON.stringify(
+      {
+        classification: "LOCAL_SYNTHETIC_ISOLATED",
+        pass: "B",
+        realData: false,
+        cloudWrite: false,
+        fixture: {
+          customerName,
+          requestId,
+          requestReference,
+          inscription,
+          productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+          quoteSnapshotId,
+          jobId,
+          planId,
+          taskId: atelierTaskId,
+        },
+        instruments: {
+          cerere: "resolution",
+          configurator: "construction",
+          oferta: "sheet",
+          lucrare: "traveler",
+          atelier: "dispatch",
+          execution: "workstation",
+        },
+        businessFactParity: "PASS",
+        configuratorCommercialPriceVisible: false,
+        ofertaCommercialValueVisible: true,
+        unconditionalAtelierGlobalLink: false,
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_B_DIR, "FIGMA_RUNTIME_RECONCILIATION.md"),
+    [
+      "# Figma → runtime reconciliation",
+      "",
+      "File `0XP0yGa1siWQdTTL7ou8xz` was used as mental-model intent, not pixel copy.",
+      "Specimen values such as 5.490 EUR, invented transport/montaj, and fake CNC telemetry were not copied.",
+      "",
+      "- Cerere: two planes (Cunoscut / Nerezolvat), action inside unresolved. No card-per-fact.",
+      "- Configurator: composition map + lens. Selected role uses aria-pressed. No commercial price.",
+      "- Ofertă: frozen sheet. Source Serif on title, IBM Plex Mono on money. One real commercial line.",
+      "- Lucrare: Trecut / Current / Următor. Current dominates. Atelier is the post-plan continuation.",
+      "- Atelier: flat worklist table. Energy from real inbox lanes only.",
+      "- Execuție: active task dominates; remaining plan is quiet. Dark is a production instrument.",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_B_DIR, "OPTICAL_SELF_REVIEW.md"),
+    [
+      "# Optical self-review",
+      "",
+      "Screenshots: `.tmp/ui20-vertical-pass-b/`.",
+      "Checked 1440 / 1280 / 768 plus 1440 dark for each instrument.",
+      "",
+      "## What holds",
+      "",
+      "- Cerere reads as two planes, not a card stack. Known has a quiet green edge. Unresolved keeps the action.",
+      "- Configurator keeps a composition map and a selected lens. After confirm, Volum stays pressed. No commercial price.",
+      "- Ofertă is a centered frozen sheet. Title is serif. Money is mono. One real line. Frozen stamp is visible.",
+      "- Lucrare is Trecut / Current / Următor. Current has the only strong frame and the next action.",
+      "- Atelier is a table ledger. Rows with missing utilaj carry a terracotta attention edge. No task cards.",
+      "- Execuție lets the current CNC face task dominate. The rest of the plan is a quiet numbered list. Dark stays charcoal, not neon.",
+      "",
+      "## Residual optical notes",
+      "",
+      "- Cerere repeats \"Alege produs\" in the unresolved item and again under \"Următoarea acțiune\". Same real action, two placements.",
+      "- Configurator after confirm still shows the last filled role (Volum), not a separate confirmed composition state.",
+      "- Atelier 768 stacks cells; the ledger remains a list, not cards.",
+      "- No horizontal overflow at captured widths.",
+      "- State is not color-only: edges, pressed, blocked wash, and labels travel together.",
+      "- 44px targets remain on composition, primary actions, and worklist links.",
       "",
     ].join("\n"),
     "utf8",
