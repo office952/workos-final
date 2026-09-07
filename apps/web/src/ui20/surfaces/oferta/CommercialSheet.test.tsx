@@ -65,7 +65,7 @@ describe("CommercialSheet", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "HUB" })).toBeInTheDocument();
-    expect(screen.getAllByText(/624,82/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/624,82/)).toHaveLength(1);
     expect(document.querySelector("[data-quote-value]")?.textContent).toContain("624,82");
     expect(screen.getByText("Creată")).toBeInTheDocument();
     expect(screen.queryByText(/5[.,]490/)).not.toBeInTheDocument();

@@ -156,12 +156,6 @@ export function CommercialSheet() {
         ) : null}
       </p>
       <p>{item.productLabel}</p>
-      <div className="ui20-sheet-line">
-        <span>{item.inscription}</span>
-        <strong>
-          {item.grossDisplay} {item.currency}
-        </strong>
-      </div>
       <p className="ui20-sheet-value" data-quote-value>
         {item.grossDisplay} {item.currency}
       </p>

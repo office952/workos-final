@@ -2,6 +2,7 @@ import type { RequestDetailProjection } from "@workos-final/domain";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { usePathIdAfter } from "../../../navigation/usePathIdAfter";
+import type { RequestObjectPrimaryAction } from "../../../requestObjectView";
 import { readRequestDetail } from "../../../requestsApi";
 import {
   requestKnownFacts,
@@ -15,6 +16,48 @@ type PageState =
   | { kind: "missing" }
   | { kind: "error" }
   | { kind: "ready"; detail: RequestDetailProjection };
+
+function samePrimaryAction(
+  left: RequestObjectPrimaryAction,
+  right: RequestObjectPrimaryAction,
+): boolean {
+  if (left.kind !== right.kind || left.label !== right.label) {
+    return false;
+  }
+  switch (left.kind) {
+    case "href":
+      if (right.kind !== "href") {
+        return false;
+      }
+      return left.href === right.href;
+    case "focus":
+      if (right.kind !== "focus") {
+        return false;
+      }
+      return left.targetId === right.targetId;
+    default: {
+      const _never: never = left;
+      return _never;
+    }
+  }
+}
+
+function northStarHref(href: string | undefined): string | null {
+  if (!href) {
+    return null;
+  }
+  if (
+    href.startsWith("/requests/") ||
+    href.startsWith("/quotes/") ||
+    href.startsWith("/jobs/") ||
+    href.startsWith("/products") ||
+    href.startsWith("/atelier") ||
+    href.startsWith("/execution/")
+  ) {
+    return href;
+  }
+  return null;
+}
 
 function ActionControl({
   action,
@@ -84,25 +127,28 @@ export function ResolutionField() {
   const known = requestKnownFacts(page.detail);
   const unresolved = requestUnresolvedItems(page.detail);
   const primary = requestResolutionPrimaryAction(page.detail);
+  const primaryShownInUnresolved = Boolean(
+    primary &&
+      unresolved.some((item) => item.action && samePrimaryAction(item.action, primary)),
+  );
 
   return (
     <article className="ui20-surface" data-surface="cerere" data-instrument="resolution">
       <h1>{page.detail.request.title}</h1>
-      <p className="ui20-kicker">
-        {page.detail.request.reference}. Cunoscutul e așezat. Nerezolvatul e vizibil.
-      </p>
+      <p className="ui20-kicker">{page.detail.request.reference}</p>
       <div className="ui20-resolution">
         <section className="ui20-plane" data-plane="known" aria-labelledby="known-heading">
           <h2 id="known-heading">Cunoscut</h2>
           <dl className="ui20-fact-list">
-            {known.map((fact) => (
-              <div key={fact.id} className="ui20-fact">
-                <dt>{fact.label}</dt>
-                <dd>
-                  {fact.href ? <Link to={fact.href}>{fact.value}</Link> : fact.value}
-                </dd>
-              </div>
-            ))}
+            {known.map((fact) => {
+              const href = northStarHref(fact.href);
+              return (
+                <div key={fact.id} className="ui20-fact">
+                  <dt>{fact.label}</dt>
+                  <dd>{href ? <Link to={href}>{fact.value}</Link> : fact.value}</dd>
+                </div>
+              );
+            })}
           </dl>
         </section>
         <section
@@ -133,13 +179,12 @@ export function ResolutionField() {
           )}
           <section id="request-installation" aria-labelledby="next-heading">
             <h2 id="next-heading">Următoarea acțiune</h2>
-            {primary ? (
+            {primary && !primaryShownInUnresolved ? (
               <p className="ui20-actions">
                 <ActionControl action={primary} />
               </p>
-            ) : (
-              <p>Nu există o acțiune operator pe această cerere.</p>
-            )}
+            ) : null}
+            {!primary ? <p>Nu există o acțiune operator pe această cerere.</p> : null}
           </section>
         </section>
       </div>

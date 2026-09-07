@@ -156,9 +156,9 @@ body {
 
 .ui20-main {
   flex: 1;
-  width: min(1280px, calc(100% - 2.5rem));
+  width: min(1360px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 1.75rem 0 3.5rem;
+  padding: 1.5rem 0 3rem;
 }
 
 .ui20-main:focus {
@@ -566,7 +566,7 @@ body {
 }
 
 .ui20-operator {
-  margin: 0 0 0 auto;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -617,12 +617,12 @@ body {
 
 .ui20-resolution {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 900px) {
   .ui20-resolution {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     align-items: start;
   }
 }
@@ -655,12 +655,12 @@ body {
 
 .ui20-instrument-config {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 @media (min-width: 900px) {
   .ui20-instrument-config {
-    grid-template-columns: minmax(16rem, 0.9fr) minmax(20rem, 1.1fr);
+    grid-template-columns: minmax(18rem, 1fr) minmax(22rem, 1.15fr);
     align-items: start;
   }
 }
@@ -668,9 +668,9 @@ body {
 .ui20-composition-map {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem 0.85rem;
+  gap: 0.35rem 0.15rem;
   align-items: center;
-  padding: 0.85rem;
+  padding: 1rem 0.35rem 1rem 0.85rem;
   background: var(--surface-primary);
 }
 
@@ -690,6 +690,11 @@ body {
   border-color: var(--edge-current);
   background: var(--wash-current);
   box-shadow: inset 3px 0 0 var(--edge-current);
+}
+
+.ui20-composition-map[data-confirmed="true"] .ui20-comp-node {
+  cursor: default;
+  color: var(--text-secondary);
 }
 
 .ui20-comp-item {
@@ -715,6 +720,14 @@ body {
   color: var(--edge-current);
 }
 
+.ui20-lens[data-lens="confirmed"] {
+  box-shadow: inset 3px 0 0 var(--edge-known);
+}
+
+.ui20-lens[data-lens="confirmed"] h2 {
+  color: var(--edge-known);
+}
+
 .ui20-lens .form-section {
   border: 0;
   margin: 0 0 1rem;
@@ -727,10 +740,21 @@ body {
 }
 
 .ui20-sheet {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 1.5rem 1.6rem 2rem;
-  background: var(--surface-elevated);
+  max-width: 48rem;
+  margin: 0;
+  padding: 0.25rem 0 2rem;
+  background: transparent;
+}
+
+.ui20-confirmed-roles {
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  color: var(--text-secondary);
+}
+
+.ui20-confirmed-roles li {
+  padding: 0.2rem 0;
 }
 
 .ui20-sheet h1 {
@@ -782,7 +806,7 @@ body {
 
 @media (min-width: 900px) {
   .ui20-traveler {
-    grid-template-columns: 0.8fr 1.2fr 0.8fr;
+    grid-template-columns: 0.7fr 1.55fr 0.75fr;
     align-items: start;
   }
 }
@@ -802,6 +826,7 @@ body {
 
 .ui20-lane[data-lane="current"] {
   box-shadow: inset 0 0 0 2px var(--edge-current);
+  padding: 1.25rem 1.15rem 1.45rem;
 }
 
 .ui20-lane[data-lane="current"] h2 {
@@ -848,7 +873,7 @@ body {
 }
 
 .ui20-station {
-  max-width: 36rem;
+  max-width: 42rem;
 }
 
 .ui20-station-active {
@@ -918,7 +943,13 @@ body {
   }
 
   .ui20-main {
-    width: calc(100% - 1.5rem);
+    width: calc(100% - 1.25rem);
+  }
+
+  .ui20-worklist,
+  .ui20-worklist tbody {
+    display: block;
+    width: 100%;
   }
 
   .ui20-surface h1,

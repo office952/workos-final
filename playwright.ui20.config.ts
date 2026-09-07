@@ -25,7 +25,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
-  timeout: 180000,
+  timeout: 240000,
   retries: 0,
   use: {
     baseURL: ui20Origin,

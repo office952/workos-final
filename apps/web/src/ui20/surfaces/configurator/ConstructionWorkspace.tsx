@@ -201,12 +201,11 @@ export function ConstructionWorkspace() {
     <article className="ui20-surface" data-surface="configurator" data-instrument="construction">
       <h1>{template.label}</h1>
       <p className="ui20-kicker">
-        Compoziție, nu pași. Lentila arată doar contextul selectat
         {request
-          ? `. Cerere ${request.request.reference}${
+          ? `${request.request.reference}${
               request.customerDisplayName ? ` · ${request.customerDisplayName}` : ""
-            }.`
-          : "."}
+            }`
+          : "Construcția produsului"}
       </p>
       <div className="ui20-instrument-config">
         <section aria-labelledby="composition-heading">
@@ -214,8 +213,9 @@ export function ConstructionWorkspace() {
           <div
             className="ui20-composition-map"
             data-composition
+            data-confirmed={confirmed ? "true" : "false"}
             role="toolbar"
-            aria-label="Roluri selectate"
+            aria-label="Roluri de construcție"
           >
             {row.map((node, index) => (
               <span key={node.id} className="ui20-comp-item">
@@ -227,8 +227,12 @@ export function ConstructionWorkspace() {
                 <button
                   type="button"
                   className="ui20-comp-node"
-                  aria-pressed={focusComponentId === node.id}
-                  onClick={() => setFocusComponentId(node.id)}
+                  aria-pressed={!confirmed && focusComponentId === node.id}
+                  onClick={() => {
+                    if (!confirmed) {
+                      setFocusComponentId(node.id);
+                    }
+                  }}
                 >
                   {nodeName(node)}
                 </button>
@@ -244,8 +248,12 @@ export function ConstructionWorkspace() {
                   <button
                     type="button"
                     className="ui20-comp-node"
-                    aria-pressed={focusComponentId === node.id}
-                    onClick={() => setFocusComponentId(node.id)}
+                    aria-pressed={!confirmed && focusComponentId === node.id}
+                    onClick={() => {
+                      if (!confirmed) {
+                        setFocusComponentId(node.id);
+                      }
+                    }}
                   >
                     {nodeName(node)}
                   </button>
@@ -253,8 +261,16 @@ export function ConstructionWorkspace() {
               ))}
           </div>
         </section>
-        <section className="ui20-lens" aria-labelledby="lens-heading">
-          <h2 id="lens-heading">Lentilă — {selected ? nodeName(selected) : "context"}</h2>
+        <section
+          className="ui20-lens"
+          data-lens={confirmed ? "confirmed" : "context"}
+          aria-labelledby="lens-heading"
+        >
+          <h2 id="lens-heading">
+            {confirmed
+              ? "Configurație confirmată"
+              : `Lentilă — ${selected ? nodeName(selected) : "context"}`}
+          </h2>
           {!confirmed ? (
             <div className="ui20-form">
               <FormRenderer
@@ -303,8 +319,15 @@ export function ConstructionWorkspace() {
           ) : null}
           {confirmed ? (
             <div>
-              <h3>Configurație confirmată</h3>
               <p>{confirmed.aggregate.inscription}</p>
+              <p className="ui20-meta">{confirmed.aggregate.productLabel}</p>
+              {confirmed.aggregate.components.length > 0 ? (
+                <ul className="ui20-confirmed-roles">
+                  {confirmed.aggregate.components.map((component) => (
+                    <li key={component.id}>{component.label}</li>
+                  ))}
+                </ul>
+              ) : null}
               <p className="ui20-actions">
                 <button type="button" onClick={() => void handleCreateQuote()} disabled={busy}>
                   {commercialPrimaryActionLabel("CREATE_QUOTE")}

@@ -53,10 +53,7 @@ export function JobsLaunch() {
   return (
     <article className="ui20-surface" data-surface="lucrari">
       <h1>Lucrări</h1>
-      <p className="ui20-kicker">
-        Listă de lucrări pe același motor. Nu este Acasă și nu înlocuiește runtime-ul
-        curent.
-      </p>
+      <p className="ui20-kicker">Lucrările eliberate pentru producție.</p>
       {jobs.length === 0 ? <p>Nicio lucrare încă.</p> : null}
       {jobs.map((job) => (
         <Link key={job.jobId} className="ui20-row" to={job.href}>

@@ -47,15 +47,17 @@ export function Ui20Shell({ children }: { children: ReactNode }) {
             <span>{destinationLabel(pathname)}</span>
           </nav>
           <ObjectContinuity />
-          {operational && operator ? (
-            <p className="ui20-operator">
-              <span>{operator.displayName}</span>
-              <button type="button" onClick={() => void logout()}>
-                Ieși
-              </button>
-            </p>
-          ) : null}
-          <ThemeSwitcher />
+          <div className="ui20-top-actions">
+            {operational && operator ? (
+              <p className="ui20-operator">
+                <span>{operator.displayName}</span>
+                <button type="button" onClick={() => void logout()}>
+                  Ieși
+                </button>
+              </p>
+            ) : null}
+            <ThemeSwitcher />
+          </div>
         </header>
         <main id="continut-principal" className="ui20-main" tabIndex={-1}>
           {children}

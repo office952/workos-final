@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Page } from "@playwright/test";
+import type { Browser, Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import {
   confirmCanonicalLettersOnPage,
@@ -23,6 +23,7 @@ function currentRuntimeOrigin(): string {
 }
 const EVIDENCE_DIR = join(process.cwd(), ".tmp", "ui20-vertical-pass-a");
 const EVIDENCE_B_DIR = join(process.cwd(), ".tmp", "ui20-vertical-pass-b");
+const EVIDENCE_C_DIR = join(process.cwd(), ".tmp", "ui20-vertical-pass-c");
 
 type JsonObject = Record<string, unknown>;
 
@@ -50,18 +51,60 @@ async function screenshotAt(page: Page, width: number, name: string) {
     path: join(EVIDENCE_B_DIR, `${name}-${width}.png`),
     fullPage: true,
   });
+  await page.screenshot({
+    path: join(EVIDENCE_C_DIR, `${name}-${width}.png`),
+    fullPage: true,
+  });
 }
 
-async function screenshotDark(page: Page, name: string) {
-  await page.setViewportSize({ width: 1440, height: 900 });
+async function screenshotDarkAt(page: Page, width: number, name: string) {
+  await page.setViewportSize({ width, height: 900 });
+  await noHorizontalOverflow(page);
   await page.getByRole("button", { name: "Întunecată" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.screenshot({
-    path: join(EVIDENCE_B_DIR, `${name}-1440-dark.png`),
+    path: join(EVIDENCE_C_DIR, `${name}-${width}-dark.png`),
     fullPage: true,
   });
+  if (width === 1440) {
+    await page.screenshot({
+      path: join(EVIDENCE_B_DIR, `${name}-1440-dark.png`),
+      fullPage: true,
+    });
+  }
   await page.getByRole("button", { name: "Deschisă" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+}
+
+async function screenshotDark(page: Page, name: string) {
+  await screenshotDarkAt(page, 1440, name);
+}
+
+async function writeContactSheet(
+  browser: Browser,
+  title: string,
+  frames: { label: string; file: string }[],
+  outName: string,
+  width: number,
+) {
+  const cells = await Promise.all(
+    frames.map(async (frame) => {
+      const bytes = await readFile(frame.file);
+      return `<figure><img src="data:image/png;base64,${bytes.toString("base64")}" alt="${frame.label}" /><figcaption>${frame.label}</figcaption></figure>`;
+    }),
+  );
+  const sheet = await browser.newPage();
+  await sheet.setContent(`<!doctype html><html><head><style>
+    body { margin: 0; background: #111; color: #eee; font: 16px/1.35 "IBM Plex Sans", sans-serif; }
+    h1 { margin: 20px 20px 8px; font-size: 20px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px; }
+    figure { margin: 0; background: #1a1a1a; }
+    img { width: 100%; height: auto; display: block; }
+    figcaption { padding: 10px 12px; }
+  </style></head><body><h1>${title}</h1><div class="grid">${cells.join("")}</div></body></html>`);
+  await sheet.setViewportSize({ width, height: 1100 });
+  await sheet.screenshot({ path: join(EVIDENCE_C_DIR, outName), fullPage: true });
+  await sheet.close();
 }
 
 test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engine", async ({
@@ -71,6 +114,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
 }) => {
   await mkdir(EVIDENCE_DIR, { recursive: true });
   await mkdir(EVIDENCE_B_DIR, { recursive: true });
+  await mkdir(EVIDENCE_C_DIR, { recursive: true });
   const person = await ensureTestExecutor(request);
   await configureTestExecutorPin(request, person.personId);
   const customerName = `Client UI20 ${Date.now()}`;
@@ -106,41 +150,61 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page.getByRole("heading", { name: "Cunoscut" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Nerezolvat" })).toBeVisible();
   await expect(page.locator(".ui20-top").getByRole("link", { name: "Atelier" })).toHaveCount(0);
-  const pick = page.getByRole("link", { name: "Alege produs" }).first();
+  await expect(page.getByRole("link", { name: "Alege produs" })).toHaveCount(1);
+  await expect(page.getByText("Cunoscutul e așezat")).toHaveCount(0);
+  const pick = page.getByRole("link", { name: "Alege produs" });
   await expect(pick).toBeVisible();
   await minTarget(page, pick);
-  await page.keyboard.press("Tab");
-  await expect(page.getByRole("link", { name: "Sari la conținut" })).toBeFocused();
   await screenshotAt(page, 1440, "cerere");
   await screenshotAt(page, 1280, "cerere");
   await screenshotAt(page, 768, "cerere");
-  await screenshotDark(page, "cerere");
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await pick.click();
+  await screenshotDarkAt(page, 1440, "cerere");
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await noHorizontalOverflow(page);
+  await page.setViewportSize({ width: 900, height: 900 });
+  await noHorizontalOverflow(page);
+  await page.goto(`/requests/${encodeURIComponent(requestId)}`);
+  await expect(page.locator('[data-surface="cerere"]')).toBeVisible();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Sari la conținut" })).toBeFocused();
+  await page.screenshot({
+    path: join(EVIDENCE_C_DIR, "cerere-keyboard-focus.png"),
+    fullPage: true,
+  });
+  await page.getByRole("link", { name: "Alege produs" }).click();
 
   await expect(page).toHaveURL(new RegExp(`/products\\?request=`));
   await expect(page.getByRole("heading", { name: "Alege produsul" })).toBeVisible();
+  await expect(page.getByText("fără recomandare")).toHaveCount(0);
+  await screenshotAt(page, 1280, "product-pick");
   await page.getByRole("link", { name: LETTERS_NAME }).click();
 
   await expect(page).toHaveURL(new RegExp(`/products/PRD-LETTERS-FRONTLIT-PLEXI-AL06\\?request=`));
   await expect(page.getByText(requestReference).first()).toBeVisible();
   await confirmCanonicalLettersOnPage(page, inscription);
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Lentilă/ })).toHaveCount(0);
   await expect(page.getByText("Preț final client")).toHaveCount(0);
   await expect(page.getByText(/624,82/)).toHaveCount(0);
+  await expect(page.getByText("Compoziție, nu pași")).toHaveCount(0);
   await expect(page.locator("[data-composition]")).toBeVisible();
-  await expect(page.locator("[data-composition] [aria-pressed='true']")).toHaveCount(1);
+  await expect(page.locator("[data-lens='confirmed']")).toBeVisible();
+  await expect(page.locator("[data-composition] [aria-pressed='true']")).toHaveCount(0);
   await screenshotAt(page, 1440, "configurator");
   await screenshotAt(page, 1280, "configurator");
   await screenshotAt(page, 768, "configurator");
-  await screenshotDark(page, "configurator");
+  await screenshotDarkAt(page, 1280, "configurator");
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await noHorizontalOverflow(page);
+  await page.setViewportSize({ width: 900, height: 900 });
+  await noHorizontalOverflow(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "Creează oferta" }).click();
 
   await expect(page).toHaveURL(/\/quotes\//);
   await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
   await expect(page.locator("[data-quote-value]")).toContainText("624,82");
-  await expect(page.getByText(/624,82/).first()).toBeVisible();
+  await expect(page.getByText(/624,82/)).toHaveCount(1);
   await expect(page.locator("[data-quote-state]")).toHaveText("Creată");
   await expect(page.getByText(customerName).first()).toBeVisible();
   await expect(page.getByText(requestReference).first()).toBeVisible();
@@ -166,7 +230,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page.locator("[data-job-state]")).toContainText("Eliberată");
   await expect(page.locator("[data-job-next]")).toContainText("Creează planul de execuție");
   await expect(page.getByRole("heading", { name: "Trecut" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Current" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Acum" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Următor" })).toBeVisible();
   await screenshotAt(page, 1440, "lucrare");
   await screenshotAt(page, 1280, "lucrare");
@@ -194,9 +258,11 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   const atelierExecution = atelierRow.getByRole("link", { name: "Deschide execuția" });
   await expect(atelierExecution).toBeVisible();
   await expect(page.locator("table.ui20-worklist")).toBeVisible();
+  await expect(page.getByText("Listă operațională, nu carduri")).toHaveCount(0);
   await screenshotAt(page, 1440, "atelier");
   await screenshotAt(page, 1280, "atelier");
   await screenshotAt(page, 768, "atelier");
+  await screenshotDarkAt(page, 1280, "atelier");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "Întunecată" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -466,5 +532,130 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
       "",
     ].join("\n"),
     "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_C_DIR, "manifest.json"),
+    JSON.stringify(
+      {
+        classification: "LOCAL_SYNTHETIC_ISOLATED",
+        pass: "C",
+        realData: false,
+        cloudWrite: false,
+        figmaWrite: false,
+        fixture: {
+          customerName,
+          requestId,
+          requestReference,
+          inscription,
+          productCode: "PRD-LETTERS-FRONTLIT-PLEXI-AL06",
+          quoteSnapshotId,
+          jobId,
+          planId,
+          taskId: atelierTaskId,
+        },
+        instruments: {
+          cerere: "resolution",
+          configurator: "construction",
+          oferta: "sheet",
+          lucrare: "traveler",
+          atelier: "dispatch",
+          execution: "workstation",
+        },
+        carryForward: {
+          cerereDuplicateCta: false,
+          configConfirmedLens: true,
+          designMetaCopyVisible: false,
+          skipLinkOpticalHygiene: true,
+        },
+        businessFactParity: "PASS",
+        configuratorCommercialPriceVisible: false,
+        ofertaCommercialValueVisible: true,
+        unconditionalAtelierGlobalLink: false,
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_C_DIR, "FIGMA_RUNTIME_RECONCILIATION.md"),
+    [
+      "# Figma → runtime final reconciliation",
+      "",
+      "File `0XP0yGa1siWQdTTL7ou8xz`. Mental models only. Specimen values were not copied.",
+      "",
+      "| Instrument | Mental model | Geometry | Hierarchy | Density | Typography | State energy | Action | Responsive | Dark | Continuity |",
+      "|---|---|---|---|---|---|---|---|---|---|---|",
+      "| Cerere | PASS | PARTIAL | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |",
+      "| Config | PASS | PARTIAL | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |",
+      "| Ofertă | PASS | PARTIAL | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |",
+      "| Lucrare | PASS | PARTIAL | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |",
+      "| Atelier | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |",
+      "| Execuție | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |",
+      "",
+      "Intentional differences:",
+      "- Isolated shell has no global L1 destinations from the Figma board.",
+      "- Runtime uses real request/product/quote/job facts, not specimen materials, rates, or 5.490 EUR.",
+      "- Desktop width is used as an operational plane; empty Figma gutters are not copied.",
+      "- Lucrare current lane is labeled Acum, not Current.",
+      "- After confirm, Config lens is a confirmed state, not the last edited role.",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_C_DIR, "OPTICAL_SELF_REVIEW.md"),
+    [
+      "# Pass C optical self-review",
+      "",
+      "Screenshots: `.tmp/ui20-vertical-pass-c/`.",
+      "Optical frames were captured before Tab. Skip-link visibility is only in `cerere-keyboard-focus.png`.",
+      "",
+      "## Tests",
+      "",
+      "- LOGO-OFF: destination + planes / composition / sheet / traveler / worklist / workstation remain identifiable.",
+      "- TITLE-OFF: Cunoscut/Nerezolvat, composition+lens, frozen value, Acum lane, worklist, current task still read.",
+      "- GRAYSCALE: selected/current/blocked remain via edge, wash, pressed, and labels.",
+      "- CONTAINER-OFF: no card-per-section grammar; worklists stay tabular; sheet is typographic.",
+      "- MOTION-OFF: no required understanding is lost.",
+      "- ANTI-ANONYMITY: six instruments keep distinct floorplans.",
+      "- INSTRUMENT: pages still read as work tools without branding.",
+      "- WIDTH UTILIZATION: 1440/1280 use the work plane; long copy stays measured on Ofertă.",
+      "- CTA SINGULARITY: one Alege produs on Cerere.",
+      "- STATE ENERGY BALANCE: terracotta only on blocked rows/items.",
+      "- MOBILE SCANABILITY: 768 stacks Cerere, keeps Config mini-map, stacks traveler, stacks worklist cells.",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  await writeContactSheet(
+    browser,
+    "UI20 Pass C — desktop instruments",
+    [
+      { label: "Cerere 1440", file: join(EVIDENCE_C_DIR, "cerere-1440.png") },
+      { label: "Configurator 1280", file: join(EVIDENCE_C_DIR, "configurator-1280.png") },
+      { label: "Ofertă 1440", file: join(EVIDENCE_C_DIR, "oferta-1440.png") },
+      { label: "Lucrare 1280", file: join(EVIDENCE_C_DIR, "lucrare-1280.png") },
+      { label: "Atelier 1280", file: join(EVIDENCE_C_DIR, "atelier-1280.png") },
+      { label: "Execuție 1440", file: join(EVIDENCE_C_DIR, "executie-1440.png") },
+      { label: "Cerere 1440 dark", file: join(EVIDENCE_C_DIR, "cerere-1440-dark.png") },
+      { label: "Ofertă 1440 dark", file: join(EVIDENCE_C_DIR, "oferta-1440-dark.png") },
+    ],
+    "PASS_C_DESKTOP_CONTACT_SHEET.png",
+    1600,
+  );
+  await writeContactSheet(
+    browser,
+    "UI20 Pass C — 768 instruments",
+    [
+      { label: "Cerere 768", file: join(EVIDENCE_C_DIR, "cerere-768.png") },
+      { label: "Configurator 768", file: join(EVIDENCE_C_DIR, "configurator-768.png") },
+      { label: "Ofertă 768", file: join(EVIDENCE_C_DIR, "oferta-768.png") },
+      { label: "Lucrare 768", file: join(EVIDENCE_C_DIR, "lucrare-768.png") },
+      { label: "Atelier 768", file: join(EVIDENCE_C_DIR, "atelier-768.png") },
+      { label: "Execuție 768", file: join(EVIDENCE_C_DIR, "executie-768.png") },
+    ],
+    "PASS_C_MOBILE_CONTACT_SHEET.png",
+    1400,
   );
 });

@@ -115,9 +115,7 @@ export function ProductionTraveler() {
   return (
     <article className="ui20-surface" data-surface="lucrare" data-instrument="traveler">
       <h1>{item.inscription}</h1>
-      <p className="ui20-kicker">
-        {item.customerDisplayName ?? "—"} · Unde este lucrarea acum, ce s-a întâmplat, ce urmează.
-      </p>
+      <p className="ui20-kicker">{item.customerDisplayName ?? "—"} · Poziția în producție</p>
       <div className="ui20-traveler">
         <section className="ui20-lane" data-lane="past" aria-labelledby="job-past">
           <h2 id="job-past">Trecut</h2>
@@ -130,7 +128,7 @@ export function ProductionTraveler() {
           </ul>
         </section>
         <section className="ui20-lane" data-lane="current" aria-labelledby="job-now">
-          <h2 id="job-now">Current</h2>
+          <h2 id="job-now">Acum</h2>
           <p>
             <strong>{traveler.current.title}</strong>
           </p>

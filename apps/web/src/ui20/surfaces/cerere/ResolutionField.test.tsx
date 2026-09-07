@@ -67,7 +67,9 @@ describe("ResolutionField", () => {
     expect(document.querySelector('[data-plane="known"]')).toBeTruthy();
     expect(document.querySelector('[data-plane="unresolved"]')).toBeTruthy();
     expect(screen.getByText("Nu există încă o ofertă legată")).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Alege produs" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Alege produs" })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Următoarea acțiune" })).toBeInTheDocument();
+    expect(screen.queryByText("Cunoscutul e așezat")).not.toBeInTheDocument();
     expect(screen.queryByText("Produsul nu este ales")).not.toBeInTheDocument();
   });
 });

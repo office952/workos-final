@@ -78,7 +78,7 @@ export function DispatchFloor() {
     return (
       <article className="ui20-surface" data-surface="atelier" data-instrument="dispatch">
         <h1>Atelier</h1>
-        <p className="ui20-kicker">Podea de dispecerat. Identifică operatorul.</p>
+        <p className="ui20-kicker">Identifică operatorul ca să vezi lucrările disponibile.</p>
         {expired ? <p>Sesiunea operatorului a expirat.</p> : null}
         <OperatorIdentifyForm onIdentified={() => setReloadToken((value) => value + 1)} />
       </article>
@@ -93,9 +93,7 @@ export function DispatchFloor() {
   return (
     <article className="ui20-surface" data-surface="atelier" data-instrument="dispatch">
       <h1>Atelier</h1>
-      <p className="ui20-kicker">
-        {page.inbox.operator.displayName}. Listă operațională, nu carduri.
-      </p>
+      <p className="ui20-kicker">{page.inbox.operator.displayName}</p>
       {notice ? <p className="ui20-error">{notice}</p> : null}
       {rows.length === 0 ? (
         <p>Niciun task disponibil.</p>

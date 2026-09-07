@@ -80,8 +80,7 @@ export function ProductPickBridge() {
       <h1>Alege produsul</h1>
       <p className="ui20-kicker">
         {page.requestReference ?? "Cerere"}
-        {page.customerName ? ` · ${page.customerName}` : ""}. Doar produsele disponibile, fără
-        recomandare.
+        {page.customerName ? ` · ${page.customerName}` : ""}
       </p>
       {page.products.length === 0 ? (
         <p>Nu există produse disponibile.</p>
