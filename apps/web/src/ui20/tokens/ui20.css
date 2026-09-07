@@ -995,3 +995,103 @@ body {
     align-self: center;
   }
 }
+
+.ui20-registry-head {
+  margin-bottom: 1.25rem;
+}
+
+.ui20-registry-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ui20-registry-pulse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.85rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.ui20-registry-pulse [data-energy="blocked"] {
+  color: var(--status-blocked);
+}
+
+.ui20-registry-toolbar {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0 0 1.25rem;
+}
+
+.ui20-registry-toolbar-primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.ui20-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ui20-filter-chip {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ui20-filter-chip[data-selected="true"],
+.ui20-filter-chip[aria-pressed="true"] {
+  background: var(--surface-selected);
+  border-color: var(--border-strong);
+}
+
+.ui20-filter-chip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.ui20-registry-count {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.ui20-registry-search input {
+  width: min(100%, 28rem);
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-elevated);
+  color: inherit;
+  font: inherit;
+}
+
+.ui20-attention {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--status-blocked);
+  font-size: 0.85rem;
+}
+
+.ui20-surface[data-floorplan="registry"] .ui20-worklist,
+.ui20-surface[data-floorplan="commercial-register"] .ui20-worklist,
+.ui20-surface[data-floorplan="relationship-workspace"] .ui20-worklist {
+  margin-top: 0.35rem;
+}
+
+.ui20-main {
+  width: min(1480px, calc(100% - 2rem));
+}
