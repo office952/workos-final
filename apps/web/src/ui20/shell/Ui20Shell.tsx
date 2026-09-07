@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useOperatorSession } from "../../OperatorSessionContext";
 import { ThemeSwitcher } from "../../theme/ThemeSwitcher";
 import { ContinuityProvider, ObjectContinuity } from "./ObjectContinuity";
@@ -56,9 +56,6 @@ export function Ui20Shell({ children }: { children: ReactNode }) {
             </p>
           ) : null}
           <ThemeSwitcher />
-          {pathname !== "/atelier" ? (
-            <Link to="/atelier">Atelier</Link>
-          ) : null}
         </header>
         <main id="continut-principal" className="ui20-main" tabIndex={-1}>
           {children}

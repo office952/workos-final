@@ -48,14 +48,22 @@ describe("requestResolutionView", () => {
     expect(JSON.stringify(known)).not.toContain("16,00");
   });
 
-  it("marks a missing product as unresolved only when no linked quote exists", () => {
+  it("marks a missing linked offer without inventing product state", () => {
     const open = requestUnresolvedItems(base);
-    expect(open.some((item) => item.id === "product")).toBe(true);
-    expect(open.find((item) => item.id === "product")?.action).toEqual({
-      kind: "href",
-      label: "Alege produs",
-      href: "/products?request=crq%3A11111111-2222-3333-4444-555555555555",
+    const unresolved = open.find((item) => item.id === "linked-offer");
+    expect(unresolved).toEqual({
+      id: "linked-offer",
+      title: "Nu există încă o ofertă legată",
+      cause: "Cererea nu are o ofertă legată.",
+      consequence: "Continuă produsul sau configurarea înainte să poată exista oferta.",
+      energy: "open",
+      action: {
+        kind: "href",
+        label: "Alege produs",
+        href: "/products?request=crq%3A11111111-2222-3333-4444-555555555555",
+      },
     });
+    expect(JSON.stringify(open)).not.toContain("Produsul nu este ales");
 
     const withQuote = requestUnresolvedItems({
       ...base,
@@ -85,6 +93,6 @@ describe("requestResolutionView", () => {
         },
       ],
     });
-    expect(withQuote.some((item) => item.id === "product")).toBe(false);
+    expect(withQuote.some((item) => item.id === "linked-offer")).toBe(false);
   });
 });

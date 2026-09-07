@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   commercialPrimaryActionLabel,
-  type CommercialPriceProjection,
   type DraftValues,
   type ProductAggregate,
   type ProductDefinition,
@@ -10,7 +9,6 @@ import {
 } from "@workos-final/domain";
 import { projectConstructionComposition } from "../../../constructionCompositionModel";
 import { FormRenderer } from "../../../FormRenderer";
-import { formatMoney } from "../../../formatDisplay";
 import {
   compileConfiguration,
   confirmReviewedConfiguration,
@@ -30,7 +28,6 @@ type PageState =
 type ConfirmedState = {
   definition: ProductDefinition;
   aggregate: ProductAggregate;
-  commercialPrice: CommercialPriceProjection;
 };
 
 export function ConstructionWorkspace() {
@@ -139,7 +136,6 @@ export function ConstructionWorkspace() {
         setConfirmed({
           definition,
           aggregate: result.aggregate,
-          commercialPrice: result.commercialPrice,
         });
         setDefinition(null);
       } else if (result.reason === "review_mismatch") {
@@ -262,14 +258,6 @@ export function ConstructionWorkspace() {
         <section className="ui20-cluster">
           <h2>Configurație confirmată</h2>
           <p>{confirmed.aggregate.inscription}</p>
-          {confirmed.commercialPrice.grossPrice !== null ? (
-            <p>
-              Preț final client: {formatMoney(confirmed.commercialPrice.grossPrice)}{" "}
-              {confirmed.commercialPrice.currency}
-            </p>
-          ) : (
-            <p>Prețul clientului nu este disponibil pe această configurație.</p>
-          )}
           <p className="ui20-actions">
             <button type="button" onClick={() => void handleCreateQuote()} disabled={busy}>
               {commercialPrimaryActionLabel("CREATE_QUOTE")}

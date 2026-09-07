@@ -133,10 +133,11 @@ export function requestUnresolvedItems(
 
   if (detail.request.status !== "CANCELLED" && detail.linkedOffers.length === 0) {
     items.push({
-      id: "product",
-      title: "Produsul nu este ales",
-      cause: "Cererea nu are încă o ofertă legată.",
-      consequence: "Alege produsul și configurează-l ca să poți oferi.",
+      id: "linked-offer",
+      title: "Nu există încă o ofertă legată",
+      cause: "Cererea nu are o ofertă legată.",
+      consequence:
+        "Continuă produsul sau configurarea înainte să poată exista oferta.",
       energy: "open",
       action:
         primary?.kind === "href" && primary.label === "Alege produs"

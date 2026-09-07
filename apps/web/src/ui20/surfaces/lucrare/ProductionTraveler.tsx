@@ -113,8 +113,8 @@ export function ProductionTraveler() {
     <article className="ui20-surface" data-surface="lucrare">
       <h1>{item.inscription}</h1>
       <p className="ui20-kicker">
-        Traveler de producție. Comanda, eliberarea și planul rămân pași expliciți. Nu sărim la
-        execuție înainte să existe.
+        Traveler de producție. Comanda, eliberarea și planul rămân pași expliciți. După plan,
+        continuarea verticală este atelierul.
       </p>
       <section className="ui20-cluster" aria-labelledby="job-now">
         <h2 id="job-now">Unde este lucrarea</h2>
@@ -180,15 +180,17 @@ export function ProductionTraveler() {
               {commercialPrimaryActionLabel("CREATE_EXECUTION_PLAN")}
             </button>
           ) : null}
+          {item.planId ? (
+            <Link to="/atelier" data-next-action="OPEN_ATELIER">
+              Deschide atelierul
+            </Link>
+          ) : null}
           {executionHref &&
           (item.nextAction === "OPEN_EXECUTION" ||
             item.nextAction === "CONTINUE_EXECUTION" ||
             item.nextAction === "VIEW_COMPLETED") ? (
-            <Link to={executionHref} data-next-action={item.nextAction}>
-              {commercialPrimaryActionLabel("OPEN_EXECUTION")}
-            </Link>
+            <Link to={executionHref}>{commercialPrimaryActionLabel("OPEN_EXECUTION")}</Link>
           ) : null}
-          {item.planId ? <Link to="/atelier">Deschide atelierul</Link> : null}
         </p>
       </section>
       {notice ? <p className="ui20-error">{notice}</p> : null}

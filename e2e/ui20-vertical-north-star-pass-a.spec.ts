@@ -81,7 +81,8 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   const requestReference = requestDetail.detail?.request?.reference ?? "";
   expect(requestReference).toMatch(/^CER-/);
   await expect(page.getByText(requestReference).first()).toBeVisible();
-  await expect(page.getByText("Produsul nu este ales")).toBeVisible();
+  await expect(page.getByText("Nu există încă o ofertă legată")).toBeVisible();
+  await expect(page.getByText("Produsul nu este ales")).toHaveCount(0);
   const pick = page.getByRole("link", { name: "Alege produs" }).first();
   await expect(pick).toBeVisible();
   await minTarget(page, pick);
@@ -101,7 +102,8 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page.getByText(requestReference).first()).toBeVisible();
   await confirmCanonicalLettersOnPage(page, inscription);
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
-  await expect(page.getByText(/624,82/)).toBeVisible();
+  await expect(page.getByText("Preț final client")).toHaveCount(0);
+  await expect(page.getByText(/624,82/)).toHaveCount(0);
   await screenshotAt(page, 1440, "configurator");
   await screenshotAt(page, 1280, "configurator");
   await screenshotAt(page, 768, "configurator");
@@ -111,6 +113,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await expect(page).toHaveURL(/\/quotes\//);
   await expect(page.getByRole("heading", { name: inscription })).toBeVisible();
   await expect(page.locator("[data-quote-value]")).toContainText("624,82");
+  await expect(page.getByText(/624,82/).first()).toBeVisible();
   await expect(page.locator("[data-quote-state]")).toHaveText("Creată");
   await expect(page.getByText(customerName).first()).toBeVisible();
   await expect(page.getByText(requestReference).first()).toBeVisible();
@@ -138,18 +141,47 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await screenshotAt(page, 768, "lucrare");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
-  await expect(page.getByRole("link", { name: "Deschide execuția" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Deschide atelierul" })).toBeVisible();
   const jobId = decodeURIComponent(new URL(page.url()).pathname.replace("/jobs/", ""));
 
-  await page.getByRole("link", { name: "Deschide execuția" }).click();
-  await expect(page).toHaveURL(/\/execution\//);
+  await page.getByRole("link", { name: "Deschide atelierul" }).click();
+  await expect(page).toHaveURL(/\/atelier$/);
+  await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
   await identifyTestExecutorOnPage(page);
-  const planId = decodeURIComponent(new URL(page.url()).pathname.replace("/execution/", ""));
+  await expect(page.getByText(inscription).first()).toBeVisible();
+  const atelierRow = page
+    .locator(".ui20-task")
+    .filter({ hasText: inscription })
+    .filter({ hasText: "Debitare foaie CNC" })
+    .filter({ hasText: "Față" })
+    .first();
+  await expect(atelierRow).toBeVisible();
+  const atelierTaskId = await atelierRow.getAttribute("data-task-id");
+  expect(atelierTaskId).toBeTruthy();
+  const atelierExecution = atelierRow.getByRole("link", { name: "Deschide execuția" });
+  await expect(atelierExecution).toBeVisible();
+  await screenshotAt(page, 1440, "atelier");
+  await screenshotAt(page, 1280, "atelier");
+  await screenshotAt(page, 768, "atelier");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("button", { name: "Întunecată" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.screenshot({ path: join(EVIDENCE_DIR, "atelier-1440-dark.png"), fullPage: true });
+  await page.getByRole("button", { name: "Deschisă" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await atelierExecution.click();
+
+  await expect(page).toHaveURL(/\/execution\//);
+  if ((await page.locator("form.operator-identify-form").count()) > 0) {
+    await identifyTestExecutorOnPage(page);
+  }
+  const planId = decodeURIComponent(new URL(page.url()).pathname.replace("/execution/", "").split("?")[0] ?? "");
   const startable = page
     .locator(".ui20-task")
     .filter({ hasText: "Debitare foaie CNC" })
     .filter({ hasText: "Față" })
     .first();
+  await expect(startable).toHaveAttribute("data-task-id", atelierTaskId as string);
   await expect(startable.getByRole("button", { name: "Alocă utilaj" })).toBeVisible({ timeout: 15000 });
   await startable.getByLabel("Utilaj dedicat").selectOption({ label: "CNC 4020" });
   await startable.getByRole("button", { name: "Alocă utilaj" }).click();
@@ -164,27 +196,17 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
   await startable.getByRole("button", { name: "Pornește" }).click();
   await expect(startable.getByText("În lucru")).toBeVisible();
   await page.reload();
-  await expect(page.getByText("În lucru").first()).toBeVisible();
+  const persisted = page
+    .locator(".ui20-task")
+    .filter({ hasText: "Debitare foaie CNC" })
+    .filter({ hasText: "Față" })
+    .first();
+  await expect(persisted).toHaveAttribute("data-task-id", atelierTaskId as string);
+  await expect(persisted.getByText("În lucru")).toBeVisible();
   await screenshotAt(page, 1440, "executie");
   await screenshotAt(page, 1280, "executie");
   await screenshotAt(page, 768, "executie");
   await page.setViewportSize({ width: 1440, height: 900 });
-
-  await page.goto("/atelier");
-  await expect(page.getByRole("heading", { name: "Atelier" })).toBeVisible();
-  if ((await page.locator("form.operator-identify-form").count()) > 0) {
-    await identifyTestExecutorOnPage(page);
-  }
-  await expect(page.getByText(inscription).first()).toBeVisible();
-  await screenshotAt(page, 1440, "atelier");
-  await screenshotAt(page, 1280, "atelier");
-  await screenshotAt(page, 768, "atelier");
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.getByRole("button", { name: "Întunecată" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.screenshot({ path: join(EVIDENCE_DIR, "atelier-1440-dark.png"), fullPage: true });
-  await page.getByRole("button", { name: "Deschisă" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
   const quoteApi = (await (
     await request.get(`/api/quotes/${encodeURIComponent(quoteSnapshotId)}`)
@@ -249,6 +271,7 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
           quoteSnapshotId,
           jobId,
           planId,
+          taskId: atelierTaskId,
         },
         routes: {
           cerere: `/requests/${requestId}`,
@@ -262,10 +285,64 @@ test("UI20_VERTICAL_NORTH_STAR_PASS_A walks Cerere to Execuție on the same engi
         businessFactParity: "PASS",
         sameApi: true,
         sameIds: true,
+        sameTaskId: atelierTaskId,
+        verticalE2eOrder: "LUCRARE_TO_ATELIER_TO_EXECUTION",
+        configuratorCommercialPriceVisible: false,
+        ofertaCommercialValueVisible: true,
+        requestInventedProductState: false,
       },
       null,
       2,
     ),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_DIR, "routes.md"),
+    [
+      "# UI20 Pass A routes",
+      "",
+      `- Cerere: /requests/${requestId}`,
+      `- Product Pick: /products?request=${requestId}`,
+      `- Configurator: /products/PRD-LETTERS-FRONTLIT-PLEXI-AL06?request=${requestId}`,
+      `- Ofertă: /quotes/${quoteSnapshotId}`,
+      `- Lucrare: /jobs/${jobId}`,
+      `- Atelier: /atelier`,
+      `- Execuție: /execution/${planId}`,
+      `- Task: ${atelierTaskId}`,
+      "",
+      "Order: Lucrare → Atelier row → Deschide execuția → Workstation",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_DIR, "fixture-classification.md"),
+    [
+      "# Fixture classification",
+      "",
+      "LOCAL_SYNTHETIC_ISOLATED",
+      "REAL_DATA = NO",
+      "CLOUD_WRITE = NO",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  await writeFile(
+    join(EVIDENCE_DIR, "parity.md"),
+    [
+      "# Business fact parity",
+      "",
+      `inscription: ${inscription}`,
+      `requestReference: ${requestReference}`,
+      `customerName: ${customerName}`,
+      `quoteSnapshotId: ${quoteSnapshotId}`,
+      `jobId: ${jobId}`,
+      `planId: ${planId}`,
+      `taskId: ${atelierTaskId}`,
+      "grossDisplay: 624,82 (Ofertă + API only; Configurator hidden)",
+      "BUSINESS_FACT_PARITY = PASS",
+      "",
+    ].join("\n"),
     "utf8",
   );
 });

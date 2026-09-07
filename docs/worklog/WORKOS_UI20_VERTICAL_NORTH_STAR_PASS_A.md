@@ -41,6 +41,18 @@ TYPECHECK                 = PASS
 LINT                      = PASS  warnings only; pre-existing plus ObjectContinuity export
 BUILD                     = PASS  current vite index.html bundle
 BUSINESS_FACT_PARITY      = PASS
+REQUEST_INVENTED_PRODUCT_STATE = NO
+CONFIGURATOR_COMMERCIAL_PRICE_VISIBLE = NO
+OFERTA_COMMERCIAL_VALUE_VISIBLE = YES
+VERTICAL_E2E_ORDER        = LUCRARE_TO_ATELIER_TO_EXECUTION
+UNCONDITIONAL_ATELIER_GLOBAL_LINK = NO
 ```
+
+Targeted Pass A correction (not Pass B):
+
+- Cerere unresolved copy states only the missing linked offer. It does not invent chosen-product state.
+- Configurator keeps compile/confirm and the quote transition. Frozen commercial value appears on Ofertă only.
+- After Execution Plan, Lucrare continues to Atelier. Execuție opens from the real DispatchFloor row.
+- Ui20 shell has no unconditional Atelier shortcut. Continuation stays on the object.
 
 Evidence (gitignored, not committed): `.tmp/ui20-vertical-pass-a/`
