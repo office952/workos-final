@@ -21,7 +21,7 @@ function isolatedEnv(extra: Record<string, string>): NodeJS.ProcessEnv {
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: "**/ui20-vertical-north-star-pass-a.spec.ts",
+  testMatch: ["**/ui20-vertical-north-star-pass-a.spec.ts", "**/ui20-coverage-1.spec.ts"],
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
