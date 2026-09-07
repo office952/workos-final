@@ -90,13 +90,23 @@ export async function configureCanonicalLettersForRequest(page: Page, requestId:
     .click();
 }
 
+async function selectUi20CompositionRole(page: Page, name: string) {
+  const role = page.locator("[data-composition]").getByRole("button", { name, exact: true });
+  if ((await role.count()) > 0) {
+    await role.click();
+  }
+}
+
 export async function confirmCanonicalLettersOnPage(
   page: Page,
   inscription: string,
 ) {
+  await selectUi20CompositionRole(page, "Produs");
   await page.getByLabel("Textul literelor").fill(inscription);
+  await selectUi20CompositionRole(page, "Față");
   await page.locator('select[name="face.finish"]').selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+  await selectUi20CompositionRole(page, "Volum");
   await page.locator('select[name="volume.depthMm"]').selectOption("60");
   await page.locator('select[name="volume.finish"]').selectOption("none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");

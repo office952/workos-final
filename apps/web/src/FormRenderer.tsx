@@ -14,6 +14,7 @@ type FormRendererProps = {
   schema: FormSchema;
   values: DraftValues;
   onChange: (fieldId: string, value: DraftValue) => void;
+  focusComponentId?: string;
 };
 
 function FieldControl({
@@ -91,12 +92,16 @@ export function FormRenderer({
   schema,
   values,
   onChange,
+  focusComponentId,
 }: FormRendererProps) {
   const selectedIds = selectedComponentIds(template, values);
+  const sections = focusComponentId
+    ? schema.sections.filter((section) => section.componentId === focusComponentId)
+    : schema.sections;
 
   return (
     <div className="form-stack">
-      {schema.sections.map((section) => {
+      {sections.map((section) => {
         const visibleFields = section.fields.filter((field) =>
           isFieldVisible(field, values, selectedIds),
         );

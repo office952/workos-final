@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:ui20": "vite --config vite.ui20.config.ts",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test": "vitest run",

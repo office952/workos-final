@@ -23,6 +23,8 @@ export default defineConfig({
     "**/hf-wave4-resources-admin-reuse.spec.ts",
     "**/hf-wave5-regression-accessibility-screenshot.spec.ts",
     "**/architecture-c-wave1-resources.spec.ts",
+    "**/ui20-vertical-north-star-pass-a.spec.ts",
+    "**/ui20-coverage-1.spec.ts",
   ],
   fullyParallel: false,
   workers: 1,
