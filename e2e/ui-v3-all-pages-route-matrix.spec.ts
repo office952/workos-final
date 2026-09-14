@@ -430,7 +430,7 @@ test.describe("UI V3 all existing routes matrix", () => {
     const primaryBox = await primary.boundingBox();
     expect(primaryBox && primaryBox.height >= 44 && primaryBox.width >= 44).toBeTruthy();
 
-    await page.getByRole("button", { name: "Cont" }).click();
+    await page.locator(".identity-menu-trigger").click();
     await expect(page.getByRole("dialog", { name: "Datele contului" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog", { name: "Datele contului" })).toBeHidden();

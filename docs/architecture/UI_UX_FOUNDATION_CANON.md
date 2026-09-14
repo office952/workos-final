@@ -168,6 +168,8 @@ Compact rows. Create form uses `Field`. Retired list is secondary.
 
 ## Product configuration / result pattern
 
+Configurator presentation architecture is frozen in `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md`. Reuse those patterns. Do not freeze field inventory or Product Truth. `UI_UX_FRAMEWORK_FROZEN_V1 = YES`. `NEXT_PROGRAM = CONFIGURATOR_FORM_COMPLETENESS`. During form completeness, do not redesign the floorplan without an explicit Owner reopen.
+
 While editing, the form leads. Construction facts are a compact summary of supplied identity, not editable fields. Readiness is a short problem list from backend missing labels.
 
 Review is a concise operator summary. Confirm is primary. Modify is secondary.

@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { identityMenuTrigger } from "./account";
 
 const COMMERCIAL_LABELS = new Set(["Clienți", "Oferte", "Catalog"]);
 const MORE_LABELS = new Set([
@@ -53,7 +54,7 @@ export async function openMorePanel(page: Page) {
 }
 
 export async function openContMenu(page: Page) {
-  const trigger = page.getByRole("button", { name: "Cont" });
+  const trigger = identityMenuTrigger(page);
   if ((await trigger.getAttribute("aria-expanded")) !== "true") {
     await trigger.click();
   }
@@ -87,7 +88,7 @@ export async function expectUi20DesktopShell(page: Page) {
   await expect(primaryNav(page).getByRole("link", { name: "Lucrări" })).toBeVisible();
   await expect(primaryNav(page).getByRole("link", { name: "Atelier" })).toBeVisible();
   await expect(primaryNav(page).getByRole("button", { name: "Mai multe" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Cont" })).toBeVisible();
+  await expect(identityMenuTrigger(page)).toBeVisible();
   await expect(primaryNav(page).getByRole("link", { name: "Acasă" })).toHaveCount(0);
   await expect(page.locator(".app-sidebar-desktop")).toHaveCount(0);
 }

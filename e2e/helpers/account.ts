@@ -1,11 +1,15 @@
 import { expect, type Page } from "@playwright/test";
 
+export function identityMenuTrigger(page: Page) {
+  return page.locator(".identity-menu-trigger");
+}
+
 export async function openAccountMenu(page: Page): Promise<void> {
   const panel = page.getByRole("dialog", { name: "Datele contului" });
   if (await panel.isVisible()) {
     return;
   }
-  await page.getByRole("button", { name: "Cont", exact: true }).click();
+  await identityMenuTrigger(page).click();
   await expect(panel).toBeVisible();
 }
 

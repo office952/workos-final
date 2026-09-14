@@ -98,7 +98,7 @@ describe("ProductConfigurationPage", () => {
         name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Material față: Plexiglas 3 mm opal")).toBeInTheDocument();
+    expect(screen.getByText("Plexiglas 3 mm opal")).toBeInTheDocument();
     expect(screen.getByLabelText("Textul literelor")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Verifică configurația" })).toBeInTheDocument();
     expect(screen.queryByText("PRD-LETTERS-FRONTLIT-PLEXI-AL06")).not.toBeInTheDocument();

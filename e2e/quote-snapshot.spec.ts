@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 const productName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -13,10 +14,10 @@ async function confirmLetters(
   await page.goto("/products");
   await page.getByRole("link", { name: productName }).click();
   await page.getByLabel("Textul literelor").fill(values.inscription);
-  await page.getByLabel("Finisaj față").selectOption("none");
+  await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption(values.depth);
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", values.depth);
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

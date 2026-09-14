@@ -2,6 +2,7 @@ import { expect, test } from "./fixtures";
 import { selectOrCreateCustomer } from "./helpers/customers";
 import { clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { productChoiceGroup, selectProductChoice } from "./helpers/productChoices";
 
 test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({ page }) => {
   await page.goto("/");
@@ -20,10 +21,10 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
 
   await page.getByRole("link", { name: "Panou ACM casetat" }).click();
   await expect(page.getByRole("heading", { name: "Panou ACM casetat" })).toBeVisible();
-  await expect(page.getByText("Material casetă: ACM 3 mm")).toBeVisible();
-  await expect(page.getByText("Cadru intern: Profil oțel")).toBeVisible();
-  await expect(page.getByText("Iluminare: Fără iluminare")).toBeVisible();
-  await expect(page.getByLabel("Sistem de prindere")).toBeVisible();
+  await expect(page.getByText("ACM 3 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Profil oțel", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fără iluminare", { exact: true })).toBeVisible();
+  await expect(productChoiceGroup(page, "Sistem de prindere")).toBeVisible();
   await expect(page.getByText("PRD-ACM-CASSETTE-NONE")).toHaveCount(0);
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-config-initial.png",
@@ -31,20 +32,22 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
   });
 
   await page.getByLabel("Denumire lucrare").fill("PANOU ACM");
-  await page.getByLabel("Sistem de prindere").selectOption("steel_angle");
+  await selectProductChoice(page, "Sistem de prindere", "steel_angle");
   await page.getByLabel("Lățime exterioară (mm)").fill("1000");
   await page.getByLabel("Înălțime exterioară (mm)").fill("500");
-  await page.getByLabel("Adâncime casetă (mm)").selectOption("40");
-  await page.getByLabel("Număr de îndoituri").selectOption("2");
+  await selectProductChoice(page, "Adâncime casetă (mm)", "40");
+  await selectProductChoice(page, "Număr de îndoituri", "2");
   await page.screenshot({
     path: "docs/worklog/screenshots/acm-config-filled.png",
     fullPage: true,
   });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
+  await expect(page.getByRole("heading", { name: "Configurare Panou ACM" })).toBeVisible();
+  await expect(page.getByText("Revizuiește configurația înainte de confirmare.")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
 
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();

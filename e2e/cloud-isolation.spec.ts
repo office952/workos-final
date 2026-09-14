@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { expectAccountOrganization, switchOrganization } from "./helpers/account";
+import { expectAccountOrganization, identityMenuTrigger, switchOrganization } from "./helpers/account";
 import { clickPrimaryDestination } from "./helpers/navigation";
 
 function requiredEnv(name: string): string | undefined {
@@ -83,7 +83,7 @@ test.describe("Cloud two-organization isolation", () => {
     await switchOrganization(page, orgB);
     await expectAccountOrganization(page, orgB);
     await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Cont" })).toBeVisible();
+    await expect(identityMenuTrigger(page)).toBeVisible();
     await clickPrimaryDestination(page, "Atelier");
     await expect(page.getByRole("button", { name: "Identifică-te" })).toBeVisible();
     await clickPrimaryDestination(page, "Clienți");

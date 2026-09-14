@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { setTheme } from "./helpers/account";
+import { identityMenuTrigger, setTheme } from "./helpers/account";
 import { createCommercialOrder, createCommercialPlan, releaseCommercialOrder, uniqueJobInscription } from "./helpers/jobs";
 import { destinationLink } from "./helpers/navigation";
 import { createCommercialQuote, uniqueQuoteInscription } from "./helpers/quotes";
@@ -59,7 +59,7 @@ test("stable job and quote routes refresh, theme and responsive shell", async ({
   await page.screenshot({ path: shot("job-1280-light"), fullPage: true });
   await page.setViewportSize({ width: 768, height: 1024 });
   await expect(page.getByRole("group", { name: "Utilitare" })).toBeVisible();
-  await expect(page.getByLabel("Cont", { exact: true })).toBeVisible();
+  await expect(identityMenuTrigger(page)).toBeVisible();
   await expect(page.getByRole("button", { name: "Meniu" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Navigare principală" })).toBeHidden();
   await page.screenshot({ path: shot("job-768-light"), fullPage: true });

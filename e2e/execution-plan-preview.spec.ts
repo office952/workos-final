@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 async function confirmLetters(
   page: import("@playwright/test").Page,
@@ -17,13 +18,13 @@ async function confirmLetters(
     })
     .click();
   await page.getByLabel("Textul literelor").fill("WORKOS");
-  await page.getByLabel("Finisaj față").selectOption(values.faceFinish);
+  await selectProductChoice(page, "Finisaj față", values.faceFinish);
   if (values.faceColor) {
     await page.getByLabel("Culoare față").fill(values.faceColor);
   }
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption(values.volumeFinish);
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", values.volumeFinish);
   if (values.volumeColor) {
     await page.getByLabel("Culoare volum").fill(values.volumeColor);
   }

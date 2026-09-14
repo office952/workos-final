@@ -15,6 +15,11 @@ import type {
   QuoteSnapshot,
 } from "@workos-final/domain";
 import {
+  CANONICAL_PRODUCT_CODE,
+  getFormSchemaForTemplate,
+  getProductTemplate,
+} from "@workos-final/domain";
+import {
   AcceptedSnapshotSection,
   CommercialPriceSection,
   ConfiguratorSummary,
@@ -25,8 +30,9 @@ import {
   EicSection,
   InstallationScopeSection,
   ReadinessNotice,
-  ReviewPanel,
 } from "./ProductConfigurationViews";
+import { ConfiguratorWorkspace } from "./configurator/ConfiguratorWorkspace";
+import { projectConfiguratorView } from "./configurator/configuratorView";
 
 const template: ProductTemplate = {
   code: "PRD-TEST",
@@ -135,42 +141,53 @@ describe("Product configuration views", () => {
   });
 
   it("shows review primary and secondary actions without review IDs", () => {
+    const letters = getProductTemplate(CANONICAL_PRODUCT_CODE);
+    const schema = getFormSchemaForTemplate(CANONICAL_PRODUCT_CODE);
+    if (!letters || !schema) {
+      throw new Error("LETTERS missing");
+    }
+    const values = {
+      "root.inscription": "WORKOS",
+      "face.finish": "vinyl",
+      "face.color": "alb",
+      "face.confirmedAreaMm2": 250000,
+      "volume.depthMm": "60",
+      "volume.finish": "none",
+      "volume.confirmedPerimeterMm": 12500,
+    };
     render(
-      <ReviewPanel
-        template={template}
-        formSchema={{
-          id: "form",
-          templateCode: "PRD-TEST",
-          sections: [
-            {
-              id: "product",
-              title: "Produs",
-              componentId: "ROOT",
-              fields: [
-                {
-                  id: "root.inscription",
-                  componentId: "ROOT",
-                  label: "Textul literelor",
-                  type: "text",
-                  required: true,
-                  visibleWhen: { kind: "always" },
-                },
-              ],
+      <MemoryRouter>
+        <ConfiguratorWorkspace
+          view={projectConfiguratorView({
+            template: letters,
+            schema,
+            values,
+            context: {
+              returnHref: "/products",
+              returnLabel: "Catalog",
+              requestReference: null,
+              clientName: null,
+              objectLabel: null,
             },
-          ],
-        }}
-        definition={ready}
-        busy={false}
-        onConfirm={() => undefined}
-        onEdit={() => undefined}
-      />,
+          })}
+          mode="review"
+          onScopeChange={() => undefined}
+          onConfirm={() => undefined}
+          onEdit={() => undefined}
+        />
+      </MemoryRouter>,
     );
+    expect(screen.getByRole("heading", { name: "Configurare litere" })).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+      screen.getByText("Revizuiește configurația înainte de confirmare."),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Confirmă configurația" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Modifică configurația" })).toBeInTheDocument();
     expect(screen.queryByText("rev-hidden")).not.toBeInTheDocument();
+    expect(document.querySelector("ul.review-facts")).toBeNull();
   });
 
   it("leads confirmed result with inscription and calculated quantities", () => {

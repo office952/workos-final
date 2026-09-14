@@ -85,6 +85,11 @@ body {
   margin: 0;
 }
 
+html:has(.configurator-final) {
+  scrollbar-gutter: stable;
+  overflow-anchor: none;
+}
+
 .skip-link {
   position: absolute;
   left: 0.75rem;
@@ -2061,6 +2066,7 @@ a.button-link.button-secondary {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+  pointer-events: none;
 }
 
 .choice-chips {
@@ -2402,18 +2408,58 @@ a.button-link.button-secondary {
 
 .identity-menu-trigger {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
   min-height: 44px;
   min-width: 44px;
-  padding: 0 0.75rem;
+  max-width: min(16rem, 36vw);
+  padding: 0.2rem 0.4rem 0.2rem 0.55rem;
   border: 0;
   border-bottom: 2px solid transparent;
   border-radius: 0;
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 0.95rem;
-  font-weight: 500;
+  text-align: right;
   cursor: pointer;
+}
+
+.identity-menu-trigger-copy {
+  display: grid;
+  justify-items: end;
+  min-width: 0;
+  gap: 0.05rem;
+}
+
+.identity-menu-trigger-org,
+.identity-menu-trigger-account {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity-menu-trigger-org {
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.identity-menu-trigger-account {
+  color: var(--text-secondary, var(--text-muted, #53575e));
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.identity-menu-trigger-caret {
+  flex: 0 0 auto;
+  color: var(--text-secondary, var(--text-muted, #53575e));
+  font-size: 0.7rem;
+  line-height: 1;
 }
 
 .identity-menu-trigger:focus-visible {
@@ -5039,5 +5085,1099 @@ a.jobs-customer {
 
   .resources-tariff-input {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .global-shell-top {
+  border-bottom-color: #ebeef2;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .global-shell-top-inner {
+  min-height: 48px;
+  height: 48px;
+  padding: 0 48px;
+  gap: 48px;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) {
+  --cfg-brand-mark: #637585;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .global-shell-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  font-family: Geist, "IBM Plex Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1d21;
+  letter-spacing: 0;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .global-shell-brand::before {
+  content: "";
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  background:
+    linear-gradient(#1a1a18, #1a1a18) 0 0 / 2.22px 20px no-repeat,
+    linear-gradient(#1a1a18, #1a1a18) 0 0 / 4.44px 2.22px no-repeat,
+    linear-gradient(#1a1a18, #1a1a18) 0 17.78px / 4.44px 2.22px no-repeat,
+    linear-gradient(#1a1a18, #1a1a18) 17.78px 0 / 2.22px 20px no-repeat,
+    linear-gradient(#1a1a18, #1a1a18) 15.56px 0 / 4.44px 2.22px no-repeat,
+    linear-gradient(#1a1a18, #1a1a18) 15.56px 17.78px / 4.44px 2.22px no-repeat,
+    linear-gradient(var(--cfg-brand-mark), var(--cfg-brand-mark)) 4.89px 4.89px / 10.22px 10.22px no-repeat;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .global-nav-item {
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #53575e;
+  border-bottom-width: 2px;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .global-nav-item.is-active {
+  font-weight: 600;
+  color: #1a1d21;
+  border-bottom-color: #2066cf;
+}
+
+.app-shell.is-ui20-top:has(.configurator-final) .app-content {
+  padding: 0;
+  background: #f7f8fa;
+  overflow-anchor: none;
+}
+
+/* Configurator final — Figma 219:3 presentation, scoped tokens only */
+.configurator-final {
+  --cfg-canvas: #f7f8fa;
+  --cfg-surface: #ffffff;
+  --cfg-ink: #1a1d21;
+  --cfg-secondary: #53575e;
+  --cfg-muted: #868d94;
+  --cfg-line: #ebeef2;
+  --cfg-card-line: #e2e5ea;
+  --cfg-rail-line: #d0d6dd;
+  --cfg-azure: #2066cf;
+  --cfg-warn: #c4750a;
+  --cfg-warn-bg: #fef3c7;
+  --cfg-ok-bg: #eaf6ee;
+  --cfg-ok-line: #1b7a3d;
+  --cfg-brand-mark: #637585;
+  --cfg-pad: 48px;
+  --cfg-gutter: 24px;
+  --cfg-fact-label: 128px;
+  --cfg-fact-gap: 12px;
+  --cfg-rail-gap: 40px;
+  --cfg-rail-hug-pad: 10px;
+  --cfg-rail-bracket: 5px;
+  --cfg-rail-check-gap: 7px;
+  --cfg-title-to-rail: 18px;
+  --cfg-cta-width: 258px;
+  --cfg-cta-height: 44px;
+  --cfg-sans: "IBM Plex Sans", "Segoe UI", Arial, sans-serif;
+  --cfg-mono: "IBM Plex Mono", ui-monospace, monospace;
+  container-type: inline-size;
+  container-name: cfg;
+  box-sizing: border-box;
+  overflow-anchor: none;
+  margin: 0;
+  padding: 0 0 32px;
+  background: var(--cfg-canvas);
+  color: var(--cfg-ink);
+  font-family: var(--cfg-sans);
+}
+
+.configurator-final .cfg-chrome {
+  background: var(--cfg-surface);
+}
+
+.configurator-final .cfg-object-context {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0 var(--cfg-pad);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.configurator-final .cfg-context-rule,
+.configurator-final .cfg-title-rule {
+  flex: 1 1 auto;
+  min-width: 24px;
+  height: 1px;
+  background: var(--cfg-line);
+}
+
+.configurator-final .cfg-context-return {
+  flex: 0 0 auto;
+  height: 28px;
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--cfg-azure);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.configurator-final .cfg-context-return:hover {
+  text-decoration: underline;
+}
+
+.configurator-final .cfg-context-dot {
+  color: var(--cfg-muted);
+  font-size: 11px;
+}
+
+.configurator-final .cfg-context-client,
+.configurator-final .cfg-context-object {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.configurator-final .cfg-context-client {
+  color: var(--cfg-secondary);
+  font-size: 11px;
+}
+
+.configurator-final .cfg-context-object {
+  color: var(--cfg-muted);
+  flex: 1 1 auto;
+  font-family: var(--cfg-mono);
+  font-size: 10px;
+}
+
+.configurator-final .cfg-page-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 36px;
+  min-height: 36px;
+  margin-bottom: var(--cfg-title-to-rail);
+  padding: 0 var(--cfg-pad);
+}
+
+.configurator-final .cfg-page-identity h1 {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.configurator-final .cfg-page-status {
+  margin: 0;
+  color: var(--cfg-muted);
+  font-family: var(--cfg-mono);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.configurator-final .cfg-rail {
+  position: relative;
+  height: 40px;
+  border-bottom: 1px solid var(--cfg-rail-line);
+}
+
+.configurator-final .cfg-rail-line {
+  position: absolute;
+  left: var(--cfg-pad);
+  right: var(--cfg-pad);
+  top: 32px;
+  height: 1px;
+  background: var(--cfg-rail-line);
+}
+
+.configurator-final .cfg-rail-items,
+.configurator-final .cfg-rail-ghosts {
+  position: absolute;
+  inset: 0;
+}
+
+.configurator-final .cfg-rail-ghosts span,
+.configurator-final .cfg-rail-item {
+  position: absolute;
+  left: calc(var(--cfg-pad) + (100% - 2 * var(--cfg-pad)) * var(--cfg-slot-x));
+}
+
+.configurator-final .cfg-rail-ghosts span {
+  top: 30.5px;
+  width: 1px;
+  height: 3px;
+  background: var(--cfg-rail-line);
+}
+
+.configurator-final .cfg-rail-item {
+  top: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: max-content;
+  min-height: 44px;
+  padding: 6px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--cfg-secondary);
+  font-family: var(--cfg-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.configurator-final .cfg-rail-item[data-slot="1"] {
+  --cfg-slot-x: 0.07589;
+}
+
+.configurator-final .cfg-rail-item[data-slot="2"] {
+  --cfg-slot-x: 0.29167;
+}
+
+.configurator-final .cfg-rail-item[data-slot="3"] {
+  --cfg-slot-x: 0.50521;
+}
+
+.configurator-final .cfg-rail-item[data-slot="4"] {
+  --cfg-slot-x: 0.7433;
+}
+
+.configurator-final .cfg-rail[data-rail-mode="group"] {
+  --cfg-rail-gap: 40px;
+}
+
+.configurator-final .cfg-rail[data-rail-mode="proportional"] {
+  --cfg-rail-gap: 48px;
+}
+
+.configurator-final .cfg-rail[data-rail-mode="group"] .cfg-rail-items,
+.configurator-final .cfg-rail[data-rail-mode="proportional"] .cfg-rail-items {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cfg-rail-gap);
+  left: var(--cfg-pad);
+  right: auto;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--cfg-pad));
+}
+
+.configurator-final .cfg-rail[data-rail-mode="group"] .cfg-rail-item,
+.configurator-final .cfg-rail[data-rail-mode="proportional"] .cfg-rail-item {
+  position: relative;
+  left: auto;
+}
+
+.configurator-final .cfg-rail-ghosts span[data-slot="1"] {
+  --cfg-slot-x: 0.09784;
+}
+
+.configurator-final .cfg-rail-ghosts span[data-slot="2"] {
+  --cfg-slot-x: 0.30599;
+}
+
+.configurator-final .cfg-rail-ghosts span[data-slot="3"] {
+  --cfg-slot-x: 0.52939;
+}
+
+.configurator-final .cfg-rail-ghosts span[data-slot="4"] {
+  --cfg-slot-x: 0.76748;
+}
+
+.configurator-final .cfg-rail-item.is-active {
+  color: var(--cfg-ink);
+  font-weight: 500;
+}
+
+.configurator-final .cfg-rail-item:not(.is-active) .cfg-rail-tick {
+  top: 30.5px;
+  width: 1px;
+  height: 3px;
+  background: var(--cfg-rail-line);
+}
+
+.configurator-final .cfg-rail:has(.cfg-rail-item.is-active[data-slot="1"]) .cfg-rail-ghosts span[data-slot="1"],
+.configurator-final .cfg-rail:has(.cfg-rail-item.is-active[data-slot="2"]) .cfg-rail-ghosts span[data-slot="2"],
+.configurator-final .cfg-rail:has(.cfg-rail-item.is-active[data-slot="3"]) .cfg-rail-ghosts span[data-slot="3"],
+.configurator-final .cfg-rail:has(.cfg-rail-item.is-active[data-slot="4"]) .cfg-rail-ghosts span[data-slot="4"] {
+  visibility: hidden;
+}
+
+.configurator-final .cfg-rail-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 26px;
+  padding: 0 calc(var(--cfg-rail-bracket) + var(--cfg-rail-hug-pad));
+}
+
+.configurator-final .cfg-rail-hug {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cfg-rail-check-gap);
+}
+
+.configurator-final .cfg-rail-reserve {
+  flex: 0 0 calc(var(--cfg-rail-check-gap) + 13px);
+  width: calc(var(--cfg-rail-check-gap) + 13px);
+}
+
+.configurator-final .cfg-rail-item:has(.cfg-rail-hug .cfg-section-check.is-complete) .cfg-rail-reserve {
+  flex-basis: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.configurator-final .cfg-rail-hug::before,
+.configurator-final .cfg-rail-hug::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: var(--cfg-rail-bracket);
+  height: 26px;
+  box-sizing: border-box;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.configurator-final .cfg-rail-hug::before {
+  left: calc(-1 * (var(--cfg-rail-bracket) + var(--cfg-rail-hug-pad)));
+  border-left: 1.5px solid var(--cfg-ink);
+  border-top: 1.5px solid var(--cfg-ink);
+  border-bottom: 1.5px solid var(--cfg-ink);
+}
+
+.configurator-final .cfg-rail-hug::after {
+  right: calc(-1 * (var(--cfg-rail-bracket) + var(--cfg-rail-hug-pad)));
+  border-right: 1.5px solid var(--cfg-ink);
+  border-top: 1.5px solid var(--cfg-ink);
+  border-bottom: 1.5px solid var(--cfg-ink);
+}
+
+.configurator-final .cfg-rail-item.is-active .cfg-rail-hug::before,
+.configurator-final .cfg-rail-item.is-active .cfg-rail-hug::after {
+  visibility: visible;
+}
+
+.configurator-final .cfg-rail-tick {
+  position: absolute;
+  left: 50%;
+  top: 30.5px;
+  width: 1px;
+  height: 3px;
+  background: var(--cfg-rail-line);
+  transform: translateX(-50%);
+}
+
+.configurator-final .cfg-rail-item.is-active .cfg-rail-tick {
+  top: 29.5px;
+  width: 1.5px;
+  height: 5px;
+  background: var(--cfg-ink);
+}
+
+.configurator-final .cfg-rail-item:focus-visible,
+.configurator-final .cfg-target:focus-visible,
+.configurator-final .cfg-verify:focus-visible,
+.configurator-final .cfg-edit-link:focus-visible,
+.configurator-final .cfg-segmented .choice-chip:focus-visible {
+  outline: 2px solid var(--cfg-azure);
+  outline-offset: 2px;
+}
+
+.configurator-final .cfg-targets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 var(--cfg-pad);
+  background: var(--cfg-canvas);
+}
+
+.configurator-final .cfg-targets-label {
+  margin: 0;
+  color: var(--cfg-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.configurator-final .cfg-targets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.configurator-final .cfg-target {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: #f0f1f3;
+  color: var(--cfg-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.configurator-final .cfg-target.is-active {
+  background: var(--cfg-ink);
+  color: #fff;
+}
+
+.configurator-final .cfg-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 740fr) minmax(0, 580fr);
+  gap: var(--cfg-gutter);
+  align-items: start;
+  padding: 44px var(--cfg-pad) 32px;
+}
+
+.configurator-final:has(.cfg-targets) .cfg-workspace {
+  padding-top: 4px;
+}
+
+.configurator-final .cfg-blueprint,
+.configurator-final .cfg-editor {
+  min-width: 0;
+  background: var(--cfg-surface);
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--cfg-card-line);
+  padding: 0;
+}
+
+.configurator-final .cfg-editor,
+.configurator-final .cfg-review {
+  width: auto;
+  min-width: 0;
+  justify-self: stretch;
+}
+
+.configurator-final .cfg-review {
+  display: grid;
+  gap: 16px;
+}
+
+.configurator-final .cfg-review-lead {
+  margin: 0;
+  color: var(--cfg-muted);
+  font-size: 12px;
+}
+
+.configurator-final .cfg-editor-accent {
+  height: 2px;
+  background: var(--cfg-azure);
+}
+
+.configurator-final .cfg-blueprint-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--cfg-line);
+}
+
+.configurator-final .cfg-blueprint-body {
+  display: grid;
+  gap: 0;
+  padding: 16px 20px 18px;
+}
+
+.configurator-final .cfg-editor-head {
+  display: grid;
+  gap: 4px;
+  padding: 24px;
+  border-bottom: 1px solid var(--cfg-line);
+}
+
+.configurator-final .cfg-blueprint h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.configurator-final .cfg-editor-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.configurator-final .cfg-editor-head p {
+  margin: 0;
+  color: var(--cfg-secondary);
+  font-size: 13px;
+}
+
+.configurator-final .cfg-blueprint-section {
+  display: grid;
+  gap: 6px;
+  padding: 0 0 10px;
+  border-bottom: 0;
+}
+
+.configurator-final .cfg-blueprint-section + .cfg-blueprint-section {
+  padding-top: 10px;
+  border-top: 1px solid var(--cfg-line);
+}
+
+.configurator-final .cfg-blueprint-jump {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.configurator-final .cfg-section-check {
+  flex: 0 0 13px;
+  width: 13px;
+  min-width: 13px;
+  color: var(--cfg-brand-mark);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.configurator-final .cfg-rail-hug .cfg-section-check {
+  flex: 0 0 13px;
+  width: 13px;
+  min-width: 13px;
+}
+
+.configurator-final .cfg-blueprint-section h3,
+.configurator-final .cfg-editor-section h3,
+.configurator-final .cfg-composition-item h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.configurator-final .cfg-blueprint-section dl {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.configurator-final .cfg-fact {
+  display: grid;
+  grid-template-columns: var(--cfg-fact-label) max-content;
+  column-gap: var(--cfg-fact-gap);
+  justify-content: start;
+  width: max-content;
+  max-width: 100%;
+  align-items: start;
+  margin: 0;
+  padding: 1px 0;
+}
+
+.configurator-final .cfg-fact dt,
+.configurator-final .cfg-fact dd {
+  margin: 0;
+}
+
+.configurator-final .cfg-fact dt {
+  color: var(--cfg-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.configurator-final .cfg-fact-value {
+  color: var(--cfg-ink);
+  font-family: var(--cfg-mono);
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.configurator-final .cfg-fact.is-missing .cfg-fact-value {
+  color: var(--cfg-ink);
+}
+
+.configurator-final .cfg-fact.is-derived .cfg-fact-value {
+  color: var(--cfg-secondary);
+}
+
+.configurator-final .cfg-fact.is-personalized .cfg-fact-value {
+  color: var(--cfg-azure);
+}
+
+.configurator-final .cfg-fact-kind {
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--cfg-muted);
+  font-family: var(--cfg-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.configurator-final .cfg-necessary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  color: var(--cfg-warn);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.configurator-final .cfg-necessary.is-stack {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 10px;
+  position: relative;
+}
+
+.configurator-final .cfg-necessary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cfg-warn);
+}
+
+.configurator-final .cfg-necessary.is-stack::before {
+  position: absolute;
+  left: 0;
+  top: 4px;
+}
+
+.configurator-final .cfg-fact-block {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--cfg-line);
+  border-radius: 2px;
+  background: var(--cfg-canvas);
+  color: var(--cfg-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.configurator-final .cfg-editor-body {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+}
+
+.configurator-final .cfg-editor-section {
+  display: grid;
+  gap: 12px;
+}
+
+.configurator-final .cfg-editor-section dl {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.configurator-final .cfg-section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.configurator-final .cfg-section-dash {
+  width: 16px;
+  height: 2px;
+  background: var(--cfg-ink);
+}
+
+.configurator-final .cfg-editor-section h3 {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.configurator-final .cfg-form,
+.configurator-final .cfg-form .form-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.configurator-final .cfg-form .form-section {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.configurator-final .cfg-form .form-section-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.configurator-final .cfg-field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.configurator-final .cfg-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: none;
+  width: 100%;
+}
+
+.configurator-final .cfg-form .field-choice {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  column-gap: 0;
+  row-gap: 6px;
+  align-items: stretch;
+  min-height: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.configurator-final .cfg-form .field-label {
+  color: var(--cfg-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.configurator-final .cfg-form .field-label[data-visual] {
+  font-size: 0;
+  line-height: 0;
+}
+
+.configurator-final .cfg-form .field-label[data-visual]::after {
+  content: attr(data-visual);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--cfg-secondary);
+}
+
+.configurator-final .cfg-form .field-label[data-visual][data-required]::after {
+  content: attr(data-visual) " *";
+}
+
+.configurator-final .cfg-form .field input,
+.configurator-final .cfg-form .field textarea {
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--cfg-card-line);
+  border-radius: 2px;
+  background: var(--cfg-canvas);
+  color: var(--cfg-ink);
+  font-family: var(--cfg-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.configurator-final .cfg-input-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding-right: 12px;
+  border: 1px solid var(--cfg-card-line);
+  border-radius: 2px;
+  background: var(--cfg-canvas);
+}
+
+.configurator-final .cfg-form .cfg-input-wrap input {
+  border: 0;
+  background: transparent;
+}
+
+.configurator-final .cfg-input-unit {
+  color: var(--cfg-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.configurator-final .cfg-form .field-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.configurator-final .cfg-segmented {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: 2px;
+  margin-top: 0;
+  padding: 2px;
+  border: 1px solid var(--cfg-line);
+  border-radius: 2px;
+  background: var(--cfg-canvas);
+}
+
+.configurator-final .cfg-segmented .choice-chip {
+  display: flex;
+  flex: 1 0 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--cfg-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+}
+
+.configurator-final .cfg-segmented .choice-chip.is-selected {
+  background: var(--cfg-azure);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.configurator-final .cfg-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 24px;
+  border-top: 1px solid var(--cfg-line);
+  background: transparent;
+}
+
+.configurator-final .cfg-incomplete-hint {
+  margin: 0 auto 0 0;
+  color: var(--cfg-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.configurator-final .cfg-modify {
+  margin: 0 auto 0 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--cfg-azure);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.configurator-final .cfg-review-note {
+  margin: 16px 0 0;
+  color: var(--cfg-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.configurator-final .cfg-verify-slot {
+  flex: 0 0 auto;
+}
+
+.configurator-final .cfg-verify {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: var(--cfg-cta-width);
+  height: var(--cfg-cta-height);
+  min-height: var(--cfg-cta-height);
+  padding: 0 16px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--cfg-azure);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.configurator-final .cfg-verify:disabled {
+  background: #a2a09c;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.configurator-final .cfg-composition {
+  display: grid;
+  gap: 16px;
+}
+
+.configurator-final .cfg-composition-item {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--cfg-line);
+  border-radius: 4px;
+  background: var(--cfg-surface);
+}
+
+.configurator-final .cfg-composition-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.configurator-final .cfg-composition-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.configurator-final .cfg-composition-item h3 {
+  font-size: 16px;
+}
+
+.configurator-final .cfg-composition-item p {
+  margin: 0;
+  color: var(--cfg-secondary);
+  font-size: 13px;
+}
+
+.configurator-final .cfg-composition-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cfg-ok-line);
+}
+
+.configurator-final .cfg-edit-link {
+  flex: 0 0 auto;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  color: var(--cfg-azure);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.configurator-final .cfg-composition-complete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--cfg-ok-line);
+  border-radius: 4px;
+  background: var(--cfg-ok-bg);
+  color: #1c1b19;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.configurator-final .cfg-composition-incomplete,
+.configurator-final .cfg-composition-gap {
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--cfg-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.configurator-final .cfg-composition-incomplete {
+  padding: 16px 0 0;
+}
+
+@media (max-width: 1439px) {
+  .app-shell.is-ui20-top:has(.configurator-final) .global-shell-top-inner {
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell.is-ui20-top:has(.configurator-final) .global-shell-top-inner {
+    padding: 0 24px;
+    gap: 16px;
+  }
+
+  .configurator-final {
+    --cfg-pad: 24px;
+  }
+
+  .configurator-final .cfg-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 16px;
+  }
+
+  .configurator-final .cfg-workspace .cfg-editor {
+    order: -1;
+  }
+
+  .configurator-final .cfg-editor,
+  .configurator-final .cfg-review {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .configurator-final .cfg-page-identity {
+    height: auto;
+    min-height: 36px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .configurator-final .cfg-field-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .configurator-final .cfg-editor-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .configurator-final .cfg-verify,
+  .configurator-final .cfg-verify-slot {
+    width: 100%;
+  }
+}
+
+@container cfg (max-width: 768px) {
+  .configurator-final .cfg-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .configurator-final .cfg-workspace .cfg-editor {
+    order: -1;
   }
 }

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import {
   expectAccountOrganization,
+  identityMenuTrigger,
   logoutCloudFromMenu,
   openAccountMenu,
   setTheme,
@@ -253,7 +254,7 @@ test.describe("Architecture C UI Wave 1", () => {
     expect(mid.overflow).toBeFalsy();
 
     await page.keyboard.press("Escape");
-    const cont = page.getByRole("button", { name: "Cont", exact: true });
+    const cont = identityMenuTrigger(page);
     const box = await cont.boundingBox();
     expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);

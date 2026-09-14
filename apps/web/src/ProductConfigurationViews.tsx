@@ -14,11 +14,9 @@ import {
   type EicLineGroup,
   type EicResult,
   type ExecutionPlanPreview,
-  type FormSchema,
   type ProductAggregate,
   type ProductDefinition,
   type ProductIdentityFact,
-  type ProductTemplate,
   type ProductTruth,
   type OrderSnapshot,
   type QuoteAcceptanceDecision,
@@ -167,69 +165,6 @@ export function ReadinessNotice({ definition }: { definition: ProductDefinition 
         ))}
       </ul>
     </Notice>
-  );
-}
-
-export function ReviewPanel({
-  template,
-  formSchema,
-  definition,
-  busy,
-  onConfirm,
-  onEdit,
-}: {
-  template: ProductTemplate;
-  formSchema: FormSchema;
-  definition: ProductDefinition;
-  busy: boolean;
-  onConfirm: () => void;
-  onEdit: () => void;
-}) {
-  return (
-    <section className="result-section">
-      <h2>Configurație pregătită pentru confirmare</h2>
-      <p>Revizuiți configurația. Nu mai editați formularul în acest pas.</p>
-      <p>Produs: {template.label}</p>
-      <p>
-        Componente active:{" "}
-        {template.components
-          .filter((component) => definition.selectedComponentIds.includes(component.id))
-          .map((component) => component.label)
-          .join(", ")}
-      </p>
-      <ul className="review-facts">
-        {formSchema.sections
-          .flatMap((section) => section.fields)
-          .filter(
-            (field) =>
-              definition.values[field.id] !== undefined && field.type !== "boolean",
-          )
-          .map((field) => {
-            const raw = definition.values[field.id];
-            const label =
-              field.options?.find((option) => option.value === raw)?.label ?? String(raw);
-            return (
-              <li key={field.id}>
-                {field.label}: {label}
-              </li>
-            );
-          })}
-      </ul>
-      {definition.measurements.length > 0 ? (
-        <p className="page-lead">
-          Măsurătorile de mai sus sunt introduse de operator. Nu sunt geometrie
-          calculată de WorkOS.
-        </p>
-      ) : null}
-      <div className="action-row">
-        <button type="button" onClick={onConfirm} disabled={busy}>
-          Confirmă configurația
-        </button>
-        <button type="button" className="button-secondary" onClick={onEdit}>
-          Modifică configurația
-        </button>
-      </div>
-    </section>
   );
 }
 

@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import { clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 test("catalog leads to canonical product confirm and partial EIC", async ({
   page,
@@ -32,10 +33,10 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     }),
   ).toBeVisible();
-  await expect(page.getByText("Material față: Plexiglas 3 mm opal")).toBeVisible();
-  await expect(page.getByText("Material volum: Aluminiu 0,6 mm")).toBeVisible();
-  await expect(page.getByText("Material spate: Forex 10 mm")).toBeVisible();
-  await expect(page.getByText("Iluminare: Iluminare frontală")).toBeVisible();
+  await expect(page.getByText("Plexiglas 3 mm opal", { exact: true })).toBeVisible();
+  await expect(page.getByText("Aluminiu 0,6 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Forex 10 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Iluminare frontală", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Include iluminare")).toHaveCount(0);
   await expect(page.getByLabel("Pas module LED")).toHaveCount(0);
   await expect(page.getByLabel("Rezervă sursă de alimentare")).toHaveCount(0);
@@ -65,11 +66,11 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
 
   await page.getByLabel("Textul literelor").fill("WORKOS");
-  await page.getByLabel("Finisaj față").selectOption("vinyl");
+  await selectProductChoice(page, "Finisaj față", "vinyl");
   await page.getByLabel("Culoare față").fill("alb");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.screenshot({
     path: "docs/worklog/screenshots/owner-surfaces-configure.png",
@@ -89,9 +90,11 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await expect(page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" })).toBeVisible();
-  await expect(page.getByText("Revizuiți configurația.")).toBeVisible();
-  await expect(page.getByText("Suprafață confirmată (mm²): 250000").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Configurare litere" })).toBeVisible();
+  await expect(page.getByText("Revizuiește configurația înainte de confirmare.")).toBeVisible();
+  await expect(page.locator('.cfg-editor [data-fact-id="face.confirmedAreaMm2"]')).toContainText(
+    "250000",
+  );
   await expect(page.getByLabel("Textul literelor")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Modifică configurația" })).toBeVisible();
   await page.screenshot({

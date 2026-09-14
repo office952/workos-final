@@ -67,6 +67,18 @@ const schema: FormSchema = {
           required: true,
           visibleWhen: { kind: "componentSelected", componentId: "LIGHTING" },
         },
+        {
+          id: "extra.finish",
+          componentId: "LIGHTING",
+          label: "Finisaj",
+          type: "select",
+          required: true,
+          options: [
+            { value: "none", label: "Fără finisaj" },
+            { value: "vinyl", label: "Colantat" },
+          ],
+          visibleWhen: { kind: "componentSelected", componentId: "LIGHTING" },
+        },
       ],
     },
   ],
@@ -103,5 +115,94 @@ describe("FormRenderer", () => {
       />,
     );
     expect(screen.getByLabelText("Detaliu opțional")).toBeInTheDocument();
+  });
+
+  it("makes visible choice chips the accessible select control", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    const { rerender } = render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{ "extra.selected": true }}
+        onChange={onChange}
+      />,
+    );
+
+    const group = screen.getByRole("radiogroup", { name: "Finisaj" });
+    const none = screen.getByRole("radio", { name: "Fără finisaj" });
+    const vinyl = screen.getByRole("radio", { name: "Colantat" });
+    const native = document.querySelector(
+      'select[name="extra.finish"]',
+    ) as HTMLSelectElement | null;
+
+    expect(group).toBeInTheDocument();
+    expect(none.closest("[aria-hidden='true']")).toBeNull();
+    expect(vinyl.closest("[aria-hidden='true']")).toBeNull();
+    expect(native).not.toBeNull();
+    expect(native?.tabIndex).toBe(-1);
+    expect(native?.getAttribute("aria-hidden")).toBe("true");
+
+    none.focus();
+    expect(none).toHaveFocus();
+
+    await user.keyboard("{ArrowRight}");
+    expect(onChange).toHaveBeenCalledWith("extra.finish", "vinyl");
+
+    rerender(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{ "extra.selected": true, "extra.finish": "vinyl" }}
+        onChange={onChange}
+      />,
+    );
+
+    expect(screen.getByRole("radio", { name: "Colantat" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    expect(screen.getByRole("radio", { name: "Fără finisaj" })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+    expect(document.querySelector('select[name="extra.finish"]')).toHaveValue("vinyl");
+
+    await user.click(screen.getByRole("radio", { name: "Fără finisaj" }));
+    expect(onChange).toHaveBeenCalledWith("extra.finish", "none");
+  });
+
+  it("configurator required fields stay quiet until validation ids are provided", () => {
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{}}
+        onChange={vi.fn()}
+        presentation="configurator"
+      />,
+    );
+
+    expect(screen.getByText("Nume față")).toBeInTheDocument();
+    expect(document.querySelector('[data-required][data-visual="Nume"]')).not.toBeNull();
+    expect(screen.queryByText("Necesar")).not.toBeInTheDocument();
+    expect(screen.queryByText("Completează acest câmp.")).not.toBeInTheDocument();
+  });
+
+  it("configurator shows compiler validation only for provided field ids", () => {
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{}}
+        onChange={vi.fn()}
+        presentation="configurator"
+        invalidFieldIds={["face.name"]}
+      />,
+    );
+
+    expect(screen.getByText("Completează acest câmp.")).toBeInTheDocument();
+    expect(screen.queryByText("Necesar")).not.toBeInTheDocument();
   });
 });

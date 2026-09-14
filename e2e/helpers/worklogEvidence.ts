@@ -7,5 +7,5 @@ export function shouldWriteWorklogEvidence(path: string): boolean {
     return true;
   }
   const fileName = path.replaceAll("\\", "/").split("/").pop() ?? "";
-  return fileName.startsWith("v3-nav-");
+  return fileName.startsWith("v3-nav-") || fileName.startsWith("configurator-final-");
 }

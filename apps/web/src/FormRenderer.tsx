@@ -7,23 +7,179 @@ import {
   type FormSchema,
   type ProductTemplate,
 } from "@workos-final/domain";
+import { useId, type KeyboardEvent } from "react";
+import {
+  fieldUnitFromLabel,
+  projectVisualLabel,
+} from "./configurator/configuratorPresentation";
 import { Field } from "./ui/Field";
+
+function SelectChoiceField({
+  field,
+  value,
+  onChange,
+  configurator,
+  invalid,
+}: {
+  field: FormField;
+  value: DraftValue | undefined;
+  onChange: (value: DraftValue) => void;
+  configurator: boolean;
+  invalid: boolean;
+}) {
+  const labelId = useId();
+  const hintId = useId();
+  const options = field.options ?? [];
+  const selected = typeof value === "string" ? value : "";
+  const selectedIndex = options.findIndex((option) => option.value === selected);
+
+  function selectValue(next: string) {
+    onChange(next === "" ? null : next);
+  }
+
+  function moveSelection(event: KeyboardEvent<HTMLDivElement>, nextIndex: number) {
+    const next = options[nextIndex];
+    if (!next) {
+      return;
+    }
+    event.preventDefault();
+    selectValue(next.value);
+    const target = event.currentTarget.querySelector<HTMLElement>(
+      `[data-choice-value="${next.value}"]`,
+    );
+    target?.focus({ preventScroll: true });
+  }
+
+  function onGroupKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (options.length === 0) {
+      return;
+    }
+    const focusedValue =
+      event.target instanceof HTMLElement ? event.target.dataset.choiceValue : undefined;
+    const focusedIndex = options.findIndex((option) => option.value === focusedValue);
+    const fromIndex = focusedIndex >= 0 ? focusedIndex : selectedIndex;
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        moveSelection(event, fromIndex < 0 ? 0 : (fromIndex + 1) % options.length);
+        return;
+      case "ArrowLeft":
+      case "ArrowUp":
+        moveSelection(
+          event,
+          fromIndex < 0
+            ? options.length - 1
+            : (fromIndex - 1 + options.length) % options.length,
+        );
+        return;
+      case "Home":
+        moveSelection(event, 0);
+        return;
+      case "End":
+        moveSelection(event, options.length - 1);
+        return;
+      default:
+        return;
+    }
+  }
+
+  const visibleLabel = configurator ? projectVisualLabel(field.label) : field.label;
+
+  return (
+    <div className={configurator && invalid ? "field field-choice field-invalid" : "field field-choice"}>
+      <span
+        id={labelId}
+        className="field-label"
+        data-visual={configurator ? visibleLabel : undefined}
+        data-required={configurator && field.required ? "" : undefined}
+      >
+        {field.label}
+      </span>
+      <select
+        id={`field-${field.id}`}
+        name={field.id}
+        className="choice-select-native"
+        tabIndex={-1}
+        aria-hidden="true"
+        value={selected}
+        onChange={(event) => selectValue(event.target.value)}
+      >
+        <option value="">Alegeți…</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <div
+        role="radiogroup"
+        aria-labelledby={labelId}
+        aria-describedby={
+          [field.hint ? hintId : null, invalid ? `${hintId}-error` : null]
+            .filter((id): id is string => id !== null)
+            .join(" ") || undefined
+        }
+        aria-invalid={invalid || undefined}
+        aria-required={field.required || undefined}
+        className={configurator ? "choice-chips cfg-segmented" : "choice-chips"}
+        onKeyDown={onGroupKeyDown}
+      >
+        {options.map((option, index) => {
+          const checked = selected === option.value;
+          const tabStop = checked || (selected === "" && index === 0);
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={checked}
+              tabIndex={tabStop ? 0 : -1}
+              data-choice-value={option.value}
+              className={checked ? "choice-chip is-selected" : "choice-chip"}
+              onClick={() => selectValue(option.value)}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+      {field.hint ? (
+        <p id={hintId} className={configurator ? "field-hint visually-hidden" : "field-hint"}>
+          {field.hint}
+        </p>
+      ) : null}
+      {invalid ? (
+        <p id={`${hintId}-error`} className="field-error" role="alert">
+          Completează acest câmp.
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 type FormRendererProps = {
   template: ProductTemplate;
   schema: FormSchema;
   values: DraftValues;
   onChange: (fieldId: string, value: DraftValue) => void;
+  includeComponentIds?: readonly string[];
+  sectionTitleFor?: (componentId: string, fallback: string) => string;
+  presentation?: "default" | "configurator";
+  invalidFieldIds?: readonly string[];
 };
 
 function FieldControl({
   field,
   value,
   onChange,
+  ...controlProps
 }: {
   field: FormField;
   value: DraftValue | undefined;
   onChange: (value: DraftValue) => void;
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  "aria-label"?: string;
 }) {
   const id = `field-${field.id}`;
 
@@ -36,6 +192,7 @@ function FieldControl({
           type="text"
           value={typeof value === "string" ? value : ""}
           onChange={(event) => onChange(event.target.value)}
+          {...controlProps}
         />
       );
     case "number":
@@ -50,6 +207,7 @@ function FieldControl({
             const next = event.target.value;
             onChange(next === "" ? null : Number(next));
           }}
+          {...controlProps}
         />
       );
     case "select":
@@ -57,9 +215,9 @@ function FieldControl({
         <select
           id={id}
           name={field.id}
-          className="choice-select-native"
           value={typeof value === "string" ? value : ""}
           onChange={(event) => onChange(event.target.value || null)}
+          {...controlProps}
         >
           <option value="">Alegeți…</option>
           {field.options?.map((option) => (
@@ -77,6 +235,7 @@ function FieldControl({
           type="checkbox"
           checked={value === true}
           onChange={(event) => onChange(event.target.checked)}
+          {...controlProps}
         />
       );
     default: {
@@ -91,12 +250,24 @@ export function FormRenderer({
   schema,
   values,
   onChange,
+  includeComponentIds,
+  sectionTitleFor,
+  presentation = "default",
+  invalidFieldIds = [],
 }: FormRendererProps) {
   const selectedIds = selectedComponentIds(template, values);
+  const configurator = presentation === "configurator";
+  const invalidIds = new Set(invalidFieldIds);
 
   return (
-    <div className="form-stack">
+    <div className={configurator ? "form-stack cfg-form" : "form-stack"}>
       {schema.sections.map((section) => {
+        if (
+          includeComponentIds &&
+          !includeComponentIds.includes(section.componentId)
+        ) {
+          return null;
+        }
         const visibleFields = section.fields.filter((field) =>
           isFieldVisible(field, values, selectedIds),
         );
@@ -104,50 +275,76 @@ export function FormRenderer({
           return null;
         }
 
+        const title = sectionTitleFor
+          ? sectionTitleFor(section.componentId, section.title)
+          : section.title;
+
         return (
           <fieldset key={section.id} className="form-section">
-            <legend>
-              {section.title}
-              {visibleFields.some((field) => field.required) ? " – obligatoriu" : ""}
-            </legend>
+            {title ? (
+              <legend>
+                {title}
+                {visibleFields.some((field) => field.required) && !configurator
+                  ? " – obligatoriu"
+                  : ""}
+              </legend>
+            ) : null}
             <div className="form-section-fields">
-              {visibleFields.map((field) => (
+              {groupConfiguratorFields(visibleFields, configurator).map((row) => (
                 <div
-                  key={field.id}
+                  key={row.map((field) => field.id).join(":")}
                   className={
-                    field.type === "boolean"
-                      ? "field-span field-inline"
-                      : field.type === "select"
-                        ? "field-span"
-                        : undefined
+                    row.length > 1
+                      ? "cfg-field-row"
+                      : row[0]?.type === "boolean"
+                        ? "field-span field-inline"
+                        : row[0]?.type === "select"
+                          ? "field-span"
+                          : undefined
                   }
                 >
-                  <Field label={field.label} hint={field.hint}>
-                    <FieldControl
-                      field={field}
-                      value={values[field.id]}
-                      onChange={(value) => onChange(field.id, value)}
-                    />
-                  </Field>
-                  {field.type === "select" && field.options && field.options.length > 0 ? (
-                    <div className="choice-chips" aria-hidden="true">
-                      {field.options.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className={
-                            values[field.id] === option.value
-                              ? "choice-chip is-selected"
-                              : "choice-chip"
+                  {row.map((field) => {
+                    const missing = field.required && isEmptyField(values[field.id]);
+                    const invalid = configurator && invalidIds.has(field.id);
+                    return (
+                    <div key={field.id}>
+                      {field.type === "select" && field.options && field.options.length > 0 ? (
+                        <SelectChoiceField
+                          field={field}
+                          value={values[field.id]}
+                          onChange={(value) => onChange(field.id, value)}
+                          configurator={configurator}
+                          invalid={invalid}
+                        />
+                      ) : (
+                        <Field
+                          label={field.label}
+                          hint={configurator ? undefined : field.hint}
+                          error={invalid ? "Completează acest câmp." : undefined}
+                          hideLabel={false}
+                          required={configurator && field.required}
+                          visibleLabel={
+                            configurator ? projectVisualLabel(field.label) : undefined
                           }
-                          aria-pressed={values[field.id] === option.value}
-                          onClick={() => onChange(field.id, option.value)}
+                          suffix={
+                            configurator ? fieldUnitFromLabel(field.label) ?? undefined : undefined
+                          }
                         >
-                          {option.label}
-                        </button>
-                      ))}
+                          <FieldControl
+                            field={field}
+                            value={values[field.id]}
+                            onChange={(value) => onChange(field.id, value)}
+                          />
+                        </Field>
+                      )}
+                      {!configurator && missing ? (
+                        <p className="cfg-necessary" role="status">
+                          NECESAR
+                        </p>
+                      ) : null}
                     </div>
-                  ) : null}
+                    );
+                  })}
                 </div>
               ))}
             </div>
@@ -156,4 +353,44 @@ export function FormRenderer({
       })}
     </div>
   );
+}
+
+function groupConfiguratorFields(
+  fields: readonly FormField[],
+  configurator: boolean,
+): FormField[][] {
+  if (!configurator) {
+    return fields.map((field) => [field]);
+  }
+  const rows: FormField[][] = [];
+  for (let index = 0; index < fields.length; index += 1) {
+    const current = fields[index];
+    const next = fields[index + 1];
+    if (
+      current &&
+      next &&
+      current.type === "number" &&
+      next.type === "number" &&
+      fieldUnitFromLabel(current.label) &&
+      fieldUnitFromLabel(next.label)
+    ) {
+      rows.push([current, next]);
+      index += 1;
+      continue;
+    }
+    if (current) {
+      rows.push([current]);
+    }
+  }
+  return rows;
+}
+
+function isEmptyField(value: DraftValue | undefined): boolean {
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === "string") {
+    return value.trim().length === 0;
+  }
+  return false;
 }

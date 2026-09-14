@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
+import { selectProductChoice } from "./helpers/productChoices";
 
 async function confirmLetters(
   page: import("@playwright/test").Page,
@@ -13,13 +14,13 @@ async function confirmLetters(
     })
     .click();
   await page.getByLabel("Textul literelor").fill("WORKOS");
-  await page.getByLabel("Finisaj față").selectOption(values.faceFinish);
+  await selectProductChoice(page, "Finisaj față", values.faceFinish);
   if (values.faceColor) {
     await page.getByLabel("Culoare față").fill(values.faceColor);
   }
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

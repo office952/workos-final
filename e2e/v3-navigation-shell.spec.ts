@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { identityMenuTrigger } from "./helpers/account";
 import {
   brandLink,
   clickPrimaryDestination,
@@ -42,7 +43,7 @@ test("ui20 quiet top shell projects L1 and nested destinations without fake page
   await page.goto("/governance");
   await expect(page.getByRole("heading", { name: "Guvernanța sistemului" })).toBeVisible();
   await expectUi20DesktopShell(page);
-  await page.getByRole("button", { name: "Cont" }).click();
+  await identityMenuTrigger(page).click();
   await expect(page.getByRole("link", { name: "Administrare" })).toBeVisible();
   await page.screenshot({ path: shot("1440-governance-cont"), fullPage: true });
 

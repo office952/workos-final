@@ -2,6 +2,7 @@ import { type APIRequestContext, type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { adminHomeLink, clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 const FAMILY_ID = "LIGHTED_VOLUMETRIC_SIGNS";
 const CATEGORY_ID = "HALO_LIT_VOLUMETRIC_LETTERS";
@@ -158,17 +159,17 @@ test("admin display-label write persists and propagates", async ({
   await page.goto("/products");
   await page.getByRole("link", { name: ORIGINAL.product }).click();
   await page.getByLabel("Textul literelor").fill("WORKOS");
-  await page.getByLabel("Finisaj față").selectOption("none");
+  await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-configure.png",
     fullPage: true,
   });
   await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await expect(page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" })).toBeVisible();
+  await expect(page.getByText("Revizuiește configurația înainte de confirmare.")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-review.png",
     fullPage: true,
