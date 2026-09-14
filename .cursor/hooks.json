@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "node .cursor/hooks/before-shell.mjs",
+        "timeout": 20,
+        "failClosed": false
+      },
+      {
+        "command": "node .cursor/hooks/catastrophic-deny.mjs",
+        "timeout": 20,
+        "failClosed": true,
+        "matcher": "(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Gg][Ii][Tt])(?:\\.exe)?(?:\\s+(?:--no-pager|--porcelain|-C\\s+\\S+|--git-dir=\\S+|--work-tree=\\S+))*\\s+(?:[Pp][Uu][Ss][Hh])\\b(?:\\s+\\S+)*\\s+(?:(?:--[Ff][Oo][Rr][Cc][Ee](?:-[Ww][Ii][Tt][Hh]-[Ll][Ee][Aa][Ss][Ee])?\\b)|-[a-zA-Z]*f[a-zA-Z]*)|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Gg][Ii][Tt])(?:\\.exe)?(?:\\s+(?:--no-pager|--porcelain|-C\\s+\\S+|--git-dir=\\S+|--work-tree=\\S+))*\\s+(?:[Pp][Uu][Ss][Hh])\\b(?:\\s+\\S+)*\\s+\\+|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Gg][Ii][Tt])(?:\\.exe)?(?:\\s+(?:--no-pager|--porcelain|-C\\s+\\S+|--git-dir=\\S+|--work-tree=\\S+))*\\s+(?:[Rr][Ee][Ss][Ee][Tt])\\b(?:\\s+\\S+)*\\s+(?:--[Hh][Aa][Rr][Dd]\\b)|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Gg][Ii][Tt])(?:\\.exe)?(?:\\s+(?:--no-pager|--porcelain|-C\\s+\\S+|--git-dir=\\S+|--work-tree=\\S+))*\\s+(?:[Cc][Ll][Ee][Aa][Nn])\\b(?:\\s+\\S+)*\\s+(?:(?:--[Ff][Oo][Rr][Cc][Ee](?:-[Ww][Ii][Tt][Hh]-[Ll][Ee][Aa][Ss][Ee])?\\b)|-[a-zA-Z]*f[a-zA-Z]*)|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Rr][Mm])(?:\\.exe)?\\s+-[a-zA-Z]*r|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Rr][Ee][Mm][Oo][Vv][Ee]-[Ii][Tt][Ee][Mm])\\b[\\s\\S]*-(?:[Rr][Ee][Cc][Uu][Rr][Ss][Ee])\\b|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Rr][Mm][Dd][Ii][Rr]|[Rr][Dd])(?:\\.exe)?\\s+/[sS]\\b|(?:^|[\\n;&]|&&|\\|\\|)\\s*(?:[\"'])?(?:[Nn][Oo][Dd][Ee])(?:\\.exe)?\\s+(?:-e|--[Ee][Vv][Aa][Ll])\\s+[^\\n]*(?:(?:[Pp][Uu][Ss][Hh])[^\\n]*(?:--[Ff][Oo][Rr][Cc][Ee](?:-[Ww][Ii][Tt][Hh]-[Ll][Ee][Aa][Ss][Ee])?\\b)|(?:[Rr][Ee][Ss][Ee][Tt])[^\\n]*(?:--[Hh][Aa][Rr][Dd]\\b)|(?:[Rr][Mm])(?:\\.exe)?\\s+-[a-zA-Z]*r)"
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "node .cursor/hooks/subagent-audit.mjs",
+        "timeout": 10,
+        "failClosed": false
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "node .cursor/hooks/subagent-audit.mjs",
+        "timeout": 10,
+        "failClosed": false
+      }
+    ]
+  }
+}

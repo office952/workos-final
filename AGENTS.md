@@ -74,3 +74,7 @@ The app has the UI20 Candidate A quiet top shell over existing routes and existi
 LETTERS none/none at 60 mm is the regression anchor through that spine. ACM cassette is the second Quote-ready product on the same engines. Unselected roles stay silent. Historical snapshots stay immutable. Analyzer stays outside WorkOS.
 
 Live flags, Cloud write gates, and the next authorized build live only in `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`.
+
+## Cursor engineering harness
+
+Cursor WorkOS Harness V2 is tooling methodology only. It is not Product Truth and not a second roadmap. See `docs/CURSOR_PLUGINS.md` section `CURSOR WORKOS HARNESS V2`.

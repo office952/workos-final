@@ -16,12 +16,13 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["scripts/**/*.{js,mjs,cjs}"],
+    files: ["scripts/**/*.{js,mjs,cjs}", ".cursor/**/*.{js,mjs,cjs}"],
     languageOptions: {
       globals: {
         console: "readonly",
         fetch: "readonly",
         process: "readonly",
+        Buffer: "readonly",
       },
     },
   },

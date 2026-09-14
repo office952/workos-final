@@ -1,7 +1,7 @@
 # Cursor plugins — ghid de utilizare pentru WorkOS Final
 
 Acest fișier este **tooling Cursor**, nu canon de produs.
-Adevărul de business rămâne în `docs/architecture/` și `AGENTS.md`.
+Adevărul de business rămâne în `docs/architecture/` și în contractele de domeniu. `AGENTS.md` nu este Product Truth.
 Pluginurile ajută agentul să planifice, să verifice, să citească documentație și să studieze UI.
 Nu înlocuiesc Owner GO, one-truth, E2E-first sau `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
 
@@ -333,8 +333,133 @@ subtext
 2. UI codează experiență, nu adevăr de business.
 3. Un fact = un owner. Pluginul nu devine a doua autoritate.
 4. Done = path real + evidență runtime, nu screenshot singur.
-5. Fără DB de business, auth, Commercial, Analyzer runtime, sau al doilea produs de catalog, fără Owner GO.
+5. Fără DB de business, auth, Analyzer runtime, sau un produs de catalog nou, fără Owner GO.
 6. Nu instala pluginul **WorkOS** de la workos.com în acest workspace.
+
+---
+
+## CURSOR WORKOS HARNESS V2
+
+This section is Cursor engineering methodology. It is not Product Truth, not a delivery roadmap, not Figma authority, and not a business settings store.
+
+Live delivery flags stay in `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`.
+
+### Orchestration model
+
+```text
+CURSOR_EXECUTION_MODE     = MAX_CAPABILITY
+ONE_WRITER                = SOCIAL_LAW
+READONLY_SPECIALISTS      = 3
+PLAN_MODE                 = PREFERRED FOR COMPLEX / UNCLEAR WORK
+REPORTS                   = EVIDENCE, NOT OWNER ACCEPTANCE
+```
+
+Complex, multi-file, or unclear work starts in Plan Mode. A rule cannot flip the IDE mode. Independent research uses readonly subagents. Shared product code has one writer. Do not launch an agent swarm for appearance.
+
+SUBAGENT ≠ SKILL. A subagent is a separate context that returns findings. A skill is a same-context how-to. Phase 1 adds zero new Skills.
+
+### Readonly specialists
+
+Project files in `.cursor/agents/` use only official keys: `name`, `description`, `model`, `readonly`, `is_background`.
+
+| Agent | Job |
+|---|---|
+| `workos-product-truth-reviewer` | Find invented second owners of business facts. Do not restate Product Truth. |
+| `workos-runtime-evidence-reviewer` | Check claims against existing tests/logs/runtime. Do not invent PASS. Do not start servers. |
+| `workos-red-team` | Attack the current change. Do not assume PASS. |
+
+They must not commit, push, merge, mutate Cloud/real data, or claim Owner acceptance. One-writer is a social law. Cursor cannot mechanically stop a readonly agent from inheriting MCP or spawning a child.
+
+### Plan Mode / Browser / runtime
+
+Use Plan Mode first when the path is multi-file, architectural, or unclear.
+
+UI or runtime claims need the first-party Browser and the repository tests (`node .cursor/run-isolated-e2e.mjs`, existing unit tests). Screenshots alone are not PASS.
+
+Playwright configuration is `retries: process.env.CI ? 1 : 0`. Do not claim configured retries=0 for CI.
+
+### Hooks
+
+`.cursor/hooks.json` is official schema `version: 1`. Scripts are Node. The general classifier uses `failClosed: false` so a parser crash cannot freeze every shell.
+
+`beforeShellExecution` classifies tokens, not naive substrings:
+
+```text
+HOOK_GIT_READONLY          = ALLOW
+HOOK_VERIFICATION          = ALLOW
+HOOK_GIT_COMMIT            = ASK
+HOOK_GIT_NORMAL_PUSH       = ASK
+HOOK_GIT_FORCE_PUSH        = DENY
+HOOK_UNCERTAIN_COMMAND     = ASK
+OPAQUE_WRAPPERS            = DENY
+DIRECT_PNPM_E2E            = DENY
+DIRECT_PLAYWRIGHT_VARIANTS = DENY
+ISOLATED_E2E_RUNNER        = ALLOW
+HOOK_ASK_SECURITY_GATE     = NO
+HOOKS_ARE_ACCIDENT_GUARDRAILS = YES
+HOOKS_ARE_SECURITY_SANDBOX = NO
+```
+
+Local proof on Cursor 3.20.21: ALLOW executed; ASK returned `ask` but the shell ran without an approval pause; DENY was blocked by the hook before execution. ASK is an intent/audit signal, not a mechanical human-approval gate. Commit, push, one-writer, and Owner GO stay process law.
+
+Direct `pnpm e2e` and ordinary Playwright entrypoints (`pnpm exec playwright`, `pnpm dlx playwright`, `pnpm playwright`, `npx playwright`, `playwright test`) are DENY. Use `node .cursor/run-isolated-e2e.mjs`.
+
+Opaque wrappers that can hide destructive execution (`-EncodedCommand` / `-enc`, `Invoke-Expression` / `iex`, `node -e` / `--eval`, `python -c` / `python3 -c` / `py -c`, `bash -c`, `sh -c`) are DENY. `powershell -Command "<plain command>"` and `cmd /c "<plain command>"` stay unwrap-and-classify.
+
+A dedicated `failClosed: true` hook (`node .cursor/hooks/catastrophic-deny.mjs`) matches only high-confidence catastrophic command text and always returns DENY. It does not reclassify and does not return ASK. The general before-shell classifier stays `failClosed: false`.
+
+Audit lines go to `.tmp/cursor-hooks-audit/` and record only event, permission, category, timestamp, and optional subagent type/status. They must not store command, cwd, task, output, tokens, or file contents.
+
+`subagentStart` / `subagentStop` audit type/status only. No `stop` followup loops.
+
+Prove classification with `node --test .cursor/hooks/classify-shell.test.mjs .cursor/setup-worktree.test.mjs`. Do not run real destructive commands to test the guard.
+
+### Worktrees
+
+`.cursor/worktrees.json` runs `node .cursor/setup-worktree.mjs` on Windows and Unix. That script may only run `pnpm install --frozen-lockfile`.
+
+Windows uses `pnpm.cmd` with `shell: true`. Unix uses `pnpm` with `shell: false`. The same resolution path can probe `pnpm --version` without installing. The install child environment removes `WORKOS_CLOUD_ROOT`, `WORKOS_SQLITE_PATH`, `WORKOS_CLOUD_E2E`, `WORKOS_CLOUD_E2E_PASSWORD`, `WORKOS_WAVE3_CLOUD_ROOT`, and `WORKOS_DATA_DIR`. PATH and package-manager environment stay.
+
+It does not copy `.env`, `.env.local`, or SQLite. It does not invoke migrate/seed commands or start servers on 5173/8787.
+
+`node .cursor/run-isolated-e2e.mjs` allocates unused ports other than 5173/8787, uses a unique `.tmp/isolated-e2e/<token>` data dir, and removes real Cloud / SQLite pointers from the child environment before invoking the existing `pnpm e2e`. It does not copy `.env` or SQLite. The Harness runner does not invoke migration/seed commands against an existing or real database. WorkOS API startup may initialize/apply its normal schema migrations inside the disposable isolated E2E database under `.tmp/isolated-e2e/<token>`; that disposable migration is expected test initialization.
+
+### Permissions
+
+```text
+CLI_PERMISSIONS_IMPLEMENTED  = NO
+IDE_PERMISSIONS_IMPLEMENTED  = NO
+PERMISSIONS_PLAN             = DOCUMENTED
+```
+
+Do not add `.cursor/cli.json` or `.cursor/permissions.json` in Phase 1. Empty allowlists can disable ordinary Auto-review.
+
+### MCP scope
+
+Project `.cursor/mcp.json` is not used. User/plugin MCP stays user-level.
+
+Do not commit credentials. Do not duplicate user servers into the repo.
+
+### High-risk review pipeline
+
+1. One writer implements.
+2. `workos-product-truth-reviewer` and `workos-runtime-evidence-reviewer` when the change touches those risks.
+3. `workos-red-team` after high-risk or tooling work.
+4. Exact-head CI before integration, when a PR exists.
+5. Owner acceptance is a separate gate.
+
+### Unavailable / unverified
+
+```text
+AGENT_CLI                    = NOT_FOUND on this machine
+BUGBOT_ON_PRS                = NOT_TESTED / not claimed active
+CLOUD_AGENTS                 = DISCOVERY ONLY / no writes
+PROJECTS_MIGRATION           = NO
+MY_MACHINES                  = DISCOVERY ONLY / no enrollment
+NESTED_AGENTS_MD             = NOT ADDED IN PHASE 1
+```
+
+Bugbot exists as a Cursor Task type. That does not mean Bugbot auto-reviews WorkOS PRs.
 
 ---
 

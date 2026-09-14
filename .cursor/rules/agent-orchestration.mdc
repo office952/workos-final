@@ -1,0 +1,20 @@
+---
+description: Cursor max-capability orchestration for WorkOS
+alwaysApply: true
+---
+
+# Agent orchestration
+
+This rule is engineering method only. It is not Product Truth and not a delivery roadmap.
+
+Complex, multi-file, or unclear work starts in Plan Mode. That is a preference, not a claim that a rule can flip the IDE.
+
+Independent research uses readonly subagents. Shared product code has one writer.
+
+UI or runtime claims need the Browser and the repository tests. High-risk work also asks `workos-red-team`.
+
+When Cursor or tool APIs change, read current official docs. Do not rely on memory.
+
+Reports are evidence. They are not Owner acceptance.
+
+Do not launch an agent swarm for appearance. Do not duplicate the existing e2e-first, one-truth, boundaries, technical-settings, canonical-direction, or operator-ui rules.
