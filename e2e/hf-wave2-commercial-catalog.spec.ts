@@ -59,15 +59,15 @@ test("commercial catalog configurator reaches a stable job", async ({ page, requ
   );
 
   await expect(page.getByRole("heading", { name: /Litere volumetrice luminoase/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Rezumat" })).toBeVisible();
-  await expect(page.getByText("Preț client neconfirmat.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Verifică configurația" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "LITERE" })).toBeVisible();
   await page.screenshot({ path: shot("configurator"), fullPage: true });
   await page.goBack();
   await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await page.goForward();
-  await expect(page.getByRole("heading", { name: "Rezumat" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Verifică configurația" })).toBeVisible();
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Rezumat" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Verifică configurația" })).toBeVisible();
   await confirmCanonicalLettersOnPage(page, inscription);
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await page.locator(".quote-section").getByRole("button", { name: "Creează oferta" }).click();
@@ -131,7 +131,7 @@ test("commercial catalog configurator reaches a stable job", async ({ page, requ
   await expect(page.getByRole("heading", { name: "Catalog" })).toBeVisible();
   await page.screenshot({ path: shot("dark-catalog"), fullPage: true });
   await page.goto(`/products/${CANONICAL_LETTERS_PRODUCT_CODE}`);
-  await expect(page.getByRole("heading", { name: "Rezumat" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Verifică configurația" })).toBeVisible();
   await page.screenshot({ path: shot("dark-configurator"), fullPage: true });
   await setTheme(page, "Deschisă");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");

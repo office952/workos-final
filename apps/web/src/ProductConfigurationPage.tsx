@@ -24,8 +24,12 @@ import {
   type SiteInstallationOperatorView,
 } from "@workos-final/domain";
 import { ClientLink } from "./ClientLink";
+import { ConfiguratorWorkspace } from "./configurator/ConfiguratorWorkspace";
+import {
+  projectConfiguratorView,
+  type ConfiguratorScopeId,
+} from "./configurator/configuratorView";
 import { createCustomer, fetchCustomers } from "./customerApi";
-import { FormRenderer } from "./FormRenderer";
 import {
   AcceptedSnapshotSection,
   CommercialProgress,
@@ -141,6 +145,9 @@ export function ProductConfigurationPage() {
   const [busy, setBusy] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [configuratorScope, setConfiguratorScope] = useState<ConfiguratorScopeId | null>(
+    null,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -154,6 +161,7 @@ export function ProductConfigurationPage() {
         if (cancelled) {
           return;
         }
+        setConfiguratorScope(null);
         setPage(projection ? { kind: "ready", projection } : { kind: "missing" });
       })
       .catch(() => {
@@ -307,7 +315,6 @@ export function ProductConfigurationPage() {
 
   const { template, formSchema } = page.projection;
   const reviewing = definition?.readiness === "ready" && !confirmed;
-  const editing = !confirmed && !reviewing;
 
   async function handleCompile() {
     setBusy(true);
@@ -868,6 +875,74 @@ export function ProductConfigurationPage() {
   const prequoteFloorplan = Boolean(
     confirmed && !confirmed.quoteSnapshot && installationScope,
   );
+  const inscription =
+    typeof values["root.inscription"] === "string" ? values["root.inscription"] : "";
+  const configuratorView = projectConfiguratorView({
+    template,
+    schema: formSchema,
+    values,
+    definition,
+    activeScopeId: configuratorScope,
+    context: {
+      returnHref: requestContext
+        ? `/requests/${encodeURIComponent(requestContext.request.requestId)}`
+        : catalogHref,
+      returnLabel: requestContext ? "Înapoi la cerere" : "Catalog",
+      requestReference: requestContext?.request.reference ?? null,
+      clientName: requestContext?.customerDisplayName ?? null,
+      objectLabel: inscription || null,
+    },
+  });
+
+  if (!confirmed) {
+    return (
+      <section className="product-page">
+        <ConfiguratorWorkspace
+          view={configuratorView}
+          mode={reviewing ? "review" : "edit"}
+          template={template}
+          schema={formSchema}
+          values={values}
+          onChange={(fieldId, value) => {
+            setValues((current) => ({ ...current, [fieldId]: value }));
+            setDefinition(null);
+            setConfirmed(null);
+            setConfirmNotice(null);
+          }}
+          onVerify={() => void handleCompile()}
+          onScopeChange={setConfiguratorScope}
+          busy={busy}
+          notices={
+            <>
+              {confirmNotice ? (
+                <Notice tone="warn" compact>
+                  <p>{confirmNotice}</p>
+                </Notice>
+              ) : null}
+              {definition?.readiness === "blocked" ? (
+                <ReadinessNotice definition={definition} />
+              ) : null}
+            </>
+          }
+          review={
+            reviewing && definition ? (
+              <ReviewPanel
+                template={template}
+                formSchema={formSchema}
+                definition={definition}
+                busy={busy}
+                onConfirm={() => void handleConfirm()}
+                onEdit={() => {
+                  setDefinition(null);
+                  setConfirmNotice(null);
+                }}
+              />
+            ) : null
+          }
+        />
+      </section>
+    );
+  }
 
   return (
     <section
@@ -945,27 +1020,6 @@ export function ProductConfigurationPage() {
 
       {prequoteFloorplan ? null : <ConstructionFacts facts={template.identityFacts} />}
 
-      {editing ? (
-        <>
-          <FormRenderer
-            template={template}
-            schema={formSchema}
-            values={values}
-            onChange={(fieldId, value) => {
-              setValues((current) => ({ ...current, [fieldId]: value }));
-              setDefinition(null);
-              setConfirmed(null);
-              setConfirmNotice(null);
-            }}
-          />
-          <div className="action-row">
-            <button type="button" onClick={() => void handleCompile()} disabled={busy}>
-              Verifică configurația
-            </button>
-          </div>
-        </>
-      ) : null}
-
       {confirmNotice ? (
         <Notice tone="warn" compact>
           <p>{confirmNotice}</p>
@@ -973,20 +1027,6 @@ export function ProductConfigurationPage() {
       ) : null}
 
       {definition?.readiness === "blocked" ? <ReadinessNotice definition={definition} /> : null}
-
-      {reviewing && definition ? (
-        <ReviewPanel
-          template={template}
-          formSchema={formSchema}
-          definition={definition}
-          busy={busy}
-          onConfirm={() => void handleConfirm()}
-          onEdit={() => {
-            setDefinition(null);
-            setConfirmNotice(null);
-          }}
-        />
-      ) : null}
 
       {confirmed ? (
         <ConfirmedCommercialWorkspace

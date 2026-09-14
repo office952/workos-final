@@ -5041,3 +5041,441 @@ a.jobs-customer {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 }
+
+/* Configurator final — Figma 219:3 presentation, scoped tokens only */
+.configurator-final {
+  --cfg-canvas: #f7f8fa;
+  --cfg-surface: #ffffff;
+  --cfg-ink: #1a1d21;
+  --cfg-secondary: #53575e;
+  --cfg-muted: #868d94;
+  --cfg-azure: #2066cf;
+  --cfg-pad: 48px;
+  --cfg-gutter: 24px;
+  container-type: inline-size;
+  container-name: cfg;
+  box-sizing: border-box;
+  margin: -1.25rem -1.5rem -2rem;
+  padding: 0 var(--cfg-pad) 2.5rem;
+  background: var(--cfg-canvas);
+  color: var(--cfg-ink);
+}
+
+.configurator-final .cfg-object-context {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 28px;
+  min-height: 28px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+}
+
+.configurator-final .cfg-context-return {
+  flex: 0 0 auto;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--cfg-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.configurator-final .cfg-context-return:hover {
+  text-decoration: underline;
+}
+
+.configurator-final .cfg-context-client,
+.configurator-final .cfg-context-object {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.configurator-final .cfg-context-client {
+  color: var(--cfg-secondary);
+}
+
+.configurator-final .cfg-context-object {
+  color: var(--cfg-muted);
+  flex: 1 1 auto;
+}
+
+.configurator-final .cfg-page-identity {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 36px;
+}
+
+.configurator-final .cfg-page-identity h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.configurator-final .cfg-page-status {
+  margin: 0;
+  color: var(--cfg-secondary);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.configurator-final .cfg-rail {
+  position: relative;
+  height: 40px;
+  margin: 0.35rem 0 0.85rem;
+}
+
+.configurator-final .cfg-rail-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #d8dee6;
+}
+
+.configurator-final .cfg-rail-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  height: 100%;
+}
+
+.configurator-final .cfg-rail-item {
+  position: relative;
+  min-height: 44px;
+  margin-bottom: -4px;
+  padding: 0 0.5rem 0.35rem;
+  border: 0;
+  background: transparent;
+  color: var(--cfg-secondary);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+}
+
+.configurator-final .cfg-rail-item.is-active {
+  color: var(--cfg-ink);
+}
+
+.configurator-final .cfg-rail-item.is-active::before,
+.configurator-final .cfg-rail-item.is-active::after {
+  position: absolute;
+  bottom: 0;
+  color: var(--cfg-ink);
+  font-weight: 400;
+  content: "[";
+}
+
+.configurator-final .cfg-rail-item.is-active::after {
+  right: 0.15rem;
+  content: "]";
+}
+
+.configurator-final .cfg-rail-item.is-active::before {
+  left: 0.15rem;
+}
+
+.configurator-final .cfg-rail-tick {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: 1px;
+  height: 8px;
+  background: var(--cfg-azure);
+  transform: translateX(-50%);
+}
+
+.configurator-final .cfg-rail-item.is-active .cfg-rail-tick {
+  display: block;
+}
+
+.configurator-final .cfg-rail-item:focus-visible,
+.configurator-final .cfg-target:focus-visible,
+.configurator-final .cfg-verify:focus-visible,
+.configurator-final .cfg-edit-link:focus-visible,
+.configurator-final .cfg-segmented .choice-chip:focus-visible {
+  outline: 2px solid var(--cfg-azure);
+  outline-offset: 2px;
+}
+
+.configurator-final .cfg-targets {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 44px;
+  margin-bottom: 1rem;
+}
+
+.configurator-final .cfg-targets-label {
+  margin: 0;
+  color: var(--cfg-secondary);
+  font-size: 0.85rem;
+}
+
+.configurator-final .cfg-targets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.configurator-final .cfg-target {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: #eceff2;
+  color: var(--cfg-secondary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.configurator-final .cfg-target.is-active {
+  background: var(--cfg-ink);
+  color: #fff;
+}
+
+.configurator-final .cfg-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--cfg-gutter);
+  align-items: start;
+}
+
+.configurator-final .cfg-blueprint,
+.configurator-final .cfg-editor {
+  min-width: 0;
+  background: var(--cfg-surface);
+  padding: 1.25rem 1.35rem 1.5rem;
+}
+
+.configurator-final .cfg-editor {
+  border-top: 2px solid var(--cfg-azure);
+}
+
+.configurator-final .cfg-blueprint-head,
+.configurator-final .cfg-editor-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.configurator-final .cfg-blueprint h2,
+.configurator-final .cfg-editor-head h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.configurator-final .cfg-editor-head p,
+.configurator-final .cfg-blueprint-section p {
+  margin: 0.35rem 0 0;
+  color: var(--cfg-secondary);
+  font-size: 0.85rem;
+}
+
+.configurator-final .cfg-blueprint-section {
+  padding: 0.85rem 0;
+  border-top: 1px solid #eceff2;
+}
+
+.configurator-final .cfg-blueprint-section h3,
+.configurator-final .cfg-editor-section h3,
+.configurator-final .cfg-readonly-block h3,
+.configurator-final .cfg-composition-item h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.configurator-final .cfg-blueprint-section dl {
+  margin: 0;
+}
+
+.configurator-final .cfg-fact {
+  margin: 0 0 0.4rem;
+}
+
+.configurator-final .cfg-fact dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+}
+
+.configurator-final .cfg-fact-label {
+  color: var(--cfg-muted);
+}
+
+.configurator-final .cfg-fact-value {
+  color: var(--cfg-ink);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.86rem;
+}
+
+.configurator-final .cfg-fact.is-missing .cfg-fact-value {
+  color: #9a3412;
+  font-family: inherit;
+  font-weight: 650;
+}
+
+.configurator-final .cfg-fact.is-derived .cfg-fact-value {
+  color: var(--cfg-secondary);
+}
+
+.configurator-final .cfg-fact.is-personalized .cfg-fact-value {
+  color: var(--cfg-azure);
+}
+
+.configurator-final .cfg-fact-kind {
+  color: var(--cfg-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.configurator-final .cfg-incomplete-badge,
+.configurator-final .cfg-necessary {
+  margin: 0;
+  color: #9a3412;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.configurator-final .cfg-readonly-fact {
+  margin: 0 0 0.4rem;
+  padding: 0.65rem 0.75rem;
+  background: #f3f5f7;
+  color: var(--cfg-secondary);
+}
+
+.configurator-final .cfg-form .form-section {
+  border: 0;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.configurator-final .cfg-segmented {
+  margin-top: 0.45rem;
+}
+
+.configurator-final .cfg-segmented .choice-chip {
+  background: #eceff2;
+  border-color: transparent;
+  color: var(--cfg-secondary);
+}
+
+.configurator-final .cfg-segmented .choice-chip.is-selected {
+  background: var(--cfg-azure);
+  color: #fff;
+  border-color: var(--cfg-azure);
+}
+
+.configurator-final .cfg-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.configurator-final .cfg-incomplete-banner {
+  flex: 1 1 12rem;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  background: #f6ece8;
+  color: #9a3412;
+}
+
+.configurator-final .cfg-verify {
+  background: var(--cfg-ink);
+  border-color: var(--cfg-ink);
+  color: #fff;
+}
+
+.configurator-final .cfg-composition {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.configurator-final .cfg-composition-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid #eceff2;
+}
+
+.configurator-final .cfg-edit-link {
+  flex: 0 0 auto;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  color: var(--cfg-azure);
+  font: inherit;
+  font-weight: 650;
+}
+
+.configurator-final .cfg-composition-complete {
+  margin: 0.5rem 0 0;
+  padding: 0.85rem 1rem;
+  background: #e7f0ea;
+  color: #2c6b45;
+}
+
+.configurator-final .cfg-composition-incomplete {
+  margin: 0.5rem 0 0;
+  padding: 0.85rem 1rem;
+  background: #f6ece8;
+  color: #9a3412;
+}
+
+@media (max-width: 1439px) {
+  .configurator-final {
+    --cfg-pad: 32px;
+  }
+
+  .configurator-final .cfg-workspace {
+    grid-template-columns: minmax(0, 1fr) 560px;
+  }
+}
+
+@media (max-width: 768px) {
+  .configurator-final {
+    --cfg-pad: 24px;
+  }
+
+  .configurator-final .cfg-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .configurator-final .cfg-page-identity {
+    flex-wrap: wrap;
+  }
+
+  .configurator-final .cfg-fact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container cfg (max-width: 768px) {
+  .configurator-final .cfg-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -14,6 +14,9 @@ type FormRendererProps = {
   schema: FormSchema;
   values: DraftValues;
   onChange: (fieldId: string, value: DraftValue) => void;
+  includeComponentIds?: readonly string[];
+  sectionTitleFor?: (componentId: string, fallback: string) => string;
+  presentation?: "default" | "configurator";
 };
 
 function FieldControl({
@@ -91,12 +94,22 @@ export function FormRenderer({
   schema,
   values,
   onChange,
+  includeComponentIds,
+  sectionTitleFor,
+  presentation = "default",
 }: FormRendererProps) {
   const selectedIds = selectedComponentIds(template, values);
+  const configurator = presentation === "configurator";
 
   return (
-    <div className="form-stack">
+    <div className={configurator ? "form-stack cfg-form" : "form-stack"}>
       {schema.sections.map((section) => {
+        if (
+          includeComponentIds &&
+          !includeComponentIds.includes(section.componentId)
+        ) {
+          return null;
+        }
         const visibleFields = section.fields.filter((field) =>
           isFieldVisible(field, values, selectedIds),
         );
@@ -104,12 +117,20 @@ export function FormRenderer({
           return null;
         }
 
+        const title = sectionTitleFor
+          ? sectionTitleFor(section.componentId, section.title)
+          : section.title;
+
         return (
           <fieldset key={section.id} className="form-section">
-            <legend>
-              {section.title}
-              {visibleFields.some((field) => field.required) ? " – obligatoriu" : ""}
-            </legend>
+            {title ? (
+              <legend>
+                {title}
+                {visibleFields.some((field) => field.required) && !configurator
+                  ? " – obligatoriu"
+                  : ""}
+              </legend>
+            ) : null}
             <div className="form-section-fields">
               {visibleFields.map((field) => (
                 <div
@@ -129,8 +150,16 @@ export function FormRenderer({
                       onChange={(value) => onChange(field.id, value)}
                     />
                   </Field>
+                  {field.required && isEmptyField(values[field.id]) ? (
+                    <p className="cfg-necessary" role="status">
+                      NECESAR
+                    </p>
+                  ) : null}
                   {field.type === "select" && field.options && field.options.length > 0 ? (
-                    <div className="choice-chips" aria-hidden="true">
+                    <div
+                      className={configurator ? "choice-chips cfg-segmented" : "choice-chips"}
+                      aria-hidden="true"
+                    >
                       {field.options.map((option) => (
                         <button
                           key={option.value}
@@ -156,4 +185,14 @@ export function FormRenderer({
       })}
     </div>
   );
+}
+
+function isEmptyField(value: DraftValue | undefined): boolean {
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === "string") {
+    return value.trim().length === 0;
+  }
+  return false;
 }
