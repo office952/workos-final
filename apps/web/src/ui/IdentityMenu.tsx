@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeSwitcher } from "../theme/ThemeSwitcher";
 import type { CloudSessionMembership } from "../cloudSessionApi";
+import { identityTriggerAccessibleName } from "./identityPresentation";
 
 export function IdentityMenu({
   shortName,
@@ -47,17 +48,28 @@ export function IdentityMenu({
     };
   }, [open]);
 
+  const triggerName = identityTriggerAccessibleName(shortName, accountLabel);
+
   return (
     <div className="identity-menu" ref={rootRef}>
       <button
         type="button"
         className="identity-menu-trigger"
-        aria-label="Cont"
+        aria-label={triggerName}
+        title={triggerName}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((current) => !current)}
       >
-        Cont
+        <span className="identity-menu-trigger-copy">
+          <span className="identity-menu-trigger-org">{shortName}</span>
+          {accountLabel ? (
+            <span className="identity-menu-trigger-account">{accountLabel}</span>
+          ) : null}
+        </span>
+        <span className="identity-menu-trigger-caret" aria-hidden="true">
+          ▾
+        </span>
       </button>
       {open ? (
         <div

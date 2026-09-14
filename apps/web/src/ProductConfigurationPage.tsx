@@ -43,7 +43,6 @@ import {
   ProductionPreviewSection,
   QuoteSnapshotSection,
   ReadinessNotice,
-  ReviewPanel,
 } from "./ProductConfigurationViews";
 import {
   acceptProductionSnapshot,
@@ -912,6 +911,11 @@ export function ProductConfigurationPage() {
           onVerify={() => void handleCompile()}
           onScopeChange={setConfiguratorScope}
           busy={busy}
+          invalidFieldIds={
+            definition && definition.readiness === "blocked"
+              ? definition.missing.map((item) => item.fieldId)
+              : []
+          }
           notices={
             <>
               {confirmNotice ? (
@@ -924,21 +928,19 @@ export function ProductConfigurationPage() {
               ) : null}
             </>
           }
-          review={
-            reviewing && definition ? (
-              <ReviewPanel
-                template={template}
-                formSchema={formSchema}
-                definition={definition}
-                busy={busy}
-                onConfirm={() => void handleConfirm()}
-                onEdit={() => {
-                  setDefinition(null);
-                  setConfirmNotice(null);
-                }}
-              />
+          reviewNote={
+            reviewing && definition && definition.measurements.length > 0 ? (
+              <p className="cfg-review-note">
+                Măsurătorile de mai sus sunt introduse de operator. Nu sunt geometrie
+                calculată de WorkOS.
+              </p>
             ) : null
           }
+          onConfirm={() => void handleConfirm()}
+          onEdit={() => {
+            setDefinition(null);
+            setConfirmNotice(null);
+          }}
         />
       </section>
     );

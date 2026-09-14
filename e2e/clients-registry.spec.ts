@@ -2,6 +2,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "./fixtures";
 import { createCustomer } from "./helpers/customers";
+import { identityMenuTrigger } from "./helpers/account";
 import { brandLink, clickPrimaryDestination } from "./helpers/navigation";
 import { createRequestNeedingAction, uniqueRequestToken } from "./helpers/requests";
 
@@ -83,7 +84,7 @@ test("clients registry matches the accepted Figma interaction contract", async (
   await expect(page.getByText("WorkOS Final", { exact: true })).toHaveCount(0);
   await expect(page.locator(".app-context-title")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Identifică-te" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Cont" })).toBeVisible();
+  await expect(identityMenuTrigger(page)).toBeVisible();
   await expect(page.locator(".registry-pagination")).toHaveCount(0);
 
   const names = await page.locator(".clients-overview .registry-row-name").allTextContents();

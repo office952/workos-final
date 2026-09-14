@@ -86,7 +86,7 @@ describe("AppShell", () => {
     expect(within(primaryNav()).queryByRole("link", { name: "Acasă" })).not.toBeInTheDocument();
     expect(within(primaryNav()).queryByRole("link", { name: "Catalog" })).not.toBeInTheDocument();
     expect(screen.getByText("conținut")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cont" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Atelier Demo" })).toBeInTheDocument();
     expect(screen.queryByText("PRODUCT")).not.toBeInTheDocument();
     expect(screen.queryByText("TRUTH_COMPILER")).not.toBeInTheDocument();
   });
@@ -187,7 +187,7 @@ describe("AppShell", () => {
         <p>conținut</p>
       </AppShell>,
     );
-    await user.click(screen.getByRole("button", { name: "Cont" }));
+    await user.click(screen.getByRole("button", { name: "Atelier Demo" }));
     expect(screen.getByRole("link", { name: "Administrare" })).toHaveAttribute("href", "/admin");
   });
 
@@ -227,8 +227,11 @@ describe("AppShell", () => {
       </MemoryRouter>,
     );
 
-    await userEvent.click(await screen.findByRole("button", { name: "Cont" }));
-    expect(screen.getByText("Atelier Alpha")).toBeInTheDocument();
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Atelier Alpha. owner@example.test" }),
+    );
+    expect(screen.getAllByText("Atelier Alpha").length).toBeGreaterThan(1);
+    expect(screen.getAllByText("owner@example.test").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Administrare" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ieși din cont" })).toBeInTheDocument();
   });
@@ -276,7 +279,9 @@ describe("AppShell", () => {
       </MemoryRouter>,
     );
 
-    await userEvent.click(await screen.findByRole("button", { name: "Cont" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Atelier Alpha. user.c@isolation.test" }),
+    );
     expect(screen.getByLabelText("Schimbă organizația")).toBeInTheDocument();
   });
 
@@ -292,7 +297,7 @@ describe("AppShell", () => {
       "#continut-principal",
     );
     expect(screen.getByRole("main")).toHaveAttribute("id", "continut-principal");
-    await user.click(screen.getByRole("button", { name: "Cont" }));
+    await user.click(screen.getByRole("button", { name: "Atelier Demo" }));
     expect(screen.getByRole("button", { name: "Deschisă" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Întunecată" })).toBeInTheDocument();
   });

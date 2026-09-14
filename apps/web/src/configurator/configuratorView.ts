@@ -42,11 +42,13 @@ export type BlueprintSection = {
   label: string;
   facts: readonly BlueprintFact[];
   incomplete: boolean;
+  complete: boolean;
 };
 
 export type ConfiguratorScope = {
   id: ConfiguratorScopeId;
   label: string;
+  complete: boolean;
 };
 
 export type ConfiguratorTarget = {
@@ -121,14 +123,14 @@ const LETTERS_SECTION_LABEL: Record<string, string> = {
   FACE: "FAȚĂ",
   VOLUME: "CANT",
   BACK: "SPATE",
-  LIGHTING: "ILUMINARE",
+  LIGHTING: "Iluminare",
 };
 
 const ACM_SECTION_LABEL: Record<string, string> = {
   ROOT: "PRODUS",
-  FACE: "CORP CASETAT",
-  BACK: "CADRU INTERN",
-  LIGHTING: "ILUMINARE",
+  FACE: "Corp casetat",
+  BACK: "Cadru intern",
+  LIGHTING: "Iluminare",
 };
 
 export function configuratorProductKind(
@@ -152,9 +154,9 @@ export function configuratorProductKind(
 
 export function availableConfiguratorScopes(
   template: ProductTemplate,
-): ConfiguratorScope[] {
+): Array<Pick<ConfiguratorScope, "id" | "label">> {
   const kind = configuratorProductKind(template);
-  const scopes: ConfiguratorScope[] = [];
+  const scopes: Array<Pick<ConfiguratorScope, "id" | "label">> = [];
   if (kind === "acm") {
     scopes.push({ id: "panou-acm", label: SCOPE_LABEL["panou-acm"] });
   }
@@ -165,8 +167,25 @@ export function availableConfiguratorScopes(
   return scopes;
 }
 
+export function attachConfiguratorScopeCompletion(
+  scopes: ReadonlyArray<Pick<ConfiguratorScope, "id" | "label">>,
+  contributingComplete: Readonly<Partial<Record<ConfiguratorScopeId, boolean>>>,
+): ConfiguratorScope[] {
+  const contributing = scopes.filter((scope) => scope.id !== "compozitie");
+  const compositionComplete =
+    contributing.length > 0 &&
+    contributing.every((scope) => contributingComplete[scope.id] === true);
+
+  return scopes.map((scope) => {
+    if (scope.id === "compozitie") {
+      return { ...scope, complete: compositionComplete };
+    }
+    return { ...scope, complete: contributingComplete[scope.id] === true };
+  });
+}
+
 export function resolveActiveScope(
-  scopes: readonly ConfiguratorScope[],
+  scopes: ReadonlyArray<Pick<ConfiguratorScope, "id">>,
   requested: ConfiguratorScopeId | null | undefined,
 ): ConfiguratorScopeId {
   if (requested && scopes.some((scope) => scope.id === requested)) {
@@ -340,12 +359,14 @@ function blueprintSectionsFor(
       return [];
     }
 
+    const incomplete = facts.some((fact) => fact.kind === "missing");
     return [
       {
         id: componentId,
         label: editorSectionLabel(kind, componentId),
         facts,
-        incomplete: facts.some((fact) => fact.kind === "missing"),
+        incomplete,
+        complete: !incomplete,
       },
     ];
   });
@@ -374,8 +395,18 @@ export function projectConfiguratorView(
     (component) => !missingComponentIds.has(component.id),
   ).length;
   const complete = compiled.readiness === "ready";
+  const contributingComplete: Partial<Record<ConfiguratorScopeId, boolean>> = {};
+  for (const scope of scopes) {
+    if (scope.id !== "compozitie") {
+      contributingComplete[scope.id] = complete;
+    }
+  }
+  const scopesWithCompletion = attachConfiguratorScopeCompletion(
+    scopes,
+    contributingComplete,
+  );
   const sections = blueprintSectionsFor(kind, template, values, fields, compiled);
-  const contributing = scopes.filter((scope) => scope.id !== "compozitie");
+  const contributing = scopesWithCompletion.filter((scope) => scope.id !== "compozitie");
   const compositionItems: CompositionReviewItem[] = contributing.map((scope) => {
     const scopeSections = sections.filter((section) => {
       if (scope.id === "panou-acm") {
@@ -400,7 +431,7 @@ export function projectConfiguratorView(
     return {
       scopeId: scope.id,
       label: scope.label,
-      complete,
+      complete: scope.complete,
       summary: compositionSummary(scopeSections),
       editLabel: `Editează în ${scope.label}`,
     };
@@ -422,24 +453,28 @@ export function projectConfiguratorView(
     modulesValidated,
     modulesTotal: modules.length,
     productKind: kind,
-    scopes,
+    scopes: scopesWithCompletion,
     activeScopeId,
     targets: [],
     activeTargetId: input.activeTargetId ?? null,
     blueprintTitle:
-      kind === "acm"
-        ? "Construcție cadru și corp"
-        : kind === "letters"
-          ? "Anatomie fizică litere"
-          : "Adevăr de produs",
+      activeScopeId === "compozitie"
+        ? complete
+          ? "Compoziție completă detaliată"
+          : "Compoziție"
+        : kind === "acm"
+          ? "Construcție cadru & corp"
+          : kind === "letters"
+            ? "Anatomie fizică litere"
+            : "Adevăr de produs",
     blueprintIncomplete: sections.some((section) => section.incomplete),
     sections,
     editorTitle:
       kind === "acm"
-        ? "Configurezi panoul ACM"
+        ? "Configurare Panou ACM"
         : kind === "letters"
-          ? "Configurezi literele"
-          : "Configurezi produsul",
+          ? "Configurare litere"
+          : "Configurare produs",
     editorLead:
       kind === "acm"
         ? "Dimensiunile, adâncimea și construcția casetei rămân la corpul casetat. Cadrul intern arată doar faptele contractate."

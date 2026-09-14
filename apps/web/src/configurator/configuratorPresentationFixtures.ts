@@ -17,10 +17,10 @@ function baseView(partial: Partial<ConfiguratorView>): ConfiguratorView {
     modulesTotal: 4,
     productKind: "letters",
     scopes: [
-      { id: "panou-acm", label: "PANOU ACM" },
-      { id: "litere", label: "LITERE" },
-      { id: "ansamblare", label: "ANSAMBLARE" },
-      { id: "compozitie", label: "COMPOZIȚIE" },
+      { id: "panou-acm", label: "PANOU ACM", complete: false },
+      { id: "litere", label: "LITERE", complete: false },
+      { id: "ansamblare", label: "ANSAMBLARE", complete: false },
+      { id: "compozitie", label: "COMPOZIȚIE", complete: false },
     ],
     activeScopeId: "litere",
     targets: [],
@@ -49,6 +49,7 @@ export function fixtureAcmMultiPiece(): ConfiguratorView {
         id: "FACE",
         label: "CORP CASETAT",
         incomplete: false,
+        complete: true,
         facts: [
           {
             id: "face.pieces",
@@ -77,6 +78,7 @@ export function fixtureLettersPersonalized(): ConfiguratorView {
         id: "VOLUME",
         label: "CANT",
         incomplete: false,
+        complete: true,
         facts: [
           {
             id: "volume.depthMm",
@@ -109,6 +111,7 @@ export function fixtureAssemblyDirect(): ConfiguratorView {
         id: "ASSEMBLY",
         label: "ANSAMBLARE",
         incomplete: false,
+        complete: true,
         facts: [
           {
             id: "assembly.mount",
@@ -134,6 +137,7 @@ export function fixtureAssemblyJoint(): ConfiguratorView {
         id: "ASSEMBLY",
         label: "ANSAMBLARE",
         incomplete: false,
+        complete: true,
         facts: [
           {
             id: "assembly.mount",

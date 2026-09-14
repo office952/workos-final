@@ -21,9 +21,9 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
 
   await page.getByRole("link", { name: "Panou ACM casetat" }).click();
   await expect(page.getByRole("heading", { name: "Panou ACM casetat" })).toBeVisible();
-  await expect(page.getByText("Material casetă: ACM 3 mm")).toBeVisible();
-  await expect(page.getByText("Cadru intern: Profil oțel")).toBeVisible();
-  await expect(page.getByText("Iluminare: Fără iluminare")).toBeVisible();
+  await expect(page.getByText("ACM 3 mm", { exact: true })).toBeVisible();
+  await expect(page.getByText("Profil oțel", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fără iluminare", { exact: true })).toBeVisible();
   await expect(productChoiceGroup(page, "Sistem de prindere")).toBeVisible();
   await expect(page.getByText("PRD-ACM-CASSETTE-NONE")).toHaveCount(0);
   await page.screenshot({
@@ -43,9 +43,11 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
   });
 
   await page.getByRole("button", { name: "Verifică configurația" }).click();
+  await expect(page.getByRole("heading", { name: "Configurare Panou ACM" })).toBeVisible();
+  await expect(page.getByText("Revizuiește configurația înainte de confirmare.")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
 
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();

@@ -172,4 +172,37 @@ describe("FormRenderer", () => {
     await user.click(screen.getByRole("radio", { name: "Fără finisaj" }));
     expect(onChange).toHaveBeenCalledWith("extra.finish", "none");
   });
+
+  it("configurator required fields stay quiet until validation ids are provided", () => {
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{}}
+        onChange={vi.fn()}
+        presentation="configurator"
+      />,
+    );
+
+    expect(screen.getByText("Nume față")).toBeInTheDocument();
+    expect(document.querySelector('[data-required][data-visual="Nume"]')).not.toBeNull();
+    expect(screen.queryByText("Necesar")).not.toBeInTheDocument();
+    expect(screen.queryByText("Completează acest câmp.")).not.toBeInTheDocument();
+  });
+
+  it("configurator shows compiler validation only for provided field ids", () => {
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{}}
+        onChange={vi.fn()}
+        presentation="configurator"
+        invalidFieldIds={["face.name"]}
+      />,
+    );
+
+    expect(screen.getByText("Completează acest câmp.")).toBeInTheDocument();
+    expect(screen.queryByText("Necesar")).not.toBeInTheDocument();
+  });
 });

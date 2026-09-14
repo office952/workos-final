@@ -78,16 +78,23 @@ describe("ConfiguratorWorkspace", () => {
     });
 
     expect(screen.getByRole("heading", { name: "Panou ACM casetat" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "PANOU ACM" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "PANOU ACM Complet" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "COMPOZIȚIE Complet" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Module de configurare" })).toHaveAttribute(
+      "data-rail-mode",
+      "group",
+    );
     expect(screen.queryByRole("button", { name: "ANSAMBLARE" })).not.toBeInTheDocument();
-    expect(screen.getByText("Material casetă: ACM 3 mm")).toBeInTheDocument();
+    expect(screen.getByText("ACM 3 mm")).toBeInTheDocument();
+    expect(document.querySelector('[data-fact-id="identity:face.material"]')).not.toBeNull();
     expect(screen.getByLabelText("Lățime exterioară (mm)")).toBeInTheDocument();
     expect(screen.queryByText("Ansamblu ACM + litere volumetrice")).not.toBeInTheDocument();
   });
 
   it("B — presentation fixture can show multi-piece without becoming domain truth", () => {
     renderWorkspace(fixtureAcmMultiPiece());
-    expect(screen.getByText("Bucăți: 2 × 1600 × 800 mm")).toBeInTheDocument();
+    expect(screen.getByText("Bucăți:")).toBeInTheDocument();
+    expect(screen.getByText("2 × 1600 × 800 mm")).toBeInTheDocument();
     expect(document.querySelector('[data-fact-id="face.pieces"]')).not.toBeNull();
   });
 
@@ -120,7 +127,17 @@ describe("ConfiguratorWorkspace", () => {
       onVerify: vi.fn(),
     });
 
-    expect(screen.getByRole("button", { name: "LITERE" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "LITERE Complet" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "COMPOZIȚIE Complet" })).toBeInTheDocument();
+    expect(document.querySelectorAll(".cfg-rail-hug .cfg-section-check.is-complete")).toHaveLength(2);
+    expect(screen.getByRole("navigation", { name: "Module de configurare" })).toHaveAttribute(
+      "data-rail-mode",
+      "group",
+    );
+    expect(screen.getByRole("navigation", { name: "Module de configurare" })).toHaveAttribute(
+      "data-rail-count",
+      "2",
+    );
     expect(screen.getAllByText("FAȚĂ").length).toBeGreaterThan(0);
     expect(screen.getAllByText("CANT").length).toBeGreaterThan(0);
     expect(screen.queryByText("Configurezi:")).not.toBeInTheDocument();
@@ -131,7 +148,8 @@ describe("ConfiguratorWorkspace", () => {
     renderWorkspace(fixtureLettersPersonalized());
     expect(screen.getByText("Personalizat")).toBeInTheDocument();
     expect(screen.getByText("Moștenit")).toBeInTheDocument();
-    expect(screen.getByText(/Lățime bandă: 60 mm/)).toBeInTheDocument();
+    expect(screen.getByText("Lățime bandă:")).toBeInTheDocument();
+    expect(screen.getByText("60 mm")).toBeInTheDocument();
     expect(document.querySelector('[data-fact-kind="personalized"]')).not.toBeNull();
     expect(document.querySelector('[data-fact-kind="inherited"]')).not.toBeNull();
     expect(screen.queryByText(/avertisment/i)).not.toBeInTheDocument();
@@ -139,7 +157,8 @@ describe("ConfiguratorWorkspace", () => {
 
   it("E/F — assembly fixtures render relation facts only", () => {
     const { rerender } = renderWorkspace(fixtureAssemblyDirect());
-    expect(screen.getByText("Montare: Direct")).toBeInTheDocument();
+    expect(screen.getByText("Montare:")).toBeInTheDocument();
+    expect(screen.getByText("Direct")).toBeInTheDocument();
     expect(document.querySelector('[data-fact-id="assembly.mount"]')).not.toBeNull();
     rerender(
       <MemoryRouter>
@@ -150,8 +169,8 @@ describe("ConfiguratorWorkspace", () => {
         />
       </MemoryRouter>,
     );
-    expect(screen.getByText("Montare: Distanțate")).toBeInTheDocument();
-    expect(screen.getByText(/Joint: din limita de panou/)).toBeInTheDocument();
+    expect(screen.getByText("Distanțate")).toBeInTheDocument();
+    expect(screen.getByText("din limita de panou")).toBeInTheDocument();
   });
 
   it("G — composition is read-only navigation without mutation CTA", async () => {
@@ -198,7 +217,7 @@ describe("ConfiguratorWorkspace", () => {
     expect(onScopeChange).toHaveBeenCalledWith("litere");
   });
 
-  it("H — incomplete required facts show NECONFIGURAT and NECESAR", () => {
+  it("H — incomplete required facts show NECONFIGURAT, stars, and compiler ✓", () => {
     const template = getProductTemplate(CANONICAL_PRODUCT_CODE);
     const schema = getFormSchemaForTemplate(CANONICAL_PRODUCT_CODE);
     if (!template || !schema) {
@@ -219,8 +238,65 @@ describe("ConfiguratorWorkspace", () => {
     });
 
     expect(screen.getAllByText(/NECONFIGURAT/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText("NECESAR").length).toBeGreaterThan(0);
+    expect(screen.queryByText("INCOMPLET")).not.toBeInTheDocument();
+    expect(screen.queryByText("Necesar")).not.toBeInTheDocument();
+    expect(screen.queryByText(/NECESAR:/)).not.toBeInTheDocument();
+    expect(screen.getByText("Completează câmpurile marcate cu *.")).toBeInTheDocument();
     expect(screen.getByText("2 din 4 module validate")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^LITERE$/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^COMPOZIȚIE$/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "LITERE Complet" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "COMPOZIȚIE Complet" })).not.toBeInTheDocument();
+    expect(screen.getAllByText("Complet").length).toBe(
+      view.sections.filter((section) => section.complete).length,
+    );
     expect(screen.queryByText("Configurare completă")).not.toBeInTheDocument();
+    expect(document.querySelectorAll(".cfg-rail-hug .cfg-section-check")).toHaveLength(0);
+    expect(document.querySelectorAll(".cfg-rail-reserve")).toHaveLength(2);
+    expect(document.querySelector(".cfg-rail-bracket")).toBeNull();
+  });
+
+  it("keeps validated review inside the Editor card with structured facts", async () => {
+    const user = userEvent.setup();
+    const template = getProductTemplate(CANONICAL_PRODUCT_CODE);
+    const schema = getFormSchemaForTemplate(CANONICAL_PRODUCT_CODE);
+    if (!template || !schema) {
+      throw new Error("LETTERS missing");
+    }
+    const values = {
+      "root.inscription": "WORKOS",
+      "face.finish": "vinyl",
+      "face.color": "alb",
+      "face.confirmedAreaMm2": 250000,
+      "volume.depthMm": "60",
+      "volume.finish": "none",
+      "volume.confirmedPerimeterMm": 12500,
+    };
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values,
+      context,
+    });
+    const onEdit = vi.fn();
+    renderWorkspace(view, {
+      mode: "review",
+      onConfirm: vi.fn(),
+      onEdit,
+    });
+
+    expect(screen.getByRole("heading", { name: "Configurare litere" })).toBeInTheDocument();
+    expect(
+      screen.getByText("Revizuiește configurația înainte de confirmare."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).not.toBeInTheDocument();
+    expect(document.querySelector("ul.review-facts")).toBeNull();
+    expect(document.querySelector(".cfg-editor .cfg-editor-accent")).not.toBeNull();
+    expect(document.querySelector('.cfg-editor [data-fact-id="face.confirmedAreaMm2"]')).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Confirmă configurația" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Modifică configurația" }));
+    expect(onEdit).toHaveBeenCalledOnce();
   });
 });

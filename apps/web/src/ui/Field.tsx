@@ -14,6 +14,9 @@ type FieldProps = {
   error?: string;
   hideLabel?: boolean;
   variant?: FieldVariant;
+  suffix?: string;
+  visibleLabel?: string;
+  required?: boolean;
   children: ReactNode;
 };
 
@@ -33,6 +36,9 @@ function fieldVariantClass(variant: FieldVariant): string {
 type FieldControlProps = {
   "aria-describedby"?: string;
   "aria-invalid"?: boolean;
+  "aria-required"?: boolean;
+  "aria-label"?: string;
+  required?: boolean;
 };
 
 export function Field({
@@ -41,6 +47,9 @@ export function Field({
   error,
   hideLabel = false,
   variant = "default",
+  suffix,
+  visibleLabel,
+  required = false,
   children,
 }: FieldProps) {
   const errorId = useId();
@@ -52,6 +61,8 @@ export function Field({
     ? cloneElement(children as ReactElement<FieldControlProps>, {
         "aria-describedby": describedBy || undefined,
         ...(error ? { "aria-invalid": true } : {}),
+        ...(required ? { "aria-required": true, required: true } : {}),
+        ...(suffix ? { "aria-label": label } : {}),
       })
     : children;
   const variantClass = fieldVariantClass(variant);
@@ -61,8 +72,21 @@ export function Field({
 
   return (
     <label className={fieldClass}>
-      <span className={hideLabel ? "visually-hidden" : "field-label"}>{label}</span>
-      {control}
+      <span
+        className={hideLabel ? "visually-hidden" : "field-label"}
+        data-visual={visibleLabel && !hideLabel ? visibleLabel : undefined}
+        data-required={required && !hideLabel ? "" : undefined}
+      >
+        {label}
+      </span>
+      {suffix ? (
+        <span className="cfg-input-wrap">
+          {control}
+          <span className="cfg-input-unit">{suffix}</span>
+        </span>
+      ) : (
+        control
+      )}
       {error ? (
         <p id={errorId} className="field-error" role="alert">
           {error}

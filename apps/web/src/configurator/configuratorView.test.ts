@@ -6,7 +6,7 @@ import {
   getProductTemplate,
 } from "@workos-final/domain";
 import { describe, expect, it } from "vitest";
-import { projectConfiguratorView } from "./configuratorView";
+import { attachConfiguratorScopeCompletion, projectConfiguratorView } from "./configuratorView";
 
 const context = {
   returnHref: "/products",
@@ -62,7 +62,10 @@ describe("projectConfiguratorView", () => {
     });
 
     expect(view.title).toBe("Panou ACM casetat");
-    expect(view.scopes.map((scope) => scope.id)).toEqual(["panou-acm", "compozitie"]);
+    expect(view.scopes.map((scope) => ({ id: scope.id, complete: scope.complete }))).toEqual([
+      { id: "panou-acm", complete: true },
+      { id: "compozitie", complete: true },
+    ]);
     expect(view.targets).toEqual([]);
     expect(view.complete).toBe(true);
     expect(view.statusLabel).toBe("Configurare completă");
@@ -118,7 +121,10 @@ describe("projectConfiguratorView", () => {
     expect(view.title).toBe(
       "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     );
-    expect(view.scopes.map((scope) => scope.id)).toEqual(["litere", "compozitie"]);
+    expect(view.scopes.map((scope) => ({ id: scope.id, complete: scope.complete }))).toEqual([
+      { id: "litere", complete: true },
+      { id: "compozitie", complete: true },
+    ]);
     expect(view.targets).toEqual([]);
     expect(view.complete).toBe(true);
     expect(view.statusLabel).toBe("Configurare completă");
@@ -206,6 +212,10 @@ describe("projectConfiguratorView", () => {
 
     expect(view.complete).toBe(false);
     expect(view.statusLabel).toBe("2 din 4 module validate");
+    expect(view.scopes.map((scope) => ({ id: scope.id, complete: scope.complete }))).toEqual([
+      { id: "litere", complete: false },
+      { id: "compozitie", complete: false },
+    ]);
     const missing = view.sections.flatMap((section) =>
       section.facts.filter((fact) => fact.kind === "missing"),
     );
@@ -238,6 +248,10 @@ describe("projectConfiguratorView", () => {
     expect(view.statusLabel).toBe("2 din 4 module validate");
     expect(view.modulesValidated).toBe(2);
     expect(view.modulesTotal).toBe(4);
+    expect(view.sections.find((section) => section.id === "BACK")?.complete).toBe(true);
+    expect(view.sections.find((section) => section.id === "LIGHTING")?.complete).toBe(true);
+    expect(view.sections.find((section) => section.id === "FACE")?.complete).toBe(false);
+    expect(view.sections.find((section) => section.id === "VOLUME")?.complete).toBe(false);
   });
 
   it("B — LETTERS valid fixture is complete from compileDefinition.readiness", () => {
@@ -336,6 +350,35 @@ describe("projectConfiguratorView", () => {
     expect(filled.compositionItems[0]?.complete).toBe(true);
     expect(filled.complete).toBe(true);
     expect(filled.compositionItems[0]?.complete).toBe(filled.complete);
+    expect(empty.scopes.find((scope) => scope.id === "compozitie")?.complete).toBe(false);
+    expect(filled.scopes.find((scope) => scope.id === "compozitie")?.complete).toBe(true);
+  });
+
+  it("marks composition complete only when every contributing scope is complete", () => {
+    const partial = attachConfiguratorScopeCompletion(
+      [
+        { id: "panou-acm", label: "PANOU ACM" },
+        { id: "litere", label: "LITERE" },
+        { id: "ansamblare", label: "ANSAMBLARE" },
+        { id: "compozitie", label: "COMPOZIȚIE" },
+      ],
+      { "panou-acm": true, litere: true, ansamblare: false },
+    );
+    const ready = attachConfiguratorScopeCompletion(
+      [
+        { id: "panou-acm", label: "PANOU ACM" },
+        { id: "litere", label: "LITERE" },
+        { id: "ansamblare", label: "ANSAMBLARE" },
+        { id: "compozitie", label: "COMPOZIȚIE" },
+      ],
+      { "panou-acm": true, litere: true, ansamblare: true },
+    );
+
+    expect(partial.find((scope) => scope.id === "compozitie")?.complete).toBe(false);
+    expect(ready.find((scope) => scope.id === "compozitie")?.complete).toBe(true);
+    expect(ready.filter((scope) => scope.id !== "compozitie").every((scope) => scope.complete)).toBe(
+      true,
+    );
   });
 
   it("does not invent assembly title or letter group names from Figma fixtures", () => {
