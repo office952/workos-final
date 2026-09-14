@@ -46,6 +46,9 @@ if (!parsed.ok) {
 
 const decision = classifyShellCommand(
   typeof parsed.value.command === "string" ? parsed.value.command : "",
+  {
+    cwd: typeof parsed.value.cwd === "string" ? parsed.value.cwd : "",
+  },
 );
 emit(decision);
 audit(decision);

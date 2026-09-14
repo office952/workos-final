@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   basename,
   splitShellSegments,
@@ -48,8 +49,21 @@ function skipGitGlobals(args) {
   const remaining = [];
   for (let index = 0; index < args.length; index += 1) {
     const token = args[index];
-    if (token === "-C" || token === "--git-dir" || token === "--work-tree") {
+    if (
+      token === "-C" ||
+      token === "--git-dir" ||
+      token === "--work-tree" ||
+      token === "-c" ||
+      token === "--config"
+    ) {
       index += 1;
+      continue;
+    }
+    if (
+      token.startsWith("--git-dir=") ||
+      token.startsWith("--work-tree=") ||
+      token.startsWith("--config=")
+    ) {
       continue;
     }
     if (token.startsWith("-")) {
@@ -131,6 +145,288 @@ function isAllowedGitBranchShow(tokens) {
   }
   const after = gitSubcommandArgs(tokens);
   return after.length === 1 && after[0] === "--show-current";
+}
+
+const COMMIT_VALUE_FLAGS = new Set([
+  "-m",
+  "--message",
+  "-f",
+  "--file",
+  "-c",
+  "-C",
+  "--reedit-message",
+  "--reuse-message",
+  "--template",
+  "--author",
+  "--date",
+  "--cleanup",
+]);
+
+function isHistoryRewriteCommit(tokens) {
+  if (gitSubcommand(tokens) !== "commit") {
+    return false;
+  }
+  const after = gitSubcommandArgs(tokens);
+  for (let index = 0; index < after.length; index += 1) {
+    const token = after[index];
+    const lower = token.toLowerCase();
+    if (COMMIT_VALUE_FLAGS.has(lower)) {
+      index += 1;
+      continue;
+    }
+    if (
+      lower.startsWith("--message=") ||
+      lower.startsWith("--file=") ||
+      lower.startsWith("--template=") ||
+      lower.startsWith("--author=") ||
+      lower.startsWith("--date=") ||
+      lower.startsWith("--cleanup=")
+    ) {
+      continue;
+    }
+    if (
+      lower === "--amend" ||
+      lower === "--fixup" ||
+      lower === "--squash" ||
+      lower.startsWith("--fixup=") ||
+      lower.startsWith("--squash=")
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isAllowedGitCommit(tokens) {
+  return gitSubcommand(tokens) === "commit" && !isHistoryRewriteCommit(tokens);
+}
+
+function isGitAliasOverride(tokens) {
+  if (findToolIndex(tokens, new Set(["git"])) < 0) {
+    return false;
+  }
+  const args = gitArgs(tokens);
+  for (let index = 0; index < args.length; index += 1) {
+    const token = args[index];
+    const lower = token.toLowerCase();
+    if (lower === "-c" || lower === "--config") {
+      const value = String(args[index + 1] ?? "").toLowerCase();
+      if (value.startsWith("alias.")) {
+        return true;
+      }
+    }
+    if (lower.startsWith("--config=") && lower.slice("--config=".length).startsWith("alias.")) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function readCurrentBranch(cwd) {
+  if (typeof cwd !== "string" || cwd.trim().length === 0) {
+    return "";
+  }
+  const result = spawnSync("git", ["-C", cwd, "branch", "--show-current"], {
+    encoding: "utf8",
+    timeout: 5000,
+    windowsHide: true,
+  });
+  if (result.status !== 0) {
+    return "";
+  }
+  return String(result.stdout ?? "").trim();
+}
+
+function resolveCurrentBranch(options = {}) {
+  try {
+    if (typeof options.resolveCurrentBranch === "function") {
+      return String(options.resolveCurrentBranch(options.cwd) ?? "").trim();
+    }
+    return readCurrentBranch(options.cwd);
+  } catch {
+    return "";
+  }
+}
+
+function isProtectedCurrentBranch(branch) {
+  const value = String(branch ?? "").trim().toLowerCase();
+  return value === "main" || value === "master";
+}
+
+function classifyHeadPush(options) {
+  const branch = resolveCurrentBranch(options);
+  if (branch.length === 0) {
+    return decision(
+      "deny",
+      "destructive",
+      "Current branch could not be resolved safely.",
+    );
+  }
+  if (isProtectedCurrentBranch(branch)) {
+    return decision(
+      "deny",
+      "destructive",
+      "Direct push to main or master is blocked.",
+    );
+  }
+  return decision(
+    "allow",
+    "verification",
+    "Ordinary repository-local git workflow is allowed.",
+  );
+}
+
+function isAllowedGitFetch(tokens) {
+  return gitSubcommand(tokens) === "fetch";
+}
+
+const PUSH_VALUE_FLAGS = new Set([
+  "--repo",
+  "--exec",
+  "--receive-pack",
+  "--push-option",
+  "--signed",
+  "-o",
+]);
+
+function collectPushPositionals(tokens) {
+  const after = gitSubcommandArgs(tokens);
+  const positionals = [];
+  for (let index = 0; index < after.length; index += 1) {
+    const token = after[index];
+    if (token.startsWith("--") && token.includes("=")) {
+      continue;
+    }
+    if (PUSH_VALUE_FLAGS.has(token.toLowerCase())) {
+      index += 1;
+      continue;
+    }
+    if (token.startsWith("-")) {
+      continue;
+    }
+    positionals.push(token);
+  }
+  return positionals;
+}
+
+function isProtectedBranchRef(rawRef) {
+  const value = String(rawRef ?? "").replace(/^\+/, "");
+  if (
+    value === "main" ||
+    value === "master" ||
+    value === "refs/heads/main" ||
+    value === "refs/heads/master"
+  ) {
+    return true;
+  }
+  const dest = value.includes(":") ? value.slice(value.indexOf(":") + 1) : value;
+  if (
+    dest === "main" ||
+    dest === "master" ||
+    dest === "refs/heads/main" ||
+    dest === "refs/heads/master"
+  ) {
+    return true;
+  }
+  const base = dest.split("/").pop();
+  return base === "main" || base === "master";
+}
+
+function isDirectMainPush(tokens) {
+  if (gitSubcommand(tokens) !== "push") {
+    return false;
+  }
+  const positionals = collectPushPositionals(tokens);
+  if (positionals.length === 0) {
+    return false;
+  }
+  if (positionals.length === 1) {
+    return isProtectedBranchRef(positionals[0]);
+  }
+  return positionals.slice(1).some((refspec) => isProtectedBranchRef(refspec));
+}
+
+function isAllowedFeatureBranchPush(tokens) {
+  if (gitSubcommand(tokens) !== "push") {
+    return false;
+  }
+  if (isForcePush(tokens) || isDirectMainPush(tokens)) {
+    return false;
+  }
+  const after = gitSubcommandArgs(tokens);
+  let index = 0;
+  if (after[index] === "-u" || after[index] === "--set-upstream") {
+    index += 1;
+  }
+  return (
+    after.length === index + 2 &&
+    after[index] === "origin" &&
+    after[index + 1] === "HEAD"
+  );
+}
+
+const GH_VALUE_FLAGS = new Set(["-r", "--repo", "--hostname"]);
+
+function ghPositionals(tokens) {
+  if (basename(tokens[0] ?? "") !== "gh") {
+    return [];
+  }
+  const positionals = [];
+  const args = tokens.slice(1);
+  for (let index = 0; index < args.length; index += 1) {
+    const token = args[index];
+    if (token.startsWith("--") && token.includes("=")) {
+      continue;
+    }
+    if (GH_VALUE_FLAGS.has(token.toLowerCase())) {
+      index += 1;
+      continue;
+    }
+    if (token.startsWith("-")) {
+      continue;
+    }
+    positionals.push(token);
+  }
+  return positionals;
+}
+
+function isGhPrMerge(tokens) {
+  const positionals = ghPositionals(tokens);
+  return positionals[0] === "pr" && positionals[1] === "merge";
+}
+
+function isGhApiMerge(tokens) {
+  if (basename(tokens[0] ?? "") !== "gh") {
+    return false;
+  }
+  const positionals = ghPositionals(tokens);
+  if (positionals[0] !== "api") {
+    return false;
+  }
+  const text = tokens.join(" ").toLowerCase();
+  if (/\/pulls\/\d+\/merge\b/.test(text) || /\/merges\b/.test(text)) {
+    return true;
+  }
+  return (
+    positionals.includes("graphql") &&
+    /merge(pullrequest|branch)\b/.test(text)
+  );
+}
+
+function isAllowedGhWorkflow(tokens) {
+  const positionals = ghPositionals(tokens);
+  if (
+    positionals[0] === "pr" &&
+    (positionals[1] === "create" ||
+      positionals[1] === "view" ||
+      positionals[1] === "checks")
+  ) {
+    return true;
+  }
+  return (
+    positionals[0] === "run" &&
+    (positionals[1] === "view" || positionals[1] === "list")
+  );
 }
 
 function collectPowerShellDestinations(tokens) {
@@ -507,7 +803,7 @@ function isIsolatedE2eRunner(tokens) {
   );
 }
 
-function classifySegment(command) {
+function classifySegment(command, options = {}) {
   const tokens = tokenize(unwrapCommand(command));
   if (tokens.length === 0) {
     return decision(
@@ -517,11 +813,32 @@ function classifySegment(command) {
     );
   }
 
+  if (isGitAliasOverride(tokens)) {
+    return decision(
+      "deny",
+      "destructive",
+      "Git alias overrides are blocked because they can hide destructive commands.",
+    );
+  }
   if (isForcePush(tokens)) {
     return decision(
       "deny",
       "destructive",
       "Force-push and +refspec pushes are blocked.",
+    );
+  }
+  if (isDirectMainPush(tokens)) {
+    return decision(
+      "deny",
+      "destructive",
+      "Direct push to main or master is blocked.",
+    );
+  }
+  if (isGhPrMerge(tokens) || isGhApiMerge(tokens)) {
+    return decision(
+      "deny",
+      "destructive",
+      "Pull request merge remains Owner-gated.",
     );
   }
   if (isHardReset(tokens)) {
@@ -599,11 +916,16 @@ function classifySegment(command) {
     ) {
       return decision("allow", "readonly", "git clean dry-run is allowed.");
     }
+    if (isAllowedFeatureBranchPush(tokens)) {
+      return classifyHeadPush(options);
+    }
     if (
       isAllowedGitAdd(tokens) ||
       isAllowedUnstageReset(tokens) ||
       isAllowedGitBranchShow(tokens) ||
-      isAllowedHashObject(tokens)
+      isAllowedHashObject(tokens) ||
+      isAllowedGitCommit(tokens) ||
+      isAllowedGitFetch(tokens)
     ) {
       return decision(
         "allow",
@@ -634,6 +956,14 @@ function classifySegment(command) {
     );
   }
 
+  if (isAllowedGhWorkflow(tokens)) {
+    return decision(
+      "allow",
+      "verification",
+      "Classified GitHub CLI workflow command is allowed.",
+    );
+  }
+
   return decision(
     "ask",
     "uncertain",
@@ -641,7 +971,7 @@ function classifySegment(command) {
   );
 }
 
-export function classifyShellCommand(command) {
+export function classifyShellCommand(command, options = {}) {
   if (typeof command !== "string" || command.trim().length === 0) {
     return decision(
       "ask",
@@ -661,7 +991,9 @@ export function classifyShellCommand(command) {
 
   const segments = splitShellSegments(unwrapped);
   if (segments.length === 0) {
-    return classifySegment(unwrapped);
+    return classifySegment(unwrapped, options);
   }
-  return mergeDecisions(segments.map((segment) => classifySegment(segment)));
+  return mergeDecisions(
+    segments.map((segment) => classifySegment(segment, options)),
+  );
 }

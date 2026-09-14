@@ -387,9 +387,16 @@ Playwright configuration is `retries: process.env.CI ? 1 : 0`. Do not claim conf
 ```text
 HOOK_GIT_READONLY          = ALLOW
 HOOK_VERIFICATION          = ALLOW
-HOOK_GIT_COMMIT            = ASK
-HOOK_GIT_NORMAL_PUSH       = ASK
+HOOK_GIT_COMMIT            = ALLOW
+HOOK_GIT_COMMIT_AMEND      = ASK
+HOOK_GIT_FETCH             = ALLOW
+HOOK_GIT_NORMAL_HEAD_PUSH  = ALLOW if current branch is not main/master
 HOOK_GIT_FORCE_PUSH        = DENY
+HOOK_GIT_PUSH_MAIN         = DENY
+HOOK_GH_PR_CREATE          = ALLOW
+HOOK_GH_PR_INSPECT         = ALLOW
+HOOK_GH_PR_MERGE           = DENY
+HOOK_GH_API_MERGE          = DENY
 HOOK_UNCERTAIN_COMMAND     = ASK
 OPAQUE_WRAPPERS            = DENY
 DIRECT_PNPM_E2E            = DENY
@@ -400,7 +407,11 @@ HOOKS_ARE_ACCIDENT_GUARDRAILS = YES
 HOOKS_ARE_SECURITY_SANDBOX = NO
 ```
 
-Local proof on Cursor 3.20.21: ALLOW executed; ASK returned `ask` but the shell ran without an approval pause; DENY was blocked by the hook before execution. ASK is an intent/audit signal, not a mechanical human-approval gate. Commit, push, one-writer, and Owner GO stay process law.
+Owner authorization is workflow/scope authorization. After a task authorizes COMMIT / PUSH / CREATE_PR, routine reversible commands required for those actions must return ALLOW. ASK is the exception for unknown or still-gated commands, not the normal path.
+
+Normal feature-branch push ALLOW is branch-aware. For `git push origin HEAD`, `git push -u origin HEAD`, and `git push --set-upstream origin HEAD`, the hook reads the current branch from `cwd` with `git -C <cwd> branch --show-current`. ALLOW only when that branch is non-empty and not `main`/`master`. Resolution failure is DENY, not ASK. Explicit `git push origin main|master`, force-push, `gh pr merge`, and `gh api` `/pulls/<n>/merge` or `/merges` stay DENY. `git commit --amend` / `--fixup` / `--squash` are not routine ALLOW. Other `git push` / `git merge` forms stay ASK.
+
+Local proof on Cursor 3.20.21: ALLOW executed; DENY was blocked before execution. Later Owner runtime evidence showed ASK can interrupt with `Hook requested approval` (example: `git push -u origin HEAD`). ASK is therefore an interruption signal, not a security gate. Do not use ASK for routine authorized workflow.
 
 Direct `pnpm e2e` and ordinary Playwright entrypoints (`pnpm exec playwright`, `pnpm dlx playwright`, `pnpm playwright`, `npx playwright`, `playwright test`) are DENY. Use `node .cursor/run-isolated-e2e.mjs`.
 
@@ -427,12 +438,32 @@ It does not copy `.env`, `.env.local`, or SQLite. It does not invoke migrate/see
 ### Permissions
 
 ```text
-CLI_PERMISSIONS_IMPLEMENTED  = NO
-IDE_PERMISSIONS_IMPLEMENTED  = NO
-PERMISSIONS_PLAN             = DOCUMENTED
+PROJECT_PERMISSIONS_IMPLEMENTED = YES
+CLI_PERMISSIONS_IMPLEMENTED     = NO
+RUN_MODE                        = AUTO_REVIEW
+PERMISSIONS_ALLOWLIST           = CONVENIENCE_FOR_READONLY_AND_VERIFICATION
+STATE_CHANGING_ROUTINE_AUTHORITY = OWNER_GO + CONTEXTUAL_HOOK
+AUTO_REVIEW                     = CURSOR_REVIEW_LAYER
+HOOKS                           = ACCIDENT_GUARDRAILS
+HOOKS_ARE_ACCIDENT_GUARDRAILS   = YES
+HOOKS_ARE_SECURITY_SANDBOX      = NO
+ONE_WRITER                      = SOCIAL_PROCESS_LAW
+PERMISSIONS_SECURITY_BOUNDARY   = NO
+HOOK_SECURITY_BOUNDARY          = NO
+AUTO_REVIEW_SECURITY_BOUNDARY   = NO
 ```
 
-Do not add `.cursor/cli.json` or `.cursor/permissions.json` in Phase 1. Empty allowlists can disable ordinary Auto-review.
+`.cursor/permissions.json` is repository-specific convenience for Auto-review. Official Cursor docs (permissions reference, run modes, hooks; read 2026-09-15 against Cursor 3.20.21):
+
+- `terminalAllowlist` entries are case-sensitive command prefixes. This repo allowlists only read-only git, verification, isolated E2E, diagnostics, and GitHub inspection. It does not allowlist `git add`, `git commit`, `git push`, or `gh pr create`.
+- State-changing routine commit/push/PR create is authorized by Owner GO plus the contextual project hook, not by prefix matching.
+- When the key is present, it overrides the in-app terminal allowlist. An empty array is an empty allowlist, not an IDE fallback. This file does not define `mcpAllowlist`. Official docs also concatenate `~/.cursor/permissions.json` with the repo file; a user-level `git` prefix would still match every git command. This repo file is not an isolated policy.
+- Auto-review order: allowlisted calls run immediately; other shell commands may run sandboxed; the rest go to the Auto-review classifier. `autoRun` steers that classifier only.
+- Official docs state allowlists and `autoRun` are best-effort convenience, not a security guarantee.
+- `beforeShellExecution` input includes `cwd`. The hook uses that for read-only current-branch resolution before allowing `git push origin HEAD`.
+- Target local mode remains Auto-review. Do not switch to Run Everything.
+
+Do not add `.cursor/cli.json`. Do not add a broad `git`, `git push`, `gh pr`, `pnpm`, or `node` prefix.
 
 ### MCP scope
 

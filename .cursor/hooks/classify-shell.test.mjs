@@ -10,9 +10,23 @@ import { createAuditRecord } from "./lib/audit-write.mjs";
 import { parseHookInput } from "./lib/parse-hook-input.mjs";
 
 const hookRoot = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(hookRoot, "..", "..");
+const featureBranchOptions = {
+  resolveCurrentBranch: () => "chore/cursor-workos-harness-v2",
+};
 
-function permission(command) {
-  return classifyShellCommand(command).permission;
+function permission(command, options = featureBranchOptions) {
+  return classifyShellCommand(command, options).permission;
+}
+
+function hookPermission(command, cwd = repoRoot) {
+  const result = spawnSync(process.execPath, [join(hookRoot, "before-shell.mjs")], {
+    input: `${JSON.stringify({ command, cwd })}\n`,
+    encoding: "utf8",
+    cwd: repoRoot,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout.trim()).permission;
 }
 
 test("readonly git is allowed", () => {
@@ -39,9 +53,22 @@ test("verification commands are allowed", () => {
   assert.equal(permission("pnpm install --frozen-lockfile"), "allow");
 });
 
-test("commit and normal push ask", () => {
-  assert.equal(permission("git commit -m freeze"), "ask");
-  assert.equal(permission("git push origin HEAD"), "ask");
+test("commit and normal HEAD push are allowed", () => {
+  assert.equal(permission("git commit -m freeze"), "allow");
+  assert.equal(
+    permission(
+      'git -c user.name=office952 -c user.email=office@p-media.ro commit -m "chore(cursor): add WorkOS Harness V2"',
+    ),
+    "allow",
+  );
+  assert.notEqual(permission("git commit --amend"), "allow");
+  assert.notEqual(permission("git commit --amend --no-edit"), "allow");
+  assert.notEqual(permission("git commit --fixup HEAD"), "allow");
+  assert.notEqual(permission("git commit --squash HEAD"), "allow");
+  assert.equal(permission("git fetch origin"), "allow");
+  assert.equal(permission("git push origin HEAD"), "allow");
+  assert.equal(permission("git push -u origin HEAD"), "allow");
+  assert.equal(permission("git push --set-upstream origin HEAD"), "allow");
   assert.equal(permission("git push -u origin chore/cursor-workos-harness-v2"), "ask");
   assert.equal(permission("git worktree add C:/tmp/x origin/main"), "ask");
   assert.equal(permission("git worktree remove C:/tmp/x"), "ask");
@@ -136,7 +163,7 @@ test("force push and hard reset deny", () => {
 });
 
 test("does not treat reset in a commit message as destructive git reset", () => {
-  assert.equal(permission('git commit -m "reset letter height"'), "ask");
+  assert.equal(permission('git commit -m "reset letter height"'), "allow");
 });
 
 test("does not treat push in a branch name as force push", () => {
@@ -312,8 +339,152 @@ test("invalid hook JSON denies instead of asking", () => {
   );
 });
 
-test("worktrees.json and hooks.json parse", () => {
+test("worktrees.json, hooks.json, and permissions.json parse", () => {
   const cursorDir = join(hookRoot, "..");
   JSON.parse(readFileSync(join(cursorDir, "hooks.json"), "utf8"));
   JSON.parse(readFileSync(join(cursorDir, "worktrees.json"), "utf8"));
+  const permissions = JSON.parse(
+    readFileSync(join(cursorDir, "permissions.json"), "utf8"),
+  );
+  assert.equal(Array.isArray(permissions.terminalAllowlist), true);
+  assert.equal(Object.hasOwn(permissions, "mcpAllowlist"), false);
+  const forbidden = new Set([
+    "git",
+    "git add",
+    "git commit",
+    "git push",
+    "git push origin HEAD",
+    "git push -u origin HEAD",
+    "gh",
+    "gh pr",
+    "gh pr create",
+    "pnpm",
+    "node",
+  ]);
+  for (const entry of permissions.terminalAllowlist) {
+    assert.equal(forbidden.has(entry), false, `broad or mutating allowlist entry: ${entry}`);
+  }
+  for (const required of [
+    "git status",
+    "git fetch",
+    "pnpm lint",
+    "node --test",
+    "gh pr view",
+    "gh pr checks",
+    "gh run view",
+    "gh run list",
+  ]) {
+    assert.equal(
+      permissions.terminalAllowlist.includes(required),
+      true,
+      `missing allowlist entry: ${required}`,
+    );
+  }
+});
+
+test("autonomy cleanup matrix", () => {
+  assert.equal(permission("git commit -m message"), "allow");
+  assert.notEqual(permission("git commit --amend"), "allow");
+  assert.notEqual(permission("git commit --fixup HEAD"), "allow");
+  assert.notEqual(permission("git commit --squash HEAD"), "allow");
+  assert.equal(permission("git push origin HEAD"), "allow");
+  assert.equal(permission("git push -u origin HEAD"), "allow");
+  assert.equal(
+    permission("git push origin HEAD", { resolveCurrentBranch: () => "main" }),
+    "deny",
+  );
+  assert.equal(
+    permission("git push -u origin HEAD", { resolveCurrentBranch: () => "master" }),
+    "deny",
+  );
+  assert.equal(
+    permission("git push origin HEAD", { resolveCurrentBranch: () => "" }),
+    "deny",
+  );
+  assert.equal(permission("git push origin main"), "deny");
+  assert.equal(permission("git push origin master"), "deny");
+  assert.equal(permission("git push main"), "deny");
+  assert.equal(permission("git push origin HEAD:main"), "deny");
+  assert.equal(permission("git push --force origin HEAD"), "deny");
+  assert.equal(permission("git push --force-with-lease origin HEAD"), "deny");
+  assert.equal(permission("gh pr create --title t --body b"), "allow");
+  assert.equal(permission("gh pr view 25 --json url"), "allow");
+  assert.equal(permission("gh pr checks 25"), "allow");
+  assert.equal(permission("gh run view 123 --json status"), "allow");
+  assert.equal(permission("gh run list --branch chore/x"), "allow");
+  assert.equal(permission("gh pr merge 25"), "deny");
+  assert.equal(permission("gh --repo office952/workos-final pr merge 25"), "deny");
+  assert.equal(permission("gh pr --repo office952/workos-final merge 25"), "deny");
+  assert.equal(permission("gh api repos/office952/workos-final/pulls/25/merge"), "deny");
+  assert.equal(
+    permission("gh api --method PUT /repos/office952/workos-final/pulls/25/merge"),
+    "deny",
+  );
+  assert.equal(permission("gh api repos/office952/workos-final/merges"), "deny");
+  assert.equal(
+    permission(
+      'gh api graphql -f query=mutation { mergePullRequest(input: {pullRequestId: "x"}) { clientMutationId } }',
+    ),
+    "deny",
+  );
+  assert.equal(
+    permission('git -c alias.push="push --force" push origin HEAD'),
+    "deny",
+  );
+  assert.equal(
+    permission('git -c alias.commit="commit --amend" commit -m message'),
+    "deny",
+  );
+  assert.equal(
+    permission("gh --repo office952/workos-final pr view 25 --json url"),
+    "allow",
+  );
+  assert.equal(permission("git reset --hard HEAD"), "deny");
+  assert.equal(permission("git clean -fd"), "deny");
+  assert.equal(permission('node -e "console.log(1)"'), "deny");
+  assert.equal(permission("pnpm lint"), "allow");
+  assert.equal(permission("pnpm typecheck"), "allow");
+  assert.equal(permission("pnpm test"), "allow");
+  assert.equal(permission("pnpm build"), "allow");
+  assert.equal(permission("node .cursor/run-isolated-e2e.mjs"), "allow");
+  assert.equal(permission("pnpm e2e"), "deny");
+  assert.equal(permission("echo hello"), "ask");
+});
+
+test("commit push PR workflow classifies allow without ASK", () => {
+  const commands = [
+    "git fetch origin",
+    "git status --short",
+    "git diff --stat",
+    "git diff --name-only",
+    "node --test .cursor/hooks/classify-shell.test.mjs .cursor/setup-worktree.test.mjs",
+    "pnpm lint",
+    "pnpm typecheck",
+    "pnpm test",
+    "pnpm build",
+    "git add -- .cursor/permissions.json .cursor/hooks/lib/classify-shell.mjs",
+    "git diff --cached --stat",
+    "git diff --cached --name-only",
+    "git diff --cached --check",
+    'git -c user.name=office952 -c user.email=office@p-media.ro commit -m "chore(cursor): add WorkOS Harness V2"',
+    "git rev-parse HEAD",
+    "git log -1 --format=%H",
+    "git push -u origin HEAD",
+    "gh pr create --base main --head chore/cursor-workos-harness-v2 --title t --body b",
+    "gh pr view 25 --json number,url,state,headRefOid",
+    "gh run list --branch chore/cursor-workos-harness-v2 --limit 5",
+    "gh run view 34904624451 --json headSha,status,conclusion",
+  ];
+  const approvals = commands.filter((command) => permission(command) === "ask");
+  assert.deepEqual(approvals, []);
+  for (const command of commands) {
+    assert.equal(hookPermission(command), "allow", command);
+  }
+  assert.equal(hookPermission("git push origin HEAD"), "allow");
+  assert.equal(hookPermission("git push origin HEAD", ""), "deny");
+  assert.equal(
+    classifyShellCommand("git push origin HEAD", { cwd: repoRoot }).permission,
+    "allow",
+  );
+  assert.equal(classifyShellCommand("git push origin HEAD").permission, "deny");
 });
