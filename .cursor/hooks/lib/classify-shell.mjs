@@ -101,6 +101,46 @@ function gitSubcommandArgs(tokens) {
   return skipGitGlobals(tokens.slice(gitIndex + 1)).slice(1);
 }
 
+function hasRepositoryRedirection(tokens) {
+  const gitIndex = findToolIndex(tokens, new Set(["git"]));
+  if (gitIndex < 0) {
+    return false;
+  }
+  const args = tokens.slice(gitIndex + 1);
+  for (let index = 0; index < args.length; index += 1) {
+    const token = args[index];
+    const lower = token.toLowerCase();
+    if (token === "-C" || (token.startsWith("-C") && !token.startsWith("--") && token.length > 2)) {
+      return true;
+    }
+    if (token === "--git-dir" || token === "--work-tree") {
+      return true;
+    }
+    if (token.startsWith("--git-dir=") || token.startsWith("--work-tree=")) {
+      return true;
+    }
+    if (lower === "-c" || lower === "--config") {
+      const value = String(args[index + 1] ?? "").toLowerCase();
+      if (value.startsWith("core.worktree") || value.startsWith("core.gitdir")) {
+        return true;
+      }
+      index += 1;
+      continue;
+    }
+    if (lower.startsWith("--config=core.worktree") || lower.startsWith("--config=core.gitdir")) {
+      return true;
+    }
+    if (lower.startsWith("-c") && lower.length > 2 && (lower.startsWith("-ccore.worktree") || lower.startsWith("-ccore.gitdir"))) {
+      return true;
+    }
+    if (token.startsWith("-")) {
+      continue;
+    }
+    break;
+  }
+  return false;
+}
+
 function isAllowedGitAdd(tokens) {
   return gitSubcommand(tokens) === "add";
 }
@@ -214,6 +254,9 @@ function isGitAliasOverride(tokens) {
       if (value.startsWith("alias.")) {
         return true;
       }
+    }
+    if (lower.startsWith("-calias.")) {
+      return true;
     }
     if (lower.startsWith("--config=") && lower.slice("--config=".length).startsWith("alias.")) {
       return true;
@@ -915,6 +958,20 @@ function classifySegment(command, options = {}) {
       })
     ) {
       return decision("allow", "readonly", "git clean dry-run is allowed.");
+    }
+    if (isAllowedGitBranchShow(tokens)) {
+      return decision(
+        "allow",
+        "verification",
+        "Ordinary repository-local git workflow is allowed.",
+      );
+    }
+    if (hasRepositoryRedirection(tokens)) {
+      return decision(
+        "deny",
+        "destructive",
+        "State-changing git with -C / --git-dir / --work-tree is blocked. Run it from the intended WorkOS worktree.",
+      );
     }
     if (isAllowedFeatureBranchPush(tokens)) {
       return classifyHeadPush(options);

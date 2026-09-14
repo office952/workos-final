@@ -68,7 +68,7 @@ Official prefix semantics: `git` matches every git command. Project `terminalAll
 - OWNER_GO is process law. The classifier cannot see task authorization.
 - One-writer remains social law.
 - GitHub branch protection is not evidenced here.
-- `git -C other-repo push origin HEAD` still resolves the hook `cwd`, not the `-C` path.
+- State-changing git with `-C` / `--git-dir` / `--work-tree` (including glued `-Cpath`) is DENY. Readonly `-C` inspection stays ALLOW. `GIT_DIR` / `GIT_WORK_TREE` environment forms are not classified from the command string.
 - If hook input omits `cwd` or sends an empty `cwd`, `before-shell` falls back to `process.cwd()`. The classifier still DENYs when that directory has no current branch or the branch is `main`/`master`.
 - Git `-c alias.*` overrides and `gh api graphql` mergePullRequest / mergeBranch are DENY in this slice. Other non-obvious write APIs remain ASK.
 

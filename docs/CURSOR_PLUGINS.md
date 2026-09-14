@@ -393,6 +393,7 @@ HOOK_GIT_FETCH             = ALLOW
 HOOK_GIT_NORMAL_HEAD_PUSH  = ALLOW if current branch is not main/master
 HOOK_GIT_FORCE_PUSH        = DENY
 HOOK_GIT_PUSH_MAIN         = DENY
+HOOK_GIT_REPO_REDIRECT_MUTATION = DENY
 HOOK_GH_PR_CREATE          = ALLOW
 HOOK_GH_PR_INSPECT         = ALLOW
 HOOK_GH_PR_MERGE           = DENY
@@ -408,6 +409,8 @@ HOOKS_ARE_SECURITY_SANDBOX = NO
 ```
 
 Owner authorization is workflow/scope authorization. After a task authorizes COMMIT / PUSH / CREATE_PR, routine reversible commands required for those actions must return ALLOW. ASK is the exception for unknown or still-gated commands, not the normal path.
+
+State-changing git with `-C`, `--git-dir`, or `--work-tree` is DENY. Do not resolve the other repository. Run mutations from the intended WorkOS worktree. Readonly `git -C … status|diff|log|show|rev-parse` stays ALLOW. One-shot `git -c user.name=…` is not repository redirection.
 
 Normal feature-branch push ALLOW is branch-aware. For `git push origin HEAD`, `git push -u origin HEAD`, and `git push --set-upstream origin HEAD`, the hook reads the current branch from `cwd` with `git -C <cwd> branch --show-current`. ALLOW only when that branch is non-empty and not `main`/`master`. Resolution failure is DENY, not ASK. Explicit `git push origin main|master`, force-push, `gh pr merge`, and `gh api` `/pulls/<n>/merge` or `/merges` stay DENY. `git commit --amend` / `--fixup` / `--squash` are not routine ALLOW. Other `git push` / `git merge` forms stay ASK.
 

@@ -35,6 +35,10 @@ test("readonly git is allowed", () => {
   assert.equal(permission("git log -1 --oneline"), "allow");
   assert.equal(permission("git --no-pager show HEAD"), "allow");
   assert.equal(permission("git -C repo status --short"), "allow");
+  assert.equal(permission("git -C other-repo diff --stat"), "allow");
+  assert.equal(permission("git -C other-repo log -1"), "allow");
+  assert.equal(permission("git -C other-repo show HEAD"), "allow");
+  assert.equal(permission("git -C other-repo rev-parse HEAD"), "allow");
   assert.equal(permission("git rev-parse HEAD"), "allow");
   assert.equal(permission("git hash-object file.txt"), "allow");
   assert.notEqual(permission("git hash-object -w file.txt"), "allow");
@@ -449,6 +453,22 @@ test("autonomy cleanup matrix", () => {
   assert.equal(permission("node .cursor/run-isolated-e2e.mjs"), "allow");
   assert.equal(permission("pnpm e2e"), "deny");
   assert.equal(permission("echo hello"), "ask");
+  assert.equal(permission("git -C other-repo add ."), "deny");
+  assert.equal(permission("git -C other-repo commit -m message"), "deny");
+  assert.equal(permission("git -C other-repo reset"), "deny");
+  assert.equal(permission("git -C other-repo push origin HEAD"), "deny");
+  assert.equal(permission("git -Cother-repo push origin HEAD"), "deny");
+  assert.equal(permission("git commit -C HEAD -m message"), "allow");
+  assert.equal(permission("git --git-dir external/.git commit -m message"), "deny");
+  assert.equal(permission("git --git-dir=external/.git commit -m message"), "deny");
+  assert.equal(permission("git --work-tree external add ."), "deny");
+  assert.equal(permission("git --work-tree=external add ."), "deny");
+  assert.equal(
+    permission(
+      'git -c user.name=office952 -c user.email=office@p-media.ro commit -m "chore(cursor): close cross-repo git mutation bypass"',
+    ),
+    "allow",
+  );
 });
 
 test("commit push PR workflow classifies allow without ASK", () => {
