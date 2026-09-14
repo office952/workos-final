@@ -195,6 +195,44 @@ docs/worklog/screenshots/configurator-final-a-panou-acm-1440.png
 D personalized has no live product groups. Unit fixture covers presentation.
 Runtime D screenshot = not applicable.
 
+## Figma Make interaction reference
+
+```text
+MAKE_FILE = OqSF7nXn1SMjh6fQiua9HP
+MAKE_NAME = App Builder
+ROLE = INTERACTION_REFERENCE_ONLY
+MAKE_ROLE = ACCEPTED_AS_INTERACTION_REFERENCE_ONLY
+BUSINESS_TRUTH = NO
+STATIC_VISUAL_AUTHORITY = FIGMA_219_3
+RUNTIME_PRODUCT_AUTHORITY = CURRENT_DOMAIN
+MAKE_SYNTHETIC_DATA = DO_NOT_COPY
+CURRENT_IMPLEMENTATION_DIRECTION = PASS
+CODE_CHANGE_REQUIRED_FROM_MAKE_REVIEW = NO
+NEXT_WAVE = NO
+```
+
+Useful interaction patterns:
+
+- active rail feedback
+- blueprint → editor focus transfer
+- immediate local visual feedback
+
+Explicitly non-authoritative:
+
+- scope availability
+- targets/groups
+- product values
+- override semantics
+- confirmation lifecycle
+- responsive constraints (`minWidth: 1100` in Make)
+- business readiness
+
+Make React source (via `get_design_context`) confirms hardcoded
+`COMUN / GRĂDINIȚA / PRICHINDEL / LOGO`, four always-on stages, Oracal /
+band options, and local state (`activeTarget`, `activeStep`, `band`,
+`color`, `saved`, `confirmed`). Those remain future design targets, not
+current persisted truth. No code change from this review.
+
 ## Known advisories
 
 - Not pixel-parity with Figma fixture chrome (assembly title, four always-on scopes, COMUN/GRĂDINIȚA/PRICHINDEL/LOGO, Oracal / inner lip / multi-piece / Joint).
