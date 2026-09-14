@@ -12,6 +12,7 @@ import {
 } from "./helpers/people";
 import { uniqueRequestToken } from "./helpers/requests";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 const HARDENING_PERSON_PATH = join(process.cwd(), ".tmp", "hardening-person.json");
 
@@ -72,10 +73,10 @@ test("removed skill stays removed and planned start revalidates availability", a
     })
     .click();
   await page.getByLabel("Textul literelor").fill("HARD");
-  await page.getByLabel("Finisaj față").selectOption("none");
+  await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

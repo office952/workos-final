@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import { clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 test("catalog leads to canonical product confirm and partial EIC", async ({
   page,
@@ -65,11 +66,11 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   });
 
   await page.getByLabel("Textul literelor").fill("WORKOS");
-  await page.getByLabel("Finisaj față").selectOption("vinyl");
+  await selectProductChoice(page, "Finisaj față", "vinyl");
   await page.getByLabel("Culoare față").fill("alb");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.screenshot({
     path: "docs/worklog/screenshots/owner-surfaces-configure.png",

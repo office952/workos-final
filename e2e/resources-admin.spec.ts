@@ -4,6 +4,7 @@ import { setTheme } from "./helpers/account";
 import { CANONICAL_PRODUCT_CODE } from "./helpers/jobs";
 import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
+import { selectProductChoice } from "./helpers/productChoices";
 
 const ACM_PRODUCT_CODE = "PRD-ACM-CASSETTE-NONE";
 const LETTERS_LABEL =
@@ -94,10 +95,10 @@ test("resources admin is a flat rate workspace, not a catalog cascade", async ({
     })
     .click();
   await page.getByLabel("Textul literelor").fill("WORKOS");
-  await page.getByLabel("Finisaj față").selectOption("none");
+  await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

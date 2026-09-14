@@ -2061,6 +2061,7 @@ a.button-link.button-secondary {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+  pointer-events: none;
 }
 
 .choice-chips {

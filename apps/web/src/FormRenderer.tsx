@@ -7,7 +7,131 @@ import {
   type FormSchema,
   type ProductTemplate,
 } from "@workos-final/domain";
+import { useId, type KeyboardEvent } from "react";
 import { Field } from "./ui/Field";
+
+function SelectChoiceField({
+  field,
+  value,
+  onChange,
+  configurator,
+}: {
+  field: FormField;
+  value: DraftValue | undefined;
+  onChange: (value: DraftValue) => void;
+  configurator: boolean;
+}) {
+  const labelId = useId();
+  const hintId = useId();
+  const options = field.options ?? [];
+  const selected = typeof value === "string" ? value : "";
+  const selectedIndex = options.findIndex((option) => option.value === selected);
+
+  function selectValue(next: string) {
+    onChange(next === "" ? null : next);
+  }
+
+  function moveSelection(event: KeyboardEvent<HTMLDivElement>, nextIndex: number) {
+    const next = options[nextIndex];
+    if (!next) {
+      return;
+    }
+    event.preventDefault();
+    selectValue(next.value);
+    const target = event.currentTarget.querySelector<HTMLElement>(
+      `[data-choice-value="${next.value}"]`,
+    );
+    target?.focus();
+  }
+
+  function onGroupKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (options.length === 0) {
+      return;
+    }
+    const focusedValue =
+      event.target instanceof HTMLElement ? event.target.dataset.choiceValue : undefined;
+    const focusedIndex = options.findIndex((option) => option.value === focusedValue);
+    const fromIndex = focusedIndex >= 0 ? focusedIndex : selectedIndex;
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        moveSelection(event, fromIndex < 0 ? 0 : (fromIndex + 1) % options.length);
+        return;
+      case "ArrowLeft":
+      case "ArrowUp":
+        moveSelection(
+          event,
+          fromIndex < 0
+            ? options.length - 1
+            : (fromIndex - 1 + options.length) % options.length,
+        );
+        return;
+      case "Home":
+        moveSelection(event, 0);
+        return;
+      case "End":
+        moveSelection(event, options.length - 1);
+        return;
+      default:
+        return;
+    }
+  }
+
+  return (
+    <div className="field field-choice">
+      <span id={labelId} className="field-label">
+        {field.label}
+      </span>
+      <select
+        id={`field-${field.id}`}
+        name={field.id}
+        className="choice-select-native"
+        tabIndex={-1}
+        aria-hidden="true"
+        value={selected}
+        onChange={(event) => selectValue(event.target.value)}
+      >
+        <option value="">Alegeți…</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <div
+        role="radiogroup"
+        aria-labelledby={labelId}
+        aria-describedby={field.hint ? hintId : undefined}
+        className={configurator ? "choice-chips cfg-segmented" : "choice-chips"}
+        onKeyDown={onGroupKeyDown}
+      >
+        {options.map((option, index) => {
+          const checked = selected === option.value;
+          const tabStop = checked || (selected === "" && index === 0);
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={checked}
+              tabIndex={tabStop ? 0 : -1}
+              data-choice-value={option.value}
+              className={checked ? "choice-chip is-selected" : "choice-chip"}
+              onClick={() => selectValue(option.value)}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+      {field.hint ? (
+        <p id={hintId} className="field-hint">
+          {field.hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 type FormRendererProps = {
   template: ProductTemplate;
@@ -60,7 +184,6 @@ function FieldControl({
         <select
           id={id}
           name={field.id}
-          className="choice-select-native"
           value={typeof value === "string" ? value : ""}
           onChange={(event) => onChange(event.target.value || null)}
         >
@@ -143,39 +266,26 @@ export function FormRenderer({
                         : undefined
                   }
                 >
-                  <Field label={field.label} hint={field.hint}>
-                    <FieldControl
+                  {field.type === "select" && field.options && field.options.length > 0 ? (
+                    <SelectChoiceField
                       field={field}
                       value={values[field.id]}
                       onChange={(value) => onChange(field.id, value)}
+                      configurator={configurator}
                     />
-                  </Field>
+                  ) : (
+                    <Field label={field.label} hint={field.hint}>
+                      <FieldControl
+                        field={field}
+                        value={values[field.id]}
+                        onChange={(value) => onChange(field.id, value)}
+                      />
+                    </Field>
+                  )}
                   {field.required && isEmptyField(values[field.id]) ? (
                     <p className="cfg-necessary" role="status">
                       NECESAR
                     </p>
-                  ) : null}
-                  {field.type === "select" && field.options && field.options.length > 0 ? (
-                    <div
-                      className={configurator ? "choice-chips cfg-segmented" : "choice-chips"}
-                      aria-hidden="true"
-                    >
-                      {field.options.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className={
-                            values[field.id] === option.value
-                              ? "choice-chip is-selected"
-                              : "choice-chip"
-                          }
-                          aria-pressed={values[field.id] === option.value}
-                          onClick={() => onChange(field.id, option.value)}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
                   ) : null}
                 </div>
               ))}

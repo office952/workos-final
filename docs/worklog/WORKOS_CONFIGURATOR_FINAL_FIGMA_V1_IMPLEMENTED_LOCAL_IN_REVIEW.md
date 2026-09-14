@@ -263,7 +263,9 @@ current persisted truth. No code change from this review.
 - Scoped configurator tokens (`#F7F8FA`, `#1A1D21`, Azure `#2066CF`) do not rewrite the global app theme.
 - Rail brackets are restrained CSS, not Figma’s exact glyph weight.
 - Composition review is unnumbered (rail remains non-wizard).
-- Segmented chips stay visually azure; native select remains the labelled control so existing e2e `selectOption` paths hold.
+- Segmented chips stay visually azure. The visible radiogroup is the accessible
+  control; the native select stays synchronized and visually hidden, not a Tab
+  stop and not an `aria-hidden` ancestor of the chips.
 - Dark theme on this surface still uses the scoped light canvas tokens.
 
 ## Verdict

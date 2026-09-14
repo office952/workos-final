@@ -5,6 +5,7 @@ import { copyDownload } from "./helpers/copyDownload";
 import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { uniqueJobInscription } from "./helpers/jobs";
+import { selectProductChoice } from "./helpers/productChoices";
 
 const lettersName =
   "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm";
@@ -14,10 +15,10 @@ async function confirmLetters(page: Page, inscription: string) {
   await page.getByRole("link", { name: lettersName }).click();
   await expect(page.getByRole("heading", { name: lettersName })).toBeVisible();
   await page.getByLabel("Textul literelor").fill(inscription);
-  await page.getByLabel("Finisaj față").selectOption("none");
+  await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.getByLabel("Adâncime volum (mm)").selectOption("60");
-  await page.getByLabel("Finisaj volum").selectOption("none");
+  await selectProductChoice(page, "Adâncime volum (mm)", "60");
+  await selectProductChoice(page, "Finisaj volum", "none");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
@@ -85,11 +86,11 @@ test("ACM quote freezes a different customer", async ({ page }) => {
   await page.goto("/products");
   await page.getByRole("link", { name: "Panou ACM casetat" }).click();
   await page.getByLabel("Denumire lucrare").fill("PANOU ACM");
-  await page.getByLabel("Sistem de prindere").selectOption("steel_angle");
+  await selectProductChoice(page, "Sistem de prindere", "steel_angle");
   await page.getByLabel("Lățime exterioară (mm)").fill("1000");
   await page.getByLabel("Înălțime exterioară (mm)").fill("500");
-  await page.getByLabel("Adâncime casetă (mm)").selectOption("40");
-  await page.getByLabel("Număr de îndoituri").selectOption("2");
+  await selectProductChoice(page, "Adâncime casetă (mm)", "40");
+  await selectProductChoice(page, "Număr de îndoituri", "2");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByText("Preț final client: 118,66 EUR")).toBeVisible();
