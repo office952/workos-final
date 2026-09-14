@@ -69,6 +69,7 @@ Official prefix semantics: `git` matches every git command. Project `terminalAll
 - One-writer remains social law.
 - GitHub branch protection is not evidenced here.
 - `git -C other-repo push origin HEAD` still resolves the hook `cwd`, not the `-C` path.
+- If hook input omits `cwd` or sends an empty `cwd`, `before-shell` falls back to `process.cwd()`. The classifier still DENYs when that directory has no current branch or the branch is `main`/`master`.
 - Git `-c alias.*` overrides and `gh api graphql` mergePullRequest / mergeBranch are DENY in this slice. Other non-obvious write APIs remain ASK.
 
 ```text

@@ -481,7 +481,18 @@ test("commit push PR workflow classifies allow without ASK", () => {
     assert.equal(hookPermission(command), "allow", command);
   }
   assert.equal(hookPermission("git push origin HEAD"), "allow");
-  assert.equal(hookPermission("git push origin HEAD", ""), "deny");
+  assert.equal(hookPermission("git push origin HEAD", ""), "allow");
+  const omittedCwd = spawnSync(
+    process.execPath,
+    [join(hookRoot, "before-shell.mjs")],
+    {
+      input: `${JSON.stringify({ command: "git push origin HEAD" })}\n`,
+      encoding: "utf8",
+      cwd: repoRoot,
+    },
+  );
+  assert.equal(omittedCwd.status, 0, omittedCwd.stderr);
+  assert.equal(JSON.parse(omittedCwd.stdout.trim()).permission, "allow");
   assert.equal(
     classifyShellCommand("git push origin HEAD", { cwd: repoRoot }).permission,
     "allow",

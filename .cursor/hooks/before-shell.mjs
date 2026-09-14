@@ -44,10 +44,12 @@ if (!parsed.ok) {
   process.exit(0);
 }
 
+const reportedCwd =
+  typeof parsed.value.cwd === "string" ? parsed.value.cwd.trim() : "";
 const decision = classifyShellCommand(
   typeof parsed.value.command === "string" ? parsed.value.command : "",
   {
-    cwd: typeof parsed.value.cwd === "string" ? parsed.value.cwd : "",
+    cwd: reportedCwd.length > 0 ? reportedCwd : process.cwd(),
   },
 );
 emit(decision);

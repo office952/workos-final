@@ -460,7 +460,7 @@ AUTO_REVIEW_SECURITY_BOUNDARY   = NO
 - When the key is present, it overrides the in-app terminal allowlist. An empty array is an empty allowlist, not an IDE fallback. This file does not define `mcpAllowlist`. Official docs also concatenate `~/.cursor/permissions.json` with the repo file; a user-level `git` prefix would still match every git command. This repo file is not an isolated policy.
 - Auto-review order: allowlisted calls run immediately; other shell commands may run sandboxed; the rest go to the Auto-review classifier. `autoRun` steers that classifier only.
 - Official docs state allowlists and `autoRun` are best-effort convenience, not a security guarantee.
-- `beforeShellExecution` input includes `cwd`. The hook uses that for read-only current-branch resolution before allowing `git push origin HEAD`.
+- `beforeShellExecution` input includes `cwd`. The hook uses that for read-only current-branch resolution before allowing `git push origin HEAD`. If `cwd` is omitted or empty, the hook falls back to `process.cwd()` so the Cursor agent shell can still resolve the branch. The classifier still DENYs when the resolved directory has no current branch or the branch is `main`/`master`.
 - Target local mode remains Auto-review. Do not switch to Run Everything.
 
 Do not add `.cursor/cli.json`. Do not add a broad `git`, `git push`, `gh pr`, `pnpm`, or `node` prefix.
