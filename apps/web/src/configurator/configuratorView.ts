@@ -199,28 +199,6 @@ function isEmpty(value: DraftValue | undefined): boolean {
   return false;
 }
 
-function isValidDraft(field: FormField, value: DraftValue | undefined): boolean {
-  if (isEmpty(value)) {
-    return false;
-  }
-  if (field.type === "number") {
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-      return false;
-    }
-    if (field.min !== undefined && value < field.min) {
-      return false;
-    }
-    return true;
-  }
-  if (field.type === "select" && field.options) {
-    return field.options.some((option) => option.value === value);
-  }
-  if (field.type === "boolean") {
-    return typeof value === "boolean";
-  }
-  return typeof value === "string" && value.trim().length > 0;
-}
-
 export function formatConfiguratorValue(
   field: FormField,
   value: DraftValue | undefined,
@@ -271,45 +249,6 @@ function visibleFields(
   );
 }
 
-function componentValid(
-  componentId: string,
-  fields: readonly FormField[],
-  values: DraftValues,
-): boolean {
-  return fields
-    .filter((field) => field.componentId === componentId && field.required)
-    .every((field) => isValidDraft(field, values[field.id]));
-}
-
-function contributingScopeComplete(
-  scopeId: ConfiguratorScopeId,
-  template: ProductTemplate,
-  fields: readonly FormField[],
-  values: DraftValues,
-  selectedIds: readonly string[],
-): boolean {
-  const kind = configuratorProductKind(template);
-  const relevant = template.components.filter((component) => {
-    if (!component.required && !selectedIds.includes(component.id)) {
-      return false;
-    }
-    if (scopeId === "panou-acm") {
-      return kind === "acm";
-    }
-    if (scopeId === "litere") {
-      return kind === "letters";
-    }
-    return false;
-  });
-  const rootReady = fields
-    .filter((field) => field.componentId === "ROOT" && field.required)
-    .every((field) => isValidDraft(field, values[field.id]));
-  return (
-    rootReady &&
-    relevant.every((component) => componentValid(component.id, fields, values))
-  );
-}
-
 function compositionSummary(
   sections: readonly BlueprintSection[],
 ): string {
@@ -325,12 +264,11 @@ function compositionSummary(
 function blueprintSectionsFor(
   kind: ConfiguratorProductKind,
   template: ProductTemplate,
-  schema: FormSchema,
   values: DraftValues,
-  selectedIds: readonly string[],
   fields: readonly FormField[],
-  definition: ProductDefinition | null | undefined,
+  authority: ProductDefinition,
 ): BlueprintSection[] {
+  const missingFieldIds = new Set(authority.missing.map((item) => item.fieldId));
   const componentOrder =
     kind === "acm"
       ? ["ROOT", "FACE", "BACK", "LIGHTING"]
@@ -358,11 +296,7 @@ function blueprintSectionsFor(
       if (field.componentId !== componentId) {
         continue;
       }
-      const display = formatConfiguratorValue(field, values[field.id]);
-      if (display === null) {
-        if (!field.required) {
-          continue;
-        }
+      if (missingFieldIds.has(field.id)) {
         facts.push({
           id: field.id,
           label: field.label,
@@ -370,6 +304,10 @@ function blueprintSectionsFor(
           kind: "missing",
           required: true,
         });
+        continue;
+      }
+      const display = formatConfiguratorValue(field, values[field.id]);
+      if (display === null) {
         continue;
       }
       facts.push({
@@ -381,23 +319,21 @@ function blueprintSectionsFor(
       });
     }
 
-    if (definition) {
-      for (const measurement of definition.measurements) {
-        if (measurement.componentId !== componentId || !measurement.label) {
-          continue;
-        }
-        if (facts.some((fact) => fact.id === measurement.fieldId)) {
-          continue;
-        }
-        const unit = measurement.unit === "mm2" ? "mm²" : measurement.unit;
-        facts.push({
-          id: `derived:${measurement.fieldId}`,
-          label: measurement.label,
-          display: `${measurement.value} ${unit}`,
-          kind: "derived",
-          required: false,
-        });
+    for (const measurement of authority.measurements) {
+      if (measurement.componentId !== componentId || !measurement.label) {
+        continue;
       }
+      if (facts.some((fact) => fact.id === measurement.fieldId)) {
+        continue;
+      }
+      const unit = measurement.unit === "mm2" ? "mm²" : measurement.unit;
+      facts.push({
+        id: `derived:${measurement.fieldId}`,
+        label: measurement.label,
+        display: `${measurement.value} ${unit}`,
+        kind: "derived",
+        required: false,
+      });
     }
 
     if (facts.length === 0) {
@@ -418,7 +354,7 @@ function blueprintSectionsFor(
 export function projectConfiguratorView(
   input: ProjectConfiguratorViewInput,
 ): ConfiguratorView {
-  const { template, schema, values, definition, context } = input;
+  const { template, schema, values, context } = input;
   const kind = configuratorProductKind(template);
   const selectedIds = selectedComponentIds(template, values);
   const fields = visibleFields(schema, values, selectedIds);
@@ -431,19 +367,14 @@ export function projectConfiguratorView(
   const modules = template.components.filter(
     (component) => component.required || selectedIds.includes(component.id),
   );
-  const modulesValidated = modules.filter((component) =>
-    componentValid(component.id, fields, values),
+  const missingComponentIds = new Set(
+    compiled.missing.map((item) => item.componentId),
+  );
+  const modulesValidated = modules.filter(
+    (component) => !missingComponentIds.has(component.id),
   ).length;
   const complete = compiled.readiness === "ready";
-  const sections = blueprintSectionsFor(
-    kind,
-    template,
-    schema,
-    values,
-    selectedIds,
-    fields,
-    definition ?? compiled,
-  );
+  const sections = blueprintSectionsFor(kind, template, values, fields, compiled);
   const contributing = scopes.filter((scope) => scope.id !== "compozitie");
   const compositionItems: CompositionReviewItem[] = contributing.map((scope) => {
     const scopeSections = sections.filter((section) => {
@@ -469,7 +400,7 @@ export function projectConfiguratorView(
     return {
       scopeId: scope.id,
       label: scope.label,
-      complete: contributingScopeComplete(scope.id, template, fields, values, selectedIds),
+      complete,
       summary: compositionSummary(scopeSections),
       editLabel: `Editează în ${scope.label}`,
     };

@@ -93,8 +93,33 @@ COMPOZIȚIE is a read-only summary of **this** ProductDefinition /
 ProductAggregate. Copy: „Rezumat numai-citire al acestui produs.” It does
 not claim ACM + LETTERS assembly, Joint, or Assembly Interface.
 
-Live status `complete` / `statusLabel` comes from domain
-`compileDefinition(...).readiness` inside `projectConfiguratorView`.
+Presentation readiness is projected from domain `compileDefinition`, not
+recomputed by UI helpers.
+
+```text
+complete / readiness =
+compileDefinition.readiness
+
+module validation count =
+derived from compileDefinition.missing
+(X = modules whose componentId is absent from compiled.missing)
+ROOT is not a ProductTemplate module and does not change X/Y
+
+Blueprint missing state =
+derived from ProductDefinition.missing
+(field.id in compiled.missing → kind=missing, display=NECONFIGURAT
+even when the raw draft holds a non-empty invalid value)
+
+Composition current-product completeness =
+derived from compiler readiness
+(complete === compiled.readiness === "ready")
+
+UI_INVENTED_READINESS = NO
+```
+
+Empty LETTERS remains `2 din 4 module validate` because BACK and LIGHTING
+are domain-valid without required form gaps.
+
 Review still requires API `compileConfiguration`. Confirm still requires
 API `confirmReviewedConfiguration`. UI does not persist Product Truth.
 
@@ -115,6 +140,7 @@ editor     projectConfiguratorView.editorComponentIds
            section titles via editorSectionLabel / sectionTitleForView
 status     compileDefinition.readiness === "ready"
            → "Configurare completă" else "X din Y module validate"
+           X from compileDefinition.missing component IDs
 page       ProductConfigurationPage → ConfiguratorWorkspace
 ```
 
@@ -133,7 +159,8 @@ blueprint  blueprintSectionsFor → ROOT/FACE/BACK/LIGHTING
            labels PRODUS / CORP CASETAT / CADRU INTERN / ILUMINARE
 editor     ROOT / FACE / BACK → FormRenderer
            ROOT mounting stays product-owned; not Assembly Interface
-status     same compileDefinition.readiness path
+status     same compileDefinition.readiness + compiled.missing path
+           composition item complete follows compiler readiness
 ```
 
 ## Source-to-component mapping
@@ -166,21 +193,17 @@ Product-truth blueprint text is identical across those viewports.
 
 ## Tests and runtime proof
 
-Reconciled 2026-09-14 on `feat/configurator-final-figma-v1` at `e993a70` plus
-uncommitted current-contract wording / evidence amendments:
+Product-truth projection correction on `feat/configurator-final-figma-v1`
+from `ec2b8e8`. Presentation no longer owns readiness.
 
 ```text
 typecheck           PASS  pnpm typecheck                 exit 0
 lint                PASS  pnpm lint                      exit 0  (11 pre-existing warnings)
-web unit            PASS  configurator + page + form     20/20
-domain unit         PASS  453/453
-api unit            PASS  302/302
-playwright          PASS  16/16  configurator-final, acm-cassette, product-catalog,
-                          quote-snapshot, quotes-overview, requests-overview,
-                          hf-wave2, owner-surfaces
+web unit            PASS  configurator + page + form     25/25
+playwright          PASS  5/5   configurator-final, acm-cassette, product-catalog
 PLAYWRIGHT_RETRIES  = 0
 web build           PASS  pnpm --filter @workos-final/web build  exit 0
-HISTORICAL_SCREENSHOT_SIDE_EFFECTS_CLEANED = 114  (restored to HEAD; not committed)
+HISTORICAL_SCREENSHOT_SIDE_EFFECTS_CLEANED = restored to HEAD; not committed
 ```
 
 Screenshots (local synthetic runtime, no cloud write):

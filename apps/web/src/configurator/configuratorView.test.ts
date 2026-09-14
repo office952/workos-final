@@ -1,6 +1,7 @@
 import {
   ACM_CASSETTE_NONE_PRODUCT_CODE,
   CANONICAL_PRODUCT_CODE,
+  compileDefinition,
   getFormSchemaForTemplate,
   getProductTemplate,
 } from "@workos-final/domain";
@@ -217,6 +218,124 @@ describe("projectConfiguratorView", () => {
         .flatMap((section) => section.facts)
         .some((fact) => fact.display === "-" || fact.display === "—"),
     ).toBe(false);
+  });
+
+  it("A — LETTERS empty status comes from compileDefinition.missing", () => {
+    const { template, schema } = lettersTemplate();
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values: {},
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: {},
+      context,
+    });
+
+    expect(compiled.readiness).toBe("blocked");
+    expect(view.complete).toBe(false);
+    expect(view.statusLabel).toBe("2 din 4 module validate");
+    expect(view.modulesValidated).toBe(2);
+    expect(view.modulesTotal).toBe(4);
+  });
+
+  it("B — LETTERS valid fixture is complete from compileDefinition.readiness", () => {
+    const { template, schema } = lettersTemplate();
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values: lettersFilled,
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: lettersFilled,
+      context,
+    });
+
+    expect(compiled.readiness).toBe("ready");
+    expect(view.complete).toBe(true);
+    expect(view.statusLabel).toBe("Configurare completă");
+  });
+
+  it("C — required number below min is NECONFIGURAT from compiler missing", () => {
+    const { template, schema } = lettersTemplate();
+    const values = {
+      ...lettersFilled,
+      "face.confirmedAreaMm2": 0,
+    };
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values,
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values,
+      context,
+    });
+    const area = view.sections
+      .flatMap((section) => section.facts)
+      .find((fact) => fact.id === "face.confirmedAreaMm2");
+
+    expect(compiled.readiness).toBe("blocked");
+    expect(compiled.missing.some((item) => item.fieldId === "face.confirmedAreaMm2")).toBe(true);
+    expect(area?.kind).toBe("missing");
+    expect(area?.display).toBe("NECONFIGURAT");
+    expect(view.blueprintIncomplete).toBe(true);
+    expect(view.complete).toBe(false);
+  });
+
+  it("D — invalid select is not projected as configured", () => {
+    const { template, schema } = lettersTemplate();
+    const values = {
+      ...lettersFilled,
+      "volume.depthMm": "not-a-depth",
+    };
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values,
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values,
+      context,
+    });
+    const depth = view.sections
+      .flatMap((section) => section.facts)
+      .find((fact) => fact.id === "volume.depthMm");
+
+    expect(compiled.readiness).toBe("blocked");
+    expect(compiled.missing.some((item) => item.fieldId === "volume.depthMm")).toBe(true);
+    expect(depth?.kind).toBe("missing");
+    expect(depth?.display).toBe("NECONFIGURAT");
+    expect(view.sections.flatMap((section) => section.facts).some((fact) => fact.id === "volume.depthMm" && fact.kind === "configured")).toBe(false);
+  });
+
+  it("E — composition completeness follows compiler readiness only", () => {
+    const { template, schema } = lettersTemplate();
+    const empty = projectConfiguratorView({
+      template,
+      schema,
+      values: {},
+      context,
+      activeScopeId: "compozitie",
+    });
+    const filled = projectConfiguratorView({
+      template,
+      schema,
+      values: lettersFilled,
+      context,
+      activeScopeId: "compozitie",
+    });
+
+    expect(empty.compositionItems).toHaveLength(1);
+    expect(empty.compositionItems[0]?.complete).toBe(false);
+    expect(empty.complete).toBe(false);
+    expect(filled.compositionItems[0]?.complete).toBe(true);
+    expect(filled.complete).toBe(true);
+    expect(filled.compositionItems[0]?.complete).toBe(filled.complete);
   });
 
   it("does not invent assembly title or letter group names from Figma fixtures", () => {
