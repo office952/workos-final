@@ -1,0 +1,5 @@
+{
+  "setup-worktree-windows": ["node .cursor/setup-worktree.mjs"],
+  "setup-worktree-unix": ["node .cursor/setup-worktree.mjs"],
+  "setup-worktree": ["node .cursor/setup-worktree.mjs"]
+}

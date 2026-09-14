@@ -1,0 +1,39 @@
+{
+  "terminalAllowlist": [
+    "git status",
+    "git diff",
+    "git log",
+    "git show",
+    "git rev-parse",
+    "git fetch",
+    "pnpm lint",
+    "pnpm typecheck",
+    "pnpm test",
+    "pnpm build",
+    "pnpm install --frozen-lockfile",
+    "node --test",
+    "node .cursor/run-isolated-e2e.mjs",
+    "Get-FileHash",
+    "Get-Item",
+    "Test-Path",
+    "Write-Output",
+    "gh pr view",
+    "gh pr checks",
+    "gh run view",
+    "gh run list"
+  ],
+  "autoRun": {
+    "allow_instructions": [
+      "Allow read-only git inspection, git fetch, pnpm lint/typecheck/test/build, frozen-lockfile install, node --test, and node .cursor/run-isolated-e2e.mjs.",
+      "Allow GitHub inspection only: gh pr view, gh pr checks, gh run view, and gh run list.",
+      "Allow PowerShell diagnostics Get-FileHash, Get-Item, Test-Path, and Write-Output.",
+      "State-changing git add, normal git commit, feature-branch git push origin HEAD, and gh pr create are authorized by the WorkOS project hook, not by this allowlist."
+    ],
+    "block_instructions": [
+      "Block git commit --amend, --fixup, and --squash.",
+      "Block git push --force, git push --force-with-lease, +refspec force push, and any push to main or master, including git push origin HEAD when the current branch is main or master.",
+      "Block gh pr merge, gh api calls to /pulls/<n>/merge or /merges, and git merge into main or master.",
+      "Block git reset --hard, destructive git clean, recursive destructive delete, opaque wrappers, direct pnpm e2e, direct Playwright, real Cloud mutation, and destructive database reset or drop."
+    ]
+  }
+}
