@@ -188,6 +188,11 @@ describe("ConfiguratorWorkspace", () => {
     });
 
     expect(screen.queryByRole("button", { name: "Verifică configurația" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Rezumat numai-citire al acestui produs. Nu se modifică aici."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/ansamblu/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Editează în PANOU ACM" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Editează în LITERE" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Editează în LITERE" }));
     expect(onScopeChange).toHaveBeenCalledWith("litere");

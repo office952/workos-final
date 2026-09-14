@@ -174,7 +174,7 @@ describe("projectConfiguratorView", () => {
     expect(acm.scopes.some((scope) => scope.id === "ansamblare")).toBe(false);
   });
 
-  it("G — Compoziție is a read-only projection of contributing scopes", () => {
+  it("G — Compoziție is a read-only projection of this product only", () => {
     const { template, schema } = lettersTemplate();
     const view = projectConfiguratorView({
       template,
@@ -186,8 +186,11 @@ describe("projectConfiguratorView", () => {
 
     expect(view.activeScopeId).toBe("compozitie");
     expect(view.compositionItems).toHaveLength(1);
+    expect(view.compositionItems[0]?.scopeId).toBe("litere");
     expect(view.compositionItems[0]?.complete).toBe(true);
     expect(view.compositionItems[0]?.editLabel).toBe("Editează în LITERE");
+    expect(view.compositionItems.map((item) => item.scopeId)).not.toContain("panou-acm");
+    expect(view.compositionItems.map((item) => item.scopeId)).not.toContain("ansamblare");
     expect(view.complete).toBe(true);
   });
 

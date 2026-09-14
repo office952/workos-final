@@ -23,6 +23,15 @@ async function openLetters(page: import("@playwright/test").Page) {
   ).toBeVisible();
 }
 
+async function fillAcmSimple(page: import("@playwright/test").Page) {
+  await page.getByLabel("Denumire lucrare").fill("PANOU ACM");
+  await page.getByLabel("Sistem de prindere").selectOption("steel_angle");
+  await page.getByLabel("Lățime exterioară (mm)").fill("1000");
+  await page.getByLabel("Înălțime exterioară (mm)").fill("500");
+  await page.getByLabel("Adâncime casetă (mm)").selectOption("40");
+  await page.getByLabel("Număr de îndoituri").selectOption("1");
+}
+
 async function fillLettersComun(page: import("@playwright/test").Page) {
   await page.getByLabel("Textul literelor").fill("WORKOS");
   await page.getByLabel("Finisaj față").selectOption("vinyl");
@@ -95,9 +104,32 @@ test.describe("configurator final 219:3", () => {
     expect(new Set(filledByViewport).size).toBe(1);
 
     await page.setViewportSize({ width: 1440, height: 1100 });
+    await page.getByRole("button", { name: "Verifică configurația" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Confirmă configurația" })).toBeVisible();
+    const reviewFacts = await workspaceFacts(page);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(
+      page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).toBeVisible();
+    expect(await workspaceFacts(page)).toBe(reviewFacts);
+    await page.setViewportSize({ width: 768, height: 1100 });
+    await expect(
+      page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).toBeVisible();
+    expect(await workspaceFacts(page)).toBe(reviewFacts);
+    expect(await workspaceColumnCount(page)).toBe(1);
+
+    await page.setViewportSize({ width: 1440, height: 1100 });
     await page.getByRole("button", { name: "COMPOZIȚIE" }).click();
     await expect(page.getByRole("button", { name: "Editează în LITERE" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Verifică configurația" })).toHaveCount(0);
+    await expect(
+      page.getByText("Rezumat numai-citire al acestui produs. Nu se modifică aici."),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Editează în PANOU ACM" })).toHaveCount(0);
     await expect(page.getByText("Configurare completă").first()).toBeVisible();
 
     for (const viewport of VIEWPORTS) {
@@ -121,6 +153,58 @@ test.describe("configurator final 219:3", () => {
     await expect(page.getByText("Material casetă: ACM 3 mm")).toBeVisible();
     await expect(page.getByLabel("Lățime exterioară (mm)")).toBeVisible();
     await expect(page.getByText("buză interioară", { exact: false })).toHaveCount(0);
+
+    const acmIncomplete: string[] = [];
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await expect(page.locator(".cfg-blueprint").getByText("NECONFIGURAT").first()).toBeVisible();
+      if (viewport.width <= 768) {
+        expect(await workspaceColumnCount(page)).toBe(1);
+      } else {
+        expect(await workspaceColumnCount(page)).toBe(2);
+      }
+      acmIncomplete.push(await workspaceFacts(page));
+    }
+    expect(new Set(acmIncomplete).size).toBe(1);
+
+    await page.setViewportSize({ width: 1440, height: 1100 });
+    await fillAcmSimple(page);
+    await expect(page.getByText("Configurare completă")).toBeVisible();
+    const acmReady = await workspaceFacts(page);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    expect(await workspaceFacts(page)).toBe(acmReady);
+    await page.setViewportSize({ width: 768, height: 1100 });
+    expect(await workspaceFacts(page)).toBe(acmReady);
+    await page.setViewportSize({ width: 1440, height: 1100 });
+    await page.getByRole("button", { name: "Verifică configurația" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).toBeVisible();
+    const acmReview = await workspaceFacts(page);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(
+      page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).toBeVisible();
+    expect(await workspaceFacts(page)).toBe(acmReview);
+    await page.setViewportSize({ width: 768, height: 1100 });
+    await expect(
+      page.getByRole("heading", { name: "Configurație pregătită pentru confirmare" }),
+    ).toBeVisible();
+    expect(await workspaceFacts(page)).toBe(acmReview);
+    await page.setViewportSize({ width: 1440, height: 1100 });
+    await page.getByRole("button", { name: "COMPOZIȚIE" }).click();
+    await expect(page.getByRole("button", { name: "Editează în PANOU ACM" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Editează în LITERE" })).toHaveCount(0);
+    await expect(
+      page.getByText("Rezumat numai-citire al acestui produs. Nu se modifică aici."),
+    ).toBeVisible();
+    const acmComposition = await workspaceFacts(page);
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await expect(page.getByRole("button", { name: "Editează în PANOU ACM" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Verifică configurația" })).toHaveCount(0);
+      expect(await workspaceFacts(page)).toBe(acmComposition);
+    }
     await page.screenshot({
       path: ".tmp/configurator-final-proof/a-panou-acm-1440.png",
       fullPage: true,
@@ -129,13 +213,34 @@ test.describe("configurator final 219:3", () => {
 
   test("keyboard can move between scopes and keep focus visible", async ({ page }) => {
     await openLetters(page);
-    await page.getByRole("button", { name: "COMPOZIȚIE" }).focus();
-    await expect(page.getByRole("button", { name: "COMPOZIȚIE" })).toBeFocused();
-    await page.getByRole("button", { name: "COMPOZIȚIE" }).press("Enter");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Anatomie fizică litere" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Configurezi literele" })).toBeVisible();
+    const rail = page.getByRole("button", { name: "LITERE" });
+    const verify = page.getByRole("button", { name: "Verifică configurația" });
+    for (const target of [rail, verify]) {
+      const box = await target.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+    await page.getByRole("button", { name: "LITERE" }).focus();
+    await page.keyboard.press("Tab");
+    const compositionScope = page.getByRole("button", { name: "COMPOZIȚIE" });
+    await expect(compositionScope).toBeFocused();
+    const outline = await compositionScope.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { width: style.outlineWidth, style: style.outlineStyle };
+    });
+    expect(Number.parseFloat(outline.width)).toBeGreaterThanOrEqual(2);
+    expect(outline.style).not.toBe("none");
+    await compositionScope.press("Enter");
     await expect(page.getByRole("button", { name: "COMPOZIȚIE" })).toHaveAttribute(
       "aria-current",
       "true",
     );
-    await expect(page.getByRole("button", { name: "Editează în LITERE" })).toBeVisible();
+    const edit = page.getByRole("button", { name: "Editează în LITERE" });
+    await expect(edit).toBeVisible();
+    expect((await edit.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+    await expect(page.getByText("NECONFIGURAT").first()).toBeVisible();
+    await expect(page.getByText("Incomplet").first()).toBeVisible();
   });
 });

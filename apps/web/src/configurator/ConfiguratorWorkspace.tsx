@@ -204,7 +204,11 @@ export function ConfiguratorWorkspace({
         <div className="cfg-editor">
           <header className="cfg-editor-head">
             <h2>{composition ? "Compoziție" : view.editorTitle}</h2>
-            <p>{composition ? "Verifică într-un singur loc configurația disponibilă. Nu se modifică aici." : view.editorLead}</p>
+            <p>
+              {composition
+                ? "Rezumat numai-citire al acestui produs. Nu se modifică aici."
+                : view.editorLead}
+            </p>
           </header>
 
           {notices}
@@ -244,7 +248,7 @@ export function ConfiguratorWorkspace({
                 </p>
               ) : (
                 <p className="cfg-composition-incomplete" role="status">
-                  Compoziția rămâne incompletă până sunt complete modulele sursă.
+                  Acest produs rămâne incomplet până sunt complete modulele lui.
                 </p>
               )}
             </div>
