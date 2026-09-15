@@ -37,6 +37,7 @@ Do not treat a cached SHA as current integration authority. This file must not b
 | CI_TIERING | `docs/development/WORKOS_CURSOR_WORKFLOW.md` plus `scripts/classify-ci-impact.mjs` |
 | CURSOR_PLUGIN_REGISTRY | `docs/CURSOR_PLUGINS.md` |
 | FIGMA_WORKFLOW | `docs/development/WORKOS_FIGMA_WORKFLOW.md` |
+| FIGMA_RUNTIME_REGISTRY | `docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md` |
 | PRODUCT_TRUTH_AUTHORITIES | current ProductTemplates / FormSchemas / component contracts / `compileDefinition` plus `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` |
 | UI_UX_AUTHORITIES | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`; `docs/architecture/UI_UX_FOUNDATION_CANON.md`; current Configurator implementation on main plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` as documented guardrail |
 | NEW_SESSION_BOOTSTRAP | `docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md` |
@@ -46,14 +47,29 @@ Do not treat a cached SHA as current integration authority. This file must not b
 This block is a checkpoint copied from the living roadmap plus live GitHub evidence. Re-read those authorities before acting. Do not treat this file as the delivery sequence.
 
 ```text
-LAST_RECONCILED_MAIN_BASE              = debf5182a657e2794b873b74707d842c816d4f08
+LAST_RECONCILED_MAIN_BASE              = aacbc212bf7149acca0811e97c05e9c4f21df4e6
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
+PR32_PROTECTED_REGION_LAW              = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = NONE_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_SLICE                     = NOT_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_GATE                      = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
-FC2_AUTHORIZED                         = NO
+CURRENT_PRODUCT_SLICE                  = FC2_RECONCILED_WITH_CURRENT_MAIN
+MAIN_AACBC212_IN_ANCESTRY              = YES
+NEXT_PRODUCT_SLICE                     = CONFIGURATOR_FC2_RUNTIME_TO_FIGMA_MUTABLE_CONTENT_POLISH
+NEXT_PRODUCT_GATE                      = EXACT_HEAD_CI_THEN_OWNER_REVIEW_BEFORE_FIGMA_MUTABLE_POLISH
+FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
+FC2_INTEGRATED_ON_MAIN                 = NO
+FC2A_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2D_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2B_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2C_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2D_AUTHORIZED                        = NO
+FC2B_AUTHORIZED                        = NO
+FC2C_AUTHORIZED                        = NO
+FC2_DECISION_PACK                      = ACCEPTED_WITH_TARGETED_AMENDMENTS
+SURFACE_FRAMEWORK_STATUS               = PROTECTED_EXISTING
+OWNER_REOPEN_UI_FRAMEWORK              = NO
+FIGMA_WRITE                            = NO
 ```
 
 ### Owner-accepted items relevant to current position
@@ -68,7 +84,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required (catalogs, richer construction facts). Do not implement them from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, the FC2B LETTERS FACE V2 form + catalog resolver, and the FC2C LETTERS VOLUME/CANT V2 form + catalog resolver. Those slices are `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/fc2-letters-v2-roundtrip` / PR #31. They are not on `origin/main`. Live main `aacbc21` is now a parent of this branch, so protected-region law from PR #32 is in ancestry, not only path-copied. Do not write Figma, do not merge FC2, and do not resume PURE CLIMATE from this file.
 
 ### Accepted advisories
 

@@ -18,6 +18,7 @@ import {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import { LED_PITCH_SETTING_ID } from "../product/technicalSettings.js";
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
@@ -176,7 +177,7 @@ describe("persisted execution plan materialization", () => {
       frontlitPlexiAl06FormSchema,
       {
         templateCode: CANONICAL_PRODUCT_CODE,
-        values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
+        values: { ...readyValues, ...lettersFaceReadyValues("651") },
       },
     );
     const truth = confirmReviewedDefinition(definition, definition.reviewId);

@@ -30,7 +30,6 @@ export type EicLine = {
   group: EicLineGroup;
 };
 
-export const EIC_CALIBRATION_REASON = "Costuri încă în calibrare";
 export const EIC_GEOMETRY_CONFIRMED_LABEL = "Geometrie confirmată";
 
 export type EicResult = {
@@ -130,18 +129,9 @@ export function compileEic(
   const measurementGaps = uniqueReasons(
     aggregate.componentStatuses.flatMap((item) => item.unavailable),
   );
-  const hasProvisionalCost = requirements.some((requirement) => {
-    const evidence = lookupCostEvidence(
-      evidenceRows,
-      requirement.resourceId,
-      requirement.costQualifier,
-    );
-    return evidence !== undefined && costEvidenceKeepsEicPartial(evidence);
-  });
   const completenessReasons = uniqueReasons([
     ...measurementGaps,
     ...missingEvidenceReasons,
-    ...(hasProvisionalCost ? [EIC_CALIBRATION_REASON] : []),
   ]);
   const geometryMissing = aggregate.componentStatuses.some(
     (item) => item.status === "MISSING_MEASUREMENT",
@@ -168,21 +158,12 @@ export function costCompletenessLabel(
     case "COMPLETE":
       return "Complete pentru configurația curentă";
     case "PARTIAL":
-      return "Necesită calibrare";
+      return "Incompletă pentru configurația curentă";
     default: {
       const _exhaustive: never = completeness;
       return _exhaustive;
     }
   }
-}
-
-export function costEvidenceKeepsEicPartial(evidence: CostEvidence): boolean {
-  if (evidence.source === "PILOT_INTERNAL_EVIDENCE" || evidence.source === "LEGACY_EVIDENCE") {
-    return true;
-  }
-  return (
-    evidence.classification !== "OWNER_CONFIRMED" && evidence.classification !== "AI_DECISION"
-  );
 }
 
 function uniqueReasons(values: readonly string[]): string[] {

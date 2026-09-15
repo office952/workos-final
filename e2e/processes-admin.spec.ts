@@ -227,7 +227,7 @@ test("processes admin inspects capability-bound operational processes", async ({
 
   await page.getByRole("button", { name: "Finisare", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Aplicare folie" })).toBeVisible();
-  await expect(page.getByText("Apare când Finisaj față: Colantat.")).toBeVisible();
+  await expect(page.getByText("Apare când Finisaj față: Colantat / Oracal / Print.")).toBeVisible();
   await page.screenshot({
     path: "docs/worklog/screenshots/ui-processes-conditional.png",
     fullPage: true,
@@ -274,7 +274,7 @@ test("processes admin inspects capability-bound operational processes", async ({
   await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
+  await selectProductChoice(page, "Finisaj volum", "stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

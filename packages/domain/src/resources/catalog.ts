@@ -202,6 +202,10 @@ export const MAT_LED_PSU_12V_100W_ID = "MAT-LED-PSU-12V-100W";
 export const MAT_LED_PSU_12V_160W_ID = "MAT-LED-PSU-12V-160W";
 export const MAT_LED_PSU_12V_200W_ID = "MAT-LED-PSU-12V-200W";
 export const MAT_VINYL_ORACAL_651_ID = "MAT-VINYL-ORACAL-651";
+export const MAT_VINYL_ORACAL_641_ID = "MAT-VINYL-ORACAL-641";
+export const MAT_VINYL_ORACAL_8500_ID = "MAT-VINYL-ORACAL-8500";
+export const MAT_VINYL_PRINT_ID = "MAT-VINYL-PRINT";
+export const MAT_VINYL_LAMINATE_ID = "MAT-VINYL-LAMINATE";
 export const SVC_CNC_FACE_ID = "SVC-CNC-FACE";
 export const SVC_CNC_BACK_ID = "SVC-CNC-BACK";
 export const LAB_VINYL_FACE_ID = "LAB-VINYL-FACE";
@@ -211,7 +215,32 @@ export const LAB_CLOSE_LETTER_BODY_ID = "LAB-CLOSE-LETTER-BODY";
 export const SVC_PLACE_LED_MODULES_ID = "SVC-PLACE-LED-MODULES";
 export const SVC_ELECTRICAL_FINISH_ID = "SVC-ELECTRICAL-FINISH";
 export const SVC_PAINT_RAL_ID = "SVC-PAINT-RAL";
+export const SVC_LARGE_FORMAT_PRINT_ID = "SVC-LARGE-FORMAT-PRINT";
 export const SVC_PACK_PRODUCT_ID = "SVC-PACK-PRODUCT";
+
+export const FC2D_PROVISIONAL_RESOURCE_IDS = [
+  MAT_VINYL_ORACAL_641_ID,
+  MAT_VINYL_ORACAL_8500_ID,
+  MAT_VINYL_PRINT_ID,
+  MAT_VINYL_LAMINATE_ID,
+  SVC_LARGE_FORMAT_PRINT_ID,
+] as const;
+
+export const PLANNED_FC2_FACE_COST_RESOURCE_IDS = [
+  MAT_VINYL_ORACAL_641_ID,
+  MAT_VINYL_ORACAL_651_ID,
+  MAT_VINYL_ORACAL_8500_ID,
+  MAT_VINYL_PRINT_ID,
+  MAT_VINYL_LAMINATE_ID,
+  SVC_LARGE_FORMAT_PRINT_ID,
+  LAB_VINYL_FACE_ID,
+] as const;
+
+export function isFc2dProvisionalResourceId(
+  resourceId: string,
+): resourceId is (typeof FC2D_PROVISIONAL_RESOURCE_IDS)[number] {
+  return (FC2D_PROVISIONAL_RESOURCE_IDS as readonly string[]).includes(resourceId);
+}
 export const ACM_3MM_ID = "acm_3mm";
 export const STEEL_FRAME_PROFILE_ID = "steel_frame_profile";
 export const SVC_CNC_SHEET_PANEL_ID = "SVC-CNC-SHEET-PANEL";
@@ -355,6 +384,38 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
     specification: { familyId: "VINYL", form: "sheet" },
   },
   {
+    id: MAT_VINYL_ORACAL_641_ID,
+    label: "Folie Oracal 641",
+    kind: "MATERIAL",
+    unit: "m2",
+    familyId: "VINYL",
+    specification: { familyId: "VINYL", form: "sheet" },
+  },
+  {
+    id: MAT_VINYL_ORACAL_8500_ID,
+    label: "Folie Oracal 8500",
+    kind: "MATERIAL",
+    unit: "m2",
+    familyId: "VINYL",
+    specification: { familyId: "VINYL", form: "sheet" },
+  },
+  {
+    id: MAT_VINYL_PRINT_ID,
+    label: "Folie print",
+    kind: "MATERIAL",
+    unit: "m2",
+    familyId: "VINYL",
+    specification: { familyId: "VINYL", form: "sheet" },
+  },
+  {
+    id: MAT_VINYL_LAMINATE_ID,
+    label: "Folie laminare",
+    kind: "MATERIAL",
+    unit: "m2",
+    familyId: "VINYL",
+    specification: { familyId: "VINYL", form: "sheet" },
+  },
+  {
     id: SVC_CNC_FACE_ID,
     label: "Debitare CNC față",
     kind: "SERVICE",
@@ -407,6 +468,12 @@ export const resourceCatalog: readonly ResourceDefinition[] = [
     label: "Vopsire RAL",
     kind: "SERVICE",
     unit: "m",
+  },
+  {
+    id: SVC_LARGE_FORMAT_PRINT_ID,
+    label: "Print mare format",
+    kind: "SERVICE",
+    unit: "m2",
   },
   {
     id: SVC_PACK_PRODUCT_ID,
@@ -679,6 +746,51 @@ export const costEvidence: readonly CostEvidence[] = [
     note: "Legacy generic PAINTING 4 EUR/ml după asamblare. Doar când volumul este vopsit.",
   },
   {
+    resourceId: MAT_VINYL_ORACAL_641_ID,
+    amount: 7,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Provisional legacy-comparable Oracal 641 rate. Functional default, not owner-confirmed.",
+  },
+  {
+    resourceId: MAT_VINYL_ORACAL_8500_ID,
+    amount: 12,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "LEGACY_EVIDENCE",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Provisional legacy-comparable Oracal 8500 rate. Functional default, not owner-confirmed.",
+  },
+  {
+    resourceId: MAT_VINYL_PRINT_ID,
+    amount: 8,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "PLATFORM_DEFAULT",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Provisional print-media rate. Functional default, not owner-confirmed.",
+  },
+  {
+    resourceId: MAT_VINYL_LAMINATE_ID,
+    amount: 5,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "PLATFORM_DEFAULT",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Provisional laminate-material rate. Functional default, not owner-confirmed. Not a composite print-laminated identity.",
+  },
+  {
+    resourceId: SVC_LARGE_FORMAT_PRINT_ID,
+    amount: 15,
+    currency: "EUR",
+    perUnit: "m2",
+    source: "PLATFORM_DEFAULT",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: "Provisional large-format print service rate. Functional default, not owner-confirmed.",
+  },
+  {
     resourceId: SVC_PACK_PRODUCT_ID,
     amount: 10,
     currency: "EUR",
@@ -784,6 +896,21 @@ export function getCostEvidence(
   when?: CostEvidenceWhen,
 ): CostEvidence | undefined {
   return lookupCostEvidence(costEvidence, resourceId, when);
+}
+
+export function listFc2dProvisionalCostEvidence(
+  rows: readonly CostEvidence[] = costEvidence,
+): CostEvidence[] {
+  return rows.filter((row) => isFc2dProvisionalResourceId(row.resourceId));
+}
+
+export function countMissingRatesForPlannedFc2FinishResources(
+  rows: readonly CostEvidence[],
+): number {
+  return PLANNED_FC2_FACE_COST_RESOURCE_IDS.filter((resourceId) => {
+    const evidence = lookupCostEvidence(rows, resourceId);
+    return evidence === undefined || !isValidCostAmount(evidence.amount);
+  }).length;
 }
 
 export function ownerConfirmedCostSource(kind: ResourceKind): CostEvidence["source"] {

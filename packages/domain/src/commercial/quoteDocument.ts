@@ -55,8 +55,15 @@ export type QuoteDocumentModel = {
 const CONFIG_VALUE_LABELS: Record<string, string> = {
   none: "Fără finisaj",
   vinyl: "Colantat",
+  oracal: "Oracal",
+  stock: "Stoc",
+  print: "Print",
+  laminated: "Cu laminare",
   painted: "Vopsit",
   steel_angle: "Cornier oțel",
+  "641": "Oracal 641",
+  "651": "Oracal 651",
+  "8500": "Oracal 8500",
 };
 
 const PREFIX_QUALIFIER: Record<string, string> = {
@@ -255,7 +262,18 @@ function configurationLabel(fieldId: string): string | null {
     case "finish":
       return qualifier ? `Finisaj ${qualifier}` : "Finisaj";
     case "color":
+    case "colorDisplayName":
       return qualifier ? `Culoare ${qualifier}` : "Culoare";
+    case "colorCode":
+      return qualifier ? `Cod culoare ${qualifier}` : "Cod culoare";
+    case "vinylSeries":
+      return "Serie Oracal";
+    case "stockColor":
+      return qualifier ? `Culoare ${qualifier}` : "Culoare";
+    case "rollWidthMm":
+      return qualifier ? `Rolă ${qualifier}` : "Rolă";
+    case "lamination":
+      return "Laminare";
     case "depthMm":
     case "cassetteDepthMm":
       return qualifier ? `Adâncime ${qualifier}` : "Adâncime";
@@ -301,6 +319,12 @@ function configurationValue(suffix: string, raw: DraftValue): string {
   const text = sanitizeDocumentText(String(raw));
   if (!text) {
     return "";
+  }
+  if (suffix === "lamination") {
+    return text === "laminated" ? "Cu laminare" : "Fără laminare";
+  }
+  if (suffix === "rollWidthMm") {
+    return `Rolă ${text} mm`;
   }
   const token = CONFIG_VALUE_LABELS[text];
   if (token) {

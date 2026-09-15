@@ -11,13 +11,24 @@ import {
   processProviderRequirement,
   type ProviderRequirement,
 } from "../processes/catalog.js";
-import { listTypeTechnicalSettings } from "../product/technicalSettings.js";
+import {
+  RETURN_WRAP_ALLOWANCE_SETTING_ID,
+  listTypeTechnicalSettings,
+} from "../product/technicalSettings.js";
 import type {
   ProductAggregate,
   ProductTruth,
   TechnicalQuantity,
 } from "../product/types.js";
-import { getResource, MAT_LED_MODULE_ID, costEvidence, lookupCostEvidence, type CostEvidence } from "../resources/catalog.js";
+import {
+  getResource,
+  MAT_LED_MODULE_ID,
+  MAT_VINYL_ORACAL_641_ID,
+  MAT_VINYL_ORACAL_651_ID,
+  costEvidence,
+  lookupCostEvidence,
+  type CostEvidence,
+} from "../resources/catalog.js";
 import type { EicResult } from "../resources/eic.js";
 import {
   quantityForRecipe,
@@ -282,6 +293,12 @@ export function usedTechnicalSettingsFromAggregate(
       if (setting.resolution.status !== "RESOLVED") {
         return [];
       }
+      if (
+        setting.id === RETURN_WRAP_ALLOWANCE_SETTING_ID &&
+        !aggregateUsedReturnWrapAllowance(aggregate)
+      ) {
+        return [];
+      }
       return [
         {
           id: setting.id,
@@ -292,6 +309,20 @@ export function usedTechnicalSettingsFromAggregate(
         },
       ];
     }),
+  );
+}
+
+function aggregateUsedReturnWrapAllowance(aggregate: ProductAggregate): boolean {
+  const lateral = aggregate.quantities.find((item) => item.id === "volume_lateral")?.value;
+  const wrapQuantity = aggregate.requirements.find(
+    (item) =>
+      item.resourceId === MAT_VINYL_ORACAL_641_ID ||
+      item.resourceId === MAT_VINYL_ORACAL_651_ID,
+  )?.quantity;
+  return (
+    typeof wrapQuantity === "number" &&
+    typeof lateral === "number" &&
+    wrapQuantity !== lateral
   );
 }
 

@@ -3,6 +3,7 @@ import type { ComponentTypeId } from "./componentTypes.js";
 export const LED_PITCH_SETTING_ID = "ledPitchMm";
 export const LED_MODULE_POWER_SETTING_ID = "ledModulePowerW";
 export const PSU_RESERVE_SETTING_ID = "psuReservePercent";
+export const RETURN_WRAP_ALLOWANCE_SETTING_ID = "returnWrapAllowanceMm";
 
 export const TECHNICAL_SETTING_VALUE_TYPES = ["number"] as const;
 export const TECHNICAL_SETTING_UNITS = ["mm", "percent", "W"] as const;
@@ -81,6 +82,26 @@ export function createTechnicalSettingsRegistry(
   };
 }
 
+export const aluminiumVolumeTechnicalSettings: readonly ComponentTechnicalSettingDefinition[] =
+  [
+    {
+      id: RETURN_WRAP_ALLOWANCE_SETTING_ID,
+      typeId: "ALUMINIUM_VOLUME",
+      label: "Adaos de înfășurare cant",
+      description:
+        "Adaos tehnic adăugat la adâncimea volumului pentru consumul de folie pe cant. Nu este câmp de comandă.",
+      valueType: "number",
+      unit: "mm",
+      resolution: { status: "RESOLVED", value: 10 },
+      source: "OWNER_CONFIRMED",
+      classification: "OWNER_CONFIRMED",
+      configurable: true,
+      unresolvedReason: "Adaosul de înfășurare pe cant nu este stabilit",
+      note: "Valoare activă canonică. Documentația explică; calculul consumă. Nu se aplică adaos de 20%.",
+      constraints: { min: 0 },
+    },
+  ];
+
 export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSettingDefinition[] =
   [
     {
@@ -133,7 +154,7 @@ export const lightingFrontLedTechnicalSettings: readonly ComponentTechnicalSetti
   ];
 
 export const componentTechnicalSettingsRegistry = createTechnicalSettingsRegistry(
-  lightingFrontLedTechnicalSettings,
+  [...aluminiumVolumeTechnicalSettings, ...lightingFrontLedTechnicalSettings],
 );
 
 export function listTypeTechnicalSettings(

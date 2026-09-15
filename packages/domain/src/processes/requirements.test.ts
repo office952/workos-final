@@ -20,7 +20,12 @@ describe("component process requirements", () => {
     ).toEqual([CUT_SHEET_CNC_ID]);
     expect(
       processRequirementReferenceLabel(contract[1]!),
-    ).toBe("Aplicare folie (Finisaj față: Colantat)");
+    ).toBe("Aplicare folie (Finisaj față: Colantat / Oracal / Print)");
+    expect(
+      resolvedProcessRequirementsForType("PLEXIGLAS_FACE", { "face.finish": "oracal" }).map(
+        (item) => item.processId,
+      ),
+    ).toEqual([CUT_SHEET_CNC_ID, APPLY_SURFACE_FINISH_ID]);
   });
 
   it("does not treat painted volume as vinyl", () => {

@@ -45,6 +45,10 @@ import {
   type DraftValue,
   type DraftValues,
   type ProductDefinition,
+  defaultFinishOrganization,
+  getFormSchema,
+  getProductTemplate,
+  projectProductConfigurationOptions,
 } from "@workos-final/domain";
 import type { Hono } from "hono";
 import { getCookie } from "hono/cookie";
@@ -172,7 +176,11 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     if (!template || !formSchema) {
       return c.json({ error: "not_found" }, 404);
     }
-    return c.json({ template, formSchema });
+    return c.json({
+      template,
+      formSchema,
+      configurationOptions: projectProductConfigurationOptions(template, {}),
+    });
   });
 
   app.get("/api/products/:productCode/process-composition", (c) => {
@@ -209,12 +217,18 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       return c.json({ error: "not_found" }, 404);
     }
 
-    const definition = compileDefinition(
-      template,
-      formSchema,
-      readDraft(productCode, await c.req.json()),
-    );
-    return c.json({ definition, reviewId: definition.reviewId });
+    const draft = readDraft(productCode, await c.req.json());
+    const definition = compileDefinition(template, formSchema, draft, {
+      organization: defaultFinishOrganization(),
+    });
+    return c.json({
+      definition,
+      reviewId: definition.reviewId,
+      configurationOptions: projectProductConfigurationOptions(
+        template,
+        definition.values,
+      ),
+    });
   });
 
   app.post("/api/products/:productCode/confirm", async (c) => {
@@ -792,12 +806,9 @@ function compileAcceptedProduct(
 ) {
   noteRuntimePresent();
   const presented = runtime.present();
-  const template = presented.template(productCode);
-  const formSchema = presented.formSchema(productCode);
-  if (!template || !formSchema) {
+  if (!presented.template(productCode) && !getProductTemplate(productCode)) {
     return { ok: false as const, status: 404 as const, body: { error: "not_found" } };
   }
-
   const { definition, reviewId } = readReviewedDefinition(body);
   if (!definition || definition.templateCode !== productCode) {
     return {
@@ -807,7 +818,42 @@ function compileAcceptedProduct(
     };
   }
 
-  const confirmed = confirmReviewedDefinition(definition, reviewId);
+  const versioned = getProductTemplate(productCode, definition.templateVersion);
+  const versionedSchema = versioned ? getFormSchema(versioned.formSchemaId) : undefined;
+  const presentedTemplate = presented.template(productCode);
+  const template = versioned
+    ? {
+        ...versioned,
+        label: presentedTemplate?.label ?? versioned.label,
+      }
+    : presentedTemplate;
+  const formSchema = versionedSchema ?? presented.formSchema(productCode);
+  if (!template || !formSchema) {
+    return { ok: false as const, status: 404 as const, body: { error: "not_found" } };
+  }
+
+  const recompiled = compileDefinition(
+    template,
+    formSchema,
+    { templateCode: productCode, values: definition.values },
+    { organization: defaultFinishOrganization() },
+  );
+  if (recompiled.readiness !== "ready") {
+    return {
+      ok: false as const,
+      status: 422 as const,
+      body: { error: "not_ready", definition: recompiled },
+    };
+  }
+  if (recompiled.reviewId !== reviewId) {
+    return {
+      ok: false as const,
+      status: 409 as const,
+      body: { error: "review_mismatch", definition: recompiled },
+    };
+  }
+
+  const confirmed = confirmReviewedDefinition(recompiled, recompiled.reviewId);
   if ("ok" in confirmed) {
     return {
       ok: false as const,

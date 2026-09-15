@@ -8,6 +8,8 @@ import {
   CANONICAL_PRODUCT_CODE,
   getFormSchemaForTemplate,
   getProductTemplate,
+  lettersFaceReadyValues,
+  lettersVolumeReadyValues,
 } from "@workos-final/domain";
 import { ConfiguratorWorkspace } from "./ConfiguratorWorkspace";
 import {
@@ -106,12 +108,9 @@ describe("ConfiguratorWorkspace", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     const view = projectConfiguratorView({
       template,
@@ -182,12 +181,9 @@ describe("ConfiguratorWorkspace", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     const view = projectConfiguratorView({
       template,
@@ -265,12 +261,9 @@ describe("ConfiguratorWorkspace", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     const view = projectConfiguratorView({
       template,

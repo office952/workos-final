@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { APIRequestContext, Page } from "@playwright/test";
+import { confirmLettersV2NoneStock } from "./lettersV2";
 
 export const CANONICAL_LETTERS_PRODUCT_CODE = "PRD-LETTERS-FRONTLIT-PLEXI-AL06";
 
@@ -94,12 +95,5 @@ export async function confirmCanonicalLettersOnPage(
   page: Page,
   inscription: string,
 ) {
-  await page.getByLabel("Textul literelor").fill(inscription);
-  await page.locator('select[name="face.finish"]').selectOption("none");
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await page.locator('select[name="volume.depthMm"]').selectOption("60");
-  await page.locator('select[name="volume.finish"]').selectOption("none");
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
-  await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await page.getByRole("button", { name: "Confirmă configurația" }).click();
+  await confirmLettersV2NoneStock(page, { inscription });
 }

@@ -43,7 +43,7 @@ describe("component architecture projection", () => {
       { processId: "CUT_SHEET_CNC", label: "Debitare foaie CNC" },
       {
         processId: "APPLY_SURFACE_FINISH",
-        label: "Aplicare folie (Finisaj față: Colantat)",
+        label: "Aplicare folie (Finisaj față: Colantat / Oracal / Print)",
       },
     ]);
     expect(

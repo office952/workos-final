@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CANONICAL_PRODUCT_CODE } from "@workos-final/domain";
+import { CANONICAL_PRODUCT_CODE, costEvidence } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 
 describe("system projection API", () => {
@@ -101,7 +101,7 @@ describe("system projection API", () => {
     expect(body.services[0]).toEqual(
       expect.objectContaining({ id: "return_cant_forming", kind: "SERVICE" }),
     );
-    expect(body.costEvidence).toHaveLength(29);
+    expect(body.costEvidence).toHaveLength(costEvidence.length);
     expect(body.costEvidence.every((item) => typeof item.evidenceRowId === "string")).toBe(
       true,
     );

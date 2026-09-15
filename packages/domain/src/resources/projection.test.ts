@@ -108,7 +108,7 @@ describe("resources administration projection", () => {
     expect(admin.missingLaborRecipes.map((item) => item.processId)).toContain(
       "INSPECT_FINISHED_LETTER",
     );
-    expect(admin.costEvidence).toHaveLength(29);
+    expect(admin.costEvidence).toHaveLength(costEvidence.length);
     const catalogIds = admin.materials
       .concat(admin.services)
       .concat(admin.labor)

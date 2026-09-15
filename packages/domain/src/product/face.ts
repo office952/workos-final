@@ -1,3 +1,7 @@
+import {
+  deriveLettersFaceApplicationId,
+} from "../finishes/lettersFace.js";
+import { faceFinishDirectRequirements } from "../finishes/costResolution.js";
 import type {
   ComponentCalculationContract,
   ComponentCalculationInput,
@@ -14,6 +18,27 @@ export const FACE_MISSING_AREA = "Suprafață față neconfirmată";
 
 export function faceAreaSquareMeters(areaMm2: number): number {
   return squareMetersFromMm2(areaMm2);
+}
+
+function faceFinishRequirements(
+  values: DraftValues,
+  confirmedAreaMm2: number,
+): ComponentCalculationResult["requirements"] {
+  if (values["face.finish"] === "vinyl") {
+    return [
+      {
+        componentId: FACE_COMPONENT_ID,
+        resourceId: MAT_VINYL_ORACAL_651_ID,
+        quantity: squareMetersFromMm2(confirmedAreaMm2),
+        unit: "m2",
+      },
+    ];
+  }
+  const applicationId = deriveLettersFaceApplicationId(values);
+  if (!applicationId || applicationId === "none") {
+    return [];
+  }
+  return faceFinishDirectRequirements(applicationId, confirmedAreaMm2);
 }
 
 function faceResult(
@@ -80,16 +105,7 @@ export const plexiglasFaceContract: ComponentCalculationContract = {
             ]
           : [],
       ),
-      ...(input.values["face.finish"] === "vinyl"
-        ? [
-            {
-              componentId: FACE_COMPONENT_ID,
-              resourceId: MAT_VINYL_ORACAL_651_ID,
-              quantity: squareMeters,
-              unit: "m2" as const,
-            },
-          ]
-        : []),
+      ...faceFinishRequirements(input.values, area.value),
     ];
     return faceResult(
       "CALCULATED",

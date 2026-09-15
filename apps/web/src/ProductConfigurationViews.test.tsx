@@ -18,6 +18,8 @@ import {
   CANONICAL_PRODUCT_CODE,
   getFormSchemaForTemplate,
   getProductTemplate,
+  lettersFaceReadyValues,
+  lettersVolumeReadyValues,
 } from "@workos-final/domain";
 import {
   AcceptedSnapshotSection,
@@ -106,7 +108,7 @@ const truth: ProductTruth = {
 
 const eic: EicResult = {
   completeness: "PARTIAL",
-  completenessReasons: ["Costuri încă în calibrare"],
+  completenessReasons: ["Evidență de cost indisponibilă"],
   geometryLabel: "Geometrie confirmată",
   currency: "EUR",
   total: 595,
@@ -148,12 +150,8 @@ describe("Product configuration views", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
-      "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersFaceReadyValues("651"),
+      ...lettersVolumeReadyValues("stock"),
     };
     render(
       <MemoryRouter>
@@ -263,7 +261,7 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Parțial")).toBeInTheDocument();
     expect(screen.getByText("Geometrie confirmată.")).toBeInTheDocument();
     expect(
-      screen.getByText("Costul intern rămâne parțial: Costuri încă în calibrare."),
+      screen.getByText("Costul intern rămâne parțial: Evidență de cost indisponibilă."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Geometrie din Analyzer")).not.toBeInTheDocument();
     expect(screen.getByText("Plexiglas: 0,25 m²")).toBeInTheDocument();

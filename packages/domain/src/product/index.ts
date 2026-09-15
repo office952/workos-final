@@ -42,6 +42,7 @@ export {
   isFieldVisible,
   selectedComponentIds,
   type CompileAggregateOptions,
+  type CompileDefinitionContext,
 } from "./compiler.js";
 export {
   noteCompileEic,
@@ -95,8 +96,12 @@ export {
 } from "./face.js";
 export {
   CANONICAL_PRODUCT_CODE,
+  LETTERS_FORM_SCHEMA_V1_ID,
+  LETTERS_FORM_SCHEMA_V2_ID,
   frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06FormSchemaV1,
   frontlitPlexiAl06Template,
+  frontlitPlexiAl06TemplateV1,
 } from "./frontlitPlexiAl06.js";
 export {
   ACM_CASSETTE_NONE_PRODUCT_CODE,
@@ -111,6 +116,7 @@ export {
   getFormSchema,
   getFormSchemaForTemplate,
   getProductTemplate,
+  historicalProductTemplates,
   productTemplates,
 } from "./productRegistry.js";
 export {
@@ -148,6 +154,7 @@ export {
   LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
+  RETURN_WRAP_ALLOWANCE_SETTING_ID,
   componentTechnicalSettingsRegistry,
   createTechnicalSettingsRegistry,
   listTypeTechnicalSettings,

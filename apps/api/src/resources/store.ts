@@ -6,6 +6,7 @@ import {
   costEvidence,
   getResource,
   isValidCostAmount,
+  listFc2dProvisionalCostEvidence,
   ownerConfirmedCostSource,
   parseCostEvidenceWhen,
   resourceAllowsCostEvidenceQualifier,
@@ -21,6 +22,8 @@ export const PLATFORM_DEFAULT_COST_NOTE =
   "Valoare implicită de platformă. Trebuie confirmată de owner.";
 
 export const RESOURCE_COST_EVIDENCE_MARKER = "RESOURCE_COST_EVIDENCE_V1_APPLIED";
+export const RESOURCE_COST_EVIDENCE_FC2D_MARKER =
+  "RESOURCE_COST_EVIDENCE_FC2D_V1_APPLIED";
 
 const COST_SOURCES = [
   "PILOT_INTERNAL_EVIDENCE",
@@ -73,11 +76,140 @@ export type CostEvidenceWriteResult =
   | { ok: true; evidence: CostEvidence }
   | { ok: false; error: CostEvidenceWriteError };
 
-export function isCostEvidenceApplied(db: SqliteDatabase): boolean {
+function isBootstrapMarkerApplied(db: SqliteDatabase, marker: string): boolean {
   const row = db
     .prepare("SELECT marker_id FROM runtime_bootstrap_markers WHERE marker_id = ?")
-    .get(RESOURCE_COST_EVIDENCE_MARKER) as { marker_id: string } | undefined;
+    .get(marker) as { marker_id: string } | undefined;
   return Boolean(row);
+}
+
+export function isCostEvidenceApplied(db: SqliteDatabase): boolean {
+  return isBootstrapMarkerApplied(db, RESOURCE_COST_EVIDENCE_MARKER);
+}
+
+export function isFc2dCostEvidenceApplied(db: SqliteDatabase): boolean {
+  return isBootstrapMarkerApplied(db, RESOURCE_COST_EVIDENCE_FC2D_MARKER);
+}
+
+function insertCostEvidenceSeed(
+  insert: { run: (...args: unknown[]) => unknown },
+  seed: CostEvidence,
+  createdAt: string,
+): void {
+  insert.run(
+    `cev:${randomUUID()}`,
+    seed.resourceId,
+    seed.when?.volumeDepthMm ?? null,
+    seed.amount,
+    seed.currency,
+    seed.perUnit,
+    seed.source,
+    seed.classification,
+    seed.note,
+    seed.supplierLabel ?? null,
+    seed.validFrom ?? null,
+    seed.validUntil ?? null,
+    createdAt,
+  );
+}
+
+function costEvidenceInsertStatement(db: SqliteDatabase) {
+  return db.prepare(
+    `
+    INSERT INTO resource_cost_evidence (
+      evidence_row_id,
+      resource_id,
+      volume_depth_mm,
+      amount,
+      currency,
+      per_unit,
+      source,
+      classification,
+      note,
+      supplier_label,
+      valid_from,
+      valid_until,
+      created_at,
+      superseded_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+  `,
+  );
+}
+
+function hasActiveCostEvidenceSlot(
+  db: SqliteDatabase,
+  resourceId: string,
+  volumeDepthMm: number | null,
+): boolean {
+  if (volumeDepthMm === null) {
+    return Boolean(
+      db
+        .prepare(
+          `
+          SELECT 1
+          FROM resource_cost_evidence
+          WHERE resource_id = ?
+            AND superseded_at IS NULL
+            AND volume_depth_mm IS NULL
+        `,
+        )
+        .get(resourceId),
+    );
+  }
+  return Boolean(
+    db
+      .prepare(
+        `
+        SELECT 1
+        FROM resource_cost_evidence
+        WHERE resource_id = ?
+          AND superseded_at IS NULL
+          AND volume_depth_mm = ?
+      `,
+      )
+      .get(resourceId, volumeDepthMm),
+  );
+}
+
+function markBootstrapApplied(
+  db: SqliteDatabase,
+  marker: string,
+  appliedAt: string,
+): void {
+  db.prepare(
+    `
+    INSERT INTO runtime_bootstrap_markers (marker_id, applied_at)
+    VALUES (?, ?)
+  `,
+  ).run(marker, appliedAt);
+}
+
+export function ensureFc2dCostEvidence(
+  db: SqliteDatabase,
+  policy: BootstrapPolicy | "SINGLE_PLANE" = "SINGLE_PLANE",
+): void {
+  if (policy === "ADOPT_EXISTING") {
+    return;
+  }
+  if (isFc2dCostEvidenceApplied(db)) {
+    return;
+  }
+  const seeds = fc2dSeedsForPolicy(policy);
+  const apply = db.transaction(() => {
+    if (isFc2dCostEvidenceApplied(db)) {
+      return;
+    }
+    const createdAt = new Date().toISOString();
+    const insert = costEvidenceInsertStatement(db);
+    for (const seed of seeds) {
+      if (hasActiveCostEvidenceSlot(db, seed.resourceId, seed.when?.volumeDepthMm ?? null)) {
+        continue;
+      }
+      insertCostEvidenceSeed(insert, seed, createdAt);
+    }
+    markBootstrapApplied(db, RESOURCE_COST_EVIDENCE_FC2D_MARKER, createdAt);
+  });
+  apply();
 }
 
 export function ensureCostEvidence(
@@ -87,60 +219,33 @@ export function ensureCostEvidence(
   if (policy === "ADOPT_EXISTING") {
     return;
   }
-  if (isCostEvidenceApplied(db)) {
-    return;
+  if (!isCostEvidenceApplied(db)) {
+    const seeds = costSeedsForPolicy(policy);
+    const apply = db.transaction(() => {
+      if (isCostEvidenceApplied(db)) {
+        return;
+      }
+      const createdAt = new Date().toISOString();
+      const insert = costEvidenceInsertStatement(db);
+      for (const seed of seeds) {
+        insertCostEvidenceSeed(insert, seed, createdAt);
+      }
+      markBootstrapApplied(db, RESOURCE_COST_EVIDENCE_MARKER, createdAt);
+    });
+    apply();
   }
-  const seeds = costSeedsForPolicy(policy);
-  const apply = db.transaction(() => {
-    if (isCostEvidenceApplied(db)) {
-      return;
-    }
-    const createdAt = new Date().toISOString();
-    const insert = db.prepare(
-      `
-      INSERT INTO resource_cost_evidence (
-        evidence_row_id,
-        resource_id,
-        volume_depth_mm,
-        amount,
-        currency,
-        per_unit,
-        source,
-        classification,
-        note,
-        supplier_label,
-        valid_from,
-        valid_until,
-        created_at,
-        superseded_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
-    `,
-    );
-    for (const seed of seeds) {
-      insert.run(
-        `cev:${randomUUID()}`,
-        seed.resourceId,
-        seed.when?.volumeDepthMm ?? null,
-        seed.amount,
-        seed.currency,
-        seed.perUnit,
-        seed.source,
-        seed.classification,
-        seed.note,
-        seed.supplierLabel ?? null,
-        seed.validFrom ?? null,
-        seed.validUntil ?? null,
-        createdAt,
-      );
-    }
-    db.prepare(
-      `
-      INSERT INTO runtime_bootstrap_markers (marker_id, applied_at)
-      VALUES (?, ?)
-    `,
-    ).run(RESOURCE_COST_EVIDENCE_MARKER, createdAt);
-  });
-  apply();
+  ensureFc2dCostEvidence(db, policy);
+}
+
+function remapPlatformDefaultSeeds(
+  rows: readonly CostEvidence[],
+): readonly CostEvidence[] {
+  return rows.map((row) => ({
+    ...row,
+    source: "PLATFORM_DEFAULT",
+    classification: "DEVELOPMENT_DEFAULT",
+    note: PLATFORM_DEFAULT_COST_NOTE,
+  }));
 }
 
 function costSeedsForPolicy(
@@ -149,12 +254,17 @@ function costSeedsForPolicy(
   if (policy === "SINGLE_PLANE") {
     return costEvidence;
   }
-  return costEvidence.map((row) => ({
-    ...row,
-    source: "PLATFORM_DEFAULT",
-    classification: "DEVELOPMENT_DEFAULT",
-    note: PLATFORM_DEFAULT_COST_NOTE,
-  }));
+  return remapPlatformDefaultSeeds(costEvidence);
+}
+
+function fc2dSeedsForPolicy(
+  policy: Exclude<BootstrapPolicy | "SINGLE_PLANE", "ADOPT_EXISTING">,
+): readonly CostEvidence[] {
+  const seeds = listFc2dProvisionalCostEvidence();
+  if (policy === "SINGLE_PLANE") {
+    return seeds;
+  }
+  return remapPlatformDefaultSeeds(seeds);
 }
 
 export function listActiveCostEvidence(db: SqliteDatabase): CostEvidence[] {

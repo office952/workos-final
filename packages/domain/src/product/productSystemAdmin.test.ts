@@ -44,7 +44,7 @@ describe("product system administration projection", () => {
     expect(product?.code).not.toBe(product?.label);
     expect(product?.familyId).toBe("LIGHTED_VOLUMETRIC_SIGNS");
     expect(product?.categoryId).toBe("FRONT_LIT_VOLUMETRIC_LETTERS");
-    expect(product?.formSchemaId).toBe("prd-letters-frontlit-plexi-al06-form-v1");
+    expect(product?.formSchemaId).toBe("prd-letters-frontlit-plexi-al06-form-v2");
     expect(product?.formBound).toBe(true);
     expect(product?.composition.map((item) => item.typeId)).toEqual([
       "PLEXIGLAS_FACE",

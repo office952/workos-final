@@ -272,7 +272,7 @@ test("workcenters admin shows the real shop-floor map without inventing capacity
   await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
+  await selectProductChoice(page, "Finisaj volum", "stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

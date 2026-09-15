@@ -119,7 +119,7 @@ describe("resource cost evidence persistence", () => {
     const app = createApp({ productSystem: first });
     const admin = await readBody(await app.request("/api/resources-admin"));
     expect(admin.writeState).toBe("READY");
-    expect((admin.costEvidence as JsonObject[]).length).toBe(29);
+    expect((admin.costEvidence as JsonObject[]).length).toBe(costEvidence.length);
     const plexi = (admin.costEvidence as JsonObject[]).find(
       (item) => item.resourceId === PLEXIGLAS_3MM_OPAL_ID,
     );

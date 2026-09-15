@@ -9,6 +9,7 @@ import {
   PLACE_LED_MODULES_ID,
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
+  lettersFaceReadyValues,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 import {
@@ -223,14 +224,14 @@ describe("product configuration API", () => {
     expect(JSON.stringify(preview)).not.toMatch(/ExecutionTask|startTask|assignedTo/);
   });
 
-  it("keeps commercial PARTIAL when planned EIC is PARTIAL", async () => {
+  it("keeps commercial COMPLETE when vinyl has usable numeric CostEvidence", async () => {
     const compiled = await createApp().request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
+          values: { ...readyValues, ...lettersFaceReadyValues("651") },
         }),
       },
     );
@@ -250,11 +251,9 @@ describe("product configuration API", () => {
     const body = await readBody(response);
     const eic = body.eic as JsonObject;
     const commercialPrice = body.commercialPrice as JsonObject;
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(commercialPrice.completeness).toBe("PARTIAL");
-    expect(commercialPrice.unavailableReasons).toEqual([
-      "Costul intern nu este complet pentru această configurație.",
-    ]);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(commercialPrice.completeness).toBe("COMPLETE");
+    expect(commercialPrice.unavailableReasons).toEqual([]);
   });
 
   it.each([
@@ -793,8 +792,7 @@ describe("product configuration API", () => {
       body: JSON.stringify({
         values: {
           ...readyValues,
-          "face.finish": "vinyl",
-          "face.color": "alb",
+          ...lettersFaceReadyValues("651"),
         },
       }),
     });
@@ -822,7 +820,7 @@ describe("product configuration API", () => {
     expect(planPath).not.toMatch(/projectCommercialPrice|composeProductProcesses/);
   });
 
-  it("rejects a PARTIAL configuration from becoming a quote snapshot", async () => {
+  it("freezes a vinyl configuration when EIC is functionally complete", async () => {
     const app = createApp();
     const compiled = await app.request(
       `/api/products/${CANONICAL_PRODUCT_CODE}/compile`,
@@ -830,7 +828,7 @@ describe("product configuration API", () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
+          values: { ...readyValues, ...lettersFaceReadyValues("651") },
         }),
       },
     );
@@ -847,10 +845,12 @@ describe("product configuration API", () => {
         }),
       },
     );
-    expect(response.status).toBe(422);
+    expect(response.status).toBe(200);
     const body = await readBody(response);
-    expect(body.error).toBe("incomplete_offer");
-    expect(body.quoteSnapshot).toBeUndefined();
+    const snapshot = body.quoteSnapshot as JsonObject;
+    expect(snapshot).toBeDefined();
+    expect((snapshot.eic as JsonObject).completeness).toBe("COMPLETE");
+    expect((snapshot.commercial as JsonObject).completeness).toBe("COMPLETE");
   });
 
   it("does not let a draft override product-fixed identity", async () => {

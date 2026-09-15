@@ -1,3 +1,4 @@
+import type { SlotFinishAllowance } from "../finishes/types.js";
 import type { ResourceRequirement } from "../resources/requirement.js";
 
 export type ComponentId = "FACE" | "VOLUME" | "BACK" | "LIGHTING" | "ROOT";
@@ -23,7 +24,13 @@ export type ComponentRuntimeStatus = {
   unavailable: readonly string[];
 };
 
-export type FieldType = "text" | "number" | "select" | "boolean";
+export type FieldType =
+  | "text"
+  | "number"
+  | "select"
+  | "boolean"
+  | "catalog_color"
+  | "catalog_roll";
 
 export type VisibilityRule =
   | { kind: "always" }
@@ -110,6 +117,7 @@ export type ProductTemplate = {
   components: readonly ProductComponent[];
   formSchemaId: string;
   status: "PILOT";
+  slotFinishAllowances?: readonly SlotFinishAllowance[];
 };
 
 export type DraftConfiguration = {

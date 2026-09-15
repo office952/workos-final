@@ -6,10 +6,13 @@ import {
   confirmReviewedDefinition,
 } from "../product/compiler.js";
 import { seededDisplayLabelCatalog } from "../product/displayMetadata.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06FormSchemaV1,
   frontlitPlexiAl06Template,
+  frontlitPlexiAl06TemplateV1,
 } from "../product/frontlitPlexiAl06.js";
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
@@ -94,14 +97,49 @@ describe("quote snapshot freeze", () => {
       `qts:${CANONICAL_PRODUCT_CODE}:${result.snapshot.contentHash}`,
     );
     expect(result.snapshot.contentHash).toBe(
-      // Proven equal on origin/main 33c2f9fae4402b152f2840c96cf6da98a1c74a03.
-      "35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27",
+      // LETTERS ProductTemplate V2 stock/none 60 mm after VOLUME finish normalization.
+      "55fdec84c223299426b82a2abaea1793cf0716113e902893092e6fa589c6f774",
     );
     expect(quoteSnapshotContentHash(result.snapshot)).toBe(result.snapshot.contentHash);
     expect(JSON.stringify(result.snapshot)).not.toMatch(
       /ExecutionPlan|ExecutionTask|inventory|actualCost|OrderSnapshot/i,
     );
     expect(result.snapshot).not.toHaveProperty("operations");
+  });
+
+  it("keeps the historical V1 none/none 60 mm quote hash when compiled through V1", () => {
+    const definition = compileDefinition(
+      frontlitPlexiAl06TemplateV1,
+      frontlitPlexiAl06FormSchemaV1,
+      {
+        templateCode: CANONICAL_PRODUCT_CODE,
+        values: readyValues,
+      },
+    );
+    const truth = confirmReviewedDefinition(definition, definition.reviewId);
+    if ("ok" in truth) {
+      throw new Error("expected confirmed V1 truth");
+    }
+    expect(truth.templateVersion).toBe("1");
+    const aggregate = compileAggregate(
+      truth,
+      frontlitPlexiAl06TemplateV1,
+      frontlitPlexiAl06FormSchemaV1,
+      seededDisplayLabelCatalog(),
+    );
+    const composition = composeProductProcessesFromTruth(truth, frontlitPlexiAl06TemplateV1);
+    const eic = compileEic(aggregate, composition);
+    const commercial = projectCommercialPrice(eic);
+    const result = freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial, {
+      createdAt: "2026-08-17T00:00:00.000Z",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+    expect(result.snapshot.contentHash).toBe(
+      "35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27",
+    );
   });
 
   it("is idempotent for the same confirmed content", () => {
@@ -133,15 +171,18 @@ describe("quote snapshot freeze", () => {
   });
 
   it("blocks PARTIAL EIC and commercial from becoming a frozen quote", () => {
-    const { truth, aggregate, composition, eic } = confirmedSpine({
-      ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
-    });
+    const { truth, composition } = confirmedSpine();
+    const missing = compileAggregate(
+      { ...truth, measurements: [] },
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
+    );
+    const eic = compileEic(missing, composition);
     const commercial = projectCommercialPrice(eic);
     expect(eic.completeness).toBe("PARTIAL");
     expect(commercial.completeness).toBe("PARTIAL");
-    expect(freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial)).toEqual({
+    expect(freezeQuoteSnapshot(truth, missing, composition, eic, commercial)).toEqual({
       ok: false,
       error: "incomplete_offer",
       reasons: [
@@ -151,16 +192,17 @@ describe("quote snapshot freeze", () => {
   });
 
   it.each<DraftValues>([
-    { "face.finish": "vinyl", "face.color": "alb" },
+    lettersFaceReadyValues("651"),
     { "volume.finish": "painted", "volume.color": "RAL 9010" },
-  ])("blocks incomplete configuration %o", (overrides) => {
+  ])("freezes a COMPLETE vinyl or painted configuration %o", (overrides) => {
     const { truth, aggregate, composition, eic } = confirmedSpine({
       ...readyValues,
       ...overrides,
     });
-    expect(
-      freezeQuoteSnapshot(truth, aggregate, composition, eic, projectCommercialPrice(eic)).ok,
-    ).toBe(false);
+    const commercial = projectCommercialPrice(eic);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(commercial.completeness).toBe("COMPLETE");
+    expect(freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial).ok).toBe(true);
   });
 
   it.each([

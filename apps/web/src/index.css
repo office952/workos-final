@@ -5921,6 +5921,82 @@ a.jobs-customer {
   font-weight: 500;
 }
 
+.configurator-final .cfg-form .field-catalog-color,
+.field-catalog-color {
+  position: relative;
+}
+
+.cfg-color-summary,
+.cfg-color-option,
+.cfg-color-search {
+  min-height: 44px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.cfg-color-summary,
+.cfg-color-search {
+  padding: 8px 12px;
+  border: 1px solid var(--cfg-card-line, #cfc8bc);
+  border-radius: 2px;
+  background: var(--cfg-canvas, #fff);
+}
+
+.cfg-color-swatch {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.cfg-color-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cfg-color-popover {
+  position: absolute;
+  z-index: 8;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: 8px;
+  border: 1px solid var(--cfg-card-line, #cfc8bc);
+  border-radius: 2px;
+  background: var(--cfg-canvas, #fff);
+  box-shadow: 0 8px 24px rgba(20, 16, 10, 0.12);
+}
+
+.cfg-color-list {
+  max-height: 240px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.cfg-color-option {
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+}
+
+.cfg-color-option.is-selected,
+.cfg-color-option:focus-visible {
+  background: var(--cfg-chip-active, #efe8dc);
+  outline: 2px solid var(--cfg-ink, #1b1712);
+  outline-offset: -2px;
+}
+
+.cfg-color-empty {
+  margin: 8px 0 0;
+  color: var(--cfg-secondary, #6b645b);
+}
+
 .configurator-final .cfg-form .field-hint {
   position: absolute;
   width: 1px;

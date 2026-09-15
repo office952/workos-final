@@ -1,11 +1,15 @@
 import { expect, test } from "./fixtures";
-import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 import { openExecutionWorkspace } from "./helpers/execution";
-import { selectProductChoice } from "./helpers/productChoices";
+import {
+  confirmLettersV2NoneStock,
+  fillLettersV2NoneStock,
+  selectLettersFaceOracal651,
+} from "./helpers/lettersV2";
+import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
 
 async function confirmLetters(
   page: import("@playwright/test").Page,
-  values: { faceFinish: "none" | "vinyl"; faceColor?: string },
+  values: { face: "none" | "oracal651" },
 ) {
   await page.goto("/products");
   await page
@@ -13,25 +17,22 @@ async function confirmLetters(
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     })
     .click();
-  await page.getByLabel("Textul literelor").fill("WORKOS");
-  await selectProductChoice(page, "Finisaj față", values.faceFinish);
-  if (values.faceColor) {
-    await page.getByLabel("Culoare față").fill(values.faceColor);
+  if (values.face === "none") {
+    await confirmLettersV2NoneStock(page);
+  } else {
+    await fillLettersV2NoneStock(page);
+    await selectLettersFaceOracal651(page);
+    await page.getByRole("button", { name: "Verifică configurația" }).click();
+    await page.getByRole("button", { name: "Confirmă configurația" }).click();
+    await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   }
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
-  await page.getByRole("button", { name: "Verifică configurația" }).click();
-  await page.getByRole("button", { name: "Confirmă configurația" }).click();
-  await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
   await revealSecondaryProductSurfaces(page);
 }
 
 test("accepted snapshot materializes a persisted planned execution plan", async ({
   page,
 }) => {
-  await confirmLetters(page, { faceFinish: "none" });
+  await confirmLetters(page, { face: "none" });
   await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   const snapshot = page.locator(".production-snapshot");
@@ -128,8 +129,8 @@ test("accepted snapshot materializes a persisted planned execution plan", async 
   });
 });
 
-test("vinyl snapshot persists the frozen vinyl task", async ({ page }) => {
-  await confirmLetters(page, { faceFinish: "vinyl", faceColor: "alb" });
+test("Oracal snapshot persists the frozen vinyl task", async ({ page }) => {
+  await confirmLetters(page, { face: "oracal651" });
   await page.getByRole("button", { name: "Acceptă pentru producție" }).click();
   await page.getByRole("button", { name: "Creează planul de execuție" }).click();
   await openExecutionWorkspace(page);

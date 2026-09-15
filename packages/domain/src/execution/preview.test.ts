@@ -24,6 +24,7 @@ import {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { compileExecutionPlanPreview } from "./preview.js";
@@ -163,8 +164,7 @@ describe("execution plan preview", () => {
 
     const vinyl = previewFor({
       ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
     });
     expect(
       vinyl.operations.some(

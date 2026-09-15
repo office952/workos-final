@@ -6,6 +6,7 @@ import {
   confirmReviewedDefinition,
 } from "../product/compiler.js";
 import { seededDisplayLabelCatalog } from "../product/displayMetadata.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
@@ -243,12 +244,11 @@ describe("commercial configuration gate", () => {
     );
   });
 
-  it("stays PARTIAL for vinyl and painted finishes", () => {
+  it("stays COMPLETE for vinyl and painted finishes with usable numeric evidence", () => {
     const vinyl = projectCommercialPrice(
       confirmedEic({
         ...readyValues,
-        "face.finish": "vinyl",
-        "face.color": "alb",
+        ...lettersFaceReadyValues("651"),
       }),
     );
     const painted = projectCommercialPrice(
@@ -258,7 +258,7 @@ describe("commercial configuration gate", () => {
         "volume.color": "RAL 9010",
       }),
     );
-    expect(vinyl.completeness).toBe("PARTIAL");
-    expect(painted.completeness).toBe("PARTIAL");
+    expect(vinyl.completeness).toBe("COMPLETE");
+    expect(painted.completeness).toBe("COMPLETE");
   });
 });
