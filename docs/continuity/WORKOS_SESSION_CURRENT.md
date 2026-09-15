@@ -52,7 +52,8 @@ LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTE
 PR27                                   = INTEGRATED_ON_MAIN
 PR32_PROTECTED_REGION_LAW              = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = FC2_RECONCILE_WITH_LIVE_MAIN
+CURRENT_PRODUCT_SLICE                  = FC2_RECONCILED_WITH_CURRENT_MAIN
+MAIN_AACBC212_IN_ANCESTRY              = YES
 NEXT_PRODUCT_SLICE                     = CONFIGURATOR_FC2_RUNTIME_TO_FIGMA_MUTABLE_CONTENT_POLISH
 NEXT_PRODUCT_GATE                      = EXACT_HEAD_CI_THEN_OWNER_REVIEW_BEFORE_FIGMA_MUTABLE_POLISH
 FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
@@ -83,7 +84,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, the FC2B LETTERS FACE V2 form + catalog resolver, and the FC2C LETTERS VOLUME/CANT V2 form + catalog resolver. Those slices are `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/fc2-letters-v2-roundtrip` / PR #31. They are not on `origin/main`. Live main `aacbc21` includes the protected-region law (PR #32). Current methodology files on this branch are the live-main versions. Do not write Figma, do not merge FC2, and do not resume PURE CLIMATE from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, the FC2B LETTERS FACE V2 form + catalog resolver, and the FC2C LETTERS VOLUME/CANT V2 form + catalog resolver. Those slices are `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/fc2-letters-v2-roundtrip` / PR #31. They are not on `origin/main`. Live main `aacbc21` is now a parent of this branch, so protected-region law from PR #32 is in ancestry, not only path-copied. Do not write Figma, do not merge FC2, and do not resume PURE CLIMATE from this file.
 
 ### Accepted advisories
 
