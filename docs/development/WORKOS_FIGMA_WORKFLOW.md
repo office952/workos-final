@@ -30,6 +30,75 @@ OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY
 
 Recording a file or section is not the same as assigning current implementation visual authority. A Figma frame may describe chrome, spacing, and interaction grammar. It must not invent fields, options, readiness, materials, or prices. It must not force the accepted application back to an older frame. UI20 direction or a Figma class is not page-level Owner acceptance of every WorkOS page.
 
+## WorkOS UI design roundtrip
+
+For an existing accepted surface, the standard method is:
+
+```text
+PRODUCT / DOMAIN CONTRACT
+→ CURSOR FUNCTIONAL IMPLEMENTATION
+→ RUNTIME + TESTS + BROWSER EVIDENCE
+→ CHATGPT INDEPENDENT REVIEW
+→ RUNTIME / SOURCE HTML → FIGMA
+→ FIGMA POLISH
+→ OWNER / CHATGPT DESIGN REVIEW
+→ OWNER_ACCEPTED_DESIGN
+→ CURSOR DESIGN-DELTA IMPLEMENTATION
+→ RUNTIME PARITY
+→ CURRENT_VALID_MIRROR
+```
+
+Cursor owns the real behavior: fields, allowed values, requiredness, validation, readiness, calculations, persistence, Product Truth, permissions, lifecycle and snapshots.
+
+Figma may polish presentation: layout, spacing, typography, hierarchy, density, grouping, control presentation, responsive composition and accessibility presentation.
+
+Figma must not silently change Product Truth or other domain semantics. Any Figma delta that adds/removes fields, changes allowed values, requiredness, validation, readiness, formulas, pricing, permissions, lifecycle or execution semantics returns to Owner/domain review before implementation.
+
+For a major new surface whose layout/floorplan is not yet decided, use:
+
+```text
+RESEARCH
+→ FIGMA DIRECTION CANDIDATE
+→ OWNER DIRECTION ACCEPTANCE
+→ CURSOR IMPLEMENTATION
+→ RUNTIME PROOF
+→ PARITY REVIEW
+→ REGISTRY UPDATE
+```
+
+Do not refresh Figma after every small code change. Refresh after a coherent UI slice is functionally stable.
+
+### Design-delta classification
+
+Before implementing a polished Figma candidate, Cursor must classify material differences as:
+
+```text
+PRESENTATION_ONLY
+LAYOUT
+SPACING
+TYPOGRAPHY
+CONTROL_PRESENTATION
+RESPONSIVE
+ACCESSIBILITY
+
+SEMANTIC_CHANGE
+PRODUCT_TRUTH_CHANGE
+NEW_FIELD
+REMOVED_FIELD
+VALIDATION_CHANGE
+STATE_CHANGE
+```
+
+The presentation group may be implemented under an authorized UI design-delta scope. The semantic/Product Truth group requires a separate Owner/domain decision.
+
+### Figma ↔ runtime registry
+
+Every canonical Figma frame/state must be tracked in:
+
+`docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md`
+
+That registry records the exact runtime/Figma relationship and lifecycle status. Do not rely on remembered node ids from chat.
+
 ## Classification
 
 | Class | Meaning |
