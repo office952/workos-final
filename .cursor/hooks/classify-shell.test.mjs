@@ -19,6 +19,31 @@ function permission(command, options = featureBranchOptions) {
   return classifyShellCommand(command, options).permission;
 }
 
+function resolvedRepoBranch() {
+  const result = spawnSync("git", ["-C", repoRoot, "branch", "--show-current"], {
+    encoding: "utf8",
+    timeout: 5000,
+    windowsHide: true,
+  });
+  return String(result.stdout ?? "").trim();
+}
+
+function expectedOriginHeadPushPermission() {
+  const branch = resolvedRepoBranch().toLowerCase();
+  if (branch.length === 0 || branch === "main" || branch === "master") {
+    return "deny";
+  }
+  return "allow";
+}
+
+function isOriginHeadPush(command) {
+  return (
+    command === "git push origin HEAD" ||
+    command === "git push -u origin HEAD" ||
+    command === "git push --set-upstream origin HEAD"
+  );
+}
+
 function hookPermission(command, cwd = repoRoot) {
   const result = spawnSync(process.execPath, [join(hookRoot, "before-shell.mjs")], {
     input: `${JSON.stringify({ command, cwd })}\n`,
@@ -567,10 +592,14 @@ test("commit push PR workflow classifies allow without ASK", () => {
   const approvals = commands.filter((command) => permission(command) === "ask");
   assert.deepEqual(approvals, []);
   for (const command of commands) {
-    assert.equal(hookPermission(command), "allow", command);
+    const expected = isOriginHeadPush(command)
+      ? expectedOriginHeadPushPermission()
+      : "allow";
+    assert.equal(hookPermission(command), expected, command);
   }
-  assert.equal(hookPermission("git push origin HEAD"), "allow");
-  assert.equal(hookPermission("git push origin HEAD", ""), "allow");
+  const headPush = expectedOriginHeadPushPermission();
+  assert.equal(hookPermission("git push origin HEAD"), headPush);
+  assert.equal(hookPermission("git push origin HEAD", ""), headPush);
   const omittedCwd = spawnSync(
     process.execPath,
     [join(hookRoot, "before-shell.mjs")],
@@ -581,10 +610,10 @@ test("commit push PR workflow classifies allow without ASK", () => {
     },
   );
   assert.equal(omittedCwd.status, 0, omittedCwd.stderr);
-  assert.equal(JSON.parse(omittedCwd.stdout.trim()).permission, "allow");
+  assert.equal(JSON.parse(omittedCwd.stdout.trim()).permission, headPush);
   assert.equal(
     classifyShellCommand("git push origin HEAD", { cwd: repoRoot }).permission,
-    "allow",
+    headPush,
   );
   assert.equal(classifyShellCommand("git push origin HEAD").permission, "deny");
 });
