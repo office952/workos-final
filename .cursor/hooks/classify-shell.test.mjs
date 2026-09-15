@@ -75,7 +75,9 @@ test("commit and normal HEAD push are allowed", () => {
   assert.equal(permission("git push origin HEAD"), "allow");
   assert.equal(permission("git push -u origin HEAD"), "allow");
   assert.equal(permission("git push --set-upstream origin HEAD"), "allow");
-  assert.equal(permission("git push -u origin chore/cursor-workos-harness-v2"), "ask");
+  assert.equal(permission("git push -u origin chore/cursor-workos-harness-v2"), "allow");
+  assert.equal(permission("git push -u origin HEAD:chore/workos-ci-tiering-v1"), "allow");
+  assert.equal(permission("git worktree list"), "allow");
   assert.equal(permission("git worktree add C:/tmp/x origin/main"), "ask");
   assert.equal(permission("git worktree remove C:/tmp/x"), "ask");
 });
@@ -205,6 +207,24 @@ test("uncertain commands ask", () => {
   assert.equal(permission("pnpm install"), "ask");
   assert.equal(permission("echo hello"), "ask");
   assert.equal(permission(""), "ask");
+});
+
+test("audit-observed routine push refspec and gh run watch are allow", () => {
+  assert.equal(
+    classifyShellCommand("git push origin HEAD:chore/workos-ci-tiering-v1", featureBranchOptions)
+      .permission,
+    "allow",
+  );
+  assert.equal(
+    classifyShellCommand("gh run watch 34930213292 --repo office952/workos-final --exit-status")
+      .permission,
+    "allow",
+  );
+  assert.equal(hookPermission("git push origin HEAD:chore/workos-ci-tiering-v1"), "allow");
+  assert.equal(hookPermission("gh run watch 34930213292 --exit-status"), "allow");
+  assert.equal(permission("git push origin HEAD:main"), "deny");
+  assert.equal(permission("git push --force origin HEAD"), "deny");
+  assert.equal(permission("gh pr merge 25"), "deny");
 });
 
 test("Owner-observed gh log Select-String pipeline is allow", () => {
@@ -393,8 +413,10 @@ test("worktrees.json, hooks.json, and permissions.json parse", () => {
     "gh pr checks",
     "gh run view",
     "gh run list",
+    "gh run watch",
     "Select-String",
     "Select-Object",
+    "git worktree list",
   ]) {
     assert.equal(
       permissions.terminalAllowlist.includes(required),
@@ -427,6 +449,12 @@ test("autonomy cleanup matrix", () => {
   assert.equal(permission("git push origin master"), "deny");
   assert.equal(permission("git push main"), "deny");
   assert.equal(permission("git push origin HEAD:main"), "deny");
+  assert.equal(permission("git push origin HEAD:master"), "deny");
+  assert.equal(permission("git push -u origin HEAD:chore/workos-ci-tiering-v1"), "allow");
+  assert.equal(permission("git push origin HEAD:chore/workos-ci-tiering-v1"), "allow");
+  assert.equal(permission("git push -u origin chore/workos-ci-tiering-v1"), "allow");
+  assert.equal(permission("gh run watch 34930213292 --repo office952/workos-final --exit-status"), "allow");
+  assert.equal(permission("git worktree list"), "allow");
   assert.equal(permission("git push --force origin HEAD"), "deny");
   assert.equal(permission("git push --force-with-lease origin HEAD"), "deny");
   assert.equal(permission("gh pr create --title t --body b"), "allow");
@@ -434,6 +462,7 @@ test("autonomy cleanup matrix", () => {
   assert.equal(permission("gh pr checks 25"), "allow");
   assert.equal(permission("gh run view 123 --json status"), "allow");
   assert.equal(permission("gh run list --branch chore/x"), "allow");
+  assert.equal(permission("gh run watch 34930213292 --exit-status"), "allow");
   assert.equal(
     permission('gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"'),
     "allow",
@@ -526,6 +555,9 @@ test("commit push PR workflow classifies allow without ASK", () => {
     "gh pr view 25 --json number,url,state,headRefOid",
     "gh run list --branch chore/cursor-workos-harness-v2 --limit 5",
     "gh run view 34904624451 --json headSha,status,conclusion",
+    "gh run watch 34930213292 --exit-status",
+    "git push origin HEAD:chore/workos-ci-tiering-v1",
+    "git worktree list",
     'gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"',
     'Select-String -Pattern "CI_TIER"',
   ];

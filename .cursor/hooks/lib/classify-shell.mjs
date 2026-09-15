@@ -396,6 +396,18 @@ function isDirectMainPush(tokens) {
   return positionals.slice(1).some((refspec) => isProtectedBranchRef(refspec));
 }
 
+function featurePushDestination(tokens) {
+  const after = gitSubcommandArgs(tokens);
+  let index = 0;
+  if (after[index] === "-u" || after[index] === "--set-upstream") {
+    index += 1;
+  }
+  if (after.length !== index + 2 || after[index] !== "origin") {
+    return null;
+  }
+  return after[index + 1];
+}
+
 function isAllowedFeatureBranchPush(tokens) {
   if (gitSubcommand(tokens) !== "push") {
     return false;
@@ -403,16 +415,14 @@ function isAllowedFeatureBranchPush(tokens) {
   if (isForcePush(tokens) || isDirectMainPush(tokens)) {
     return false;
   }
-  const after = gitSubcommandArgs(tokens);
-  let index = 0;
-  if (after[index] === "-u" || after[index] === "--set-upstream") {
-    index += 1;
+  const dest = featurePushDestination(tokens);
+  if (!dest) {
+    return false;
   }
-  return (
-    after.length === index + 2 &&
-    after[index] === "origin" &&
-    after[index + 1] === "HEAD"
-  );
+  if (isProtectedBranchRef(dest)) {
+    return false;
+  }
+  return dest === "HEAD" || !dest.startsWith(":");
 }
 
 const GH_VALUE_FLAGS = new Set(["-r", "--repo", "--hostname"]);
@@ -475,7 +485,9 @@ function isAllowedGhWorkflow(tokens) {
   }
   return (
     positionals[0] === "run" &&
-    (positionals[1] === "view" || positionals[1] === "list")
+    (positionals[1] === "view" ||
+      positionals[1] === "list" ||
+      positionals[1] === "watch")
   );
 }
 
@@ -994,6 +1006,13 @@ function classifySegment(command, options = {}) {
         "Ordinary repository-local git workflow is allowed.",
       );
     }
+    if (git === "worktree" && gitSubcommandArgs(tokens)[0] === "list") {
+      return decision(
+        "allow",
+        "readonly",
+        "Readonly git inspection is allowed.",
+      );
+    }
     if (hasRepositoryRedirection(tokens)) {
       return decision(
         "deny",
@@ -1002,7 +1021,14 @@ function classifySegment(command, options = {}) {
       );
     }
     if (isAllowedFeatureBranchPush(tokens)) {
-      return classifyHeadPush(options);
+      if (featurePushDestination(tokens) === "HEAD") {
+        return classifyHeadPush(options);
+      }
+      return decision(
+        "allow",
+        "verification",
+        "Ordinary repository-local git workflow is allowed.",
+      );
     }
     if (
       isAllowedGitAdd(tokens) ||

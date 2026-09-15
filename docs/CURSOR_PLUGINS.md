@@ -436,6 +436,9 @@ HOOK_GIT_COMMIT            = ALLOW
 HOOK_GIT_COMMIT_AMEND      = ASK
 HOOK_GIT_FETCH             = ALLOW
 HOOK_GIT_NORMAL_HEAD_PUSH  = ALLOW if current branch is not main/master
+HOOK_GIT_FEATURE_REF_PUSH  = ALLOW when destination is not main/master
+HOOK_GIT_WORKTREE_LIST     = ALLOW
+HOOK_GH_RUN_WATCH          = ALLOW
 HOOK_GIT_FORCE_PUSH        = DENY
 HOOK_GIT_PUSH_MAIN         = DENY
 HOOK_GIT_REPO_REDIRECT_MUTATION = DENY
@@ -457,7 +460,7 @@ Owner authorization is workflow/scope authorization. After a task authorizes COM
 
 State-changing git with `-C`, `--git-dir`, or `--work-tree` is DENY. Do not resolve the other repository. Run mutations from the intended WorkOS worktree. Readonly `git -C … status|diff|log|show|rev-parse` stays ALLOW. One-shot `git -c user.name=…` is not repository redirection.
 
-Normal feature-branch push ALLOW is branch-aware. For `git push origin HEAD`, `git push -u origin HEAD`, and `git push --set-upstream origin HEAD`, the hook reads the current branch from `cwd` with `git -C <cwd> branch --show-current`. ALLOW only when that branch is non-empty and not `main`/`master`. Resolution failure is DENY, not ASK. Explicit `git push origin main|master`, force-push, `gh pr merge`, and `gh api` `/pulls/<n>/merge` or `/merges` stay DENY. `git commit --amend` / `--fixup` / `--squash` are not routine ALLOW. Other `git push` / `git merge` forms stay ASK.
+Normal feature-branch push ALLOW is branch-aware. For `git push origin HEAD`, `git push -u origin HEAD`, and `git push --set-upstream origin HEAD`, the hook reads the current branch from `cwd` with `git -C <cwd> branch --show-current`. ALLOW only when that branch is non-empty and not `main`/`master`. Resolution failure is DENY, not ASK. Explicit `git push origin <feature-branch>` and `git push origin HEAD:<feature-branch>` are ALLOW when the destination is not `main`/`master`. Explicit `git push origin main|master`, `HEAD:main`, force-push, `gh pr merge`, and `gh api` `/pulls/<n>/merge` or `/merges` stay DENY. `git commit --amend` / `--fixup` / `--squash` are not routine ALLOW. `gh run watch` and `git worktree list` are routine inspection ALLOW. Other `git push` / `git merge` / `git worktree` forms stay ASK.
 
 Local proof on Cursor 3.20.21: ALLOW executed; DENY was blocked before execution. Later Owner runtime evidence showed ASK can interrupt with `Hook requested approval` (example: `git push -u origin HEAD`). ASK is therefore an interruption signal, not a security gate. Do not use ASK for routine authorized workflow.
 
