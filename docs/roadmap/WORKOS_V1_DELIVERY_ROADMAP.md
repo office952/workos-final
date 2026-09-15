@@ -68,7 +68,7 @@ Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN
 
 ```text
 LIVE_MAIN_AUTHORITY                  = GITHUB_ORIGIN_MAIN
-LAST_RECONCILED_MAIN_BASE            = debf5182a657e2794b873b74707d842c816d4f08
+LAST_RECONCILED_MAIN_BASE            = 39190b4981edbfe9ef28d1aa2c69e46f2a684a04
 PR24_CONFIGURATOR_UI_FRAMEWORK       = INTEGRATED_ON_MAIN
 PR26                                 = INTEGRATED_ON_MAIN
 PR27                                 = INTEGRATED_ON_MAIN
