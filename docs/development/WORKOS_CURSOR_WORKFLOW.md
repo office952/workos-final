@@ -53,6 +53,34 @@ UI or runtime claims need the first-party Browser and repository tests. Isolated
 
 After high-risk or tooling work, run `workos-red-team`. Do not assume PASS.
 
+## UI design roundtrip
+
+UI/UX changes must follow `docs/development/WORKOS_FIGMA_WORKFLOW.md` and `docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md`.
+
+For an existing accepted surface, default to:
+
+```text
+PRODUCT / DOMAIN CONTRACT
+→ CURSOR FUNCTIONAL IMPLEMENTATION
+→ RUNTIME + TESTS + BROWSER EVIDENCE
+→ CHATGPT INDEPENDENT REVIEW
+→ RUNTIME / SOURCE HTML → FIGMA
+→ FIGMA POLISH
+→ OWNER / CHATGPT DESIGN REVIEW
+→ OWNER_ACCEPTED_DESIGN
+→ CURSOR DESIGN-DELTA IMPLEMENTATION
+→ RUNTIME PARITY
+→ CURRENT_VALID_MIRROR
+```
+
+Cursor owns logic and functional reality. Figma may polish presentation but cannot silently alter Product Truth, fields, allowed values, requiredness, validation, readiness, formulas, pricing, permissions, lifecycle or execution semantics.
+
+Before implementing a Figma polish delta, classify each material difference as presentation or semantic. Presentation deltas may be implemented under a UI scope. Semantic/Product Truth deltas require a separate Owner/domain decision.
+
+Every canonical Figma state must be recorded in the Figma ↔ runtime registry. Do not rely on remembered node ids from chat or a stale report.
+
+For a new major surface whose layout/floorplan itself is undecided, research and Figma direction may precede implementation; Owner direction acceptance remains separate from runtime implementation acceptance.
+
 ## Hard gates
 
 These remain closed unless an Owner GO explicitly opens the named gate:
