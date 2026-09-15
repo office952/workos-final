@@ -93,3 +93,10 @@ Playwright was not run. Runtime UI was not affected.
 ## Smart modularity
 
 Same foundation contracts for HUB MEDIA, a 651-only small company, and a company without print. Enabling print later does not rewrite a frozen Oracal snapshot. No client-code fork. Customer operation without Cursor remains a FC2E target, not an FC2A claim.
+
+## FC2A1 correction
+
+Owner later corrected two living semantics before FC2D. Details live in `docs/worklog/WORKOS_CONFIGURATOR_FORM_COMPLETENESS_FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW.md`.
+
+- Price provenance no longer keeps EIC PARTIAL.
+- An organization-disabled finish is `ORG_CAPABILITY_DISABLED`, not Product Truth conflict.

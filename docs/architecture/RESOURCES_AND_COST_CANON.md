@@ -107,8 +107,11 @@ One active typed row per live resource: amount, currency, unit, source, classifi
 A row may carry an optional configuration qualifier. Aluminium profile keeps one resource identity. Owner-confirmed purchase rates are 2 / 3 / 4 / 5 EUR/m at 30 / 60 / 80 / 100 mm. Unqualified lookup must not inherit a qualified rate.
 
 Owner-confirmed workshop rates use `OWNER_CONFIRMED_WORKSHOP`. Purchase rates use `OWNER_CONFIRMED_PURCHASE`.
-`AI_DECISION` source/classification may complete planned EIC when every required line has a rate. It is not owner-confirmed truth.
-Used `PILOT_INTERNAL_EVIDENCE` or `LEGACY_EVIDENCE` keeps planned EIC PARTIAL. Vinyl / RAL stay PARTIAL on that rule.
+`PRICE_CONFIDENCE != COST_RESOLVABILITY`.
+A required cost resource is resolvable when the resource exists, a compatible active CostEvidence row exists, unit/currency/qualifier are valid, and the rate is a usable numeric value.
+Provenance and classification (`LEGACY_EVIDENCE`, `PILOT_INTERNAL_EVIDENCE`, `DEVELOPMENT_DEFAULT`, `AI_DECISION`, `OWNER_CONFIRMED`, and the rest) stay visible for admin, audit, and review. They do not keep planned EIC PARTIAL.
+EIC PARTIAL means only functional incompleteness: missing measurement, missing resource identity, missing CostEvidence, invalid qualifier/unit, or an excluded/unresolved component.
+A usable numeric vinyl or RAL row can complete EIC. Missing CostEvidence remains unresolved. Do not coerce a missing rate to silent zero.
 
 Not a procurement ledger. Future need: effective date, supplier/provenance, history.
 Do not overwrite destructively when that slice arrives.

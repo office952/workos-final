@@ -105,7 +105,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   });
 
   await page.getByRole("button", { name: "Colantat față și volum" }).click();
-  await expect(page.getByText("Necesită calibrare").first()).toBeVisible();
+  await expect(page.getByText("Complete pentru configurația curentă").first()).toBeVisible();
   await expect(page.getByText("Finisaj față: Colantat").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Colantat").first()).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
@@ -120,7 +120,7 @@ test("letters critical processes complete vinyl paint and electrical routes", as
   });
 
   await page.getByRole("button", { name: "Volum vopsit" }).click();
-  await expect(page.getByText("Necesită calibrare").first()).toBeVisible();
+  await expect(page.getByText("Complete pentru configurația curentă").first()).toBeVisible();
   await expect(page.getByText("Vopsire RAL").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Vopsit").first()).toBeVisible();
   await expect(page.getByText("Finisaj volum: Colantat")).toHaveCount(0);

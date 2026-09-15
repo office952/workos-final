@@ -21,9 +21,9 @@ import {
   getCostEvidence,
   getResource,
   resourceCatalog,
+  type CostEvidence,
 } from "./catalog.js";
 import {
-  EIC_CALIBRATION_REASON,
   EIC_GEOMETRY_CONFIRMED_LABEL,
   applyRequirement,
   compileEic,
@@ -202,8 +202,8 @@ describe("EIC", () => {
     expect(eic.lines.filter((line) => line.resourceId === "MAT-VINYL-ORACAL-651")).toHaveLength(
       1,
     );
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.completenessReasons).toEqual([]);
     expect(eic.total).toBe(386);
   });
 
@@ -215,9 +215,59 @@ describe("EIC", () => {
     });
     const eic = compileEic(aggregate, composition);
     expect(lineCost(eic, "SVC-PAINT-RAL")).toBe(50);
-    expect(eic.completeness).toBe("PARTIAL");
-    expect(eic.completenessReasons).toEqual([EIC_CALIBRATION_REASON]);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(eic.completenessReasons).toEqual([]);
     expect(eic.total).toBe(432.5);
+  });
+
+  it.each([
+    {
+      source: "LEGACY_EVIDENCE",
+      classification: "DEVELOPMENT_DEFAULT",
+    },
+    {
+      source: "PLATFORM_DEFAULT",
+      classification: "DEVELOPMENT_DEFAULT",
+    },
+    {
+      source: "PILOT_INTERNAL_EVIDENCE",
+      classification: "DEVELOPMENT_DEFAULT",
+    },
+    {
+      source: "OWNER_CONFIRMED_WORKSHOP",
+      classification: "OWNER_CONFIRMED",
+    },
+  ] as const)(
+    "completes EIC for usable $source / $classification rates",
+    ({ source, classification }) => {
+      const { aggregate, composition } = confirmedSpine({
+        ...readyValues,
+        "face.finish": "vinyl",
+        "face.color": "alb",
+      });
+      const remapped: CostEvidence[] = costEvidence.map((row) => ({
+        ...row,
+        source,
+        classification,
+      }));
+      const eic = compileEic(aggregate, composition, remapped);
+      expect(eic.completeness).toBe("COMPLETE");
+      expect(eic.completenessReasons).toEqual([]);
+      expect(lineCost(eic, "MAT-VINYL-ORACAL-651")).toBe(2.25);
+    },
+  );
+
+  it("stays PARTIAL when a required CostEvidence row is missing", () => {
+    const { aggregate, composition } = confirmedSpine({
+      ...readyValues,
+      "face.finish": "vinyl",
+      "face.color": "alb",
+    });
+    const withoutVinyl = costEvidence.filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651");
+    const eic = compileEic(aggregate, composition, withoutVinyl);
+    expect(eic.completeness).toBe("PARTIAL");
+    expect(eic.completenessReasons).toEqual(["Evidență de cost indisponibilă"]);
+    expect(lineCost(eic, "MAT-VINYL-ORACAL-651")).toBe(0);
   });
 
   it("reports honest missing geometry without an Analyzer gap", () => {

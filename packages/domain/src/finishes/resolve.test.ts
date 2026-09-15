@@ -98,6 +98,22 @@ describe("finish compatibility resolver", () => {
     });
     expect(print).toMatchObject({
       status: "FAILED",
+      code: "ORG_CAPABILITY_DISABLED",
+    });
+  });
+
+  it("treats a template-forbidden application as Product Truth conflict", () => {
+    const result = resolveFinishCompatibility({
+      slot: "FACE",
+      allowedApplicationIds: ["none", "face_letters_premium"],
+      organization: HUB_MEDIA_FINISH_OVERLAY,
+      selection: faceSelection("print_face", {
+        rollProfileId: HUB_MEDIA_PRINT_ROLL_1050_ID,
+        rollWidthMm: 1050,
+      }),
+    });
+    expect(result).toMatchObject({
+      status: "FAILED",
       code: "PRODUCT_TRUTH_CONFLICT",
     });
   });
@@ -133,7 +149,7 @@ describe("finish compatibility resolver", () => {
     });
     expect(print).toMatchObject({
       status: "FAILED",
-      code: "PRODUCT_TRUTH_CONFLICT",
+      code: "ORG_CAPABILITY_DISABLED",
     });
   });
 

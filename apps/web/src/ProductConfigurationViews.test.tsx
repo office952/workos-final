@@ -106,7 +106,7 @@ const truth: ProductTruth = {
 
 const eic: EicResult = {
   completeness: "PARTIAL",
-  completenessReasons: ["Costuri încă în calibrare"],
+  completenessReasons: ["Evidență de cost indisponibilă"],
   geometryLabel: "Geometrie confirmată",
   currency: "EUR",
   total: 595,
@@ -263,7 +263,7 @@ describe("Product configuration views", () => {
     expect(screen.getByText("Parțial")).toBeInTheDocument();
     expect(screen.getByText("Geometrie confirmată.")).toBeInTheDocument();
     expect(
-      screen.getByText("Costul intern rămâne parțial: Costuri încă în calibrare."),
+      screen.getByText("Costul intern rămâne parțial: Evidență de cost indisponibilă."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Geometrie din Analyzer")).not.toBeInTheDocument();
     expect(screen.getByText("Plexiglas: 0,25 m²")).toBeInTheDocument();

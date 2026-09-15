@@ -84,10 +84,22 @@ export function resolveFinishCompatibility(
     );
   }
 
-  if (!visibleApplicationIds.includes(selectedId)) {
+  if (!input.allowedApplicationIds.includes(selectedId)) {
     return fail(
       "PRODUCT_TRUTH_CONFLICT",
-      "Aplicația de finisaj nu este permisă pentru acest produs sau organizație.",
+      "Aplicația de finisaj nu este permisă pentru acest produs.",
+      visibleApplicationIds,
+    );
+  }
+
+  const organizationEnables =
+    !input.organization ||
+    input.organization.enabledApplicationIds === "all" ||
+    input.organization.enabledApplicationIds.includes(selectedId);
+  if (!organizationEnables) {
+    return fail(
+      "ORG_CAPABILITY_DISABLED",
+      "Aplicația de finisaj nu este activă pentru această organizație.",
       visibleApplicationIds,
     );
   }

@@ -50,11 +50,12 @@ LAST_RECONCILED_MAIN_BASE              = 8c2223b3a7853e6c0ebb788e44046401985d7f1
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = FC2A_SHARED_FINISH_COLOR_ROLL_FOUNDATION
-NEXT_PRODUCT_SLICE                     = FC2D_RESOURCE_IDENTITIES_AND_EDITABLE_COSTING
-NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2A_THEN_FC2D
+CURRENT_PRODUCT_SLICE                  = FC2A1_NON_BLOCKING_COST_AND_CAPABILITY_SEMANTICS_CORRECTION
+NEXT_PRODUCT_SLICE                     = FC2D_RESOURCE_IDENTITIES_AND_FUNCTIONAL_PROVISIONAL_COSTING
+NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2A1_THEN_FC2D
 FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
 FC2A_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW      = YES
 FC2D_AUTHORIZED                        = NO
 FC2_DECISION_PACK                      = ACCEPTED_WITH_TARGETED_AMENDMENTS
 ```
@@ -71,7 +72,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation now implemented locally in review. That foundation is not bound to the live LETTERS FormSchema. Do not start FC2D, form fields, or admin UI from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation and the FC2A1 cost-readiness / capability-semantics correction, both local in review. That foundation is not bound to the live LETTERS FormSchema. Do not start FC2D, form fields, or admin UI from this file.
 
 ### Accepted advisories
 

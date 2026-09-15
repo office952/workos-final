@@ -153,6 +153,12 @@ export function verifySessionCurrent(sessionText, errors) {
   ) {
     fail(errors, "WORKOS_SESSION_CURRENT.md must keep FC2D unauthorized after FC2A");
   }
+  if (
+    /FC2A_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText) &&
+    !/FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText)
+  ) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must record the FC2A1 cost-readiness correction");
+  }
 }
 
 export function verifyRoadmapFc1(roadmapText, errors) {
@@ -168,26 +174,29 @@ export function verifyRoadmapFc1(roadmapText, errors) {
   if (!/FORM_COMPLETENESS_FC2A\s*=\s*IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
     fail(errors, "living roadmap must record FORM_COMPLETENESS_FC2A = IMPLEMENTED_LOCAL_IN_REVIEW");
   }
-  if (!/FORM_COMPLETENESS\s*=\s*FC2A_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
-    fail(errors, "living roadmap must record FORM_COMPLETENESS = FC2A_IMPLEMENTED_LOCAL_IN_REVIEW");
+  if (!/FORM_COMPLETENESS_FC2A1\s*=\s*IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap must record FORM_COMPLETENESS_FC2A1 = IMPLEMENTED_LOCAL_IN_REVIEW");
+  }
+  if (!/FORM_COMPLETENESS\s*=\s*FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap must record FORM_COMPLETENESS = FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW");
   }
   if (
-    !/NEXT_PRODUCT_SLICE\s*=\s*FC2D_RESOURCE_IDENTITIES_AND_EDITABLE_COSTING/.test(
+    !/NEXT_PRODUCT_SLICE\s*=\s*FC2D_RESOURCE_IDENTITIES_AND_FUNCTIONAL_PROVISIONAL_COSTING/.test(
       roadmapText,
     )
   ) {
     fail(
       errors,
-      "living roadmap must record NEXT_PRODUCT_SLICE = FC2D_RESOURCE_IDENTITIES_AND_EDITABLE_COSTING",
+      "living roadmap must record NEXT_PRODUCT_SLICE = FC2D_RESOURCE_IDENTITIES_AND_FUNCTIONAL_PROVISIONAL_COSTING",
     );
   }
   if (/FORM_COMPLETENESS\s*=\s*FC1_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
     fail(errors, "living roadmap still records FC1 as local-in-review");
   }
   if (
-    !/NEXT_PRODUCT_GATE\s*=\s*OWNER_REVIEW_FC2A_THEN_FC2D/.test(roadmapText)
+    !/NEXT_PRODUCT_GATE\s*=\s*OWNER_REVIEW_FC2A1_THEN_FC2D/.test(roadmapText)
   ) {
-    fail(errors, "living roadmap must record NEXT_PRODUCT_GATE = OWNER_REVIEW_FC2A_THEN_FC2D");
+    fail(errors, "living roadmap must record NEXT_PRODUCT_GATE = OWNER_REVIEW_FC2A1_THEN_FC2D");
   }
 }
 

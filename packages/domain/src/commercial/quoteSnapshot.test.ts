@@ -133,15 +133,18 @@ describe("quote snapshot freeze", () => {
   });
 
   it("blocks PARTIAL EIC and commercial from becoming a frozen quote", () => {
-    const { truth, aggregate, composition, eic } = confirmedSpine({
-      ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
-    });
+    const { truth, composition } = confirmedSpine();
+    const missing = compileAggregate(
+      { ...truth, measurements: [] },
+      frontlitPlexiAl06Template,
+      frontlitPlexiAl06FormSchema,
+      seededDisplayLabelCatalog(),
+    );
+    const eic = compileEic(missing, composition);
     const commercial = projectCommercialPrice(eic);
     expect(eic.completeness).toBe("PARTIAL");
     expect(commercial.completeness).toBe("PARTIAL");
-    expect(freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial)).toEqual({
+    expect(freezeQuoteSnapshot(truth, missing, composition, eic, commercial)).toEqual({
       ok: false,
       error: "incomplete_offer",
       reasons: [
@@ -153,14 +156,15 @@ describe("quote snapshot freeze", () => {
   it.each<DraftValues>([
     { "face.finish": "vinyl", "face.color": "alb" },
     { "volume.finish": "painted", "volume.color": "RAL 9010" },
-  ])("blocks incomplete configuration %o", (overrides) => {
+  ])("freezes a COMPLETE vinyl or painted configuration %o", (overrides) => {
     const { truth, aggregate, composition, eic } = confirmedSpine({
       ...readyValues,
       ...overrides,
     });
-    expect(
-      freezeQuoteSnapshot(truth, aggregate, composition, eic, projectCommercialPrice(eic)).ok,
-    ).toBe(false);
+    const commercial = projectCommercialPrice(eic);
+    expect(eic.completeness).toBe("COMPLETE");
+    expect(commercial.completeness).toBe("COMPLETE");
+    expect(freezeQuoteSnapshot(truth, aggregate, composition, eic, commercial).ok).toBe(true);
   });
 
   it.each([
