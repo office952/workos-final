@@ -124,6 +124,21 @@ describe("letters process composition", () => {
     ).toBe(false);
   });
 
+  it("requires Oracal volume finish and orders wrap before forming", () => {
+    const composition = composeProductProcesses(frontlitPlexiAl06Template, {
+      "face.finish": "none",
+      "volume.finish": "oracal",
+    });
+    expect(
+      composition.nodes.some(
+        (item) => item.id === compositionNodeId("VOLUME", APPLY_SURFACE_FINISH_ID),
+      ),
+    ).toBe(true);
+    expect(
+      composition.nodes.some((item) => item.id === compositionNodeId("VOLUME", PAINT_RAL_ID)),
+    ).toBe(false);
+  });
+
   it("requires vinyl finish only when selected and orders volume vinyl before forming", () => {
     const composition = composeProductProcesses(frontlitPlexiAl06Template, vinylFinish);
     const faceVinyl = composition.nodes.find(

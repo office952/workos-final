@@ -14,6 +14,7 @@ import type {
   RollProfile,
 } from "./types.js";
 import { isFinishApplicationId } from "./types.js";
+import { projectLettersVolumeOptions } from "./lettersVolume.js";
 import type {
   DraftValue,
   DraftValues,
@@ -174,7 +175,22 @@ export function projectProductConfigurationOptions(
   if (!isLettersFaceV2Template(template)) {
     return null;
   }
-  return projectLettersFaceOptions({ template, values, organization });
+  const face = projectLettersFaceOptions({ template, values, organization });
+  const volume = projectLettersVolumeOptions({ template, values, organization });
+  return {
+    selectOptions: {
+      ...face.selectOptions,
+      ...volume.selectOptions,
+    },
+    catalogColors: {
+      ...face.catalogColors,
+      ...volume.catalogColors,
+    },
+    catalogRolls: {
+      ...face.catalogRolls,
+      ...volume.catalogRolls,
+    },
+  };
 }
 
 export function projectLettersFaceOptions(input: {

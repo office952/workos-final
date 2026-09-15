@@ -1,6 +1,7 @@
 import {
   compileDefinition,
   formatLettersFaceField,
+  formatLettersVolumeField,
   isFieldVisible,
   projectProductConfigurationOptions,
   selectedComponentIds,
@@ -228,12 +229,12 @@ export function formatConfiguratorValue(
   if (isEmpty(value)) {
     return null;
   }
-  const faceLabel = formatLettersFaceField(
-    field.id,
-    value,
-    values,
-    template ? projectProductConfigurationOptions(template, values) : null,
-  );
+  const options = template ? projectProductConfigurationOptions(template, values) : null;
+  const volumeLabel = formatLettersVolumeField(field.id, value, values, options);
+  if (volumeLabel) {
+    return volumeLabel;
+  }
+  const faceLabel = formatLettersFaceField(field.id, value, values, options);
   if (faceLabel) {
     return faceLabel;
   }

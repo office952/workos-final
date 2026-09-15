@@ -93,6 +93,7 @@ describe("FC2D face finish cost resolution", () => {
   it("does not map volume or RAL applications onto FACE area costing", () => {
     expect(faceFinishCostRequirements("none", FACE_AREA_MM2)).toEqual([]);
     expect(faceFinishCostRequirements("return_ral", FACE_AREA_MM2)).toEqual([]);
+    expect(faceFinishCostRequirements("return_letters_standard", FACE_AREA_MM2)).toEqual([]);
     expect(faceFinishCostRequirements("return_cant_volum_wrapping", FACE_AREA_MM2)).toEqual(
       [],
     );

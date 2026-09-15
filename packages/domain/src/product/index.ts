@@ -154,6 +154,7 @@ export {
   LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
+  RETURN_WRAP_ALLOWANCE_SETTING_ID,
   componentTechnicalSettingsRegistry,
   createTechnicalSettingsRegistry,
   listTypeTechnicalSettings,

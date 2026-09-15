@@ -135,6 +135,36 @@ export const componentTypes: readonly ComponentTypeDefinition[] = [
         kind: "applied_color",
       },
       {
+        id: "volume.stockColor",
+        label: "Culoare / descriere stoc",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "applied_color",
+      },
+      {
+        id: "volume.vinylSeries",
+        label: "Serie Oracal",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "applied_finish",
+      },
+      {
+        id: "volume.colorId",
+        label: "Culoare catalog Oracal",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "applied_color",
+      },
+      {
+        id: "volume.ralColorId",
+        label: "Culoare catalog RAL",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "applied_color",
+      },
+      {
+        id: "volume.rollProfileId",
+        label: "Rolă Oracal",
+        ownership: "CONFIGURABLE_BY_ORDER",
+        kind: "applied_finish",
+      },
+      {
         id: "volume.confirmedPerimeterMm",
         label: "Perimetru confirmat",
         ownership: "MEASUREMENT",

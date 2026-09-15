@@ -71,6 +71,7 @@ export function faceFinishCostRequirements(
       return printFaceRequirements(confirmedAreaMm2, true);
     case "none":
     case "return_stock":
+    case "return_letters_standard":
     case "return_cant_volum_wrapping":
     case "return_ral":
       return [];

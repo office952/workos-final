@@ -47,7 +47,7 @@ Applied vinyl/paint color is not the same fact as inherent material color or opt
 |---|---|---|
 | FACE | `PLEXIGLAS_FACE` | 3 mm, opal; LETTERS V2 finish is order configuration (none / Oracal 641·651·8500 / print ± lamination). V1 vinyl+text remains readable for historical snapshots. |
 | FACE | `ACM_CASSETTE_BODY` | ACM 3 mm cassette; width/height/depth/folds by order |
-| VOLUME | `ALUMINIUM_VOLUME` | 0.6 mm; depth/finish by order |
+| VOLUME | `ALUMINIUM_VOLUME` | 0.6 mm; depth by order; LETTERS V2 finish is stock / Oracal 641·651 / RAL. V1 none/vinyl/painted+text remains readable for historical snapshots. |
 | BACK | `FOREX_BACK` | 10 mm |
 | BACK | `STEEL_INTERNAL_FRAME` | steel profile; size from cassette formula |
 | LIGHTING | `LIGHTING_FRONT_LED` | technology fixed; LED pitch / module power / PSU reserve are settings |
@@ -59,6 +59,8 @@ Display labels for families, categories, templates, and constructive types are p
 ## SETTINGS BOUNDARY
 
 LED pitch, module power and PSU reserve stay technical settings on `LIGHTING_FRONT_LED`.
+
+Return wrap allowance stays a technical setting on `ALUMINIUM_VOLUME`. It is not an order field.
 
 Material, thickness, depth, area, and rates are not technical settings.
 

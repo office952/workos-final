@@ -50,7 +50,11 @@ const VOLUME_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
   },
   {
     processId: APPLY_SURFACE_FINISH_ID,
-    condition: { kind: "fieldEquals", fieldId: "volume.finish", value: "vinyl" },
+    condition: {
+      kind: "fieldIn",
+      fieldId: "volume.finish",
+      values: ["vinyl", "oracal"],
+    },
     reason: "Volumul colantat cere aplicare de folie înainte de formare.",
   },
   {
@@ -206,6 +210,9 @@ function fieldEqualsLabel(fieldId: string, value: string): string {
   if (fieldId === "volume.finish" && value === "vinyl") {
     return "Finisaj volum: Colantat";
   }
+  if (fieldId === "volume.finish" && value === "oracal") {
+    return "Finisaj volum: Oracal";
+  }
   if (fieldId === "volume.finish" && value === "painted") {
     return "Finisaj volum: Vopsit";
   }
@@ -215,6 +222,9 @@ function fieldEqualsLabel(fieldId: string, value: string): string {
 function fieldInLabel(fieldId: string, values: readonly string[]): string {
   if (fieldId === "face.finish") {
     return "Finisaj față: Colantat / Oracal / Print";
+  }
+  if (fieldId === "volume.finish") {
+    return "Finisaj volum: Colantat / Oracal";
   }
   return `${fieldId} ∈ ${values.join(" | ")}`;
 }

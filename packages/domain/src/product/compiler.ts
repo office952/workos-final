@@ -7,6 +7,18 @@ import {
   resolveLettersFaceDraft,
 } from "../finishes/lettersFace.js";
 import {
+  VOLUME_RETURN_WRAP_ALLOWANCE_FIELD,
+  formatLettersVolumeField,
+  normalizeLettersVolumeDraft,
+  projectLettersVolumeOptions,
+  resolveLettersVolumeDraft,
+} from "../finishes/lettersVolume.js";
+import {
+  RETURN_WRAP_ALLOWANCE_SETTING_ID,
+  listTypeTechnicalSettings,
+  resolvedSettingValue,
+} from "./technicalSettings.js";
+import {
   collectComponentMeasurements,
   evaluateProductComponents,
   type ComponentEvaluation,
@@ -126,7 +138,7 @@ export function compileDefinition(
   context: CompileDefinitionContext = {},
 ): ProductDefinition {
   const draftValues = isLettersFaceV2Template(template)
-    ? normalizeLettersFaceDraft(draft.values)
+    ? normalizeLettersVolumeDraft(normalizeLettersFaceDraft(draft.values))
     : draft.values;
   const selectedIds = selectedComponentIds(template, draftValues);
   const missing: MissingInput[] = [];
@@ -178,6 +190,37 @@ export function compileDefinition(
       }
     } else {
       Object.assign(values, resolved.snapshotValues);
+    }
+    const resolvedVolume = resolveLettersVolumeDraft({
+      template,
+      values,
+      organization: context.organization,
+    });
+    if (!resolvedVolume.ok) {
+      for (const item of resolvedVolume.issues) {
+        if (missing.some((entry) => entry.fieldId === item.fieldId)) {
+          continue;
+        }
+        missing.push({
+          fieldId: item.fieldId,
+          label: item.fieldLabel,
+          componentId: "VOLUME",
+        });
+      }
+    } else {
+      Object.assign(values, resolvedVolume.snapshotValues);
+      if (
+        resolvedVolume.applicationId === "return_letters_standard" ||
+        resolvedVolume.applicationId === "return_cant_volum_wrapping"
+      ) {
+        const allowance = resolvedSettingValue(
+          listTypeTechnicalSettings("ALUMINIUM_VOLUME"),
+          RETURN_WRAP_ALLOWANCE_SETTING_ID,
+        );
+        if (allowance !== undefined) {
+          values[VOLUME_RETURN_WRAP_ALLOWANCE_FIELD] = allowance;
+        }
+      }
     }
   }
 
@@ -259,13 +302,26 @@ function optionLabel(
   values: DraftValues,
   template: ProductTemplate,
 ): string {
+  const options = isLettersFaceV2Template(template)
+    ? {
+        face: projectLettersFaceOptions({ template, values }),
+        volume: projectLettersVolumeOptions({ template, values }),
+      }
+    : null;
+  const volumeLabel = formatLettersVolumeField(
+    fieldId,
+    value,
+    values,
+    options?.volume ?? null,
+  );
+  if (volumeLabel) {
+    return volumeLabel;
+  }
   const faceLabel = formatLettersFaceField(
     fieldId,
     value,
     values,
-    isLettersFaceV2Template(template)
-      ? projectLettersFaceOptions({ template, values })
-      : null,
+    options?.face ?? null,
   );
   if (faceLabel) {
     return faceLabel;

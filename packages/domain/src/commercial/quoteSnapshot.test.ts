@@ -97,8 +97,8 @@ describe("quote snapshot freeze", () => {
       `qts:${CANONICAL_PRODUCT_CODE}:${result.snapshot.contentHash}`,
     );
     expect(result.snapshot.contentHash).toBe(
-      // LETTERS ProductTemplate V2 none/none 60 mm.
-      "eccf3bf84057f00abd76ad739c6354b867644cf5010dc200f8bb4f63626f90e0",
+      // LETTERS ProductTemplate V2 stock/none 60 mm after VOLUME finish normalization.
+      "55fdec84c223299426b82a2abaea1793cf0716113e902893092e6fa589c6f774",
     );
     expect(quoteSnapshotContentHash(result.snapshot)).toBe(result.snapshot.contentHash);
     expect(JSON.stringify(result.snapshot)).not.toMatch(

@@ -23,7 +23,27 @@ describe("LETTERS form schema versions", () => {
     expect(faceFinish?.options?.map((option) => option.value)).toEqual(["none", "vinyl"]);
   });
 
-  it("publishes the current V2 FACE form without VOLUME changes", () => {
+  it("freezes the historical V1 VOLUME form", () => {
+    const volumeFields = frontlitPlexiAl06FormSchemaV1.sections
+      .find((section) => section.id === "volume")
+      ?.fields.map((field) => field.id);
+    expect(volumeFields).toEqual([
+      "volume.depthMm",
+      "volume.finish",
+      "volume.color",
+      "volume.confirmedPerimeterMm",
+    ]);
+    const volumeFinish = frontlitPlexiAl06FormSchemaV1.sections
+      .flatMap((section) => section.fields)
+      .find((field) => field.id === "volume.finish");
+    expect(volumeFinish?.options?.map((option) => option.value)).toEqual([
+      "none",
+      "vinyl",
+      "painted",
+    ]);
+  });
+
+  it("publishes the current V2 FACE and VOLUME forms", () => {
     expect(frontlitPlexiAl06Template.version).toBe("2");
     expect(frontlitPlexiAl06Template.formSchemaId).toBe(LETTERS_FORM_SCHEMA_V2_ID);
     expect(frontlitPlexiAl06FormSchema.id).toBe(LETTERS_FORM_SCHEMA_V2_ID);
@@ -45,8 +65,20 @@ describe("LETTERS form schema versions", () => {
     expect(volumeFields).toEqual([
       "volume.depthMm",
       "volume.finish",
-      "volume.color",
+      "volume.stockColor",
+      "volume.vinylSeries",
+      "volume.colorId",
+      "volume.rollProfileId",
+      "volume.ralColorId",
       "volume.confirmedPerimeterMm",
+    ]);
+    const volumeFinish = frontlitPlexiAl06FormSchema.sections
+      .flatMap((section) => section.fields)
+      .find((field) => field.id === "volume.finish");
+    expect(volumeFinish?.options?.map((option) => option.value)).toEqual([
+      "stock",
+      "oracal",
+      "painted",
     ]);
   });
 });

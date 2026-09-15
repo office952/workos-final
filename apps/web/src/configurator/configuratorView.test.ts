@@ -5,6 +5,7 @@ import {
   getFormSchemaForTemplate,
   getProductTemplate,
   lettersFaceReadyValues,
+  lettersVolumeReadyValues,
   type DraftValues,
 } from "@workos-final/domain";
 import { describe, expect, it } from "vitest";
@@ -44,8 +45,7 @@ const lettersFilled: DraftValues = {
   "root.inscription": "WORKOS",
   ...lettersFaceReadyValues("651"),
   "volume.depthMm": "60",
-  "volume.finish": "none",
-  "volume.confirmedPerimeterMm": 12500,
+  ...lettersVolumeReadyValues("stock"),
 };
 
 describe("projectConfiguratorView", () => {
@@ -288,6 +288,60 @@ describe("projectConfiguratorView", () => {
     expect(view.statusLabel).toBe("Configurare completă");
   });
 
+  it("projects VOLUME Oracal, RAL and stock without raw catalog ids", () => {
+    const { template, schema } = lettersTemplate();
+    const oracal = projectConfiguratorView({
+      template,
+      schema,
+      values: {
+        "root.inscription": "WORKOS",
+        ...lettersFaceReadyValues("none"),
+        ...lettersVolumeReadyValues("651"),
+      },
+      context,
+    });
+    const oracalFacts = oracal.sections
+      .find((section) => section.id === "VOLUME")
+      ?.facts.map((fact) => fact.display);
+    expect(oracal.complete).toBe(true);
+    expect(oracalFacts).toEqual(
+      expect.arrayContaining(["Oracal 651", "010 — White", "Rolă 1260 mm"]),
+    );
+    expect(JSON.stringify(oracalFacts)).not.toMatch(/oracal:651:010|roll:shared/);
+
+    const ral = projectConfiguratorView({
+      template,
+      schema,
+      values: {
+        "root.inscription": "WORKOS",
+        ...lettersFaceReadyValues("none"),
+        ...lettersVolumeReadyValues("painted"),
+      },
+      context,
+    });
+    expect(ral.sections.find((section) => section.id === "VOLUME")?.facts.map((fact) => fact.display)).toEqual(
+      expect.arrayContaining(["Vopsit RAL", "RAL 9005 — Jet black"]),
+    );
+
+    const stale = projectConfiguratorView({
+      template,
+      schema,
+      values: {
+        "root.inscription": "WORKOS",
+        ...lettersFaceReadyValues("none"),
+        ...lettersVolumeReadyValues("651"),
+        "volume.finish": "stock",
+        "volume.stockColor": "Negru",
+      },
+      context,
+    });
+    const staleFacts = stale.sections
+      .find((section) => section.id === "VOLUME")
+      ?.facts.map((fact) => fact.display);
+    expect(staleFacts).toEqual(expect.arrayContaining(["Stoc", "Negru"]));
+    expect(staleFacts).not.toEqual(expect.arrayContaining(["Oracal 651", "Rolă 1260 mm"]));
+  });
+
   it("C — required number below min is NECONFIGURAT from compiler missing", () => {
     const { template, schema } = lettersTemplate();
     const values = {
@@ -422,7 +476,11 @@ const LETTERS_SCHEMA_FIELD_IDS = [
   "face.confirmedAreaMm2",
   "volume.depthMm",
   "volume.finish",
-  "volume.color",
+  "volume.stockColor",
+  "volume.vinylSeries",
+  "volume.colorId",
+  "volume.rollProfileId",
+  "volume.ralColorId",
   "volume.confirmedPerimeterMm",
 ] as const;
 

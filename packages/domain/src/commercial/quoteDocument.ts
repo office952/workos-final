@@ -56,6 +56,7 @@ const CONFIG_VALUE_LABELS: Record<string, string> = {
   none: "Fără finisaj",
   vinyl: "Colantat",
   oracal: "Oracal",
+  stock: "Stoc",
   print: "Print",
   laminated: "Cu laminare",
   painted: "Vopsit",
@@ -267,6 +268,8 @@ function configurationLabel(fieldId: string): string | null {
       return qualifier ? `Cod culoare ${qualifier}` : "Cod culoare";
     case "vinylSeries":
       return "Serie Oracal";
+    case "stockColor":
+      return qualifier ? `Culoare ${qualifier}` : "Culoare";
     case "rollWidthMm":
       return qualifier ? `Rolă ${qualifier}` : "Rolă";
     case "lamination":

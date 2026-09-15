@@ -130,7 +130,7 @@ describe("quote document projection", () => {
       expect.arrayContaining([
         { label: "Finisaj față", value: "Fără finisaj" },
         { label: "Adâncime volum", value: "60 mm" },
-        { label: "Finisaj volum", value: "Fără finisaj" },
+        { label: "Finisaj volum", value: "Stoc" },
       ]),
     );
     expect(document.technicalSummary).toEqual(

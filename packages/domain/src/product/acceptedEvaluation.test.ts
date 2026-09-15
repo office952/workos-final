@@ -59,7 +59,7 @@ const acmValues: DraftValues = {
 };
 
 const QUOTE_HASH_PIN_V2 =
-  "eccf3bf84057f00abd76ad739c6354b867644cf5010dc200f8bb4f63626f90e0";
+  "55fdec84c223299426b82a2abaea1793cf0716113e902893092e6fa589c6f774";
 const QUOTE_HASH_PIN_V1 =
   "35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27";
 

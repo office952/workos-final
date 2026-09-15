@@ -50,14 +50,15 @@ LAST_RECONCILED_MAIN_BASE              = 8c2223b3a7853e6c0ebb788e44046401985d7f1
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = FC2B_LETTERS_FACE_FORM_AND_RESOLVER_INTEGRATION
-NEXT_PRODUCT_SLICE                     = FC2C_LETTERS_VOLUME_CANT_FORM_AND_RESOLVER
-NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2B_THEN_FC2C
+CURRENT_PRODUCT_SLICE                  = FC2C_LETTERS_VOLUME_CANT_FORM_AND_RESOLVER
+NEXT_PRODUCT_SLICE                     = CONFIGURATOR_LETTERS_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP
+NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2C_THEN_LETTERS_ROUNDTRIP
 FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
 FC2A_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW      = YES
 FC2D_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2B_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2C_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2D_AUTHORIZED                        = NO
 FC2B_AUTHORIZED                        = NO
 FC2C_AUTHORIZED                        = NO
@@ -76,7 +77,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, and the FC2B LETTERS FACE V2 form + catalog resolver, all local in review. Historical LETTERS templateVersion = 1 snapshots stay on the V1 form. Do not start FC2C, refresh Figma, or resume PURE CLIMATE from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, the FC2B LETTERS FACE V2 form + catalog resolver, and the FC2C LETTERS VOLUME/CANT V2 form + catalog resolver, all local in review. Historical LETTERS templateVersion = 1 snapshots stay on the V1 form. Do not start Figma write, design-delta implementation, or resume PURE CLIMATE from this file.
 
 ### Accepted advisories
 

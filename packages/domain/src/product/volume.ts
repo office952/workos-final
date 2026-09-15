@@ -3,13 +3,20 @@ import type {
   ComponentCalculationInput,
   ComponentCalculationResult,
 } from "./componentContract.js";
+import { deriveLettersVolumeApplicationId } from "../finishes/lettersVolume.js";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
+  MAT_VINYL_ORACAL_641_ID,
   MAT_VINYL_ORACAL_651_ID,
 } from "../resources/catalog.js";
 import { resolveTypeResources } from "./componentTypes.js";
+import {
+  RETURN_WRAP_ALLOWANCE_SETTING_ID,
+  resolvedSettingValue,
+  type ComponentTechnicalSettingDefinition,
+} from "./technicalSettings.js";
 import type { DraftValues, TechnicalMeasurement } from "./types.js";
-import { linearMetersFromMm } from "./units.js";
+import { linearMetersFromMm, squareMetersFromMm2 } from "./units.js";
 
 export const VOLUME_COMPONENT_ID = "VOLUME";
 export const VOLUME_PERIMETER_FIELD = "volume.confirmedPerimeterMm";
@@ -87,16 +94,13 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
             ? { costQualifier: { volumeDepthMm: depthMm } }
             : {}),
         })),
-      ...(input.values["volume.finish"] === "vinyl" && lateralArea !== undefined
-        ? [
-            {
-              componentId: VOLUME_COMPONENT_ID,
-              resourceId: MAT_VINYL_ORACAL_651_ID,
-              quantity: lateralArea,
-              unit: "m2" as const,
-            },
-          ]
-        : []),
+      ...volumeFinishMaterialRequirements(
+        input.values,
+        perimeter.value,
+        depthMm,
+        lateralArea,
+        input.technicalSettings,
+      ),
     ];
     return volumeResult(
       "CALCULATED",
@@ -123,9 +127,83 @@ export const aluminiumVolumeContract: ComponentCalculationContract = {
             ]),
       ],
       requirements,
-      resolutions.flatMap((item) =>
-        item.status === "UNRESOLVED" ? [item.reason] : [],
-      ),
+      [
+        ...resolutions.flatMap((item) =>
+          item.status === "UNRESOLVED" ? [item.reason] : [],
+        ),
+        ...volumeWrapUnavailable(input.values, input.technicalSettings),
+      ],
     );
   },
 };
+
+function volumeFinishMaterialRequirements(
+  values: DraftValues,
+  perimeterMm: number,
+  depthMm: number,
+  lateralArea: number | undefined,
+  technicalSettings: readonly ComponentTechnicalSettingDefinition[],
+): ComponentCalculationResult["requirements"] {
+  if (values["volume.finish"] === "vinyl" && lateralArea !== undefined) {
+    return [
+      {
+        componentId: VOLUME_COMPONENT_ID,
+        resourceId: MAT_VINYL_ORACAL_651_ID,
+        quantity: lateralArea,
+        unit: "m2",
+      },
+    ];
+  }
+  const applicationId = deriveLettersVolumeApplicationId(values);
+  if (
+    applicationId !== "return_letters_standard" &&
+    applicationId !== "return_cant_volum_wrapping"
+  ) {
+    return [];
+  }
+  if (!Number.isFinite(depthMm) || depthMm <= 0) {
+    return [];
+  }
+  const allowance = resolvedSettingValue(
+    technicalSettings,
+    RETURN_WRAP_ALLOWANCE_SETTING_ID,
+  );
+  if (allowance === undefined) {
+    return [];
+  }
+  return [
+    {
+      componentId: VOLUME_COMPONENT_ID,
+      resourceId:
+        applicationId === "return_letters_standard"
+          ? MAT_VINYL_ORACAL_641_ID
+          : MAT_VINYL_ORACAL_651_ID,
+      quantity: squareMetersFromMm2(perimeterMm * (depthMm + allowance)),
+      unit: "m2",
+    },
+  ];
+}
+
+function volumeWrapUnavailable(
+  values: DraftValues,
+  technicalSettings: readonly ComponentTechnicalSettingDefinition[],
+): string[] {
+  const applicationId = deriveLettersVolumeApplicationId(values);
+  if (
+    applicationId !== "return_letters_standard" &&
+    applicationId !== "return_cant_volum_wrapping"
+  ) {
+    return [];
+  }
+  const allowance = resolvedSettingValue(
+    technicalSettings,
+    RETURN_WRAP_ALLOWANCE_SETTING_ID,
+  );
+  if (allowance !== undefined) {
+    return [];
+  }
+  const setting = technicalSettings.find(
+    (item) => item.id === RETURN_WRAP_ALLOWANCE_SETTING_ID,
+  );
+  return [setting?.unresolvedReason ?? "Adaosul de înfășurare pe cant nu este stabilit"];
+}

@@ -189,6 +189,12 @@ export function verifySessionCurrent(sessionText, errors) {
   ) {
     fail(errors, "WORKOS_SESSION_CURRENT.md must keep FC2C unauthorized after FC2B");
   }
+  if (
+    /FC2B_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText) &&
+    !/FC2C_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText)
+  ) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must record the FC2C LETTERS VOLUME form slice");
+  }
 }
 
 export function verifyRoadmapFc1(roadmapText, errors) {
@@ -213,17 +219,20 @@ export function verifyRoadmapFc1(roadmapText, errors) {
   if (!/FORM_COMPLETENESS_FC2B\s*=\s*IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
     fail(errors, "living roadmap must record FORM_COMPLETENESS_FC2B = IMPLEMENTED_LOCAL_IN_REVIEW");
   }
-  if (!/FORM_COMPLETENESS\s*=\s*FC2B_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
-    fail(errors, "living roadmap must record FORM_COMPLETENESS = FC2B_IMPLEMENTED_LOCAL_IN_REVIEW");
+  if (!/FORM_COMPLETENESS_FC2C\s*=\s*IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap must record FORM_COMPLETENESS_FC2C = IMPLEMENTED_LOCAL_IN_REVIEW");
+  }
+  if (!/FORM_COMPLETENESS\s*=\s*FC2C_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap must record FORM_COMPLETENESS = FC2C_IMPLEMENTED_LOCAL_IN_REVIEW");
   }
   if (
-    !/NEXT_PRODUCT_SLICE\s*=\s*FC2C_LETTERS_VOLUME_CANT_FORM_AND_RESOLVER/.test(
+    !/NEXT_PRODUCT_SLICE\s*=\s*CONFIGURATOR_LETTERS_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP/.test(
       roadmapText,
     )
   ) {
     fail(
       errors,
-      "living roadmap must record NEXT_PRODUCT_SLICE = FC2C_LETTERS_VOLUME_CANT_FORM_AND_RESOLVER",
+      "living roadmap must record NEXT_PRODUCT_SLICE = CONFIGURATOR_LETTERS_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP",
     );
   }
   if (/FORM_COMPLETENESS\s*=\s*FC1_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
@@ -235,10 +244,16 @@ export function verifyRoadmapFc1(roadmapText, errors) {
   if (/FORM_COMPLETENESS\s*=\s*FC2D_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
     fail(errors, "living roadmap still records FC2D as the current form-completeness head");
   }
+  if (/FORM_COMPLETENESS\s*=\s*FC2B_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap still records FC2B as the current form-completeness head");
+  }
   if (
-    !/NEXT_PRODUCT_GATE\s*=\s*OWNER_REVIEW_FC2B_THEN_FC2C/.test(roadmapText)
+    !/NEXT_PRODUCT_GATE\s*=\s*OWNER_REVIEW_FC2C_THEN_LETTERS_ROUNDTRIP/.test(roadmapText)
   ) {
-    fail(errors, "living roadmap must record NEXT_PRODUCT_GATE = OWNER_REVIEW_FC2B_THEN_FC2C");
+    fail(
+      errors,
+      "living roadmap must record NEXT_PRODUCT_GATE = OWNER_REVIEW_FC2C_THEN_LETTERS_ROUNDTRIP",
+    );
   }
 }
 

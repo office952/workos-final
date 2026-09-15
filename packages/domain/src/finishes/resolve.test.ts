@@ -22,6 +22,7 @@ const FACE_ALLOWANCE: readonly FinishApplicationId[] = [
 const VOLUME_ALLOWANCE: readonly FinishApplicationId[] = [
   "none",
   "return_stock",
+  "return_letters_standard",
   "return_cant_volum_wrapping",
   "return_ral",
 ];

@@ -201,14 +201,25 @@ describe("product system admin catalog presentation", () => {
         }),
       ]),
     );
-    const lightingSettings = catalog.categories[4]?.items[0]?.groups[0]?.sections.find(
-      (item) => item.id === "technical-settings",
-    )?.settingLines;
+    const lightingSettings = catalog.categories[4]?.items
+      .find((item) => item.id === "settings:LIGHTING_FRONT_LED")
+      ?.groups[0]?.sections.find((item) => item.id === "technical-settings")?.settingLines;
     expect(lightingSettings).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           label: "Pas module LED",
           valueDisplay: "100 mm",
+        }),
+      ]),
+    );
+    const volumeSettings = catalog.categories[4]?.items
+      .find((item) => item.id === "settings:ALUMINIUM_VOLUME")
+      ?.groups[0]?.sections.find((item) => item.id === "technical-settings")?.settingLines;
+    expect(volumeSettings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Adaos de înfășurare cant",
+          valueDisplay: "10 mm",
         }),
       ]),
     );
@@ -505,7 +516,7 @@ describe("processes catalog presentation", () => {
     ).toEqual(
       expect.arrayContaining([
         "Apare când Finisaj față: Colantat / Oracal / Print.",
-        "Apare când Finisaj volum: Colantat.",
+        "Apare când Finisaj volum: Colantat / Oracal.",
       ]),
     );
     expect(items.every((item) => !item.editTarget)).toBe(true);

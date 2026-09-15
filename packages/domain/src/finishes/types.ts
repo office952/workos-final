@@ -9,6 +9,7 @@ export const FINISH_APPLICATION_IDS = [
   "print_face",
   "print_face_laminated",
   "return_stock",
+  "return_letters_standard",
   "return_cant_volum_wrapping",
   "return_ral",
 ] as const;

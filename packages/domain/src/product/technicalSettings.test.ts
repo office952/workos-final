@@ -4,6 +4,7 @@ import {
   LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
   PSU_RESERVE_SETTING_ID,
+  RETURN_WRAP_ALLOWANCE_SETTING_ID,
   createTechnicalSettingsRegistry,
   listTypeTechnicalSettings,
   projectTechnicalSettings,
@@ -143,8 +144,28 @@ describe("canonical lighting settings", () => {
     expect(fieldIds).not.toContain(LED_PITCH_SETTING_ID);
     expect(fieldIds).not.toContain(LED_MODULE_POWER_SETTING_ID);
     expect(fieldIds).not.toContain(PSU_RESERVE_SETTING_ID);
+    expect(fieldIds).not.toContain(RETURN_WRAP_ALLOWANCE_SETTING_ID);
     expect(JSON.stringify(frontlitPlexiAl06FormSchema)).not.toMatch(
-      /ledPitch|ledModulePower|psuReserve|Pas module LED|Putere modul LED|Rezervă sursă/,
+      /ledPitch|ledModulePower|psuReserve|Pas module LED|Putere modul LED|Rezervă sursă|returnWrapAllowance/,
     );
+  });
+});
+
+describe("canonical volume wrap setting", () => {
+  it("owns the 10 mm return wrap allowance once", () => {
+    const settings = listTypeTechnicalSettings("ALUMINIUM_VOLUME");
+    expect(settings.map((item) => item.id)).toEqual([RETURN_WRAP_ALLOWANCE_SETTING_ID]);
+    expect(settings[0]?.resolution).toEqual({ status: "RESOLVED", value: 10 });
+    expect(settings[0]?.source).toBe("OWNER_CONFIRMED");
+    expect(projectTechnicalSettings("ALUMINIUM_VOLUME")).toEqual([
+      {
+        id: RETURN_WRAP_ALLOWANCE_SETTING_ID,
+        label: "Adaos de înfășurare cant",
+        valueDisplay: "10 mm",
+        statusLabel: "Setat",
+        sourceLabel: "Confirmat de owner",
+        administrationLabel: "Configurabil",
+      },
+    ]);
   });
 });

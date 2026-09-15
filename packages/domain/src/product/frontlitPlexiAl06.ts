@@ -1,4 +1,5 @@
 import { LETTERS_FACE_V2_ALLOWED_APPLICATIONS } from "../finishes/lettersFace.js";
+import { LETTERS_VOLUME_V2_ALLOWED_APPLICATIONS } from "../finishes/lettersVolume.js";
 import {
   FRONT_LIT_VOLUMETRIC_LETTERS_CATEGORY_ID,
   LIGHTED_VOLUMETRIC_SIGNS_FAMILY_ID,
@@ -58,7 +59,7 @@ const lettersIdentity = {
   ],
 };
 
-const volumeSection: FormSchema["sections"][number] = {
+const volumeSectionV1: FormSchema["sections"][number] = {
   id: "volume",
   title: "Volum",
   componentId: "VOLUME",
@@ -173,7 +174,7 @@ export const frontlitPlexiAl06FormSchemaV1: FormSchema = {
         },
       ],
     },
-    volumeSection,
+    volumeSectionV1,
   ],
 };
 
@@ -267,7 +268,94 @@ export const frontlitPlexiAl06FormSchema: FormSchema = {
         },
       ],
     },
-    volumeSection,
+    {
+      id: "volume",
+      title: "Volum",
+      componentId: "VOLUME",
+      fields: [
+        {
+          id: "volume.depthMm",
+          componentId: "VOLUME",
+          label: "Adâncime volum (mm)",
+          type: "select",
+          required: true,
+          options: [
+            { value: "30", label: "30 mm" },
+            { value: "60", label: "60 mm" },
+            { value: "80", label: "80 mm" },
+            { value: "100", label: "100 mm" },
+          ],
+          visibleWhen: { kind: "always" },
+        },
+        {
+          id: "volume.finish",
+          componentId: "VOLUME",
+          label: "Finisaj volum",
+          type: "select",
+          required: true,
+          options: [
+            { value: "stock", label: "Stoc" },
+            { value: "oracal", label: "Oracal" },
+            { value: "painted", label: "Vopsit RAL" },
+          ],
+          visibleWhen: { kind: "always" },
+        },
+        {
+          id: "volume.stockColor",
+          componentId: "VOLUME",
+          label: "Culoare / descriere stoc",
+          type: "text",
+          required: false,
+          visibleWhen: { kind: "fieldEquals", fieldId: "volume.finish", value: "stock" },
+        },
+        {
+          id: "volume.vinylSeries",
+          componentId: "VOLUME",
+          label: "Serie Oracal",
+          type: "select",
+          required: true,
+          options: [
+            { value: "641", label: "Oracal 641" },
+            { value: "651", label: "Oracal 651" },
+          ],
+          visibleWhen: { kind: "fieldEquals", fieldId: "volume.finish", value: "oracal" },
+        },
+        {
+          id: "volume.colorId",
+          componentId: "VOLUME",
+          label: "Culoare",
+          type: "catalog_color",
+          required: true,
+          visibleWhen: { kind: "fieldEquals", fieldId: "volume.finish", value: "oracal" },
+        },
+        {
+          id: "volume.rollProfileId",
+          componentId: "VOLUME",
+          label: "Rolă",
+          type: "catalog_roll",
+          required: true,
+          visibleWhen: { kind: "fieldEquals", fieldId: "volume.finish", value: "oracal" },
+        },
+        {
+          id: "volume.ralColorId",
+          componentId: "VOLUME",
+          label: "Culoare RAL",
+          type: "catalog_color",
+          required: true,
+          visibleWhen: { kind: "fieldEquals", fieldId: "volume.finish", value: "painted" },
+        },
+        {
+          id: "volume.confirmedPerimeterMm",
+          componentId: "VOLUME",
+          label: "Perimetru confirmat (mm)",
+          type: "number",
+          required: true,
+          min: 1,
+          visibleWhen: { kind: "always" },
+          hint: "Valoare confirmată de operator. Nu este geometrie calculată de WorkOS.",
+        },
+      ],
+    },
   ],
 };
 
@@ -279,6 +367,10 @@ export const frontlitPlexiAl06Template: ProductTemplate = {
     {
       slot: "FACE",
       allowedApplicationIds: LETTERS_FACE_V2_ALLOWED_APPLICATIONS,
+    },
+    {
+      slot: "VOLUME",
+      allowedApplicationIds: LETTERS_VOLUME_V2_ALLOWED_APPLICATIONS,
     },
   ],
 };

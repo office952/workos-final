@@ -60,7 +60,7 @@ Current live specifications:
 - Aluminium return profile 0.6 mm — profile, m
 - Modul LED 12V — buc
 - Sursă LED 12V 60 / 100 / 160 / 200 W — buc
-- Folie Oracal 651 — sheet, m² — only when vinyl is selected
+- Folie Oracal 641 / 651 — sheet, m² — FACE or VOLUME Oracal; VOLUME wrap quantity is confirmed perimeter × (depth + return wrap allowance). No +20% waste in V1.
 - ACM 3 mm — sheet, m² — AI_DECISION 32 EUR/m² on developed blank area; not owner-confirmed
 - Profil oțel cadru intern — profile, m — AI_DECISION 3.50 EUR/m on frame perimeter; not owner-confirmed
 
@@ -128,7 +128,7 @@ Resource identity, kind, unit, labels, specifications and recipes remain typed c
 
 SQLite owns the active CostEvidence amount after one-time bootstrap (`RESOURCE_COST_EVIDENCE_V1_APPLIED`). Seed `costEvidence[]` is bootstrap plus pure domain tests. Live compile, freeze and admin projection read active database rows. They do not fall back to seed amounts.
 
-FC2D added reusable FACE-finish identities and provisional rates. FC2B wires them to LETTERS ProductTemplate V2 FACE configuration. Historical templateVersion = 1 snapshots stay on the V1 vinyl path and are not recompiled through V2.
+FC2D added reusable FACE-finish identities and provisional rates. FC2B wires them to LETTERS ProductTemplate V2 FACE configuration. FC2C wires VOLUME stock / Oracal 641·651 / RAL on the same unreleased V2 template. Historical templateVersion = 1 snapshots stay on the V1 vinyl path and are not recompiled through V2.
 
 - `MAT-VINYL-ORACAL-641`
 - `MAT-VINYL-ORACAL-8500`
