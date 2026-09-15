@@ -162,7 +162,7 @@ test("admin display-label write persists and propagates", async ({
   await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
+  await selectProductChoice(page, "Finisaj volum", "stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.screenshot({
     path: "docs/worklog/screenshots/admin-product-configure.png",

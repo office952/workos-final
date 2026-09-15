@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures";
+import { fillLettersV2NoneStock, selectLettersVolumePaintedRal9010 } from "./helpers/lettersV2";
 import { adminHomeLink } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
-import { selectProductChoice } from "./helpers/productChoices";
 
 test("letters critical processes complete vinyl paint and electrical routes", async ({
   page,
@@ -166,13 +166,8 @@ test("letters critical processes complete vinyl paint and electrical routes", as
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     })
     .click();
-  await page.getByLabel("Textul literelor").fill("WORKOS");
-  await selectProductChoice(page, "Finisaj față", "none");
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "painted");
-  await page.getByLabel("Culoare volum").fill("RAL 9010");
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
+  await fillLettersV2NoneStock(page);
+  await selectLettersVolumePaintedRal9010(page);
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();

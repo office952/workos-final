@@ -186,6 +186,10 @@ test("owner surfaces use catalog navigation", async ({ page }) => {
   });
 
   await page.getByRole("button", { name: "Setări tehnice" }).click();
+  await page
+    .getByRole("navigation", { name: "Elemente catalog" })
+    .getByRole("button", { name: "Setări tip Iluminare frontală cu module LED" })
+    .click();
   await expect(page.getByText("Pas module LED")).toBeVisible();
   await expect(page.getByText("100 mm", { exact: true })).toBeVisible();
   await expect(page.getByText("Putere modul LED")).toBeVisible();

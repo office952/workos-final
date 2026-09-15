@@ -9,6 +9,7 @@ import {
   getFormSchemaForTemplate,
   getProductTemplate,
   lettersFaceReadyValues,
+  lettersVolumeReadyValues,
 } from "@workos-final/domain";
 import { ConfiguratorWorkspace } from "./ConfiguratorWorkspace";
 import {
@@ -109,9 +110,7 @@ describe("ConfiguratorWorkspace", () => {
       "root.inscription": "WORKOS",
       ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     const view = projectConfiguratorView({
       template,
@@ -184,9 +183,7 @@ describe("ConfiguratorWorkspace", () => {
       "root.inscription": "WORKOS",
       ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     const view = projectConfiguratorView({
       template,
@@ -266,9 +263,7 @@ describe("ConfiguratorWorkspace", () => {
       "root.inscription": "WORKOS",
       ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     const view = projectConfiguratorView({
       template,

@@ -19,6 +19,7 @@ import {
   getFormSchemaForTemplate,
   getProductTemplate,
   lettersFaceReadyValues,
+  lettersVolumeReadyValues,
 } from "@workos-final/domain";
 import {
   AcceptedSnapshotSection,
@@ -150,9 +151,7 @@ describe("Product configuration views", () => {
     const values = {
       "root.inscription": "WORKOS",
       ...lettersFaceReadyValues("651"),
-      "volume.depthMm": "60",
-      "volume.finish": "none",
-      "volume.confirmedPerimeterMm": 12500,
+      ...lettersVolumeReadyValues("stock"),
     };
     render(
       <MemoryRouter>

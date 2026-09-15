@@ -15,7 +15,7 @@ test("accepts confirmed manual geometry and shows owner-confirmed 60 mm EIC", as
   await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
+  await selectProductChoice(page, "Finisaj volum", "stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   const review = page.locator(".cfg-editor");
@@ -59,7 +59,7 @@ test("confirms 30 mm aluminium profile cost as complete", async ({ page }) => {
   await selectProductChoice(page, "Finisaj față", "none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await selectProductChoice(page, "Adâncime volum (mm)", "30");
-  await selectProductChoice(page, "Finisaj volum", "none");
+  await selectProductChoice(page, "Finisaj volum", "stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
@@ -82,7 +82,7 @@ test("blocks missing face area without inventing Analyzer geometry", async ({ pa
   await page.getByLabel("Textul literelor").fill("LIPSA");
   await selectProductChoice(page, "Finisaj față", "none");
   await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
+  await selectProductChoice(page, "Finisaj volum", "stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await expect(page.getByText("Probleme de rezolvat: 1")).toBeVisible();

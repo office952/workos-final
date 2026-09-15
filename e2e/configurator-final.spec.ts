@@ -1,6 +1,10 @@
 import { mkdir } from "node:fs/promises";
 import { expect, test } from "./fixtures";
 import { identityMenuTrigger, openAccountMenu } from "./helpers/account";
+import {
+  fillLettersV2NoneStock,
+  selectLettersFaceOracal651,
+} from "./helpers/lettersV2";
 import { clickPrimaryDestination } from "./helpers/navigation";
 import { selectProductChoice } from "./helpers/productChoices";
 
@@ -37,13 +41,8 @@ async function fillAcmSimple(page: import("@playwright/test").Page) {
 }
 
 async function fillLettersComun(page: import("@playwright/test").Page) {
-  await page.getByLabel("Textul literelor").fill("WORKOS");
-  await selectProductChoice(page, "Finisaj față", "vinyl");
-  await page.getByLabel("Culoare față").fill("alb");
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
+  await fillLettersV2NoneStock(page);
+  await selectLettersFaceOracal651(page);
 }
 
 function workspaceFacts(page: import("@playwright/test").Page) {
@@ -373,7 +372,7 @@ test.describe("configurator final 219:3", () => {
     await openLetters(page);
     const group = page.getByRole("radiogroup", { name: "Finisaj față" });
     const none = page.getByRole("radio", { name: "Fără finisaj" }).first();
-    const vinyl = page.getByRole("radio", { name: "Colantat" }).first();
+    const oracal = page.getByRole("radio", { name: "Oracal" }).first();
     const native = page.locator('select[name="face.finish"]');
 
     await expect(group).toBeVisible();
@@ -391,9 +390,9 @@ test.describe("configurator final 219:3", () => {
     expect(outline.style).not.toBe("none");
 
     await page.keyboard.press("ArrowRight");
-    await expect(vinyl).toHaveAttribute("aria-checked", "true");
-    await expect(vinyl).toBeFocused();
-    await expect(native).toHaveValue("vinyl");
+    await expect(oracal).toHaveAttribute("aria-checked", "true");
+    await expect(oracal).toBeFocused();
+    await expect(native).toHaveValue("oracal");
   });
 
   test("keyboard can move between scopes and keep focus visible", async ({ page }) => {
@@ -492,7 +491,7 @@ test.describe("configurator final 219:3", () => {
     expectStablePanel(start.editor, afterCant.editor, "desktop");
 
     await page.locator(".cfg-blueprint").getByRole("button", { name: "FAȚĂ" }).click();
-    await page.getByRole("radio", { name: "Colantat" }).first().click();
+    await page.getByRole("radio", { name: "Oracal" }).first().click();
     const afterFace = await panelGeometry(page);
     expect(afterFace.scrollY).toBe(start.scrollY);
     expectStablePanel(start.blueprint, afterFace.blueprint, "desktop");
@@ -624,14 +623,13 @@ test.describe("configurator final 219:3", () => {
     await page.setViewportSize({ width: 1440, height: 1100 });
     await openLetters(page);
     await page.getByLabel("Textul literelor").fill("WORKOS");
-    await selectProductChoice(page, "Finisaj față", "vinyl");
-    await page.getByLabel("Culoare față").fill("red");
-    await expect(page.getByLabel("Culoare față")).toBeVisible();
+    await selectLettersFaceOracal651(page);
+    await expect(page.getByRole("button", { name: /010 — White/ })).toBeVisible();
     await selectProductChoice(page, "Finisaj față", "none");
-    await expect(page.getByLabel("Culoare față")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Culoare/ })).toHaveCount(0);
     await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
     await selectProductChoice(page, "Adâncime volum (mm)", "60");
-    await selectProductChoice(page, "Finisaj volum", "none");
+    await selectProductChoice(page, "Finisaj volum", "stock");
     await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
     const inheritedArea = page.locator('.cfg-blueprint [data-fact-kind="inherited"]');
     await expect(inheritedArea).toHaveCount(1);

@@ -1,34 +1,35 @@
 import { expect, test } from "./fixtures";
+import {
+  fillLettersV2NoneStock,
+  selectLettersFaceOracal651,
+  selectLettersVolumePaintedRal9010,
+} from "./helpers/lettersV2";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
-import { selectProductChoice } from "./helpers/productChoices";
 
-async function confirmLetters(
-  page: import("@playwright/test").Page,
-  values: {
-    faceFinish: "none" | "vinyl";
-    volumeFinish: "none" | "painted";
-    faceColor?: string;
-    volumeColor?: string;
-  },
-) {
+async function openLetters(page: import("@playwright/test").Page) {
   await page.goto("/products");
   await page
     .getByRole("link", {
       name: "Litere volumetrice luminoase — față plexiglas, volum aluminiu 0,6 mm",
     })
     .click();
-  await page.getByLabel("Textul literelor").fill("WORKOS");
-  await selectProductChoice(page, "Finisaj față", values.faceFinish);
-  if (values.faceColor) {
-    await page.getByLabel("Culoare față").fill(values.faceColor);
+}
+
+async function confirmLetters(
+  page: import("@playwright/test").Page,
+  values: {
+    face: "none" | "oracal651";
+    volume: "stock" | "painted";
+  },
+) {
+  await openLetters(page);
+  await fillLettersV2NoneStock(page);
+  if (values.face === "oracal651") {
+    await selectLettersFaceOracal651(page);
   }
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", values.volumeFinish);
-  if (values.volumeColor) {
-    await page.getByLabel("Culoare volum").fill(values.volumeColor);
+  if (values.volume === "painted") {
+    await selectLettersVolumePaintedRal9010(page);
   }
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();
   await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
@@ -38,7 +39,7 @@ async function confirmLetters(
 test("confirmed LETTERS product shows a read-only production plan preview", async ({
   page,
 }) => {
-  await confirmLetters(page, { faceFinish: "none", volumeFinish: "none" });
+  await confirmLetters(page, { face: "none", volume: "stock" });
   await expect(page.getByText("Total cost intern estimat: 382,50 EUR")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Cost intern curent: 382,50 EUR (complet)")).toBeVisible();
@@ -93,13 +94,12 @@ test("confirmed LETTERS product shows a read-only production plan preview", asyn
   });
 });
 
-test("vinyl face adds only the selected finish operation to the plan", async ({
+test("Oracal face adds only the selected finish operation to the plan", async ({
   page,
 }) => {
   await confirmLetters(page, {
-    faceFinish: "vinyl",
-    volumeFinish: "none",
-    faceColor: "alb",
+    face: "oracal651",
+    volume: "stock",
   });
   await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
@@ -114,9 +114,8 @@ test("vinyl face adds only the selected finish operation to the plan", async ({
 
 test("painted volume adds RAL with an honest missing provider", async ({ page }) => {
   await confirmLetters(page, {
-    faceFinish: "none",
-    volumeFinish: "painted",
-    volumeColor: "RAL 9010",
+    face: "none",
+    volume: "painted",
   });
   await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Vopsire RAL").first()).toBeVisible();

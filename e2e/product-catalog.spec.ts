@@ -1,9 +1,12 @@
 import { expect, test } from "./fixtures";
+import {
+  fillLettersV2NoneStock,
+  selectLettersFaceOracal651,
+} from "./helpers/lettersV2";
 import { clickPrimaryDestination } from "./helpers/navigation";
 import { revealSecondaryProductSurfaces } from "./helpers/surfaces";
-import { selectProductChoice } from "./helpers/productChoices";
 
-test("catalog leads to canonical product confirm and partial EIC", async ({
+test("catalog leads to canonical product confirm and complete EIC", async ({
   page,
 }) => {
   await page.goto("/");
@@ -65,13 +68,8 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
     fullPage: true,
   });
 
-  await page.getByLabel("Textul literelor").fill("WORKOS");
-  await selectProductChoice(page, "Finisaj față", "vinyl");
-  await page.getByLabel("Culoare față").fill("alb");
-  await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
-  await selectProductChoice(page, "Adâncime volum (mm)", "60");
-  await selectProductChoice(page, "Finisaj volum", "none");
-  await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
+  await fillLettersV2NoneStock(page);
+  await selectLettersFaceOracal651(page);
   await page.screenshot({
     path: "docs/worklog/screenshots/owner-surfaces-configure.png",
     fullPage: true,
@@ -140,7 +138,8 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("Debitare CNC față: 12,5 m", { exact: true })).toBeVisible();
   await expect(page.getByText("Lipire față-volum: 12,5 m", { exact: true })).toBeVisible();
   await expect(page.getByText("Montare module LED: 125 buc", { exact: true })).toBeVisible();
-  await expect(page.getByText("Costul intern rămâne parțial: Costuri încă în calibrare.")).toBeVisible();
+  await expect(page.locator(".eic-section").getByText("Complet")).toBeVisible();
+  await expect(page.getByText("Costul intern rămâne parțial: Costuri încă în calibrare.")).toHaveCount(0);
   await expect(page.locator(".eic-section").getByText("Geometrie confirmată.")).toBeVisible();
   await expect(
     page.getByText("Cantitatea de module LED nu poate fi calculată", { exact: false }),
@@ -153,8 +152,8 @@ test("catalog leads to canonical product confirm and partial EIC", async ({
   await expect(page.getByText("RETURN_CANT")).toHaveCount(0);
   await expect(page.getByText("Lungime cant")).toHaveCount(0);
   await expect(page.locator(".quote-section").getByRole("heading", { name: "Ofertă" })).toBeVisible();
-  await expect(page.locator(".quote-section").getByText("Costul intern nu este complet.")).toBeVisible();
-  await expect(page.getByText("Preț final client")).toHaveCount(0);
+  await expect(page.locator(".quote-section").getByText("Costul intern nu este complet.")).toHaveCount(0);
+  await expect(page.getByText("Preț final client: 630,53 EUR")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Previzualizare producție" })).toBeVisible();
   await expect(page.getByText("Aplicare folie").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Start" })).toHaveCount(0);
