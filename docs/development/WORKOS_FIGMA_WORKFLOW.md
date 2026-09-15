@@ -50,7 +50,11 @@ PRODUCT / DOMAIN CONTRACT
 
 Cursor owns the real behavior: fields, allowed values, requiredness, validation, readiness, calculations, persistence, Product Truth, permissions, lifecycle and snapshots.
 
-Figma may polish presentation: layout, spacing, typography, hierarchy, density, grouping, control presentation, responsive composition and accessibility presentation.
+Figma polish is not a global redesign license.
+
+```text
+FIGMA_CAN_POLISH_LAYOUT = WITHIN_AUTHORIZED_MUTABLE_REGIONS_FOR_PROTECTED_SURFACES
+```
 
 Figma must not silently change Product Truth or other domain semantics. Any Figma delta that adds/removes fields, changes allowed values, requiredness, validation, readiness, formulas, pricing, permissions, lifecycle or execution semantics returns to Owner/domain review before implementation.
 
@@ -68,28 +72,99 @@ RESEARCH
 
 Do not refresh Figma after every small code change. Refresh after a coherent UI slice is functionally stable.
 
-### Design-delta classification
+## Protected region law
 
-Before implementing a polished Figma candidate, Cursor must classify material differences as:
+WorkOS permanently distinguishes an existing accepted surface from a new or unaccepted surface.
 
 ```text
-PRESENTATION_ONLY
-LAYOUT
-SPACING
-TYPOGRAPHY
-CONTROL_PRESENTATION
-RESPONSIVE
-ACCESSIBILITY
-
-SEMANTIC_CHANGE
-PRODUCT_TRUTH_CHANGE
-NEW_FIELD
-REMOVED_FIELD
-VALIDATION_CHANGE
-STATE_CHANGE
+EXISTING_ACCEPTED_SURFACE
+NEW_OR_UNACCEPTED_SURFACE
 ```
 
-The presentation group may be implemented under an authorized UI design-delta scope. The semantic/Product Truth group requires a separate Owner/domain decision.
+### EXISTING_ACCEPTED_SURFACE
+
+A surface is protected when a living canon or an explicit Owner decision has frozen or accepted its framework. The exact protected set is surface-specific and must come from that surface's living canon.
+
+Typical framework-level regions, when that canon names them, include: global shell, branding/logo, global navigation, organization/account area, page canvas, page header, L2 / scope navigation, page padding, main floorplan, column geometry, outer panel/container grammar, footer/CTA grammar, responsive ordering, shared tokens, and field grammar.
+
+For a protected surface, Figma may not globally redesign the page. Polish is limited to the explicitly mutable content slots of that surface.
+
+Configurator V1 is an existing accepted surface. Its frozen regions are named by `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` and include:
+
+```text
+GLOBAL SHELL
+PAGE CANVAS
+PAGE HEADER
+SCOPE RAIL
+740fr / 580fr desktop floorplan
+768 Editor-before-Blueprint law
+BLUEPRINT outer container
+FOCUSED EDITOR outer container
+EDITOR footer / CTA grammar
+existing global token system
+existing field grammar
+```
+
+Configurator V1 mutable content slots:
+
+```text
+BLUEPRINT facts / content
+EDITOR fields / values
+progressive disclosure inside Editor
+field-specific control interiors
+catalog-color control interior
+catalog-roll control interior
+Review facts
+field validation presentation
+```
+
+New fields or catalog controls are content. They do not reopen the page framework.
+
+### NEW_OR_UNACCEPTED_SURFACE
+
+When a surface has no accepted or frozen framework, Figma may explore floorplan, layout, hierarchy, responsive composition, panel organization, and control presentation, subject to Product Truth, domain semantics, accessibility, and Owner direction.
+
+Once the Owner accepts that framework, later incremental work treats it as an existing accepted surface.
+
+### Figma polish boundary
+
+On a protected surface, authorized polish inside mutable slots may include spacing, typography, hierarchy, density, alignment, grouping, control interior, field layout inside the Editor body, and responsive behavior inside the slot.
+
+It must not change protected outer geometry.
+
+On a new or unaccepted surface, the same presentation verbs may apply to the undecided floorplan until Owner acceptance.
+
+### Owner reopen law
+
+A protected framework may change only through an explicit Owner decision:
+
+```text
+OWNER_REOPEN_UI_FRAMEWORK = YES
+```
+
+The decision must name the surface, the protected region(s) reopened, the purpose, and the scope.
+
+`polish this page`, `make it nicer`, or `send it through Figma` does not reopen protected regions.
+
+### Design-delta classification
+
+For every Figma → Cursor roundtrip on a protected surface, Cursor must classify material differences as:
+
+```text
+MUTABLE_PRESENTATION_DELTA
+PROTECTED_REGION_DELTA
+SEMANTIC_DELTA
+PRODUCT_TRUTH_DELTA
+```
+
+```text
+MUTABLE_PRESENTATION_DELTA   = allowed in an authorized UI polish wave
+PROTECTED_REGION_DELTA       = forbidden without OWNER_REOPEN_UI_FRAMEWORK = YES
+SEMANTIC_DELTA               = never visual-only authority
+PRODUCT_TRUTH_DELTA          = never visual-only authority
+```
+
+Finer presentation labels (`LAYOUT`, `SPACING`, `TYPOGRAPHY`, `CONTROL_PRESENTATION`, `RESPONSIVE`, `ACCESSIBILITY`) remain useful notes. They do not override this four-way classification and are not a license to rebuild a frozen floorplan.
 
 ### Figma ↔ runtime registry
 

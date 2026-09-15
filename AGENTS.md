@@ -36,6 +36,8 @@ Before any UI/UX change, also read:
 - `docs/development/WORKOS_FIGMA_WORKFLOW.md`
 - `docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md`
 
+Then determine whether the surface framework is `PROTECTED_EXISTING`, `OPEN_DESIGN`, or `UNKNOWN`. Read the surface canon. Preserve protected regions. Use Figma polish only inside authorized mutable regions. Redesigning a protected framework requires an explicit Owner reopen. New fields are not a new page framework. Do not duplicate the full law here; the authority is `docs/development/WORKOS_FIGMA_WORKFLOW.md`.
+
 Any agent must report:
 
 ```text
@@ -86,7 +88,7 @@ Read live flags, next authorized slice, Cloud/pilot gates, and UI closure from t
 - Do not create operational-service tasks before a frozen Order / Production Release.
 - Do not implement full ACM, illuminated ACM, Analyzer runtime, or a new product template without an explicit Owner GO.
 - Every future Owner-facing page requires an old-versus-new UI/UX/code audit before implementation.
-- Existing accepted surfaces use the documented Cursor → runtime → Figma polish → Cursor design-delta roundtrip. Figma can polish presentation but must not silently change Product Truth or other domain semantics. See `docs/development/WORKOS_FIGMA_WORKFLOW.md`.
+- Existing accepted surfaces use the documented Cursor → runtime → Figma polish → Cursor design-delta roundtrip. Figma can polish only authorized mutable content slots and must not silently change Product Truth, domain semantics, or a frozen page framework. See `docs/development/WORKOS_FIGMA_WORKFLOW.md`.
 - Every canonical Figma state must be registered in `docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md`; do not rely on remembered node ids from chat.
 - UI20 presentation rebuild is a vertical clean-sheet North Star over the existing domain/API. Do not resume horizontal RW2/RW3 page-by-page main integration. Do not treat current page composition as the required visual foundation. Live sequence flags live only in the roadmap.
 

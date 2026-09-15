@@ -7,6 +7,7 @@ import {
   repoRootFrom,
   verifyConfiguratorUiAuthority,
   verifyOwnerUiUxApprovalScope,
+  verifyProtectedRegionLaw,
   verifyRoadmapFc1,
   verifySessionCurrent,
   verifyTerminologyConcepts,
@@ -48,6 +49,59 @@ describe("verify-workos-docs-continuity", () => {
     const errors = [];
     verifyTerminologyConcepts("### CONCEPT = CLIENT\n\n### CONCEPT = CLIENT\n", errors);
     assert.deepEqual(errors, ["duplicate CONCEPT: CLIENT"]);
+  });
+
+  it("rejects claiming FC2 is on main", () => {
+    const errors = [];
+    verifySessionCurrent(
+      [
+        "LIVE_MAIN_AUTHORITY",
+        "GITHUB_ORIGIN_MAIN",
+        "LIVE_GITHUB_WINS = YES",
+        "DELIVERY_ROADMAP",
+        "AUTHORITY_MAP",
+        "TERMINOLOGY_CANON",
+        "CURSOR_WORKFLOW",
+        "CURSOR_PLUGIN_REGISTRY",
+        "FIGMA_WORKFLOW",
+        "FIGMA_RUNTIME_REGISTRY",
+        "PRODUCT_TRUTH_AUTHORITIES",
+        "UI_UX_AUTHORITIES",
+        "FC2A_IMPLEMENTED_LOCAL_IN_REVIEW = YES",
+        "FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW = YES",
+        "FC2D_IMPLEMENTED_LOCAL_IN_REVIEW = YES",
+        "FC2B_IMPLEMENTED_LOCAL_IN_REVIEW = YES",
+        "FC2C_IMPLEMENTED_LOCAL_IN_REVIEW = YES",
+        "FC2D_AUTHORIZED = NO",
+        "FC2B_AUTHORIZED = NO",
+        "FC2C_AUTHORIZED = NO",
+        "FC2_INTEGRATED_ON_MAIN = YES",
+        "FIGMA_WRITE = NO",
+      ].join("\n"),
+      errors,
+    );
+    assert.ok(errors.some((item) => item.includes("must not claim FC2 is integrated on main")));
+  });
+
+  it("rejects the unrestricted Figma layout-polish sentence", () => {
+    const errors = [];
+    verifyProtectedRegionLaw(
+      [
+        "EXISTING_ACCEPTED_SURFACE",
+        "NEW_OR_UNACCEPTED_SURFACE",
+        "OWNER_REOPEN_UI_FRAMEWORK",
+        "MUTABLE_PRESENTATION_DELTA",
+        "PROTECTED_REGION_DELTA",
+        "Figma may polish presentation: layout, spacing, typography, hierarchy, density, grouping, control presentation, responsive composition",
+      ].join("\n"),
+      "FRAMEWORK_CLASS PROTECTED_EXISTING",
+      "SURFACE_FRAMEWORK_STATUS",
+      "PROTECTED_EXISTING WORKOS_FIGMA_WORKFLOW.md",
+      "PROTECTED BY DEFAULT ACCORDING TO ITS CANON",
+      "WORKOS_FIGMA_WORKFLOW.md",
+      errors,
+    );
+    assert.ok(errors.some((item) => item.includes("unrestricted global layout-polish")));
   });
 
   it("rejects stale FC1 local-in-review living-roadmap copy", () => {

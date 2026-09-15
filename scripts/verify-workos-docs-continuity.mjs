@@ -8,6 +8,7 @@ const REQUIRED_DOCS = [
   "docs/governance/WORKOS_AUTHORITY_MAP.md",
   "docs/development/WORKOS_CURSOR_WORKFLOW.md",
   "docs/development/WORKOS_FIGMA_WORKFLOW.md",
+  "docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md",
   "docs/continuity/WORKOS_SESSION_CURRENT.md",
   "docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md",
   "docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md",
@@ -148,6 +149,9 @@ export function verifySessionCurrent(sessionText, errors) {
   if (/FC2C_AUTHORIZED\s*=\s*YES/.test(sessionText)) {
     fail(errors, "WORKOS_SESSION_CURRENT.md must not authorize FC2C");
   }
+  if (/FC2_INTEGRATED_ON_MAIN\s*=\s*YES/.test(sessionText)) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must not claim FC2 is integrated on main");
+  }
   if (
     !/NOT_AUTHORIZED_AFTER_FC1|NONE_AUTHORIZED_AFTER_FC1/.test(sessionText) &&
     !/FC2A_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText)
@@ -196,6 +200,18 @@ export function verifySessionCurrent(sessionText, errors) {
   ) {
     fail(errors, "WORKOS_SESSION_CURRENT.md must record the FC2C LETTERS VOLUME form slice");
   }
+  if (
+    /FC2C_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText) &&
+    !/FC2_INTEGRATED_ON_MAIN\s*=\s*NO/.test(sessionText)
+  ) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must record FC2_INTEGRATED_ON_MAIN = NO");
+  }
+  if (
+    /FC2C_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText) &&
+    !/FIGMA_WRITE\s*=\s*NO/.test(sessionText)
+  ) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must keep FIGMA_WRITE = NO until Owner authorizes Figma");
+  }
 }
 
 export function verifyRoadmapFc1(roadmapText, errors) {
@@ -227,14 +243,17 @@ export function verifyRoadmapFc1(roadmapText, errors) {
     fail(errors, "living roadmap must record FORM_COMPLETENESS = FC2C_IMPLEMENTED_LOCAL_IN_REVIEW");
   }
   if (
-    !/NEXT_PRODUCT_SLICE\s*=\s*CONFIGURATOR_LETTERS_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP/.test(
+    !/NEXT_PRODUCT_SLICE\s*=\s*CONFIGURATOR_FC2_RUNTIME_TO_FIGMA_MUTABLE_CONTENT_POLISH/.test(
       roadmapText,
     )
   ) {
     fail(
       errors,
-      "living roadmap must record NEXT_PRODUCT_SLICE = CONFIGURATOR_LETTERS_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP",
+      "living roadmap must record NEXT_PRODUCT_SLICE = CONFIGURATOR_FC2_RUNTIME_TO_FIGMA_MUTABLE_CONTENT_POLISH",
     );
+  }
+  if (/FC2_INTEGRATED_ON_MAIN\s*=\s*YES/.test(roadmapText)) {
+    fail(errors, "living roadmap must not claim FC2 is integrated on main");
   }
   if (/FORM_COMPLETENESS\s*=\s*FC1_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
     fail(errors, "living roadmap still records FC1 as local-in-review");
@@ -249,11 +268,13 @@ export function verifyRoadmapFc1(roadmapText, errors) {
     fail(errors, "living roadmap still records FC2B as the current form-completeness head");
   }
   if (
-    !/NEXT_PRODUCT_GATE\s*=\s*OWNER_REVIEW_FC2C_THEN_LETTERS_ROUNDTRIP/.test(roadmapText)
+    !/NEXT_PRODUCT_GATE\s*=\s*EXACT_HEAD_CI_THEN_OWNER_REVIEW_BEFORE_FIGMA_MUTABLE_POLISH/.test(
+      roadmapText,
+    )
   ) {
     fail(
       errors,
-      "living roadmap must record NEXT_PRODUCT_GATE = OWNER_REVIEW_FC2C_THEN_LETTERS_ROUNDTRIP",
+      "living roadmap must record NEXT_PRODUCT_GATE = EXACT_HEAD_CI_THEN_OWNER_REVIEW_BEFORE_FIGMA_MUTABLE_POLISH",
     );
   }
 }
@@ -433,6 +454,66 @@ export function verifyOwnerUiUxApprovalScope(
   }
 }
 
+export function verifyProtectedRegionLaw(
+  figmaWorkflowText,
+  figmaRegistryText,
+  cursorWorkflowText,
+  agentsText,
+  bootstrapText,
+  frameworkText,
+  errors,
+) {
+  if (!/EXISTING_ACCEPTED_SURFACE/.test(figmaWorkflowText)) {
+    fail(errors, "WORKOS_FIGMA_WORKFLOW.md must distinguish EXISTING_ACCEPTED_SURFACE");
+  }
+  if (!/NEW_OR_UNACCEPTED_SURFACE/.test(figmaWorkflowText)) {
+    fail(errors, "WORKOS_FIGMA_WORKFLOW.md must distinguish NEW_OR_UNACCEPTED_SURFACE");
+  }
+  if (!/OWNER_REOPEN_UI_FRAMEWORK/.test(figmaWorkflowText)) {
+    fail(errors, "WORKOS_FIGMA_WORKFLOW.md must record OWNER_REOPEN_UI_FRAMEWORK");
+  }
+  if (!/MUTABLE_PRESENTATION_DELTA/.test(figmaWorkflowText)) {
+    fail(errors, "WORKOS_FIGMA_WORKFLOW.md must classify MUTABLE_PRESENTATION_DELTA");
+  }
+  if (!/PROTECTED_REGION_DELTA/.test(figmaWorkflowText)) {
+    fail(errors, "WORKOS_FIGMA_WORKFLOW.md must classify PROTECTED_REGION_DELTA");
+  }
+  if (
+    /Figma may polish presentation: layout, spacing, typography, hierarchy, density, grouping, control presentation, responsive composition/.test(
+      figmaWorkflowText,
+    )
+  ) {
+    fail(
+      errors,
+      "WORKOS_FIGMA_WORKFLOW.md must not keep the unrestricted global layout-polish sentence",
+    );
+  }
+  if (!/FRAMEWORK_CLASS/.test(figmaRegistryText)) {
+    fail(errors, "WORKOS_FIGMA_RUNTIME_REGISTRY.md must record FRAMEWORK_CLASS");
+  }
+  if (!/PROTECTED_EXISTING/.test(figmaRegistryText)) {
+    fail(errors, "WORKOS_FIGMA_RUNTIME_REGISTRY.md must record PROTECTED_EXISTING");
+  }
+  if (!/SURFACE_FRAMEWORK_STATUS/.test(cursorWorkflowText)) {
+    fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record SURFACE_FRAMEWORK_STATUS");
+  }
+  if (!/PROTECTED_EXISTING/.test(agentsText) || !/WORKOS_FIGMA_WORKFLOW.md/.test(agentsText)) {
+    fail(errors, "AGENTS.md must point UI/UX work at the Figma protected-region law");
+  }
+  if (!/PROTECTED BY DEFAULT ACCORDING TO ITS CANON/.test(bootstrapText)) {
+    fail(
+      errors,
+      "WORKOS_NEW_SESSION_BOOTSTRAP.md must reconstruct existing accepted surfaces as protected by default",
+    );
+  }
+  if (!/WORKOS_FIGMA_WORKFLOW.md/.test(frameworkText)) {
+    fail(
+      errors,
+      "CONFIGURATOR_V1_UI_FRAMEWORK.md must cross-reference the general protected-region law",
+    );
+  }
+}
+
 export function verifyOwnerUpdateRule(agentsText, cursorWorkflowText, errors) {
   if (!agentsText.includes("OWNER_UPDATE_LINKS")) {
     fail(errors, "AGENTS.md must require OWNER_UPDATE_LINKS");
@@ -488,6 +569,7 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   const cursorWorkflow = readRepoFile(repoRoot, "docs/development/WORKOS_CURSOR_WORKFLOW.md");
   const figmaWorkflow = readRepoFile(repoRoot, "docs/development/WORKOS_FIGMA_WORKFLOW.md");
   const framework = readRepoFile(repoRoot, "docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md");
+  const figmaRegistry = readRepoFile(repoRoot, "docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md");
 
   verifyReadmeIndex(readme, errors);
   verifyDocumentRoles(repoRoot, errors);
@@ -500,6 +582,15 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   verifyConfiguratorUiAuthority(framework, figmaWorkflow, authorityMap, session, errors);
   const bootstrap = readRepoFile(repoRoot, "docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md");
   verifyOwnerUiUxApprovalScope(session, figmaWorkflow, authorityMap, bootstrap, roadmap, errors);
+  verifyProtectedRegionLaw(
+    figmaWorkflow,
+    figmaRegistry,
+    cursorWorkflow,
+    agents,
+    bootstrap,
+    framework,
+    errors,
+  );
 
   const guarded = [
     ...CLASSIFIED_DOCS,

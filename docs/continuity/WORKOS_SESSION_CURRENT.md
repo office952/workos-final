@@ -47,16 +47,18 @@ Do not treat a cached SHA as current integration authority. This file must not b
 This block is a checkpoint copied from the living roadmap plus live GitHub evidence. Re-read those authorities before acting. Do not treat this file as the delivery sequence.
 
 ```text
-LAST_RECONCILED_MAIN_BASE              = 39190b4981edbfe9ef28d1aa2c69e46f2a684a04
+LAST_RECONCILED_MAIN_BASE              = aacbc212bf7149acca0811e97c05e9c4f21df4e6
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
+PR32_PROTECTED_REGION_LAW              = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = CONFIGURATOR_LETTERS_V2_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP
-NEXT_PRODUCT_SLICE                     = CONFIGURATOR_LETTERS_RUNTIME_TO_FIGMA_POLISH_ROUNDTRIP
-NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2C_THEN_LETTERS_ROUNDTRIP
+CURRENT_PRODUCT_SLICE                  = FC2_RECONCILE_WITH_LIVE_MAIN
+NEXT_PRODUCT_SLICE                     = CONFIGURATOR_FC2_RUNTIME_TO_FIGMA_MUTABLE_CONTENT_POLISH
+NEXT_PRODUCT_GATE                      = EXACT_HEAD_CI_THEN_OWNER_REVIEW_BEFORE_FIGMA_MUTABLE_POLISH
 FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
+FC2_INTEGRATED_ON_MAIN                 = NO
 FC2A_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
-FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW      = YES
+FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2D_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2B_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2C_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
@@ -64,6 +66,9 @@ FC2D_AUTHORIZED                        = NO
 FC2B_AUTHORIZED                        = NO
 FC2C_AUTHORIZED                        = NO
 FC2_DECISION_PACK                      = ACCEPTED_WITH_TARGETED_AMENDMENTS
+SURFACE_FRAMEWORK_STATUS               = PROTECTED_EXISTING
+OWNER_REOPEN_UI_FRAMEWORK              = NO
+FIGMA_WRITE                            = NO
 ```
 
 ### Owner-accepted items relevant to current position
@@ -78,7 +83,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, the FC2B LETTERS FACE V2 form + catalog resolver, and the FC2C LETTERS VOLUME/CANT V2 form + catalog resolver, now reconciled onto live main `39190b4` on `feat/fc2-letters-v2-roundtrip`. Historical LETTERS templateVersion = 1 snapshots stay on the V1 form. Main methodology files (`AGENTS.md`, Figma workflow, Figma runtime registry, new-session bootstrap, Cursor workflow) remain the current-main versions. This slice may write Figma design candidates only. Do not implement Figma polish back into runtime, merge FC2, or resume PURE CLIMATE from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, the FC2B LETTERS FACE V2 form + catalog resolver, and the FC2C LETTERS VOLUME/CANT V2 form + catalog resolver. Those slices are `IMPLEMENTED_LOCAL_IN_REVIEW` on `feat/fc2-letters-v2-roundtrip` / PR #31. They are not on `origin/main`. Live main `aacbc21` includes the protected-region law (PR #32). Current methodology files on this branch are the live-main versions. Do not write Figma, do not merge FC2, and do not resume PURE CLIMATE from this file.
 
 ### Accepted advisories
 
