@@ -67,13 +67,14 @@ Related living authority:
 Recorded against merged `origin/main`. Harness V2 is engineering enablement only. It is not Product Truth and not a second roadmap. Historical UI20 milestone blocks below remain historical.
 
 ```text
-ORIGIN_MAIN                          = c64543a0da21cb548b6b53ad5429c0dcecfdb833
+ORIGIN_MAIN                          = 756b9f6f537cf5ee571583577ef2552d28a0923b
 PR24_CONFIGURATOR_UI_FRAMEWORK       = INTEGRATED_ON_MAIN
 CONFIGURATOR_UI_UX_FRAMEWORK         = FROZEN_V1
 CURRENT_TOOLING_ENABLEMENT           = CURSOR_WORKOS_HARNESS_V2
-CURSOR_WORKOS_HARNESS_V2             = CURRENT_TOOLING_ENABLEMENT_SLICE
+CURSOR_WORKOS_HARNESS_V2             = INTEGRATED_ON_MAIN
 NEXT_PRODUCT_PROGRAM                 = CONFIGURATOR_FORM_COMPLETENESS
-FORM_COMPLETENESS                    = NEXT_PRODUCT_PROGRAM / NOT_STARTED
+FORM_COMPLETENESS_AUDIT_V1           = ACCEPTED
+FORM_COMPLETENESS                    = FC1_IMPLEMENTED_LOCAL_IN_REVIEW
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE

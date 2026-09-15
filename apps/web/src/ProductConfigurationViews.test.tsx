@@ -198,6 +198,65 @@ describe("Product configuration views", () => {
     expect(screen.queryByText("ProductTruth")).not.toBeInTheDocument();
   });
 
+  it("does not present FIXED_BY_PRODUCT ACM thickness as operator-entered after confirm", () => {
+    const acmTemplate = getProductTemplate("PRD-ACM-CASSETTE-NONE");
+    if (!acmTemplate) {
+      throw new Error("ACM template missing");
+    }
+    const acmTruth: ProductTruth = {
+      ...truth,
+      templateCode: acmTemplate.code,
+      templateVersion: acmTemplate.version,
+      selectedComponentIds: ["FACE", "BACK"],
+      measurements: [
+        {
+          componentId: "FACE",
+          fieldId: "face.thicknessMm",
+          source: "OPERATOR_MANUAL",
+          unit: "mm",
+          value: 3,
+          confirmed: true,
+          label: "Grosime ACM",
+        },
+      ],
+    };
+    render(
+      <ConfirmedSummary
+        aggregate={aggregate}
+        truth={acmTruth}
+        fixedFieldIds={Object.keys(acmTemplate.fixedValues)}
+      />,
+    );
+    expect(screen.queryByText(/Grosime ACM: 3 mm \(introdus de operator\)/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/introdus de operator/)).not.toBeInTheDocument();
+  });
+
+  it("hides FIXED_BY_PRODUCT thickness even when ConfirmedSummary is not passed fixedFieldIds", () => {
+    const acmTemplate = getProductTemplate("PRD-ACM-CASSETTE-NONE");
+    if (!acmTemplate) {
+      throw new Error("ACM template missing");
+    }
+    const acmTruth: ProductTruth = {
+      ...truth,
+      templateCode: acmTemplate.code,
+      templateVersion: acmTemplate.version,
+      selectedComponentIds: ["FACE", "BACK"],
+      measurements: [
+        {
+          componentId: "FACE",
+          fieldId: "face.thicknessMm",
+          source: "OPERATOR_MANUAL",
+          unit: "mm",
+          value: 3,
+          confirmed: true,
+          label: "Grosime ACM",
+        },
+      ],
+    };
+    render(<ConfirmedSummary aggregate={aggregate} truth={acmTruth} />);
+    expect(screen.queryByText(/Grosime ACM: 3 mm \(introdus de operator\)/)).not.toBeInTheDocument();
+  });
+
   it("keeps EIC readable without dominating with rates", () => {
     render(<EicSection eic={eic} aggregate={aggregate} />);
     expect(screen.getByText("Total cost intern estimat: 595,00 EUR")).toBeInTheDocument();

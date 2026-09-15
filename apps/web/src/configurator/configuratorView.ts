@@ -130,7 +130,6 @@ const ACM_SECTION_LABEL: Record<string, string> = {
   ROOT: "PRODUS",
   FACE: "Corp casetat",
   BACK: "Cadru intern",
-  LIGHTING: "Iluminare",
 };
 
 export function configuratorProductKind(
@@ -242,20 +241,66 @@ export function formatConfiguratorValue(
   return String(value);
 }
 
-function identityComponentId(factId: string): string {
-  if (factId === "lighting" || factId.startsWith("lighting.")) {
-    return "LIGHTING";
+function productComponentIds(template: ProductTemplate): readonly string[] {
+  return ["ROOT", ...template.components.map((component) => component.id)];
+}
+
+function identityComponentId(factId: string, template: ProductTemplate): string {
+  const mapped =
+    factId === "lighting" || factId.startsWith("lighting.")
+      ? "LIGHTING"
+      : factId.startsWith("face.")
+        ? "FACE"
+        : factId.startsWith("volume.")
+          ? "VOLUME"
+          : factId.startsWith("back.")
+            ? "BACK"
+            : "ROOT";
+  return productComponentIds(template).includes(mapped) ? mapped : "ROOT";
+}
+
+export function selectedConfigurationFacts(
+  template: ProductTemplate,
+  schema: FormSchema,
+  values: DraftValues,
+): string[] {
+  const selectedIds = selectedComponentIds(template, values);
+  return schema.sections.flatMap((section) =>
+    section.fields.flatMap((field) => {
+      if (!isFieldVisible(field, values, selectedIds)) {
+        return [];
+      }
+      const raw = values[field.id];
+      if (raw === undefined || raw === null || raw === "") {
+        return [];
+      }
+      if (field.type === "boolean") {
+        return raw === true ? [field.label] : [];
+      }
+      const option = field.options?.find((item) => item.value === String(raw));
+      return [`${field.label}: ${option?.label ?? String(raw)}`];
+    }),
+  );
+}
+
+export function configuratorStatusLabel(input: {
+  readiness: ProductDefinition["readiness"];
+  modulesValidated: number;
+  modulesTotal: number;
+  missingCount: number;
+}): string {
+  if (input.readiness === "ready") {
+    return "Configurare completă";
   }
-  if (factId.startsWith("face.")) {
-    return "FACE";
+  const modules = `${input.modulesValidated} din ${input.modulesTotal} module validate`;
+  if (input.modulesValidated === input.modulesTotal && input.missingCount > 0) {
+    const fields =
+      input.missingCount === 1
+        ? "1 câmp obligatoriu lipsă"
+        : `${input.missingCount} câmpuri obligatorii lipsă`;
+    return `${modules} · ${fields}`;
   }
-  if (factId.startsWith("volume.")) {
-    return "VOLUME";
-  }
-  if (factId.startsWith("back.")) {
-    return "BACK";
-  }
-  return "ROOT";
+  return modules;
 }
 
 function visibleFields(
@@ -280,6 +325,45 @@ function compositionSummary(
   return displays.slice(0, 4).join(" · ");
 }
 
+function measurementDisplay(value: number, unit: "mm" | "mm2"): string {
+  return unit === "mm2" ? `${value} mm²` : `${value} ${unit}`;
+}
+
+function inheritedAreaFacts(
+  template: ProductTemplate,
+  componentId: string,
+  authority: ProductDefinition,
+): BlueprintFact[] {
+  return template.components
+    .filter(
+      (component) =>
+        component.id === componentId &&
+        component.inputMapping?.confirmedAreaMm2FromComponentId,
+    )
+    .flatMap((component) => {
+      const sourceId = component.inputMapping?.confirmedAreaMm2FromComponentId;
+      if (!sourceId) {
+        return [];
+      }
+      const sourceArea = authority.measurements.find(
+        (measurement) =>
+          measurement.componentId === sourceId && measurement.unit === "mm2",
+      );
+      if (!sourceArea) {
+        return [];
+      }
+      return [
+        {
+          id: `inherited:${component.id}:${sourceArea.fieldId}`,
+          label: "Suprafață",
+          display: measurementDisplay(sourceArea.value, sourceArea.unit),
+          kind: "inherited" as const,
+          required: false,
+        },
+      ];
+    });
+}
+
 function blueprintSectionsFor(
   kind: ConfiguratorProductKind,
   template: ProductTemplate,
@@ -288,18 +372,13 @@ function blueprintSectionsFor(
   authority: ProductDefinition,
 ): BlueprintSection[] {
   const missingFieldIds = new Set(authority.missing.map((item) => item.fieldId));
-  const componentOrder =
-    kind === "acm"
-      ? ["ROOT", "FACE", "BACK", "LIGHTING"]
-      : kind === "letters"
-        ? ["ROOT", "FACE", "VOLUME", "BACK", "LIGHTING"]
-        : ["ROOT", ...template.components.map((component) => component.id)];
+  const componentOrder = productComponentIds(template);
 
   return componentOrder.flatMap((componentId) => {
     const facts: BlueprintFact[] = [];
 
     for (const identity of template.identityFacts) {
-      if (identityComponentId(identity.id) !== componentId) {
+      if (identityComponentId(identity.id, template) !== componentId) {
         continue;
       }
       facts.push({
@@ -338,6 +417,8 @@ function blueprintSectionsFor(
       });
     }
 
+    facts.push(...inheritedAreaFacts(template, componentId, authority));
+
     for (const measurement of authority.measurements) {
       if (measurement.componentId !== componentId || !measurement.label) {
         continue;
@@ -345,11 +426,13 @@ function blueprintSectionsFor(
       if (facts.some((fact) => fact.id === measurement.fieldId)) {
         continue;
       }
-      const unit = measurement.unit === "mm2" ? "mm²" : measurement.unit;
+      if (measurement.fieldId in template.fixedValues) {
+        continue;
+      }
       facts.push({
         id: `derived:${measurement.fieldId}`,
         label: measurement.label,
-        display: `${measurement.value} ${unit}`,
+        display: measurementDisplay(measurement.value, measurement.unit),
         kind: "derived",
         required: false,
       });
@@ -406,28 +489,10 @@ export function projectConfiguratorView(
     contributingComplete,
   );
   const sections = blueprintSectionsFor(kind, template, values, fields, compiled);
+  const productSectionIds = new Set(productComponentIds(template));
   const contributing = scopesWithCompletion.filter((scope) => scope.id !== "compozitie");
   const compositionItems: CompositionReviewItem[] = contributing.map((scope) => {
-    const scopeSections = sections.filter((section) => {
-      if (scope.id === "panou-acm") {
-        return (
-          section.id === "ROOT" ||
-          section.id === "FACE" ||
-          section.id === "BACK" ||
-          section.id === "LIGHTING"
-        );
-      }
-      if (scope.id === "litere") {
-        return (
-          section.id === "ROOT" ||
-          section.id === "FACE" ||
-          section.id === "VOLUME" ||
-          section.id === "BACK" ||
-          section.id === "LIGHTING"
-        );
-      }
-      return false;
-    });
+    const scopeSections = sections.filter((section) => productSectionIds.has(section.id));
     return {
       scopeId: scope.id,
       label: scope.label,
@@ -437,18 +502,16 @@ export function projectConfiguratorView(
     };
   });
 
-  const editorComponentIds =
-    kind === "acm"
-      ? ["ROOT", "FACE", "BACK"]
-      : kind === "letters"
-        ? ["ROOT", "FACE", "VOLUME", "BACK", "LIGHTING"]
-        : schema.sections.map((section) => section.componentId);
+  const editorComponentIds = [...productComponentIds(template)];
 
   return {
     title: template.label,
-    statusLabel: complete
-      ? "Configurare completă"
-      : `${modulesValidated} din ${modules.length} module validate`,
+    statusLabel: configuratorStatusLabel({
+      readiness: compiled.readiness,
+      modulesValidated,
+      modulesTotal: modules.length,
+      missingCount: compiled.missing.length,
+    }),
     complete,
     modulesValidated,
     modulesTotal: modules.length,

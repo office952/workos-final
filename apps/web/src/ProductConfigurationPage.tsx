@@ -9,7 +9,6 @@ import {
   type EicResult,
   type ExecutionPlanPreview,
   type ExecutionPlanView,
-  type FormSchema,
   type LiveJobCommercial,
   type ProductAggregate,
   type ProductDefinition,
@@ -27,6 +26,7 @@ import { ClientLink } from "./ClientLink";
 import { ConfiguratorWorkspace } from "./configurator/ConfiguratorWorkspace";
 import {
   projectConfiguratorView,
+  selectedConfigurationFacts,
   type ConfiguratorScopeId,
 } from "./configurator/configuratorView";
 import { createCustomer, fetchCustomers } from "./customerApi";
@@ -838,7 +838,7 @@ export function ProductConfigurationPage() {
   const requestContext =
     restoredRequest.kind === "ready" ? restoredRequest.detail : null;
 
-  const summaryFacts = selectedConfigurationFacts(formSchema, values);
+  const summaryFacts = selectedConfigurationFacts(template, formSchema, values);
   const installationScope =
     confirmed?.installationScope ?? requestContext?.installationScope ?? null;
   const summaryStatus = confirmed
@@ -929,7 +929,11 @@ export function ProductConfigurationPage() {
             </>
           }
           reviewNote={
-            reviewing && definition && definition.measurements.length > 0 ? (
+            reviewing &&
+            definition &&
+            definition.measurements.some(
+              (measurement) => !(measurement.fieldId in template.fixedValues),
+            ) ? (
               <p className="cfg-review-note">
                 Măsurătorile de mai sus sunt introduse de operator. Nu sunt geometrie
                 calculată de WorkOS.
@@ -1061,6 +1065,7 @@ export function ProductConfigurationPage() {
           installationScope={installationScope}
           installationMode={requestContext?.installationOffer.mode ?? null}
           installationFacts={requestContext?.installationFacts ?? null}
+          fixedFieldIds={Object.keys(template.fixedValues)}
           prequoteFloorplan={prequoteFloorplan}
         />
       ) : null}
@@ -1121,6 +1126,7 @@ function ConfirmedCommercialWorkspace({
   installationMode = null,
   installationFacts = null,
   prequoteFloorplan = false,
+  fixedFieldIds = [],
 }: {
   confirmed: ConfirmedProduct;
   busy: boolean;
@@ -1139,6 +1145,7 @@ function ConfirmedCommercialWorkspace({
   installationMode?: OperationalServiceProviderMode | null;
   installationFacts?: RequestDetailProjection["installationFacts"];
   prequoteFloorplan?: boolean;
+  fixedFieldIds?: readonly string[];
 }) {
   const commercialRelease =
     confirmed.snapshot &&
@@ -1185,7 +1192,11 @@ function ConfirmedCommercialWorkspace({
       {quoteFrozen ? (
         <details className="phase-summary">
           <summary>Configurație confirmată</summary>
-          <ConfirmedSummary aggregate={confirmed.aggregate} truth={confirmed.truth} />
+          <ConfirmedSummary
+            aggregate={confirmed.aggregate}
+            truth={confirmed.truth}
+            fixedFieldIds={fixedFieldIds}
+          />
         </details>
       ) : (
         <>
@@ -1193,6 +1204,7 @@ function ConfirmedCommercialWorkspace({
             aggregate={confirmed.aggregate}
             truth={confirmed.truth}
             compact={prequoteFloorplan}
+            fixedFieldIds={fixedFieldIds}
           />
           <div className="action-row">
             <button
@@ -1331,25 +1343,6 @@ function ConfirmedCommercialWorkspace({
         </details>
       )}
     </div>
-  );
-}
-
-function selectedConfigurationFacts(
-  schema: FormSchema,
-  values: DraftValues,
-): string[] {
-  return schema.sections.flatMap((section) =>
-    section.fields.flatMap((field) => {
-      const raw = values[field.id];
-      if (raw === undefined || raw === null || raw === "") {
-        return [];
-      }
-      if (field.type === "boolean") {
-        return raw === true ? [field.label] : [];
-      }
-      const option = field.options?.find((item) => item.value === String(raw));
-      return [`${field.label}: ${option?.label ?? String(raw)}`];
-    }),
   );
 }
 
