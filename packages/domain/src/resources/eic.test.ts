@@ -6,6 +6,7 @@ import {
   confirmReviewedDefinition,
 } from "../product/compiler.js";
 import { seededDisplayLabelCatalog } from "../product/displayMetadata.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
@@ -193,8 +194,7 @@ describe("EIC", () => {
   it("keeps vinyl material and application labor separate when vinyl is selected", () => {
     const { aggregate, composition } = confirmedSpine({
       ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
     });
     const eic = compileEic(aggregate, composition);
     expect(lineCost(eic, "MAT-VINYL-ORACAL-651")).toBe(2.25);
@@ -242,8 +242,7 @@ describe("EIC", () => {
     ({ source, classification }) => {
       const { aggregate, composition } = confirmedSpine({
         ...readyValues,
-        "face.finish": "vinyl",
-        "face.color": "alb",
+        ...lettersFaceReadyValues("651"),
       });
       const remapped: CostEvidence[] = costEvidence.map((row) => ({
         ...row,
@@ -260,8 +259,7 @@ describe("EIC", () => {
   it("stays PARTIAL when a required CostEvidence row is missing", () => {
     const { aggregate, composition } = confirmedSpine({
       ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
     });
     const withoutVinyl = costEvidence.filter((item) => item.resourceId !== "MAT-VINYL-ORACAL-651");
     const eic = compileEic(aggregate, composition, withoutVinyl);

@@ -25,6 +25,7 @@ import {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import type { DraftValues } from "../product/types.js";
 import { compileEic } from "../resources/eic.js";
 import { freezeAcceptedProductionSnapshot } from "../production/snapshot.js";
@@ -288,8 +289,7 @@ describe("LETTERS execution golden path", () => {
   it("keeps the vinyl face operation frozen without fabricating paint or extra providers", () => {
     const vinyl = freeze({
       ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
     });
     const record = materializeExecutionPlanFromSnapshot(vinyl);
     const view = projectExecutionPlanView(record);

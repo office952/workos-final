@@ -50,15 +50,17 @@ LAST_RECONCILED_MAIN_BASE              = 8c2223b3a7853e6c0ebb788e44046401985d7f1
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = FC2D_RESOURCE_IDENTITIES_AND_FUNCTIONAL_PROVISIONAL_COSTING
-NEXT_PRODUCT_SLICE                     = FC2B_LETTERS_FACE_FORM_AND_RESOLVER_INTEGRATION
-NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2D_THEN_FC2B
+CURRENT_PRODUCT_SLICE                  = FC2B_LETTERS_FACE_FORM_AND_RESOLVER_INTEGRATION
+NEXT_PRODUCT_SLICE                     = FC2C_LETTERS_VOLUME_CANT_FORM_AND_RESOLVER
+NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2B_THEN_FC2C
 FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
 FC2A_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2A1_IMPLEMENTED_LOCAL_IN_REVIEW      = YES
 FC2D_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2B_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
 FC2D_AUTHORIZED                        = NO
 FC2B_AUTHORIZED                        = NO
+FC2C_AUTHORIZED                        = NO
 FC2_DECISION_PACK                      = ACCEPTED_WITH_TARGETED_AMENDMENTS
 ```
 
@@ -74,7 +76,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, and the FC2D resource identities plus functional provisional costing, all local in review. That foundation is not bound to the live LETTERS FormSchema. Do not start FC2B, live finish activation, or a real-Cloud backfill from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation, the FC2A1 cost-readiness / capability-semantics correction, the FC2D resource identities plus functional provisional costing, and the FC2B LETTERS FACE V2 form + catalog resolver, all local in review. Historical LETTERS templateVersion = 1 snapshots stay on the V1 form. Do not start FC2C, refresh Figma, or resume PURE CLIMATE from this file.
 
 ### Accepted advisories
 

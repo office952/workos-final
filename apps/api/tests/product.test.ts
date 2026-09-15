@@ -9,6 +9,7 @@ import {
   PLACE_LED_MODULES_ID,
   WC_ASSEMBLY_01_ID,
   WC_ASSEMBLY_02_ID,
+  lettersFaceReadyValues,
 } from "@workos-final/domain";
 import { createApp } from "../src/app.js";
 import {
@@ -230,7 +231,7 @@ describe("product configuration API", () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
+          values: { ...readyValues, ...lettersFaceReadyValues("651") },
         }),
       },
     );
@@ -791,8 +792,7 @@ describe("product configuration API", () => {
       body: JSON.stringify({
         values: {
           ...readyValues,
-          "face.finish": "vinyl",
-          "face.color": "alb",
+          ...lettersFaceReadyValues("651"),
         },
       }),
     });
@@ -828,7 +828,7 @@ describe("product configuration API", () => {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          values: { ...readyValues, "face.finish": "vinyl", "face.color": "alb" },
+          values: { ...readyValues, ...lettersFaceReadyValues("651") },
         }),
       },
     );

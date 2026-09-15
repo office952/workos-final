@@ -6,6 +6,7 @@ import {
   confirmReviewedDefinition,
 } from "../product/compiler.js";
 import { seededDisplayLabelCatalog } from "../product/displayMetadata.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import {
   CANONICAL_PRODUCT_CODE,
   frontlitPlexiAl06FormSchema,
@@ -247,8 +248,7 @@ describe("commercial configuration gate", () => {
     const vinyl = projectCommercialPrice(
       confirmedEic({
         ...readyValues,
-        "face.finish": "vinyl",
-        "face.color": "alb",
+        ...lettersFaceReadyValues("651"),
       }),
     );
     const painted = projectCommercialPrice(

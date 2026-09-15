@@ -4,6 +4,8 @@ import {
   compileDefinition,
   getFormSchemaForTemplate,
   getProductTemplate,
+  lettersFaceReadyValues,
+  type DraftValues,
 } from "@workos-final/domain";
 import { describe, expect, it } from "vitest";
 import {
@@ -38,11 +40,9 @@ function acmTemplate() {
   return { template, schema };
 }
 
-const lettersFilled = {
+const lettersFilled: DraftValues = {
   "root.inscription": "WORKOS",
-  "face.finish": "vinyl",
-  "face.color": "alb",
-  "face.confirmedAreaMm2": 250000,
+  ...lettersFaceReadyValues("651"),
   "volume.depthMm": "60",
   "volume.finish": "none",
   "volume.confirmedPerimeterMm": 12500,
@@ -414,7 +414,11 @@ describe("projectConfiguratorView", () => {
 const LETTERS_SCHEMA_FIELD_IDS = [
   "root.inscription",
   "face.finish",
-  "face.color",
+  "face.vinylSeries",
+  "face.colorId",
+  "face.rollProfileId",
+  "face.printRollProfileId",
+  "face.lamination",
   "face.confirmedAreaMm2",
   "volume.depthMm",
   "volume.finish",
@@ -452,11 +456,11 @@ describe("form completeness FC1 projection", () => {
     );
   });
 
-  it("B1 — hidden vinyl color stays in draft but is absent from summary and compile", () => {
+  it("B1 — hidden Oracal color stays in draft but is absent from summary and compile", () => {
     const { template, schema } = lettersTemplate();
-    const vinyl = { ...lettersFilled, "face.finish": "vinyl", "face.color": "red" };
-    const none = { ...vinyl, "face.finish": "none" };
-    const vinylFacts = selectedConfigurationFacts(template, schema, vinyl);
+    const oracal: DraftValues = { ...lettersFilled };
+    const none: DraftValues = { ...oracal, "face.finish": "none" };
+    const oracalFacts = selectedConfigurationFacts(template, schema, oracal);
     const noneFacts = selectedConfigurationFacts(template, schema, none);
     const compiledNone = compileDefinition(template, schema, {
       templateCode: template.code,
@@ -469,14 +473,14 @@ describe("form completeness FC1 projection", () => {
       context,
     });
 
-    expect(vinylFacts.some((fact) => fact.includes("Culoare față"))).toBe(true);
-    expect(noneFacts.some((fact) => fact.includes("Culoare față"))).toBe(false);
-    expect(compiledNone.values["face.color"]).toBeUndefined();
+    expect(oracalFacts.some((fact) => fact.includes("Culoare"))).toBe(true);
+    expect(noneFacts.some((fact) => fact.includes("Culoare:"))).toBe(false);
+    expect(compiledNone.values["face.colorId"]).toBeUndefined();
     expect(compiledNone.readiness).toBe("ready");
     expect(
-      noneView.sections.flatMap((section) => section.facts).some((fact) => fact.id === "face.color"),
+      noneView.sections.flatMap((section) => section.facts).some((fact) => fact.id === "face.colorId"),
     ).toBe(false);
-    expect(none["face.color"]).toBe("red");
+    expect(none["face.colorId"]).toBe(oracal["face.colorId"]);
   });
 
   it("B2 — LETTERS BACK projects canonical FACE area inheritance only", () => {

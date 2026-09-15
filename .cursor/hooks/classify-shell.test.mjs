@@ -232,6 +232,10 @@ test("direct Playwright entrypoints are denied and isolated runner is allowed", 
     permission("node .cursor/run-isolated-e2e.mjs --policy-only"),
     "allow",
   );
+  assert.equal(
+    permission("node .cursor/run-isolated-e2e.mjs -- e2e/letters-face-v2.spec.ts --retries=0"),
+    "allow",
+  );
 });
 
 test("uncertain commands deny and never ask", () => {

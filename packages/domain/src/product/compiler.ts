@@ -1,3 +1,11 @@
+import type { OrganizationFinishOverlay } from "../finishes/types.js";
+import {
+  formatLettersFaceField,
+  isLettersFaceV2Template,
+  normalizeLettersFaceDraft,
+  projectLettersFaceOptions,
+  resolveLettersFaceDraft,
+} from "../finishes/lettersFace.js";
 import {
   collectComponentMeasurements,
   evaluateProductComponents,
@@ -17,6 +25,10 @@ import type {
   ProductTruth,
   VisibilityRule,
 } from "./types.js";
+
+export type CompileDefinitionContext = {
+  organization?: OrganizationFinishOverlay;
+};
 
 export function selectedComponentIds(
   template: ProductTemplate,
@@ -78,21 +90,29 @@ function isValidValue(field: FormField, value: DraftValue | undefined): boolean 
   if (isEmpty(value)) {
     return false;
   }
-  if (field.type === "number") {
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-      return false;
+  switch (field.type) {
+    case "number":
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return false;
+      }
+      if (field.min !== undefined && value < field.min) {
+        return false;
+      }
+      return true;
+    case "select":
+      return Boolean(field.options?.some((option) => option.value === value));
+    case "boolean":
+      return typeof value === "boolean";
+    case "text":
+      return typeof value === "string" && value.trim().length > 0;
+    case "catalog_color":
+    case "catalog_roll":
+      return typeof value === "string" && value.trim().length > 0;
+    default: {
+      const _exhaustive: never = field.type;
+      return _exhaustive;
     }
-    if (field.min !== undefined && value < field.min) {
-      return false;
-    }
   }
-  if (field.type === "select" && field.options) {
-    return field.options.some((option) => option.value === value);
-  }
-  if (field.type === "boolean") {
-    return typeof value === "boolean";
-  }
-  return true;
 }
 
 function allFields(schema: FormSchema): FormField[] {
@@ -103,8 +123,12 @@ export function compileDefinition(
   template: ProductTemplate,
   schema: FormSchema,
   draft: DraftConfiguration,
+  context: CompileDefinitionContext = {},
 ): ProductDefinition {
-  const selectedIds = selectedComponentIds(template, draft.values);
+  const draftValues = isLettersFaceV2Template(template)
+    ? normalizeLettersFaceDraft(draft.values)
+    : draft.values;
+  const selectedIds = selectedComponentIds(template, draftValues);
   const missing: MissingInput[] = [];
   const values: DraftValues = { ...template.fixedValues };
 
@@ -117,11 +141,11 @@ export function compileDefinition(
     if (!belongsToSelected) {
       continue;
     }
-    if (!isFieldVisible(field, draft.values, selectedIds)) {
+    if (!isFieldVisible(field, draftValues, selectedIds)) {
       continue;
     }
 
-    const value = draft.values[field.id];
+    const value = draftValues[field.id];
     if (field.required && !isValidValue(field, value)) {
       missing.push({
         fieldId: field.id,
@@ -132,6 +156,28 @@ export function compileDefinition(
     }
     if (!isEmpty(value) && isValidValue(field, value)) {
       values[field.id] = value as DraftValue;
+    }
+  }
+
+  if (isLettersFaceV2Template(template)) {
+    const resolved = resolveLettersFaceDraft({
+      template,
+      values,
+      organization: context.organization,
+    });
+    if (!resolved.ok) {
+      for (const item of resolved.issues) {
+        if (missing.some((entry) => entry.fieldId === item.fieldId)) {
+          continue;
+        }
+        missing.push({
+          fieldId: item.fieldId,
+          label: item.fieldLabel,
+          componentId: "FACE",
+        });
+      }
+    } else {
+      Object.assign(values, resolved.snapshotValues);
     }
   }
 
@@ -206,7 +252,24 @@ export function confirmReviewedDefinition(
   };
 }
 
-function optionLabel(schema: FormSchema, fieldId: string, value: DraftValue): string {
+function optionLabel(
+  schema: FormSchema,
+  fieldId: string,
+  value: DraftValue,
+  values: DraftValues,
+  template: ProductTemplate,
+): string {
+  const faceLabel = formatLettersFaceField(
+    fieldId,
+    value,
+    values,
+    isLettersFaceV2Template(template)
+      ? projectLettersFaceOptions({ template, values })
+      : null,
+  );
+  if (faceLabel) {
+    return faceLabel;
+  }
   const field = allFields(schema).find((item) => item.id === fieldId);
   if (!field?.options || typeof value !== "string") {
     return String(value ?? "");
@@ -237,7 +300,10 @@ export function compileAggregate(
         field.id !== "root.inscription" &&
         truth.values[field.id] !== undefined,
     )
-    .map((field) => `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id])}`);
+    .map(
+      (field) =>
+        `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id], truth.values, template)}`,
+    );
   const components = [
     ...(rootDetails.length > 0
       ? [{ id: "ROOT", label: "Produs", details: rootDetails }]
@@ -254,7 +320,7 @@ export function compileAggregate(
           )
           .map(
             (field) =>
-              `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id])}`,
+              `${field.label}: ${optionLabel(schema, field.id, truth.values[field.id], truth.values, template)}`,
           );
 
         return {

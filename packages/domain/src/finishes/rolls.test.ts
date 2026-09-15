@@ -6,6 +6,8 @@ import {
   HUB_MEDIA_PRINT_ROLL_1370_ID,
   SHARED_ORACAL_ROLL_1000_ID,
   SHARED_ORACAL_ROLL_1260_ID,
+  SHARED_PRINT_ROLL_1050_ID,
+  SHARED_PRINT_ROLL_1370_ID,
   defaultRollProfile,
   resolveCompatibleRolls,
   sharedRollProfiles,
@@ -25,11 +27,14 @@ const smallCompanyOverlay: OrganizationFinishOverlay = {
 };
 
 describe("roll registry foundation", () => {
-  it("keeps shared Oracal defaults and treats HUB MEDIA print widths as organization config", () => {
+  it("keeps shared Oracal and print defaults; HUB MEDIA print widths remain an overlay", () => {
     const oracal = resolveCompatibleRolls({ family: "oracal" });
     expect(oracal.map((item) => item.widthMm)).toEqual([1000, 1260]);
     expect(defaultRollProfile("oracal")?.id).toBe(SHARED_ORACAL_ROLL_1000_ID);
-    expect(resolveCompatibleRolls({ family: "print" })).toEqual([]);
+    expect(resolveCompatibleRolls({ family: "print" }).map((item) => item.id)).toEqual([
+      SHARED_PRINT_ROLL_1050_ID,
+      SHARED_PRINT_ROLL_1370_ID,
+    ]);
     const hubPrint = resolveCompatibleRolls({
       family: "print",
       organization: HUB_MEDIA_FINISH_OVERLAY,

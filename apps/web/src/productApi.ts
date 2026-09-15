@@ -9,6 +9,7 @@ import type {
   ExecutionPlanView,
   FormSchema,
   ProductAggregate,
+  ProductConfigurationOptions,
   ProductDefinition,
   ProductTemplate,
   ProductTruth,
@@ -24,6 +25,7 @@ import { notifyCloudUnauthorized } from "./sessionExpiryBridge";
 export type TemplateProjection = {
   template: ProductTemplate;
   formSchema: FormSchema;
+  configurationOptions?: ProductConfigurationOptions | null;
 };
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";

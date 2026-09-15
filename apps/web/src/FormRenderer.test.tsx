@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { FormSchema, ProductTemplate } from "@workos-final/domain";
+import {
+  CANONICAL_PRODUCT_CODE,
+  getFormSchemaForTemplate,
+  getProductTemplate,
+  type FormSchema,
+  type ProductTemplate,
+} from "@workos-final/domain";
 import { FormRenderer } from "./FormRenderer";
 
 const template: ProductTemplate = {
@@ -204,5 +210,29 @@ describe("FormRenderer", () => {
 
     expect(screen.getByText("Completează acest câmp.")).toBeInTheDocument();
     expect(screen.queryByText("Necesar")).not.toBeInTheDocument();
+  });
+
+  it("renders LETTERS FACE color as a catalog picker, not segmented chips", async () => {
+    const user = userEvent.setup();
+    const template = getProductTemplate(CANONICAL_PRODUCT_CODE);
+    const schema = getFormSchemaForTemplate(CANONICAL_PRODUCT_CODE);
+    if (!template || !schema) {
+      throw new Error("LETTERS missing");
+    }
+    render(
+      <FormRenderer
+        template={template}
+        schema={schema}
+        values={{ "face.finish": "oracal", "face.vinylSeries": "651" }}
+        onChange={vi.fn()}
+        presentation="configurator"
+      />,
+    );
+    expect(screen.getByRole("button", { name: /Culoare/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("radiogroup", { name: "Culoare" }),
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Culoare/ }));
+    expect(screen.getByLabelText("Caută culoare după cod sau nume")).toBeInTheDocument();
   });
 });

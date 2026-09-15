@@ -172,7 +172,7 @@ describe("product system admin catalog presentation", () => {
       )?.lines,
     ).toEqual([
       "Debitare foaie CNC",
-      "Aplicare folie (Finisaj față: Colantat)",
+      "Aplicare folie (Finisaj față: Colantat / Oracal / Print)",
     ]);
     expect(
       catalog.categories[3]?.items[1]?.groups[0]?.sections.find(
@@ -504,7 +504,7 @@ describe("processes catalog presentation", () => {
       vinyl?.groups[0]?.sections.find((item) => item.id === "condition")?.lines,
     ).toEqual(
       expect.arrayContaining([
-        "Apare când Finisaj față: Colantat.",
+        "Apare când Finisaj față: Colantat / Oracal / Print.",
         "Apare când Finisaj volum: Colantat.",
       ]),
     );

@@ -45,7 +45,7 @@ Applied vinyl/paint color is not the same fact as inherent material color or opt
 
 | Role | Type | Current product configuration |
 |---|---|---|
-| FACE | `PLEXIGLAS_FACE` | 3 mm, opal |
+| FACE | `PLEXIGLAS_FACE` | 3 mm, opal; LETTERS V2 finish is order configuration (none / Oracal 641·651·8500 / print ± lamination). V1 vinyl+text remains readable for historical snapshots. |
 | FACE | `ACM_CASSETTE_BODY` | ACM 3 mm cassette; width/height/depth/folds by order |
 | VOLUME | `ALUMINIUM_VOLUME` | 0.6 mm; depth/finish by order |
 | BACK | `FOREX_BACK` | 10 mm |

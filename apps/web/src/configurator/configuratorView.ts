@@ -1,6 +1,8 @@
 import {
   compileDefinition,
+  formatLettersFaceField,
   isFieldVisible,
+  projectProductConfigurationOptions,
   selectedComponentIds,
   type DraftValue,
   type DraftValues,
@@ -220,15 +222,29 @@ function isEmpty(value: DraftValue | undefined): boolean {
 export function formatConfiguratorValue(
   field: FormField,
   value: DraftValue | undefined,
+  values: DraftValues = {},
+  template?: ProductTemplate,
 ): string | null {
   if (isEmpty(value)) {
     return null;
+  }
+  const faceLabel = formatLettersFaceField(
+    field.id,
+    value,
+    values,
+    template ? projectProductConfigurationOptions(template, values) : null,
+  );
+  if (faceLabel) {
+    return faceLabel;
   }
   if (field.type === "boolean") {
     return value === true ? field.label : null;
   }
   if (field.type === "select" && field.options && typeof value === "string") {
     return field.options.find((option) => option.value === value)?.label ?? value;
+  }
+  if (field.type === "catalog_color" || field.type === "catalog_roll") {
+    return null;
   }
   if (field.type === "number" && typeof value === "number") {
     const unit = field.label.includes("mm²")
@@ -277,8 +293,11 @@ export function selectedConfigurationFacts(
       if (field.type === "boolean") {
         return raw === true ? [field.label] : [];
       }
-      const option = field.options?.find((item) => item.value === String(raw));
-      return [`${field.label}: ${option?.label ?? String(raw)}`];
+      const formatted = formatConfiguratorValue(field, raw, values, template);
+      if (!formatted) {
+        return [];
+      }
+      return [`${field.label}: ${formatted}`];
     }),
   );
 }
@@ -404,7 +423,7 @@ function blueprintSectionsFor(
         });
         continue;
       }
-      const display = formatConfiguratorValue(field, values[field.id]);
+      const display = formatConfiguratorValue(field, values[field.id], values, template);
       if (display === null) {
         continue;
       }

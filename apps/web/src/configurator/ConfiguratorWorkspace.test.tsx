@@ -8,6 +8,7 @@ import {
   CANONICAL_PRODUCT_CODE,
   getFormSchemaForTemplate,
   getProductTemplate,
+  lettersFaceReadyValues,
 } from "@workos-final/domain";
 import { ConfiguratorWorkspace } from "./ConfiguratorWorkspace";
 import {
@@ -106,8 +107,7 @@ describe("ConfiguratorWorkspace", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
       "volume.depthMm": "60",
       "volume.finish": "none",
@@ -182,8 +182,7 @@ describe("ConfiguratorWorkspace", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
       "volume.depthMm": "60",
       "volume.finish": "none",
@@ -265,8 +264,7 @@ describe("ConfiguratorWorkspace", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
       "face.confirmedAreaMm2": 250000,
       "volume.depthMm": "60",
       "volume.finish": "none",

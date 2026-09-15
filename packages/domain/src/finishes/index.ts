@@ -33,6 +33,8 @@ export {
   ROLL_REGISTRY_SOURCE,
   SHARED_ORACAL_ROLL_1000_ID,
   SHARED_ORACAL_ROLL_1260_ID,
+  SHARED_PRINT_ROLL_1050_ID,
+  SHARED_PRINT_ROLL_1370_ID,
   defaultRollProfile,
   getRollProfile,
   hubMediaPrintRollProfiles,
@@ -41,7 +43,44 @@ export {
 } from "./rolls.js";
 export { snapshotFinishSelection } from "./snapshot.js";
 export { listVisibleFinishApplications, resolveFinishCompatibility } from "./resolve.js";
-export { compileFaceFinishCost, faceFinishCostRequirements } from "./costResolution.js";
+export {
+  compileFaceFinishCost,
+  faceFinishCostRequirements,
+  faceFinishDirectRequirements,
+} from "./costResolution.js";
+export {
+  FACE_COLOR_CODE_FIELD,
+  FACE_COLOR_DISPLAY_NAME_FIELD,
+  FACE_COLOR_ID_FIELD,
+  FACE_COLOR_SWATCH_FIELD,
+  FACE_FINISH_APPLICATION_FIELD,
+  FACE_FINISH_FIELD,
+  FACE_LAMINATION_FIELD,
+  FACE_PRINT_ROLL_PROFILE_FIELD,
+  FACE_ROLL_PROFILE_FIELD,
+  FACE_ROLL_WIDTH_MM_FIELD,
+  FACE_VINYL_SERIES_FIELD,
+  LETTERS_FACE_COLOR_651_010_ID,
+  LETTERS_FACE_COLOR_8500_010_ID,
+  LETTERS_FACE_V2_ALLOWED_APPLICATIONS,
+  SHARED_FINISH_ORGANIZATION_ID,
+  defaultFinishOrganization,
+  deriveLettersFaceApplicationId,
+  formatLettersFaceField,
+  isLettersFaceV2Template,
+  lettersFaceAllowedApplications,
+  lettersFaceReadyValues,
+  normalizeLettersFaceDraft,
+  projectLettersFaceOptions,
+  projectProductConfigurationOptions,
+  resolveLettersFaceDraft,
+  type CatalogColorOption,
+  type CatalogRollOption,
+  type LettersFaceBlockCode,
+  type LettersFaceIssue,
+  type LettersFaceResolution,
+  type ProductConfigurationOptions,
+} from "./lettersFace.js";
 export {
   COLOR_SOURCES,
   COLOR_SYSTEMS,

@@ -5,6 +5,8 @@ export const ROLL_REGISTRY_SOURCE = "FC2A_ROLL_REGISTRY";
 
 export const SHARED_ORACAL_ROLL_1000_ID = "roll:shared:oracal:1000";
 export const SHARED_ORACAL_ROLL_1260_ID = "roll:shared:oracal:1260";
+export const SHARED_PRINT_ROLL_1050_ID = "roll:shared:print:1050";
+export const SHARED_PRINT_ROLL_1370_ID = "roll:shared:print:1370";
 export const HUB_MEDIA_PRINT_ROLL_1050_ID = "roll:org:hub-media:print:1050";
 export const HUB_MEDIA_PRINT_ROLL_1370_ID = "roll:org:hub-media:print:1370";
 
@@ -31,6 +33,30 @@ export const sharedRollProfiles: readonly RollProfile[] = [
     isDefault: false,
     scope: { kind: "shared" },
     notes: "Shared Oracal alternate width.",
+    source: ROLL_REGISTRY_SOURCE,
+  },
+  {
+    id: SHARED_PRINT_ROLL_1050_ID,
+    family: "print",
+    brand: null,
+    series: null,
+    widthMm: 1050,
+    active: true,
+    isDefault: true,
+    scope: { kind: "shared" },
+    notes: "Shared print default width. Not a ProductTemplate constant.",
+    source: ROLL_REGISTRY_SOURCE,
+  },
+  {
+    id: SHARED_PRINT_ROLL_1370_ID,
+    family: "print",
+    brand: null,
+    series: null,
+    widthMm: 1370,
+    active: true,
+    isDefault: false,
+    scope: { kind: "shared" },
+    notes: "Shared print alternate width.",
     source: ROLL_REGISTRY_SOURCE,
   },
 ];
@@ -73,7 +99,9 @@ export function getRollProfile(
   id: string,
   extra: readonly RollProfile[] = [],
 ): RollProfile | undefined {
-  return [...sharedRollProfiles, ...extra].find((item) => item.id === id);
+  return [...sharedRollProfiles, ...hubMediaPrintRollProfiles, ...extra].find(
+    (item) => item.id === id,
+  );
 }
 
 export function resolveCompatibleRolls(input: {

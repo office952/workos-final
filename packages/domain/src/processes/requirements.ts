@@ -16,7 +16,8 @@ import {
 
 export type ProcessRequirementCondition =
   | { kind: "always" }
-  | { kind: "fieldEquals"; fieldId: string; value: string };
+  | { kind: "fieldEquals"; fieldId: string; value: string }
+  | { kind: "fieldIn"; fieldId: string; values: readonly string[] };
 
 export type ComponentProcessRequirement = {
   processId: string;
@@ -32,8 +33,12 @@ const FACE_REQUIREMENTS: readonly ComponentProcessRequirement[] = [
   },
   {
     processId: APPLY_SURFACE_FINISH_ID,
-    condition: { kind: "fieldEquals", fieldId: "face.finish", value: "vinyl" },
-    reason: "Fața colantată cere aplicare de folie după debitare.",
+    condition: {
+      kind: "fieldIn",
+      fieldId: "face.finish",
+      values: ["vinyl", "oracal", "print"],
+    },
+    reason: "Fața cu folie sau print cere aplicare după debitare.",
   },
 ];
 
@@ -159,6 +164,8 @@ export function matchesProcessCondition(
       return true;
     case "fieldEquals":
       return values[condition.fieldId] === condition.value;
+    case "fieldIn":
+      return condition.values.includes(String(values[condition.fieldId] ?? ""));
     default: {
       const _exhaustive: never = condition;
       return _exhaustive;
@@ -174,6 +181,8 @@ export function processConditionLabel(
       return null;
     case "fieldEquals":
       return fieldEqualsLabel(condition.fieldId, condition.value);
+    case "fieldIn":
+      return fieldInLabel(condition.fieldId, condition.values);
     default: {
       const _exhaustive: never = condition;
       return _exhaustive;
@@ -201,4 +210,11 @@ function fieldEqualsLabel(fieldId: string, value: string): string {
     return "Finisaj volum: Vopsit";
   }
   return `${fieldId} = ${value}`;
+}
+
+function fieldInLabel(fieldId: string, values: readonly string[]): string {
+  if (fieldId === "face.finish") {
+    return "Finisaj față: Colantat / Oracal / Print";
+  }
+  return `${fieldId} ∈ ${values.join(" | ")}`;
 }

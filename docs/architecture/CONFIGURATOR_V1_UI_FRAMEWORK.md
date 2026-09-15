@@ -169,6 +169,7 @@ Do not move Blueprint, Editor, rail, or page origin when entering or leaving rev
 
 Required selects with options render as an accessible radiogroup of horizontal chips.
 The native `<select>` stays synchronized, `aria-hidden`, and out of tab order.
+Catalog color fields use a compact searchable picker (swatch + code + name). Do not render the color catalog as segmented chips.
 
 ## FIELD
 

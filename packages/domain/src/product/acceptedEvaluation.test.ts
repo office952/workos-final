@@ -27,7 +27,9 @@ import { seededDisplayLabelCatalog } from "./displayMetadata.js";
 import { runWithProductEvaluationTrace } from "./evaluationTrace.js";
 import {
   frontlitPlexiAl06FormSchema,
+  frontlitPlexiAl06FormSchemaV1,
   frontlitPlexiAl06Template,
+  frontlitPlexiAl06TemplateV1,
 } from "./frontlitPlexiAl06.js";
 import type { DraftValues, FormSchema, ProductTemplate } from "./types.js";
 
@@ -56,7 +58,9 @@ const acmValues: DraftValues = {
   "face.foldCount": "2",
 };
 
-const QUOTE_HASH_PIN =
+const QUOTE_HASH_PIN_V2 =
+  "eccf3bf84057f00abd76ad739c6354b867644cf5010dc200f8bb4f63626f90e0";
+const QUOTE_HASH_PIN_V1 =
   "35e562617d45f4caabb4f582b9c6385e6be5c1edc345c1dd31d688b25add2f27";
 
 function confirmedTruth(
@@ -180,7 +184,29 @@ describe("accepted product evaluation", () => {
     if (!frozen.ok) {
       return;
     }
-    expect(frozen.snapshot.contentHash).toBe(QUOTE_HASH_PIN);
+    expect(frozen.snapshot.contentHash).toBe(QUOTE_HASH_PIN_V2);
+  });
+
+  it("keeps the historical V1 60 mm Quote content-hash pin", () => {
+    const compiled = evaluateAccepted(
+      frontlitPlexiAl06TemplateV1,
+      frontlitPlexiAl06FormSchemaV1,
+      lettersNoneNone,
+    );
+    expect(compiled.truth.templateVersion).toBe("1");
+    const frozen = freezeQuoteSnapshot(
+      compiled.truth,
+      compiled.aggregate,
+      compiled.composition,
+      compiled.eic,
+      projectCommercialPrice(compiled.eic),
+      { createdAt: "2026-08-17T00:00:00.000Z" },
+    );
+    expect(frozen.ok).toBe(true);
+    if (!frozen.ok) {
+      return;
+    }
+    expect(frozen.snapshot.contentHash).toBe(QUOTE_HASH_PIN_V1);
   });
 
   it("freezes the accepted production snapshot from the same evaluation", () => {

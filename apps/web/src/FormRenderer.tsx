@@ -1,13 +1,16 @@
 import {
   isFieldVisible,
+  projectProductConfigurationOptions,
   selectedComponentIds,
   type DraftValue,
   type DraftValues,
   type FormField,
   type FormSchema,
+  type ProductConfigurationOptions,
   type ProductTemplate,
 } from "@workos-final/domain";
 import { useId, type KeyboardEvent } from "react";
+import { CatalogColorField } from "./CatalogColorField";
 import {
   fieldUnitFromLabel,
   projectVisualLabel,
@@ -166,7 +169,27 @@ type FormRendererProps = {
   sectionTitleFor?: (componentId: string, fallback: string) => string;
   presentation?: "default" | "configurator";
   invalidFieldIds?: readonly string[];
+  configurationOptions?: ProductConfigurationOptions | null;
 };
+
+function resolvePresentedField(
+  field: FormField,
+  options: ProductConfigurationOptions | null,
+): FormField {
+  const selectOptions = options?.selectOptions[field.id];
+  if (selectOptions) {
+    return { ...field, options: selectOptions };
+  }
+  if (field.type === "catalog_roll") {
+    const rolls = options?.catalogRolls[field.id] ?? [];
+    return {
+      ...field,
+      type: "select",
+      options: rolls.map((item) => ({ value: item.id, label: item.label })),
+    };
+  }
+  return field;
+}
 
 function FieldControl({
   field,
@@ -238,6 +261,9 @@ function FieldControl({
           {...controlProps}
         />
       );
+    case "catalog_color":
+    case "catalog_roll":
+      return null;
     default: {
       const _exhaustive: never = field.type;
       return _exhaustive;
@@ -254,10 +280,13 @@ export function FormRenderer({
   sectionTitleFor,
   presentation = "default",
   invalidFieldIds = [],
+  configurationOptions,
 }: FormRendererProps) {
   const selectedIds = selectedComponentIds(template, values);
   const configurator = presentation === "configurator";
   const invalidIds = new Set(invalidFieldIds);
+  const options =
+    configurationOptions ?? projectProductConfigurationOptions(template, values);
 
   return (
     <div className={configurator ? "form-stack cfg-form" : "form-stack"}>
@@ -304,13 +333,27 @@ export function FormRenderer({
                   }
                 >
                   {row.map((field) => {
+                    const presented = resolvePresentedField(field, options);
                     const missing = field.required && isEmptyField(values[field.id]);
                     const invalid = configurator && invalidIds.has(field.id);
                     return (
                     <div key={field.id}>
-                      {field.type === "select" && field.options && field.options.length > 0 ? (
+                      {field.type === "catalog_color" ? (
+                        <CatalogColorField
+                          fieldId={field.id}
+                          label={configurator ? projectVisualLabel(field.label) : field.label}
+                          value={values[field.id]}
+                          colors={options?.catalogColors[field.id] ?? []}
+                          required={field.required}
+                          invalid={invalid}
+                          configurator={configurator}
+                          onChange={(value) => onChange(field.id, value)}
+                        />
+                      ) : presented.type === "select" &&
+                        presented.options &&
+                        presented.options.length > 0 ? (
                         <SelectChoiceField
-                          field={field}
+                          field={presented}
                           value={values[field.id]}
                           onChange={(value) => onChange(field.id, value)}
                           configurator={configurator}

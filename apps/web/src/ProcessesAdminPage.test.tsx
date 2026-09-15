@@ -68,7 +68,9 @@ describe("ProcessesAdminPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Finisare" }));
     expect(screen.getByRole("heading", { name: "Aplicare folie" })).toBeInTheDocument();
-    expect(screen.getByText("Apare când Finisaj față: Colantat.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Apare când Finisaj față: Colantat / Oracal / Print."),
+    ).toBeInTheDocument();
     expect(screen.getByText("Apare când Finisaj volum: Colantat.")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /Vopsire RAL/ }));

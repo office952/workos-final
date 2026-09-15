@@ -105,6 +105,15 @@ function syntheticFaceAggregate(
   };
 }
 
+export function faceFinishDirectRequirements(
+  applicationId: FinishApplicationId,
+  confirmedAreaMm2: number,
+): ResourceRequirement[] {
+  return faceFinishCostRequirements(applicationId, confirmedAreaMm2).filter(
+    (item) => item.resourceId !== LAB_VINYL_FACE_ID,
+  );
+}
+
 export function compileFaceFinishCost(
   applicationId: FinishApplicationId,
   confirmedAreaMm2: number,

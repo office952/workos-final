@@ -18,6 +18,7 @@ import {
   frontlitPlexiAl06FormSchema,
   frontlitPlexiAl06Template,
 } from "../product/frontlitPlexiAl06.js";
+import { lettersFaceReadyValues } from "../finishes/lettersFace.js";
 import {
   LED_MODULE_POWER_SETTING_ID,
   LED_PITCH_SETTING_ID,
@@ -110,8 +111,7 @@ describe("accepted production snapshot", () => {
     const none = freeze().snapshot;
     const vinyl = freeze({
       ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
     }).snapshot;
     expect(none.contentHash).toHaveLength(64);
     expect(vinyl.contentHash).not.toBe(none.contentHash);
@@ -207,8 +207,7 @@ describe("accepted production snapshot", () => {
     const none = freeze().snapshot;
     const vinyl = freeze({
       ...readyValues,
-      "face.finish": "vinyl",
-      "face.color": "alb",
+      ...lettersFaceReadyValues("651"),
     }).snapshot;
     expect(vinyl.operations.some((item) => item.processLabel === "Aplicare folie")).toBe(true);
     expect(none.operations.some((item) => item.processLabel === "Aplicare folie")).toBe(false);

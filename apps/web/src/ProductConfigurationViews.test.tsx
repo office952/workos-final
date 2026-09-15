@@ -18,6 +18,7 @@ import {
   CANONICAL_PRODUCT_CODE,
   getFormSchemaForTemplate,
   getProductTemplate,
+  lettersFaceReadyValues,
 } from "@workos-final/domain";
 import {
   AcceptedSnapshotSection,
@@ -148,9 +149,7 @@ describe("Product configuration views", () => {
     }
     const values = {
       "root.inscription": "WORKOS",
-      "face.finish": "vinyl",
-      "face.color": "alb",
-      "face.confirmedAreaMm2": 250000,
+      ...lettersFaceReadyValues("651"),
       "volume.depthMm": "60",
       "volume.finish": "none",
       "volume.confirmedPerimeterMm": 12500,

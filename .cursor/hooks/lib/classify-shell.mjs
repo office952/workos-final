@@ -978,9 +978,18 @@ function isIsolatedE2eRunner(tokens) {
     return false;
   }
   const extras = tokens.slice(nodeIndex + 2);
-  return extras.every(
-    (token) => token === "--plan-only" || token === "--policy-only",
-  );
+  return extras.every(isAllowedIsolatedE2eExtra);
+}
+
+function isAllowedIsolatedE2eExtra(token) {
+  if (token === "--plan-only" || token === "--policy-only" || token === "--") {
+    return true;
+  }
+  if (token === "--retries=0" || token === "--retries" || token === "0") {
+    return true;
+  }
+  const normalized = String(token).replace(/\\/g, "/");
+  return /^e2e\/[A-Za-z0-9._-]+\.spec\.ts$/.test(normalized);
 }
 
 function classifySegment(command, options = {}) {

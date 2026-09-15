@@ -128,7 +128,7 @@ Resource identity, kind, unit, labels, specifications and recipes remain typed c
 
 SQLite owns the active CostEvidence amount after one-time bootstrap (`RESOURCE_COST_EVIDENCE_V1_APPLIED`). Seed `costEvidence[]` is bootstrap plus pure domain tests. Live compile, freeze and admin projection read active database rows. They do not fall back to seed amounts.
 
-FC2D adds reusable FACE-finish identities and provisional rates without activating them on the live LETTERS form:
+FC2D added reusable FACE-finish identities and provisional rates. FC2B wires them to LETTERS ProductTemplate V2 FACE configuration. Historical templateVersion = 1 snapshots stay on the V1 vinyl path and are not recompiled through V2.
 
 - `MAT-VINYL-ORACAL-641`
 - `MAT-VINYL-ORACAL-8500`
@@ -140,7 +140,7 @@ Reuse existing `MAT-VINYL-ORACAL-651`, `LAB-VINYL-FACE`, `LAB-VINYL-VOLUME`, and
 
 Existing organizations already marked `RESOURCE_COST_EVIDENCE_V1_APPLIED` receive an additive, idempotent backfill (`RESOURCE_COST_EVIDENCE_FC2D_V1_APPLIED`). It inserts only missing FC2D slots. It never overwrites an existing active rate, never supersedes an Owner-edited rate, and never restores a provisional amount after Owner edit. New organizations receive the current seed, including FC2D rows, then the FC2D marker. `ADOPT_EXISTING` still skips both cost bootstraps.
 
-Supplier management, multi-supplier comparison, detailed historical RAL pricing, and roll nesting are out of scope. Current generic `SVC-PAINT-RAL` remains the functional RAL path. FACE V1 quantity is confirmed face area m².
+Supplier management, multi-supplier comparison, detailed historical RAL pricing, and roll nesting are out of scope. Current generic `SVC-PAINT-RAL` remains the functional RAL path. FACE quantity remains confirmed face area m². Selected roll width is snapshotted and does not change V1 quantity costing. Price confidence never blocks configuration, EIC, or Quote.
 
 One active row per resource, or per resource plus configuration qualifier. Aluminium depths are qualified rows; unqualified lookup does not inherit them. 30 / 60 / 80 / 100 mm each have an owner-confirmed profile rate.
 

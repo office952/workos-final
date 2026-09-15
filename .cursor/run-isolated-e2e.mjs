@@ -135,7 +135,17 @@ async function main() {
   }
 
   mkdirSync(plan.absoluteDataDir, { recursive: true });
-  const result = spawnSync(plan.launcher.command, plan.launcher.args, {
+  const playwrightArgs = process.argv
+    .slice(2)
+    .filter((token) => token !== "--plan-only" && token !== "--policy-only")
+    .reduce((args, token) => {
+      if (token === "--") {
+        return args;
+      }
+      args.push(token);
+      return args;
+    }, []);
+  const result = spawnSync(plan.launcher.command, [...plan.launcher.args, ...playwrightArgs], {
     cwd: repoRoot,
     env: plan.env,
     stdio: "inherit",
