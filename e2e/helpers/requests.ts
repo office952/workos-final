@@ -98,7 +98,7 @@ export async function confirmCanonicalLettersOnPage(
   await page.locator('select[name="face.finish"]').selectOption("none");
   await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
   await page.locator('select[name="volume.depthMm"]').selectOption("60");
-  await page.locator('select[name="volume.finish"]').selectOption("none");
+  await page.locator('select[name="volume.finish"]').selectOption("stock");
   await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
   await page.getByRole("button", { name: "Verifică configurația" }).click();
   await page.getByRole("button", { name: "Confirmă configurația" }).click();

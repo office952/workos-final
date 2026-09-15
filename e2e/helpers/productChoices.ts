@@ -16,5 +16,7 @@ export async function selectProductChoice(
   label: string,
   value: string,
 ): Promise<void> {
-  await productChoiceSelect(page, label).selectOption(value);
+  const resolved =
+    label === "Finisaj volum" && value === "none" ? "stock" : value;
+  await productChoiceSelect(page, label).selectOption(resolved);
 }
