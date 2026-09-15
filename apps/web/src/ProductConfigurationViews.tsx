@@ -30,6 +30,7 @@ import {
   type LiveJobCommercial,
   type OperationalServiceProviderMode,
   type SiteInstallationOperatorView,
+  getProductTemplate,
 } from "@workos-final/domain";
 import {
   formatCostCompleteness,
@@ -56,6 +57,14 @@ function eicGroups(eic: EicResult): Array<[EicLineGroup, EicLine[]]> {
     const lines = eic.lines.filter((line) => line.group === group);
     return lines.length === 0 ? [] : [[group, lines]];
   });
+}
+
+function fixedFieldIdsForTruth(
+  truth: ProductTruth,
+  explicit: readonly string[] = [],
+): readonly string[] {
+  const fromTemplate = Object.keys(getProductTemplate(truth.templateCode)?.fixedValues ?? {});
+  return [...new Set([...fromTemplate, ...explicit])];
 }
 
 function lightingUnavailableReason(aggregate: ProductAggregate): string {
@@ -172,10 +181,12 @@ export function ConfirmedSummary({
   aggregate,
   truth,
   compact = false,
+  fixedFieldIds = [],
 }: {
   aggregate: ProductAggregate;
   truth: ProductTruth;
   compact?: boolean;
+  fixedFieldIds?: readonly string[];
 }) {
   return (
     <section className={compact ? "result-section confirmed-summary-compact" : "result-section"}>
@@ -197,11 +208,16 @@ export function ConfirmedSummary({
             </div>
           ))}
       </div>
-      {truth.measurements.map((measurement) => (
-        <p key={measurement.fieldId}>
-          {measurementCopy(measurement)}
-        </p>
-      ))}
+      {truth.measurements
+        .filter(
+          (measurement) =>
+            !fixedFieldIdsForTruth(truth, fixedFieldIds).includes(measurement.fieldId),
+        )
+        .map((measurement) => (
+          <p key={measurement.fieldId}>
+            {measurementCopy(measurement)}
+          </p>
+        ))}
       {aggregate.quantities.length === 0 ? (
         compact ? null : (
           <p>Cantitatea tehnică nu poate fi calculată fără măsurătoare confirmată.</p>

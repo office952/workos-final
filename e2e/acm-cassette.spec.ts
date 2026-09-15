@@ -24,6 +24,12 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
   await expect(page.getByText("ACM 3 mm", { exact: true })).toBeVisible();
   await expect(page.getByText("Profil oțel", { exact: true })).toBeVisible();
   await expect(page.getByText("Fără iluminare", { exact: true })).toBeVisible();
+  await expect(page.locator(".cfg-blueprint").getByRole("heading", { name: "Iluminare" })).toHaveCount(
+    0,
+  );
+  await expect(page.locator(".cfg-blueprint").getByText("Derivat")).toHaveCount(0);
+  await expect(page.locator(".cfg-blueprint").getByText("introdus de operator")).toHaveCount(0);
+  await expect(page.getByText("ACM 3 mm", { exact: true })).toBeVisible();
   await expect(productChoiceGroup(page, "Sistem de prindere")).toBeVisible();
   await expect(page.getByText("PRD-ACM-CASSETTE-NONE")).toHaveCount(0);
   await page.screenshot({
@@ -57,6 +63,7 @@ test("catalog shows ACM cassette and confirms complete EIC plus quote", async ({
   });
   await expect(confirmed.getByText("Sistem de prindere: Cornier oțel")).toBeVisible();
   await expect(page.getByText("Lățime exterioară: 1000 mm (introdus de operator)")).toBeVisible();
+  await expect(page.getByText("Grosime ACM: 3 mm (introdus de operator)")).toHaveCount(0);
   await expect(page.getByText("Suprafață față: 0,5 m²")).toBeVisible();
   await expect(page.getByText("Lățime exterioară cadru: 0,99 m")).toBeVisible();
   await expect(page.getByText("Înălțime exterioară cadru: 0,49 m")).toBeVisible();

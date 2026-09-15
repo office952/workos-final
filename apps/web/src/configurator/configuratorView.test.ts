@@ -6,7 +6,11 @@ import {
   getProductTemplate,
 } from "@workos-final/domain";
 import { describe, expect, it } from "vitest";
-import { attachConfiguratorScopeCompletion, projectConfiguratorView } from "./configuratorView";
+import {
+  attachConfiguratorScopeCompletion,
+  projectConfiguratorView,
+  selectedConfigurationFacts,
+} from "./configuratorView";
 
 const context = {
   returnHref: "/products",
@@ -153,9 +157,21 @@ describe("projectConfiguratorView", () => {
     expect(
       view.sections.flatMap((section) => section.facts).some((fact) => fact.kind === "personalized"),
     ).toBe(false);
-    expect(
-      view.sections.flatMap((section) => section.facts).some((fact) => fact.kind === "inherited"),
-    ).toBe(false);
+    const inherited = view.sections.flatMap((section) =>
+      section.facts.filter((fact) => fact.kind === "inherited"),
+    );
+    expect(inherited).toEqual([
+      {
+        id: "inherited:BACK:face.confirmedAreaMm2",
+        label: "Suprafață",
+        display: "250000 mm²",
+        kind: "inherited",
+        required: false,
+      },
+    ]);
+    expect(view.sections.find((section) => section.id === "BACK")?.facts).toEqual(
+      expect.arrayContaining(inherited),
+    );
   });
 
   it("E/F — current products do not expose Ansamblare", () => {
@@ -392,5 +408,204 @@ describe("projectConfiguratorView", () => {
     expect(view.title).not.toBe("Ansamblu ACM + litere volumetrice");
     expect(view.targets.map((target) => target.label)).not.toContain("GRĂDINIȚA");
     expect(view.targets.map((target) => target.label)).not.toContain("LOGO");
+  });
+});
+
+const LETTERS_SCHEMA_FIELD_IDS = [
+  "root.inscription",
+  "face.finish",
+  "face.color",
+  "face.confirmedAreaMm2",
+  "volume.depthMm",
+  "volume.finish",
+  "volume.color",
+  "volume.confirmedPerimeterMm",
+] as const;
+
+const ACM_SCHEMA_FIELD_IDS = [
+  "root.inscription",
+  "root.mountingSystem",
+  "face.widthMm",
+  "face.heightMm",
+  "face.cassetteDepthMm",
+  "face.foldCount",
+] as const;
+
+const acmFilled = {
+  "root.inscription": "PANOU ACM",
+  "root.mountingSystem": "steel_angle",
+  "face.widthMm": 1000,
+  "face.heightMm": 500,
+  "face.cassetteDepthMm": "40",
+  "face.foldCount": "2",
+};
+
+describe("form completeness FC1 projection", () => {
+  it("pins the current LETTERS and ACM FormSchema field inventories", () => {
+    const letters = lettersTemplate();
+    const acm = acmTemplate();
+    expect(letters.schema.sections.flatMap((section) => section.fields.map((field) => field.id))).toEqual(
+      [...LETTERS_SCHEMA_FIELD_IDS],
+    );
+    expect(acm.schema.sections.flatMap((section) => section.fields.map((field) => field.id))).toEqual(
+      [...ACM_SCHEMA_FIELD_IDS],
+    );
+  });
+
+  it("B1 — hidden vinyl color stays in draft but is absent from summary and compile", () => {
+    const { template, schema } = lettersTemplate();
+    const vinyl = { ...lettersFilled, "face.finish": "vinyl", "face.color": "red" };
+    const none = { ...vinyl, "face.finish": "none" };
+    const vinylFacts = selectedConfigurationFacts(template, schema, vinyl);
+    const noneFacts = selectedConfigurationFacts(template, schema, none);
+    const compiledNone = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values: none,
+    });
+    const noneView = projectConfiguratorView({
+      template,
+      schema,
+      values: none,
+      context,
+    });
+
+    expect(vinylFacts.some((fact) => fact.includes("Culoare față"))).toBe(true);
+    expect(noneFacts.some((fact) => fact.includes("Culoare față"))).toBe(false);
+    expect(compiledNone.values["face.color"]).toBeUndefined();
+    expect(compiledNone.readiness).toBe("ready");
+    expect(
+      noneView.sections.flatMap((section) => section.facts).some((fact) => fact.id === "face.color"),
+    ).toBe(false);
+    expect(none["face.color"]).toBe("red");
+  });
+
+  it("B2 — LETTERS BACK projects canonical FACE area inheritance only", () => {
+    const { template, schema } = lettersTemplate();
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values: lettersFilled,
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: lettersFilled,
+      context,
+    });
+    const back = view.sections.find((section) => section.id === "BACK");
+    const inherited = back?.facts.filter((fact) => fact.kind === "inherited") ?? [];
+
+    expect(inherited).toHaveLength(1);
+    expect(inherited[0]?.display).toBe("250000 mm²");
+    expect(inherited[0]?.label).toBe("Suprafață");
+    expect(compiled.measurements.some((measurement) => measurement.componentId === "BACK")).toBe(
+      false,
+    );
+    expect(
+      view.sections
+        .flatMap((section) => section.facts)
+        .filter((fact) => fact.kind === "inherited")
+        .every((fact) => fact.id.startsWith("inherited:BACK:")),
+    ).toBe(true);
+  });
+
+  it("B2 — empty LETTERS does not invent inherited or Figma group facts", () => {
+    const { template, schema } = lettersTemplate();
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: {},
+      context,
+    });
+    expect(view.sections.flatMap((section) => section.facts).some((fact) => fact.kind === "inherited")).toBe(
+      false,
+    );
+    expect(
+      view.sections.flatMap((section) => section.facts).some((fact) => fact.kind === "personalized"),
+    ).toBe(false);
+  });
+
+  it("B3 — ACM keeps no-lighting identity without a LIGHTING component section", () => {
+    const { template, schema } = acmTemplate();
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: acmFilled,
+      context,
+    });
+    const facts = view.sections.flatMap((section) => section.facts);
+
+    expect(view.sections.some((section) => section.id === "LIGHTING")).toBe(false);
+    expect(view.editorComponentIds).toEqual(["ROOT", "FACE", "BACK"]);
+    expect(facts.some((fact) => fact.id === "identity:lighting" && fact.display === "Fără iluminare")).toBe(
+      true,
+    );
+    expect(view.sections.find((section) => section.id === "ROOT")?.facts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "identity:lighting",
+          display: "Fără iluminare",
+          kind: "fixed",
+        }),
+      ]),
+    );
+  });
+
+  it("B4 — ACM thickness stays fixed identity and is not operator/derived copy", () => {
+    const { template, schema } = acmTemplate();
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values: acmFilled,
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: acmFilled,
+      context,
+    });
+    const facts = view.sections.flatMap((section) => section.facts);
+    const thickness = facts.find(
+      (fact) => fact.id === "fixed:face.thicknessMm" || fact.id === "derived:face.thicknessMm",
+    );
+
+    expect(compiled.measurements.some((measurement) => measurement.fieldId === "face.thicknessMm")).toBe(
+      true,
+    );
+    expect(thickness).toBeUndefined();
+    expect(facts.some((fact) => fact.kind === "fixed" && fact.display === "ACM 3 mm")).toBe(true);
+    expect(JSON.stringify(view.sections)).not.toContain("introdus");
+    expect(facts.some((fact) => fact.id === "derived:face.thicknessMm")).toBe(false);
+  });
+
+  it("B5 — ROOT missing does not imply a ready product", () => {
+    const { template, schema } = lettersTemplate();
+    const values = { ...lettersFilled, "root.inscription": "" };
+    const compiled = compileDefinition(template, schema, {
+      templateCode: template.code,
+      values,
+    });
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values,
+      context,
+    });
+
+    expect(compiled.readiness).toBe("blocked");
+    expect(view.complete).toBe(false);
+    expect(view.modulesValidated).toBe(view.modulesTotal);
+    expect(view.statusLabel).toBe("4 din 4 module validate · 1 câmp obligatoriu lipsă");
+    expect(view.statusLabel).not.toBe("Configurare completă");
+  });
+
+  it("B5 — ready status remains Configurare completă", () => {
+    const { template, schema } = lettersTemplate();
+    const view = projectConfiguratorView({
+      template,
+      schema,
+      values: lettersFilled,
+      context,
+    });
+    expect(view.complete).toBe(true);
+    expect(view.statusLabel).toBe("Configurare completă");
   });
 });

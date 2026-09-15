@@ -401,7 +401,7 @@ export function ConfiguratorWorkspace({
                 </p>
               ) : (
                 <p className="cfg-composition-incomplete" role="status">
-                  Acest produs rămâne incomplet până sunt complete modulele lui.
+                  Acest produs rămâne incomplet până sunt complete faptele obligatorii.
                 </p>
               )}
             </div>

@@ -618,6 +618,40 @@ test.describe("configurator final 219:3", () => {
     expectStableRail(acmRail, await railGeometry(page));
   });
 
+  test("FC1 projects current LETTERS truth without stale color or false-complete status", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1100 });
+    await openLetters(page);
+    await page.getByLabel("Textul literelor").fill("WORKOS");
+    await selectProductChoice(page, "Finisaj față", "vinyl");
+    await page.getByLabel("Culoare față").fill("red");
+    await expect(page.getByLabel("Culoare față")).toBeVisible();
+    await selectProductChoice(page, "Finisaj față", "none");
+    await expect(page.getByLabel("Culoare față")).toHaveCount(0);
+    await page.getByLabel("Suprafață confirmată (mm²)").fill("250000");
+    await selectProductChoice(page, "Adâncime volum (mm)", "60");
+    await selectProductChoice(page, "Finisaj volum", "none");
+    await page.getByLabel("Perimetru confirmat (mm)").fill("12500");
+    const inheritedArea = page.locator('.cfg-blueprint [data-fact-kind="inherited"]');
+    await expect(inheritedArea).toHaveCount(1);
+    await expect(inheritedArea).toContainText("250000 mm²");
+    await expect(inheritedArea.getByText("Moștenit")).toBeVisible();
+    await page.getByRole("button", { name: "Verifică configurația" }).click();
+    await expect(page.getByText("Configurare completă")).toBeVisible();
+    await expect(page.getByText("red", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Culoare față")).toHaveCount(0);
+    await page.getByRole("button", { name: "Confirmă configurația" }).click();
+    await expect(page.getByRole("heading", { name: "Configurație confirmată" })).toBeVisible();
+    await expect(page.getByText("red", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Culoare față")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Modifică configurația" }).click();
+    await page.getByLabel("Textul literelor").fill("");
+    await expect(page.getByText("Configurare completă")).toHaveCount(0);
+    await expect(page.getByText("4 din 4 module validate · 1 câmp obligatoriu lipsă")).toBeVisible();
+  });
+
   test("768 stacks the active editor before Blueprint, composition stays review-first", async ({
     page,
   }) => {
