@@ -26,6 +26,8 @@ During FORM COMPLETENESS, do not redesign the floorplan without an explicit Owne
 
 Future form or product work must reuse these patterns. Do not invent a second Configurator chrome, rail, Blueprint, editor, field, or footer.
 
+The general Cursor ↔ Figma protected-region law for any already accepted surface lives in `docs/development/WORKOS_FIGMA_WORKFLOW.md`. This file remains the Configurator-specific frozen framework. Do not duplicate that general law here.
+
 ## FROZEN V1
 
 - shell
