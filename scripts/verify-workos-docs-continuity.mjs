@@ -150,6 +150,9 @@ export function verifyRoadmapFc1(roadmapText, errors) {
   if (!/PR26\s*=\s*INTEGRATED_ON_MAIN/.test(roadmapText)) {
     fail(errors, "living roadmap must record PR26 = INTEGRATED_ON_MAIN");
   }
+  if (!/PR27\s*=\s*INTEGRATED_ON_MAIN/.test(roadmapText)) {
+    fail(errors, "living roadmap must record PR27 = INTEGRATED_ON_MAIN");
+  }
   if (!/NEXT_PRODUCT_SLICE\s*=\s*NOT_AUTHORIZED_AFTER_FC1/.test(roadmapText)) {
     fail(errors, "living roadmap must record NEXT_PRODUCT_SLICE = NOT_AUTHORIZED_AFTER_FC1");
   }
@@ -352,6 +355,27 @@ export function verifyOwnerUpdateRule(agentsText, cursorWorkflowText, errors) {
   }
 }
 
+export function verifyCursorWorkflowCiLaw(cursorWorkflowText, errors) {
+  if (!/OWNER_APPROVAL_MODEL\s*=\s*SCOPE_AUTHORIZATION_NOT_COMMAND_AUTHORIZATION/.test(cursorWorkflowText)) {
+    fail(
+      errors,
+      "WORKOS_CURSOR_WORKFLOW.md must record OWNER_APPROVAL_MODEL = SCOPE_AUTHORIZATION_NOT_COMMAND_AUTHORIZATION",
+    );
+  }
+  if (!/ROUTINE_COMMAND_CONFIRMATION\s*=\s*FORBIDDEN/.test(cursorWorkflowText)) {
+    fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record ROUTINE_COMMAND_CONFIRMATION = FORBIDDEN");
+  }
+  if (!/ROUTINE_APPROVAL_PROMPTS\s*=\s*0/.test(cursorWorkflowText)) {
+    fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record ROUTINE_APPROVAL_PROMPTS = 0");
+  }
+  if (!/EXACT_HEAD_RELEVANT_CI/.test(cursorWorkflowText)) {
+    fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record EXACT_HEAD_RELEVANT_CI");
+  }
+  if (/EXACT_HEAD_CI\s*=\s*REQUIRED BEFORE INTEGRATION/.test(cursorWorkflowText) && !/EXACT_HEAD_RELEVANT_CI/.test(cursorWorkflowText)) {
+    fail(errors, "WORKOS_CURSOR_WORKFLOW.md must not keep the old undifferentiated exact-head CI law");
+  }
+}
+
 export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   const errors = [];
   verifyRequiredDocs(repoRoot, errors);
@@ -376,6 +400,7 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   verifyRoadmapFc1(roadmap, errors);
   verifyTerminologyConcepts(terminology, errors);
   verifyOwnerUpdateRule(agents, cursorWorkflow, errors);
+  verifyCursorWorkflowCiLaw(cursorWorkflow, errors);
   verifyConfiguratorUiAuthority(framework, figmaWorkflow, authorityMap, session, errors);
   const bootstrap = readRepoFile(repoRoot, "docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md");
   verifyOwnerUiUxApprovalScope(session, figmaWorkflow, authorityMap, bootstrap, roadmap, errors);
@@ -385,6 +410,7 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
     "docs/CURSOR_PLUGINS.md",
     "docs/README.md",
     "docs/worklog/WORKOS_DOCUMENTATION_AND_SESSION_CONTINUITY_V1_IMPLEMENTED_LOCAL_IN_REVIEW.md",
+    "docs/worklog/WORKOS_CI_TIERING_V1_IMPLEMENTED_LOCAL_IN_REVIEW.md",
   ];
   for (const relativePath of guarded) {
     if (existsSync(join(repoRoot, relativePath))) {

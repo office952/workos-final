@@ -51,6 +51,8 @@ test("verification commands are allowed", () => {
   assert.equal(permission("pnpm typecheck"), "allow");
   assert.equal(permission("pnpm test"), "allow");
   assert.equal(permission("pnpm build"), "allow");
+  assert.equal(permission("pnpm docs:check"), "allow");
+  assert.equal(permission("pnpm ci:classify"), "allow");
   assert.equal(permission("pnpm -r typecheck"), "allow");
   assert.equal(permission("pnpm --filter @workos-final/web test"), "allow");
   assert.equal(permission("node --test .cursor/hooks/classify-shell.test.mjs"), "allow");

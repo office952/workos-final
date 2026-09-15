@@ -56,6 +56,7 @@ describe("verify-workos-docs-continuity", () => {
       [
         "FORM_COMPLETENESS_FC1 = INTEGRATED_ON_MAIN",
         "PR26 = INTEGRATED_ON_MAIN",
+        "PR27 = INTEGRATED_ON_MAIN",
         "NEXT_PRODUCT_SLICE = NOT_AUTHORIZED_AFTER_FC1",
         "FORM_COMPLETENESS = FC1_IMPLEMENTED_LOCAL_IN_REVIEW",
       ].join("\n"),

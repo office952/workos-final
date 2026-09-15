@@ -41,6 +41,7 @@ These files are not a second roadmap. Live GitHub is the integration authority.
 
 - `docs/CURSOR_PLUGINS.md` — plugin / MCP inventory and Harness V2
 - `scripts/verify-workos-docs-continuity.mjs` — deterministic docs check (`pnpm docs:check`)
+- `scripts/classify-ci-impact.mjs` — change-impact CI tier (`pnpm ci:classify`)
 
 Tooling does not own Product Truth.
 

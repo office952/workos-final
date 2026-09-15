@@ -34,6 +34,7 @@ Do not treat a cached SHA as current integration authority. This file must not b
 | TERMINOLOGY_CANON | `docs/governance/WORKOS_ROMANIAN_TERMINOLOGY_CANON.md` |
 | DOCUMENTATION_GOVERNANCE | `docs/governance/WORKOS_DOCUMENTATION_GOVERNANCE.md` |
 | CURSOR_WORKFLOW | `docs/development/WORKOS_CURSOR_WORKFLOW.md` |
+| CI_TIERING | `docs/development/WORKOS_CURSOR_WORKFLOW.md` plus `scripts/classify-ci-impact.mjs` |
 | CURSOR_PLUGIN_REGISTRY | `docs/CURSOR_PLUGINS.md` |
 | FIGMA_WORKFLOW | `docs/development/WORKOS_FIGMA_WORKFLOW.md` |
 | PRODUCT_TRUTH_AUTHORITIES | current ProductTemplates / FormSchemas / component contracts / `compileDefinition` plus `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` |
@@ -45,8 +46,9 @@ Do not treat a cached SHA as current integration authority. This file must not b
 This block is a checkpoint copied from the living roadmap plus live GitHub evidence. Re-read those authorities before acting. Do not treat this file as the delivery sequence.
 
 ```text
-LAST_RECONCILED_MAIN_BASE              = db149cf1bbed19ccbdee7210017d3ffb649cbd13
+LAST_RECONCILED_MAIN_BASE              = debf5182a657e2794b873b74707d842c816d4f08
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
+PR27                                   = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
 CURRENT_PRODUCT_SLICE                  = NONE_AUTHORIZED_AFTER_FC1
 NEXT_PRODUCT_SLICE                     = NOT_AUTHORIZED_AFTER_FC1

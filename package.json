@@ -7,9 +7,10 @@
     "dev:web": "pnpm --filter @workos-final/web dev",
     "dev:api": "pnpm --filter @workos-final/api dev",
     "docs:check": "node scripts/verify-workos-docs-continuity.mjs && node --test scripts/verify-workos-docs-continuity.test.mjs",
+    "ci:classify": "node scripts/classify-ci-impact.mjs",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test",
+    "test": "node --test scripts/verify-workos-docs-continuity.test.mjs scripts/classify-ci-impact.test.mjs && pnpm -r test",
     "build": "pnpm -r build",
     "e2e": "playwright test"
   },

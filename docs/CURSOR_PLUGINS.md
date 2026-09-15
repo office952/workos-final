@@ -461,7 +461,7 @@ Normal feature-branch push ALLOW is branch-aware. For `git push origin HEAD`, `g
 
 Local proof on Cursor 3.20.21: ALLOW executed; DENY was blocked before execution. Later Owner runtime evidence showed ASK can interrupt with `Hook requested approval` (example: `git push -u origin HEAD`). ASK is therefore an interruption signal, not a security gate. Do not use ASK for routine authorized workflow.
 
-Direct `pnpm e2e` and ordinary Playwright entrypoints (`pnpm exec playwright`, `pnpm dlx playwright`, `pnpm playwright`, `npx playwright`, `playwright test`) are DENY. Use `node .cursor/run-isolated-e2e.mjs`.
+Direct `pnpm e2e` and ordinary Playwright entrypoints (`pnpm exec playwright`, `pnpm dlx playwright`, `pnpm playwright`, `npx playwright`, `playwright test`) are DENY on the agent machine. Use `node .cursor/run-isolated-e2e.mjs`. GitHub Actions CI may invoke `pnpm e2e` for the classified runtime or conservative-full tier. That is the repository CI path, not a local harness bypass. Feature-branch push without a PR does not run GitHub CI. Local verification is change-aware (`node scripts/run-local-ci-tier.mjs`).
 
 Opaque wrappers that can hide destructive execution (`-EncodedCommand` / `-enc`, `Invoke-Expression` / `iex`, `node -e` / `--eval`, `python -c` / `python3 -c` / `py -c`, `bash -c`, `sh -c`) are DENY. `powershell -Command "<plain command>"` and `cmd /c "<plain command>"` stay unwrap-and-classify.
 
