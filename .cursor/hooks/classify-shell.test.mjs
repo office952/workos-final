@@ -4,7 +4,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { classifyShellCommand } from "./lib/classify-shell.mjs";
+import {
+  classifyShellCommand,
+  finalizeHookDecision,
+  hookPermissionAskCount,
+  REFORMULATE_AGENT_MESSAGE,
+} from "./lib/classify-shell.mjs";
 import { matchesCatastrophicCommand } from "./lib/catastrophic-matcher.mjs";
 import { createAuditRecord } from "./lib/audit-write.mjs";
 import { parseHookInput } from "./lib/parse-hook-input.mjs";
@@ -104,8 +109,8 @@ test("commit and normal HEAD push are allowed", () => {
   assert.equal(permission("git push -u origin chore/cursor-workos-harness-v2"), "allow");
   assert.equal(permission("git push -u origin HEAD:chore/workos-ci-tiering-v1"), "allow");
   assert.equal(permission("git worktree list"), "allow");
-  assert.equal(permission("git worktree add C:/tmp/x origin/main"), "ask");
-  assert.equal(permission("git worktree remove C:/tmp/x"), "ask");
+  assert.equal(permission("git worktree add C:/tmp/x origin/main"), "deny");
+  assert.equal(permission("git worktree remove C:/tmp/x"), "deny");
 });
 
 test("chained readonly git cannot hide a force push", () => {
@@ -201,7 +206,7 @@ test("does not treat reset in a commit message as destructive git reset", () => 
 });
 
 test("does not treat push in a branch name as force push", () => {
-  assert.equal(permission("git checkout -b chore/cursor-push-docs"), "ask");
+  assert.equal(permission("git checkout -b chore/cursor-push-docs"), "allow");
 });
 
 test("direct Playwright entrypoints are denied and isolated runner is allowed", () => {
@@ -229,10 +234,10 @@ test("direct Playwright entrypoints are denied and isolated runner is allowed", 
   );
 });
 
-test("uncertain commands ask", () => {
-  assert.equal(permission("pnpm install"), "ask");
-  assert.equal(permission("echo hello"), "ask");
-  assert.equal(permission(""), "ask");
+test("uncertain commands deny and never ask", () => {
+  assert.equal(permission("pnpm install"), "deny");
+  assert.equal(permission("echo hello"), "deny");
+  assert.equal(permission(""), "deny");
 });
 
 test("audit-observed routine push refspec and gh run watch are allow", () => {
@@ -262,8 +267,8 @@ test("Owner-observed gh log Select-String pipeline is allow", () => {
   );
   assert.equal(permission('Select-String -Pattern "CI_TIER"'), "allow");
   assert.equal(hookPermission('gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"'), "allow");
-  assert.equal(permission("echo hello"), "ask");
-  assert.equal(permission("Select-Object -Property { $_.Name }"), "ask");
+  assert.equal(permission("echo hello"), "deny");
+  assert.equal(permission("Select-Object -Property { $_.Name }"), "deny");
   assert.equal(permission("gh pr merge 25 | Select-String -Pattern x"), "deny");
 });
 
@@ -401,7 +406,7 @@ test("invalid hook JSON denies instead of asking", () => {
   assert.equal(payload.permission, "deny");
   assert.equal(
     payload.agent_message,
-    "Shell command could not be parsed safely. Reformulate as a direct supported command.",
+    "Unsupported command formulation. Reformulate as a safe supported command and continue autonomously. Do not ask the Owner for command approval.",
   );
 });
 
@@ -502,8 +507,8 @@ test("autonomy cleanup matrix", () => {
     ),
     "allow",
   );
-  assert.equal(permission("Select-Object -Property { $_.Name }"), "ask");
-  assert.equal(permission("ForEach-Object { $_ }"), "ask");
+  assert.equal(permission("Select-Object -Property { $_.Name }"), "deny");
+  assert.equal(permission("ForEach-Object { $_ }"), "deny");
   assert.equal(permission("gh pr merge 25"), "deny");
   assert.equal(permission("gh --repo office952/workos-final pr merge 25"), "deny");
   assert.equal(permission("gh pr --repo office952/workos-final merge 25"), "deny");
@@ -540,7 +545,7 @@ test("autonomy cleanup matrix", () => {
   assert.equal(permission("pnpm build"), "allow");
   assert.equal(permission("node .cursor/run-isolated-e2e.mjs"), "allow");
   assert.equal(permission("pnpm e2e"), "deny");
-  assert.equal(permission("echo hello"), "ask");
+  assert.equal(permission("echo hello"), "deny");
   assert.equal(permission("git -C other-repo add ."), "deny");
   assert.equal(permission("git -C other-repo commit -m message"), "deny");
   assert.equal(permission("git -C other-repo reset"), "deny");
@@ -617,3 +622,147 @@ test("commit push PR workflow classifies allow without ASK", () => {
   );
   assert.equal(classifyShellCommand("git push origin HEAD").permission, "deny");
 });
+
+test("zero-prompt matrix never returns ASK", () => {
+  const commands = [
+    "git status",
+    "git fetch origin",
+    "git add AGENTS.md",
+    "git commit -m message",
+    "git push origin HEAD",
+    "gh pr create --title t --body b",
+    "pnpm test",
+    "node .cursor/run-isolated-e2e.mjs",
+    'gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"',
+    "Select-Object -First 40",
+    "Select-Object -Property { $_.Name }",
+    "unknown-harmless.exe --help",
+    "",
+    "   ",
+    "git ???",
+    'node -e "console.log(1)"',
+    "playwright test",
+    "git push --force origin HEAD",
+    "git push origin main",
+    "gh pr merge 25",
+    "git reset --hard HEAD",
+    "rm -rf data",
+    "git status && git push --force",
+    'git -c alias.push="push --force" push origin HEAD',
+    "node .tmp/figma-sync/capture.mjs",
+    "node --import ./evil.mjs .tmp/figma-sync/capture.mjs",
+    "node .tmp/../apps/api/src/index.ts",
+    "git checkout -b chore/cursor-push-docs",
+    "git checkout -b main",
+    "git merge main",
+    "git rebase main",
+    "ForEach-Object { $_ }",
+    "pnpm install",
+    "echo hello",
+    "git worktree add C:/tmp/x origin/main",
+    "git commit --amend",
+  ];
+  const decisions = commands.map((command) =>
+    classifyShellCommand(command, featureBranchOptions),
+  );
+  assert.equal(hookPermissionAskCount(decisions), 0);
+  for (const decision of decisions) {
+    assert.ok(decision.permission === "allow" || decision.permission === "deny");
+    assert.notEqual(decision.permission, "ask");
+  }
+  assert.equal(permission("git status"), "allow");
+  assert.equal(permission("git fetch origin"), "allow");
+  assert.equal(permission("git add AGENTS.md"), "allow");
+  assert.equal(permission("git commit -m message"), "allow");
+  assert.equal(permission("git push origin HEAD"), "allow");
+  assert.equal(permission("gh pr create --title t --body b"), "allow");
+  assert.equal(permission("pnpm test"), "allow");
+  assert.equal(permission("node .cursor/run-isolated-e2e.mjs"), "allow");
+  assert.equal(
+    permission('gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"'),
+    "allow",
+  );
+  assert.equal(permission("Select-Object -First 40"), "allow");
+  assert.equal(permission("Select-Object -Property { $_.Name }"), "deny");
+  assert.equal(permission("unknown-harmless.exe --help"), "deny");
+  assert.equal(permission(""), "deny");
+  assert.equal(permission("git ???"), "deny");
+  assert.equal(permission('node -e "console.log(1)"'), "deny");
+  assert.equal(permission("playwright test"), "deny");
+  assert.equal(permission("git push --force origin HEAD"), "deny");
+  assert.equal(permission("git push origin main"), "deny");
+  assert.equal(permission("gh pr merge 25"), "deny");
+  assert.equal(permission("git reset --hard HEAD"), "deny");
+  assert.equal(permission("rm -rf data"), "deny");
+  assert.equal(permission("git status && git push --force"), "deny");
+  assert.equal(
+    permission('git -c alias.push="push --force" push origin HEAD'),
+    "deny",
+  );
+  assert.equal(permission("node .tmp/figma-sync/capture.mjs"), "deny");
+  assert.equal(permission("node --import ./evil.mjs .tmp/figma-sync/capture.mjs"), "deny");
+  assert.equal(permission("node .tmp/../apps/api/src/index.ts"), "deny");
+  assert.equal(permission("git checkout -b chore/cursor-push-docs"), "allow");
+  assert.equal(permission("git checkout -b main"), "deny");
+  assert.equal(permission("git merge main"), "deny");
+  assert.equal(permission("git rebase main"), "deny");
+  assert.equal(permission("git commit --amend"), "deny");
+});
+
+test("before-shell JSON never emits permission=ask", () => {
+  const commands = [
+    "",
+    "not a real command",
+    "echo hello",
+    "git status",
+    "git push --force origin main",
+    "Select-Object -Property { $_.Name }",
+  ];
+  for (const command of commands) {
+    const result = spawnSync(process.execPath, [join(hookRoot, "before-shell.mjs")], {
+      input: `${JSON.stringify({ command, cwd: repoRoot })}\n`,
+      encoding: "utf8",
+      cwd: repoRoot,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout.trim());
+    assert.notEqual(payload.permission, "ask");
+    assert.ok(payload.permission === "allow" || payload.permission === "deny");
+  }
+  const malformed = spawnSync(process.execPath, [join(hookRoot, "before-shell.mjs")], {
+    input: "not-json",
+    encoding: "utf8",
+    cwd: repoRoot,
+  });
+  const malformedPayload = JSON.parse(malformed.stdout.trim());
+  assert.equal(malformedPayload.permission, "deny");
+  assert.equal(malformedPayload.agent_message, REFORMULATE_AGENT_MESSAGE);
+});
+
+test("finalizeHookDecision cannot reintroduce ASK", () => {
+  const coerced = finalizeHookDecision({
+    permission: "ask",
+    category: "uncertain",
+    agentMessage: "should never reach Owner",
+  });
+  assert.equal(coerced.permission, "deny");
+  assert.equal(coerced.agentMessage, "should never reach Owner");
+  assert.equal(
+    hookPermissionAskCount([
+      classifyShellCommand("echo hello"),
+      classifyShellCommand(""),
+      coerced,
+    ]),
+    0,
+  );
+});
+
+test("classifier source does not construct ASK decisions", () => {
+  const source = readFileSync(join(hookRoot, "lib", "classify-shell.mjs"), "utf8");
+  const hook = readFileSync(join(hookRoot, "before-shell.mjs"), "utf8");
+  assert.equal(/\bdecision\(\s*["']ask["']/.test(source), false);
+  assert.equal(/permission:\s*["']ask["']/.test(source), false);
+  assert.equal(/permission:\s*["']ask["']/.test(hook), false);
+  assert.match(source, /CUSTOM_HOOK_ASK|REFORMULATE_AGENT_MESSAGE/);
+});
+

@@ -368,6 +368,15 @@ export function verifyCursorWorkflowCiLaw(cursorWorkflowText, errors) {
   if (!/ROUTINE_APPROVAL_PROMPTS\s*=\s*0/.test(cursorWorkflowText)) {
     fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record ROUTINE_APPROVAL_PROMPTS = 0");
   }
+  if (!/CUSTOM_HOOK_ASK\s*=\s*FORBIDDEN/.test(cursorWorkflowText)) {
+    fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record CUSTOM_HOOK_ASK = FORBIDDEN");
+  }
+  if (!/UNKNOWN_COMMAND_BEHAVIOR\s*=\s*DENY_REFORMULATE_AUTONOMOUSLY/.test(cursorWorkflowText)) {
+    fail(
+      errors,
+      "WORKOS_CURSOR_WORKFLOW.md must record UNKNOWN_COMMAND_BEHAVIOR = DENY_REFORMULATE_AUTONOMOUSLY",
+    );
+  }
   if (!/EXACT_HEAD_RELEVANT_CI/.test(cursorWorkflowText)) {
     fail(errors, "WORKOS_CURSOR_WORKFLOW.md must record EXACT_HEAD_RELEVANT_CI");
   }

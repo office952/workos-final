@@ -45,8 +45,32 @@ const PS_ARTIFACT_WRITE_CMDLETS = new Set([
   "out-file",
 ]);
 
+export const REFORMULATE_AGENT_MESSAGE =
+  "Unsupported command formulation. Reformulate as a safe supported command and continue autonomously. Do not ask the Owner for command approval.";
+
+export const HOOK_PERMISSIONS = Object.freeze(["allow", "deny"]);
+
+export function finalizeHookDecision(decision) {
+  if (decision && decision.permission === "allow") {
+    return {
+      permission: "allow",
+      category: decision.category ?? "verification",
+      agentMessage: decision.agentMessage ?? "Classified command is allowed.",
+    };
+  }
+  return {
+    permission: "deny",
+    category: decision?.category ?? "uncertain",
+    agentMessage: decision?.agentMessage || REFORMULATE_AGENT_MESSAGE,
+  };
+}
+
+export function hookPermissionAskCount(decisions) {
+  return decisions.filter((decision) => decision?.permission === "ask").length;
+}
+
 function decision(permission, category, agentMessage) {
-  return { permission, category, agentMessage };
+  return finalizeHookDecision({ permission, category, agentMessage });
 }
 
 function findToolIndex(tokens, names) {
@@ -672,13 +696,7 @@ function isCloudMutation(tokens) {
 }
 
 function rank(permission) {
-  if (permission === "deny") {
-    return 2;
-  }
-  if (permission === "ask") {
-    return 1;
-  }
-  return 0;
+  return permission === "deny" ? 1 : 0;
 }
 
 function mergeDecisions(decisions) {
@@ -728,6 +746,86 @@ function isNodeTest(tokens) {
     return false;
   }
   return tokens[nodeIndex + 1] === "--test";
+}
+
+function hasNodeInjectionFlag(tokens) {
+  return (
+    hasEvalFlag(
+      tokens,
+      new Set(["node"]),
+      new Set(["-e", "--eval", "-p", "--print", "--import", "--require", "-r"]),
+    ) ||
+    tokens.some((token) => {
+      const lower = token.toLowerCase();
+      return lower.startsWith("--input-type");
+    })
+  );
+}
+
+function isDangerousCheckoutFlag(token) {
+  const lower = String(token ?? "").toLowerCase();
+  return (
+    lower === "-f" ||
+    lower === "--force" ||
+    lower === "--ours" ||
+    lower === "--theirs" ||
+    lower === "-m" ||
+    lower === "--merge" ||
+    lower === "--conflict" ||
+    lower.startsWith("--conflict=") ||
+    lower === "--discard-changes" ||
+    lower === "--patch" ||
+    lower === "-p"
+  );
+}
+
+function isAllowedFeatureBranchCreate(tokens) {
+  const git = gitSubcommand(tokens);
+  const after = gitSubcommandArgs(tokens);
+  if (after.some((token) => isDangerousCheckoutFlag(token))) {
+    return false;
+  }
+  if (git === "checkout") {
+    const index = after.findIndex((token) => token === "-b" || token === "-B");
+    if (index < 0) {
+      return false;
+    }
+    const name = after[index + 1];
+    return Boolean(name) && !name.startsWith("-") && !isProtectedBranchRef(name);
+  }
+  if (git === "switch") {
+    const index = after.findIndex((token) => token === "-c" || token === "-C");
+    if (index < 0) {
+      return false;
+    }
+    const name = after[index + 1];
+    return Boolean(name) && !name.startsWith("-") && !isProtectedBranchRef(name);
+  }
+  return false;
+}
+
+function isAllowedPathCheckout(tokens) {
+  if (gitSubcommand(tokens) !== "checkout") {
+    return false;
+  }
+  const after = gitSubcommandArgs(tokens);
+  if (after.some((token) => isDangerousCheckoutFlag(token))) {
+    return false;
+  }
+  const separator = after.indexOf("--");
+  if (separator < 0) {
+    return false;
+  }
+  const pathspecs = after.slice(separator + 1);
+  return (
+    pathspecs.length > 0 &&
+    pathspecs.every((token) => token.length > 0 && !token.startsWith("-"))
+  );
+}
+
+function isGitMergeOrRebase(tokens) {
+  const git = gitSubcommand(tokens);
+  return git === "merge" || git === "rebase";
 }
 
 function packageManagerScripts(tokens, managers) {
@@ -815,9 +913,7 @@ function isOpaqueWrapper(tokens) {
   if (hasEncodedPowerShellFlag(tokens) || isInvokeExpression(tokens)) {
     return true;
   }
-  if (
-    hasEvalFlag(tokens, new Set(["node"]), new Set(["-e", "--eval"]))
-  ) {
+  if (hasNodeInjectionFlag(tokens)) {
     return true;
   }
   if (
@@ -890,11 +986,7 @@ function isIsolatedE2eRunner(tokens) {
 function classifySegment(command, options = {}) {
   const tokens = tokenize(unwrapCommand(command));
   if (tokens.length === 0) {
-    return decision(
-      "ask",
-      "uncertain",
-      "Shell command could not be tokenized.",
-    );
+    return decision("deny", "uncertain", REFORMULATE_AGENT_MESSAGE);
   }
 
   if (isGitAliasOverride(tokens)) {
@@ -923,6 +1015,20 @@ function classifySegment(command, options = {}) {
       "deny",
       "destructive",
       "Pull request merge remains Owner-gated.",
+    );
+  }
+  if (isHistoryRewriteCommit(tokens)) {
+    return decision(
+      "deny",
+      "destructive",
+      "git commit --amend / --fixup / --squash is blocked.",
+    );
+  }
+  if (isGitMergeOrRebase(tokens)) {
+    return decision(
+      "deny",
+      "destructive",
+      "git merge and git rebase remain Owner-gated.",
     );
   }
   if (isHardReset(tokens)) {
@@ -1037,7 +1143,9 @@ function classifySegment(command, options = {}) {
       isAllowedGitBranchShow(tokens) ||
       isAllowedHashObject(tokens) ||
       isAllowedGitCommit(tokens) ||
-      isAllowedGitFetch(tokens)
+      isAllowedGitFetch(tokens) ||
+      isAllowedFeatureBranchCreate(tokens) ||
+      isAllowedPathCheckout(tokens)
     ) {
       return decision(
         "allow",
@@ -1045,11 +1153,7 @@ function classifySegment(command, options = {}) {
         "Ordinary repository-local git workflow is allowed.",
       );
     }
-    return decision(
-      "ask",
-      "state_changing",
-      "Legitimate state-changing git requires task-specific authorization.",
-    );
+    return decision("deny", "uncertain", REFORMULATE_AGENT_MESSAGE);
   }
 
   if (isAllowedPowerShellCmdlet(tokens)) {
@@ -1076,20 +1180,12 @@ function classifySegment(command, options = {}) {
     );
   }
 
-  return decision(
-    "ask",
-    "uncertain",
-    "Uncertain shell command requires confirmation.",
-  );
+  return decision("deny", "uncertain", REFORMULATE_AGENT_MESSAGE);
 }
 
 export function classifyShellCommand(command, options = {}) {
   if (typeof command !== "string" || command.trim().length === 0) {
-    return decision(
-      "ask",
-      "uncertain",
-      "Empty shell command is treated as uncertain.",
-    );
+    return decision("deny", "uncertain", REFORMULATE_AGENT_MESSAGE);
   }
 
   const unwrapped = unwrapCommand(command);

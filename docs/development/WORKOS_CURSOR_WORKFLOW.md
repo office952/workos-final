@@ -37,6 +37,12 @@ OWNER_GO                           = SCOPE / WORKFLOW AUTHORIZATION
 OWNER_APPROVAL_MODEL               = SCOPE_AUTHORIZATION_NOT_COMMAND_AUTHORIZATION
 ROUTINE_APPROVAL_PROMPTS           = 0
 ROUTINE_COMMAND_CONFIRMATION       = FORBIDDEN
+CUSTOM_HOOK_ASK                    = FORBIDDEN
+UNKNOWN_COMMAND_BEHAVIOR           = DENY_REFORMULATE_AUTONOMOUSLY
+MALFORMED_COMMAND_BEHAVIOR         = DENY_REFORMULATE_AUTONOMOUSLY
+OWNER_COMMAND_APPROVAL             = ROUTINE_NEVER
+HARD_GATE_BEHAVIOR                 = DENY
+SAFE_ROUTINE_BEHAVIOR              = ALLOW
 ```
 
 Complex, multi-file, or unclear work starts in Plan Mode. A rule cannot flip the IDE mode.
@@ -69,17 +75,38 @@ Owner GO authorizes **scope**, not individual command syntax. It is not Owner ac
 OWNER_APPROVAL_MODEL               = SCOPE_AUTHORIZATION_NOT_COMMAND_AUTHORIZATION
 ROUTINE_APPROVAL_PROMPTS           = 0
 ROUTINE_COMMAND_CONFIRMATION       = FORBIDDEN
+CUSTOM_HOOK_ASK                    = FORBIDDEN
+UNKNOWN_COMMAND_BEHAVIOR           = DENY_REFORMULATE_AUTONOMOUSLY
+MALFORMED_COMMAND_BEHAVIOR         = DENY_REFORMULATE_AUTONOMOUSLY
+OWNER_COMMAND_APPROVAL             = ROUTINE_NEVER
+HARD_GATE_BEHAVIOR                 = DENY
+SAFE_ROUTINE_BEHAVIOR              = ALLOW
 ```
 
 Once the Owner has authorized a wave or scope, Cursor must autonomously run every routine reversible command needed to finish that work. Do not ask whether to fetch, inspect, lint, test, build, run isolated E2E, commit, push the feature branch, or create the PR.
 
-Routine autonomous operations include, when relevant: `git fetch` / `status` / `diff` / `log` / `show`, worktree inspection, `pnpm install`, `pnpm docs:check`, lint, typecheck, test, build, repository-authorized isolated E2E, Playwright, Browser inspection, read-only MCP, normal commit, normal feature-branch push, PR create, and CI inspection.
+The WorkOS `beforeShellExecution` hook has only two outcomes: ALLOW or DENY. It must not emit `permission=ask`. ASK from this Harness is what produced Owner “Run?” cards. That path is closed.
+
+Known safe / routine / reversible commands ALLOW. Hard gates DENY. Unknown, malformed, or unparseable formulations DENY with an agent reformulation instruction. DENY is not an Owner approval request.
+
+When a routine command is denied because its formulation is unsupported, Cursor must:
+
+1. understand the intended operation
+2. select a safe supported equivalent
+3. retry autonomously
+4. continue the task
+
+Cursor must not surface an Owner Run approval request, ask whether it should continue, or ask the Owner to choose shell syntax. Only a genuine scope or authority decision may interrupt the Owner.
+
+Routine autonomous operations include, when relevant: `git fetch` / `status` / `diff` / `log` / `show`, worktree inspection, `pnpm install --frozen-lockfile`, `pnpm docs:check`, lint, typecheck, test, build, repository-authorized isolated E2E, Browser inspection, read-only MCP, normal commit, normal feature-branch push, PR create, and CI inspection. Direct Playwright and `pnpm e2e` stay harness-denied; use `node .cursor/run-isolated-e2e.mjs`.
+
+Repo-local temporary Node helpers are DENY. The hook can prove a `.tmp/` path but cannot prove the script body is non-destructive, so a helper must not become an opaque wrapper. Use a native Cursor/MCP/file/browser operation, or an already-classified command, and continue autonomously.
 
 Stop only for a true Owner decision / hard gate: merge, force push, direct main push, destructive git, destructive data, real Cloud write, real business DB write, credentials, Product Truth expansion, Figma write/publish, authority expansion, or unexpected scope change.
 
 Ask about the decision (`Owner GO — MERGE PR #X?`), not the command (`May I run gh pr merge?`).
 
-Native OS or Cursor sandbox permission dialogs are platform enforcement. Do not add a second conversational permission prompt around routine commands.
+Native OS or Cursor sandbox permission dialogs are platform enforcement. This program eliminates WorkOS Harness-generated prompts only. It does not claim control over native Cursor or OS security dialogs. The Harness must not add a second approval layer.
 
 ## CI tiering
 
