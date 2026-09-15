@@ -270,6 +270,79 @@ export function verifyConfiguratorUiAuthority(
   }
 }
 
+const FORBIDDEN_BLANKET_PAGE_ACCEPTANCE = [
+  /ALL_UI20_PAGES_OWNER_ACCEPTED\s*=\s*YES/,
+  /ALL_WORKOS_PAGES_UI_UX\s*=\s*OWNER_ACCEPTED/,
+  /OWNER_APPROVED_CURRENT_UI_UX_SURFACES\s*=\s*ALL/,
+  /OTHER_WORKOS_PAGES_UI_UX\s*=\s*REJECTED/,
+];
+
+export function verifyOwnerUiUxApprovalScope(
+  sessionText,
+  figmaWorkflowText,
+  authorityMapText,
+  bootstrapText,
+  roadmapText,
+  errors,
+) {
+  if (!/OWNER_APPROVED_CURRENT_UI_UX_SURFACES\s*=\s*CONFIGURATOR_ONLY/.test(sessionText)) {
+    fail(
+      errors,
+      "WORKOS_SESSION_CURRENT.md must record OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+    );
+  }
+  if (!/CONFIGURATOR_CURRENT_UI_UX\s*=\s*OWNER_APPROVED_IMPLEMENTED_APPLICATION/.test(sessionText)) {
+    fail(
+      errors,
+      "WORKOS_SESSION_CURRENT.md must record CONFIGURATOR_CURRENT_UI_UX = OWNER_APPROVED_IMPLEMENTED_APPLICATION",
+    );
+  }
+  if (!/OTHER_PAGE_UI_UX_OWNER_ACCEPTANCE\s*=\s*NOT_GRANTED/.test(sessionText)) {
+    fail(
+      errors,
+      "WORKOS_SESSION_CURRENT.md must record OTHER_PAGE_UI_UX_OWNER_ACCEPTANCE = NOT_GRANTED",
+    );
+  }
+  if (!/PAGE_LEVEL_OWNER_ACCEPTANCE/.test(figmaWorkflowText)) {
+    fail(
+      errors,
+      "WORKOS_FIGMA_WORKFLOW.md must separate UI20 direction from page-level Owner acceptance",
+    );
+  }
+  if (!/OWNER_APPROVED_CURRENT_UI_UX_SURFACES\s*=\s*CONFIGURATOR_ONLY/.test(figmaWorkflowText)) {
+    fail(
+      errors,
+      "WORKOS_FIGMA_WORKFLOW.md must record OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+    );
+  }
+  if (!/CONFIGURATOR_ONLY/.test(authorityMapText)) {
+    fail(errors, "WORKOS_AUTHORITY_MAP.md must record CONFIGURATOR_ONLY page-level UI/UX Owner acceptance");
+  }
+  if (!/CONFIGURATOR_ONLY/.test(bootstrapText) || !/page-level Owner acceptance/.test(bootstrapText)) {
+    fail(
+      errors,
+      "WORKOS_NEW_SESSION_BOOTSTRAP.md must preserve Configurator-only page-level Owner acceptance",
+    );
+  }
+  if (!/OWNER_APPROVED_CURRENT_UI_UX_SURFACES\s*=\s*CONFIGURATOR_ONLY/.test(roadmapText)) {
+    fail(
+      errors,
+      "living roadmap current state must record OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+    );
+  }
+
+  for (const text of [sessionText, figmaWorkflowText, authorityMapText, bootstrapText]) {
+    for (const pattern of FORBIDDEN_BLANKET_PAGE_ACCEPTANCE) {
+      if (pattern.test(text)) {
+        fail(
+          errors,
+          "living continuity docs must not imply all UI20/WorkOS pages are Owner-accepted or rejected",
+        );
+      }
+    }
+  }
+}
+
 export function verifyOwnerUpdateRule(agentsText, cursorWorkflowText, errors) {
   if (!agentsText.includes("OWNER_UPDATE_LINKS")) {
     fail(errors, "AGENTS.md must require OWNER_UPDATE_LINKS");
@@ -304,6 +377,8 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   verifyTerminologyConcepts(terminology, errors);
   verifyOwnerUpdateRule(agents, cursorWorkflow, errors);
   verifyConfiguratorUiAuthority(framework, figmaWorkflow, authorityMap, session, errors);
+  const bootstrap = readRepoFile(repoRoot, "docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md");
+  verifyOwnerUiUxApprovalScope(session, figmaWorkflow, authorityMap, bootstrap, roadmap, errors);
 
   const guarded = [
     ...CLASSIFIED_DOCS,

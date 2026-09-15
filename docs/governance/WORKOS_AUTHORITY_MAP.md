@@ -23,10 +23,12 @@ It does not decide current milestones. GitHub live state decides whether somethi
 | What fields exist? | Current ProductTemplate / FormSchema |
 | Is the product ready? | `compileDefinition.readiness` |
 | How should it look? | Applicable UI/UX canon. For Configurator: current `apps/web` implementation on main plus `CONFIGURATOR_V1_UI_FRAMEWORK` as documented guardrail. Figma only where a living canon assigns that class |
+| Is this page's current UI/UX Owner-approved? | Only Configurator. `OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY`. Other pages: acceptance not granted, not rejected |
 
 A worklog saying `IMPLEMENTED_LOCAL_IN_REVIEW` does not override a live merged PR.
 A Figma frame does not override Product Truth.
 A Figma frame does not override later accepted Configurator implementation refinements.
+UI20 direction, an implemented shell, or a page existing in the app is not page-level Owner acceptance of that page.
 A session continuity snapshot does not override the roadmap.
 A cached SHA is evidence, not current integration authority.
 
@@ -45,7 +47,8 @@ A cached SHA is evidence, not current integration authority.
 | Execution | `docs/architecture/EXECUTION_PLAN_AND_TASKS_CANON.md` and related execution canons | Execution worklogs | Configurator, Figma |
 | People / operator identity | `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` | People admin / Atelier projections | account email in Figma |
 | Machines / workcenters | `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` | `/admin/workcenters` projection | invented capacity UI |
-| UI/UX direction | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` | Foundation canon, UI20 worklogs | plugin inspiration, 21st.dev |
+| UI/UX direction | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` | Foundation canon, UI20 worklogs | plugin inspiration, 21st.dev, treating direction as page-level Owner acceptance |
+| Current page-level UI/UX Owner acceptance | Configurator only: implemented application on main plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` | `docs/continuity/WORKOS_SESSION_CURRENT.md` (`OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY`) | UI20 Figma, implemented shell, page existence, historical V3/UI20 accepts as current all-pages accept |
 | Implemented presentation law | `docs/architecture/UI_UX_FOUNDATION_CANON.md` | current `apps/web` shell | historical V3 Figma as live shell |
 | Configurator current implemented presentation | current `apps/web` Configurator on `origin/main`, plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` as documented guardrail | Configurator worklogs | Figma `219:3` as a reason to overwrite later accepted refinements; ProductTemplate; Figma Make business values |
 | Configurator Figma `219:3` | `docs/development/WORKOS_FIGMA_WORKFLOW.md` (`ACCEPTED_BASELINE_REFERENCE`) | recorded `FIGMA_FILE` / `FIGMA_SECTION` in the frozen framework | current implementation visual authority |

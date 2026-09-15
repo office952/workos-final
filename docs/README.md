@@ -9,7 +9,7 @@ If a current canonical document disagrees with runtime, the runtime / live GitHu
 - `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery direction
 - `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation law
-- `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` — documented guardrail of the accepted Configurator implementation; current UI/UX authority is the application on main
+- `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` — documented guardrail of the accepted Configurator implementation; current UI/UX authority is the application on main. At this checkpoint only Configurator UI/UX is Owner-approved; other pages are not rejected and are not Owner-accepted by existence or UI20 direction.
 - `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration
 - `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings
 - `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity and cost evidence

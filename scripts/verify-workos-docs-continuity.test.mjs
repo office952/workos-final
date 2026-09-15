@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import {
   repoRootFrom,
   verifyConfiguratorUiAuthority,
+  verifyOwnerUiUxApprovalScope,
   verifyRoadmapFc1,
   verifySessionCurrent,
   verifyTerminologyConcepts,
@@ -111,6 +112,44 @@ describe("verify-workos-docs-continuity", () => {
     assert.ok(errors.some((item) => item.includes("CURRENT_IMPLEMENTED_UI_AUTHORITY")));
     assert.ok(errors.some((item) => item.includes("FIGMA_ROLE")));
     assert.ok(errors.some((item) => item.includes("FORCE_SYNC_APP_TO_FIGMA")));
+  });
+
+  it("rejects blanket UI20 page Owner acceptance in living continuity docs", () => {
+    const errors = [];
+    verifyOwnerUiUxApprovalScope(
+      [
+        "OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+        "CONFIGURATOR_CURRENT_UI_UX = OWNER_APPROVED_IMPLEMENTED_APPLICATION",
+        "OTHER_PAGE_UI_UX_OWNER_ACCEPTANCE = NOT_GRANTED",
+        "ALL_UI20_PAGES_OWNER_ACCEPTED = YES",
+      ].join("\n"),
+      [
+        "PAGE_LEVEL_OWNER_ACCEPTANCE = NOT_IMPLIED",
+        "OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+      ].join("\n"),
+      "CONFIGURATOR_ONLY",
+      "CONFIGURATOR_ONLY page-level Owner acceptance",
+      "OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+      errors,
+    );
+    assert.ok(errors.some((item) => item.includes("must not imply all UI20")));
+  });
+
+  it("rejects a session that omits Configurator-only Owner approval scope", () => {
+    const errors = [];
+    verifyOwnerUiUxApprovalScope(
+      "FORCE_SYNC_APP_TO_FIGMA = NO\n",
+      [
+        "PAGE_LEVEL_OWNER_ACCEPTANCE = NOT_IMPLIED",
+        "OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+      ].join("\n"),
+      "CONFIGURATOR_ONLY",
+      "CONFIGURATOR_ONLY page-level Owner acceptance",
+      "OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY",
+      errors,
+    );
+    assert.ok(errors.some((item) => item.includes("OWNER_APPROVED_CURRENT_UI_UX_SURFACES")));
+    assert.ok(errors.some((item) => item.includes("OTHER_PAGE_UI_UX_OWNER_ACCEPTANCE")));
   });
 
   it("does not treat an empty temp tree as the repo", () => {

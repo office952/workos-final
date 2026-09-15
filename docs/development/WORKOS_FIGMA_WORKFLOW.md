@@ -19,11 +19,16 @@ FIGMA                         != DOMAIN_AUTHORITY
 FIGMA                         != PRICING_AUTHORITY
 FIGMA                         != EXECUTION_AUTHORITY
 FIGMA                         != AUTOMATIC_CURRENT_IMPLEMENTATION_AUTHORITY
+FIGMA                         != PAGE_LEVEL_OWNER_ACCEPTANCE
 FIGMA_WRITE                    = REQUIRES_EXPLICIT_OWNER_GO
 FORCE_SYNC_APP_TO_FIGMA        = NO FOR CONFIGURATOR
+UI_UX_DIRECTION               != PAGE_LEVEL_OWNER_ACCEPTANCE
+IMPLEMENTED                   != OWNER_ACCEPTED
+FIGMA_REFERENCE               != OWNER_ACCEPTED
+OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY
 ```
 
-Recording a file or section is not the same as assigning current implementation visual authority. A Figma frame may describe chrome, spacing, and interaction grammar. It must not invent fields, options, readiness, materials, or prices. It must not force the accepted application back to an older frame.
+Recording a file or section is not the same as assigning current implementation visual authority. A Figma frame may describe chrome, spacing, and interaction grammar. It must not invent fields, options, readiness, materials, or prices. It must not force the accepted application back to an older frame. UI20 direction or a Figma class is not page-level Owner acceptance of every WorkOS page.
 
 ## Classification
 
@@ -75,12 +80,15 @@ Repository: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` (`NEW_FIGMA_FILE
 
 ```text
 FIGMA_FILE                     = 0XP0yGa1siWQdTTL7ou8xz
+CLASS                          = VISUAL_AUTHORITY
+OWNS                           = UI20_DIRECTION_AND_REFERENCE
+PAGE_LEVEL_OWNER_ACCEPTANCE    = NOT_IMPLIED
 URL                            = https://www.figma.com/design/0XP0yGa1siWQdTTL7ou8xz
 LIVE_MCP_READ_2026_09_15       = YES
 LIVE_TOP_LEVEL_PAGE            = 547:11 00 — WORKOS ZERO-BASE CANONICAL HANDOFF V1
 ```
 
-This is UI20 visual direction, not Configurator Product Truth, and not a second roadmap.
+This is UI20 visual direction, not Configurator Product Truth, and not a second roadmap. It does not Owner-accept other WorkOS pages. Other pages are not rejected; they are not Owner-approved merely because they exist in the application, in Figma, or under UI20. At the current checkpoint, the only Owner-approved current UI/UX surface is the implemented Configurator.
 
 ### First HF / IA file — HISTORICAL
 

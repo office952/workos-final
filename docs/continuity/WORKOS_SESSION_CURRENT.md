@@ -58,11 +58,11 @@ FC2_AUTHORIZED                         = NO
 
 Read the living roadmap for the full accepted set. Do not duplicate volatile flags here. Relevant to the current product position:
 
-- Configurator UI/UX framework frozen V1. Current Configurator UI/UX authority is the implemented application on main. Figma `219:3` is the accepted design baseline / reference, not a reason to revert later accepted refinements.
+- Configurator UI/UX is the only current page-level Owner-approved UI/UX surface. Authority is the implemented application on main. Figma `219:3` is the accepted design baseline / reference, not a reason to revert later accepted refinements.
 - FORM_COMPLETENESS_AUDIT_V1 accepted
 - FC1 integrated on main via PR #26
 - LETTERS and ACM remain the two live ProductTemplates
-- UI20 Candidate A quiet top shell is the current implemented presentation and is reference, not the required visual migration base
+- UI20 Candidate A quiet top shell is the current implemented presentation and is reference, not the required visual migration base. UI20 direction remains valid. It does not Owner-accept other pages. Other pages are not rejected.
 
 ### Open Owner decisions
 
@@ -84,6 +84,13 @@ MERGE_POLICY                             = NO_MERGE_WITHOUT_EXPLICIT_OWNER_GO
 CONFIGURATOR_CURRENT_UI_UX_AUTHORITY     = CURRENT_IMPLEMENTED_APPLICATION_ON_MAIN
 FIGMA_219_3_ROLE                         = ACCEPTED_BASELINE_REFERENCE
 FORCE_SYNC_APP_TO_FIGMA                  = NO
+OWNER_APPROVED_CURRENT_UI_UX_SURFACES    = CONFIGURATOR_ONLY
+CONFIGURATOR_CURRENT_UI_UX               = OWNER_APPROVED_IMPLEMENTED_APPLICATION
+OTHER_PAGE_UI_UX_OWNER_ACCEPTANCE        = NOT_GRANTED
+OTHER_WORKOS_PAGES_UI_UX                 = NOT_OWNER_APPROVED_BY_CURRENT_ACCEPTANCE
+UI_UX_DIRECTION                         != PAGE_LEVEL_OWNER_ACCEPTANCE
+IMPLEMENTED                             != OWNER_ACCEPTED
+FIGMA_REFERENCE                         != OWNER_ACCEPTED
 ```
 
 ## Protocols

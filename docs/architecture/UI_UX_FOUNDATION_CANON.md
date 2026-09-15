@@ -11,7 +11,7 @@ React must not own product truth, pricing, provider eligibility, executor eligib
 
 ## Shell
 
-This file records the **current implemented** presentation shell. Living UI20 evolution authority remains `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
+This file records the **current implemented** presentation shell. Living UI20 evolution authority remains `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. Implemented shell and existing page bodies are current runtime presentation. They are not current page-level Owner acceptance of those pages. At this checkpoint only Configurator UI/UX is Owner-approved. Other pages are not rejected.
 
 ```text
 IMPLEMENTED_SHELL                      = UI20_CANDIDATE_A_QUIET_TOP_SHELL

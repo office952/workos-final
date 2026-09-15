@@ -64,7 +64,7 @@ Related living authority:
 
 ## Current canonical state
 
-Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN`. `LAST_RECONCILED_MAIN_BASE` is evidence from the last documentation reconciliation, not current integration authority. Harness V2 is engineering enablement only. It is not Product Truth and not a second roadmap. Historical UI20 milestone blocks below remain historical.
+Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN`. `LAST_RECONCILED_MAIN_BASE` is evidence from the last documentation reconciliation, not current integration authority. Harness V2 is engineering enablement only. It is not Product Truth and not a second roadmap. Historical UI20 milestone blocks below remain historical. At this checkpoint, page-level Owner acceptance of current UI/UX covers Configurator only. Historical `OWNER_ACCEPTED` flags below are not a current all-pages visual accept. Other pages are not rejected.
 
 ```text
 LIVE_MAIN_AUTHORITY                  = GITHUB_ORIGIN_MAIN
@@ -72,6 +72,7 @@ LAST_RECONCILED_MAIN_BASE            = db149cf1bbed19ccbdee7210017d3ffb649cbd13
 PR24_CONFIGURATOR_UI_FRAMEWORK       = INTEGRATED_ON_MAIN
 PR26                                 = INTEGRATED_ON_MAIN
 CONFIGURATOR_UI_UX_FRAMEWORK         = FROZEN_V1
+OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY
 CURRENT_TOOLING_ENABLEMENT           = CURSOR_WORKOS_HARNESS_V2
 CURSOR_WORKOS_HARNESS_V2             = INTEGRATED_ON_MAIN
 NEXT_PRODUCT_PROGRAM                 = CONFIGURATOR_FORM_COMPLETENESS

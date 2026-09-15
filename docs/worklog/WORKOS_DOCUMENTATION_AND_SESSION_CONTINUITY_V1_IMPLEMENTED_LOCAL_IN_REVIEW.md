@@ -31,6 +31,7 @@ No product app, domain, API, DB, Cloud, or Figma mutation.
 - Figma MCP read-only verification of Configurator `219:3` and UI20 file page list
 - Plugin / MCP claims classified; unverified “already active” language is no longer treated as connection proof
 - Owner correction: Configurator present UI/UX authority is the implemented application on main. Figma `219:3` is `ACCEPTED_BASELINE_REFERENCE`, not current implementation visual authority. `FORCE_SYNC_APP_TO_FIGMA = NO`. Historical Configurator Figma worklogs were not mass-rewritten.
+- Owner correction: `OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY`. UI20 remains direction/reference. Other pages are not rejected and are not Owner-accepted by existence, Figma, UI20, or implemented shell.
 
 ## Files
 

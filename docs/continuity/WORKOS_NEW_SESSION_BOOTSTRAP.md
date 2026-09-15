@@ -32,7 +32,10 @@ The receiving session must reconstruct state from:
 
 Then run the continuity preflight in `docs/development/WORKOS_CURSOR_WORKFLOW.md`.
 
-Durable reconstruction rule, not a milestone flag: current Configurator UI/UX authority is the implemented application on `origin/main`. Figma section `219:3` is the accepted design baseline / reference. Do not force the application back to that frame because the accepted implementation differs from it.
+Durable reconstruction rules, not milestone flags:
+
+- current Configurator UI/UX authority is the implemented application on `origin/main`. Figma section `219:3` is the accepted design baseline / reference. Do not force the application back to that frame because the accepted implementation differs from it.
+- `OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY`. Other WorkOS pages are not rejected. Do not treat UI20 direction, an implemented shell, Figma existence, or a page existing in the application as page-level Owner acceptance.
 
 Do not start implementation if `CONTINUITY_CONTRADICTION = YES`.
 
@@ -48,6 +51,8 @@ docs/governance/WORKOS_AUTHORITY_MAP.md.
 Verifică live origin/main pe GitHub.
 Nu trata un SHA din documentație ca autoritate de integrare.
 Nu trata Figma 219:3 ca autoritate vizuală curentă a Configuratorului.
+Nu trata UI20 sau existența unei pagini ca acceptare Owner la nivel de pagină.
+Doar Configuratorul are UI/UX Owner-approved la checkpoint-ul curent.
 Nu începe un val de produs fără Owner GO.
 Raportează CONTINUITY_PREFLIGHT și DIRECTION_CONFLICT înainte de orice scriere.
 ```
