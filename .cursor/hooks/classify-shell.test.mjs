@@ -207,6 +207,20 @@ test("uncertain commands ask", () => {
   assert.equal(permission(""), "ask");
 });
 
+test("Owner-observed gh log Select-String pipeline is allow", () => {
+  assert.equal(
+    classifyShellCommand(
+      'gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"',
+    ).permission,
+    "allow",
+  );
+  assert.equal(permission('Select-String -Pattern "CI_TIER"'), "allow");
+  assert.equal(hookPermission('gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"'), "allow");
+  assert.equal(permission("echo hello"), "ask");
+  assert.equal(permission("Select-Object -Property { $_.Name }"), "ask");
+  assert.equal(permission("gh pr merge 25 | Select-String -Pattern x"), "deny");
+});
+
 test("BOM and wrapper parsing", () => {
   const parsed = parseHookInput(
     `\uFEFF${JSON.stringify({ command: "git status" })}`,
@@ -379,6 +393,8 @@ test("worktrees.json, hooks.json, and permissions.json parse", () => {
     "gh pr checks",
     "gh run view",
     "gh run list",
+    "Select-String",
+    "Select-Object",
   ]) {
     assert.equal(
       permissions.terminalAllowlist.includes(required),
@@ -418,6 +434,20 @@ test("autonomy cleanup matrix", () => {
   assert.equal(permission("gh pr checks 25"), "allow");
   assert.equal(permission("gh run view 123 --json status"), "allow");
   assert.equal(permission("gh run list --branch chore/x"), "allow");
+  assert.equal(
+    permission('gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"'),
+    "allow",
+  );
+  assert.equal(permission('Select-String -Pattern "CI_TIER"'), "allow");
+  assert.equal(permission("Select-Object -First 40"), "allow");
+  assert.equal(
+    permission(
+      'gh run view 34927727668 --repo office952/workos-final --log | Select-String -Pattern "CI_TIER" | Select-Object -First 40',
+    ),
+    "allow",
+  );
+  assert.equal(permission("Select-Object -Property { $_.Name }"), "ask");
+  assert.equal(permission("ForEach-Object { $_ }"), "ask");
   assert.equal(permission("gh pr merge 25"), "deny");
   assert.equal(permission("gh --repo office952/workos-final pr merge 25"), "deny");
   assert.equal(permission("gh pr --repo office952/workos-final merge 25"), "deny");
@@ -496,6 +526,8 @@ test("commit push PR workflow classifies allow without ASK", () => {
     "gh pr view 25 --json number,url,state,headRefOid",
     "gh run list --branch chore/cursor-workos-harness-v2 --limit 5",
     "gh run view 34904624451 --json headSha,status,conclusion",
+    'gh run view 34927727668 --log | Select-String -Pattern "CI_TIER"',
+    'Select-String -Pattern "CI_TIER"',
   ];
   const approvals = commands.filter((command) => permission(command) === "ask");
   assert.deepEqual(approvals, []);

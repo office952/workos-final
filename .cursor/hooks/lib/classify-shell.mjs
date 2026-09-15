@@ -33,6 +33,11 @@ const PS_DIAGNOSTIC_CMDLETS = new Set([
   "out-null",
 ]);
 
+const PS_READONLY_FILTER_CMDLETS = new Set([
+  "select-string",
+  "select-object",
+]);
+
 const PS_ARTIFACT_WRITE_CMDLETS = new Set([
   "new-item",
   "set-content",
@@ -502,8 +507,29 @@ function isTmpRelativeDestination(rawPath) {
   return normalized === ".tmp" || normalized.startsWith(".tmp/");
 }
 
+function hasPowerShellScriptblock(tokens) {
+  return tokens.some((token) => token.includes("{") || token.includes("}"));
+}
+
+function isAllowedReadOnlyFilterCmdlet(tokens) {
+  const name = basename(tokens[0] ?? "");
+  if (!PS_READONLY_FILTER_CMDLETS.has(name)) {
+    return false;
+  }
+  if (tokens.some((token) => isInvokeExpressionToken(token))) {
+    return false;
+  }
+  if (hasPowerShellScriptblock(tokens)) {
+    return false;
+  }
+  return true;
+}
+
 function isAllowedPowerShellCmdlet(tokens) {
   const name = basename(tokens[0] ?? "");
+  if (isAllowedReadOnlyFilterCmdlet(tokens)) {
+    return true;
+  }
   if (PS_DIAGNOSTIC_CMDLETS.has(name)) {
     return true;
   }
