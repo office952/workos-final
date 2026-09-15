@@ -52,6 +52,8 @@ SURFACE + VARIANT + ROUTE + STATE + VIEWPORT + THEME
 | SOURCE_FORM_SCHEMA_VERSION | FormSchema/version identity if applicable |
 | LAST_SYNC_DATE | Date of last proven synchronization |
 | OWNER_STATUS | NOT_REVIEWED / DIRECTION_ACCEPTED / OWNER_ACCEPTED |
+| FRAMEWORK_CLASS | `PROTECTED_EXISTING` or `OPEN_DESIGN` |
+| MUTABLE_REGION_SCOPE | Optional. Names the authorized content slots when `FRAMEWORK_CLASS = PROTECTED_EXISTING` |
 | SUPERSEDES | Previous node/state identity if applicable |
 | SUPERSEDED_BY | Replacement node/state identity if applicable |
 | NOTES | Short explanation only; no Product Truth duplication |
@@ -68,9 +70,18 @@ CURRENT_VALID_FIGMA_MIRROR    = REGISTERED_FRAME_AFTER_RUNTIME_PARITY
 If Figma and runtime differ:
 
 - `RUNTIME_IMPORT` or `DESIGN_CANDIDATE` does not override runtime;
-- `OWNER_ACCEPTED_DESIGN` authorizes the presentation delta for that exact state only;
+- `DESIGN_CANDIDATE` is not authority over a protected region unless `OWNER_REOPEN_UI_FRAMEWORK = YES`;
+- `OWNER_ACCEPTED_DESIGN` authorizes the presentation delta for that exact state only, and only inside authorized mutable regions when `FRAMEWORK_CLASS = PROTECTED_EXISTING`;
 - any semantic/Product Truth delta returns to Owner/domain review;
 - after Cursor implements the accepted design and runtime parity is proven, the frame may become `CURRENT_VALID_MIRROR`.
+
+Configurator frames, current and future, use:
+
+```text
+FRAMEWORK_CLASS = PROTECTED_EXISTING
+```
+
+unless an Owner decision explicitly reopens a named Configurator framework region.
 
 ## Roundtrip rule
 
@@ -104,40 +115,41 @@ RESEARCH
 
 ## What Figma may polish without Product Truth authority
 
-- layout
+On a `PROTECTED_EXISTING` surface, only inside that surface's mutable content slots:
+
 - spacing
 - typography
 - visual hierarchy
 - density
+- alignment
 - grouping
-- control presentation
-- responsive composition
+- control interior
+- field layout inside the mutable slot
+- responsive behavior inside the slot
 - accessibility presentation
+
+Those verbs are not a license to change protected outer geometry, floorplan, shell, header, scope navigation, or footer/CTA grammar.
+
+On an `OPEN_DESIGN` surface, Figma may also explore floorplan, layout, panel organization, and responsive composition until the Owner accepts the framework.
 
 Figma must not silently change fields, allowed values, requiredness, validation, readiness, formulas, pricing, permissions, lifecycle, Product Truth, or execution semantics.
 
+The full boundary lives in `docs/development/WORKOS_FIGMA_WORKFLOW.md`.
+
 ## Design delta classification
 
-Cursor must classify every material Figma → runtime difference as one of:
+Cursor must classify every material Figma → runtime difference on a protected surface as one of:
 
 ```text
-PRESENTATION_ONLY
-LAYOUT
-SPACING
-TYPOGRAPHY
-CONTROL_PRESENTATION
-RESPONSIVE
-ACCESSIBILITY
-
-SEMANTIC_CHANGE
-PRODUCT_TRUTH_CHANGE
-NEW_FIELD
-REMOVED_FIELD
-VALIDATION_CHANGE
-STATE_CHANGE
+MUTABLE_PRESENTATION_DELTA
+PROTECTED_REGION_DELTA
+SEMANTIC_DELTA
+PRODUCT_TRUTH_DELTA
 ```
 
-Only the presentation group is implementable under a UI-only design-delta scope. Semantic/Product Truth changes require a separate Owner/domain decision.
+Finer notes (`LAYOUT`, `SPACING`, `RESPONSIVE`, and the rest) may describe a mutable-slot change. They do not authorize a protected-region rewrite.
+
+Only `MUTABLE_PRESENTATION_DELTA` is implementable under a UI-only design-delta scope. `PROTECTED_REGION_DELTA` requires `OWNER_REOPEN_UI_FRAMEWORK = YES`. Semantic/Product Truth changes require a separate Owner/domain decision.
 
 ## Current registry policy
 

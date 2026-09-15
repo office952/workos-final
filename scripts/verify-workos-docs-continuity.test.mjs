@@ -7,6 +7,7 @@ import {
   repoRootFrom,
   verifyConfiguratorUiAuthority,
   verifyOwnerUiUxApprovalScope,
+  verifyProtectedRegionLaw,
   verifyRoadmapFc1,
   verifySessionCurrent,
   verifyTerminologyConcepts,
@@ -151,6 +152,27 @@ describe("verify-workos-docs-continuity", () => {
     );
     assert.ok(errors.some((item) => item.includes("OWNER_APPROVED_CURRENT_UI_UX_SURFACES")));
     assert.ok(errors.some((item) => item.includes("OTHER_PAGE_UI_UX_OWNER_ACCEPTANCE")));
+  });
+
+  it("rejects the unrestricted Figma layout-polish sentence", () => {
+    const errors = [];
+    verifyProtectedRegionLaw(
+      [
+        "EXISTING_ACCEPTED_SURFACE",
+        "NEW_OR_UNACCEPTED_SURFACE",
+        "OWNER_REOPEN_UI_FRAMEWORK",
+        "MUTABLE_PRESENTATION_DELTA",
+        "PROTECTED_REGION_DELTA",
+        "Figma may polish presentation: layout, spacing, typography, hierarchy, density, grouping, control presentation, responsive composition and accessibility presentation.",
+      ].join("\n"),
+      "FRAMEWORK_CLASS\nPROTECTED_EXISTING",
+      "SURFACE_FRAMEWORK_STATUS",
+      "PROTECTED_EXISTING WORKOS_FIGMA_WORKFLOW.md",
+      "PROTECTED BY DEFAULT ACCORDING TO ITS CANON",
+      "WORKOS_FIGMA_WORKFLOW.md",
+      errors,
+    );
+    assert.ok(errors.some((item) => item.includes("unrestricted global layout-polish")));
   });
 
   it("does not treat an empty temp tree as the repo", () => {

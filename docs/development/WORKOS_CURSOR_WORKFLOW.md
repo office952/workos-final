@@ -57,6 +57,16 @@ After high-risk or tooling work, run `workos-red-team`. Do not assume PASS.
 
 UI/UX changes must follow `docs/development/WORKOS_FIGMA_WORKFLOW.md` and `docs/development/WORKOS_FIGMA_RUNTIME_REGISTRY.md`.
 
+Before any UI/UX GO, determine:
+
+```text
+SURFACE_FRAMEWORK_STATUS = PROTECTED_EXISTING | OPEN_DESIGN | UNKNOWN
+```
+
+Read the surface canon. Do not infer `OPEN_DESIGN` merely because the task adds new fields. New content is not a new page framework. If the status is `UNKNOWN`, inspect the living canon and interrupt the Owner only when a real framework decision is missing.
+
+For an existing accepted / protected surface, Figma polish and later design-delta work stay inside that surface's mutable content slots. Protected regions change only when `OWNER_REOPEN_UI_FRAMEWORK = YES`. See the protected-region law in `docs/development/WORKOS_FIGMA_WORKFLOW.md`.
+
 For an existing accepted surface, default to:
 
 ```text
@@ -73,9 +83,9 @@ PRODUCT / DOMAIN CONTRACT
 → CURRENT_VALID_MIRROR
 ```
 
-Cursor owns logic and functional reality. Figma may polish presentation but cannot silently alter Product Truth, fields, allowed values, requiredness, validation, readiness, formulas, pricing, permissions, lifecycle or execution semantics.
+Cursor owns logic and functional reality. Figma may polish presentation inside authorized mutable regions but cannot silently alter Product Truth, fields, allowed values, requiredness, validation, readiness, formulas, pricing, permissions, lifecycle or execution semantics, and cannot globally redesign a protected surface.
 
-Before implementing a Figma polish delta, classify each material difference as presentation or semantic. Presentation deltas may be implemented under a UI scope. Semantic/Product Truth deltas require a separate Owner/domain decision.
+Before implementing a Figma polish delta on a protected surface, classify each material difference as `MUTABLE_PRESENTATION_DELTA`, `PROTECTED_REGION_DELTA`, `SEMANTIC_DELTA`, or `PRODUCT_TRUTH_DELTA`. Only mutable presentation may be implemented under a UI polish scope. Protected-region deltas require an explicit Owner reopen. Semantic/Product Truth deltas require a separate Owner/domain decision.
 
 Every canonical Figma state must be recorded in the Figma ↔ runtime registry. Do not rely on remembered node ids from chat or a stale report.
 
