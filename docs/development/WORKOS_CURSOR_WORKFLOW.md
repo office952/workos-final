@@ -94,9 +94,9 @@ Exact-head means the required checks for the classified tier succeeded on the PR
 | Tier | When | Required |
 |---|---|---|
 | TIER_1_DOCS | ordinary docs under `docs/`, README, AGENTS, worklog evidence | `pnpm docs:check` |
-| TIER_2_STATIC_LOGIC | executable non-runtime change | docs:check, lint, typecheck, test, build |
+| TIER_2_STATIC_LOGIC | known-safe static scripts only, currently docs continuity validators | docs:check, lint, typecheck, test, build |
 | TIER_3_RUNTIME_E2E | `apps/web`, `apps/api`, `packages/domain`, `e2e` | previous plus Chromium E2E |
-| TIER_4_CONSERVATIVE_FULL | CI, classifier, package.json, Playwright, harness, unknown | full set |
+| TIER_4_CONSERVATIVE_FULL | CI, classifier, package.json, Playwright, Cursor Harness, unknown scripts | full set plus `pnpm cursor:harness:test` |
 
 Authoritative CI is the pull request. Feature-branch push without a PR does not run GitHub CI. `main` push may run the same change-aware job as post-integration safety; it is not an Owner wait gate unless it fails. `workflow_dispatch` can force full CI.
 

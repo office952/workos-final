@@ -53,6 +53,7 @@ test("verification commands are allowed", () => {
   assert.equal(permission("pnpm build"), "allow");
   assert.equal(permission("pnpm docs:check"), "allow");
   assert.equal(permission("pnpm ci:classify"), "allow");
+  assert.equal(permission("pnpm cursor:harness:test"), "allow");
   assert.equal(permission("pnpm -r typecheck"), "allow");
   assert.equal(permission("pnpm --filter @workos-final/web test"), "allow");
   assert.equal(permission("node --test .cursor/hooks/classify-shell.test.mjs"), "allow");
@@ -408,6 +409,7 @@ test("worktrees.json, hooks.json, and permissions.json parse", () => {
     "git status",
     "git fetch",
     "pnpm lint",
+    "pnpm cursor:harness:test",
     "node --test",
     "gh pr view",
     "gh pr checks",
@@ -542,6 +544,7 @@ test("commit push PR workflow classifies allow without ASK", () => {
     "pnpm lint",
     "pnpm typecheck",
     "pnpm test",
+    "pnpm cursor:harness:test",
     "pnpm build",
     "git add -- .cursor/permissions.json .cursor/hooks/lib/classify-shell.mjs",
     "git diff --cached --stat",

@@ -36,7 +36,7 @@ AMBIGUOUS_IMPACT           = TIER_4_CONSERVATIVE_FULL
 
 Tiers: docs → `docs:check` only. Static/logic → docs:check, lint, typecheck, test, build. Runtime and conservative full → previous plus Chromium E2E.
 
-`main` keeps the same classified job as post-integration safety. The Owner does not wait for it unless it fails. That is an Owner-authorized cheaper main path: a docs-only merge does not re-run Chromium on main. Product/runtime PRs still require E2E before merge. Classification fails closed if GitHub outputs are missing. Renames are collected with `--no-renames`. Workflow/classifier/package/harness paths also force full from YAML, not only from HEAD's classifier.
+`main` keeps the same classified job as post-integration safety. The Owner does not wait for it unless it fails. That is an Owner-authorized cheaper main path: a docs-only merge does not re-run Chromium on main. Product/runtime PRs still require E2E before merge. Classification fails closed if GitHub outputs are missing. Renames are collected with `--no-renames`. Workflow/classifier/package/`.cursor/` paths also force full from YAML, not only from HEAD's classifier. Unknown `scripts/**` executables are TIER_4. Known-safe static scripts are only the docs continuity validators. TIER_4 runs `pnpm cursor:harness:test` as an authoritative CI gate.
 
 This migration PR itself is TIER_4. Until the new workflow is on main, the old main workflow may still run full CI on the feature-branch push. That is transitional evidence only.
 

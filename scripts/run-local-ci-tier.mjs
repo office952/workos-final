@@ -44,6 +44,8 @@ function commandForCheck(name) {
       return ["pnpm", ["test"]];
     case "build":
       return ["pnpm", ["build"]];
+    case "cursor:harness:test":
+      return ["pnpm", ["cursor:harness:test"]];
     case "e2e":
       return ["node", [".cursor/run-isolated-e2e.mjs"]];
     default:
@@ -64,6 +66,9 @@ export function plannedLocalCommands(result) {
   }
   if (result.runBuild) {
     commands.push("build");
+  }
+  if (result.runHarnessTests) {
+    commands.push("cursor:harness:test");
   }
   if (result.runE2e) {
     commands.push("e2e");

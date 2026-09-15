@@ -13,6 +13,7 @@ const ALLOWED_PNPM_SCRIPTS = new Set([
   "build",
   "docs:check",
   "ci:classify",
+  "cursor:harness:test",
 ]);
 
 const ISOLATED_E2E_SCRIPT = ".cursor/run-isolated-e2e.mjs";

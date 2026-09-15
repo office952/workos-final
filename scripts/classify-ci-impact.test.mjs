@@ -113,5 +113,39 @@ describe("classify-ci-impact", () => {
     assert.equal(result.tier, TIER_2_STATIC_LOGIC);
     assert.equal(result.runBuild, true);
     assert.equal(result.runE2e, false);
+    assert.equal(result.runHarnessTests, false);
+  });
+
+  it("known docs continuity script is TIER_2, unknown scripts escalate", () => {
+    assert.equal(
+      classifyCiPath("scripts/verify-workos-docs-continuity.mjs"),
+      TIER_2_STATIC_LOGIC,
+    );
+    assert.equal(classifyCiPath("scripts/unknown-future-tool.mjs"), TIER_4_CONSERVATIVE_FULL);
+    assert.equal(classifyCiImpact(["scripts/unknown-future-tool.mjs"]).runE2e, true);
+  });
+
+  it("Cursor permissions and hooks are conservative full", () => {
+    assert.equal(classifyCiPath(".cursor/permissions.json"), TIER_4_CONSERVATIVE_FULL);
+    assert.equal(classifyCiPath(".cursor/hooks/lib/classify-shell.mjs"), TIER_4_CONSERVATIVE_FULL);
+    assert.equal(classifyCiPath(".cursor/run-isolated-e2e.mjs"), TIER_4_CONSERVATIVE_FULL);
+    assert.equal(classifyCiPath(".cursor/hooks.json"), TIER_4_CONSERVATIVE_FULL);
+  });
+
+  it("mixed docs plus unknown script escalate to conservative full", () => {
+    const result = classifyCiImpact([
+      "docs/README.md",
+      "scripts/unknown-future-tool.mjs",
+    ]);
+    assert.equal(result.tier, TIER_4_CONSERVATIVE_FULL);
+    assert.equal(result.runHarnessTests, true);
+  });
+
+  it("TIER_4 Cursor Harness change runs the Harness deterministic test gate", () => {
+    const result = classifyCiImpact([".cursor/hooks/lib/classify-shell.mjs"]);
+    assert.equal(result.tier, TIER_4_CONSERVATIVE_FULL);
+    assert.equal(result.runHarnessTests, true);
+    assert.equal(classifyCiImpact(["docs/README.md"]).runHarnessTests, false);
+    assert.equal(classifyCiImpact(["apps/web/src/App.tsx"]).runHarnessTests, false);
   });
 });

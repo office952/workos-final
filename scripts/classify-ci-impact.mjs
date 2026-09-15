@@ -17,6 +17,11 @@ const RANK = {
 const EXECUTABLE_OR_CONFIG_EXT =
   /\.(?:js|mjs|cjs|ts|tsx|jsx|mts|cts|py|sh|bash|ps1|yml|yaml|json|lock|wasm)$/i;
 
+const KNOWN_SAFE_STATIC_SCRIPTS = new Set([
+  "scripts/verify-workos-docs-continuity.mjs",
+  "scripts/verify-workos-docs-continuity.test.mjs",
+]);
+
 export function normalizeCiPath(input) {
   return String(input ?? "")
     .trim()
@@ -47,11 +52,7 @@ function isConservativeFullPath(path) {
   if (/^playwright(?:\.[^/]+)?\.config\.(?:ts|js|mjs)$/.test(path)) {
     return true;
   }
-  if (
-    path === ".cursor/run-isolated-e2e.mjs" ||
-    path.startsWith(".cursor/lib/") ||
-    path.startsWith(".cursor/hooks/")
-  ) {
+  if (path.startsWith(".cursor/")) {
     return true;
   }
   if (
@@ -85,7 +86,7 @@ function isRuntimePath(path) {
 }
 
 function isStaticLogicPath(path) {
-  return path.startsWith("scripts/") || path.startsWith(".cursor/");
+  return KNOWN_SAFE_STATIC_SCRIPTS.has(path);
 }
 
 function isDocsPath(path) {
@@ -137,6 +138,7 @@ export function checksForTier(tier) {
     runBuild: rank >= 2,
     runE2e: rank >= 3,
     installChromium: rank >= 3,
+    runHarnessTests: rank >= 4,
   };
 }
 
@@ -186,6 +188,7 @@ export function formatGithubOutput(result) {
     `run_build=${result.runBuild}`,
     `run_e2e=${result.runE2e}`,
     `install_chromium=${result.installChromium}`,
+    `run_harness_tests=${result.runHarnessTests}`,
   ].join("\n");
 }
 

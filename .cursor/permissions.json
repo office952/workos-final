@@ -12,6 +12,7 @@
     "pnpm build",
     "pnpm docs:check",
     "pnpm ci:classify",
+    "pnpm cursor:harness:test",
     "pnpm install --frozen-lockfile",
     "node --test",
     "node .cursor/run-isolated-e2e.mjs",
@@ -30,7 +31,7 @@
   ],
   "autoRun": {
     "allow_instructions": [
-      "Allow read-only git inspection, git fetch, pnpm lint/typecheck/test/build/docs:check/ci:classify, frozen-lockfile install, node --test, and node .cursor/run-isolated-e2e.mjs.",
+      "Allow read-only git inspection, git fetch, pnpm lint/typecheck/test/build/docs:check/ci:classify/cursor:harness:test, frozen-lockfile install, node --test, and node .cursor/run-isolated-e2e.mjs.",
       "Allow GitHub inspection only: gh pr view, gh pr checks, gh run view, gh run list, and gh run watch.",
       "Allow PowerShell diagnostics Get-FileHash, Get-Item, Test-Path, and Write-Output.",
       "Allow read-only PowerShell filters Select-String and Select-Object without scriptblocks.",

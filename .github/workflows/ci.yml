@@ -61,7 +61,7 @@ jobs:
             echo "CI_TIER=TIER_4_CONSERVATIVE_FULL (unknown event)" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          if grep -E '^(\.github/workflows/|scripts/classify-ci-impact|scripts/run-local-ci-tier\.mjs$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|playwright.+\.config\.|\.cursor/run-isolated-e2e\.mjs$|\.cursor/hooks/)' "${RUNNER_TEMP}/changed.txt" >/dev/null; then
+          if grep -E '^(\.github/workflows/|scripts/classify-ci-impact|scripts/run-local-ci-tier\.mjs$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|playwright.+\.config\.|\.cursor/)' "${RUNNER_TEMP}/changed.txt" >/dev/null; then
             node scripts/classify-ci-impact.mjs --force-full --github-output >> "$GITHUB_OUTPUT"
             echo "CI_TIER=TIER_4_CONSERVATIVE_FULL (YAML force-full on CI/toolchain paths)" >> "$GITHUB_STEP_SUMMARY"
           else
@@ -81,6 +81,9 @@ jobs:
           test -n "${{ steps.classify.outputs.run_build }}"
           test -n "${{ steps.classify.outputs.run_e2e }}"
           test -n "${{ steps.classify.outputs.install_chromium }}"
+          test -n "${{ steps.classify.outputs.run_harness_tests }}"
+      - run: pnpm cursor:harness:test
+        if: steps.classify.outputs.run_harness_tests == 'true'
       - run: pnpm docs:check
         if: steps.classify.outputs.run_docs_check == 'true'
       - run: pnpm lint
