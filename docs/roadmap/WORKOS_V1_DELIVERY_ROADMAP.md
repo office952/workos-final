@@ -64,17 +64,22 @@ Related living authority:
 
 ## Current canonical state
 
-Recorded against merged `origin/main`. Harness V2 is engineering enablement only. It is not Product Truth and not a second roadmap. Historical UI20 milestone blocks below remain historical.
+Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN`. `LAST_RECONCILED_MAIN_BASE` is evidence from the last documentation reconciliation, not current integration authority. Harness V2 is engineering enablement only. It is not Product Truth and not a second roadmap. Historical UI20 milestone blocks below remain historical.
 
 ```text
-ORIGIN_MAIN                          = 756b9f6f537cf5ee571583577ef2552d28a0923b
+LIVE_MAIN_AUTHORITY                  = GITHUB_ORIGIN_MAIN
+LAST_RECONCILED_MAIN_BASE            = db149cf1bbed19ccbdee7210017d3ffb649cbd13
 PR24_CONFIGURATOR_UI_FRAMEWORK       = INTEGRATED_ON_MAIN
+PR26                                 = INTEGRATED_ON_MAIN
 CONFIGURATOR_UI_UX_FRAMEWORK         = FROZEN_V1
 CURRENT_TOOLING_ENABLEMENT           = CURSOR_WORKOS_HARNESS_V2
 CURSOR_WORKOS_HARNESS_V2             = INTEGRATED_ON_MAIN
 NEXT_PRODUCT_PROGRAM                 = CONFIGURATOR_FORM_COMPLETENESS
+NEXT_PRODUCT_SLICE                   = NOT_AUTHORIZED_AFTER_FC1
+NEXT_PRODUCT_GATE                    = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
 FORM_COMPLETENESS_AUDIT_V1           = ACCEPTED
-FORM_COMPLETENESS                    = FC1_IMPLEMENTED_LOCAL_IN_REVIEW
+FORM_COMPLETENESS_FC1                = INTEGRATED_ON_MAIN
+FORM_COMPLETENESS                    = FC1_INTEGRATED_ON_MAIN
 MACHINE_STRICT_V1                    = COMPLETE
 MIN_ORG_CONFIGURATION                = COMPLETE
 CLOUD_PROVISIONING_ATOMIC_RESUME_V1  = COMPLETE

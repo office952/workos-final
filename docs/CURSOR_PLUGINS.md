@@ -1,9 +1,50 @@
 # Cursor plugins — ghid de utilizare pentru WorkOS Final
 
-Acest fișier este **tooling Cursor**, nu canon de produs.
+```text
+ROLE                       = TOOLING
+OWNS                       = PLUGIN_MCP_INVENTORY_AND_HARNESS_V2
+DOES_NOT_OWN               = PRODUCT_TRUTH, DELIVERY_SEQUENCE, CURSOR_METHOD
+```
+
+Acest fișier este **inventar tooling**, nu metodă și nu canon de produs.
+Metoda WorkOS pentru Cursor: `docs/development/WORKOS_CURSOR_WORKFLOW.md`.
 Adevărul de business rămâne în `docs/architecture/` și în contractele de domeniu. `AGENTS.md` nu este Product Truth.
 Pluginurile ajută agentul să planifice, să verifice, să citească documentație și să studieze UI.
 Nu înlocuiesc Owner GO, one-truth, E2E-first sau `docs/architecture/UI_UX_FOUNDATION_CANON.md`.
+
+CONFIGURED, INSTALLED, AVAILABLE, CONNECTED și ACTUALLY_USED nu sunt sinonime.
+Nu pretinde CONNECTED doar pentru că un paragraf vechi spune „deja activ”.
+
+Clasificare folosită aici:
+
+| STATUS | Meaning |
+|---|---|
+| VERIFIED_CONNECTED | live handshake succeeded in the classifying session |
+| VERIFIED_AVAILABLE | namespace or files were visible; no live handshake claimed |
+| DOCUMENTED_NOT_REVERIFIED | older prose; not re-proven |
+| CANDIDATE_NOT_INSTALLED | intentionally not installed |
+| NOT_TESTED | exists as a Cursor type or docs mention; not proven here |
+| UNAVAILABLE | looked for and not found |
+
+### Classification this documentation slice (2026-09-15)
+
+| NAME | ROLE | STATUS | REQUIRED_FOR_CURRENT_WORK |
+|---|---|---|---|
+| Figma MCP | visual / interaction read | VERIFIED_CONNECTED | only when a recorded Figma authority is material |
+| Cursor IDE Browser | in-IDE page inspect | VERIFIED_AVAILABLE | UI/runtime claims |
+| Playwright MCP | separate browser MCP | VERIFIED_AVAILABLE | not the repo E2E authority |
+| Context7 | library docs | VERIFIED_AVAILABLE | library API questions |
+| BrowserStack MCP | real-device / Percy tools | VERIFIED_AVAILABLE | not a substitute for isolated E2E |
+| Subtext | session replay | VERIFIED_AVAILABLE | only if Fullstory sessions exist |
+| 21st.dev | visual inspiration | VERIFIED_AVAILABLE | never Product Truth |
+| shadcn MCP | component patterns | VERIFIED_AVAILABLE | consult only; no init |
+| Compound Engineering | plan/work/review skills | DOCUMENTED_NOT_REVERIFIED | optional method helper |
+| Cursor Team Kit | verify/CI/review skills | DOCUMENTED_NOT_REVERIFIED | optional method helper |
+| Bugbot | PR review agent type | NOT_TESTED | no |
+| Cloud Agents | remote agents | NOT_TESTED | no |
+| Isolated E2E runner | repo runtime proof | VERIFIED_AVAILABLE | product/runtime claims |
+
+Evidence for Figma CONNECTED: read-only `whoami` plus `get_metadata` on recorded file keys in the documentation-continuity session. Identities are not recorded here.
 
 După instalări locale: **Developer: Reload Window** în Cursor, ca skill-urile noi să se încarce.
 
@@ -38,7 +79,9 @@ Am ținut doar pluginuri care ajută acest flux:
 
 Acestea erau instalate și folosibile. Nu le-am reinstalat.
 
-### Figma — autentificat
+### Figma
+
+STATUS: see classification table. Do not treat older “autentificat” prose as a live handshake.
 
 Marketplace: [cursor.com/marketplace/figma](https://cursor.com/marketplace/figma)
 
@@ -124,7 +167,7 @@ Pentru verificări în tab-ul Cursor, preferă browserul built-in. Pentru suite-
 
 ### BrowserStack
 
-MCP-ul e deja activ. Cont BrowserStack e necesar pentru device-e reale, Percy, Test Management.
+STATUS: VERIFIED_AVAILABLE (namespace present). Not claimed CONNECTED or ACTUALLY_USED. A BrowserStack account is required for real devices, Percy, and Test Management.
 
 ```text
 Rulează suite-ul Playwright pe un Chrome real din BrowserStack.
@@ -145,7 +188,7 @@ Nu e browser live și nu e dovadă E2E. Skill-uri: `subtext-review`, `subtext-se
 
 ### 21st.dev
 
-MCP-ul e configurat în `~/.cursor/mcp.json`.
+STATUS: VERIFIED_AVAILABLE (namespace present). User-level MCP configuration is outside this repository. Do not commit or quote credentials.
 
 **Când:** inspirație vizuală (card, toolbar, empty state).
 **Nu:** copia un kit străin peste UI-ul WorkOS. Operatorul rămâne în română. Business truth nu se mută în componenta inspirată.
@@ -217,7 +260,9 @@ npx react-doctor@latest --verbose --scope changed
 
 **Frână:** repară hygiene React (efecte, a11y, bundle). Nu schimba contracte de domeniu și nu „îmbunătăți” copy-ul ca să pară alt produs.
 
-### Playwright MCP — adăugat în `~/.cursor/mcp.json`
+### Playwright MCP
+
+STATUS: VERIFIED_AVAILABLE (namespace present). User-level MCP configuration is outside this repository.
 
 ```json
 "playwright": {
@@ -303,9 +348,9 @@ Folosește Context7, nu memoria modelului, pentru API-ul X.
 
 | Loc | Ce e |
 |---|---|
-| `C:\Users\offic\.cursor\plugins\local\` | Pluginuri încărcate local |
-| `C:\Users\offic\.cursor\plugins\cache\cursor-public\` | Copii marketplace descărcate |
-| `C:\Users\offic\.cursor\mcp.json` | MCP user: Figma, shadcn, Subtext, 21st, Playwright |
+| User-level Cursor local plugins directory | Pluginuri încărcate local |
+| User-level Cursor plugin cache | Copii marketplace descărcate |
+| User-level Cursor MCP config | Figma, shadcn, Subtext, 21st, Playwright — outside this repository |
 | Customize în Cursor | On / off, scope user vs project, auth MCP |
 
 Pluginuri locale acum:
