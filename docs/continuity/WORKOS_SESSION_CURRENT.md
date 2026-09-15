@@ -46,14 +46,17 @@ Do not treat a cached SHA as current integration authority. This file must not b
 This block is a checkpoint copied from the living roadmap plus live GitHub evidence. Re-read those authorities before acting. Do not treat this file as the delivery sequence.
 
 ```text
-LAST_RECONCILED_MAIN_BASE              = debf5182a657e2794b873b74707d842c816d4f08
+LAST_RECONCILED_MAIN_BASE              = 8c2223b3a7853e6c0ebb788e44046401985d7f1f
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
 CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
-CURRENT_PRODUCT_SLICE                  = NONE_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_SLICE                     = NOT_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_GATE                      = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
-FC2_AUTHORIZED                         = NO
+CURRENT_PRODUCT_SLICE                  = FC2A_SHARED_FINISH_COLOR_ROLL_FOUNDATION
+NEXT_PRODUCT_SLICE                     = FC2D_RESOURCE_IDENTITIES_AND_EDITABLE_COSTING
+NEXT_PRODUCT_GATE                      = OWNER_REVIEW_FC2A_THEN_FC2D
+FC2_AUTHORIZED                         = FC2A_LOCAL_IN_REVIEW_ONLY
+FC2A_IMPLEMENTED_LOCAL_IN_REVIEW       = YES
+FC2D_AUTHORIZED                        = NO
+FC2_DECISION_PACK                      = ACCEPTED_WITH_TARGETED_AMENDMENTS
 ```
 
 ### Owner-accepted items relevant to current position
@@ -68,7 +71,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 
 ### Open Owner decisions
 
-Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required (catalogs, richer construction facts). Do not implement them from this file.
+Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required except the FC2A shared Finish / Color / Roll foundation now implemented locally in review. That foundation is not bound to the live LETTERS FormSchema. Do not start FC2D, form fields, or admin UI from this file.
 
 ### Accepted advisories
 

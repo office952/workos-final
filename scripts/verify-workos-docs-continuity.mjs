@@ -135,11 +135,23 @@ export function verifySessionCurrent(sessionText, errors) {
   if (!/LIVE_GITHUB_WINS\s*=\s*YES/.test(sessionText)) {
     fail(errors, "WORKOS_SESSION_CURRENT.md must say LIVE_GITHUB_WINS = YES");
   }
-  if (!/NOT_AUTHORIZED_AFTER_FC1|NONE_AUTHORIZED_AFTER_FC1/.test(sessionText)) {
-    fail(errors, "WORKOS_SESSION_CURRENT.md must not silently authorize the next product slice");
-  }
   if (/FC2_AUTHORIZED\s*=\s*YES/.test(sessionText)) {
     fail(errors, "WORKOS_SESSION_CURRENT.md must not authorize FC2");
+  }
+  if (/FC2D_AUTHORIZED\s*=\s*YES/.test(sessionText)) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must not authorize FC2D");
+  }
+  if (
+    !/NOT_AUTHORIZED_AFTER_FC1|NONE_AUTHORIZED_AFTER_FC1/.test(sessionText) &&
+    !/FC2A_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText)
+  ) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must not silently authorize the next product slice");
+  }
+  if (
+    /FC2A_IMPLEMENTED_LOCAL_IN_REVIEW\s*=\s*YES/.test(sessionText) &&
+    !/FC2D_AUTHORIZED\s*=\s*NO/.test(sessionText)
+  ) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must keep FC2D unauthorized after FC2A");
   }
 }
 
@@ -153,21 +165,29 @@ export function verifyRoadmapFc1(roadmapText, errors) {
   if (!/PR27\s*=\s*INTEGRATED_ON_MAIN/.test(roadmapText)) {
     fail(errors, "living roadmap must record PR27 = INTEGRATED_ON_MAIN");
   }
-  if (!/NEXT_PRODUCT_SLICE\s*=\s*NOT_AUTHORIZED_AFTER_FC1/.test(roadmapText)) {
-    fail(errors, "living roadmap must record NEXT_PRODUCT_SLICE = NOT_AUTHORIZED_AFTER_FC1");
+  if (!/FORM_COMPLETENESS_FC2A\s*=\s*IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap must record FORM_COMPLETENESS_FC2A = IMPLEMENTED_LOCAL_IN_REVIEW");
   }
-  if (/FORM_COMPLETENESS\s*=\s*FC1_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
-    fail(errors, "living roadmap still records FC1 as local-in-review");
+  if (!/FORM_COMPLETENESS\s*=\s*FC2A_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap must record FORM_COMPLETENESS = FC2A_IMPLEMENTED_LOCAL_IN_REVIEW");
   }
   if (
-    !/NEXT_PRODUCT_GATE\s*=\s*CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1/.test(
+    !/NEXT_PRODUCT_SLICE\s*=\s*FC2D_RESOURCE_IDENTITIES_AND_EDITABLE_COSTING/.test(
       roadmapText,
     )
   ) {
     fail(
       errors,
-      "living roadmap must record NEXT_PRODUCT_GATE = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1",
+      "living roadmap must record NEXT_PRODUCT_SLICE = FC2D_RESOURCE_IDENTITIES_AND_EDITABLE_COSTING",
     );
+  }
+  if (/FORM_COMPLETENESS\s*=\s*FC1_IMPLEMENTED_LOCAL_IN_REVIEW/.test(roadmapText)) {
+    fail(errors, "living roadmap still records FC1 as local-in-review");
+  }
+  if (
+    !/NEXT_PRODUCT_GATE\s*=\s*OWNER_REVIEW_FC2A_THEN_FC2D/.test(roadmapText)
+  ) {
+    fail(errors, "living roadmap must record NEXT_PRODUCT_GATE = OWNER_REVIEW_FC2A_THEN_FC2D");
   }
 }
 
