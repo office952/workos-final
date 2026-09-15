@@ -11,6 +11,9 @@ const ALLOWED_PNPM_SCRIPTS = new Set([
   "typecheck",
   "test",
   "build",
+  "docs:check",
+  "ci:classify",
+  "cursor:harness:test",
 ]);
 
 const ISOLATED_E2E_SCRIPT = ".cursor/run-isolated-e2e.mjs";
@@ -29,6 +32,11 @@ const PS_DIAGNOSTIC_CMDLETS = new Set([
   "test-path",
   "write-output",
   "out-null",
+]);
+
+const PS_READONLY_FILTER_CMDLETS = new Set([
+  "select-string",
+  "select-object",
 ]);
 
 const PS_ARTIFACT_WRITE_CMDLETS = new Set([
@@ -389,6 +397,18 @@ function isDirectMainPush(tokens) {
   return positionals.slice(1).some((refspec) => isProtectedBranchRef(refspec));
 }
 
+function featurePushDestination(tokens) {
+  const after = gitSubcommandArgs(tokens);
+  let index = 0;
+  if (after[index] === "-u" || after[index] === "--set-upstream") {
+    index += 1;
+  }
+  if (after.length !== index + 2 || after[index] !== "origin") {
+    return null;
+  }
+  return after[index + 1];
+}
+
 function isAllowedFeatureBranchPush(tokens) {
   if (gitSubcommand(tokens) !== "push") {
     return false;
@@ -396,16 +416,14 @@ function isAllowedFeatureBranchPush(tokens) {
   if (isForcePush(tokens) || isDirectMainPush(tokens)) {
     return false;
   }
-  const after = gitSubcommandArgs(tokens);
-  let index = 0;
-  if (after[index] === "-u" || after[index] === "--set-upstream") {
-    index += 1;
+  const dest = featurePushDestination(tokens);
+  if (!dest) {
+    return false;
   }
-  return (
-    after.length === index + 2 &&
-    after[index] === "origin" &&
-    after[index + 1] === "HEAD"
-  );
+  if (isProtectedBranchRef(dest)) {
+    return false;
+  }
+  return dest === "HEAD" || !dest.startsWith(":");
 }
 
 const GH_VALUE_FLAGS = new Set(["-r", "--repo", "--hostname"]);
@@ -468,7 +486,9 @@ function isAllowedGhWorkflow(tokens) {
   }
   return (
     positionals[0] === "run" &&
-    (positionals[1] === "view" || positionals[1] === "list")
+    (positionals[1] === "view" ||
+      positionals[1] === "list" ||
+      positionals[1] === "watch")
   );
 }
 
@@ -500,8 +520,29 @@ function isTmpRelativeDestination(rawPath) {
   return normalized === ".tmp" || normalized.startsWith(".tmp/");
 }
 
+function hasPowerShellScriptblock(tokens) {
+  return tokens.some((token) => token.includes("{") || token.includes("}"));
+}
+
+function isAllowedReadOnlyFilterCmdlet(tokens) {
+  const name = basename(tokens[0] ?? "");
+  if (!PS_READONLY_FILTER_CMDLETS.has(name)) {
+    return false;
+  }
+  if (tokens.some((token) => isInvokeExpressionToken(token))) {
+    return false;
+  }
+  if (hasPowerShellScriptblock(tokens)) {
+    return false;
+  }
+  return true;
+}
+
 function isAllowedPowerShellCmdlet(tokens) {
   const name = basename(tokens[0] ?? "");
+  if (isAllowedReadOnlyFilterCmdlet(tokens)) {
+    return true;
+  }
   if (PS_DIAGNOSTIC_CMDLETS.has(name)) {
     return true;
   }
@@ -966,6 +1007,13 @@ function classifySegment(command, options = {}) {
         "Ordinary repository-local git workflow is allowed.",
       );
     }
+    if (git === "worktree" && gitSubcommandArgs(tokens)[0] === "list") {
+      return decision(
+        "allow",
+        "readonly",
+        "Readonly git inspection is allowed.",
+      );
+    }
     if (hasRepositoryRedirection(tokens)) {
       return decision(
         "deny",
@@ -974,7 +1022,14 @@ function classifySegment(command, options = {}) {
       );
     }
     if (isAllowedFeatureBranchPush(tokens)) {
-      return classifyHeadPush(options);
+      if (featurePushDestination(tokens) === "HEAD") {
+        return classifyHeadPush(options);
+      }
+      return decision(
+        "allow",
+        "verification",
+        "Ordinary repository-local git workflow is allowed.",
+      );
     }
     if (
       isAllowedGitAdd(tokens) ||

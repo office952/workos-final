@@ -96,6 +96,8 @@ Live flags, Cloud write gates, and the next authorized build live only in `docs/
 
 See `docs/development/WORKOS_CURSOR_WORKFLOW.md`. Harness V2 inventory remains in `docs/CURSOR_PLUGINS.md`. Both are tooling methodology. They are not Product Truth and not a second roadmap.
 
+Owner GO authorizes scope, not command syntax. `ROUTINE_COMMAND_CONFIRMATION = FORBIDDEN`. `EXACT_HEAD_RELEVANT_CI` is required before integration; the CI tier follows change impact. Ambiguous impact is conservative full.
+
 ## Owner awareness
 
 Every implementation report must end with:

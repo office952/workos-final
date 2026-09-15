@@ -30,9 +30,13 @@ READONLY_SPECIALISTS               = INDEPENDENT VERIFICATION
 BROWSER                            = UI / RUNTIME CLAIMS
 ISOLATED_E2E                       = REPOSITORY_AUTHORIZED_RUNTIME_TEST_PATH
 RED_TEAM                           = IMPORTANT / HIGH-RISK IMPLEMENTATION
-EXACT_HEAD_CI                      = REQUIRED BEFORE INTEGRATION
+EXACT_HEAD_RELEVANT_CI             = REQUIRED_BEFORE_INTEGRATION
+CI_TIERING                         = CHANGE_IMPACT_BASED
+AMBIGUOUS_IMPACT                   = CONSERVATIVE_FULL
 OWNER_GO                           = SCOPE / WORKFLOW AUTHORIZATION
-ROUTINE_APPROVAL_PROMPTS           = 0 FOR AUTHORIZED REVERSIBLE WORKFLOW
+OWNER_APPROVAL_MODEL               = SCOPE_AUTHORIZATION_NOT_COMMAND_AUTHORIZATION
+ROUTINE_APPROVAL_PROMPTS           = 0
+ROUTINE_COMMAND_CONFIRMATION       = FORBIDDEN
 ```
 
 Complex, multi-file, or unclear work starts in Plan Mode. A rule cannot flip the IDE mode.
@@ -57,7 +61,48 @@ These remain closed unless an Owner GO explicitly opens the named gate:
 - Product Truth expansion
 - Figma publish / write
 
-Owner GO authorizes scope and routine reversible workflow (commit, normal feature-branch push, PR create). It is not Owner acceptance of the product.
+Owner GO authorizes **scope**, not individual command syntax. It is not Owner acceptance of the product.
+
+## Owner approval model
+
+```text
+OWNER_APPROVAL_MODEL               = SCOPE_AUTHORIZATION_NOT_COMMAND_AUTHORIZATION
+ROUTINE_APPROVAL_PROMPTS           = 0
+ROUTINE_COMMAND_CONFIRMATION       = FORBIDDEN
+```
+
+Once the Owner has authorized a wave or scope, Cursor must autonomously run every routine reversible command needed to finish that work. Do not ask whether to fetch, inspect, lint, test, build, run isolated E2E, commit, push the feature branch, or create the PR.
+
+Routine autonomous operations include, when relevant: `git fetch` / `status` / `diff` / `log` / `show`, worktree inspection, `pnpm install`, `pnpm docs:check`, lint, typecheck, test, build, repository-authorized isolated E2E, Playwright, Browser inspection, read-only MCP, normal commit, normal feature-branch push, PR create, and CI inspection.
+
+Stop only for a true Owner decision / hard gate: merge, force push, direct main push, destructive git, destructive data, real Cloud write, real business DB write, credentials, Product Truth expansion, Figma write/publish, authority expansion, or unexpected scope change.
+
+Ask about the decision (`Owner GO — MERGE PR #X?`), not the command (`May I run gh pr merge?`).
+
+Native OS or Cursor sandbox permission dialogs are platform enforcement. Do not add a second conversational permission prompt around routine commands.
+
+## CI tiering
+
+```text
+EXACT_HEAD_RELEVANT_CI             = REQUIRED_BEFORE_INTEGRATION
+CI_TIER                            = DETERMINED_BY_CHANGE_IMPACT
+AMBIGUOUS_IMPACT                   = CONSERVATIVE_FULL
+```
+
+Exact-head means the required checks for the classified tier succeeded on the PR head SHA. It does not mean full E2E for every documentation change. Product/runtime changes still require E2E. Unknown or CI-infrastructure changes escalate to conservative full.
+
+| Tier | When | Required |
+|---|---|---|
+| TIER_1_DOCS | ordinary docs under `docs/`, README, AGENTS, worklog evidence | `pnpm docs:check` |
+| TIER_2_STATIC_LOGIC | known-safe static scripts only, currently docs continuity validators | docs:check, lint, typecheck, test, build |
+| TIER_3_RUNTIME_E2E | `apps/web`, `apps/api`, `packages/domain`, `e2e` | previous plus Chromium E2E |
+| TIER_4_CONSERVATIVE_FULL | CI, classifier, package.json, Playwright, Cursor Harness, unknown scripts | full set plus `pnpm cursor:harness:test` |
+
+Authoritative CI is the pull request. Feature-branch push without a PR does not run GitHub CI. `main` push may run the same change-aware job as post-integration safety; it is not an Owner wait gate unless it fails. `workflow_dispatch` can force full CI.
+
+Locally, classify against `origin/main` plus the working tree (`node scripts/run-local-ci-tier.mjs`). For TIER_3/4 runtime proof use `node .cursor/run-isolated-e2e.mjs`. Direct `pnpm e2e` remains harness-denied on the agent machine.
+
+Do not ask the Owner which verification commands to run. Cursor chooses the tier and executes it.
 
 ## Reports are not acceptance
 

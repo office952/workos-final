@@ -10,6 +10,9 @@
     "pnpm typecheck",
     "pnpm test",
     "pnpm build",
+    "pnpm docs:check",
+    "pnpm ci:classify",
+    "pnpm cursor:harness:test",
     "pnpm install --frozen-lockfile",
     "node --test",
     "node .cursor/run-isolated-e2e.mjs",
@@ -20,13 +23,18 @@
     "gh pr view",
     "gh pr checks",
     "gh run view",
-    "gh run list"
+    "gh run list",
+    "gh run watch",
+    "Select-String",
+    "Select-Object",
+    "git worktree list"
   ],
   "autoRun": {
     "allow_instructions": [
-      "Allow read-only git inspection, git fetch, pnpm lint/typecheck/test/build, frozen-lockfile install, node --test, and node .cursor/run-isolated-e2e.mjs.",
-      "Allow GitHub inspection only: gh pr view, gh pr checks, gh run view, and gh run list.",
+      "Allow read-only git inspection, git fetch, pnpm lint/typecheck/test/build/docs:check/ci:classify/cursor:harness:test, frozen-lockfile install, node --test, and node .cursor/run-isolated-e2e.mjs.",
+      "Allow GitHub inspection only: gh pr view, gh pr checks, gh run view, gh run list, and gh run watch.",
       "Allow PowerShell diagnostics Get-FileHash, Get-Item, Test-Path, and Write-Output.",
+      "Allow read-only PowerShell filters Select-String and Select-Object without scriptblocks.",
       "State-changing git add, normal git commit, feature-branch git push origin HEAD, and gh pr create are authorized by the WorkOS project hook, not by this allowlist."
     ],
     "block_instructions": [
