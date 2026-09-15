@@ -1,0 +1,162 @@
+# WorkOS Cursor workflow
+
+```text
+ROLE                       = AUTHORITY
+OWNS                       = HOW_WE_USE_CURSOR_FOR_WORKOS
+DOES_NOT_OWN               = PRODUCT_TRUTH, DELIVERY_SEQUENCE, PLUGIN_INVENTORY, FIGMA_FRAMES
+SUPERSEDES                 = NONE
+SUPERSEDED_BY              = NONE
+LIVE_STATE_DEPENDENCY      = NO
+LAST_RECONCILIATION_RULE   = UPDATE_WHEN_HARNESS_OR_OWNER_GO_METHOD_CHANGES
+```
+
+This is the WorkOS method for Cursor. Available tools live in `docs/CURSOR_PLUGINS.md`. Do not treat that inventory as this method, and do not treat this method as Product Truth.
+
+## Method versus tools
+
+| Layer | Owns |
+|---|---|
+| METHOD (this file) | Plan Mode, one writer, specialists, Browser, isolated E2E, red-team, exact-head CI, Owner GO, reporting |
+| AVAILABLE TOOLS | Plugin / MCP / skill inventory and classification |
+
+## Current WorkOS method
+
+```text
+CURSOR_MAX_CAPABILITY              = DEFAULT
+CURSOR_MAX_PARALLELISM             = NO
+PLAN_MODE                          = COMPLEX / ARCHITECTURAL / UNCLEAR WORK
+ONE_WRITER                         = DEFAULT FOR SHARED PRODUCT CODE
+READONLY_SPECIALISTS               = INDEPENDENT VERIFICATION
+BROWSER                            = UI / RUNTIME CLAIMS
+ISOLATED_E2E                       = REPOSITORY_AUTHORIZED_RUNTIME_TEST_PATH
+RED_TEAM                           = IMPORTANT / HIGH-RISK IMPLEMENTATION
+EXACT_HEAD_CI                      = REQUIRED BEFORE INTEGRATION
+OWNER_GO                           = SCOPE / WORKFLOW AUTHORIZATION
+ROUTINE_APPROVAL_PROMPTS           = 0 FOR AUTHORIZED REVERSIBLE WORKFLOW
+```
+
+Complex, multi-file, or unclear work starts in Plan Mode. A rule cannot flip the IDE mode.
+
+Independent research uses readonly specialists (`workos-product-truth-reviewer`, `workos-runtime-evidence-reviewer`). Shared product code has one writer. Do not launch an agent swarm for appearance.
+
+UI or runtime claims need the first-party Browser and repository tests. Isolated E2E is `node .cursor/run-isolated-e2e.mjs`. Direct `pnpm e2e` is harness-denied.
+
+After high-risk or tooling work, run `workos-red-team`. Do not assume PASS.
+
+## Hard gates
+
+These remain closed unless an Owner GO explicitly opens the named gate:
+
+- merge
+- force push
+- direct main push
+- destructive git
+- real Cloud write
+- real business DB
+- credentials
+- Product Truth expansion
+- Figma publish / write
+
+Owner GO authorizes scope and routine reversible workflow (commit, normal feature-branch push, PR create). It is not Owner acceptance of the product.
+
+## Reports are not acceptance
+
+```text
+CURSOR_REPORT                      = EVIDENCE_ONLY
+CHATGPT_REVIEW                     = INDEPENDENT_DECISION
+OWNER_ACCEPTANCE                   = SEPARATE_STATE
+INTEGRATION                        = SEPARATE_STATE
+```
+
+A green report, a ChatGPT review, and a merged PR are three different facts.
+
+## Continuity preflight
+
+At the start of a future session:
+
+1. Read `docs/continuity/WORKOS_SESSION_CURRENT.md`
+2. Read `AGENTS.md`
+3. Read the living roadmap
+4. Read the authority map
+5. Read only applicable canons
+6. Fetch / verify live GitHub main
+7. Verify active PR / CI if one exists
+8. Verify Figma live only when material
+9. Verify plugin / MCP status before claiming availability
+
+If recorded state, live GitHub, living roadmap, or applicable canon contradict:
+
+```text
+CONTINUITY_CONTRADICTION = YES
+```
+
+Do not start implementation. Report the exact contradiction.
+
+If cached documentation is merely older than live GitHub:
+
+```text
+HANDOFF_STALE      = YES
+LIVE_GITHUB_WINS   = YES
+```
+
+Reconcile the durable docs before a decision that depends on the stale state. No silent guessing.
+
+## Session close
+
+At a stable checkpoint:
+
+1. Verify live GitHub
+2. Reconcile living roadmap
+3. Reconcile worklog
+4. Reconcile `WORKOS_SESSION_CURRENT.md`
+5. Reconcile terminology if affected
+6. Reconcile Figma authority if affected
+7. Reconcile Cursor / tool status if affected
+8. Record Owner decisions and advisories
+9. Record next product gate
+10. Contradiction check
+
+Target:
+
+```text
+CONTINUITY_CONTRADICTIONS  = 0
+NEXT_GATE_UNAMBIGUOUS      = YES
+SESSION_CONTINUITY         = COMPLETE
+SESSION_HANDOFF_READY      = YES
+```
+
+This is methodology. Cursor and ChatGPT cannot autonomously wake each other.
+
+## Implementation report
+
+Every implementation report must include:
+
+```text
+ROADMAP_READ
+UI_UX_CANON_READ          when the work is UI/UX
+DIRECTION_CONFLICT
+CONTINUITY_PREFLIGHT      = PASS | FAIL
+```
+
+And must end with Owner awareness links. Those links are not an approval request.
+
+```text
+OWNER_UPDATE_LINKS
+PURPOSE            = OWNER_AWARENESS
+APPROVAL_REQUIRED  = NO
+```
+
+When applicable include direct URLs for PR, commit, branch, important changed files, Figma file/section/frame, runtime route, exact-head CI, roadmap, and worklog.
+
+If nothing was modified:
+
+```text
+OWNER_UPDATE_LINKS
+MODIFICATIONS = NONE
+```
+
+Current-state links may still be given when useful.
+
+## Documentation impact
+
+Follow `docs/governance/WORKOS_DOCUMENTATION_GOVERNANCE.md`. Code green + stale canon is not closed.

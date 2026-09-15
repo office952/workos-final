@@ -11,7 +11,7 @@ React must not own product truth, pricing, provider eligibility, executor eligib
 
 ## Shell
 
-This file records the **current implemented** presentation shell. Living UI20 evolution authority remains `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
+This file records the **current implemented** presentation shell. Living UI20 evolution authority remains `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. Implemented shell and existing page bodies are current runtime presentation. They are not current page-level Owner acceptance of those pages. At this checkpoint only Configurator UI/UX is Owner-approved. Other pages are not rejected.
 
 ```text
 IMPLEMENTED_SHELL                      = UI20_CANDIDATE_A_QUIET_TOP_SHELL
@@ -168,7 +168,7 @@ Compact rows. Create form uses `Field`. Retired list is secondary.
 
 ## Product configuration / result pattern
 
-Configurator presentation architecture is frozen in `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md`. Reuse those patterns. Do not freeze field inventory or Product Truth. `UI_UX_FRAMEWORK_FROZEN_V1 = YES`. `NEXT_PROGRAM = CONFIGURATOR_FORM_COMPLETENESS`. During form completeness, do not redesign the floorplan without an explicit Owner reopen.
+Configurator presentation architecture is frozen in `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md`. Reuse those patterns. Do not freeze field inventory or Product Truth. `UI_UX_FRAMEWORK_FROZEN_V1 = YES`. `NEXT_PROGRAM = CONFIGURATOR_FORM_COMPLETENESS`. During form completeness, do not redesign the floorplan without an explicit Owner reopen. Current Configurator UI/UX authority is the implemented application on main. Figma `219:3` is the accepted design baseline, not a reason to revert later accepted refinements.
 
 While editing, the form leads. Construction facts are a compact summary of supplied identity, not editable fields. Readiness is a short problem list from backend missing labels.
 

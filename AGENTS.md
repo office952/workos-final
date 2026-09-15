@@ -3,19 +3,34 @@
 WorkOS Final is a clean reconstruction of the product operating system.
 It is not a cleanup or fork of previous WorkOS repositories.
 
-## Canonical direction
+## Pointers
 
-Active V1 delivery authority: `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`.
-Active UI/UX direction authority: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
+| Need | Authority |
+|---|---|
+| Delivery direction | `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` |
+| Where to look | `docs/governance/WORKOS_AUTHORITY_MAP.md` |
+| Romanian UI terms | `docs/governance/WORKOS_ROMANIAN_TERMINOLOGY_CANON.md` |
+| Documentation roles | `docs/governance/WORKOS_DOCUMENTATION_GOVERNANCE.md` |
+| Cursor method | `docs/development/WORKOS_CURSOR_WORKFLOW.md` |
+| Figma method | `docs/development/WORKOS_FIGMA_WORKFLOW.md` |
+| Session continuity | `docs/continuity/WORKOS_SESSION_CURRENT.md` |
+| New-chat start | `docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md` |
+| Plugin / MCP inventory | `docs/CURSOR_PLUGINS.md` |
+| UI/UX direction | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` |
+| Implemented presentation | `docs/architecture/UI_UX_FOUNDATION_CANON.md` |
+
 `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` is construction history.
-`docs/architecture/UI_UX_FOUNDATION_CANON.md` is the current implemented presentation law.
+
+This file is not a second roadmap, plugin manual, terminology encyclopedia, or Figma catalog.
+
+## Preflight
 
 Before any implementation:
+- read `docs/continuity/WORKOS_SESSION_CURRENT.md`
 - read `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`
+- fetch / verify live GitHub `origin/main`
 
-Before any UI/UX change:
-- read `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`
-- read `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`
+Before any UI/UX change, also read `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`.
 
 Any agent must report:
 
@@ -23,22 +38,24 @@ Any agent must report:
 ROADMAP_READ
 UI_UX_CANON_READ
 DIRECTION_CONFLICT
+CONTINUITY_PREFLIGHT = PASS | FAIL
 ```
 
-Implementation reports also include the V1 roadmap checkpoint. UI changes also include the UI canon change-governance fields.
+If recorded continuity, live GitHub, living roadmap, or applicable canon contradict: `CONTINUITY_PREFLIGHT = FAIL`. Do not start implementation.
 
 ```text
 CURRENT DELIVERY STATE = READ ACTIVE ROADMAP
+LIVE_MAIN_AUTHORITY    = GITHUB_ORIGIN_MAIN
 AGENTS.md MUST NOT be a second living roadmap
 ```
 
-Do not duplicate volatile milestone flags here. If this file and the roadmap disagree, the roadmap wins.
+Do not duplicate volatile milestone flags here. If this file and the roadmap disagree, the roadmap wins. If this file and live GitHub disagree, live GitHub wins.
 
 ## Current position
 
-Hierarchical product catalog plus two live ProductTemplates: LETTERS front-lit and Panou ACM casetat. Halo-lit and full-aluminium categories stay empty until Owner construction truth exists. FACE / VOLUME / BACK / LIGHTING are roles. Constructive types and product configuration are separate. See `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md`.
+Two live ProductTemplates: LETTERS front-lit and Panou ACM casetat. FACE / VOLUME / BACK / LIGHTING are roles. See `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md`.
 
-Read live delivery flags, next build, Cloud/pilot gates, and UI closure from the active roadmap. Do not treat older worklogs or this file as the status authority.
+Read live flags, next authorized slice, Cloud/pilot gates, and UI closure from the living roadmap and live GitHub. Do not treat older worklogs or this file as the status authority.
 
 ## Working rules
 
@@ -46,7 +63,7 @@ Read live delivery flags, next build, Cloud/pilot gates, and UI closure from the
 - Current WorkOS and other previous repos are read-only reference/evidence. Do not write there. Do not copy architecture or wholesale code.
 - UI may code experience. UI must not code business truth: fields, materials, formulas, pricing, readiness, statuses, totals, or Product Truth.
 - Operator-facing UI is in Romanian. Internal code and contracts may stay in English.
-- Modular product law: an unselected module is silent. A selected module is independently validatable and calculable. Complete product is composition of the same contracts. No hidden parallel calculators.
+- Modular product law: an unselected module is silent. A selected module is independently validatable and calculable. Complete product is composition of the same contracts. No hidden parallel calculators. Operator anatomy labels are componente; see the terminology canon for the Configurator “module validate” debt.
 - Technical quantity, resource identity, internal cost evidence, EIC, and commercial price stay separate. Rates live only in Resources/Cost.
 - Adjustable technical values live in canonical Product System component settings. Documentation explains them. Calculation code consumes them. Intake does not administer them.
 - Each domain owns its settings and entities. Do not create a global Settings dump or a new V3 category to place a future system. See `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md`.
@@ -69,12 +86,24 @@ Read live delivery flags, next build, Cloud/pilot gates, and UI closure from the
 
 ## Bootstrap proof
 
-The app has the UI20 Candidate A quiet top shell over existing routes and existing page bodies. That current presentation is reference and constraint, not the required visual migration base. The next presentation program is an isolated vertical North Star (Cerere → Configurator → Ofertă → Order continuity → Lucrare → Atelier → Execuție) over the same commercial spine: confirm → EIC → Commercial → Quote Snapshot → Acceptance → Order → Release → ExecutionPlan. No partial live-route cutover. `/` stays Lucrări until an explicit Acasă contract.
+The app has the UI20 Candidate A quiet top shell over existing routes and existing page bodies. That current presentation is reference and constraint, not the required visual migration base. No partial live-route cutover. `/` stays Lucrări until an explicit Acasă contract.
 
-LETTERS none/none at 60 mm is the regression anchor through that spine. ACM cassette is the second Quote-ready product on the same engines. Unselected roles stay silent. Historical snapshots stay immutable. Analyzer stays outside WorkOS.
+LETTERS none/none at 60 mm is the regression anchor. ACM cassette is the second Quote-ready product on the same engines. Unselected roles stay silent. Historical snapshots stay immutable. Analyzer stays outside WorkOS.
 
 Live flags, Cloud write gates, and the next authorized build live only in `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md`.
 
-## Cursor engineering harness
+## Cursor method
 
-Cursor WorkOS Harness V2 is tooling methodology only. It is not Product Truth and not a second roadmap. See `docs/CURSOR_PLUGINS.md` section `CURSOR WORKOS HARNESS V2`.
+See `docs/development/WORKOS_CURSOR_WORKFLOW.md`. Harness V2 inventory remains in `docs/CURSOR_PLUGINS.md`. Both are tooling methodology. They are not Product Truth and not a second roadmap.
+
+## Owner awareness
+
+Every implementation report must end with:
+
+```text
+OWNER_UPDATE_LINKS
+PURPOSE           = OWNER_AWARENESS
+APPROVAL_REQUIRED = NO
+```
+
+These links are not an Owner approval request. If nothing was modified: `MODIFICATIONS = NONE`.

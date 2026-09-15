@@ -1,83 +1,61 @@
 # Documentation map
 
-## Canonical current
+Use the authority map when you need to know *where* a fact lives: `docs/governance/WORKOS_AUTHORITY_MAP.md`.
 
-These describe the live system. If they disagree with runtime, the runtime wins and the doc must be updated.
+If a current canonical document disagrees with runtime, the runtime / live GitHub wins and the document must be reconciled.
 
-- `AGENTS.md` — working rules and current position
-- `README.md` — how to run the app
-- `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery sequence
+## Current canonical
+
+- `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery direction
 - `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction
-- `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings single-truth law
-- `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration law
-- `docs/architecture/PRODUCT_SYSTEM_PERSISTENCE_CANON.md` — persisted display metadata and first write path
-- `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity, material family/spec, cost evidence
-- `docs/architecture/SERVICE_AND_LABOR_RECIPES_CANON.md` — service / labor recipe layer
-- `docs/architecture/OPERATIONAL_PROCESSES_CANON.md` — process definition, shop-floor capability class, and Letters process composition
-- `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` — workcenter, machine, and capability-provider law
-- `docs/architecture/EXECUTION_PLAN_PREVIEW_CANON.md` — read-only production-plan preview law
-- `docs/architecture/ACCEPTED_PRODUCTION_SNAPSHOT_CANON.md` — frozen accepted production snapshot law
-- `docs/architecture/EXECUTION_PLAN_AND_TASKS_CANON.md` — persisted ExecutionPlan / ExecutionTasks and minimal lifecycle law
-- `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` — operational person identity and task executor
-- `docs/architecture/UI_UX_FOUNDATION_CANON.md` — operator/admin visual and interaction grammar
-- `docs/architecture/CUSTOMER_IDENTITY_CANON.md` — reusable Client identity
-- `docs/architecture/CLIENT_WORKSPACE_CANON.md` — Client Workspace projection
-- `docs/architecture/SELLER_IDENTITY_CANON.md` — company / vânzător identity
-- `docs/architecture/QUOTE_SNAPSHOT_CANON.md` — immutable offer freeze
-- `docs/architecture/QUOTE_DOCUMENT_CANON.md` — customer Ofertă PDF projection
-- `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — cross-system domain and administration map
-- `docs/worklog/WORKOS_FINAL_COMPONENT_FIRST_CALCULATION_ARCHITECTURE_V1.md` — current calculation ownership
-- `docs/worklog/WORKOS_FINAL_COMPONENTS_AND_GOVERNANCE_PROJECTION_V1.md` — owner-facing projections
-- `docs/worklog/WORKOS_FINAL_OWNER_SURFACES_INFORMATION_ARCHITECTURE_V1.md` — catalog IA for those projections
-- `docs/worklog/WORKOS_FINAL_COMPONENT_TECHNICAL_SETTINGS_CANONICAL_FOUNDATION_V1.md` — settings foundation build
-- `docs/worklog/WORKOS_FINAL_SYSTEM_ADMINISTRATION_AND_DOMAIN_MAP_V1.md` — cross-system administration map build
-- `docs/worklog/WORKOS_FINAL_PRODUCT_SYSTEM_ADMIN_FOUNDATION_V1.md` — read-only Product System administration foundation
-- `docs/worklog/WORKOS_FINAL_COMPONENT_CONFIGURATION_MODEL_REALIGNMENT_AND_CLEANUP_V1.md` — role/type/configuration realignment
-- `docs/worklog/WORKOS_FINAL_PRODUCT_SYSTEM_PERSISTENCE_AND_FIRST_WRITE_PATH_V1.md` — first persisted display-label write
-- `docs/worklog/WORKOS_FINAL_RESOURCES_AND_COST_CATALOG_FOUNDATION_V1.md` — Resources / Cost catalog foundation
-- `docs/worklog/WORKOS_FINAL_OPERATIONAL_PROCESSES_FOUNDATION_V1.md` — Operational Processes foundation
-- `docs/worklog/WORKOS_FINAL_LETTERS_PROCESS_COMPOSITION_V1.md` — Letters process composition
-- `docs/worklog/WORKOS_FINAL_LETTERS_CRITICAL_PROCESS_COMPLETION_V1.md` — Letters critical process completion
-- `docs/worklog/WORKOS_FINAL_LIGHTING_COMPLETION_V1.md` — Lighting calculation consumes owner-confirmed PSU reserve 25%
-- `docs/worklog/WORKOS_FINAL_LIGHTING_SINGLE_TRUTH_ALIGNMENT_V1.md` — one Lighting evaluation path for Aggregate and processes
-- `docs/worklog/WORKOS_FINAL_WORKCENTERS_AND_MACHINES_FOUNDATION_V1.md` — capability-provider foundation without invented machines
-- `docs/worklog/WORKOS_FINAL_ASSEMBLY_WORKCENTERS_LIVE_COVERAGE_V1.md` — two owner-confirmed assembly tables provide MANUAL_ASSEMBLY
-- `docs/worklog/WORKOS_FINAL_REAL_SHOPFLOOR_EQUIPMENT_AND_CAPABILITY_MAP_V1.md` — real shop-floor Workcenter / Machine / Capability map
-- `docs/worklog/WORKOS_FINAL_SERVICE_AND_LABOR_RECIPES_FOUNDATION_V1.md` — service / labor recipe foundation
-- `docs/worklog/WORKOS_FINAL_REAL_SHOPFLOOR_OPERATIONAL_PROCESS_COMPLETION_V1.md` — reusable shop-floor Operational Process catalog completion
-- `docs/worklog/WORKOS_FINAL_LETTERS_LIGHTING_CALCULATION_COMPLETION_V1.md` — Letters Lighting resource calculation functional V1
-- `docs/worklog/WORKOS_FINAL_LETTERS_FUNCTIONAL_EIC_COMPLETION_V1.md` — Letters functional internal-cost recipes and EIC
-- `docs/worklog/WORKOS_FINAL_LETTERS_EXECUTION_PLAN_PREVIEW_V1.md` — Letters Execution Plan Preview
-- `docs/worklog/WORKOS_FINAL_ACCEPTED_PRODUCTION_SNAPSHOT_V1.md` — accepted production snapshot
-- `docs/worklog/WORKOS_FINAL_LETTERS_PERSISTED_EXECUTION_PLAN_AND_TASKS_V1.md` — persisted ExecutionPlan and tasks
-- `docs/worklog/WORKOS_FINAL_LETTERS_MINIMAL_TASK_EXECUTION_V1.md` — provider assignment and minimal Start/Complete
-- `docs/worklog/WORKOS_FINAL_LETTERS_EXECUTION_GOLDEN_PATH_COMPLETION_V1.md` — reachable LETTERS execution DAG
-- `docs/worklog/WORKOS_FINAL_MINIMAL_PEOPLE_AND_TASK_EXECUTOR_V1.md` — People identity and task executor
-- `docs/worklog/WORKOS_FINAL_UI_UX_FOUNDATION_AND_EXECUTION_SURFACE_V1.md` — UI/UX foundation proven on Execution and People
-- `docs/worklog/WORKOS_FINAL_PRODUCT_CONFIGURATION_RESULT_UX_MIGRATION_V1.md` — Product configuration / result uses the same grammar
-- `docs/worklog/WORKOS_FINAL_ADMIN_RESOURCES_UX_MIGRATION_V1.md` — Resources / Cost admin uses the same grammar
-- `docs/worklog/WORKOS_FINAL_ADMIN_OPERATIONAL_PROCESSES_UX_MIGRATION_V1.md` — Operational Processes admin uses the same grammar
-- `docs/worklog/WORKOS_FINAL_ADMIN_WORKCENTERS_UX_MIGRATION_V1.md` — Workcenters / Machines admin uses the same grammar
+- `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation law
+- `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` — documented guardrail of the accepted Configurator implementation; current UI/UX authority is the application on main. At this checkpoint only Configurator UI/UX is Owner-approved; other pages are not rejected and are not Owner-accepted by existence or UI20 direction.
+- `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration
+- `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` — technical settings
+- `docs/architecture/RESOURCES_AND_COST_CANON.md` — resource identity and cost evidence
+- `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md` — domain and administration map
+- `README.md` — how to run the app
+- `AGENTS.md` — short working rules and pointers
 
-## Historical evidence
+Other live architecture canons stay under `docs/architecture/`.
 
-Worklogs of earlier builds. They may use old names (`RETURN_CANT`, `/products/letters`). They are not current canon.
+## Governance
 
-- `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md` — historical construction map; not the live V1 sequence
-- `docs/worklog/WORKOS_FINAL_REPOSITORY_BOOTSTRAP_V1.md`
-- `docs/worklog/WORKOS_FINAL_CAPABILITY_BOUNDARY_KERNEL_V1.md`
-- `docs/worklog/WORKOS_FINAL_PLATFORM_SHELL_V1.md`
-- `docs/worklog/WORKOS_FINAL_CONFIGURATION_SPINE_V1.md`
-- `docs/worklog/WORKOS_FINAL_TECHNICAL_RESOURCE_EIC_SPINE_V1.md`
-- `docs/worklog/WORKOS_FINAL_PRODUCT_CATALOG_AND_FIRST_CANONICAL_PRODUCT_V1.md`
-- `docs/worklog/WORKOS_FINAL_FIRST_CANONICAL_PRODUCT_TECHNICAL_COMPLETION_V1.md`
+- `docs/governance/WORKOS_DOCUMENTATION_GOVERNANCE.md` — document roles and documentation-impact gate
+- `docs/governance/WORKOS_AUTHORITY_MAP.md` — question → authority routing
+- `docs/governance/WORKOS_ROMANIAN_TERMINOLOGY_CANON.md` — operator Romanian terms
 
-## Tooling (not product canon)
+## Development method
 
-- `docs/CURSOR_PLUGINS.md` — Cursor plugins installed for this workspace, when to use each one, and what not to install. This is editor tooling. It does not own product truth.
+- `docs/development/WORKOS_CURSOR_WORKFLOW.md` — how we use Cursor
+- `docs/development/WORKOS_FIGMA_WORKFLOW.md` — how we use Figma
 
-## Terminology
+## Continuity
 
-Operator-facing product parts are **componente**: Față, Volum, Spate, Iluminare.
+- `docs/continuity/WORKOS_SESSION_CURRENT.md` — index and reconciliation checkpoint
+- `docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md` — minimal new-chat start
 
-«Module» in **Module și componente** is reserved for future system modules, not for FACE/VOLUME/BACK/LIGHTING.
+These files are not a second roadmap. Live GitHub is the integration authority.
+
+## Tooling
+
+- `docs/CURSOR_PLUGINS.md` — plugin / MCP inventory and Harness V2
+- `scripts/verify-workos-docs-continuity.mjs` — deterministic docs check (`pnpm docs:check`)
+
+Tooling does not own Product Truth.
+
+Operator-facing product parts are **componente**: Față / FAȚĂ, Volum / CANT, Spate / SPATE, Iluminare. «Module» is reserved for system modules. Current Configurator progress copy still says `N din M module validate`; that is recorded terminology debt, not a new meaning.
+
+## History / evidence
+
+Worklogs prove what was implemented. They are not current canon.
+
+Current product-program evidence:
+
+- `docs/plans/WORKOS_CONFIGURATOR_FORM_COMPLETENESS_FC0_PLAN.md`
+- `docs/worklog/WORKOS_CONFIGURATOR_FORM_COMPLETENESS_FC1_IMPLEMENTED_LOCAL_IN_REVIEW.md`
+- `docs/worklog/WORKOS_DOCUMENTATION_AND_SESSION_CONTINUITY_V1_IMPLEMENTED_LOCAL_IN_REVIEW.md`
+
+Historical construction map: `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md`.
+
+All other implementation records: `docs/worklog/`.

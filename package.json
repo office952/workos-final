@@ -6,6 +6,7 @@
   "scripts": {
     "dev:web": "pnpm --filter @workos-final/web dev",
     "dev:api": "pnpm --filter @workos-final/api dev",
+    "docs:check": "node scripts/verify-workos-docs-continuity.mjs && node --test scripts/verify-workos-docs-continuity.test.mjs",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
