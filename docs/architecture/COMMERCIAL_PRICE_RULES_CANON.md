@@ -84,7 +84,7 @@ PARTIAL may keep preview amounts in the projection. The operator UI must not pre
 A COMPLETE product commercial projection is not a COMPLETE job when a selected optional scope such as `SITE_INSTALLATION` is PARTIAL. Do not present `0 EUR` as an installation cost or price. Quote freeze stays blocked until every selected commercial scope is COMPLETE under its own strategy. See `docs/architecture/OPTIONAL_SITE_INSTALLATION_CANON.md` and `docs/architecture/OPERATIONAL_SERVICES_CANON.md`.
 
 Canonical 60 mm none/none is COMPLETE.
-Vinyl and RAL may be COMPLETE when every required resource has a usable numeric CostEvidence row. Price confidence is advisory and does not keep EIC or commercial PARTIAL. Configured aluminium depths 30 / 60 / 80 / 100 mm remain COMPLETE on owner-confirmed profile rates. Missing CostEvidence still keeps EIC and commercial PARTIAL.
+Vinyl and RAL may be COMPLETE when every required resource has a usable numeric CostEvidence row. Price confidence is advisory and does not keep EIC or commercial PARTIAL. `PRICE_CALIBRATION_DOES_NOT_BLOCK_WORKFLOW`. Configured aluminium depths 30 / 60 / 80 / 100 mm remain COMPLETE on owner-confirmed profile rates. Missing CostEvidence still keeps EIC and commercial PARTIAL.
 
 ## Service commercial channel — CURRENT_RUNTIME local in review
 

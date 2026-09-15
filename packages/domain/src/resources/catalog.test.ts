@@ -1,14 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
   ALUMINIUM_RETURN_PROFILE_ID,
+  FC2D_PROVISIONAL_RESOURCE_IDS,
   FOREX_10MM_ID,
+  LAB_VINYL_FACE_ID,
   MAT_LED_MODULE_ID,
   MAT_LED_PSU_12V_100W_ID,
   MAT_LED_PSU_12V_160W_ID,
   MAT_LED_PSU_12V_200W_ID,
   MAT_LED_PSU_12V_60W_ID,
+  MAT_VINYL_ORACAL_641_ID,
   PLEXIGLAS_3MM_OPAL_ID,
   RETURN_CANT_FORMING_ID,
+  SVC_LARGE_FORMAT_PRINT_ID,
+  countMissingRatesForPlannedFc2FinishResources,
   costEvidence,
   costEvidenceQualifierFieldsFor,
   costEvidenceQualifierIdentity,
@@ -70,6 +75,10 @@ describe("resource catalog", () => {
       MAT_LED_PSU_12V_160W_ID,
       MAT_LED_PSU_12V_200W_ID,
       "MAT-VINYL-ORACAL-651",
+      "MAT-VINYL-ORACAL-641",
+      "MAT-VINYL-ORACAL-8500",
+      "MAT-VINYL-PRINT",
+      "MAT-VINYL-LAMINATE",
       "SVC-CNC-FACE",
       "SVC-CNC-BACK",
       "LAB-VINYL-FACE",
@@ -79,6 +88,7 @@ describe("resource catalog", () => {
       "SVC-PLACE-LED-MODULES",
       "SVC-ELECTRICAL-FINISH",
       "SVC-PAINT-RAL",
+      "SVC-LARGE-FORMAT-PRINT",
       "SVC-PACK-PRODUCT",
       "acm_3mm",
       "steel_frame_profile",
@@ -104,6 +114,7 @@ describe("resource catalog", () => {
       "SVC-PLACE-LED-MODULES",
       "SVC-ELECTRICAL-FINISH",
       "SVC-PAINT-RAL",
+      "SVC-LARGE-FORMAT-PRINT",
       "SVC-PACK-PRODUCT",
       "SVC-CNC-SHEET-PANEL",
       "SVC-CUT-METAL-STOCK",
@@ -242,6 +253,23 @@ describe("resource catalog", () => {
     expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.amount).toBe(5);
     expect(getCostEvidence(RETURN_CANT_FORMING_ID)?.source).toBe("OWNER_CONFIRMED_WORKSHOP");
     expect(JSON.stringify(resourceCatalog)).not.toMatch(/"amount":/);
+  });
+
+  it("seeds usable non-owner-confirmed FC2D finish rates", () => {
+    expect(countMissingRatesForPlannedFc2FinishResources(costEvidence)).toBe(0);
+    for (const resourceId of FC2D_PROVISIONAL_RESOURCE_IDS) {
+      const evidence = getCostEvidence(resourceId);
+      expect(evidence).toBeDefined();
+      expect(isValidCostAmount(evidence!.amount)).toBe(true);
+      expect(evidence!.classification).toBe("DEVELOPMENT_DEFAULT");
+      expect(evidence!.classification).not.toBe("OWNER_CONFIRMED");
+      expect(resourceCatalog.some((item) => item.id === "MAT-VINYL-PRINT-LAMINATED")).toBe(
+        false,
+      );
+    }
+    expect(getResource(MAT_VINYL_ORACAL_641_ID)?.kind).toBe("MATERIAL");
+    expect(getResource(SVC_LARGE_FORMAT_PRINT_ID)?.kind).toBe("SERVICE");
+    expect(getResource(LAB_VINYL_FACE_ID)?.id).toBe("LAB-VINYL-FACE");
   });
 
   it("looks up injected rows without inheriting a qualified aluminium rate", () => {

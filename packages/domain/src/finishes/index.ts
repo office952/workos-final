@@ -41,6 +41,7 @@ export {
 } from "./rolls.js";
 export { snapshotFinishSelection } from "./snapshot.js";
 export { listVisibleFinishApplications, resolveFinishCompatibility } from "./resolve.js";
+export { compileFaceFinishCost, faceFinishCostRequirements } from "./costResolution.js";
 export {
   COLOR_SOURCES,
   COLOR_SYSTEMS,

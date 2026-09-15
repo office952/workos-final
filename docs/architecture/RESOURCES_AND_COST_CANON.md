@@ -108,8 +108,10 @@ A row may carry an optional configuration qualifier. Aluminium profile keeps one
 
 Owner-confirmed workshop rates use `OWNER_CONFIRMED_WORKSHOP`. Purchase rates use `OWNER_CONFIRMED_PURCHASE`.
 `PRICE_CONFIDENCE != COST_RESOLVABILITY`.
+`PRICE_CALIBRATION_DOES_NOT_BLOCK_WORKFLOW`.
 A required cost resource is resolvable when the resource exists, a compatible active CostEvidence row exists, unit/currency/qualifier are valid, and the rate is a usable numeric value.
 Provenance and classification (`LEGACY_EVIDENCE`, `PILOT_INTERNAL_EVIDENCE`, `DEVELOPMENT_DEFAULT`, `AI_DECISION`, `OWNER_CONFIRMED`, and the rest) stay visible for admin, audit, and review. They do not keep planned EIC PARTIAL.
+Price accuracy, supplier comparison, and Owner calibration are not workflow gates. A provisional editable numeric rate is sufficient for functional costing. Do not coerce a missing rate to silent zero.
 EIC PARTIAL means only functional incompleteness: missing measurement, missing resource identity, missing CostEvidence, invalid qualifier/unit, or an excluded/unresolved component.
 A usable numeric vinyl or RAL row can complete EIC. Missing CostEvidence remains unresolved. Do not coerce a missing rate to silent zero.
 
@@ -125,6 +127,20 @@ Workshop LETTERS recipes stay per-unit (`m`, `m²`, `buc`), not hourly. Site-ins
 Resource identity, kind, unit, labels, specifications and recipes remain typed code.
 
 SQLite owns the active CostEvidence amount after one-time bootstrap (`RESOURCE_COST_EVIDENCE_V1_APPLIED`). Seed `costEvidence[]` is bootstrap plus pure domain tests. Live compile, freeze and admin projection read active database rows. They do not fall back to seed amounts.
+
+FC2D adds reusable FACE-finish identities and provisional rates without activating them on the live LETTERS form:
+
+- `MAT-VINYL-ORACAL-641`
+- `MAT-VINYL-ORACAL-8500`
+- `MAT-VINYL-PRINT`
+- `MAT-VINYL-LAMINATE`
+- `SVC-LARGE-FORMAT-PRINT`
+
+Reuse existing `MAT-VINYL-ORACAL-651`, `LAB-VINYL-FACE`, `LAB-VINYL-VOLUME`, and `SVC-PAINT-RAL`. Do not clone application labor per Oracal series. Do not use a composite `MAT-VINYL-PRINT-LAMINATED` identity. `SVC-LAMINATE` stays deferred; print plus laminate is print media + print service + laminate material + shared FACE apply.
+
+Existing organizations already marked `RESOURCE_COST_EVIDENCE_V1_APPLIED` receive an additive, idempotent backfill (`RESOURCE_COST_EVIDENCE_FC2D_V1_APPLIED`). It inserts only missing FC2D slots. It never overwrites an existing active rate, never supersedes an Owner-edited rate, and never restores a provisional amount after Owner edit. New organizations receive the current seed, including FC2D rows, then the FC2D marker. `ADOPT_EXISTING` still skips both cost bootstraps.
+
+Supplier management, multi-supplier comparison, detailed historical RAL pricing, and roll nesting are out of scope. Current generic `SVC-PAINT-RAL` remains the functional RAL path. FACE V1 quantity is confirmed face area m².
 
 One active row per resource, or per resource plus configuration qualifier. Aluminium depths are qualified rows; unqualified lookup does not inherit them. 30 / 60 / 80 / 100 mm each have an owner-confirmed profile rate.
 
