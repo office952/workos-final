@@ -168,7 +168,7 @@ Compact rows. Create form uses `Field`. Retired list is secondary.
 
 ## Product configuration / result pattern
 
-Configurator presentation architecture is frozen in `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md`. Reuse those patterns. Do not freeze field inventory or Product Truth. `UI_UX_FRAMEWORK_FROZEN_V1 = YES`. `NEXT_PROGRAM = CONFIGURATOR_FORM_COMPLETENESS`. During form completeness, do not redesign the floorplan without an explicit Owner reopen.
+Configurator presentation architecture is frozen in `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md`. Reuse those patterns. Do not freeze field inventory or Product Truth. `UI_UX_FRAMEWORK_FROZEN_V1 = YES`. `NEXT_PROGRAM = CONFIGURATOR_FORM_COMPLETENESS`. During form completeness, do not redesign the floorplan without an explicit Owner reopen. Current Configurator UI/UX authority is the implemented application on main. Figma `219:3` is the accepted design baseline, not a reason to revert later accepted refinements.
 
 While editing, the form leads. Construction facts are a compact summary of supplied identity, not editable fields. Readiness is a short problem list from backend missing labels.
 

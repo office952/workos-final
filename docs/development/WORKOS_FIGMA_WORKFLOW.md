@@ -13,21 +13,24 @@ LAST_RECONCILIATION_RULE   = RECONCILE_WHEN_A_CANON_CHANGES_ITS_FIGMA_FILE_OR_SE
 ## Law
 
 ```text
-FIGMA                          = VISUAL / INTERACTION AUTHORITY WHERE EXPLICITLY RECORDED
+FIGMA                          = VISUAL / INTERACTION AUTHORITY ONLY WHEN A CURRENT CANON ASSIGNS THAT CLASS
 FIGMA                         != PRODUCT_TRUTH
 FIGMA                         != DOMAIN_AUTHORITY
 FIGMA                         != PRICING_AUTHORITY
 FIGMA                         != EXECUTION_AUTHORITY
+FIGMA                         != AUTOMATIC_CURRENT_IMPLEMENTATION_AUTHORITY
 FIGMA_WRITE                    = REQUIRES_EXPLICIT_OWNER_GO
+FORCE_SYNC_APP_TO_FIGMA        = NO FOR CONFIGURATOR
 ```
 
-A Figma frame may freeze chrome, spacing, and interaction grammar only when a current canon or frozen framework records that file and node. It must not invent fields, options, readiness, materials, or prices.
+Recording a file or section is not the same as assigning current implementation visual authority. A Figma frame may describe chrome, spacing, and interaction grammar. It must not invent fields, options, readiness, materials, or prices. It must not force the accepted application back to an older frame.
 
 ## Classification
 
 | Class | Meaning |
 |---|---|
-| VISUAL_AUTHORITY | Current recorded visual / interaction grammar for a named surface |
+| VISUAL_AUTHORITY | Current recorded visual / interaction grammar for a named surface, only when a living canon assigns this class |
+| ACCEPTED_BASELINE_REFERENCE | Accepted design start. Later Owner-accepted implementation refinements win. Not current implementation visual authority |
 | INTERACTION_REFERENCE_ONLY | Motion or click grammar. Not static visual authority. Not Product Truth |
 | HISTORICAL | Accepted earlier, superseded for living direction |
 | ARCHIVE | Kept as evidence. Do not implement from it |
@@ -36,19 +39,22 @@ A Figma frame may freeze chrome, spacing, and interaction grammar only when a cu
 
 Verified against the repository on this slice. Live MCP reads are recorded separately.
 
-### Configurator V1 — VISUAL_AUTHORITY
+### Configurator V1 — ACCEPTED_BASELINE_REFERENCE
 
 Repository: `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md`
 
 ```text
-FIGMA_FILE                     = hu6gJrm0KM2NPkaIpQ8Kfo
-FIGMA_SECTION                  = 219:3
-URL                            = https://www.figma.com/design/hu6gJrm0KM2NPkaIpQ8Kfo?node-id=219-3
-LIVE_MCP_READ_2026_09_15       = YES
-LIVE_SECTION_NAME              = FINAL CONFIGURATOR — OWNER REVIEW CANDIDATE
+FIGMA_FILE                           = hu6gJrm0KM2NPkaIpQ8Kfo
+FIGMA_SECTION                        = 219:3
+CLASS                                = ACCEPTED_BASELINE_REFERENCE
+CURRENT_IMPLEMENTED_UI_AUTHORITY     = APPLICATION_ON_MAIN
+FORCE_SYNC_APP_TO_FIGMA              = NO
+URL                                  = https://www.figma.com/design/hu6gJrm0KM2NPkaIpQ8Kfo?node-id=219-3
+LIVE_MCP_READ_2026_09_15             = YES
+LIVE_SECTION_NAME                    = FINAL CONFIGURATOR — OWNER REVIEW CANDIDATE
 ```
 
-Only section `219:3` is Configurator implementation visual authority. Archive `219:2` remains historical.
+Section `219:3` is the accepted design baseline / reference for Configurator V1. The Configurator was derived from that section; later UI/UX refinements were accepted in the implemented application. Present Configurator UI/UX authority is the current implementation on `origin/main`. The frozen V1 framework is the documented guardrail of that implementation. Archive `219:2` remains historical. Do not force the application back to `219:3` because the accepted implementation differs from that frame.
 
 ### Configurator Make file — INTERACTION_REFERENCE_ONLY
 
@@ -98,10 +104,12 @@ Accepted V3 Clients / Client Hub / Cereri geometry remains historical evidence. 
 Use a **read-only** Figma MCP call when:
 
 - a current canon names a file/section and the session must confirm that node still exists
-- visual comparison against frozen Configurator chrome is material
+- visual comparison against the accepted Configurator `219:3` baseline is material
 - Owner visual review needs the live frame, not a remembered id
 
-Figma read is optional when the work does not touch recorded visual authority.
+A difference between the current accepted Configurator implementation and `219:3` is not a defect and is not a reason to revert the application.
+
+Figma read is optional when the work does not touch a recorded Figma class.
 
 Owner visual review is required when a change claims visual acceptance or would reopen a frozen framework.
 

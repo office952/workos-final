@@ -37,7 +37,7 @@ Do not treat a cached SHA as current integration authority. This file must not b
 | CURSOR_PLUGIN_REGISTRY | `docs/CURSOR_PLUGINS.md` |
 | FIGMA_WORKFLOW | `docs/development/WORKOS_FIGMA_WORKFLOW.md` |
 | PRODUCT_TRUTH_AUTHORITIES | current ProductTemplates / FormSchemas / component contracts / `compileDefinition` plus `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` |
-| UI_UX_AUTHORITIES | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`; `docs/architecture/UI_UX_FOUNDATION_CANON.md`; `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` |
+| UI_UX_AUTHORITIES | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`; `docs/architecture/UI_UX_FOUNDATION_CANON.md`; current Configurator implementation on main plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` as documented guardrail |
 | NEW_SESSION_BOOTSTRAP | `docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md` |
 
 ## Checkpoint recorded at documentation continuity V1
@@ -58,7 +58,7 @@ FC2_AUTHORIZED                         = NO
 
 Read the living roadmap for the full accepted set. Do not duplicate volatile flags here. Relevant to the current product position:
 
-- Configurator UI/UX framework frozen V1
+- Configurator UI/UX framework frozen V1. Current Configurator UI/UX authority is the implemented application on main. Figma `219:3` is the accepted design baseline / reference, not a reason to revert later accepted refinements.
 - FORM_COMPLETENESS_AUDIT_V1 accepted
 - FC1 integrated on main via PR #26
 - LETTERS and ACM remain the two live ProductTemplates
@@ -77,10 +77,13 @@ Category D items from FORM_COMPLETENESS_AUDIT_V1 remain Owner-decision-required 
 ### Policies
 
 ```text
-REAL_CLOUD_POLICY              = NO_WRITE_WITHOUT_EXPLICIT_OWNER_GO
-PRODUCT_TRUTH_WRITE_POLICY     = NO_EXPANSION_WITHOUT_EXPLICIT_OWNER_GO
-FIGMA_WRITE_POLICY             = NO_WRITE_WITHOUT_EXPLICIT_OWNER_GO
-MERGE_POLICY                   = NO_MERGE_WITHOUT_EXPLICIT_OWNER_GO
+REAL_CLOUD_POLICY                        = NO_WRITE_WITHOUT_EXPLICIT_OWNER_GO
+PRODUCT_TRUTH_WRITE_POLICY               = NO_EXPANSION_WITHOUT_EXPLICIT_OWNER_GO
+FIGMA_WRITE_POLICY                       = NO_WRITE_WITHOUT_EXPLICIT_OWNER_GO
+MERGE_POLICY                             = NO_MERGE_WITHOUT_EXPLICIT_OWNER_GO
+CONFIGURATOR_CURRENT_UI_UX_AUTHORITY     = CURRENT_IMPLEMENTED_APPLICATION_ON_MAIN
+FIGMA_219_3_ROLE                         = ACCEPTED_BASELINE_REFERENCE
+FORCE_SYNC_APP_TO_FIGMA                  = NO
 ```
 
 ## Protocols

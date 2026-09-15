@@ -4,17 +4,23 @@ Frozen presentation architecture for `/products/:code` while editing.
 This file freezes **UI/UX patterns only**. It does not freeze field inventory or Product Truth.
 
 ```text
-AUTHORITY                      = CONFIGURATOR_V1_UI_FRAMEWORK
-FIGMA_FILE                     = hu6gJrm0KM2NPkaIpQ8Kfo
-FIGMA_SECTION                  = 219:3
-OWNER_VISUAL_ACCEPTED_LOCAL    = YES
-UI_UX_FRAMEWORK_FROZEN_V1      = YES
-UI_UX_FRAMEWORK_FREEZE_READY   = YES
-FORM_COMPLETENESS_PASS         = NEXT / NOT PART OF THIS FRAMEWORK
-FORM_COMPLETENESS_DEFERRED     = YES
-NEXT_PROGRAM                   = CONFIGURATOR_FORM_COMPLETENESS
-PRODUCT_TRUTH_OWNER            = ProductTemplates / FormSchemas / compileDefinition
+AUTHORITY                              = CONFIGURATOR_V1_UI_FRAMEWORK
+FIGMA_FILE                             = hu6gJrm0KM2NPkaIpQ8Kfo
+FIGMA_SECTION                          = 219:3
+CURRENT_IMPLEMENTED_UI_AUTHORITY       = APPLICATION_ON_MAIN
+FIGMA_ROLE                             = ACCEPTED_BASELINE_REFERENCE
+POST_FIGMA_IMPLEMENTATION_REFINEMENTS  = OWNER_ACCEPTED
+FORCE_SYNC_APP_TO_FIGMA                = NO
+OWNER_VISUAL_ACCEPTED_LOCAL            = YES
+UI_UX_FRAMEWORK_FROZEN_V1              = YES
+UI_UX_FRAMEWORK_FREEZE_READY           = YES
+FORM_COMPLETENESS_PASS                 = NEXT / NOT PART OF THIS FRAMEWORK
+FORM_COMPLETENESS_DEFERRED             = YES
+NEXT_PROGRAM                           = CONFIGURATOR_FORM_COMPLETENESS
+PRODUCT_TRUTH_OWNER                    = ProductTemplates / FormSchemas / compileDefinition
 ```
+
+`FIGMA_FILE` / `FIGMA_SECTION` record the accepted design baseline from which this framework was derived. They do not mean that pixel or grammar differences must be reverted to that Figma frame. Present Configurator UI/UX authority is the current implemented application on `origin/main`. This file is the documented guardrail of that accepted implementation. When the accepted implementation and section `219:3` differ, the implementation wins unless the Owner explicitly reopens the design direction.
 
 During FORM COMPLETENESS, do not redesign the floorplan without an explicit Owner reopen.
 

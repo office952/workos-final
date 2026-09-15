@@ -11,6 +11,7 @@ const REQUIRED_DOCS = [
   "docs/continuity/WORKOS_SESSION_CURRENT.md",
   "docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md",
   "docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md",
+  "docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md",
   "docs/CURSOR_PLUGINS.md",
   "docs/README.md",
   "AGENTS.md",
@@ -193,6 +194,82 @@ export function verifyTerminologyConcepts(terminologyText, errors) {
   }
 }
 
+const FORBIDDEN_CONFIGURATOR_FIGMA_SOLE_AUTHORITY = [
+  /Configurator V1 — VISUAL_AUTHORITY/,
+  /Only section [`']?219:3[`']? is Configurator implementation visual authority/i,
+  /Only section [`']?219:3[`']? is implementation authority/i,
+  /STATIC_VISUAL_AUTHORITY\s*=\s*FIGMA_219_3/,
+];
+
+export function verifyConfiguratorUiAuthority(
+  frameworkText,
+  figmaWorkflowText,
+  authorityMapText,
+  sessionText,
+  errors,
+) {
+  if (!/CURRENT_IMPLEMENTED_UI_AUTHORITY\s*=\s*APPLICATION_ON_MAIN/.test(frameworkText)) {
+    fail(
+      errors,
+      "CONFIGURATOR_V1_UI_FRAMEWORK.md must record CURRENT_IMPLEMENTED_UI_AUTHORITY = APPLICATION_ON_MAIN",
+    );
+  }
+  if (!/FIGMA_ROLE\s*=\s*ACCEPTED_BASELINE_REFERENCE/.test(frameworkText)) {
+    fail(errors, "CONFIGURATOR_V1_UI_FRAMEWORK.md must record FIGMA_ROLE = ACCEPTED_BASELINE_REFERENCE");
+  }
+  if (!/FORCE_SYNC_APP_TO_FIGMA\s*=\s*NO/.test(frameworkText)) {
+    fail(errors, "CONFIGURATOR_V1_UI_FRAMEWORK.md must record FORCE_SYNC_APP_TO_FIGMA = NO");
+  }
+
+  if (!/CLASS\s*=\s*ACCEPTED_BASELINE_REFERENCE/.test(figmaWorkflowText)) {
+    fail(
+      errors,
+      "WORKOS_FIGMA_WORKFLOW.md must classify Configurator 219:3 as ACCEPTED_BASELINE_REFERENCE",
+    );
+  }
+  if (!/CURRENT_IMPLEMENTED_UI_AUTHORITY\s*=\s*APPLICATION_ON_MAIN/.test(figmaWorkflowText)) {
+    fail(
+      errors,
+      "WORKOS_FIGMA_WORKFLOW.md must record CURRENT_IMPLEMENTED_UI_AUTHORITY = APPLICATION_ON_MAIN",
+    );
+  }
+  if (!/FORCE_SYNC_APP_TO_FIGMA\s*=\s*NO/.test(figmaWorkflowText)) {
+    fail(errors, "WORKOS_FIGMA_WORKFLOW.md must record FORCE_SYNC_APP_TO_FIGMA = NO");
+  }
+
+  for (const pattern of FORBIDDEN_CONFIGURATOR_FIGMA_SOLE_AUTHORITY) {
+    if (pattern.test(figmaWorkflowText) || pattern.test(frameworkText)) {
+      fail(
+        errors,
+        "living Configurator docs must not treat Figma 219:3 as sole/current implementation visual authority",
+      );
+    }
+  }
+
+  if (!/apps\/web/.test(authorityMapText) || !/CONFIGURATOR_V1_UI_FRAMEWORK/.test(authorityMapText)) {
+    fail(
+      errors,
+      "WORKOS_AUTHORITY_MAP.md must route current Configurator presentation to apps/web plus the frozen framework",
+    );
+  }
+  if (!/ACCEPTED_BASELINE_REFERENCE/.test(authorityMapText)) {
+    fail(errors, "WORKOS_AUTHORITY_MAP.md must classify Configurator 219:3 as ACCEPTED_BASELINE_REFERENCE");
+  }
+
+  if (!/CONFIGURATOR_CURRENT_UI_UX_AUTHORITY\s*=\s*CURRENT_IMPLEMENTED_APPLICATION_ON_MAIN/.test(sessionText)) {
+    fail(
+      errors,
+      "WORKOS_SESSION_CURRENT.md must record CONFIGURATOR_CURRENT_UI_UX_AUTHORITY = CURRENT_IMPLEMENTED_APPLICATION_ON_MAIN",
+    );
+  }
+  if (!/FIGMA_219_3_ROLE\s*=\s*ACCEPTED_BASELINE_REFERENCE/.test(sessionText)) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must record FIGMA_219_3_ROLE = ACCEPTED_BASELINE_REFERENCE");
+  }
+  if (!/FORCE_SYNC_APP_TO_FIGMA\s*=\s*NO/.test(sessionText)) {
+    fail(errors, "WORKOS_SESSION_CURRENT.md must record FORCE_SYNC_APP_TO_FIGMA = NO");
+  }
+}
+
 export function verifyOwnerUpdateRule(agentsText, cursorWorkflowText, errors) {
   if (!agentsText.includes("OWNER_UPDATE_LINKS")) {
     fail(errors, "AGENTS.md must require OWNER_UPDATE_LINKS");
@@ -216,6 +293,8 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   const terminology = readRepoFile(repoRoot, "docs/governance/WORKOS_ROMANIAN_TERMINOLOGY_CANON.md");
   const agents = readRepoFile(repoRoot, "AGENTS.md");
   const cursorWorkflow = readRepoFile(repoRoot, "docs/development/WORKOS_CURSOR_WORKFLOW.md");
+  const figmaWorkflow = readRepoFile(repoRoot, "docs/development/WORKOS_FIGMA_WORKFLOW.md");
+  const framework = readRepoFile(repoRoot, "docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md");
 
   verifyReadmeIndex(readme, errors);
   verifyDocumentRoles(repoRoot, errors);
@@ -224,6 +303,7 @@ export function verifyWorkosDocsContinuity(repoRoot = repoRootFrom()) {
   verifyRoadmapFc1(roadmap, errors);
   verifyTerminologyConcepts(terminology, errors);
   verifyOwnerUpdateRule(agents, cursorWorkflow, errors);
+  verifyConfiguratorUiAuthority(framework, figmaWorkflow, authorityMap, session, errors);
 
   const guarded = [
     ...CLASSIFIED_DOCS,

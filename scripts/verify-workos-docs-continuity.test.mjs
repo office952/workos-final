@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   repoRootFrom,
+  verifyConfiguratorUiAuthority,
   verifyRoadmapFc1,
   verifySessionCurrent,
   verifyTerminologyConcepts,
@@ -60,6 +61,56 @@ describe("verify-workos-docs-continuity", () => {
       errors,
     );
     assert.ok(errors.some((item) => item.includes("local-in-review")));
+  });
+
+  it("rejects treating Figma 219:3 as current Configurator implementation authority", () => {
+    const errors = [];
+    verifyConfiguratorUiAuthority(
+      [
+        "CURRENT_IMPLEMENTED_UI_AUTHORITY = APPLICATION_ON_MAIN",
+        "FIGMA_ROLE = ACCEPTED_BASELINE_REFERENCE",
+        "FORCE_SYNC_APP_TO_FIGMA = NO",
+      ].join("\n"),
+      [
+        "### Configurator V1 — VISUAL_AUTHORITY",
+        "CLASS = ACCEPTED_BASELINE_REFERENCE",
+        "CURRENT_IMPLEMENTED_UI_AUTHORITY = APPLICATION_ON_MAIN",
+        "FORCE_SYNC_APP_TO_FIGMA = NO",
+        "Only section `219:3` is Configurator implementation visual authority.",
+      ].join("\n"),
+      "apps/web CONFIGURATOR_V1_UI_FRAMEWORK ACCEPTED_BASELINE_REFERENCE",
+      [
+        "CONFIGURATOR_CURRENT_UI_UX_AUTHORITY = CURRENT_IMPLEMENTED_APPLICATION_ON_MAIN",
+        "FIGMA_219_3_ROLE = ACCEPTED_BASELINE_REFERENCE",
+        "FORCE_SYNC_APP_TO_FIGMA = NO",
+      ].join("\n"),
+      errors,
+    );
+    assert.ok(
+      errors.some((item) => item.includes("must not treat Figma 219:3 as sole/current")),
+    );
+  });
+
+  it("rejects a framework that still treats Figma as the implemented UI owner", () => {
+    const errors = [];
+    verifyConfiguratorUiAuthority(
+      "AUTHORITY = CONFIGURATOR_V1_UI_FRAMEWORK\nFIGMA_SECTION = 219:3\n",
+      [
+        "CLASS = ACCEPTED_BASELINE_REFERENCE",
+        "CURRENT_IMPLEMENTED_UI_AUTHORITY = APPLICATION_ON_MAIN",
+        "FORCE_SYNC_APP_TO_FIGMA = NO",
+      ].join("\n"),
+      "apps/web CONFIGURATOR_V1_UI_FRAMEWORK ACCEPTED_BASELINE_REFERENCE",
+      [
+        "CONFIGURATOR_CURRENT_UI_UX_AUTHORITY = CURRENT_IMPLEMENTED_APPLICATION_ON_MAIN",
+        "FIGMA_219_3_ROLE = ACCEPTED_BASELINE_REFERENCE",
+        "FORCE_SYNC_APP_TO_FIGMA = NO",
+      ].join("\n"),
+      errors,
+    );
+    assert.ok(errors.some((item) => item.includes("CURRENT_IMPLEMENTED_UI_AUTHORITY")));
+    assert.ok(errors.some((item) => item.includes("FIGMA_ROLE")));
+    assert.ok(errors.some((item) => item.includes("FORCE_SYNC_APP_TO_FIGMA")));
   });
 
   it("does not treat an empty temp tree as the repo", () => {

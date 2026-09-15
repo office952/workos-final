@@ -30,6 +30,7 @@ No product app, domain, API, DB, Cloud, or Figma mutation.
 - Configurator “module validate” copy classified as terminology debt
 - Figma MCP read-only verification of Configurator `219:3` and UI20 file page list
 - Plugin / MCP claims classified; unverified “already active” language is no longer treated as connection proof
+- Owner correction: Configurator present UI/UX authority is the implemented application on main. Figma `219:3` is `ACCEPTED_BASELINE_REFERENCE`, not current implementation visual authority. `FORCE_SYNC_APP_TO_FIGMA = NO`. Historical Configurator Figma worklogs were not mass-rewritten.
 
 ## Files
 
