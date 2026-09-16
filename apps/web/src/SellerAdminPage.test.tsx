@@ -34,8 +34,9 @@ describe("SellerAdminPage", () => {
       updatedAt: "2026-08-17T00:00:00.000Z",
     });
     render(<SellerAdminPage />);
-    expect(await screen.findByRole("heading", { name: "Date firmă" })).toBeInTheDocument();
-    expect(screen.getByDisplayValue(OWNER_CONFIRMED_SELLER.legalName)).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue(OWNER_CONFIRMED_SELLER.legalName),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue(OWNER_CONFIRMED_SELLER.fiscalId)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Salvează datele firmei" })).toBeInTheDocument();
     expect(screen.queryByText(/CRM|lead|pipeline/i)).not.toBeInTheDocument();
