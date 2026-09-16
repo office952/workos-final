@@ -1,6 +1,10 @@
 import {
   compileAcceptedProductEvaluation,
   compileDefinition,
+  confirmReviewedDraft,
+  projectConfigurationPreview,
+  projectCommercialExperience,
+  siteInstallationIsPrequoteReady,
   noteListActiveCostEvidence,
   noteRuntimeLabels,
   noteRuntimePresent,
@@ -131,6 +135,26 @@ function readInstallationProjection(
   });
 }
 
+function presentInstallationTransport(
+  installationProjection: ReturnType<typeof readInstallationProjection>,
+  installationScope: ReturnType<typeof scopeSiteInstallationOperatorView> | null,
+) {
+  if (!installationProjection) {
+    return {
+      selected: false,
+      prequoteReady: null as boolean | null,
+      incompleteReasons: [] as const,
+    };
+  }
+  return {
+    selected: true,
+    prequoteReady: installationScope
+      ? siteInstallationIsPrequoteReady(installationScope)
+      : false,
+    incompleteReasons: installationScope?.incompleteReasons ?? [],
+  };
+}
+
 function readCustomerId(body: unknown): string | null {
   if (typeof body !== "object" || body === null || !("customerId" in body)) {
     return null;
@@ -153,6 +177,20 @@ function readReviewedDefinition(body: unknown): {
   const payload = body as { definition?: ProductDefinition; reviewId?: string };
   return {
     definition: payload.definition ?? null,
+    reviewId: typeof payload.reviewId === "string" ? payload.reviewId : "",
+  };
+}
+
+function readReviewedDraft(body: unknown): {
+  values: DraftValues | null;
+  reviewId: string;
+} {
+  if (typeof body !== "object" || body === null) {
+    return { values: null, reviewId: "" };
+  }
+  const payload = body as { values?: unknown; reviewId?: string };
+  return {
+    values: "values" in payload ? asDraftValues(payload.values) : null,
     reviewId: typeof payload.reviewId === "string" ? payload.reviewId : "",
   };
 }
@@ -217,6 +255,33 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     return c.json({ definition, reviewId: definition.reviewId });
   });
 
+  app.post("/api/products/:productCode/preview", async (c) => {
+    const runtime = getProductSystem(c);
+    const productCode = c.req.param("productCode");
+    const presented = runtime.present();
+    const template = presented.template(productCode);
+    const formSchema = presented.formSchema(productCode);
+    if (!template || !formSchema) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const body = await c.req.json().catch(() => null);
+    const preview = projectConfigurationPreview(
+      template,
+      formSchema,
+      readDraft(productCode, body),
+    );
+    const installationProjection = readInstallationProjection(runtime, body);
+    const presentedInstallation = presentSiteInstallationScope(installationProjection);
+    const access = financialAccess(c, "commercial");
+    const installationScope = presentedInstallation
+      ? scopeSiteInstallationOperatorView(presentedInstallation, access)
+      : null;
+    return c.json({
+      ...preview,
+      installation: presentInstallationTransport(installationProjection, installationScope),
+    });
+  });
+
   app.post("/api/products/:productCode/confirm", async (c) => {
     const runtime = getProductSystem(c);
     const body = await c.req.json().catch(() => null);
@@ -231,6 +296,10 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     const access = financialAccess(c, "commercial");
     const commercialPrice = projectCommercialPrice(compiled.eic);
     const installationProjection = readInstallationProjection(runtime, body);
+    const presentedInstallation = presentSiteInstallationScope(installationProjection);
+    const installationScope = presentedInstallation
+      ? scopeSiteInstallationOperatorView(presentedInstallation, access)
+      : null;
     const jobCommercial =
       installationProjection &&
       installationProjection.eic.completeness !== "COMPLETE"
@@ -244,12 +313,14 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
       aggregate: compiled.aggregate,
       eic: scopeEic(compiled.eic, access),
       commercialPrice: scopeCommercialPrice(commercialPrice, access),
-      installationScope: (() => {
-        const presented = presentSiteInstallationScope(installationProjection);
-        return presented
-          ? scopeSiteInstallationOperatorView(presented, access)
-          : null;
-      })(),
+      commercialExperience: projectCommercialExperience({
+        commercialCompleteness: commercialPrice.completeness,
+        internalCostCompleteness: compiled.eic.completeness,
+      }),
+      installationScope,
+      installationPrequoteReady: installationScope
+        ? siteInstallationIsPrequoteReady(installationScope)
+        : null,
       jobCommercial: access === "workshop" ? null : jobCommercial,
       executionPlanPreview: scopeExecutionPlanPreview(
         projectExecutionPlanPreview(
@@ -413,23 +484,35 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
     }
     const stored = runtime.persistQuoteSnapshot(frozen.snapshot);
     if (!requestId) {
+      const access = financialAccess(c, "commercial");
       return c.json({
         created: stored.created,
-        quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, financialAccess(c, "commercial")),
+        quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, access),
+        commercialExperience: projectCommercialExperience({
+          commercialCompleteness: stored.snapshot.commercial.completeness,
+          quote: stored.snapshot,
+        }),
       });
     }
     const linked = runtime.linkRequestQuote(requestId, stored.snapshot.quoteSnapshotId);
+    const access = financialAccess(c, "commercial");
+    const quoteExperience = projectCommercialExperience({
+      commercialCompleteness: stored.snapshot.commercial.completeness,
+      quote: stored.snapshot,
+    });
     if (!linked.ok) {
       return c.json({
         created: stored.created,
-        quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, financialAccess(c, "commercial")),
+        quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, access),
+        commercialExperience: quoteExperience,
         requestLinkError: linked.error,
         reasons: ["Oferta a fost creată, dar nu s-a legat de cerere."],
       });
     }
     return c.json({
       created: stored.created,
-      quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, financialAccess(c, "commercial")),
+      quoteSnapshot: scopeQuoteSnapshot(stored.snapshot, access),
+      commercialExperience: quoteExperience,
       requestLink: linked.link,
     });
   });
@@ -785,6 +868,27 @@ export function registerProductRoutes(app: Hono<ApiEnv>): void {
   });
 }
 
+function confirmFailure(
+  confirmed: {
+    ok: false;
+    reason: "not_ready" | "review_mismatch" | "review_required";
+    definition: ProductDefinition | null;
+  },
+) {
+  if (confirmed.reason === "review_required") {
+    return {
+      ok: false as const,
+      status: 400 as const,
+      body: { error: "review_required" as const },
+    };
+  }
+  return {
+    ok: false as const,
+    status: (confirmed.reason === "review_mismatch" ? 409 : 422) as 409 | 422,
+    body: { error: confirmed.reason, definition: confirmed.definition },
+  };
+}
+
 function compileAcceptedProduct(
   runtime: ProductSystemRuntime,
   productCode: string,
@@ -798,22 +902,31 @@ function compileAcceptedProduct(
     return { ok: false as const, status: 404 as const, body: { error: "not_found" } };
   }
 
-  const { definition, reviewId } = readReviewedDefinition(body);
-  if (!definition || definition.templateCode !== productCode) {
-    return {
-      ok: false as const,
-      status: 400 as const,
-      body: { error: "review_required" },
-    };
-  }
+  const reviewed = readReviewedDefinition(body);
+  const draft = readReviewedDraft(body);
+  const confirmed = reviewed.definition
+    ? reviewed.definition.templateCode !== productCode
+      ? {
+          ok: false as const,
+          reason: "review_required" as const,
+          definition: reviewed.definition,
+        }
+      : confirmReviewedDefinition(reviewed.definition, reviewed.reviewId)
+    : draft.values && draft.reviewId
+      ? confirmReviewedDraft(
+          template,
+          formSchema,
+          { templateCode: productCode, values: draft.values },
+          draft.reviewId,
+        )
+      : {
+          ok: false as const,
+          reason: "review_required" as const,
+          definition: null,
+        };
 
-  const confirmed = confirmReviewedDefinition(definition, reviewId);
   if ("ok" in confirmed) {
-    return {
-      ok: false as const,
-      status: (confirmed.reason === "review_mismatch" ? 409 : 422) as 409 | 422,
-      body: { error: confirmed.reason, definition: confirmed.definition },
-    };
+    return confirmFailure(confirmed);
   }
 
   noteRuntimeLabels();

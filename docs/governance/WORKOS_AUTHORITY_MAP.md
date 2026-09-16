@@ -41,6 +41,7 @@ A cached SHA is evidence, not current integration authority.
 | Current integration / merged state | GitHub `origin/main` and merged PRs | worklogs after reconciliation | cached SHA in a doc, `IMPLEMENTED_LOCAL_IN_REVIEW` alone |
 | Product fields / options | Current ProductTemplates and FormSchemas in `packages/domain` | `docs/plans/WORKOS_CONFIGURATOR_FORM_COMPLETENESS_FC0_PLAN.md` | Figma, UI copy, session files |
 | Product readiness | `compileDefinition` | Configurator projection tests | UI progress copy, Figma completeness |
+| Isolated UI / UI20 HTTP transport | `docs/architecture/WORKOS_UI_TRANSPORT_CONTRACT_V1.md` | `/api/health` `apiContractId`, preview/confirm/quote tests | importing `@workos-final/domain` in a separate frontend; CORS/cookie invention |
 | Component configuration | `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` | component contracts in `packages/domain` | Figma roles, invented modules |
 | Technical settings | `docs/architecture/PRODUCT_SYSTEM_TECHNICAL_SETTINGS_CANON.md` | Product System settings in domain | Intake fields, docs literals |
 | Resources / internal cost | `docs/architecture/RESOURCES_AND_COST_CANON.md` | EIC domain + Resources UI projection | commercial price, Figma |

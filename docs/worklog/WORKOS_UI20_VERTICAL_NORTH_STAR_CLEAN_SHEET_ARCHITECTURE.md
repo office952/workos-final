@@ -377,29 +377,32 @@ Forbidden until cutover GO:
 
 ```text
 BUSINESS OWNER     = packages/domain + apps/api + SQLite
-TRANSPORT OWNER    = apps/web/src/*Api.ts + fetchAccess / session
+TRANSPORT OWNER    = HTTP transport contract in workos-final
 PROJECTION OWNER   = *View.ts / RW2 view models lifted into apps/web/src/
-PRESENTATION OWNER = apps/web/src/ui20/
+PRESENTATION OWNER = isolated UI20 repository, not a second domain
+ISOLATED_UI20_TRANSPORT = docs/architecture/WORKOS_UI_TRANSPORT_CONTRACT_V1.md
 ```
 
-Shared across living runtime and North Star:
+Current `apps/web` may still share in-process API clients and domain helpers.
+That is legacy current-runtime coupling. Isolated `office952/workos-ui20` must
+not import `@workos-final/domain` for compile, visibility, selection, commercial
+experience, installation readiness, or template business facts. It consumes
+`POST /api/products/:productCode/preview`, values + `crv1` confirm/quote, and
+server `commercialExperience` / installation projections.
 
-- API clients
-- session / auth / permissions
-- destination hrefs and visibility
-- request primary-action rules in `requestObjectView.ts`
-- schema visibility via domain `isFieldVisible`
-- product compile / confirm / commercial through `productApi.ts`
-- quote / order / execution law through existing clients
-- ThemeProvider (one `data-theme`)
+Shared across living runtime and an isolated presentation:
 
-Not shared:
+- same WorkOS API origin (preferred production topology is same-origin)
+- session / auth / permissions owned by workos-final
+- quote / order / execution law through existing HTTP routes
+- one Product Truth
 
-- JSX page trees
-- V3 CSS
-- OwnerCatalogView layout
-- hardcoded commercial numbers
-- a second Product Truth
+Not shared by isolated UI20:
+
+- `compileDefinition` / `isFieldVisible` / `selectedComponentIds` in the browser
+- `projectCommercialExperience` / `siteInstallationIsPrequoteReady` in the browser
+- `getProductTemplate` as a business authority
+- JSX page trees, V3 CSS, OwnerCatalogView layout, hardcoded commercial numbers, a second Product Truth
 
 ---
 

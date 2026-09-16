@@ -44,6 +44,19 @@ export {
   type CompileAggregateOptions,
 } from "./compiler.js";
 export {
+  CONFIGURATION_REVIEW_ID_PREFIX,
+  configurationReviewId,
+  configurationReviewIdFor,
+  confirmReviewedDraft,
+  projectConfigurationPreview,
+  usedTechnicalSettingsSnapshot,
+  visibleFormSchema,
+  type ConfigurationPreview,
+  type ConfigurationProductIdentity,
+  type ConfigurationSelectedComponent,
+  type TechnicalSettingSnapshot,
+} from "./configurationPreview.js";
+export {
   noteCompileEic,
   noteEvaluateProductComponents,
   noteListActiveCostEvidence,

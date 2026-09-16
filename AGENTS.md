@@ -73,7 +73,7 @@ Read live flags, next authorized slice, Cloud/pilot gates, and UI closure from t
 - Technical quantity, resource identity, internal cost evidence, EIC, and commercial price stay separate. Rates live only in Resources/Cost.
 - Adjustable technical values live in canonical Product System component settings. Documentation explains them. Calculation code consumes them. Intake does not administer them.
 - Each domain owns its settings and entities. Do not create a global Settings dump or a new V3 category to place a future system. See `docs/architecture/WORKOS_FINAL_SYSTEM_DOMAIN_AND_ADMINISTRATION_MAP.md`.
-- Confirm the exact reviewed definition. Do not recompile a later draft at confirm time.
+- Confirm the exact reviewed configuration. Never confirm a later or different draft. The UI transport V1 may recompile submitted reviewed values server-side only as an identity-verification step bound to the canonical review fingerprint and applicable technical-settings snapshot; any mismatch must fail closed.
 - Catalog organization (family / recursive category) is not product technical truth.
 - ProductTemplate is the configurable product. Do not invent a parallel Product entity without Owner GO.
 - SVG Analyzer is a separate application. Its output is evidence/proposal, not final truth, until an operator confirms it.

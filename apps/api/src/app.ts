@@ -31,10 +31,12 @@ import {
 import { registerSystemProjectionRoutes } from "./system.js";
 
 export const HEALTH_SERVICE_NAME = "workos-final-api" as const;
+export const API_CONTRACT_ID = "workos-ui-contract-v1" as const;
 
 export type HealthResponse = {
   status: "ok";
   service: typeof HEALTH_SERVICE_NAME;
+  apiContractId: typeof API_CONTRACT_ID;
 };
 
 const DEV_WEB_ORIGINS = [
@@ -88,6 +90,7 @@ export function createApp(options: CreateAppOptions = {}): Hono<ApiEnv> {
     const body: HealthResponse = {
       status: "ok",
       service: HEALTH_SERVICE_NAME,
+      apiContractId: API_CONTRACT_ID,
     };
     return c.json(body);
   });
