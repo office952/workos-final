@@ -29,6 +29,7 @@ A worklog saying `IMPLEMENTED_LOCAL_IN_REVIEW` does not override a live merged P
 A Figma frame does not override Product Truth.
 A Figma frame does not override later accepted Configurator implementation refinements.
 UI20 direction, an implemented shell, or a page existing in the app is not page-level Owner acceptance of that page.
+Owner-accepted UI Foundation V1 is documentation / Figma foundation direction. It is not runtime Owner acceptance and not a second UI canon.
 A session continuity snapshot does not override the roadmap.
 A cached SHA is evidence, not current integration authority.
 
@@ -48,6 +49,7 @@ A cached SHA is evidence, not current integration authority.
 | People / operator identity | `docs/architecture/PEOPLE_OPERATIONAL_IDENTITY_CANON.md` | People admin / Atelier projections | account email in Figma |
 | Machines / workcenters | `docs/architecture/WORKCENTERS_AND_MACHINES_CANON.md` | `/admin/workcenters` projection | invented capacity UI |
 | UI/UX direction | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` | Foundation canon, UI20 worklogs | plugin inspiration, 21st.dev, treating direction as page-level Owner acceptance |
+| Owner-accepted UI Foundation V1 documentation / Figma direction | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` | `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md`; WorkOs-F frames `12:6` / `12:225` / `12:579` / `15:4` | treating Foundation V1 as runtime accept; reconstructing missing `1:19519`; treating Task 2 `8:11` as current |
 | Current page-level UI/UX Owner acceptance | Configurator only: implemented application on main plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` | `docs/continuity/WORKOS_SESSION_CURRENT.md` (`OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY`) | UI20 Figma, implemented shell, page existence, historical V3/UI20 accepts as current all-pages accept |
 | Implemented presentation law | `docs/architecture/UI_UX_FOUNDATION_CANON.md` | current `apps/web` shell | historical V3 Figma as live shell |
 | Configurator current implemented presentation | current `apps/web` Configurator on `origin/main`, plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` as documented guardrail | Configurator worklogs | Figma `219:3` as a reason to overwrite later accepted refinements; ProductTemplate; Figma Make business values |

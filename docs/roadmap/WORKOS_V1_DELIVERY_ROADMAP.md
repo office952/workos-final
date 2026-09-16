@@ -52,6 +52,8 @@ Related living authority:
 - `docs/plans/WORKOS_ARCHITECTURE_C_UI_IMPLEMENTATION_WAVE_1_PLAN.md` — Architecture C UI Wave 1 plan
 - `docs/worklog/WORKOS_ARCHITECTURE_C_FINAL_SIMULATION_ACCEPTED_WAVE_1_PLAN_V1.md` — Owner accept of the Architecture C simulation with advisories
 - `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md` — Architecture C UI Wave 1 local implementation record
+- `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md` — Owner accept of UI Foundation V1 (documentation / Figma; not runtime)
+- `docs/plans/2026-09-16-apply-ui-foundation-v1-led-calculation-surface.md` — next UI slice handoff; not authorized by the Foundation V1 accept GO
 
 ## Principles
 
@@ -66,7 +68,19 @@ Related living authority:
 
 Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN`. `LAST_RECONCILED_MAIN_BASE` is evidence from the last documentation reconciliation, not current integration authority. Harness V2 is engineering enablement only. It is not Product Truth and not a second roadmap. Historical UI20 milestone blocks below remain historical. At this checkpoint, page-level Owner acceptance of current UI/UX covers Configurator only. Historical `OWNER_ACCEPTED` flags below are not a current all-pages visual accept. Other pages are not rejected.
 
+Owner-accepted UI Foundation V1 (2026-09-16) is documentation / Figma direction only. It does not mark product implementation complete and does not Owner-accept runtime presentation from the Figma decision. The next UI implementation slice is apply that accepted foundation to the existing single-formula LED calculation surface. That slice is prepared, not authorized, by this record. Do not start Formula 2 from this accept.
+
 ```text
+WORKOS_UI_FOUNDATION_V1              = OWNER_ACCEPTED
+UI_FOUNDATION_V1_DIRECTION_ACCEPTED  = YES
+UI_FOUNDATION_V1_DOCUMENTATION_READY = YES
+UI_FOUNDATION_V1_FIGMA_READY         = YES
+UI_FOUNDATION_V1_OWNER_ACCEPTED      = YES
+UI_FOUNDATION_V1_RUNTIME_IMPLEMENTED = NO
+UI_FOUNDATION_V1_PRODUCT_RUNTIME_OWNER_ACCEPTED = NO
+NEXT_UI_IMPLEMENTATION_SLICE         = APPLY_ACCEPTED_UI_FOUNDATION_TO_EXISTING_LED_CALCULATION_SURFACE
+NEXT_UI_IMPLEMENTATION_SLICE_AUTHORIZED = NO
+FORMULA_2_STARTED                    = NO
 LIVE_MAIN_AUTHORITY                  = GITHUB_ORIGIN_MAIN
 LAST_RECONCILED_MAIN_BASE            = debf5182a657e2794b873b74707d842c816d4f08
 PR24_CONFIGURATOR_UI_FRAMEWORK       = INTEGRATED_ON_MAIN

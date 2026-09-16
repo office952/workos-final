@@ -88,6 +88,18 @@ NEXT_PROGRAM_PRIORITY              = WORKOS_UI_UX_2_0_E2E
 CATALOG_LABEL                     = ACCEPTED
 THEME_TOKENS_IMPLEMENTED          = WAVE_1_FOUNDATION
 THEME_TOKEN_IMPLEMENTATION        = WAVE_1_FOUNDATION_ONLY
+WORKOS_UI_FOUNDATION_V1              = OWNER_ACCEPTED
+UI_FOUNDATION_V1_DIRECTION_ACCEPTED  = YES
+UI_FOUNDATION_V1_DOCUMENTATION_READY = YES
+UI_FOUNDATION_V1_FIGMA_READY         = YES
+UI_FOUNDATION_V1_OWNER_ACCEPTED      = YES
+UI_FOUNDATION_V1_RUNTIME_IMPLEMENTED = NO
+UI_FOUNDATION_V1_PRODUCT_RUNTIME_OWNER_ACCEPTED = NO
+UI_FOUNDATION_V1_FIGMA_FILE          = WorkOs-F
+UI_FOUNDATION_V1_FIGMA_FILE_KEY      = M3Klzg7sulrtLSyxJBf3Vd
+PRODUCT_CHARACTER                    = CALM INSTRUMENT
+NEXT_UI_IMPLEMENTATION_SLICE         = APPLY_ACCEPTED_UI_FOUNDATION_TO_EXISTING_LED_CALCULATION_SURFACE
+NEXT_UI_IMPLEMENTATION_SLICE_AUTHORIZED = NO
 ```
 
 Figma access, information architecture, visual direction A, and the first high-fidelity lot are accepted. Implementation-readiness contracts are Owner-accepted and the readiness gate is closed. `IMPLEMENTATION_READY = YES` is not a scoped UI implementation GO. This document is not the Owner GO for React/CSS, Mobbin, a production component library, or scoped UI implementation.
@@ -100,6 +112,8 @@ Runtime and domain contracts win if this document disagrees with implemented bus
 **UI20 Final IA (Owner-accepted 2026-09-06):** living implementation direction is `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell. `GLOBAL_L1_SIDEBAR = NO`. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`.
 
 **UI20 Final Visual (Owner-accepted 2026-09-06 via Owner-delegate ChatGPT):** `FINAL_VISUAL_DIRECTION_UI20 = OWNER_ACCEPTED`. Living direction is `G_LIVING_FABRICATION_INSTRUMENT` (`CALM_PRECISION + SELECTIVE_FABRICATION_ENERGY`). `ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`. Historical `FINAL_VISUAL_DIRECTION = A_INDUSTRIAL_CLARITY` remains closed HF-lot truth only. Acceptance record: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`.
+
+**UI Foundation V1 (Owner-accepted 2026-09-16):** `WORKOS_UI_FOUNDATION_V1 = OWNER_ACCEPTED`. Current documentation / Figma authority for the corrected foundation is WorkOs-F (`M3Klzg7sulrtLSyxJBf3Vd`). Accepted frames: `12:6`, `12:225`, `12:579`, `15:4`. Product character: CALM INSTRUMENT. This accept does not Owner-accept runtime presentation and does not mark product implementation complete. Acceptance record: `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md`.
 
 Related living authority:
 
@@ -114,8 +128,83 @@ Related living authority:
 - `docs/plans/WORKOS_ARCHITECTURE_C_UI_IMPLEMENTATION_WAVE_1_PLAN.md` — Architecture C `/admin/resources` Wave 1 plan; implementation is local in review
 - `docs/worklog/WORKOS_ARCHITECTURE_C_UI_WAVE_1_IMPLEMENTED_LOCAL_IN_REVIEW_V1.md` — Wave 1 implementation record
 - `docs/worklog/WORKOS_ARCHITECTURE_C_FINAL_SIMULATION_ACCEPTED_WAVE_1_PLAN_V1.md` — Owner accept of the Architecture C simulation
+- `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md` — Owner accept of UI Foundation V1 (documentation / Figma; not runtime)
+- `docs/plans/2026-09-16-apply-ui-foundation-v1-led-calculation-surface.md` — next UI slice handoff; not authorized by the Foundation V1 accept GO
 
 Do not create a second UI/UX direction canon.
+
+## OWNER DECISION — UI FOUNDATION V1 (2026-09-16)
+
+Recorded 2026-09-16. Direct Owner accept of the corrected UI Foundation V1. This is current documentation / Figma foundation authority. It does not replace this file with a second master UI canon. It does not Owner-accept current runtime presentation.
+
+```text
+OWNER_DECISION                         = UI_FOUNDATION_V1_APPROVED
+WORKOS_UI_FOUNDATION_V1                = OWNER_ACCEPTED
+DIRECTION_ACCEPTED                     = YES
+DOCUMENTATION_READY                    = YES
+FIGMA_READY                            = YES
+OWNER_ACCEPTED                         = YES
+PRODUCT_RUNTIME_OWNER_ACCEPTED         = NO
+UI_FOUNDATION_V1_RUNTIME_IMPLEMENTED   = NO
+PRODUCT_IMPLEMENTATION_COMPLETE        = NO
+FIGMA_FILE                             = WorkOs-F
+FIGMA_FILE_KEY                         = M3Klzg7sulrtLSyxJBf3Vd
+ACCEPTED_FRAMES                        = 12:6 | 12:225 | 12:579 | 15:4
+PRODUCT_CONFIG_PRIMARY_SOURCE          = 1:8520
+COLOR_PRIMARY_SOURCE                   = 1:17238
+BRAND_PRIMARY_SOURCE                   = 1:17039
+COMPONENT_SYSTEM_1_19519               = MISSING / NOT_RECREATED
+TASK2_8_11                             = HISTORICAL_REFERENCE_ONLY
+PRODUCT_CHARACTER                      = CALM INSTRUMENT
+AZURE                                  = ACTION / INTERACTION
+NEW_DESIGN_SYSTEM                      = NO
+NEW_COMPONENT_LIBRARY                  = NO
+NEXT_UI_IMPLEMENTATION_SLICE           = APPLY_ACCEPTED_UI_FOUNDATION_TO_EXISTING_LED_CALCULATION_SURFACE
+NEXT_UI_IMPLEMENTATION_SLICE_AUTHORIZED = NO
+FORMULA_2                              = NO
+```
+
+Accepted frames:
+
+- Sections 00–01 — `12:6`
+- Sections 02–05 — `12:225`
+- Sections 06–10 — `12:579`
+- Sections 11–15 — `15:4`
+
+Accepted foundation law, without semantic expansion:
+
+- WorkOS should feel calm under operational pressure; structured without bureaucracy; industrial and precise rather than decorative; trustworthy about state and consequence; direct enough for workshop use; clear enough for Owner administration.
+- Do not turn WorkOS into a generic SaaS dashboard.
+- Preserve: AZURE = ACTION / INTERACTION. Status color is semantic. Do not use action blue as generic decoration/status.
+- One stable global shell. Small coherent floorplan vocabulary. Consistency means predictable rules, not identical pages.
+- Cards only where grouping/selection semantics justify them.
+- Configuration and operational state must remain visually understandable without technical explanation.
+
+Non-canonical even when visible in documentation or Figma:
+
+- arbitrary example copy
+- measured typography values such as 15.2px
+- illustrative error strings
+- reference-only calculation card examples
+- dark mode
+- animation/motion
+- missing historical components
+- speculative future screens
+
+Raw measurements may remain evidence/reference. Do not rationalize them into new tokens unless a later implementation proves the need.
+
+Node `1:19519` is confirmed missing. Do not recreate it from memory, fabricate its components, reconstruct old names, claim a published Figma library exists, or introduce a replacement design system to close the gap. Current runtime/source UI and accepted Foundation V1 are the authorities available today. When implementation reaches a reusable component need: existing real component → semantic fit check → reuse or minimal shared extraction. Not: missing historical library → imagined reconstruction.
+
+Vocabulary: one business concept → one canonical name → one owner → one source of truth. New term only if a semantic gap is proven. Synonym maps to canonical. New abstraction only for a current real problem. Future possibility must not force implementation today. V1 completion > architectural perfection.
+
+Smart modularity: do not turn HUB MEDIA-specific visual/detail choices into universal product assumptions. Foundation must remain usable for an advanced production company, a smaller company using a simple/manual workflow, an organization with optional modules disabled, an organization enabling modules later, and historical records surviving future configuration changes.
+
+```text
+CUSTOMER_OPERABLE_WITHOUT_CURSOR = REQUIRED
+CLIENT_SPECIFIC_CODE_FORK        = FORBIDDEN
+```
+
+The next product implementation slice after this documentation accept is apply accepted UI Foundation V1 to the existing single-formula LED calculation surface. That slice is prepared, not authorized, by this record. Do not start Formula 2 from this accept. The Configurator framework remains frozen. The LED slice is a presentation application to the existing Calcul LED / Ofertă disclosure, not a Configurator floorplan reopen. `OWNER_REOPEN_UI_FRAMEWORK` is not granted by this accept.
 
 ## Architecture C track (next UI lot)
 

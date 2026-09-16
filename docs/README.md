@@ -7,7 +7,7 @@ If a current canonical document disagrees with runtime, the runtime / live GitHu
 ## Current canonical
 
 - `docs/roadmap/WORKOS_V1_DELIVERY_ROADMAP.md` — active V1 delivery direction
-- `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction
+- `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` — UI/UX direction, including Owner-accepted UI Foundation V1 documentation / Figma authority
 - `docs/architecture/UI_UX_FOUNDATION_CANON.md` — current implemented presentation law
 - `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` — documented guardrail of the accepted Configurator implementation; current UI/UX authority is the application on main. At this checkpoint only Configurator UI/UX is Owner-approved; other pages are not rejected and are not Owner-accepted by existence or UI20 direction.
 - `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` — role / type / configuration
@@ -56,6 +56,8 @@ Current product-program evidence:
 - `docs/plans/WORKOS_CONFIGURATOR_FORM_COMPLETENESS_FC0_PLAN.md`
 - `docs/worklog/WORKOS_CONFIGURATOR_FORM_COMPLETENESS_FC1_IMPLEMENTED_LOCAL_IN_REVIEW.md`
 - `docs/worklog/WORKOS_DOCUMENTATION_AND_SESSION_CONTINUITY_V1_IMPLEMENTED_LOCAL_IN_REVIEW.md`
+- `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md`
+- `docs/plans/2026-09-16-apply-ui-foundation-v1-led-calculation-surface.md`
 
 Historical construction map: `docs/roadmap/WORKOS_FINAL_ROADMAP_V1.md`.
 

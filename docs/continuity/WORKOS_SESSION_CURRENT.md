@@ -39,6 +39,7 @@ Do not treat a cached SHA as current integration authority. This file must not b
 | FIGMA_WORKFLOW | `docs/development/WORKOS_FIGMA_WORKFLOW.md` |
 | PRODUCT_TRUTH_AUTHORITIES | current ProductTemplates / FormSchemas / component contracts / `compileDefinition` plus `docs/architecture/PRODUCT_SYSTEM_COMPONENT_CONFIGURATION_CANON.md` |
 | UI_UX_AUTHORITIES | `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`; `docs/architecture/UI_UX_FOUNDATION_CANON.md`; current Configurator implementation on main plus `docs/architecture/CONFIGURATOR_V1_UI_FRAMEWORK.md` as documented guardrail |
+| UI_FOUNDATION_V1_ACCEPTANCE | `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md` |
 | NEW_SESSION_BOOTSTRAP | `docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md` |
 
 ## Checkpoint recorded at documentation continuity V1
@@ -65,6 +66,7 @@ Read the living roadmap for the full accepted set. Do not duplicate volatile fla
 - FC1 integrated on main via PR #26
 - LETTERS and ACM remain the two live ProductTemplates
 - UI20 Candidate A quiet top shell is the current implemented presentation and is reference, not the required visual migration base. UI20 direction remains valid. It does not Owner-accept other pages. Other pages are not rejected.
+- UI Foundation V1 is Owner-accepted (2026-09-16) as documentation / Figma direction. Living record: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` plus `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md`. This does not Owner-accept runtime presentation.
 
 ### Open Owner decisions
 

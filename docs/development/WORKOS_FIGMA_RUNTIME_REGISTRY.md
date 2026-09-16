@@ -159,4 +159,26 @@ The next full Configurator registry population should happen after the current F
 
 ## Registry entries
 
-_No exact `CURRENT_VALID_MIRROR` rows are added by this policy-only change. Populate rows only from live Figma verification + exact runtime evidence._
+_No exact `CURRENT_VALID_MIRROR` rows are added by this documentation accept. Populate runtime-mirror rows only from live Figma verification + exact runtime evidence._
+
+### UI Foundation V1 — OWNER_ACCEPTED_DESIGN documentation authority
+
+These frames are Owner-accepted Foundation V1 documentation / Figma direction. They are not `CURRENT_VALID_MIRROR` and do not Owner-accept runtime. They do not reopen Configurator. Configurator remains `PROTECTED_EXISTING`. `FRAMEWORK_CLASS = OPEN_DESIGN` here means the foundation frames are not a runtime surface, not a license to rewrite accepted pages.
+
+| SURFACE | VARIANT | ROUTE | STATE | VIEWPORT | THEME | FIGMA_FILE_KEY | FIGMA_NODE_ID | FIGMA_FRAME_NAME | STATUS | OWNER_STATUS | FRAMEWORK_CLASS | NOTES |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| UI Foundation V1 | WorkOS | n/a | Sections 00–01 | n/a | n/a | M3Klzg7sulrtLSyxJBf3Vd | 12:6 | Sections 00–01 | OWNER_ACCEPTED_DESIGN | OWNER_ACCEPTED | OPEN_DESIGN | Documentation authority only. Not runtime. |
+| UI Foundation V1 | WorkOS | n/a | Sections 02–05 | n/a | n/a | M3Klzg7sulrtLSyxJBf3Vd | 12:225 | Sections 02–05 | OWNER_ACCEPTED_DESIGN | OWNER_ACCEPTED | OPEN_DESIGN | Documentation authority only. Not runtime. |
+| UI Foundation V1 | WorkOS | n/a | Sections 06–10 | n/a | n/a | M3Klzg7sulrtLSyxJBf3Vd | 12:579 | Sections 06–10 | OWNER_ACCEPTED_DESIGN | OWNER_ACCEPTED | OPEN_DESIGN | Documentation authority only. Not runtime. |
+| UI Foundation V1 | WorkOS | n/a | Sections 11–15 | n/a | n/a | M3Klzg7sulrtLSyxJBf3Vd | 15:4 | Sections 11–15 | OWNER_ACCEPTED_DESIGN | OWNER_ACCEPTED | OPEN_DESIGN | Documentation authority only. Not runtime. |
+
+Primary source references retained by the accepted foundation:
+
+- PRODUCT_CONFIG_PRIMARY_SOURCE = `1:8520`
+- COLOR_PRIMARY_SOURCE = `1:17238`
+- BRAND_PRIMARY_SOURCE = `1:17039`
+
+Known missing / non-authoritative:
+
+- COMPONENT_SYSTEM_1_19519 = MISSING / NOT_RECREATED
+- TASK2_8_11 = HISTORICAL_REFERENCE_ONLY

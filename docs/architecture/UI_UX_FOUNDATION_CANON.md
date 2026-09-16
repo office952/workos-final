@@ -48,13 +48,18 @@ CERERI_RUNTIME                         = OWNER_ACCEPTED
 CERERI_INTEGRATED_ON_MAIN              = YES
 REQUESTS_INTEGRATED_ON_MAIN            = YES
 NEXT_PROGRAM_PRIORITY                  = WORKOS_UI_UX_2_0_E2E
+WORKOS_UI_FOUNDATION_V1                = OWNER_ACCEPTED
+UI_FOUNDATION_V1_RUNTIME_IMPLEMENTED   = NO
+UI_FOUNDATION_V1_PRODUCT_RUNTIME_OWNER_ACCEPTED = NO
 ```
 
 `HISTORICAL_SHELL_V3 = STABLE_SIDEBAR_V3` and the V3 navigation acceptance remain historical evidence. They do not describe the current runtime shell after UI20-RW1.
 
 This file describes **current implemented presentation only**. It does not claim that the UI20 vertical clean-sheet North Star is already the runtime. That next presentation program is isolated until one cutover GO. See `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` and `docs/worklog/WORKOS_UI20_VERTICAL_NORTH_STAR_CLEAN_SHEET_ARCHITECTURE.md`.
 
-Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. Final UI20 IA is Owner-accepted as `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell and `GLOBAL_L1_SIDEBAR = NO`. Final UI20 visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). IA acceptance: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`. Visual acceptance: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`. RW1/RW1A worklog: `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`.
+Living UI/UX evolution authority is `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md`. That file now also records Owner-accepted UI Foundation V1 (2026-09-16) as current documentation / Figma foundation authority. This file remains current implemented presentation only. Foundation V1 does not Owner-accept runtime presentation from the Figma decision. Acceptance record: `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md`.
+
+Final UI20 IA is Owner-accepted as `IA3_QUIET_DESTINATIONS_OBJECT_CONTINUITY` with Candidate A quiet top shell and `GLOBAL_L1_SIDEBAR = NO`. Final UI20 visual direction is Owner-accepted as `G_LIVING_FABRICATION_INSTRUMENT` (`ACCEPTANCE_AUTHORITY = OWNER_DELEGATE_CHATGPT`). IA acceptance: `docs/worklog/WORKOS_UI20_FINAL_IA_OWNER_ACCEPTANCE.md`. Visual acceptance: `docs/worklog/WORKOS_UI20_FINAL_VISUAL_OWNER_DELEGATE_ACCEPTANCE.md`. RW1/RW1A worklog: `docs/worklog/WORKOS_UI20_RW1_QUIET_TOP_SHELL.md`.
 
 Current global navigation is the UI20 Candidate A quiet top shell. There is no global L1 sidebar. The rendered normal L1 in the **current** runtime is:
 

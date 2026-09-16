@@ -234,6 +234,28 @@ LIVE_TOP_LEVEL_PAGE            = 547:11 00 — WORKOS ZERO-BASE CANONICAL HANDOF
 
 This is UI20 visual direction, not Configurator Product Truth, and not a second roadmap. It does not Owner-accept other WorkOS pages. Other pages are not rejected; they are not Owner-approved merely because they exist in the application, in Figma, or under UI20. At the current checkpoint, the only Owner-approved current UI/UX surface is the implemented Configurator.
 
+### WorkOs-F UI Foundation V1 — VISUAL_AUTHORITY for Foundation V1 documentation only
+
+Repository: `docs/architecture/WORKOS_UI_UX_DIRECTION_CANON.md` (`UI_FOUNDATION_V1_FIGMA_FILE_KEY`)
+
+```text
+FIGMA_FILE                         = M3Klzg7sulrtLSyxJBf3Vd
+FIGMA_NAME                         = WorkOs-F
+CLASS                              = VISUAL_AUTHORITY
+OWNS                               = UI_FOUNDATION_V1_DOCUMENTATION_DIRECTION
+PAGE_LEVEL_OWNER_ACCEPTANCE        = NOT_IMPLIED
+RUNTIME_OWNER_ACCEPTED             = NO
+ACCEPTED_FRAMES                    = 12:6 | 12:225 | 12:579 | 15:4
+PRODUCT_CONFIG_PRIMARY_SOURCE      = 1:8520
+COLOR_PRIMARY_SOURCE               = 1:17238
+BRAND_PRIMARY_SOURCE               = 1:17039
+COMPONENT_SYSTEM_1_19519           = MISSING / NOT_RECREATED
+TASK2_8_11                         = HISTORICAL_REFERENCE_ONLY
+URL                                = https://www.figma.com/design/M3Klzg7sulrtLSyxJBf3Vd
+```
+
+Owner-accepted Foundation V1 is current documentation / Figma foundation direction. It is not runtime Owner acceptance, not a published component library, and not a reason to recreate missing node `1:19519`.
+
 ### First HF / IA file — HISTORICAL
 
 ```text
