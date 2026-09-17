@@ -42,28 +42,34 @@ Do not treat a cached SHA as current integration authority. This file must not b
 | UI_FOUNDATION_V1_ACCEPTANCE | `docs/worklog/WORKOS_UI_FOUNDATION_V1_OWNER_ACCEPTANCE.md` |
 | NEW_SESSION_BOOTSTRAP | `docs/continuity/WORKOS_NEW_SESSION_BOOTSTRAP.md` |
 
-## Checkpoint recorded at documentation continuity V1
+## Checkpoint recorded after UI20 closure
 
-This block is a checkpoint copied from the living roadmap plus live GitHub evidence. Re-read those authorities before acting. Do not treat this file as the delivery sequence.
+This block is a checkpoint copied from the living roadmap plus live GitHub evidence on 2026-09-18. Re-read those authorities before acting. Do not treat this file as the delivery sequence. `POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1` is completed history, not the current product program.
 
 ```text
-LAST_RECONCILED_MAIN_BASE              = 1f409ab728668d2daace37273055177075fecd7c
+LAST_RECONCILED_MAIN_BASE              = f0a14328d3ec1aada2311f7741a7450d414460a6
+LAST_COMPLETED_EXTERNAL_PROGRAM        = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
 PR33                                   = INTEGRATED_ON_MAIN
 UI20_PRESENTATION_REPO                 = office952/workos-ui20
 UI20_OWNER_ACCEPTED                    = YES
 UI20_INTEGRATED_ON_UI20_MAIN           = YES
-UI20_INTEGRATED_HEAD                   = 9446b6d7b2b4e6b7c8ff829de97c1a583c712366
+UI20_INTEGRATED_HEAD                   = bce6ada83c9a0a427ac62cac8938e7f589dfd2e1
+POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1 = OWNER_ACCEPTED_AND_INTEGRATED
 UI20_PHASE_5_STARTED                   = NO
+UI20_PHASE_6_STARTED                   = NO
+UI20_DEPLOYED_INTO_WORKOS_FINAL        = NO
 UI20_CUTOVER                           = NO
-CURRENT_PRODUCT_PROGRAM                = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
-CURRENT_PRODUCT_SLICE                  = NONE_AUTHORIZED_AFTER_FC1
+CURRENT_PRODUCT_PROGRAM                = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
+NEXT_PRODUCT_PROGRAM                   = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
+CURRENT_PRODUCT_SLICE                  = NONE_AUTHORIZED
 NEXT_PRODUCT_PROGRAM_AUTHORIZED        = NO
-NEXT_PRODUCT_SLICE                     = NOT_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_GATE                      = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
+NEXT_PRODUCT_SLICE                     = NOT_AUTHORIZED
+NEXT_PRODUCT_GATE                      = OWNER_GO_REQUIRED
 FC2_AUTHORIZED                         = NO
-QUOTE_SNAPSHOT_CUSTOMER_REQUEST        = DETAIL_TRANSPORT_PROJECTION_ONLY
+QUOTE_SNAPSHOT_CUSTOMER_REQUEST        = DETAIL_TRANSPORT_PROJECTION_ONLY / CLOSED_IN_UI20_PRESENTATION
+REQUEST_ID_ADDED_TO_QUOTE_SNAPSHOT     = NO
 JOB_TO_ATELIER_JOB_CONTEXT             = NOT_A_GAP_CURRENT_CANON
 CONFIGURATOR_FREEZE_RUNTIME            = CLOSED_BY_ISOLATED_SYNTHETIC_PROOF
 ```
