@@ -117,8 +117,8 @@ UI20_DEPLOYED_INTO_WORKOS_FINAL      = NO
 CURRENT_PRODUCT_PROGRAM              = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
 NEXT_PRODUCT_PROGRAM                 = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
 NEXT_PRODUCT_PROGRAM_AUTHORIZED      = NO
-NEXT_PRODUCT_SLICE                   = NOT_AUTHORIZED
-NEXT_PRODUCT_GATE                    = OWNER_GO_REQUIRED
+NEXT_PRODUCT_SLICE                   = NOT_AUTHORIZED_AFTER_FC1
+NEXT_PRODUCT_GATE                    = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
 FORM_COMPLETENESS_AUDIT_V1           = ACCEPTED
 FORM_COMPLETENESS_FC1                = INTEGRATED_ON_MAIN
 FORM_COMPLETENESS                    = FC1_INTEGRATED_ON_MAIN
@@ -399,7 +399,7 @@ ORDER_FROM_QUOTE_V2_CURRENT_STATUS    = DOMAIN_COPY_EXISTS_LIVE_ACCEPTANCE_REFUS
 OWNER_PROVIDER_MODE_DECISION_REQUIRED = NO_FOR_SELECTED_PROGRAM
 ```
 
-SITE_INSTALLATION remains optional and default-unselected. Product-only freeze stays schema v1. Live `POST /api/products/:code/quote-snapshots` still refuses a Request with selected SITE_INSTALLATION (`service_quote_freeze_not_authorized`). Live v2 acceptance and PDF stay refused. Order v2 can copy a trusted frozen Quote v2 in domain tests, but live v2 acceptance remains refused. The HUB target flow is a product-only LETTERS none/none 60 mm workshop job. That path does not require live Quote v2. If Owner later selects montaj on the first real Cerere, a later `FIRST_REAL_LETTERS_LIVE_QUOTE_V2_ENABLEMENT_V1` plus provider-mode decision would become required. That is not the current next program.
+SITE_INSTALLATION remains optional and default-unselected. Product-only freeze stays schema v1. Live `POST /api/products/:code/quote-snapshots` still refuses a Request with selected SITE_INSTALLATION (`service_quote_freeze_not_authorized`). Live v2 acceptance and PDF stay refused. Order v2 can copy a trusted frozen Quote v2 in domain tests, but live v2 acceptance remains refused. The HUB target flow is a product-only LETTERS none/none 60 mm workshop job. That path does not require live Quote v2. If Owner later selects montaj on the first real Cerere, a later `QUOTE_OPERATIONAL_SERVICES_ENABLEMENT` plus provider-mode decision would become required. That is not the current next program.
 
 Selected program reason: Cloud business state is still empty (`CUSTOMERS = 0`, `REQUESTS = 0`, `QUOTES = 0`). The product spine already runs in isolated DEV. The unfinished highest-value step is Owner-gated real Client + real Cerere + real document preparation before any live quote. This record does not authorize that write.
 
@@ -422,6 +422,30 @@ NO_CLIENT_CODE_FORK                  = YES
 ```
 
 Disabled / Basic / Advanced installation modes do not apply to this data-preparation program. They remain install-capability law, not this next program.
+
+```text
+ANTI_FRAGMENTATION_RULE                          = ACTIVE
+ONE_USER_VISIBLE_WORKFLOW_PER_BUSINESS_CAPABILITY = YES
+EXTEND_CANONICAL_FLOW_FIRST                      = YES
+NO_PARALLEL_BUSINESS_FLOW_VERSIONS               = YES
+SCHEMA_VERSIONING_IS_INTERNAL_ONLY               = YES
+E2E_CLOSURE_BEFORE_HORIZONTAL_EXPANSION          = YES
+PROGRAM_NAME_V1_ROLE                             = DELIVERY_WORK_PACKAGE_VERSION_ONLY
+NEW_BUSINESS_FLOW_VERSION                        = NO
+CANONICAL_FLOW                                   = CLIENT → CERERE → CONFIGURATOR → OFERTA → ACCEPTARE → LUCRARE → PRODUCTIE → EXECUTIE → COMPLETE
+EXTENDS_EXISTING_CANONICAL_FLOW                  = YES
+E2E_FROM                                         = FIRST_REAL_LETTERS_JOB / BLOCKED_BEFORE_QUOTE
+E2E_TO                                           = REAL_DATA_READY_BEFORE_QUOTE
+PARALLEL_WORKFLOW_CREATED                        = NO
+NEW_SOURCE_OF_TRUTH_CREATED                      = NO
+SCHEMA_VERSION_VISIBLE_TO_OPERATOR               = NO
+QUOTE_OPERATIONAL_SERVICES_ENABLEMENT            = NOT_REQUIRED_FOR_SELECTED_PILOT
+OPTIONAL_CAPABILITY_DOES_NOT_REQUIRE_PARALLEL_FLOW = YES
+DISABLED_CAPABILITY_STAYS_SILENT                 = YES
+LATER_ENABLEMENT_EXTENDS_EXISTING_RECORD_FLOW    = YES
+```
+
+Methodology authority: `docs/development/WORKOS_CURSOR_WORKFLOW.md`. Session Current remains an index only.
 
 Living UI20 implementation sequence in this file is `VERTICAL_CLEAN_SHEET` and is now closed on UI20 `main`. Later duplicate flag blocks below that still name `POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1`, `UI20_H1_DESIGN_HYGIENE_EVIDENCE_CONSOLIDATION`, or other closed next-builds are historical snapshots. They are not the living next implementation path. Do not start RW2. Do not start UI20 Phase 5 from this file.
 
