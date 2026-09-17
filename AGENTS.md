@@ -47,6 +47,20 @@ DIRECTION_CONFLICT
 CONTINUITY_PREFLIGHT = PASS | FAIL
 ```
 
+Every new product-program plan or report must also state:
+
+```text
+CANONICAL_FLOW =
+EXTENDS_EXISTING_CANONICAL_FLOW = YES/NO
+E2E_FROM =
+E2E_TO =
+PARALLEL_WORKFLOW_CREATED = YES/NO
+NEW_SOURCE_OF_TRUTH_CREATED = YES/NO
+SCHEMA_VERSION_VISIBLE_TO_OPERATOR = YES/NO
+```
+
+Normal required result: extend the existing flow; no parallel workflow; no new source of truth; schema versions not operator-visible. If the program creates a parallel workflow or does not extend the canonical flow, stop until Owner architecture authorization.
+
 If recorded continuity, live GitHub, living roadmap, or applicable canon contradict: `CONTINUITY_PREFLIGHT = FAIL`. Do not start implementation.
 
 ```text
@@ -65,7 +79,8 @@ Read live flags, next authorized slice, Cloud/pilot gates, and UI closure from t
 
 ## Working rules
 
-- E2E first. A green unit test is not enough. A feature is done when source of truth, contract, backend, API, UI projection, operator interaction, runtime, and tests stay coherent.
+- Canonical-flow anti-fragmentation: one user-visible workflow per business capability. Extend that canonical Cerere / Configurator / Ofertă / Lucrare / Execution flow. Do not create parallel Intake Vn, Quote UI Vn, Configurator Vn, or Execution Vn business systems. Schema, transport, snapshot, and worklog versions stay internal. Capability-first program names. Full law: `docs/development/WORKOS_CURSOR_WORKFLOW.md`.
+- E2E first. A green unit test is not enough. A feature is done when source of truth, contract, backend, API, UI projection, operator interaction, runtime, and tests stay coherent. Every product program must close an E2E distance on the active milestone.
 - Current WorkOS and other previous repos are read-only reference/evidence. Do not write there. Do not copy architecture or wholesale code.
 - UI may code experience. UI must not code business truth: fields, materials, formulas, pricing, readiness, statuses, totals, or Product Truth.
 - Operator-facing UI is in Romanian. Internal code and contracts may stay in English.

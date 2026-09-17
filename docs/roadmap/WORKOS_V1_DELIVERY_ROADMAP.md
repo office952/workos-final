@@ -70,17 +70,18 @@ Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN
 
 Owner-accepted UI Foundation V1 (2026-09-16) is documentation / Figma direction only. It does not mark product implementation complete and does not Owner-accept runtime presentation from the Figma decision. The next UI implementation slice is apply that accepted foundation to the existing single-formula LED calculation surface. That slice is prepared, not authorized, by this record. Do not start Formula 2 from this accept.
 
-External presentation repository `office952/workos-ui20` is Owner-accepted and integrated on its own `main` at `9446b6d7b2b4e6b7c8ff829de97c1a583c712366`. That does not deploy or cut over WorkOS Final. UI20 Phase 5 and cutover remain unstarted. UI20 `AGENTS.md` still says `INTEGRATED_ON_MAIN = NO` while GitHub `main` is already that SHA (`UI20_POST_INTEGRATION_DOC_DRIFT = YES`, P3 documentation, does not block WorkOS Final product).
+External presentation repository `office952/workos-ui20` is Owner-accepted and integrated on its own `main` at `bce6ada83c9a0a427ac62cac8938e7f589dfd2e1`. That includes Owner-accepted `POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1`. That does not deploy UI20 into WorkOS Final and does not cut over production. UI20 Phase 5, Phase 6, deploy, and cutover remain unstarted. Current production / business runtime remains `office952/workos-final`.
 
-Post-UI20 E2E reclassification against current Final canon and isolated synthetic freeze proof:
+Post-UI20 E2E reclassification against current Final canon and isolated synthetic freeze proof remains closed:
 
 ```text
-QUOTE_SNAPSHOT_CUSTOMER_REQUEST = DETAIL_TRANSPORT_PROJECTION_ONLY
+QUOTE_SNAPSHOT_CUSTOMER_REQUEST = DETAIL_TRANSPORT_PROJECTION_ONLY / CLOSED_IN_UI20_PRESENTATION
+REQUEST_ID_ADDED_TO_QUOTE_SNAPSHOT = NO
 JOB_TO_ATELIER_JOB_CONTEXT      = NOT_A_GAP_CURRENT_CANON
 CONFIGURATOR_FREEZE_RUNTIME     = CLOSED_BY_ISOLATED_SYNTHETIC_PROOF
 ```
 
-Do not add `requestId` to Quote Snapshot content. Do not implement job-scoped Atelier automatically. Do not start the next product program from this record.
+Do not add `requestId` to Quote Snapshot content. Do not implement job-scoped Atelier automatically. Do not start the next product program from this record. The next named program requires a later Owner GO.
 
 ```text
 WORKOS_UI_FOUNDATION_V1              = OWNER_ACCEPTED
@@ -107,14 +108,17 @@ WORKOS_CI_TIERING_V1                 = IMPLEMENTED_LOCAL_IN_REVIEW
 UI20_PRESENTATION_REPO               = office952/workos-ui20
 UI20_OWNER_ACCEPTED                  = YES
 UI20_INTEGRATED_ON_UI20_MAIN         = YES
-UI20_INTEGRATED_HEAD                 = 9446b6d7b2b4e6b7c8ff829de97c1a583c712366
+UI20_INTEGRATED_HEAD                 = bce6ada83c9a0a427ac62cac8938e7f589dfd2e1
+POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1 = OWNER_ACCEPTED_AND_INTEGRATED
 UI20_PHASE_5_STARTED                 = NO
+UI20_PHASE_6_STARTED                 = NO
 UI20_CUTOVER                         = NO
 UI20_DEPLOYED_INTO_WORKOS_FINAL      = NO
-NEXT_PRODUCT_PROGRAM                 = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
+CURRENT_PRODUCT_PROGRAM              = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
+NEXT_PRODUCT_PROGRAM                 = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
 NEXT_PRODUCT_PROGRAM_AUTHORIZED      = NO
 NEXT_PRODUCT_SLICE                   = NOT_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_GATE                    = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
+NEXT_PRODUCT_GATE                    = OWNER_GO_REQUIRED
 FORM_COMPLETENESS_AUDIT_V1           = ACCEPTED
 FORM_COMPLETENESS_FC1                = INTEGRATED_ON_MAIN
 FORM_COMPLETENESS                    = FC1_INTEGRATED_ON_MAIN
@@ -178,8 +182,8 @@ CERERI_INTEGRATED_ON_MAIN            = YES
 REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
-NEXT_PROGRAM_PRIORITY                = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
-NEXT_RECOMMENDED_BUILD               = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
+NEXT_PROGRAM_PRIORITY                = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
+NEXT_RECOMMENDED_BUILD               = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
 NEXT_PRODUCT_PROGRAM_AUTHORIZED      = NO
 UI20_IMPLEMENTATION_STRATEGY         = VERTICAL_CLEAN_SHEET
 UI_DESIGN                            = CLEAN_SHEET_PRESENTATION
@@ -252,7 +256,7 @@ UI20_IMPLEMENTATION_READINESS        = OWNER_ACCEPTED
 UI20_IR1                             = OWNER_ACCEPTED
 UI20_RW1                             = INTEGRATED_ON_MAIN
 UI20_RW1A                            = ACCEPTED
-NEXT_RECOMMENDED_BUILD               = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
+NEXT_RECOMMENDED_BUILD               = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
 UI20_RW2                             = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
 OS_S8                                = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 UI_V3_BASELINE                       = HISTORICALLY_COMPLETE
@@ -348,7 +352,110 @@ ARCHITECTURE_C_UI_WAVE_2             = NOT_STARTED
 FIGMA_LIBRARY_PUBLISHED              = NO
 ```
 
-Living UI20 implementation sequence in this file is `VERTICAL_CLEAN_SHEET`. Later duplicate flag blocks below that still name `UI20_H1_DESIGN_HYGIENE_EVIDENCE_CONSOLIDATION` or other closed next-builds are historical snapshots. They are not the living next implementation path. Do not start RW2.
+The ChatGPT roadmap reevaluation after documentation continuity V1 is complete. The following gate is a historical record only and is not current authority:
+
+```text
+HISTORICAL_RECORD_ONLY
+CURRENT_AUTHORITY = NO
+NEXT_PRODUCT_GATE = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
+```
+
+## After UI20 closure — next V1 program
+
+Recorded 2026-09-18 against UI20 `main` `bce6ada83c9a0a427ac62cac8938e7f589dfd2e1` and WorkOS Final `origin/main` `f0a14328d3ec1aada2311f7741a7450d414460a6`. Analysis only. Not implementation.
+
+```text
+TARGET_MILESTONE                         = HUB_MEDIA_CLEAN_PILOT
+CURRENT_STEP                             = FIRST_REAL_LETTERS_JOB
+NEXT_STEP                                = REAL_DATA_PREPARATION_BEFORE_QUOTE
+CURRENT_PRODUCT_PROGRAM                  = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
+NEXT_PRODUCT_PROGRAM                     = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION_V1
+NEXT_PRODUCT_PROGRAM_AUTHORIZED          = NO
+NEXT_PRODUCT_GATE                        = OWNER_GO_REQUIRED
+POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1  = OWNER_ACCEPTED_AND_INTEGRATED
+```
+
+`HUB_MEDIA_CLEAN_PILOT` remains the only target milestone. One real LETTERS job still outranks another foundation module, a new product template, UI20 Phase 5, transport, inventory expansion, HR/pontaj, and reporting.
+
+First-real-letters spine on current source:
+
+```text
+FIRST_REAL_LETTERS_JOB           = B+E / BLOCKED_BEFORE_QUOTE
+REAL_DATA_PREPARATION_BEFORE_QUOTE = E / NOT_STARTED / OWNER_GO_REQUIRED
+REAL_REQUEST_PATCH               = B / implemented, real-write gated
+QUOTE_CREATE                     = B product-only v1 live route exists / E real Cloud write gated
+QUOTE_FREEZE                     = A synthetic product-only v1 / B live product-only / C+gated live v2
+QUOTE_ACCEPTANCE                 = A synthetic product-only / B live product-only / live v2 refused
+ORDER_CREATE                     = A synthetic product-only / B live product-only / live v2 acceptance refused
+PRODUCTION_RELEASE               = A synthetic product-only
+EXECUTION_PLAN                   = A synthetic
+ATELIER                          = A
+EXECUTION                        = A synthetic
+COMPLETE                         = A synthetic
+PLANNED_VS_ACTUAL                = A synthetic / E Owner sign-off on the real job
+```
+
+A = already implemented. B = implemented but real-write gated. C = synthetic-only. D = genuinely missing capability. E = Owner business decision / real-write GO required.
+
+Site installation / Quote v2 on current source, not the historical worklog alone:
+
+```text
+REAL_PILOT_REQUIRES_SITE_INSTALLATION = NO
+LIVE_QUOTE_V2_REQUIRED_FOR_REAL_PILOT = NO
+LIVE_QUOTE_V2_CURRENT_STATUS          = DOMAIN_IMPLEMENTED_LIVE_MUTATION_GATED
+ORDER_FROM_QUOTE_V2_CURRENT_STATUS    = DOMAIN_COPY_EXISTS_LIVE_ACCEPTANCE_REFUSED
+OWNER_PROVIDER_MODE_DECISION_REQUIRED = NO_FOR_SELECTED_PROGRAM
+```
+
+SITE_INSTALLATION remains optional and default-unselected. Product-only freeze stays schema v1. Live `POST /api/products/:code/quote-snapshots` still refuses a Request with selected SITE_INSTALLATION (`service_quote_freeze_not_authorized`). Live v2 acceptance and PDF stay refused. Order v2 can copy a trusted frozen Quote v2 in domain tests, but live v2 acceptance remains refused. The HUB target flow is a product-only LETTERS none/none 60 mm workshop job. That path does not require live Quote v2. If Owner later selects montaj on the first real Cerere, a later `QUOTE_OPERATIONAL_SERVICES_ENABLEMENT` plus provider-mode decision would become required. That is not the current next program.
+
+Selected program reason: Cloud business state is still empty (`CUSTOMERS = 0`, `REQUESTS = 0`, `QUOTES = 0`). The product spine already runs in isolated DEV. The unfinished highest-value step is Owner-gated real Client + real Cerere + real document preparation before any live quote. This record does not authorize that write.
+
+```text
+SMART_MODULARITY_REVIEW              = RECORDED
+CAPABILITY_NAME                      = FIRST_REAL_LETTERS_REAL_DATA_PREPARATION
+AVAILABLE_MODES                      = GATED_OWNER_GO_ONLY
+DEFAULT_MODE                         = NOT_AUTHORIZED
+CONFIGURATION_SURFACE                = existing Clienți + Cereri runtime on recovered HUB MEDIA Cloud
+CUSTOMER_OPERABLE_WITHOUT_CURSOR     = YES
+DISABLED_BEHAVIOR                    = no real Cloud write
+BASIC_MODE_BEHAVIOR                  = NOT_A_SERVICE_MODE
+ADVANCED_MODE_BEHAVIOR               = NOT_A_SERVICE_MODE
+DEPENDENCIES                         = recovered HUB org, Owner login, Clients V3, Cereri V3, LETTERS product-only quote path
+SAFE_FALLBACK                        = remain CUSTOMERS=0 REQUESTS=0 QUOTES=0
+DATA_RETENTION                       = real business records only after a later Owner write GO
+SNAPSHOT_IMPACT                      = NONE_UNTIL_LATER_QUOTE_FREEZE_GO
+PERMISSION_MODEL                     = explicit Owner GO for real Cloud write
+NO_CLIENT_CODE_FORK                  = YES
+```
+
+Disabled / Basic / Advanced installation modes do not apply to this data-preparation program. They remain install-capability law, not this next program.
+
+```text
+ANTI_FRAGMENTATION_RULE                          = ACTIVE
+ONE_USER_VISIBLE_WORKFLOW_PER_BUSINESS_CAPABILITY = YES
+EXTEND_CANONICAL_FLOW_FIRST                      = YES
+NO_PARALLEL_BUSINESS_FLOW_VERSIONS               = YES
+SCHEMA_VERSIONING_IS_INTERNAL_ONLY               = YES
+E2E_CLOSURE_BEFORE_HORIZONTAL_EXPANSION          = YES
+PROGRAM_NAME_V1_ROLE                             = DELIVERY_WORK_PACKAGE_VERSION_ONLY
+NEW_BUSINESS_FLOW_VERSION                        = NO
+CANONICAL_FLOW                                   = CLIENT → CERERE → CONFIGURATOR → OFERTA → ACCEPTARE → LUCRARE → PRODUCTIE → EXECUTIE → COMPLETE
+EXTENDS_EXISTING_CANONICAL_FLOW                  = YES
+E2E_FROM                                         = FIRST_REAL_LETTERS_JOB / BLOCKED_BEFORE_QUOTE
+E2E_TO                                           = REAL_DATA_READY_BEFORE_QUOTE
+PARALLEL_WORKFLOW_CREATED                        = NO
+NEW_SOURCE_OF_TRUTH_CREATED                      = NO
+SCHEMA_VERSION_VISIBLE_TO_OPERATOR               = NO
+QUOTE_OPERATIONAL_SERVICES_ENABLEMENT            = NOT_REQUIRED_FOR_SELECTED_PILOT
+OPTIONAL_CAPABILITY_DOES_NOT_REQUIRE_PARALLEL_FLOW = YES
+DISABLED_CAPABILITY_STAYS_SILENT                 = YES
+LATER_ENABLEMENT_EXTENDS_EXISTING_RECORD_FLOW    = YES
+```
+
+Methodology authority: `docs/development/WORKOS_CURSOR_WORKFLOW.md`. Session Current remains an index only.
+
+Living UI20 implementation sequence in this file is `VERTICAL_CLEAN_SHEET` and is now closed on UI20 `main`. Later duplicate flag blocks below that still name `POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1`, `UI20_H1_DESIGN_HYGIENE_EVIDENCE_CONSOLIDATION`, or other closed next-builds are historical snapshots. They are not the living next implementation path. Do not start RW2. Do not start UI20 Phase 5 from this file.
 
 `OWNER_GATE = COMPLETE` means the Cloud initial-Owner product law is closed: fail-closed activation, exactly one initial Owner, explicit resume. It does not mean later operational Owner GOs are already granted.
 

@@ -169,6 +169,95 @@ Locally, classify against `origin/main` plus the working tree (`node scripts/run
 
 Do not ask the Owner which verification commands to run. Cursor chooses the tier and executes it.
 
+## Canonical-flow anti-fragmentation
+
+WorkOS must never repeat the historical pattern where one unfinished business workflow is replaced by successive parallel generations such as Intake V1 → V2 → V3 → V6. The product evolves canonical workflows. It does not multiply them.
+
+```text
+ANTI_FRAGMENTATION_RULE = ACTIVE
+ONE_USER_VISIBLE_WORKFLOW_PER_BUSINESS_CAPABILITY = YES
+EXTEND_CANONICAL_FLOW_FIRST = YES
+NO_PARALLEL_BUSINESS_FLOW_VERSIONS = YES
+SCHEMA_VERSIONING_IS_INTERNAL_ONLY = YES
+E2E_CLOSURE_BEFORE_HORIZONTAL_EXPANSION = YES
+EVERY_PRODUCT_PROGRAM_MUST_CLOSE_AN_E2E_DISTANCE = YES
+NO_NEW_VNEXT_BUSINESS_FLOW_WITHOUT_PROOF_CANONICAL_FLOW_CANNOT_EVOLVE = YES
+OPTIONAL_CAPABILITY_DOES_NOT_REQUIRE_PARALLEL_FLOW = YES
+DISABLED_CAPABILITY_STAYS_SILENT = YES
+LATER_ENABLEMENT_EXTENDS_EXISTING_RECORD_FLOW = YES
+NO_CLIENT_CODE_FORK = YES
+CUSTOMER_OPERABLE_WITHOUT_CURSOR = YES
+```
+
+Operators see one canonical workflow per capability:
+
+```text
+ONE Cerere flow
+ONE Configurator flow
+ONE Oferta flow
+ONE Lucrare flow
+ONE Execution flow
+```
+
+When capability expands, extend that workflow. Do not create Intake V2, Intake V3, Quote UI V2, Quote UI V3, Configurator V2, or Execution V2 as parallel user-visible business systems merely because new requirements appear.
+
+Technical compatibility versioning remains allowed and stays internal:
+
+```text
+schemaVersion
+migration version
+transport contract version
+API compatibility version
+snapshot schema version
+worklog version
+implementation-wave identifier
+evidence-pack version
+```
+
+Those facts must not automatically create new navigation, a parallel route, a new business lifecycle, a duplicate page family, or a second source of truth. `QuoteSnapshot schemaVersion = 2` is not `Oferta V2`. The operator still uses Ofertă.
+
+Name future product programs after the capability being added, not a vague V-next generation. Prefer `QUOTE_SITE_INSTALLATION_CAPABILITY`, `QUOTE_OPERATIONAL_SERVICES_ENABLEMENT`, `REQUEST_DOCUMENT_ATTACHMENTS`, `EXECUTION_ACTUALS_CAPTURE` over `QUOTE_V2`, `REQUEST_V3`, `EXECUTION_V2`. Internal schemas may keep technical version numbers.
+
+Example: `SITE_INSTALLATION = OFF` continues the same product-only Ofertă. `SITE_INSTALLATION = ON` adds service capability to that same Ofertă. Never Quote old / Quote new / Quote V2 UI.
+
+Every new product-program plan or report must state:
+
+```text
+CANONICAL_FLOW =
+EXTENDS_EXISTING_CANONICAL_FLOW = YES/NO
+E2E_FROM =
+E2E_TO =
+PARALLEL_WORKFLOW_CREATED = YES/NO
+NEW_SOURCE_OF_TRUTH_CREATED = YES/NO
+SCHEMA_VERSION_VISIBLE_TO_OPERATOR = YES/NO
+```
+
+Normal required result:
+
+```text
+EXTENDS_EXISTING_CANONICAL_FLOW = YES
+PARALLEL_WORKFLOW_CREATED = NO
+NEW_SOURCE_OF_TRUTH_CREATED = NO
+SCHEMA_VERSION_VISIBLE_TO_OPERATOR = NO
+```
+
+If `PARALLEL_WORKFLOW_CREATED = YES` or `EXTENDS_EXISTING_CANONICAL_FLOW = NO`:
+
+```text
+OWNER_ARCHITECTURE_GATE_REQUIRED = YES
+```
+
+Implementation must stop until that architecture gate is explicitly authorized.
+
+A program must close an E2E distance:
+
+```text
+E2E_FROM = <current business step>
+E2E_TO = <new reachable business step>
+```
+
+A program whose only rationale is a new framework, a new generation, prepare V2, prepare V3, or architecture for later must not become the next product program unless it removes a proven blocker on the active E2E milestone.
+
 ## Reports are not acceptance
 
 ```text
@@ -247,6 +336,8 @@ UI_UX_CANON_READ          when the work is UI/UX
 DIRECTION_CONFLICT
 CONTINUITY_PREFLIGHT      = PASS | FAIL
 ```
+
+Every new product-program plan or report must also include the canonical-flow fields above. Normal result is extend-existing, no parallel workflow, no new source of truth, schema versions hidden from operators.
 
 And must end with Owner awareness links. Those links are not an approval request.
 
