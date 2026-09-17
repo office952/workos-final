@@ -47,14 +47,25 @@ Do not treat a cached SHA as current integration authority. This file must not b
 This block is a checkpoint copied from the living roadmap plus live GitHub evidence. Re-read those authorities before acting. Do not treat this file as the delivery sequence.
 
 ```text
-LAST_RECONCILED_MAIN_BASE              = debf5182a657e2794b873b74707d842c816d4f08
+LAST_RECONCILED_MAIN_BASE              = 1f409ab728668d2daace37273055177075fecd7c
 LAST_COMPLETED_PRODUCT_MILESTONE       = CONFIGURATOR_FORM_COMPLETENESS_FC1_INTEGRATED_ON_MAIN
 PR27                                   = INTEGRATED_ON_MAIN
-CURRENT_PRODUCT_PROGRAM                = CONFIGURATOR_FORM_COMPLETENESS
+PR33                                   = INTEGRATED_ON_MAIN
+UI20_PRESENTATION_REPO                 = office952/workos-ui20
+UI20_OWNER_ACCEPTED                    = YES
+UI20_INTEGRATED_ON_UI20_MAIN           = YES
+UI20_INTEGRATED_HEAD                   = 9446b6d7b2b4e6b7c8ff829de97c1a583c712366
+UI20_PHASE_5_STARTED                   = NO
+UI20_CUTOVER                           = NO
+CURRENT_PRODUCT_PROGRAM                = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
 CURRENT_PRODUCT_SLICE                  = NONE_AUTHORIZED_AFTER_FC1
+NEXT_PRODUCT_PROGRAM_AUTHORIZED        = NO
 NEXT_PRODUCT_SLICE                     = NOT_AUTHORIZED_AFTER_FC1
 NEXT_PRODUCT_GATE                      = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
 FC2_AUTHORIZED                         = NO
+QUOTE_SNAPSHOT_CUSTOMER_REQUEST        = DETAIL_TRANSPORT_PROJECTION_ONLY
+JOB_TO_ATELIER_JOB_CONTEXT             = NOT_A_GAP_CURRENT_CANON
+CONFIGURATOR_FREEZE_RUNTIME            = CLOSED_BY_ISOLATED_SYNTHETIC_PROOF
 ```
 
 ### Owner-accepted items relevant to current position
