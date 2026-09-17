@@ -70,6 +70,18 @@ Recorded against merged `origin/main`. `LIVE_MAIN_AUTHORITY = GITHUB_ORIGIN_MAIN
 
 Owner-accepted UI Foundation V1 (2026-09-16) is documentation / Figma direction only. It does not mark product implementation complete and does not Owner-accept runtime presentation from the Figma decision. The next UI implementation slice is apply that accepted foundation to the existing single-formula LED calculation surface. That slice is prepared, not authorized, by this record. Do not start Formula 2 from this accept.
 
+External presentation repository `office952/workos-ui20` is Owner-accepted and integrated on its own `main` at `9446b6d7b2b4e6b7c8ff829de97c1a583c712366`. That does not deploy or cut over WorkOS Final. UI20 Phase 5 and cutover remain unstarted. UI20 `AGENTS.md` still says `INTEGRATED_ON_MAIN = NO` while GitHub `main` is already that SHA (`UI20_POST_INTEGRATION_DOC_DRIFT = YES`, P3 documentation, does not block WorkOS Final product).
+
+Post-UI20 E2E reclassification against current Final canon and isolated synthetic freeze proof:
+
+```text
+QUOTE_SNAPSHOT_CUSTOMER_REQUEST = DETAIL_TRANSPORT_PROJECTION_ONLY
+JOB_TO_ATELIER_JOB_CONTEXT      = NOT_A_GAP_CURRENT_CANON
+CONFIGURATOR_FREEZE_RUNTIME     = CLOSED_BY_ISOLATED_SYNTHETIC_PROOF
+```
+
+Do not add `requestId` to Quote Snapshot content. Do not implement job-scoped Atelier automatically. Do not start the next product program from this record.
+
 ```text
 WORKOS_UI_FOUNDATION_V1              = OWNER_ACCEPTED
 UI_FOUNDATION_V1_DIRECTION_ACCEPTED  = YES
@@ -82,18 +94,27 @@ NEXT_UI_IMPLEMENTATION_SLICE         = APPLY_ACCEPTED_UI_FOUNDATION_TO_EXISTING_
 NEXT_UI_IMPLEMENTATION_SLICE_AUTHORIZED = NO
 FORMULA_2_STARTED                    = NO
 LIVE_MAIN_AUTHORITY                  = GITHUB_ORIGIN_MAIN
-LAST_RECONCILED_MAIN_BASE            = debf5182a657e2794b873b74707d842c816d4f08
+LAST_RECONCILED_MAIN_BASE            = 1f409ab728668d2daace37273055177075fecd7c
 PR24_CONFIGURATOR_UI_FRAMEWORK       = INTEGRATED_ON_MAIN
 PR26                                 = INTEGRATED_ON_MAIN
 PR27                                 = INTEGRATED_ON_MAIN
+PR33                                 = INTEGRATED_ON_MAIN
 CONFIGURATOR_UI_UX_FRAMEWORK         = FROZEN_V1
 OWNER_APPROVED_CURRENT_UI_UX_SURFACES = CONFIGURATOR_ONLY
 CURRENT_TOOLING_ENABLEMENT           = CURSOR_WORKOS_HARNESS_V2
 CURSOR_WORKOS_HARNESS_V2             = INTEGRATED_ON_MAIN
 WORKOS_CI_TIERING_V1                 = IMPLEMENTED_LOCAL_IN_REVIEW
-NEXT_PRODUCT_PROGRAM                 = CONFIGURATOR_FORM_COMPLETENESS
-NEXT_PRODUCT_SLICE                   = NOT_AUTHORIZED_AFTER_FC1
-NEXT_PRODUCT_GATE                    = CHATGPT_ROADMAP_REEVALUATION_AFTER_DOCUMENTATION_CONTINUITY_V1
+UI20_PRESENTATION_REPO               = office952/workos-ui20
+UI20_OWNER_ACCEPTED                  = YES
+UI20_INTEGRATED_ON_UI20_MAIN         = YES
+UI20_INTEGRATED_HEAD                 = 9446b6d7b2b4e6b7c8ff829de97c1a583c712366
+UI20_PHASE_5_STARTED                 = NO
+UI20_CUTOVER                         = NO
+UI20_DEPLOYED_INTO_WORKOS_FINAL      = NO
+NEXT_PRODUCT_PROGRAM                 = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
+NEXT_PRODUCT_PROGRAM_AUTHORIZED      = NO
+NEXT_PRODUCT_SLICE                   = NOT_AUTHORIZED
+NEXT_PRODUCT_GATE                    = OWNER_GO_REQUIRED_BEFORE_ANY_PRODUCT_IMPLEMENTATION
 FORM_COMPLETENESS_AUDIT_V1           = ACCEPTED
 FORM_COMPLETENESS_FC1                = INTEGRATED_ON_MAIN
 FORM_COMPLETENESS                    = FC1_INTEGRATED_ON_MAIN
@@ -157,8 +178,9 @@ CERERI_INTEGRATED_ON_MAIN            = YES
 REQUESTS_INTEGRATED_ON_MAIN          = YES
 CERERI_PRODUCT_SHA                   = 03f2d747036b5ac219f283f5a969d575a9a707c9
 CERERI_OWNER_ACCEPT_RECORD           = ef4dd73514583bda2754456e2e5730ac96fc5f31
-NEXT_PROGRAM_PRIORITY                = CONFIGURATOR_FORM_COMPLETENESS
-NEXT_RECOMMENDED_BUILD               = CONFIGURATOR_FORM_COMPLETENESS
+NEXT_PROGRAM_PRIORITY                = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
+NEXT_RECOMMENDED_BUILD               = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
+NEXT_PRODUCT_PROGRAM_AUTHORIZED      = NO
 UI20_IMPLEMENTATION_STRATEGY         = VERTICAL_CLEAN_SHEET
 UI_DESIGN                            = CLEAN_SHEET_PRESENTATION
 DOMAIN_REBUILD                       = NO
@@ -230,7 +252,7 @@ UI20_IMPLEMENTATION_READINESS        = OWNER_ACCEPTED
 UI20_IR1                             = OWNER_ACCEPTED
 UI20_RW1                             = INTEGRATED_ON_MAIN
 UI20_RW1A                            = ACCEPTED
-NEXT_RECOMMENDED_BUILD               = CONFIGURATOR_FORM_COMPLETENESS
+NEXT_RECOMMENDED_BUILD               = POST_UI20_COMMERCIAL_CONTEXT_CLOSURE_V1
 UI20_RW2                             = SUPERSEDED_BY_VERTICAL_CLEAN_SHEET
 OS_S8                                = HOLD_UNTIL_UI20_E2E_DIRECTION_AND_IMPLEMENTATION_CLOSURE
 UI_V3_BASELINE                       = HISTORICALLY_COMPLETE
